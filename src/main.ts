@@ -15,7 +15,7 @@ if (path === '/success') {
   const orderId = params.get('orderId')
   const amount = params.get('amount')
   const paymentKey = params.get('paymentKey')
-  await supabase.from('payments').insert([
+  const { error } = await supabase.from('payments').insert([
     {
       order_id: orderId,
       payment_key: paymentKey,
@@ -23,6 +23,13 @@ if (path === '/success') {
       status: 'paid'
     }
   ])
+  
+  if (error) {
+    alert('DB 저장 실패: ' + error.message)
+    console.error(error)
+  } else {
+    alert('DB 저장 성공')
+  }
   app.innerHTML = `
     <div class="page">
       <div class="payment-card">
