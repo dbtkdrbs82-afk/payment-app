@@ -2,7 +2,7 @@ import './style.css'
 import { loadTossPayments } from '@tosspayments/payment-sdk'
 import { createClient } from '@supabase/supabase-js'
 const supabaseUrl = "https://rnmptlxdeihvfwegoqnf.supabase.co"
-const supabaseKey = "sb_publishable_ZwRun0n6kgv0_rqENmxoEw_XeDErjX"
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8"
 const supabase = createClient(supabaseUrl, supabaseKey)
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
 const app = document.querySelector<HTMLDivElement>('#app')!
