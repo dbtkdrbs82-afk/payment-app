@@ -1,6 +1,10 @@
 import './style.css'
 import { loadTossPayments } from '@tosspayments/payment-sdk'
+import { createClient } from '@supabase/supabase-js'
+const supabaseUrl = "https://rnmptlxdeihvfwegoqnf.supabase.co/rest/v1/"
+const supabaseKey = "sb_publishable_ZwRun0n6kgv0_rqENmxoEw_XeDEPrjX"
 
+const supabase = createClient(supabaseUrl, supabaseKey)
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
 const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
@@ -11,7 +15,14 @@ if (path === '/success') {
   const orderId = params.get('orderId')
   const amount = params.get('amount')
   const paymentKey = params.get('paymentKey')
-
+  await supabase.from('payments').insert([
+    {
+      order_id: orderId,
+      payment_key: paymentKey,
+      amount: Number(amount),
+      status: 'paid'
+    }
+  ])
   app.innerHTML = `
     <div class="page">
       <div class="payment-card">
