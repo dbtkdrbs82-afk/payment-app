@@ -1,6 +1,7 @@
 import './style.css'
 import { loadTossPayments } from '@tosspayments/payment-sdk'
 import { createClient } from '@supabase/supabase-js'
+import QRCode from 'qrcode'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
 const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
@@ -17,7 +18,11 @@ if (path === '/admin') {
         <h1>관리자 페이지</h1>
         <p>결제내역을 불러오는 중...</p>
         <div id="payment-list"></div>
-        <button id="home-button">결제 페이지로</button>
+
+<h2>QR 결제</h2>
+<canvas id="qr-canvas"></canvas>
+
+<button id="home-button">결제 페이지로</button>
       </div>
     </div>
   `
