@@ -136,11 +136,15 @@ if (path === '/admin') {
       <div class="payment-card">
         <h1>결제 테스트</h1>
         <p>상품명: 테스트 상품</p>
-        <label>보낼 금액</label>
-<input id="amount-input" type="number" placeholder="금액 입력">
+       <div class="input-group">
+  <label>보낼 금액</label>
+  <input id="amount-input" type="number" placeholder="금액 입력">
+</div>
 
-<label>보내는 사람 이름</label>
-<input id="name-input" type="text" placeholder="이름 입력">
+<div class="input-group">
+  <label>보내는 사람 이름</label>
+  <input id="name-input" type="text" placeholder="이름 입력">
+</div> 
 
 <button id="pay-button">결제하기</button>
         <button id="admin-button">관리자 페이지</button>
