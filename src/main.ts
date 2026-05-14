@@ -48,7 +48,16 @@ if (path === '/admin') {
       </div>
     `).join('')
   }
+  const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement
 
+  await QRCode.toCanvas(
+    canvas,
+    window.location.origin,
+    {
+      width: 250
+    }
+  )
+  
   document.querySelector<HTMLButtonElement>('#home-button')!
     .addEventListener('click', () => {
       window.location.href = '/'
