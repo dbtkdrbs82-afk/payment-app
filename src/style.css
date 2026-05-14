@@ -29,3 +29,27 @@ button {
   border-radius: 10px;
   cursor: pointer;
 }
+.admin-card {
+  width: 700px;
+  max-width: 90%;
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.payment-row {
+  text-align: left;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 15px;
+  margin: 15px 0;
+  background: #f9fafb;
+}
+
+.small-text {
+  font-size: 12px;
+  word-break: break-all;
+  color: #666;
+}
