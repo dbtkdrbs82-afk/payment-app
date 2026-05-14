@@ -57,7 +57,7 @@ if (path === '/admin') {
       width: 250
     }
   )
-  
+
   document.querySelector<HTMLButtonElement>('#home-button')!
     .addEventListener('click', () => {
       window.location.href = '/'
@@ -136,8 +136,13 @@ if (path === '/admin') {
       <div class="payment-card">
         <h1>결제 테스트</h1>
         <p>상품명: 테스트 상품</p>
-        <p>금액: 1,000원</p>
-        <button id="pay-button">결제하기</button>
+        <label>보낼 금액</label>
+<input id="amount-input" type="number" placeholder="금액 입력">
+
+<label>보내는 사람 이름</label>
+<input id="name-input" type="text" placeholder="이름 입력">
+
+<button id="pay-button">결제하기</button>
         <button id="admin-button">관리자 페이지</button>
       </div>
     </div>
@@ -146,12 +151,21 @@ if (path === '/admin') {
   document.querySelector<HTMLButtonElement>('#pay-button')!
     .addEventListener('click', async () => {
       const tossPayments = await loadTossPayments(clientKey)
-
+      const amountInput = document.querySelector<HTMLInputElement>('#amount-input')!
+      const nameInput = document.querySelector<HTMLInputElement>('#name-input')!
+      
+      const amountValue = Number(amountInput.value)
+      const customerNameValue = nameInput.value
+      
+      if (!amountValue || !customerNameValue) {
+        alert('금액과 이름을 입력해주세요')
+        return
+      }
       await tossPayments.requestPayment('카드', {
-        amount: 1000,
+        amount: amountValue,
         orderId: 'order-' + Date.now(),
         orderName: '테스트 상품',
-        customerName: '홍길동',
+        customerName: customerNameValue,
         successUrl: window.location.origin + '/success',
         failUrl: window.location.origin + '/fail',
       })
