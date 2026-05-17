@@ -5,6 +5,7 @@ import QRCode from 'qrcode'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
 const adminPassword = '1234'
+const adminSecondCode = '5678'
 
 const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
@@ -138,7 +139,10 @@ if (path === '/create') {
               <label>비밀번호</label>
               <input id="admin-password" type="password" placeholder="비밀번호 입력">
             </div>
-  
+  <div class="input-group">
+  <label>2차 인증코드</label>
+  <input id="admin-second-code" type="password" placeholder="2차 코드 입력">
+</div>
             <button id="admin-login-button">로그인</button>
           </div>
         </div>
@@ -147,8 +151,11 @@ if (path === '/create') {
       document.querySelector<HTMLButtonElement>('#admin-login-button')!
         .addEventListener('click', () => {
           const passwordInput = document.querySelector<HTMLInputElement>('#admin-password')!.value
-  
-          if (passwordInput === adminPassword) {
+          const secondCodeInput = document.querySelector<HTMLInputElement>('#admin-second-code')!.value
+          if (
+            passwordInput === adminPassword &&
+            secondCodeInput === adminSecondCode
+          ) { 
             localStorage.setItem('adminLogin', 'true')
             window.location.reload()
           } else {
