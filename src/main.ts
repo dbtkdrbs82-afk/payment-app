@@ -232,20 +232,35 @@ if (path === '/create') {
       eventList.innerHTML = `<p>생성된 행사가 없습니다.</p>`
     } else {
       eventList.innerHTML = eventData.map((event) => {
+        const eventPayments = data.filter(
+          (payment) => payment.event_id === event.id
+        )
+        
+        const eventTotal = eventPayments.reduce((sum, payment) => {
+          return sum + Number(payment.amount)
+        }, 0)
+        
+        const eventFee = Math.floor(eventTotal * 0.02)
+        const eventSettlement = eventTotal - eventFee 
         const eventLink =
           `${window.location.origin}/${event.event_type}?id=${event.id}`
     
         return `
-          <div class="payment-row">
-            <p><strong>행사명:</strong> ${event.receiver_name}</p>
-            <p><strong>종류:</strong> ${event.event_type}</p>
-            <p>
-              <a href="${eventLink}" target="_blank">
-                행사 링크 열기
-              </a>
-            </p>
-          </div>
-        `
+  <div class="payment-row">
+    <p><strong>행사명:</strong> ${event.receiver_name}</p>
+    <p><strong>종류:</strong> ${event.event_type}</p>
+
+    <p><strong>총 결제금액:</strong> ${eventTotal.toLocaleString()}원</p>
+    <p><strong>수수료:</strong> ${eventFee.toLocaleString()}원</p>
+    <p><strong>예상 정산금액:</strong> ${eventSettlement.toLocaleString()}원</p>
+
+    <p>
+      <a href="${eventLink}" target="_blank">
+        행사 링크 열기
+      </a>
+    </p>
+  </div>
+`
       }).join('')
     }
       const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement
@@ -383,7 +398,7 @@ if (path === '/create') {
         orderId: 'order-' + Date.now(),
         orderName: paymentTitle,
         customerName: customerNameValue,
-        successUrl: window.location.origin + '/success',
+        successUrl: window.location.origin + '/success?eventId=' + eventId, 
         failUrl: window.location.origin + '/fail',
       })
     })
