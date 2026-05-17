@@ -289,7 +289,7 @@ if (path === '/create') {
   const orderId = params.get('orderId')
   const amount = params.get('amount')
   const paymentKey = params.get('paymentKey')
-  const eventId = params.get('customEventId')
+  const eventId = sessionStorage.getItem('currentEventId')
   const { error } = await supabase.from('payments').insert([
     {
       order_id: orderId,
@@ -393,16 +393,13 @@ if (path === '/create') {
       }
 
       const tossPayments = await loadTossPayments(clientKey)
-
+      sessionStorage.setItem('currentEventId', eventId || '')
       await tossPayments.requestPayment('카드', {
         amount: amountValue,
         orderId: 'order-' + Date.now(),
         orderName: paymentTitle,
         customerName: customerNameValue,
-        successUrl:
-  window.location.origin +
-  '/success?eventId=' +
-  eventId,
+        successUrl: window.location.origin + '/success', 
         failUrl: window.location.origin + '/fail',
       })
     })
