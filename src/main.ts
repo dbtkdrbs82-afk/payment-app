@@ -13,9 +13,30 @@ const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
 
 const isFuneral = path === '/funeral'
-const receiverName = isFuneral ? '故 홍길동' : '김철수 ♥ 박영희'
-const paymentTitle = isFuneral ? '부의금 보내기' : '축의금 보내기'
-const messageLabel = isFuneral ? '추모 메시지' : '축하 메시지'
+
+const params = new URLSearchParams(window.location.search)
+const eventId = params.get('id')
+
+let receiverName = isFuneral ? '故 홍길동' : '김철수 ♥ 박영희'
+let paymentTitle = isFuneral ? '부의금 보내기' : '축의금 보내기'
+let messageLabel = isFuneral ? '추모 메시지' : '축하 메시지'
+
+if (eventId) {
+  const { data } = await supabase
+    .from('events')
+    .select('*')
+    .eq('id', eventId)
+    .single()
+
+  if (data) {
+    receiverName = data.receiver_name
+    paymentTitle = data.payment_title
+    messageLabel =
+      data.event_type === 'funeral'
+        ? '추모 메시지'
+        : '축하 메시지'
+  }
+}
 
 if (path === '/create') {
   app.innerHTML = `
