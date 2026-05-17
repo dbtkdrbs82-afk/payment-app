@@ -289,15 +289,16 @@ if (path === '/create') {
   const orderId = params.get('orderId')
   const amount = params.get('amount')
   const paymentKey = params.get('paymentKey')
-
+  const eventId = params.get('eventId')
   const { error } = await supabase.from('payments').insert([
     {
       order_id: orderId,
       payment_key: paymentKey,
       amount: Number(amount),
-      status: 'paid'
+      status: 'paid',
+      event_id: eventId ? Number(eventId) : null
     }
-  ])
+  ]) 
 
   if (error) {
     alert('DB 저장 실패: ' + error.message)
