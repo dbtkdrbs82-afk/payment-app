@@ -155,9 +155,9 @@ if (path === '/create') {
           alert('비밀번호가 틀렸습니다')
         }
       })
-
-    return
-  }
+      if (savedAdminLogin !== 'true') {
+        로그인 화면
+     }
 
   app.innerHTML = `
     <div class="page">
