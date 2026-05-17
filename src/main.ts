@@ -125,92 +125,95 @@ if (path === '/create') {
         })
     })
 
-} else if (path === '/admin') {
-  const savedAdminLogin = localStorage.getItem('adminLogin')
-
-  if (savedAdminLogin !== 'true') {
-    app.innerHTML = `
-      <div class="page">
-        <div class="payment-card">
-          <h1>관리자 로그인</h1>
-
-          <div class="input-group">
-            <label>비밀번호</label>
-            <input id="admin-password" type="password" placeholder="비밀번호 입력">
+  } else if (path === '/admin') {
+    const savedAdminLogin = localStorage.getItem('adminLogin')
+  
+    if (savedAdminLogin !== 'true') {
+      app.innerHTML = `
+        <div class="page">
+          <div class="payment-card">
+            <h1>관리자 로그인</h1>
+  
+            <div class="input-group">
+              <label>비밀번호</label>
+              <input id="admin-password" type="password" placeholder="비밀번호 입력">
+            </div>
+  
+            <button id="admin-login-button">로그인</button>
           </div>
-
-          <button id="admin-login-button">로그인</button>
         </div>
-      </div>
-    `
-
-    document.querySelector<HTMLButtonElement>('#admin-login-button')!
-      .addEventListener('click', () => {
-        const passwordInput = document.querySelector<HTMLInputElement>('#admin-password')!.value
-
-        if (passwordInput === adminPassword) {
-          localStorage.setItem('adminLogin', 'true')
+      `
+  
+      document.querySelector<HTMLButtonElement>('#admin-login-button')!
+        .addEventListener('click', () => {
+          const passwordInput = document.querySelector<HTMLInputElement>('#admin-password')!.value
+  
+          if (passwordInput === adminPassword) {
+            localStorage.setItem('adminLogin', 'true')
+            window.location.reload()
+          } else {
+            alert('비밀번호가 틀렸습니다')
+          }
+        })
+  
+    } else {
+      app.innerHTML = `
+        <div class="page">
+          <div class="admin-card">
+            <h1>관리자 페이지</h1>
+            <p>결제내역을 불러오는 중...</p>
+            <div id="payment-list"></div>
+  
+            <h2>QR 결제</h2>
+            <canvas id="qr-canvas"></canvas>
+  
+            <button id="home-button">결제 페이지로</button>
+            <button id="logout-button">로그아웃</button>
+          </div>
+        </div>
+      `
+  
+      const { data, error } = await supabase
+        .from('payments')
+        .select('*')
+        .order('created_at', { ascending: false })
+  
+      const list = document.querySelector<HTMLDivElement>('#payment-list')!
+  
+      if (error) {
+        list.innerHTML = `<p>결제내역 불러오기 실패: ${error.message}</p>`
+      } else if (!data || data.length === 0) {
+        list.innerHTML = `<p>아직 결제내역이 없습니다.</p>`
+      } else {
+        list.innerHTML = data.map((payment) => `
+          <div class="payment-row">
+            <p><strong>주문번호:</strong> ${payment.order_id}</p>
+            <p><strong>금액:</strong> ${Number(payment.amount).toLocaleString()}원</p>
+            <p><strong>상태:</strong> ${payment.status}</p>
+            <p><strong>시간:</strong> ${new Date(payment.created_at).toLocaleString()}</p>
+          </div>
+        `).join('')
+      }
+  
+      const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement
+  
+      await QRCode.toCanvas(
+        canvas,
+        window.location.origin,
+        { width: 250 }
+      )
+  
+      document.querySelector<HTMLButtonElement>('#home-button')!
+        .addEventListener('click', () => {
+          window.location.href = '/'
+        })
+  
+      document.querySelector<HTMLButtonElement>('#logout-button')!
+        .addEventListener('click', () => {
+          localStorage.removeItem('adminLogin')
           window.location.reload()
-        } else {
-          alert('비밀번호가 틀렸습니다')
-        }
-      })
-      if (savedAdminLogin !== 'true') {
-        로그인 화면
-     }
-
-  app.innerHTML = `
-    <div class="page">
-      <div class="admin-card">
-        <h1>관리자 페이지</h1>
-        <p>결제내역을 불러오는 중...</p>
-        <div id="payment-list"></div>
-
-        <h2>QR 결제</h2>
-        <canvas id="qr-canvas"></canvas>
-<button id="home-button">결제 페이지로</button>
-<button id="logout-button">로그아웃</button>
-        
-      </div>
-    </div>
-  `
-
-  const { data, error } = await supabase
-    .from('payments')
-    .select('*')
-    .order('created_at', { ascending: false })
-
-  const list = document.querySelector<HTMLDivElement>('#payment-list')!
-
-  if (error) {
-    list.innerHTML = `<p>결제내역 불러오기 실패: ${error.message}</p>`
-  } else if (!data || data.length === 0) {
-    list.innerHTML = `<p>아직 결제내역이 없습니다.</p>`
-  } else {
-    list.innerHTML = data.map((payment) => `
-      <div class="payment-row">
-        <p><strong>주문번호:</strong> ${payment.order_id}</p>
-        <p><strong>금액:</strong> ${Number(payment.amount).toLocaleString()}원</p>
-        <p><strong>상태:</strong> ${payment.status}</p>
-        <p><strong>시간:</strong> ${new Date(payment.created_at).toLocaleString()}</p>
-      </div>
-    `).join('')
-  }
-
-  const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement
-
-  await QRCode.toCanvas(
-    canvas,
-    window.location.origin,
-    { width: 250 }
-  )
-
-  document.querySelector<HTMLButtonElement>('#home-button')!
-  document.querySelector<HTMLButtonElement>('#logout-button')!
-  .addEventListener('click', () => {
-    localStorage.removeItem('adminLogin')
-    window.location.reload()
-  })
+        })
+    }
 
 } else if (path === '/success') {
   const params = new URLSearchParams(window.location.search)
