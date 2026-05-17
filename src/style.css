@@ -89,3 +89,11 @@ button {
 .funeral-card input::placeholder {
   color: #bbb;
 }
+.settlement-box {
+  text-align: left;
+  background: #eef6ff;
+  border: 1px solid #bcdcff;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
