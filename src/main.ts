@@ -18,7 +18,78 @@ const isFuneral = path === '/funeral'
 const receiverName = isFuneral ? '故 홍길동' : '김철수 ♥ 박영희'
 const paymentTitle = isFuneral ? '부의금 보내기' : '축의금 보내기'
 const messageLabel = isFuneral ? '추모 메시지' : '축하 메시지'
+if (path === '/create') {
+  app.innerHTML = `
+    <div class="page">
+      <div class="payment-card">
+        <h1>행사 생성</h1>
 
+        <div class="input-group">
+          <label>행사 종류</label>
+          <select id="event-type">
+            <option value="wedding">결혼식</option>
+            <option value="funeral">장례식</option>
+          </select>
+        </div>
+
+        <div class="input-group">
+          <label>이름 입력</label>
+          <input id="receiver-name" type="text" placeholder="김철수 ♥ 박영희 / 故 홍길동">
+        </div>
+
+        <button id="create-event-button">행사 생성</button>
+
+        <div id="result-link"></div>
+      </div>
+    </div>
+  `
+
+  document.querySelector('#create-event-button')!
+    .addEventListener('click', async () => {
+      const eventType = (
+        document.querySelector('#event-type') as HTMLSelectElement
+      ).value
+
+      const receiverName = (
+        document.querySelector('#receiver-name') as HTMLInputElement
+      ).value
+
+      const paymentTitle =
+        eventType === 'funeral'
+          ? '부의금 보내기'
+          : '축의금 보내기'
+
+      const { data, error } = await supabase
+        .from('events')
+        .insert([
+          {
+            event_type: eventType,
+            receiver_name: receiverName,
+            payment_title: paymentTitle
+          }
+        ])
+        .select()
+
+      if (error) {
+        alert('행사 생성 실패: ' + error.message)
+        return
+      }
+
+      const eventId = data[0].id
+
+      const eventLink =
+        window.location.origin +
+        '/' +
+        eventType +
+        '?id=' +
+        eventId
+
+      document.querySelector('#result-link')!.innerHTML = `
+        <p>생성 완료</p>
+        <a href="${eventLink}" target="_blank">${eventLink}</a>
+      `
+    })
+}
 if (path === '/admin') {
   app.innerHTML = `
     <div class="page">
