@@ -65,13 +65,8 @@ if (path === '/create') {
 
   document.querySelector<HTMLButtonElement>('#create-event-button')!
     .addEventListener('click', async () => {
-      const eventType = (
-        document.querySelector<HTMLSelectElement>('#event-type')!
-      ).value
-
-      const receiverNameInput = (
-        document.querySelector<HTMLInputElement>('#receiver-name')!
-      ).value
+      const eventType = document.querySelector<HTMLSelectElement>('#event-type')!.value
+      const receiverNameInput = document.querySelector<HTMLInputElement>('#receiver-name')!.value
 
       if (!receiverNameInput) {
         alert('이름을 입력해주세요')
@@ -101,24 +96,26 @@ if (path === '/create') {
       const eventLink = `${window.location.origin}/${eventType}?id=${eventId}`
 
       document.querySelector<HTMLDivElement>('#result-link')!.innerHTML = `
-  <p>생성 완료</p>
-  <a href="${eventLink}" target="_blank">${eventLink}</a>
+        <p>생성 완료</p>
+        <a href="${eventLink}" target="_blank">${eventLink}</a>
+        <button id="copy-link-button">링크 복사</button>
+        <button id="sms-link-button">문자로 보내기</button>
+      `
 
-  <button id="copy-link-button">링크 복사</button>
-  <button id="sms-link-button">문자로 보내기</button>
-`
-document.querySelector<HTMLButtonElement>('#copy-link-button')!
-.addEventListener('click', async () => {
-  await navigator.clipboard.writeText(eventLink)
-  alert('링크가 복사되었습니다')
-})
+      document.querySelector<HTMLButtonElement>('#copy-link-button')!
+        .addEventListener('click', async () => {
+          await navigator.clipboard.writeText(eventLink)
+          alert('링크가 복사되었습니다')
+        })
 
-document.querySelector<HTMLButtonElement>('#sms-link-button')!
-.addEventListener('click', () => {
-  window.location.href = `sms:?body=${encodeURIComponent(eventLink)}`
-})  
+      document.querySelector<HTMLButtonElement>('#sms-link-button')!
+        .addEventListener('click', () => {
+          window.location.href = `sms:?body=${encodeURIComponent(eventLink)}`
+        })
+    })
 
 } else if (path === '/admin') {
+
   app.innerHTML = `
     <div class="page">
       <div class="admin-card">
