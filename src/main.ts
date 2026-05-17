@@ -99,8 +99,16 @@ if (path === '/create') {
         <p>생성 완료</p>
         <a href="${eventLink}" target="_blank">${eventLink}</a>
         <button id="copy-link-button">링크 복사</button>
-        <button id="sms-link-button">문자로 보내기</button>
-      `
+<button id="sms-link-button">문자로 보내기</button>
+<button id="kakao-link-button">카카오 공유</button>
+document.querySelector<HTMLButtonElement>('#kakao-link-button')!
+  .addEventListener('click', () => {
+    const kakaoShareUrl =
+      `https://share.kakao.com/talk/friends/picker/link?url=` +
+      encodeURIComponent(eventLink)
+
+    window.open(kakaoShareUrl, '_blank')
+  })      
 
       document.querySelector<HTMLButtonElement>('#copy-link-button')!
         .addEventListener('click', async () => {
