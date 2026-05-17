@@ -4,9 +4,10 @@ import { createClient } from '@supabase/supabase-js'
 import QRCode from 'qrcode'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
-const eventType = 'wedding'
+
 const receiverName = '김철수 ♥ 박영희'
 const paymentTitle = '축의금 보내기'
+
 const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
 
