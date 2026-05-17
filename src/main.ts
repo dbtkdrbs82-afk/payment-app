@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import QRCode from 'qrcode'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
+const adminPassword = '1234'
 
 const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
@@ -125,6 +126,38 @@ if (path === '/create') {
     })
 
 } else if (path === '/admin') {
+  const savedAdminLogin = localStorage.getItem('adminLogin')
+
+  if (savedAdminLogin !== 'true') {
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card">
+          <h1>관리자 로그인</h1>
+
+          <div class="input-group">
+            <label>비밀번호</label>
+            <input id="admin-password" type="password" placeholder="비밀번호 입력">
+          </div>
+
+          <button id="admin-login-button">로그인</button>
+        </div>
+      </div>
+    `
+
+    document.querySelector<HTMLButtonElement>('#admin-login-button')!
+      .addEventListener('click', () => {
+        const passwordInput = document.querySelector<HTMLInputElement>('#admin-password')!.value
+
+        if (passwordInput === adminPassword) {
+          localStorage.setItem('adminLogin', 'true')
+          window.location.reload()
+        } else {
+          alert('비밀번호가 틀렸습니다')
+        }
+      })
+
+    return
+  }
 
   app.innerHTML = `
     <div class="page">
@@ -135,8 +168,9 @@ if (path === '/create') {
 
         <h2>QR 결제</h2>
         <canvas id="qr-canvas"></canvas>
-
-        <button id="home-button">결제 페이지로</button>
+<button id="home-button">결제 페이지로</button>
+<button id="logout-button">로그아웃</button>
+        
       </div>
     </div>
   `
@@ -172,9 +206,11 @@ if (path === '/create') {
   )
 
   document.querySelector<HTMLButtonElement>('#home-button')!
-    .addEventListener('click', () => {
-      window.location.href = '/'
-    })
+  document.querySelector<HTMLButtonElement>('#logout-button')!
+  .addEventListener('click', () => {
+    localStorage.removeItem('adminLogin')
+    window.location.reload()
+  })
 
 } else if (path === '/success') {
   const params = new URLSearchParams(window.location.search)
