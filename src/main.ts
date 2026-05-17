@@ -168,6 +168,7 @@ if (path === '/create') {
         <div class="page">
           <div class="admin-card">
             <h1>관리자 페이지</h1>
+            <div id="settlement-box"></div>
             <p>결제내역을 불러오는 중...</p>
             <div id="payment-list"></div>
             
@@ -195,6 +196,22 @@ if (path === '/create') {
       } else if (!data || data.length === 0) {
         list.innerHTML = `<p>아직 결제내역이 없습니다.</p>`
       } else {
+        const totalAmount = data.reduce((sum, payment) => {
+          return sum + Number(payment.amount)
+        }, 0)
+        
+        const platformFeeRate = 0.02
+        const platformFee = Math.floor(totalAmount * platformFeeRate)
+        const settlementAmount = totalAmount - platformFee
+        
+        document.querySelector<HTMLDivElement>('#settlement-box')!.innerHTML = `
+          <div class="settlement-box">
+            <h2>정산 요약</h2>
+            <p><strong>총 결제금액:</strong> ${totalAmount.toLocaleString()}원</p>
+            <p><strong>플랫폼 수수료 2%:</strong> ${platformFee.toLocaleString()}원</p>
+            <p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
+          </div>
+        ` 
         list.innerHTML = data.map((payment) => `
           <div class="payment-row">
             <p><strong>주문번호:</strong> ${payment.order_id}</p>
