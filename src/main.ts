@@ -5,15 +5,19 @@ import QRCode from 'qrcode'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
 
-const receiverName = '김철수 ♥ 박영희'
-const paymentTitle = '축의금 보내기'
-
 const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
+const supabaseKey = '지금_쓰는_키_그대로'
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
+
+const isFuneral = path === '/funeral'
+const isWedding = path === '/wedding' || path === '/'
+
+const receiverName = isFuneral ? '故 홍길동' : '김철수 ♥ 박영희'
+const paymentTitle = isFuneral ? '부의금 보내기' : '축의금 보내기'
+const messageLabel = isFuneral ? '추모 메시지' : '축하 메시지'
 
 if (path === '/admin') {
   app.innerHTML = `
@@ -91,7 +95,11 @@ if (path === '/admin') {
 
   app.innerHTML = `
     <div class="page">
-      <div class="payment-card">
+      <div class="payment-card ${isFuneral ? 'funeral-card' : 'wedding-card'}">
+      <div class="input-group">
+  <label>${messageLabel}</label>
+  <input id="message-input" type="text" placeholder="${messageLabel} 입력">
+</div>
         <h1>결제 성공</h1>
         <p>주문번호: ${orderId}</p>
         <p>결제금액: ${Number(amount).toLocaleString()}원</p>
