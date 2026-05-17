@@ -13,7 +13,7 @@ const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
 
 const isFuneral = path === '/funeral'
-const isWedding = path === '/wedding' || path === '/'
+
 
 const receiverName = isFuneral ? '故 홍길동' : '김철수 ♥ 박영희'
 const paymentTitle = isFuneral ? '부의금 보내기' : '축의금 보내기'
