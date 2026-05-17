@@ -232,9 +232,9 @@ if (path === '/create') {
       eventList.innerHTML = `<p>생성된 행사가 없습니다.</p>`
     } else {
       eventList.innerHTML = eventData.map((event) => {
-        const eventPayments = data.filter(
+        const eventPayments = (data || []).filter(
           (payment) => payment.event_id === event.id
-        )
+        ) 
         
         const eventTotal = eventPayments.reduce((sum, payment) => {
           return sum + Number(payment.amount)
