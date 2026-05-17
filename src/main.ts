@@ -54,6 +54,60 @@ if (path === '/create') {
         document.querySelector('#receiver-name') as HTMLInputElement
       ).value
 
+      if (!receiverName) {
+        alert('이름을 입력해주세요')
+        return
+      }
+
+      const paymentTitle =
+        eventType === 'funeral'
+          ? '부의금 보내기'
+          : '축의금 보내기'
+
+      const { data, error } = await supabase
+        .from('events')
+        .insert([
+          {
+            event_type: eventType,
+            receiver_name: receiverName,
+            payment_title: paymentTitle
+          }
+        ])
+        .select()
+
+      if (error) {
+        alert('행사 생성 실패: ' + error.message)
+        return
+      }
+
+      const eventId = data[0].id
+
+      const eventLink =
+        window.location.origin +
+        '/' +
+        eventType +
+        '?id=' +
+        eventId
+
+      document.querySelector('#result-link')!.innerHTML = `
+        <p>생성 완료</p>
+        <a href="${eventLink}" target="_blank">${eventLink}</a>
+      `
+    })
+
+} else if (path === '/admin') {
+  `
+
+  document.querySelector('#create-event-button')!
+    .addEventListener('click', async () => {
+      const eventType = (
+        document.querySelector('#event-type') as HTMLSelectElement
+      ).value
+
+      const receiverName = (
+        document.querySelector('#receiver-name') as HTMLInputElement
+      ).value
+
       const paymentTitle =
         eventType === 'funeral'
           ? '부의금 보내기'
