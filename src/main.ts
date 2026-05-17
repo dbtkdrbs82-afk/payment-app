@@ -289,7 +289,7 @@ if (path === '/create') {
   const orderId = params.get('orderId')
   const amount = params.get('amount')
   const paymentKey = params.get('paymentKey')
-  const eventId = params.get('eventId')
+  const eventId = params.get('customEventId')
   const { error } = await supabase.from('payments').insert([
     {
       order_id: orderId,
@@ -399,7 +399,10 @@ if (path === '/create') {
         orderId: 'order-' + Date.now(),
         orderName: paymentTitle,
         customerName: customerNameValue,
-        successUrl: window.location.origin + '/success?eventId=' + eventId, 
+        successUrl:
+  window.location.origin +
+  '/success?eventId=' +
+  eventId,
         failUrl: window.location.origin + '/fail',
       })
     })
