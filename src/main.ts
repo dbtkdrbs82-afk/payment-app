@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 import QRCode from 'qrcode'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
+const eventType = 'wedding'
+const receiverName = '김철수 ♥ 박영희'
+const paymentTitle = '축의금 보내기'
 const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
 
@@ -134,8 +137,8 @@ if (path === '/admin') {
   app.innerHTML = `
     <div class="page">
       <div class="payment-card">
-        <h1>결제 테스트</h1>
-        <p>상품명: 테스트 상품</p>
+       <h1>${receiverName}</h1>
+<p>${paymentTitle}</p> 
        <div class="input-group">
   <label>보낼 금액</label>
   <input id="amount-input" type="number" placeholder="금액 입력">
@@ -168,7 +171,7 @@ if (path === '/admin') {
       await tossPayments.requestPayment('카드', {
         amount: amountValue,
         orderId: 'order-' + Date.now(),
-        orderName: '테스트 상품',
+        orderName: 'paymentTitle',
         customerName: customerNameValue,
         successUrl: window.location.origin + '/success',
         failUrl: window.location.origin + '/fail',
