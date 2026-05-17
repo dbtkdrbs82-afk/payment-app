@@ -170,6 +170,9 @@ if (path === '/create') {
             <h1>관리자 페이지</h1>
             <p>결제내역을 불러오는 중...</p>
             <div id="payment-list"></div>
+            
+            <h2>생성된 행사 목록</h2>
+<div id="event-list"></div>
   
             <h2>QR 결제</h2>
             <canvas id="qr-canvas"></canvas>
@@ -186,7 +189,7 @@ if (path === '/create') {
         .order('created_at', { ascending: false })
   
       const list = document.querySelector<HTMLDivElement>('#payment-list')!
-  
+      const eventList = document.querySelector<HTMLDivElement>('#event-list')!
       if (error) {
         list.innerHTML = `<p>결제내역 불러오기 실패: ${error.message}</p>`
       } else if (!data || data.length === 0) {
@@ -201,7 +204,33 @@ if (path === '/create') {
           </div>
         `).join('')
       }
-  
+      const { data: eventData, error: eventError } = await supabase
+      .from('events')
+      .select('*')
+      .order('created_at', { ascending: false })
+    
+    if (eventError) {
+      eventList.innerHTML = `<p>행사 목록 불러오기 실패</p>`
+    } else if (!eventData || eventData.length === 0) {
+      eventList.innerHTML = `<p>생성된 행사가 없습니다.</p>`
+    } else {
+      eventList.innerHTML = eventData.map((event) => {
+        const eventLink =
+          `${window.location.origin}/${event.event_type}?id=${event.id}`
+    
+        return `
+          <div class="payment-row">
+            <p><strong>행사명:</strong> ${event.receiver_name}</p>
+            <p><strong>종류:</strong> ${event.event_type}</p>
+            <p>
+              <a href="${eventLink}" target="_blank">
+                행사 링크 열기
+              </a>
+            </p>
+          </div>
+        `
+      }).join('')
+    }
       const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement
   
       await QRCode.toCanvas(
