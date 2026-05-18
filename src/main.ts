@@ -375,6 +375,10 @@ if (path === '/create') {
 
         <button id="pay-button">결제하기</button>
         <button id="admin-button">관리자 페이지</button>
+
+        <p class="secure-text">
+  안전한 결제 시스템으로 보호됩니다
+</p>
       </div>
     </div>
   `
