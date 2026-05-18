@@ -98,18 +98,21 @@ button {
   margin-bottom: 20px;
 }
 .wedding-card {
-  background-image: url('/wedding-bg.png');
+  background-image: url('/wedding.png');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   color: #3a2a10;
 }
 
 .funeral-card {
-  background-image: url('/funeral-bg.png');
+  background-image: url('/funeral.png');
   background-size: cover;
   background-position: center;
+  background-repeat: no-repeat;
   color: white;
 }
+
 .wedding-card,
 .funeral-card {
   min-height: 620px;

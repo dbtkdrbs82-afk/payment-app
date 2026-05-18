@@ -43,7 +43,7 @@ if (eventId) {
 if (path === '/create') {
   app.innerHTML = `
     <div class="page">
-      <div class="payment-card">
+      <div class="payment-card ${isFuneral ? 'funeral-card' : 'wedding-card'}">
         <h1>행사 생성</h1>
 
         <div class="input-group">
