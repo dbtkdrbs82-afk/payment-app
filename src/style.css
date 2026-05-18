@@ -97,3 +97,30 @@ button {
   padding: 15px;
   margin-bottom: 20px;
 }
+.wedding-card {
+  background-image: url('/wedding-bg.png');
+  background-size: cover;
+  background-position: center;
+  color: #3a2a10;
+}
+
+.funeral-card {
+  background-image: url('/funeral-bg.png');
+  background-size: cover;
+  background-position: center;
+  color: white;
+}
+.wedding-card,
+.funeral-card {
+  min-height: 620px;
+}
+
+.wedding-card input,
+.funeral-card input {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.funeral-card input {
+  background: rgba(0, 0, 0, 0.45);
+  color: white;
+}
