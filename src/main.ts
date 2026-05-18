@@ -14,7 +14,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
 
-const isFuneral = path === '/funeral'
+const isFuneral = path.includes('funeral')
 
 const params = new URLSearchParams(window.location.search)
 const eventId = params.get('id')
