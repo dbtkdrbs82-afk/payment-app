@@ -127,3 +127,12 @@ button {
   background: rgba(0, 0, 0, 0.45);
   color: white;
 }
+.wedding-card button {
+  background: linear-gradient(135deg, #b8860b, #e6c66a);
+  color: white;
+  border: none;
+}
+
+.wedding-card button:hover {
+  opacity: 0.9;
+}
