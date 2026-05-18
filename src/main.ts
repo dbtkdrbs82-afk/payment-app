@@ -126,7 +126,11 @@ if (path === '/create') {
         <button id="sms-link-button">문자로 보내기</button>
         <button id="kakao-link-button">카카오 공유</button>
       `
-
+      document.querySelector<HTMLInputElement>('#receiver-name')!.value = ''
+      document.querySelector<HTMLInputElement>('#bank-name')!.value = ''
+      document.querySelector<HTMLInputElement>('#account-number')!.value = ''
+      document.querySelector<HTMLInputElement>('#account-holder')!.value = ''
+      
       document.querySelector<HTMLButtonElement>('#copy-link-button')!
         .addEventListener('click', async () => {
           await navigator.clipboard.writeText(eventLink)
