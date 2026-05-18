@@ -285,7 +285,9 @@ if (path === '/create') {
 <p><strong>예금주:</strong> ${event.account_holder || '-'}</p>
 <p><strong>정산상태:</strong> ${event.settlement_status || '정산 대기'}</p>
 
-    <p>
+    <button class="settlement-button" data-id="${event.id}">
+  정산 완료 처리
+</button>
       <a href="${eventLink}" target="_blank">
         행사 링크 열기
       </a>
@@ -294,6 +296,27 @@ if (path === '/create') {
 `
       }).join('')
     }
+
+    document.querySelectorAll('.settlement-button').forEach((button) => {
+      button.addEventListener('click', async (e) => {
+        const eventId = (e.target as HTMLElement).getAttribute('data-id')
+    
+        const { error } = await supabase
+          .from('events')
+          .update({
+            settlement_status: '정산 완료'
+          })
+          .eq('id', eventId)
+    
+        if (error) {
+          alert('정산 처리 실패')
+          return
+        }
+    
+        alert('정산 완료 처리되었습니다')
+        window.location.reload()
+      })
+    })
       const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement
   
       await QRCode.toCanvas(
