@@ -262,6 +262,7 @@ if (path === '/create') {
           </table>
         </div>
       `
+    } 
       const { data: eventData, error: eventError } = await supabase
       .from('events')
       .select('*')
