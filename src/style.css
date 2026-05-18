@@ -28,9 +28,10 @@ button {
   border-radius: 10px;
   cursor: pointer;
 }
+
 .admin-card {
-  width: 700px;
-  max-width: 90%;
+  width: 95%;
+  max-width: 1400px;
   background: white;
   padding: 30px;
   border-radius: 16px;
@@ -171,11 +172,12 @@ button {
 }
 .admin-table-wrap {
   width: 100%;
-  overflow-x: auto;
-  margin-top: 20px;
+  overflow-x: scroll;
+  margin-bottom: 40px;
 }
 
 .admin-table {
+  min-width: 1200px;
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
@@ -207,4 +209,50 @@ button {
   background: #111827;
   color: white;
   cursor: pointer;
+}
+.admin-card {
+  width: 95vw;
+  max-width: none;
+  overflow-x: auto;
+}
+
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: scroll;
+}
+
+.admin-table {
+  min-width: 1500px;
+}
+.admin-table td:last-child,
+.admin-table th:last-child {
+  min-width: 140px;
+}
+
+.admin-table .settlement-button {
+  width: 100px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #111827;
+  color: white;
+  cursor: pointer;
+}
+.admin-table td:last-child,
+.admin-table th:last-child {
+  min-width: 140px;
+}
+
+.admin-table .settlement-button {
+  width: 100px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: #111827;
+  color: white;
+  cursor: pointer;
+}
+.admin-table td:nth-last-child(2),
+.admin-table th:nth-last-child(2) {
+  min-width: 80px;
 }
