@@ -338,6 +338,7 @@ if (path === '/create') {
         window.location.reload()
       })
     })
+  }
       const canvas = document.getElementById('qr-canvas') as HTMLCanvasElement
   
       await QRCode.toCanvas(
