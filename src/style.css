@@ -169,8 +169,3 @@ button {
   position: relative;
   z-index: 2;
 }
-.wedding-card p:first-of-type {
-  text-align: left;
-  margin-bottom: 30px;
-  font-size: 24px;
-}
