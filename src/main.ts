@@ -119,7 +119,9 @@ if (path === '/create') {
 
       document.querySelector<HTMLDivElement>('#result-link')!.innerHTML = `
         <p>생성 완료</p>
-        <a href="${eventLink}" target="_blank">${eventLink}</a>
+        <a href="${eventLink}" target="_blank">
+  결제 링크 열기
+</a>
         <button id="copy-link-button">링크 복사</button>
         <button id="sms-link-button">문자로 보내기</button>
         <button id="kakao-link-button">카카오 공유</button>
