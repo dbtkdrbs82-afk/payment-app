@@ -130,7 +130,7 @@ if (path === '/create') {
       document.querySelector<HTMLInputElement>('#bank-name')!.value = ''
       document.querySelector<HTMLInputElement>('#account-number')!.value = ''
       document.querySelector<HTMLInputElement>('#account-holder')!.value = ''
-      
+
       document.querySelector<HTMLButtonElement>('#copy-link-button')!
         .addEventListener('click', async () => {
           await navigator.clipboard.writeText(eventLink)
@@ -273,12 +273,17 @@ if (path === '/create') {
     
         return `
   <div class="payment-row">
-    <p><strong>행사명:</strong> ${event.receiver_name}</p>
-    <p><strong>종류:</strong> ${event.event_type}</p>
+   <p><strong>행사명:</strong> ${event.receiver_name}</p>
+<p><strong>종류:</strong> ${event.event_type}</p>
 
-    <p><strong>총 결제금액:</strong> ${eventTotal.toLocaleString()}원</p>
-    <p><strong>수수료:</strong> ${eventFee.toLocaleString()}원</p>
-    <p><strong>예상 정산금액:</strong> ${eventSettlement.toLocaleString()}원</p>
+<p><strong>총 결제금액:</strong> ${eventTotal.toLocaleString()}원</p>
+<p><strong>수수료:</strong> ${eventFee.toLocaleString()}원</p>
+<p><strong>예상 정산금액:</strong> ${eventSettlement.toLocaleString()}원</p>
+
+<p><strong>은행명:</strong> ${event.bank_name || '-'}</p>
+<p><strong>계좌번호:</strong> ${event.account_number || '-'}</p>
+<p><strong>예금주:</strong> ${event.account_holder || '-'}</p>
+<p><strong>정산상태:</strong> ${event.settlement_status || '정산 대기'}</p>
 
     <p>
       <a href="${eventLink}" target="_blank">
