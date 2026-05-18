@@ -58,7 +58,20 @@ if (path === '/create') {
           <label>이름 입력</label>
           <input id="receiver-name" type="text" placeholder="김철수 ♥ 박영희 / 故 홍길동">
         </div>
+<div class="input-group">
+  <label>은행명</label>
+  <input id="bank-name" type="text" placeholder="예: 국민은행">
+</div>
 
+<div class="input-group">
+  <label>계좌번호</label>
+  <input id="account-number" type="text" placeholder="계좌번호 입력">
+</div>
+
+<div class="input-group">
+  <label>예금주</label>
+  <input id="account-holder" type="text" placeholder="예금주 입력">
+</div>
         <button id="create-event-button">행사 생성</button>
         <div id="result-link"></div>
       </div>
@@ -69,6 +82,9 @@ if (path === '/create') {
     .addEventListener('click', async () => {
       const eventType = document.querySelector<HTMLSelectElement>('#event-type')!.value
       const receiverNameInput = document.querySelector<HTMLInputElement>('#receiver-name')!.value
+      const bankName = document.querySelector<HTMLInputElement>('#bank-name')!.value
+      const accountNumber = document.querySelector<HTMLInputElement>('#account-number')!.value
+      const accountHolder = document.querySelector<HTMLInputElement>('#account-holder')!.value
 
       if (!receiverNameInput) {
         alert('이름을 입력해주세요')
@@ -84,7 +100,11 @@ if (path === '/create') {
           {
             event_type: eventType,
             receiver_name: receiverNameInput,
-            payment_title: paymentTitleValue
+            payment_title: paymentTitleValue,
+            bank_name: bankName,
+            account_number: accountNumber,
+            account_holder: accountHolder,
+            settlement_status: '정산 대기'
           }
         ])
         .select()
