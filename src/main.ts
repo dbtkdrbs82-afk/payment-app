@@ -195,7 +195,7 @@ if (path === '/create') {
           <div class="admin-card">
             <h1>관리자 페이지</h1>
             <div id="settlement-box"></div>
-            <p>결제내역을 불러오는 중...</p>
+            
             <div id="payment-list"></div>
             
             <h2>생성된 행사 목록</h2>
