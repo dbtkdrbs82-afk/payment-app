@@ -238,15 +238,30 @@ if (path === '/create') {
             <p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
           </div>
         ` 
-        list.innerHTML = data.map((payment) => `
-          <div class="payment-row">
-            <p><strong>주문번호:</strong> ${payment.order_id}</p>
-            <p><strong>금액:</strong> ${Number(payment.amount).toLocaleString()}원</p>
-            <p><strong>상태:</strong> ${payment.status}</p>
-            <p><strong>시간:</strong> ${new Date(payment.created_at).toLocaleString()}</p>
-          </div>
-        `).join('')
-      }
+        list.innerHTML = `
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>주문번호</th>
+                <th>금액</th>
+                <th>상태</th>
+                <th>결제시간</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${data.map((payment) => `
+                <tr>
+                  <td>${payment.order_id}</td>
+                  <td>${Number(payment.amount).toLocaleString()}원</td>
+                  <td>${payment.status}</td>
+                  <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `
       const { data: eventData, error: eventError } = await supabase
       .from('events')
       .select('*')
