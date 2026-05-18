@@ -257,45 +257,66 @@ if (path === '/create') {
     } else if (!eventData || eventData.length === 0) {
       eventList.innerHTML = `<p>생성된 행사가 없습니다.</p>`
     } else {
-      eventList.innerHTML = eventData.map((event) => {
-        const eventPayments = (data || []).filter(
-          (payment) => payment.event_id === event.id
-        ) 
-        
-        const eventTotal = eventPayments.reduce((sum, payment) => {
-          return sum + Number(payment.amount)
-        }, 0)
-        
-        const eventFee = Math.floor(eventTotal * 0.02)
-        const eventSettlement = eventTotal - eventFee 
-        const eventLink =
-          `${window.location.origin}/${event.event_type}?id=${event.id}`
+      eventList.innerHTML = `
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>행사명</th>
+              <th>종류</th>
+              <th>총 결제금액</th>
+              <th>수수료</th>
+              <th>정산금액</th>
+              <th>은행명</th>
+              <th>계좌번호</th>
+              <th>예금주</th>
+              <th>정산상태</th>
+              <th>링크</th>
+              <th>처리</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${eventData.map((event) => {
+              const eventPayments = (data || []).filter(
+                (payment) => payment.event_id === event.id
+              )
     
-        return `
-  <div class="payment-row">
-   <p><strong>행사명:</strong> ${event.receiver_name}</p>
-<p><strong>종류:</strong> ${event.event_type}</p>
-
-<p><strong>총 결제금액:</strong> ${eventTotal.toLocaleString()}원</p>
-<p><strong>수수료:</strong> ${eventFee.toLocaleString()}원</p>
-<p><strong>예상 정산금액:</strong> ${eventSettlement.toLocaleString()}원</p>
-
-<p><strong>은행명:</strong> ${event.bank_name || '-'}</p>
-<p><strong>계좌번호:</strong> ${event.account_number || '-'}</p>
-<p><strong>예금주:</strong> ${event.account_holder || '-'}</p>
-<p><strong>정산상태:</strong> ${event.settlement_status || '정산 대기'}</p>
-
-    <button class="settlement-button" data-id="${event.id}">
-  정산 완료 처리
-</button>
-      <a href="${eventLink}" target="_blank">
-        행사 링크 열기
-      </a>
-    </p>
-  </div>
-`
-      }).join('')
-    }
+              const eventTotal = eventPayments.reduce((sum, payment) => {
+                return sum + Number(payment.amount)
+              }, 0)
+    
+              const eventFee = Math.floor(eventTotal * 0.02)
+              const eventSettlement = eventTotal - eventFee
+    
+              const eventLink =
+                `${window.location.origin}/${event.event_type}?id=${event.id}`
+    
+              return `
+                <tr>
+                  <td>${event.receiver_name}</td>
+                  <td>${event.event_type === 'funeral' ? '장례식' : '결혼식'}</td>
+                  <td>${eventTotal.toLocaleString()}원</td>
+                  <td>${eventFee.toLocaleString()}원</td>
+                  <td>${eventSettlement.toLocaleString()}원</td>
+                  <td>${event.bank_name || '-'}</td>
+                  <td>${event.account_number || '-'}</td>
+                  <td>${event.account_holder || '-'}</td>
+                  <td>${event.settlement_status || '정산 대기'}</td>
+                  <td>
+                    <a href="${eventLink}" target="_blank">열기</a>
+                  </td>
+                  <td>
+                    <button class="settlement-button" data-id="${event.id}">
+                      완료
+                    </button>
+                  </td>
+                </tr>
+              `
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+    `   
 
     document.querySelectorAll('.settlement-button').forEach((button) => {
       button.addEventListener('click', async (e) => {

@@ -169,3 +169,42 @@ button {
   position: relative;
   z-index: 2;
 }
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  background: white;
+}
+
+.admin-table th,
+.admin-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.admin-table th {
+  background: #f3f4f6;
+  font-weight: bold;
+}
+
+.admin-table a {
+  color: #1d4ed8;
+  font-weight: bold;
+}
+
+.admin-table .settlement-button {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  background: #111827;
+  color: white;
+  cursor: pointer;
+}
