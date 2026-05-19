@@ -411,10 +411,10 @@ if (path === '/create') {
     </div>
   `
 
-  document.querySelector<HTMLButtonElement>('#home-button')!
-    .addEventListener('click', () => {
-      window.location.href = '/'
-    })
+  document.querySelector<HTMLButtonElement>('#contact-button')!
+  .addEventListener('click', () => {
+    window.location.href = 'tel:010-0000-0000'
+  })
 
   document.querySelector<HTMLButtonElement>('#admin-button')!
     .addEventListener('click', () => {
@@ -442,60 +442,65 @@ if (path === '/create') {
       window.location.href = '/'
     })
 
-} else {
-  app.innerHTML = `
-    <div class="page">
-      <div class="payment-card ${isFuneral ? 'funeral-card' : 'wedding-card'}">
-        <h1>${receiverName}</h1>
-        <p>${paymentTitle}</p>
+  } else {
+    app.innerHTML = `
+      <div class="page">
+        <div class="landing-card">
+          <h1>모바일 축의금 · 부의금 결제 솔루션</h1>
+  
+          <p class="landing-subtitle">
+            결혼식과 장례식에서 QR·링크·카카오 공유로 간편하게 결제하고,
+            관리자 페이지에서 행사별 정산까지 확인할 수 있습니다.
+          </p>
+  
+          <div class="landing-features">
+            <div>QR 결제</div>
+            <div>링크 공유</div>
+            <div>카카오 공유</div>
+            <div>행사별 정산</div>
+            <div>계좌 등록</div>
+            <div>관리자 대시보드</div>
+          </div>
+  
+          <div class="landing-buttons">
+         <button id="create-button">행사 생성하기</button>
+<button id="admin-button">관리자 페이지</button>
+<button id="contact-button">도입 문의</button>   
+          </div>
+  
+          <div class="demo-links">
+            <a href="/wedding">웨딩 데모 보기</a>
+            <a href="/funeral">장례 데모 보기</a>
+          </div>
+  
+          <p class="secure-text">
+            웨딩홀 · 장례식장 · 행사 업체를 위한 비대면 결제 관리 시스템
+          </p>
+         
+          <div class="landing-flow">
+  <h2>이용 흐름</h2>
 
-        <div class="input-group">
-          <label>보낼 금액</label>
-          <input id="amount-input" type="number" placeholder="금액 입력">
+  <div class="flow-steps">
+    <div>1. 행사 생성</div>
+    <div>2. 링크/QR 공유</div>
+    <div>3. 고객 결제</div>
+    <div>4. 관리자 정산</div>
         </div>
-
-        <div class="input-group">
-          <label>보내는 사람 이름</label>
-          <input id="name-input" type="text" placeholder="이름 입력">
-        </div>
-
-        <div class="input-group">
-          <label>${messageLabel}</label>
-          <input id="message-input" type="text" placeholder="${messageLabel} 입력">
-        </div>
-
-        <button id="pay-button">결제하기</button>
-        
-
-        <p class="secure-text">
-  안전한 결제 시스템으로 보호됩니다
-</p>
       </div>
-    </div>
-  `
-
-  document.querySelector<HTMLButtonElement>('#pay-button')!
-    .addEventListener('click', async () => {
-      const amountInput = document.querySelector<HTMLInputElement>('#amount-input')!
-      const nameInput = document.querySelector<HTMLInputElement>('#name-input')!
-
-      const amountValue = Number(amountInput.value)
-      const customerNameValue = nameInput.value
-
-      if (!amountValue || !customerNameValue) {
-        alert('금액과 이름을 입력해주세요')
-        return
-      }
-
-      const tossPayments = await loadTossPayments(clientKey)
-      sessionStorage.setItem('currentEventId', eventId || '')
-      await tossPayments.requestPayment('카드', {
-        amount: amountValue,
-        orderId: 'order-' + Date.now(),
-        orderName: paymentTitle,
-        customerName: customerNameValue,
-        successUrl: window.location.origin + '/success', 
-        failUrl: window.location.origin + '/fail',
+    `
+  
+    document.querySelector<HTMLButtonElement>('#create-button')!
+      .addEventListener('click', () => {
+        window.location.href = '/create'
       })
-    })
-  }
+  
+    document.querySelector<HTMLButtonElement>('#admin-button')!
+      .addEventListener('click', () => {
+        window.location.href = '/admin'
+      })
+
+      document.querySelector<HTMLButtonElement>('#contact-button')!
+  .addEventListener('click', () => {
+    window.location.href = 'tel:010-0000-0000'
+  }) 
+  }  
