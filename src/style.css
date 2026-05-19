@@ -256,3 +256,48 @@ button {
 .admin-table th:nth-last-child(2) {
   min-width: 80px;
 }
+.landing-card {
+  width: 90%;
+  max-width: 900px;
+  background: white;
+  padding: 50px;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+}
+
+.landing-card h1 {
+  font-size: 36px;
+  margin-bottom: 20px;
+}
+
+.landing-subtitle {
+  font-size: 18px;
+  line-height: 1.7;
+  color: #444;
+  margin-bottom: 30px;
+}
+
+.landing-features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-bottom: 35px;
+}
+
+.landing-features div {
+  background: #f3f4f6;
+  padding: 16px;
+  border-radius: 12px;
+  font-weight: bold;
+}
+
+.landing-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.landing-buttons button {
+  width: 200px;
+}
