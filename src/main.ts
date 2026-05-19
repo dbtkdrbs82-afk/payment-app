@@ -522,7 +522,7 @@ if (path === '/create') {
           </p>
 
           <div class="hero-preview">
-  <img src="/wedding-preview.png" alt="웨딩 결제 미리보기">
+  <img src="/preview.png" alt="웨딩 결제 미리보기">
 </div>
 
           <div class="hero-preview">
