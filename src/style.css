@@ -359,3 +359,24 @@ button {
   font-weight: bold;
   color: #1d4ed8;
 }
+.landing-flow {
+  margin: 35px 0;
+}
+
+.landing-flow h2 {
+  margin-bottom: 18px;
+}
+
+.flow-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.flow-steps div {
+  background: #fff7ed;
+  border: 1px solid #f3d19c;
+  padding: 14px;
+  border-radius: 12px;
+  font-weight: bold;
+}
