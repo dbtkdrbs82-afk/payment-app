@@ -441,7 +441,66 @@ if (path === '/create') {
     .addEventListener('click', () => {
       window.location.href = '/'
     })
+  
+  } else if (path === '/wedding' || path === '/funeral') {
 
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card ${isFuneral ? 'funeral-card' : 'wedding-card'}">
+          <h1>${receiverName}</h1>
+          <p>${paymentTitle}</p>
+  
+          <div class="input-group">
+            <label>보낼 금액</label>
+            <input id="amount-input" type="number" placeholder="금액 입력">
+          </div>
+  
+          <div class="input-group">
+            <label>보내는 사람 이름</label>
+            <input id="name-input" type="text" placeholder="이름 입력">
+          </div>
+  
+          <div class="input-group">
+            <label>${messageLabel}</label>
+            <input id="message-input" type="text" placeholder="${messageLabel} 입력">
+          </div>
+  
+          <button id="pay-button">결제하기</button>
+  
+          <p class="secure-text">
+            안전한 결제 시스템으로 보호됩니다
+          </p>
+        </div>
+      </div>
+    `
+  
+    document.querySelector<HTMLButtonElement>('#pay-button')!
+      .addEventListener('click', async () => {
+        const amountInput = document.querySelector<HTMLInputElement>('#amount-input')!
+        const nameInput = document.querySelector<HTMLInputElement>('#name-input')!
+  
+        const amountValue = Number(amountInput.value)
+        const customerNameValue = nameInput.value
+  
+        if (!amountValue || !customerNameValue) {
+          alert('금액과 이름을 입력해주세요')
+          return
+        }
+  
+        const tossPayments = await loadTossPayments(clientKey)
+  
+        sessionStorage.setItem('currentEventId', eventId || '')
+  
+        await tossPayments.requestPayment('카드', {
+          amount: amountValue,
+          orderId: 'order-' + Date.now(),
+          orderName: paymentTitle,
+          customerName: customerNameValue,
+          successUrl: window.location.origin + '/success',
+          failUrl: window.location.origin + '/fail',
+        })
+      })
+  
   } else {
     app.innerHTML = `
       <div class="page">
