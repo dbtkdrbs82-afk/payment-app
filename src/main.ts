@@ -414,7 +414,7 @@ if (path === '/create') {
   document.querySelector<HTMLButtonElement>('#contact-button')!
   .addEventListener('click', () => {
     window.location.href =
-      'sms:010-0000-0000?body=' +
+      'sms:010-9938-2962?body=' +
       encodeURIComponent(
         '안녕하세요. 모바일 축의금/부의금 결제 솔루션 도입 문의드립니다.'
       )
@@ -572,7 +572,7 @@ if (path === '/create') {
       document.querySelector<HTMLButtonElement>('#contact-button')!
   .addEventListener('click', () => {
     window.location.href =
-      'sms:010-0000-0000?body=' +
+      'sms:010-9938-2962?body=' +
       encodeURIComponent(
         '안녕하세요. 모바일 축의금/부의금 결제 솔루션 도입 문의드립니다.'
       )
