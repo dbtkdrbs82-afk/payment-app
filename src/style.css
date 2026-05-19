@@ -433,3 +433,69 @@ button {
   color: white !important;
   border: none !important;
 }
+.demo-section {
+  margin-top: 40px;
+}
+
+.demo-section h2 {
+  margin-bottom: 20px;
+}
+
+.demo-cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.demo-card {
+  width: 240px;
+  padding: 22px;
+  border-radius: 18px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 18px;
+  transition: all 0.2s ease;
+}
+
+.demo-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+.wedding-demo {
+  background: linear-gradient(135deg, #fff5e8, #ffe4c4);
+  color: #9b6b12;
+}
+
+.funeral-demo {
+  background: linear-gradient(135deg, #2f3542, #57606f);
+  color: white;
+}
+@media (max-width: 768px) {
+  .landing-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .flow-steps {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .landing-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .landing-buttons button {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .landing-card {
+    padding: 30px 20px;
+  }
+
+  .landing-card h1 {
+    font-size: 28px;
+  }
+}
