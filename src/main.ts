@@ -520,6 +520,14 @@ if (path === '/create') {
             결혼식과 장례식에서 QR·링크·카카오 공유로 간편하게 결제하고,
             관리자 페이지에서 행사별 정산까지 확인할 수 있습니다.
           </p>
+
+          <div class="hero-preview">
+  <img src="/wedding-preview.png" alt="웨딩 결제 미리보기">
+</div>
+
+          <div class="hero-preview">
+  <img src="/wedding-preview.png" alt="웨딩 결제 미리보기">
+</div>
   
           <div class="landing-features">
             <div>QR 결제</div>
@@ -536,10 +544,19 @@ if (path === '/create') {
 <button class="gold-button" id="contact-button">도입 문의</button>   
           </div>
   
-          <div class="demo-links">
-            <a href="/wedding">웨딩 데모 보기</a>
-            <a href="/funeral">장례 데모 보기</a>
-          </div>
+          <div class="demo-section">
+  <h2>데모 체험</h2>
+
+  <div class="demo-cards">
+    <a class="demo-card wedding-demo" href="/wedding">
+      💍 웨딩 결제 데모
+    </a>
+
+    <a class="demo-card funeral-demo" href="/funeral">
+      🕊 장례 결제 데모
+    </a>
+  </div>
+</div>
   
           <p class="secure-text">
             웨딩홀 · 장례식장 · 행사 업체를 위한 비대면 결제 관리 시스템
