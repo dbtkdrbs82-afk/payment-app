@@ -521,9 +521,7 @@ if (path === '/create') {
             관리자 페이지에서 행사별 정산까지 확인할 수 있습니다.
           </p>
 
-          <div class="hero-preview">
-  <img src="/preview.png" alt="웨딩 결제 미리보기">
-</div>
+          
 
           <div class="hero-preview">
   <img src="/wedding-preview.png" alt="웨딩 결제 미리보기">
