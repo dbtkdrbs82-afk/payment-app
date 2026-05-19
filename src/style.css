@@ -263,7 +263,9 @@ button {
   padding: 50px;
   border-radius: 24px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+  box-shadow:
+  0 12px 40px rgba(0,0,0,0.08),
+  0 2px 10px rgba(200,155,60,0.08);
 }
 
 .landing-card h1 {

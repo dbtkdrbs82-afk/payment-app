@@ -413,8 +413,12 @@ if (path === '/create') {
 
   document.querySelector<HTMLButtonElement>('#contact-button')!
   .addEventListener('click', () => {
-    window.location.href = 'tel:010-0000-0000'
-  })
+    window.location.href =
+      'sms:010-0000-0000?body=' +
+      encodeURIComponent(
+        '안녕하세요. 모바일 축의금/부의금 결제 솔루션 도입 문의드립니다.'
+      )
+  }) 
 
   document.querySelector<HTMLButtonElement>('#admin-button')!
     .addEventListener('click', () => {
@@ -544,14 +548,16 @@ if (path === '/create') {
           <div class="landing-flow">
   <h2>이용 흐름</h2>
 
-  <div class="flow-steps">
+    <div class="flow-steps">
     <div>1. 행사 생성</div>
     <div>2. 링크/QR 공유</div>
     <div>3. 고객 결제</div>
     <div>4. 관리자 정산</div>
-        </div>
-      </div>
-    `
+  </div>
+</div>
+</div>
+</div>
+`
   
     document.querySelector<HTMLButtonElement>('#create-button')!
       .addEventListener('click', () => {
@@ -565,6 +571,10 @@ if (path === '/create') {
 
       document.querySelector<HTMLButtonElement>('#contact-button')!
   .addEventListener('click', () => {
-    window.location.href = 'tel:010-0000-0000'
-  }) 
+    window.location.href =
+      'sms:010-0000-0000?body=' +
+      encodeURIComponent(
+        '안녕하세요. 모바일 축의금/부의금 결제 솔루션 도입 문의드립니다.'
+      )
+  })
   }  
