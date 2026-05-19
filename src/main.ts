@@ -420,7 +420,6 @@ if (path === '/create') {
     .addEventListener('click', () => {
       window.location.href = '/admin'
     })
-
 } else if (path === '/fail') {
   const params = new URLSearchParams(window.location.search)
 
@@ -499,4 +498,4 @@ if (path === '/create') {
         failUrl: window.location.origin + '/fail',
       })
     })
-
+  }
