@@ -505,7 +505,12 @@ if (path === '/create') {
     app.innerHTML = `
       <div class="page">
         <div class="landing-card">
-          <h1>모바일 축의금 · 부의금 결제 솔루션</h1>
+         <p class="brand-title">PAY FLOW</p>
+         <h1>모바일 축의금 · 부의금 결제 솔루션</h1> 
+
+         <p class="hero-badge">
+  QR · 링크 · 모바일 간편결제 지원
+</p>
   
           <p class="landing-subtitle">
             결혼식과 장례식에서 QR·링크·카카오 공유로 간편하게 결제하고,
@@ -522,9 +527,9 @@ if (path === '/create') {
           </div>
   
           <div class="landing-buttons">
-         <button id="create-button">행사 생성하기</button>
-<button id="admin-button">관리자 페이지</button>
-<button id="contact-button">도입 문의</button>   
+         <button class="gold-button" id="create-button">행사 생성하기</button>
+<button class="gold-button" id="admin-button">관리자 페이지</button>
+<button class="gold-button" id="contact-button">도입 문의</button>   
           </div>
   
           <div class="demo-links">
