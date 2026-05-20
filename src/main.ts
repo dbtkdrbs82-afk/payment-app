@@ -244,6 +244,20 @@ if (path === '/create') {
         const platformFeeRate = 0.02
         const platformFee = Math.floor(totalAmount * platformFeeRate)
         const settlementAmount = totalAmount - platformFee
+        const today = new Date().toLocaleDateString('ko-KR')
+
+const todayPayments = data.filter((payment) => {
+  return (
+    new Date(payment.created_at).toLocaleDateString('ko-KR') === today
+  )
+})
+        const today = new Date().toLocaleDateString('ko-KR')
+
+        const todayPayments = data.filter((payment) => {
+          return (
+            new Date(payment.created_at).toLocaleDateString('ko-KR') === today
+          )
+        }) 
         
         document.querySelector<HTMLDivElement>('#settlement-box')!.innerHTML = `
   <div class="dashboard-cards">
@@ -262,6 +276,11 @@ if (path === '/create') {
       <p>예상 정산금액</p>
       <h2>${settlementAmount.toLocaleString()}원</h2>
     </div>
+
+    <div class="dashboard-card">
+  <p>오늘 결제건수</p>
+  <h2>${todayPayments.length}건</h2>
+</div>
 
   </div>
 `
