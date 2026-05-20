@@ -222,6 +222,10 @@ customer_code: customerCode,
       결제 링크와 전용 QR이 생성되었습니다.
     </p>
 
+    <p class="result-code">
+  행사 코드: <strong>${customerCode}</strong>
+</p>
+
     <a class="result-link-button" href="${eventLink}" target="_blank">
       결제 링크 열기
     </a>

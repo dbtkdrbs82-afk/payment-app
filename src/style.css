@@ -586,3 +586,9 @@ button {
   text-decoration: none;
   font-weight: bold;
 }
+.result-code {
+  margin: 14px 0;
+  font-size: 18px;
+  color: #6b4300;
+  font-weight: bold;
+}
