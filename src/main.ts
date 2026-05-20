@@ -149,7 +149,7 @@ if (path === '/customer') {
 
 <div class="input-group">
   <label>행사 코드</label>
-  <input id="customer-code" type="text" placeholder="예: 1234">
+  <input id="customer-code" type="text" placeholder="자동 생성됩니다" readonly>
 </div>
 <div class="input-group">
   <label>은행명</label>
@@ -174,9 +174,13 @@ if (path === '/customer') {
   document.querySelector<HTMLButtonElement>('#create-event-button')!
     .addEventListener('click', async () => {
       const eventType = document.querySelector<HTMLSelectElement>('#event-type')!.value
+      const codePrefix = eventType === 'funeral' ? 'FUN' : 'WED'
+const autoCustomerCode =
+  codePrefix + '-' + Math.floor(1000 + Math.random() * 9000)
       const receiverNameInput = document.querySelector<HTMLInputElement>('#receiver-name')!.value
       const birthDate = document.querySelector<HTMLInputElement>('#birth-date')!.value
-const customerCode = document.querySelector<HTMLInputElement>('#customer-code')!.value
+      const customerCode = autoCustomerCode
+      document.querySelector<HTMLInputElement>('#customer-code')!.value = customerCode
       const bankName = document.querySelector<HTMLInputElement>('#bank-name')!.value
       const accountNumber = document.querySelector<HTMLInputElement>('#account-number')!.value
       const accountHolder = document.querySelector<HTMLInputElement>('#account-holder')!.value
