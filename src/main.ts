@@ -229,7 +229,7 @@ if (path === '/create') {
         .from('payments')
         .select('*')
         .order('created_at', { ascending: false })
-  
+  co
       const list = document.querySelector<HTMLDivElement>('#payment-list')!
       const eventList = document.querySelector<HTMLDivElement>('#event-list')!
       if (error) {
@@ -245,13 +245,19 @@ if (path === '/create') {
         const platformFee = Math.floor(totalAmount * platformFeeRate)
         const settlementAmount = totalAmount - platformFee
        
-        const today = new Date().toLocaleDateString('ko-KR')
+        const today = new Date().toISOString().slice(0, 10)
 
-        const todayPayments = data.filter((payment) => {
-          return (
-            new Date(payment.created_at).toLocaleDateString('ko-KR') === today
-          )
-        }) 
+const todayPayments = data.filter((payment) => {
+  return (
+    new Date(payment.created_at)
+      .toISOString()
+      .slice(0, 10) === today
+  )
+})
+
+const todayAmount = todayPayments.reduce((sum, payment) => {
+  return sum + Number(payment.amount)
+}, 0)
         
         document.querySelector<HTMLDivElement>('#settlement-box')!.innerHTML = `
   <div class="dashboard-cards">
@@ -276,6 +282,10 @@ if (path === '/create') {
   <h2>${todayPayments.length}건</h2>
 </div>
 
+<div class="dashboard-card">
+  <p>오늘 결제금액</p>
+  <h2>${todayAmount.toLocaleString()}원</h2>
+</div>
   </div>
 `
         list.innerHTML = `
