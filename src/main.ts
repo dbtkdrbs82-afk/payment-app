@@ -117,8 +117,8 @@ if (path === '/customer') {
           <p><strong>행사 종류:</strong> ${eventData.event_type === 'funeral' ? '장례식' : '결혼식'}</p>
           <p><strong>총 입금액:</strong> ${totalAmount.toLocaleString()}원</p>
           <p><strong>결제 건수:</strong> ${(paymentData || []).length}건</p>
-          <p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
-          <p><strong>정산 상태:</strong> ${eventData.settlement_status || '정산 대기'}</p>
+<p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
+<p><strong>정산 상태:</strong> ${eventData.settlement_status || '정산 대기'}</p>
 
 <h3 style="margin-top:24px;">💌 최근 메시지</h3>
 
@@ -133,7 +133,6 @@ if (path === '/customer') {
 
 </div>
 `
-
 
 } else if (path === '/create') {
   app.innerHTML = `
