@@ -40,7 +40,91 @@ if (eventId) {
   }
 }
 
-if (path === '/create') {
+if (path === '/customer') {
+  app.innerHTML = `
+    <div class="page">
+      <div class="payment-card">
+        <h1>입금 현황 확인</h1>
+
+        <div class="input-group">
+          <label>이름</label>
+          <input id="customer-name" type="text" placeholder="이름 입력">
+        </div>
+
+        <div class="input-group">
+          <label>생년월일</label>
+          <input id="customer-birth" type="text" placeholder="예: 1990-01-01">
+        </div>
+
+        <div class="input-group">
+          <label>행사 코드</label>
+          <input id="customer-code-login" type="text" placeholder="행사 코드 입력">
+        </div>
+
+        <button id="customer-login-button">확인하기</button>
+
+        <div id="customer-result"></div>
+      </div>
+    </div>
+  `
+
+  document.querySelector<HTMLButtonElement>('#customer-login-button')!
+    .addEventListener('click', async () => {
+      const name = document.querySelector<HTMLInputElement>('#customer-name')!.value
+      const birth = document.querySelector<HTMLInputElement>('#customer-birth')!.value
+      const code = document.querySelector<HTMLInputElement>('#customer-code-login')!.value
+
+      if (!name || !birth || !code) {
+        alert('이름, 생년월일, 행사 코드를 입력해주세요')
+        return
+      }
+
+      const { data: eventData, error: eventError } = await supabase
+        .from('events')
+        .select('*')
+        .eq('receiver_name', name)
+        .eq('birth_date', birth)
+        .eq('customer_code', code)
+        .single()
+
+      const resultBox = document.querySelector<HTMLDivElement>('#customer-result')!
+
+      if (eventError || !eventData) {
+        resultBox.innerHTML = `<p>일치하는 행사를 찾을 수 없습니다.</p>`
+        return
+      }
+
+      const { data: paymentData, error: paymentError } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('event_id', eventData.id)
+
+      if (paymentError) {
+        resultBox.innerHTML = `<p>입금 내역을 불러오지 못했습니다.</p>`
+        return
+      }
+
+      const totalAmount = (paymentData || []).reduce((sum, payment) => {
+        return sum + Number(payment.amount)
+      }, 0)
+
+      const fee = Math.floor(totalAmount * 0.02)
+      const settlementAmount = totalAmount - fee
+
+      resultBox.innerHTML = `
+        <div class="create-result-card">
+          <h2>${eventData.receiver_name}</h2>
+          <p><strong>행사 종류:</strong> ${eventData.event_type === 'funeral' ? '장례식' : '결혼식'}</p>
+          <p><strong>총 입금액:</strong> ${totalAmount.toLocaleString()}원</p>
+          <p><strong>결제 건수:</strong> ${(paymentData || []).length}건</p>
+          <p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
+          <p><strong>정산 상태:</strong> ${eventData.settlement_status || '정산 대기'}</p>
+        </div>
+      `
+    })
+
+
+} else if (path === '/create') {
   app.innerHTML = `
     <div class="page">
       <div class="payment-card ${isFuneral ? 'funeral-card' : 'wedding-card'}">
@@ -58,6 +142,15 @@ if (path === '/create') {
           <label>이름 입력</label>
           <input id="receiver-name" type="text" placeholder="김철수 ♥ 박영희 / 故 홍길동">
         </div>
+        <div class="input-group">
+  <label>생년월일</label>
+  <input id="birth-date" type="text" placeholder="예: 1990-01-01">
+</div>
+
+<div class="input-group">
+  <label>행사 코드</label>
+  <input id="customer-code" type="text" placeholder="예: 1234">
+</div>
 <div class="input-group">
   <label>은행명</label>
   <input id="bank-name" type="text" placeholder="예: 국민은행">
@@ -82,6 +175,8 @@ if (path === '/create') {
     .addEventListener('click', async () => {
       const eventType = document.querySelector<HTMLSelectElement>('#event-type')!.value
       const receiverNameInput = document.querySelector<HTMLInputElement>('#receiver-name')!.value
+      const birthDate = document.querySelector<HTMLInputElement>('#birth-date')!.value
+const customerCode = document.querySelector<HTMLInputElement>('#customer-code')!.value
       const bankName = document.querySelector<HTMLInputElement>('#bank-name')!.value
       const accountNumber = document.querySelector<HTMLInputElement>('#account-number')!.value
       const accountHolder = document.querySelector<HTMLInputElement>('#account-holder')!.value
@@ -101,6 +196,8 @@ if (path === '/create') {
             event_type: eventType,
             receiver_name: receiverNameInput,
             payment_title: paymentTitleValue,
+            birth_date: birthDate,
+customer_code: customerCode,
             bank_name: bankName,
             account_number: accountNumber,
             account_holder: accountHolder,
@@ -785,8 +882,8 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
       .addEventListener('click', () => {
         window.location.href = '/admin'
       })
-        
-      document.querySelector<HTMLButtonElement>('#contact-button')!
+
+     document.querySelector<HTMLButtonElement>('#contact-button')!
   .addEventListener('click', () => {
     window.location.href =
       'sms:010-9938-2962?body=' +
