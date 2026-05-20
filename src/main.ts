@@ -133,6 +133,7 @@ if (path === '/customer') {
 
 </div>
 `
+    })
 
 } else if (path === '/create') {
   app.innerHTML = `
