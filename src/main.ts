@@ -229,7 +229,7 @@ if (path === '/create') {
         .from('payments')
         .select('*')
         .order('created_at', { ascending: false })
-  co
+  
       const list = document.querySelector<HTMLDivElement>('#payment-list')!
       const eventList = document.querySelector<HTMLDivElement>('#event-list')!
       if (error) {
