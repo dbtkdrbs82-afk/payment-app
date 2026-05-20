@@ -196,7 +196,15 @@ if (path === '/create') {
             <h1>관리자 페이지</h1>
             <div id="settlement-box"></div>
             
-            <div id="payment-list"></div>
+            <div class="search-box">
+  <input
+    id="payment-search"
+    type="text"
+    placeholder="주문번호 또는 이름 검색"
+  >
+</div>
+
+           <div id="payment-list"></div>
             
             <h2>생성된 행사 목록</h2>
 <div id="event-list"></div>
@@ -262,6 +270,44 @@ if (path === '/create') {
           </table>
         </div>
       `
+
+      const searchInput = document.querySelector<HTMLInputElement>('#payment-search')!
+
+      searchInput.addEventListener('input', () => {
+        const keyword = searchInput.value.toLowerCase()
+      
+        const filteredData = data.filter((payment) => {
+          return (
+            String(payment.order_id).toLowerCase().includes(keyword) ||
+            String(payment.status).toLowerCase().includes(keyword)
+          )
+        })
+      
+        list.innerHTML = `
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>주문번호</th>
+                  <th>금액</th>
+                  <th>상태</th>
+                  <th>결제시간</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${filteredData.map((payment) => `
+                  <tr>
+                    <td>${payment.order_id}</td>
+                    <td>${Number(payment.amount).toLocaleString()}원</td>
+                    <td>${payment.status}</td>
+                    <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `
+      })
     } 
       const { data: eventData, error: eventError } = await supabase
       .from('events')

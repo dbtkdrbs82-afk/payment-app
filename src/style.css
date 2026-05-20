@@ -499,3 +499,27 @@ button {
     font-size: 28px;
   }
 }
+.search-box {
+  margin: 20px 0;
+}
+
+.search-box input {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+}
+.event-filter-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 15px 0 20px;
+}
+
+.event-filter-buttons button {
+  width: auto;
+  padding: 10px 18px;
+  border-radius: 999px;
+}
