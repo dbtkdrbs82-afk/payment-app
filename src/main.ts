@@ -128,6 +128,7 @@ if (path === '/create') {
 
         <h3>행사 전용 QR</h3>
 <canvas id="event-qr-canvas"></canvas>
+<button id="download-qr-button">QR 이미지 저장</button>
       `
       document.querySelector<HTMLInputElement>('#receiver-name')!.value = ''
       document.querySelector<HTMLInputElement>('#bank-name')!.value = ''
@@ -164,8 +165,18 @@ await QRCode.toCanvas(
     width: 220
   }
 )
-    })
 
+document.querySelector<HTMLButtonElement>('#download-qr-button')!
+  .addEventListener('click', () => {
+    const qrImage = eventQrCanvas.toDataURL('image/png')
+
+    const link = document.createElement('a')
+    link.href = qrImage
+    link.download = 'event-qr.png'
+    link.click()
+    })
+  })
+  
   } else if (path === '/admin') {
     const savedAdminLogin = localStorage.getItem('adminLogin')
   
