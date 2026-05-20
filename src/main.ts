@@ -583,6 +583,11 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
     </div>
   `
 
+  document.querySelector<HTMLButtonElement>('#home-button')!
+  .addEventListener('click', () => {
+    window.location.href = '/'
+  })
+
   document.querySelector<HTMLButtonElement>('#contact-button')!
   .addEventListener('click', () => {
     window.location.href =
