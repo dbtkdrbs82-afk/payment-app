@@ -118,18 +118,28 @@ if (path === '/create') {
       const eventLink = `${window.location.origin}/${eventType}?id=${eventId}`
 
       document.querySelector<HTMLDivElement>('#result-link')!.innerHTML = `
-        <p>생성 완료</p>
-        <a href="${eventLink}" target="_blank">
-  결제 링크 열기
-</a>
-        <button id="copy-link-button">링크 복사</button>
-        <button id="sms-link-button">문자로 보내기</button>
-        <button id="kakao-link-button">카카오 공유</button>
+  <div class="create-result-card">
+    <h2>✅ 행사 생성 완료</h2>
+    <p class="result-name">${receiverNameInput}</p>
+    <p class="result-desc">
+      결제 링크와 전용 QR이 생성되었습니다.
+    </p>
 
-        <h3>행사 전용 QR</h3>
-<canvas id="event-qr-canvas"></canvas>
-<button id="download-qr-button">QR 이미지 저장</button>
-      `
+    <a class="result-link-button" href="${eventLink}" target="_blank">
+      결제 링크 열기
+    </a>
+
+    <button id="copy-link-button">링크 복사</button>
+    <button id="sms-link-button">문자로 보내기</button>
+    <button id="kakao-link-button">카카오 공유</button>
+
+    <h3>행사 전용 QR</h3>
+    <canvas id="event-qr-canvas"></canvas>
+
+    <button id="download-qr-button">QR 이미지 저장</button>
+  </div>
+`
+      
       document.querySelector<HTMLInputElement>('#receiver-name')!.value = ''
       document.querySelector<HTMLInputElement>('#bank-name')!.value = ''
       document.querySelector<HTMLInputElement>('#account-number')!.value = ''
@@ -176,7 +186,7 @@ document.querySelector<HTMLButtonElement>('#download-qr-button')!
     link.click()
     })
   })
-  
+
   } else if (path === '/admin') {
     const savedAdminLogin = localStorage.getItem('adminLogin')
   
@@ -771,6 +781,11 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
         window.location.href = '/create'
       })
   
+      document.querySelector<HTMLButtonElement>('#admin-button')!
+      .addEventListener('click', () => {
+        window.location.href = '/admin'
+      })
+        
       document.querySelector<HTMLButtonElement>('#contact-button')!
   .addEventListener('click', () => {
     window.location.href =
