@@ -244,13 +244,7 @@ if (path === '/create') {
         const platformFeeRate = 0.02
         const platformFee = Math.floor(totalAmount * platformFeeRate)
         const settlementAmount = totalAmount - platformFee
-        const today = new Date().toLocaleDateString('ko-KR')
-
-const todayPayments = data.filter((payment) => {
-  return (
-    new Date(payment.created_at).toLocaleDateString('ko-KR') === today
-  )
-})
+       
         const today = new Date().toLocaleDateString('ko-KR')
 
         const todayPayments = data.filter((payment) => {
