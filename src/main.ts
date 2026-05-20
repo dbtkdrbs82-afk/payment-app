@@ -119,9 +119,20 @@ if (path === '/customer') {
           <p><strong>결제 건수:</strong> ${(paymentData || []).length}건</p>
           <p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
           <p><strong>정산 상태:</strong> ${eventData.settlement_status || '정산 대기'}</p>
-        </div>
-      `
-    })
+
+<h3 style="margin-top:24px;">💌 최근 메시지</h3>
+
+<div class="message-list">
+  ${(paymentData || []).map((payment) => `
+    <div class="message-card">
+      <h4>${payment.sender_name || '익명'}</h4>
+      <p>${payment.message || '메시지가 없습니다.'}</p>
+    </div>
+  `).join('')}
+</div>
+
+</div>
+`
 
 
 } else if (path === '/create') {
@@ -812,7 +823,6 @@ const { error } = await supabase.from('payments').insert([
         const amountInput = document.querySelector<HTMLInputElement>('#amount-input')!
         const nameInput = document.querySelector<HTMLInputElement>('#name-input')!
         const messageInput = document.querySelector<HTMLInputElement>('#message-input')!
-  
         const amountValue = Number(amountInput.value)
         const customerNameValue = nameInput.value
         const messageValue = messageInput.value
