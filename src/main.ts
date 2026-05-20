@@ -246,13 +246,25 @@ if (path === '/create') {
         const settlementAmount = totalAmount - platformFee
         
         document.querySelector<HTMLDivElement>('#settlement-box')!.innerHTML = `
-          <div class="settlement-box">
-            <h2>정산 요약</h2>
-            <p><strong>총 결제금액:</strong> ${totalAmount.toLocaleString()}원</p>
-            <p><strong>플랫폼 수수료 2%:</strong> ${platformFee.toLocaleString()}원</p>
-            <p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
-          </div>
-        ` 
+  <div class="dashboard-cards">
+
+    <div class="dashboard-card">
+      <p>총 결제금액</p>
+      <h2>${totalAmount.toLocaleString()}원</h2>
+    </div>
+
+    <div class="dashboard-card">
+      <p>플랫폼 수수료</p>
+      <h2>${platformFee.toLocaleString()}원</h2>
+    </div>
+
+    <div class="dashboard-card">
+      <p>예상 정산금액</p>
+      <h2>${settlementAmount.toLocaleString()}원</h2>
+    </div>
+
+  </div>
+`
         list.innerHTML = `
         <div class="admin-table-wrap">
           <table class="admin-table">
