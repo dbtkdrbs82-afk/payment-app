@@ -434,18 +434,22 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
             <thead>
               <tr>
                 <th>주문번호</th>
-                <th>금액</th>
-                <th>상태</th>
-                <th>결제시간</th>
+<th>금액</th>
+<th>보낸 사람</th>
+<th>메시지</th>
+<th>상태</th>
+<th>결제시간</th>
               </tr>
             </thead>
             <tbody>
               ${data.map((payment) => `
                 <tr>
-                  <td>${payment.order_id}</td>
-                  <td>${Number(payment.amount).toLocaleString()}원</td>
-                  <td>${payment.status}</td>
-                  <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
+            <td>${payment.order_id}</td>
+            <td>${Number(payment.amount).toLocaleString()}원</td>
+            <td>${payment.sender_name || '-'}</td>
+            <td>${payment.message || '-'}</td>
+            <td>${payment.status}</td>
+            <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>      
                 </tr>
               `).join('')}
             </tbody>
@@ -471,9 +475,11 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
               <thead>
                 <tr>
                   <th>주문번호</th>
-                  <th>금액</th>
-                  <th>상태</th>
-                  <th>결제시간</th>
+<th>금액</th>
+<th>보낸 사람</th>
+<th>메시지</th>
+<th>상태</th>
+<th>결제시간</th>
                 </tr>
               </thead>
               <tbody>
@@ -481,6 +487,8 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
                   <tr>
                     <td>${payment.order_id}</td>
                     <td>${Number(payment.amount).toLocaleString()}원</td>
+                    <td>${payment.sender_name || '-'}</td>
+                    <td>${payment.message || '-'}</td>
                     <td>${payment.status}</td>
                     <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
                   </tr>
@@ -693,17 +701,25 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
   const params = new URLSearchParams(window.location.search)
 
   const orderId = params.get('orderId')
-  const amount = params.get('amount')
-  const paymentKey = params.get('paymentKey')
-  const eventId = sessionStorage.getItem('currentEventId')
-  const { error } = await supabase.from('payments').insert([
-    {
-      order_id: orderId,
-      payment_key: paymentKey,
-      amount: Number(amount),
-      status: 'paid',
-      event_id: eventId ? Number(eventId) : null
-    }
+const amount = params.get('amount')
+const paymentKey = params.get('paymentKey')
+
+const eventId = sessionStorage.getItem('currentEventId')
+
+const senderName = sessionStorage.getItem('senderName')
+const message = sessionStorage.getItem('message')
+
+const { error } = await supabase.from('payments').insert([
+  {
+    order_id: orderId,
+    payment_key: paymentKey,
+    amount: Number(amount),
+    status: 'paid',
+    event_id: eventId ? Number(eventId) : null,
+  
+    sender_name: senderName,
+    message: message
+  }
   ]) 
 
   if (error) {
@@ -795,9 +811,11 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
       .addEventListener('click', async () => {
         const amountInput = document.querySelector<HTMLInputElement>('#amount-input')!
         const nameInput = document.querySelector<HTMLInputElement>('#name-input')!
+        const messageInput = document.querySelector<HTMLInputElement>('#message-input')!
   
         const amountValue = Number(amountInput.value)
         const customerNameValue = nameInput.value
+        const messageValue = messageInput.value
   
         if (!amountValue || !customerNameValue) {
           alert('금액과 이름을 입력해주세요')
@@ -807,8 +825,10 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
         const tossPayments = await loadTossPayments(clientKey)
   
         sessionStorage.setItem('currentEventId', eventId || '')
-  
-        await tossPayments.requestPayment('카드', {
+
+        sessionStorage.setItem('senderName', customerNameValue)
+sessionStorage.setItem('message', messageValue)
+       await tossPayments.requestPayment('카드', {
           amount: amountValue,
           orderId: 'order-' + Date.now(),
           orderName: paymentTitle,
