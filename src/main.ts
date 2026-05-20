@@ -575,13 +575,11 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
   app.innerHTML = `
     <div class="page">
       <div class="payment-card">
-        <h1>결제 성공</h1>
+        <h1>결제 완료</h1>
         <p>주문번호: ${orderId}</p>
         <p>결제금액: ${Number(amount).toLocaleString()}원</p>
-        <p class="small-text">결제키: ${paymentKey}</p>
-        <button id="home-button">처음으로</button>
-        <button id="admin-button">관리자 페이지</button>
-      </div>
+        <button id="home-button">확인</button>
+        </div>
     </div>
   `
 
@@ -594,10 +592,6 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
       )
   }) 
 
-  document.querySelector<HTMLButtonElement>('#admin-button')!
-    .addEventListener('click', () => {
-      window.location.href = '/admin'
-    })
 } else if (path === '/fail') {
   const params = new URLSearchParams(window.location.search)
 
@@ -747,11 +741,6 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
         window.location.href = '/create'
       })
   
-    document.querySelector<HTMLButtonElement>('#admin-button')!
-      .addEventListener('click', () => {
-        window.location.href = '/admin'
-      })
-
       document.querySelector<HTMLButtonElement>('#contact-button')!
   .addEventListener('click', () => {
     window.location.href =
