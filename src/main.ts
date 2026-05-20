@@ -207,6 +207,13 @@ if (path === '/create') {
            <div id="payment-list"></div>
             
             <h2>생성된 행사 목록</h2>
+
+<div class="event-filter-buttons">
+  <button id="filter-all">전체</button>
+  <button id="filter-wedding">결혼식</button>
+  <button id="filter-funeral">장례식</button>
+</div>
+
 <div id="event-list"></div>
   
             <h2>QR 결제</h2>
@@ -378,7 +385,93 @@ if (path === '/create') {
           </tbody>
         </table>
       </div>
-    `   
+    ` 
+    const renderEvents = (filteredEvents: typeof eventData) => {
+      eventList.innerHTML = `
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>행사명</th>
+                <th>종류</th>
+                <th>총 결제금액</th>
+                <th>수수료</th>
+                <th>정산금액</th>
+                <th>은행명</th>
+                <th>계좌번호</th>
+                <th>예금주</th>
+                <th>정산상태</th>
+                <th>링크</th>
+                <th>처리</th>
+              </tr>
+            </thead>
+    
+            <tbody>
+              ${filteredEvents.map((event) => {
+                const eventPayments = (data || []).filter(
+                  (payment) => payment.event_id === event.id
+                )
+    
+                const eventTotal = eventPayments.reduce((sum, payment) => {
+                  return sum + Number(payment.amount)
+                }, 0)
+    
+                const eventFee = Math.floor(eventTotal * 0.02)
+                const eventSettlement = eventTotal - eventFee
+    
+                const eventLink =
+                  `${window.location.origin}/${event.event_type}?id=${event.id}`
+    
+                return `
+                  <tr>
+                    <td>${event.receiver_name}</td>
+                    <td>${event.event_type === 'funeral' ? '장례식' : '결혼식'}</td>
+                    <td>${eventTotal.toLocaleString()}원</td>
+                    <td>${eventFee.toLocaleString()}원</td>
+                    <td>${eventSettlement.toLocaleString()}원</td>
+                    <td>${event.bank_name || '-'}</td>
+                    <td>${event.account_number || '-'}</td>
+                    <td>${event.account_holder || '-'}</td>
+                    <td>${event.settlement_status || '정산 대기'}</td>
+    
+                    <td>
+                      <a href="${eventLink}" target="_blank">열기</a>
+                    </td>
+    
+                    <td>
+                      <button class="settlement-button" data-id="${event.id}">
+                        완료
+                      </button>
+                    </td>
+                  </tr>
+                `
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `
+    }
+    
+    renderEvents(eventData)
+    
+    document.querySelector('#filter-all')!
+      .addEventListener('click', () => {
+        renderEvents(eventData)
+      })
+    
+    document.querySelector('#filter-wedding')!
+      .addEventListener('click', () => {
+        renderEvents(
+          eventData.filter((event) => event.event_type === 'wedding')
+        )
+      })
+    
+    document.querySelector('#filter-funeral')!
+      .addEventListener('click', () => {
+        renderEvents(
+          eventData.filter((event) => event.event_type === 'funeral')
+        )
+      })  
 
     document.querySelectorAll('.settlement-button').forEach((button) => {
       button.addEventListener('click', async (e) => {
