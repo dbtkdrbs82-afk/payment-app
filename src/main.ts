@@ -125,6 +125,9 @@ if (path === '/create') {
         <button id="copy-link-button">링크 복사</button>
         <button id="sms-link-button">문자로 보내기</button>
         <button id="kakao-link-button">카카오 공유</button>
+
+        <h3>행사 전용 QR</h3>
+<canvas id="event-qr-canvas"></canvas>
       `
       document.querySelector<HTMLInputElement>('#receiver-name')!.value = ''
       document.querySelector<HTMLInputElement>('#bank-name')!.value = ''
@@ -150,6 +153,17 @@ if (path === '/create') {
 
           window.open(kakaoShareUrl, '_blank')
         })
+
+        const eventQrCanvas =
+  document.getElementById('event-qr-canvas') as HTMLCanvasElement
+
+await QRCode.toCanvas(
+  eventQrCanvas,
+  eventLink,
+  {
+    width: 220
+  }
+)
     })
 
   } else if (path === '/admin') {
