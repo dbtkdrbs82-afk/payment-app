@@ -873,8 +873,8 @@ const { error } = await supabase.from('payments').insert([
       <h1>
   ${
     currentEventType === 'funeral'
-      ? '명복을 빌어 주셔서 감사합니다.'
-      : '축하해 주셔서 감사합니다 💛'
+      ? '명복을 빌어 주셔서<br>감사합니다.'
+      : '축하해 주셔서<br>감사합니다 💛'
   }
 </h1>
         <p>주문번호: ${orderId}</p>
