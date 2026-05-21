@@ -841,7 +841,6 @@ const amount = params.get('amount')
 const paymentKey = params.get('paymentKey')
 
 const eventId = sessionStorage.getItem('currentEventId')
-
 const currentEventType =
   sessionStorage.getItem('currentEventType')
 
@@ -870,9 +869,7 @@ const { error } = await supabase.from('payments').insert([
   app.innerHTML = `
     <div class="page">
       <div class="payment-card">
-      const currentEventType =
-  sessionStorage.getItem('currentEventType')
-
+    
       <h1>
   ${
     currentEventType === 'funeral'
@@ -889,7 +886,7 @@ const { error } = await supabase.from('payments').insert([
 
   document.querySelector<HTMLButtonElement>('#home-button')!
   .addEventListener('click', () => {
-    window.location.href = '/'
+    window.close()
   })
 
   document.querySelector<HTMLButtonElement>('#contact-button')!
