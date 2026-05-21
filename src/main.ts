@@ -188,7 +188,7 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
   
       link.click()
     })
-    
+
     const content =
       document.querySelector<HTMLDivElement>('#message-popup-content')!.innerHTML
 
@@ -229,13 +229,33 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
           </style>
         </head>
 
-        <body>
-          <h1>메시지 확인</h1>
+<body>
+  <h1>메시지 확인</h1>
 
-          ${content}
-        </body>
-      </html>
-    `)
+  <input
+    id="ledger-search"
+    placeholder="보낸 사람 검색"
+    style="width:100%;padding:14px;margin-bottom:20px;border:1px solid #ddd;border-radius:10px;"
+  >
+
+  ${content}
+
+  <script>
+    const searchInput = document.getElementById('ledger-search')
+
+    searchInput.addEventListener('input', () => {
+      const keyword = searchInput.value.toLowerCase()
+      const rows = document.querySelectorAll('tbody tr')
+
+      rows.forEach((row) => {
+        const name = row.children[0].textContent.toLowerCase()
+        row.style.display = name.includes(keyword) ? '' : 'none'
+      })
+    })
+  </script>
+</body>
+</html>
+`)
 
     popup.document.close()
   })
