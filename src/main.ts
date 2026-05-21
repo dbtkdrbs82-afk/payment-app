@@ -120,15 +120,30 @@ if (path === '/customer') {
 <p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
 <p><strong>정산 상태:</strong> ${eventData.settlement_status || '정산 대기'}</p>
 
-<h3 style="margin-top:24px;">💌 최근 메시지</h3>
+<h3 style="margin-top:24px;">📒 축의금 / 부의금 장부</h3>
 
-<div class="message-list">
-  ${(paymentData || []).map((payment) => `
-    <div class="message-card">
-      <h4>${payment.sender_name || '익명'}</h4>
-      <p>${payment.message || '메시지가 없습니다.'}</p>
-    </div>
-  `).join('')}
+<div class="admin-table-wrap">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>보낸 사람</th>
+        <th>금액</th>
+        <th>메시지</th>
+        <th>결제시간</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      ${(paymentData || []).map((payment) => `
+        <tr>
+          <td>${payment.sender_name || '익명'}</td>
+          <td>${Number(payment.amount).toLocaleString()}원</td>
+          <td>${payment.message || '-'}</td>
+          <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
 </div>
 
 </div>

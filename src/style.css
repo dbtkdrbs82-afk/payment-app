@@ -592,25 +592,3 @@ button {
   color: #6b4300;
   font-weight: bold;
 }
-.message-list {
-  margin-top: 20px;
-}
-
-.message-card {
-  padding: 16px;
-  margin-bottom: 14px;
-  border-radius: 16px;
-  background: rgba(255,255,255,0.8);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  text-align: left;
-}
-
-.message-card h4 {
-  margin-bottom: 8px;
-  color: #6b4300;
-}
-
-.message-card p {
-  color: #444;
-  line-height: 1.5;
-}
