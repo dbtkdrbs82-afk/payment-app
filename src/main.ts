@@ -57,8 +57,8 @@ if (path === '/customer') {
         </div>
 
         <div class="input-group">
-          <label>행사 코드</label>
-          <input id="customer-code-login" type="text" placeholder="행사 코드 입력">
+        <label>고객 확인 비밀번호</label>
+<input id="customer-code-login" type="text" placeholder="비밀번호 입력">  
         </div>
 
         <button id="customer-login-button">확인하기</button>
@@ -231,8 +231,8 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 </div>
 
 <div class="input-group">
-  <label>행사 코드</label>
-  <input id="customer-code" type="text" placeholder="자동 생성됩니다" readonly>
+<label>고객 확인 비밀번호</label>
+<input id="customer-code" type="text" placeholder="예: 1234 또는 원하는 비밀번호">
 </div>
 <div class="input-group">
   <label>은행명</label>
@@ -257,13 +257,11 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
   document.querySelector<HTMLButtonElement>('#create-event-button')!
     .addEventListener('click', async () => {
       const eventType = document.querySelector<HTMLSelectElement>('#event-type')!.value
-      const codePrefix = eventType === 'funeral' ? 'FUN' : 'WED'
-const autoCustomerCode =
-  codePrefix + '-' + Math.floor(1000 + Math.random() * 9000)
+      
       const receiverNameInput = document.querySelector<HTMLInputElement>('#receiver-name')!.value
       const birthDate = document.querySelector<HTMLInputElement>('#birth-date')!.value
-      const customerCode = autoCustomerCode
-      document.querySelector<HTMLInputElement>('#customer-code')!.value = customerCode
+      const customerCode =
+  document.querySelector<HTMLInputElement>('#customer-code')!.value
       const bankName = document.querySelector<HTMLInputElement>('#bank-name')!.value
       const accountNumber = document.querySelector<HTMLInputElement>('#account-number')!.value
       const accountHolder = document.querySelector<HTMLInputElement>('#account-holder')!.value
