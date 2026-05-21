@@ -842,6 +842,9 @@ const paymentKey = params.get('paymentKey')
 
 const eventId = sessionStorage.getItem('currentEventId')
 
+const currentEventType =
+  sessionStorage.getItem('currentEventType')
+
 const senderName = sessionStorage.getItem('senderName')
 const message = sessionStorage.getItem('message')
 
@@ -867,7 +870,16 @@ const { error } = await supabase.from('payments').insert([
   app.innerHTML = `
     <div class="page">
       <div class="payment-card">
-        <h1>결제 완료</h1>
+      const currentEventType =
+  sessionStorage.getItem('currentEventType')
+
+      <h1>
+  ${
+    currentEventType === 'funeral'
+      ? '명복을 빌어 주셔서 감사합니다.'
+      : '축하해 주셔서 감사합니다 💛'
+  }
+</h1>
         <p>주문번호: ${orderId}</p>
         <p>결제금액: ${Number(amount).toLocaleString()}원</p>
         <button id="home-button">확인</button>
@@ -960,9 +972,10 @@ const { error } = await supabase.from('payments').insert([
         const tossPayments = await loadTossPayments(clientKey)
   
         sessionStorage.setItem('currentEventId', eventId || '')
-
+        sessionStorage.setItem('currentEventType', isFuneral ? 'funeral' : 'wedding')
         sessionStorage.setItem('senderName', customerNameValue)
-sessionStorage.setItem('message', messageValue)
+        sessionStorage.setItem('message', messageValue)
+
        await tossPayments.requestPayment('카드', {
           amount: amountValue,
           orderId: 'order-' + Date.now(),
