@@ -124,6 +124,10 @@ if (path === '/customer') {
   메시지 확인
 </button>
 
+<button id="ledger-download-button" class="message-view-button">
+  장부 다운로드
+</button>
+
 <div id="message-popup-content" style="display:none;">
   <div class="admin-table-wrap">
     <table class="admin-table">
@@ -153,7 +157,38 @@ if (path === '/customer') {
 
 document.querySelector<HTMLButtonElement>('#message-view-button')!
   .addEventListener('click', () => {
-
+    document.querySelector<HTMLButtonElement>('#ledger-download-button')!
+    .addEventListener('click', () => {
+  
+      const rows = [
+        ['보낸 사람', '금액', '메시지', '결제시간'],
+  
+        ...(paymentData || []).map((payment) => [
+          payment.sender_name || '익명',
+          Number(payment.amount).toLocaleString() + '원',
+          payment.message || '-',
+          new Date(payment.created_at).toLocaleString('ko-KR')
+        ])
+      ]
+  
+      const csvContent = rows
+        .map((row) => row.map((cell) => `"${cell}"`).join(','))
+        .join('\n')
+  
+      const blob = new Blob(
+        ['\uFEFF' + csvContent],
+        { type: 'text/csv;charset=utf-8;' }
+      )
+  
+      const link = document.createElement('a')
+  
+      link.href = URL.createObjectURL(blob)
+      link.download =
+        `${eventData.receiver_name}-입금장부.csv`
+  
+      link.click()
+    })
+    
     const content =
       document.querySelector<HTMLDivElement>('#message-popup-content')!.innerHTML
 
