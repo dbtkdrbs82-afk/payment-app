@@ -120,10 +120,13 @@ if (path === '/customer') {
 <p><strong>예상 정산금액:</strong> ${settlementAmount.toLocaleString()}원</p>
 <p><strong>정산 상태:</strong> ${eventData.settlement_status || '정산 대기'}</p>
 
-<h3 style="margin-top:24px;">📒 축의금 / 부의금 장부</h3>
+<button id="message-view-button" class="message-view-button">
+  메시지 확인
+</button>
 
-<div class="admin-table-wrap">
-  <table class="admin-table">
+<div id="message-popup-content" style="display:none;">
+  <div class="admin-table-wrap">
+    <table class="admin-table">
     <thead>
       <tr>
         <th>보낸 사람</th>
@@ -145,10 +148,64 @@ if (path === '/customer') {
     </tbody>
   </table>
 </div>
-
 </div>
 `
-    })
+
+document.querySelector<HTMLButtonElement>('#message-view-button')!
+  .addEventListener('click', () => {
+
+    const content =
+      document.querySelector<HTMLDivElement>('#message-popup-content')!.innerHTML
+
+    const popup = window.open('', '_blank', 'width=900,height=700')
+
+    if (!popup) {
+      alert('팝업이 차단되었습니다.')
+      return
+    }
+
+    popup.document.write(`
+      <html>
+        <head>
+          <title>메시지 확인</title>
+
+          <style>
+            body {
+              font-family: sans-serif;
+              padding: 30px;
+              background: #f9fafb;
+            }
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              background: white;
+            }
+
+            th, td {
+              border: 1px solid #ddd;
+              padding: 12px;
+              text-align: center;
+            }
+
+            th {
+              background: #f3f4f6;
+            }
+          </style>
+        </head>
+
+        <body>
+          <h1>메시지 확인</h1>
+
+          ${content}
+        </body>
+      </html>
+    `)
+
+    popup.document.close()
+  })
+
+})
 
 } else if (path === '/create') {
   app.innerHTML = `

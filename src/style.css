@@ -592,3 +592,15 @@ button {
   color: #6b4300;
   font-weight: bold;
 }
+.message-view-button {
+  margin-top: 24px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #c89b3c, #e0c15a);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
