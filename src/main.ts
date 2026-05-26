@@ -303,6 +303,15 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
   <label>예금주</label>
   <input id="account-holder" type="text" placeholder="예금주 입력">
 </div>
+<div class="input-group">
+  <label>메뉴 이름</label>
+  <input id="menu-name" type="text" placeholder="예: 아메리카노">
+</div>
+
+<div class="input-group">
+  <label>메뉴 가격</label>
+  <input id="menu-price" type="number" placeholder="예: 4500">
+</div>
         <button id="create-event-button">행사 생성</button>
         <div id="result-link"></div>
       </div>
@@ -320,7 +329,13 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
       const bankName = document.querySelector<HTMLInputElement>('#bank-name')!.value
       const accountNumber = document.querySelector<HTMLInputElement>('#account-number')!.value
       const accountHolder = document.querySelector<HTMLInputElement>('#account-holder')!.value
+      const menuName =
+  document.querySelector<HTMLInputElement>('#menu-name')!.value
 
+const menuPrice =
+  Number(
+    document.querySelector<HTMLInputElement>('#menu-price')!.value
+  )
       if (!receiverNameInput) {
         alert('이름을 입력해주세요')
         return
@@ -352,6 +367,17 @@ customer_code: customerCode,
       }
 
       const eventId = data[0].id
+      if (eventId && menuName && menuPrice) {
+  await supabase
+    .from('menus')
+    .insert([
+      {
+        event_id: eventId,
+        name: menuName,
+        price: menuPrice
+      }
+    ])
+}
       const eventLink = `${window.location.origin}/${eventType}?id=${eventId}`
 
       document.querySelector<HTMLDivElement>('#result-link')!.innerHTML = `
