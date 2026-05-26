@@ -978,6 +978,7 @@ const { error } = await supabase.from('payments').insert([
       <div class="page">
         <div class="payment-card">
           <h1>메뉴 주문</h1>
+          <p>불러온 메뉴 수: ${(menuData || []).length}개</p>
   
           <div class="menu-list">
             ${(menuData || []).map((menu) => `
