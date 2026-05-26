@@ -397,6 +397,9 @@ customer_code: customerCode,
       }
     ])
 }
+
+const eventId = data[0].id
+
       const eventLink = `${window.location.origin}/${eventType}?id=${eventId}`
 
       document.querySelector<HTMLDivElement>('#result-link')!.innerHTML = `
