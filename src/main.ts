@@ -963,6 +963,102 @@ const { error } = await supabase.from('payments').insert([
     .addEventListener('click', () => {
       window.location.href = '/'
     })
+
+  } else if (path === '/store') {
+    const params = new URLSearchParams(window.location.search)
+    const eventId = params.get('id')
+  
+    const { data: menuData } = await supabase
+      .from('menus')
+      .select('*')
+      .eq('event_id', Number(eventId))
+  
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card">
+          <h1>메뉴 주문</h1>
+  
+          <div class="menu-list">
+            ${(menuData || []).map((menu) => `
+              <div class="menu-card">
+                ${menu.image_url ? `<img src="${menu.image_url}" alt="${menu.name}">` : ''}
+                <h3>${menu.name}</h3>
+                <p>${Number(menu.price).toLocaleString()}원</p>
+  
+                <button
+                  class="menu-select-button"
+                  data-name="${menu.name}"
+                  data-price="${menu.price}"
+                >
+                  선택하기
+                </button>
+              </div>
+            `).join('')}
+          </div>
+  
+          <div class="input-group">
+            <label>선택 메뉴</label>
+            <input id="order-name-input" type="text" readonly>
+          </div>
+  
+          <div class="input-group">
+            <label>결제 금액</label>
+            <input id="amount-input" type="number" readonly>
+          </div>
+  
+          <div class="input-group">
+            <label>주문자 이름</label>
+            <input id="name-input" type="text" placeholder="이름 입력">
+          </div>
+  
+          <div class="input-group">
+            <label>요청사항</label>
+            <input id="message-input" type="text" placeholder="예: 덜 맵게 해주세요">
+          </div>
+  
+          <button id="pay-button">결제하기</button>
+        </div>
+      </div>
+    `
+  
+    document.querySelectorAll('.menu-select-button').forEach((button) => {
+      button.addEventListener('click', () => {
+        const price = (button as HTMLElement).getAttribute('data-price')
+        const name = (button as HTMLElement).getAttribute('data-name')
+  
+        document.querySelector<HTMLInputElement>('#amount-input')!.value = price || ''
+        document.querySelector<HTMLInputElement>('#order-name-input')!.value = name || ''
+      })
+    })
+  
+    document.querySelector<HTMLButtonElement>('#pay-button')!
+      .addEventListener('click', async () => {
+        const amountValue = Number(document.querySelector<HTMLInputElement>('#amount-input')!.value)
+        const customerNameValue = document.querySelector<HTMLInputElement>('#name-input')!.value
+        const messageValue = document.querySelector<HTMLInputElement>('#message-input')!.value
+        const orderNameValue = document.querySelector<HTMLInputElement>('#order-name-input')!.value
+  
+        if (!amountValue || !customerNameValue || !orderNameValue) {
+          alert('메뉴 선택과 이름 입력을 해주세요')
+          return
+        }
+  
+        const tossPayments = await loadTossPayments(clientKey)
+  
+        sessionStorage.setItem('currentEventId', eventId || '')
+        sessionStorage.setItem('currentEventType', 'store')
+        sessionStorage.setItem('senderName', customerNameValue)
+        sessionStorage.setItem('message', `${orderNameValue} / ${messageValue}`)
+  
+        await tossPayments.requestPayment('카드', {
+          amount: amountValue,
+          orderId: 'order-' + Date.now(),
+          orderName: orderNameValue,
+          customerName: customerNameValue,
+          successUrl: window.location.origin + '/success',
+          failUrl: window.location.origin + '/fail',
+        })
+      })
   
   } else if (path === '/wedding' || path === '/funeral') {
 
