@@ -18,6 +18,10 @@ const isFuneral = path.includes('funeral')
 
 const params = new URLSearchParams(window.location.search)
 const eventId = params.get('id')
+const { data: menuData } = await supabase
+  .from('menus')
+  .select('*')
+  .eq('event_id', Number(eventId))
 
 let receiverName = isFuneral ? '故 홍길동' : '김철수 ♥ 박영희'
 let paymentTitle = isFuneral ? '부의금 보내기' : '축의금 보내기'
@@ -283,6 +287,20 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
         <div class="input-group">
   <label>생년월일</label>
   <input id="birth-date" type="text" placeholder="예: 1990-01-01">
+</div>
+<div class="input-group">
+  <label>주민번호</label>
+  <input id="resident-number" type="text" placeholder="예: 900101-1234567">
+</div>
+
+<div class="input-group">
+  <label>연락처</label>
+  <input id="phone" type="text" placeholder="예: 010-1234-5678">
+</div>
+
+<div class="input-group">
+  <label>주소</label>
+  <input id="address" type="text" placeholder="주소 입력">
 </div>
 
 <div class="input-group">
@@ -953,6 +971,23 @@ const { error } = await supabase.from('payments').insert([
         <div class="payment-card ${isFuneral ? 'funeral-card' : 'wedding-card'}">
           <h1>${receiverName}</h1>
           <p>${paymentTitle}</p>
+
+          <div class="menu-list">
+  ${(menuData || []).map((menu) => `
+    <div class="menu-card">
+      ${menu.image_url ? `<img src="${menu.image_url}" alt="${menu.name}">` : ''}
+      <h3>${menu.name}</h3>
+      <p>${Number(menu.price).toLocaleString()}원</p>
+
+      <button
+        class="menu-select-button"
+        data-price="${menu.price}"
+      >
+        선택하기
+      </button>
+    </div>
+  `).join('')}
+</div>
   
           <div class="input-group">
             <label>보낼 금액</label>
@@ -977,6 +1012,21 @@ const { error } = await supabase.from('payments').insert([
         </div>
       </div>
     `
+
+    document.querySelectorAll('.menu-select-button')
+  .forEach((button) => {
+
+    button.addEventListener('click', () => {
+
+      const price =
+        (button as HTMLElement)
+          .getAttribute('data-price')
+
+      document.querySelector<HTMLInputElement>('#amount-input')!
+        .value = price || ''
+    })
+  })
+
   
     document.querySelector<HTMLButtonElement>('#pay-button')!
       .addEventListener('click', async () => {
