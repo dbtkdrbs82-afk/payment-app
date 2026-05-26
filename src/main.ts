@@ -386,6 +386,7 @@ customer_code: customerCode,
       }
 
       const eventId = data[0].id
+
       if (eventId && menuName && menuPrice) {
   await supabase
     .from('menus')
@@ -397,8 +398,6 @@ customer_code: customerCode,
       }
     ])
 }
-
-const eventId = data[0].id
 
       const eventLink = `${window.location.origin}/${eventType}?id=${eventId}`
 
