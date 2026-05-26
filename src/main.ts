@@ -277,6 +277,7 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
           <select id="event-type">
             <option value="wedding">결혼식</option>
             <option value="funeral">장례식</option>
+            <option value="store">푸드트럭 / 행사장</option>
           </select>
         </div>
 
