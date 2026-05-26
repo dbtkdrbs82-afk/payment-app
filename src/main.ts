@@ -472,9 +472,9 @@ document.querySelector<HTMLButtonElement>('#download-qr-button')!
     link.href = qrImage
     link.download = 'event-qr.png'
     link.click()
-    })
   })
 
+     })
   } else if (path === '/admin') {
     const savedAdminLogin = localStorage.getItem('adminLogin')
   
