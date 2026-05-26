@@ -1005,12 +1005,7 @@ const { error } = await supabase.from('payments').insert([
             <label>결제 금액</label>
             <input id="amount-input" type="number" readonly>
           </div>
-  
-          <div class="input-group">
-            <label>주문자 이름</label>
-            <input id="name-input" type="text" placeholder="이름 입력">
-          </div>
-  
+        
           <div class="input-group">
             <label>요청사항</label>
             <input id="message-input" type="text" placeholder="예: 덜 맵게 해주세요">
@@ -1034,12 +1029,12 @@ const { error } = await supabase.from('payments').insert([
     document.querySelector<HTMLButtonElement>('#pay-button')!
       .addEventListener('click', async () => {
         const amountValue = Number(document.querySelector<HTMLInputElement>('#amount-input')!.value)
-        const customerNameValue = document.querySelector<HTMLInputElement>('#name-input')!.value
+        const customerNameValue = '현장고객'
         const messageValue = document.querySelector<HTMLInputElement>('#message-input')!.value
         const orderNameValue = document.querySelector<HTMLInputElement>('#order-name-input')!.value
   
-        if (!amountValue || !customerNameValue || !orderNameValue) {
-          alert('메뉴 선택과 이름 입력을 해주세요')
+        if (!amountValue || !orderNameValue) {
+          alert('메뉴를 선택해주세요')
           return
         }
   
@@ -1050,9 +1045,14 @@ const { error } = await supabase.from('payments').insert([
         sessionStorage.setItem('senderName', customerNameValue)
         sessionStorage.setItem('message', `${orderNameValue} / ${messageValue}`)
   
+        const shortOrderNumber =
+  String(Date.now()).slice(-4)
+
+const orderIdValue =
+  'order-' + shortOrderNumber
         await tossPayments.requestPayment('카드', {
           amount: amountValue,
-          orderId: 'order-' + Date.now(),
+          orderId: orderIdValue,
           orderName: orderNameValue,
           customerName: customerNameValue,
           successUrl: window.location.origin + '/success',
