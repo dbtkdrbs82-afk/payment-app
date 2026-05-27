@@ -258,40 +258,49 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
     })
   </script>
   <script>
-  async function completeOrder(paymentId, button) {
-    button.innerText = '처리중...'
-    button.disabled = true
+  document.querySelectorAll('.seller-complete-button').forEach((button) => {
 
-    
+    button.addEventListener('click', async () => {
+
+      const paymentId =
+        button.getAttribute('data-id')
+
+      button.innerText = '처리중...'
+      button.disabled = true
+
       const response = await fetch(
-  'https://rnmptlxdeihvfwegoqnf.supabase.co/rest/v1/payments?id=eq.' + paymentId,
-  {
-    method: 'PATCH',
-    headers: {
-      apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8',
+        'https://rnmptlxdeihvfwegoqnf.supabase.co/rest/v1/payments?id=eq.' + paymentId,
+        {
+          method: 'PATCH',
 
-      Authorization:
-        'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8',
+          headers: {
+            apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8',
 
-      'Content-Type': 'application/json',
-      Prefer: 'return=representation'
-    },
+            Authorization:
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8',
 
-    body: JSON.stringify({
-      order_status: '완료'
+            'Content-Type': 'application/json',
+            Prefer: 'return=representation'
+          },
+
+          body: JSON.stringify({
+            order_status: '완료'
+          })
+        }
+      )
+
+      if (!response.ok) {
+        alert('완료 처리 실패')
+
+        button.innerText = '완료'
+        button.disabled = false
+
+        return
+      }
+
+      button.innerText = '완료됨'
     })
-  }
-)
-
-    if (!response.ok) {
-      alert('완료 처리 실패')
-      button.innerText = '완료'
-      button.disabled = false
-      return
-    }
-
-    button.innerText = '완료됨'
-  }
+  })
 </script>
 </body>
 </html>
@@ -1257,9 +1266,9 @@ popup.document.write(`
               <td>
   ${
   payment.order_status !== '완료'
-    ? `<button onclick="completeOrder('${payment.id}', this)">
-        완료
-      </button>`
+    ? `<button class="seller-complete-button" data-id="${payment.id}">
+  완료
+</button>`
     : '완료됨'
   }
 </td>
