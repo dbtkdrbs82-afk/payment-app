@@ -1144,27 +1144,91 @@ if (error || !data) {
   return
 }
 
-resultBox.innerHTML = `
-  <div class="admin-table-wrap">
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>행사명</th>
-          <th>행사종류</th>
-          <th>계좌번호</th>
-        </tr>
-      </thead>
+const { data: paymentData, error: paymentError } = await supabase
+  .from('payments')
+  .select('*')
+  .eq('event_id', data.id)
+  .order('created_at', { ascending: false })
 
-      <tbody>
-        <tr>
-          <td>${data.receiver_name}</td>
-          <td>${data.event_type}</td>
-          <td>${data.account_number}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-`
+if (paymentError) {
+  resultBox.innerHTML = `<p>주문 내역을 불러오지 못했습니다.</p>`
+  return
+}
+
+const popup = window.open('', '_blank', 'width=1200,height=800')
+
+if (!popup) {
+  alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.')
+  return
+}
+
+popup.document.write(`
+  <html>
+    <head>
+      <title>판매자 주문 관리</title>
+      <style>
+        body {
+          font-family: sans-serif;
+          padding: 30px;
+          background: #f9fafb;
+        }
+
+        h1 {
+          margin-bottom: 20px;
+        }
+
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          background: white;
+        }
+
+        th, td {
+          border: 1px solid #ddd;
+          padding: 14px;
+          text-align: center;
+        }
+
+        th {
+          background: #f3f4f6;
+        }
+      </style>
+    </head>
+
+    <body>
+      <h1>판매자 주문 관리</h1>
+      <h2>${data.receiver_name}</h2>
+
+      <table>
+        <thead>
+          <tr>
+            <th>주문번호</th>
+            <th>금액</th>
+            <th>주문내용</th>
+            <th>상태</th>
+            <th>결제시간</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${(paymentData || []).map((payment) => `
+            <tr>
+              <td>${payment.order_id}</td>
+              <td>${Number(payment.amount).toLocaleString()}원</td>
+              <td>${payment.message || '-'}</td>
+              <td>${payment.order_status || '준비중'}</td>
+              <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </body>
+  </html>
+`)
+
+popup.document.close()
+
+resultBox.innerHTML = `<p>주문 관리창이 열렸습니다.</p>`
       })
 
   } else if (path === '/store') {
