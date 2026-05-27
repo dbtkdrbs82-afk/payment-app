@@ -533,7 +533,17 @@ document.querySelector<HTMLButtonElement>('#download-qr-button')!
 </div>
 
            <div id="payment-list"></div>
-            
+           <div id="payment-list"></div>
+
+<div class="sales-filter-buttons">
+  <button id="sales-daily">일별 매출</button>
+  <button id="sales-monthly">월별 매출</button>
+  <button id="sales-yearly">연별 매출</button>
+</div>
+
+<div id="sales-summary"></div>
+
+<h2>생성된 행사 목록</h2> 
             <h2>생성된 행사 목록</h2>
 
 <div class="event-filter-buttons">
@@ -691,8 +701,64 @@ document.querySelectorAll('.complete-order-button')
         location.reload()
         })
     })
-  
 
+    const salesSummary = document.querySelector<HTMLDivElement>('#sales-summary')!
+
+const renderSalesSummary = (type: 'daily' | 'monthly' | 'yearly') => {
+  const salesMap = new Map<string, number>()
+
+  data.forEach((payment) => {
+    const date = new Date(payment.created_at)
+
+    let key = ''
+
+    if (type === 'daily') {
+      key = date.toISOString().slice(0, 10)
+    }
+
+    if (type === 'monthly') {
+      key = date.toISOString().slice(0, 7)
+    }
+
+    if (type === 'yearly') {
+      key = String(date.getFullYear())
+    }
+
+    const current = salesMap.get(key) || 0
+    salesMap.set(key, current + Number(payment.amount))
+  })
+
+  salesSummary.innerHTML = `
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>기간</th>
+            <th>매출</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Array.from(salesMap.entries()).map(([period, amount]) => `
+            <tr>
+              <td>${period}</td>
+              <td>${amount.toLocaleString()}원</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `
+}
+
+document.querySelector<HTMLButtonElement>('#sales-daily')!
+  .addEventListener('click', () => renderSalesSummary('daily'))
+
+document.querySelector<HTMLButtonElement>('#sales-monthly')!
+  .addEventListener('click', () => renderSalesSummary('monthly'))
+
+document.querySelector<HTMLButtonElement>('#sales-yearly')!
+  .addEventListener('click', () => renderSalesSummary('yearly'))
+  
       const searchInput = document.querySelector<HTMLInputElement>('#payment-search')!
 
       searchInput.addEventListener('input', () => {

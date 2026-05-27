@@ -632,3 +632,14 @@ button {
   font-weight: bold;
   color: #c89b3c;
 }
+.sales-filter-buttons {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 24px 0;
+}
+
+.sales-filter-buttons button {
+  width: auto;
+  padding: 12px 20px;
+}
