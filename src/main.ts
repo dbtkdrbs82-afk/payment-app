@@ -781,6 +781,7 @@ document.querySelector<HTMLButtonElement>('#sales-yearly')!
 <th>보낸 사람</th>
 <th>메시지</th>
 <th>상태</th>
+<th>처리</th>
 <th>결제시간</th>
                 </tr>
               </thead>
@@ -1217,6 +1218,13 @@ popup.document.write(`
               <td>${Number(payment.amount).toLocaleString()}원</td>
               <td>${payment.message || '-'}</td>
               <td>${payment.order_status || '준비중'}</td>
+              <td>
+  ${
+    payment.order_status !== '완료'
+      ? `<button onclick="alert('관리자 페이지에서 완료 처리해주세요')">완료</button>`
+      : '완료됨'
+  }
+</td>
               <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
             </tr>
           `).join('')}
