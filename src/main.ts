@@ -669,17 +669,22 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
         (button as HTMLElement)
           .getAttribute('data-id')
 
-      await supabase
-        .from('payments')
-        .update({
-          order_status: '완료'
-        })
-        .eq('id', paymentId)
-
-      location.reload()
+          const { error } = await supabase
+          .from('payments')
+          .update({
+            order_status: '완료'
+          })
+          .eq('id', paymentId)
+        
+        if (error) {
+          alert('주문 상태 변경 실패: ' + error.message)
+          return
+        }
+        
+        location.reload()
     })
   })
-  
+
       const searchInput = document.querySelector<HTMLInputElement>('#payment-search')!
 
       searchInput.addEventListener('input', () => {
