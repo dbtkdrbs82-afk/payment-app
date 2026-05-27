@@ -1129,6 +1129,42 @@ const { error } = await supabase.from('payments').insert([
           document.querySelector<HTMLDivElement>('#store-admin-result')!
   
         resultBox.innerHTML = `<p>로그인 확인 중...</p>`
+        const { data, error } = await supabase
+  .from('events')
+  .select('*')
+  .eq('receiver_name', name)
+  .eq('birth_date', birth)
+  .eq('customer_code', code)
+  .single()
+
+if (error || !data) {
+  resultBox.innerHTML = `
+    <p>일치하는 판매자 정보를 찾을 수 없습니다.</p>
+  `
+  return
+}
+
+resultBox.innerHTML = `
+  <div class="admin-table-wrap">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>행사명</th>
+          <th>행사종류</th>
+          <th>계좌번호</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>${data.receiver_name}</td>
+          <td>${data.event_type}</td>
+          <td>${data.account_number}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+`
       })
 
   } else if (path === '/store') {
