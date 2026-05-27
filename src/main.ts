@@ -258,6 +258,8 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
     })
   </script>
   <script>
+  window.addEventListener('load', () => {
+
   document.querySelectorAll('.seller-complete-button').forEach((button) => {
 
     button.addEventListener('click', async () => {
@@ -301,6 +303,7 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
       button.innerText = '완료됨'
     })
   })
+})    
 </script>
 </body>
 </html>
