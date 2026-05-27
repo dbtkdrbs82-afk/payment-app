@@ -669,23 +669,29 @@ document.querySelectorAll('.complete-order-button')
         (button as HTMLElement)
           .getAttribute('data-id')
 
-      const { error } = await supabase
-        .from('payments')
-        .update({
-          order_status: '완료'
+          const { data: updatedData, error } = await supabase
+          .from('payments')
+          .update({
+            order_status: '완료'
+          })
+          .eq('id', Number(paymentId))
+          .select()
+        
+        if (error) {
+          alert('주문 상태 변경 실패: ' + error.message)
+          return
+        }
+        
+        if (!updatedData || updatedData.length === 0) {
+          alert('변경된 데이터가 없습니다. RLS 또는 ID 문제입니다.')
+          return
+        }
+        
+        alert('완료 처리되었습니다')
+        location.reload()
         })
-        .eq('id', paymentId)
-
-      if (error) {
-        alert('주문 상태 변경 실패: ' + error.message)
-        return
-      }
-
-      alert('완료 처리되었습니다')
-
-      location.reload()
     })
-  })
+  
 
       const searchInput = document.querySelector<HTMLInputElement>('#payment-search')!
 
