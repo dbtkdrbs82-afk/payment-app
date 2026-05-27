@@ -257,54 +257,7 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
       })
     })
   </script>
-  <script>
-  window.addEventListener('load', () => {
-
-  document.querySelectorAll('.seller-complete-button').forEach((button) => {
-
-    button.addEventListener('click', async () => {
-
-      const paymentId =
-        button.getAttribute('data-id')
-
-      button.innerText = '처리중...'
-      button.disabled = true
-
-      const response = await fetch(
-        'https://rnmptlxdeihvfwegoqnf.supabase.co/rest/v1/payments?id=eq.' + paymentId,
-        {
-          method: 'PATCH',
-
-          headers: {
-            apikey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8',
-
-            Authorization:
-              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8',
-
-            'Content-Type': 'application/json',
-            Prefer: 'return=representation'
-          },
-
-          body: JSON.stringify({
-            order_status: '완료'
-          })
-        }
-      )
-
-      if (!response.ok) {
-        alert('완료 처리 실패')
-
-        button.innerText = '완료'
-        button.disabled = false
-
-        return
-      }
-
-      button.innerText = '완료됨'
-    })
-  })
-})    
-</script>
+  
 </body>
 </html>
 `)
@@ -1267,13 +1220,25 @@ popup.document.write(`
               <td>${payment.message || '-'}</td>
               <td>${payment.order_status || '준비중'}</td>
               <td>
-  ${
+ ${
   payment.order_status !== '완료'
-    ? `<button class="seller-complete-button" data-id="${payment.id}">
-  완료
-</button>`
+    ? `
+      <button
+        onclick="window.opener.postMessage(
+          {
+            type: 'completeOrder',
+            id: '${payment.id}'
+          },
+          '*'
+        );
+        this.innerText='처리중...';
+        this.disabled=true;"
+      >
+        완료
+      </button>
+    `
     : '완료됨'
-  }
+}
 </td>
               <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
             </tr>
@@ -1285,6 +1250,29 @@ popup.document.write(`
 `)
 
 popup.document.close()
+
+window.addEventListener('message', async (event) => {
+
+  if (event.data?.type !== 'completeOrder') {
+    return
+  }
+
+  const paymentId = event.data.id
+
+  const { error } = await supabase
+    .from('payments')
+    .update({
+      order_status: '완료'
+    })
+    .eq('id', Number(paymentId))
+
+  if (error) {
+    alert('완료 처리 실패: ' + error.message)
+    return
+  }
+
+  alert('완료 처리되었습니다')
+})
 
 resultBox.innerHTML = `<p>주문 관리창이 열렸습니다.</p>`
       })
