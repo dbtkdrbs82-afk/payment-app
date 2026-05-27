@@ -388,16 +388,21 @@ customer_code: customerCode,
       const eventId = data[0].id
 
       if (eventId && menuName && menuPrice) {
-  await supabase
-    .from('menus')
-    .insert([
-      {
-        event_id: eventId,
-        name: menuName,
-        price: menuPrice
+        const { error: menuError } = await supabase
+          .from('menus')
+          .insert([
+            {
+              event_id: eventId,
+              name: menuName,
+              price: menuPrice
+            }
+          ])
+      
+        if (menuError) {
+          alert('메뉴 저장 실패: ' + menuError.message)
+          return
+        }
       }
-    ])
-}
 
       const eventLink = `${window.location.origin}/${eventType}?id=${eventId}`
 
