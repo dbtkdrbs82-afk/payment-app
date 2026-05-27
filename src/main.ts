@@ -1086,6 +1086,51 @@ const { error } = await supabase.from('payments').insert([
       window.location.href = '/'
     })
 
+  } else if (path === '/store-admin') {
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card">
+          <h1>판매자 주문 관리</h1>
+  
+          <div class="input-group">
+            <label>이름</label>
+            <input id="store-admin-name" type="text" placeholder="가입자 이름 입력">
+          </div>
+  
+          <div class="input-group">
+            <label>생년월일</label>
+            <input id="store-admin-birth" type="text" placeholder="예: 1990-01-01">
+          </div>
+  
+          <div class="input-group">
+            <label>고객 확인 비밀번호</label>
+            <input id="store-admin-code" type="password" placeholder="비밀번호 입력">
+          </div>
+  
+          <button id="store-admin-login-button">주문 확인하기</button>
+  
+          <div id="store-admin-result"></div>
+        </div>
+      </div>
+    `
+  
+    document.querySelector<HTMLButtonElement>('#store-admin-login-button')!
+      .addEventListener('click', async () => {
+        const name = document.querySelector<HTMLInputElement>('#store-admin-name')!.value
+        const birth = document.querySelector<HTMLInputElement>('#store-admin-birth')!.value
+        const code = document.querySelector<HTMLInputElement>('#store-admin-code')!.value
+  
+        if (!name || !birth || !code) {
+          alert('이름, 생년월일, 비밀번호를 입력해주세요')
+          return
+        }
+  
+        const resultBox =
+          document.querySelector<HTMLDivElement>('#store-admin-result')!
+  
+        resultBox.innerHTML = `<p>로그인 확인 중...</p>`
+      })
+
   } else if (path === '/store') {
     const params = new URLSearchParams(window.location.search)
     const eventId = params.get('id')
