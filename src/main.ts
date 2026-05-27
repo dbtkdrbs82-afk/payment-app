@@ -636,7 +636,22 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
             <td>${Number(payment.amount).toLocaleString()}원</td>
             <td>${payment.sender_name || '-'}</td>
             <td>${payment.message || '-'}</td>
-            <td>${payment.status}</td>
+            <td>
+  ${payment.order_status || '준비중'}
+
+  ${
+    payment.order_status !== '완료'
+      ? `
+        <button
+          class="complete-order-button"
+          data-id="${payment.id}"
+        >
+          완료
+        </button>
+      `
+      : ''
+  }
+</td>
             <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>      
                 </tr>
               `).join('')}
@@ -645,6 +660,26 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
         </div>
       `
 
+      document.querySelectorAll('.complete-order-button')
+  .forEach((button) => {
+
+    button.addEventListener('click', async () => {
+
+      const paymentId =
+        (button as HTMLElement)
+          .getAttribute('data-id')
+
+      await supabase
+        .from('payments')
+        .update({
+          order_status: '완료'
+        })
+        .eq('id', paymentId)
+
+      location.reload()
+    })
+  })
+  
       const searchInput = document.querySelector<HTMLInputElement>('#payment-search')!
 
       searchInput.addEventListener('input', () => {
