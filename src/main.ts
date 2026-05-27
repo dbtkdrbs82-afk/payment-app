@@ -658,9 +658,9 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
             </tbody>
           </table>
         </div>
-      `
+ `
 
-      document.querySelectorAll('.complete-order-button')
+document.querySelectorAll('.complete-order-button')
   .forEach((button) => {
 
     button.addEventListener('click', async () => {
@@ -669,19 +669,21 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
         (button as HTMLElement)
           .getAttribute('data-id')
 
-          const { error } = await supabase
-          .from('payments')
-          .update({
-            order_status: '완료'
-          })
-          .eq('id', paymentId)
-        
-        if (error) {
-          alert('주문 상태 변경 실패: ' + error.message)
-          return
-        }
-        
-        location.reload()
+      const { error } = await supabase
+        .from('payments')
+        .update({
+          order_status: '완료'
+        })
+        .eq('id', paymentId)
+
+      if (error) {
+        alert('주문 상태 변경 실패: ' + error.message)
+        return
+      }
+
+      alert('완료 처리되었습니다')
+
+      location.reload()
     })
   })
 
