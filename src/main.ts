@@ -267,6 +267,103 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
 })
 
+} else if (path === '/merchant-create') {
+  app.innerHTML = `
+    <div class="page">
+      <div class="payment-card">
+        <h1>가맹점 등록</h1>
+
+        <div class="input-group">
+          <label>상호명</label>
+          <input id="business-name" type="text" placeholder="예: 홍길동 푸드트럭">
+        </div>
+
+        <div class="input-group">
+          <label>대표자명</label>
+          <input id="owner-name" type="text" placeholder="대표자명 입력">
+        </div>
+
+        <div class="input-group">
+          <label>연락처</label>
+          <input id="merchant-phone" type="text" placeholder="010-0000-0000">
+        </div>
+
+        <div class="input-group">
+          <label>은행명</label>
+          <input id="merchant-bank" type="text" placeholder="예: 국민은행">
+        </div>
+
+        <div class="input-group">
+          <label>계좌번호</label>
+          <input id="merchant-account" type="text" placeholder="계좌번호 입력">
+        </div>
+
+        <div class="input-group">
+          <label>예금주</label>
+          <input id="merchant-account-holder" type="text" placeholder="예금주 입력">
+        </div>
+
+        <div class="input-group">
+          <label>수수료율 (%)</label>
+          <input id="merchant-fee-rate" type="number" value="2">
+        </div>
+
+        <div class="input-group">
+          <label>정산주기</label>
+          <select id="settlement-cycle">
+            <option value="D+1">D+1</option>
+            <option value="D+4">D+4</option>
+          </select>
+        </div>
+
+        <button id="merchant-create-button">가맹점 등록</button>
+
+        <div id="merchant-result"></div>
+      </div>
+    </div>
+  `
+
+  document.querySelector<HTMLButtonElement>('#merchant-create-button')!
+    .addEventListener('click', async () => {
+      const businessName = document.querySelector<HTMLInputElement>('#business-name')!.value
+      const ownerName = document.querySelector<HTMLInputElement>('#owner-name')!.value
+      const phone = document.querySelector<HTMLInputElement>('#merchant-phone')!.value
+      const bankName = document.querySelector<HTMLInputElement>('#merchant-bank')!.value
+      const accountNumber = document.querySelector<HTMLInputElement>('#merchant-account')!.value
+      const accountHolder = document.querySelector<HTMLInputElement>('#merchant-account-holder')!.value
+      const feeRate = Number(document.querySelector<HTMLInputElement>('#merchant-fee-rate')!.value)
+      const settlementCycle = document.querySelector<HTMLSelectElement>('#settlement-cycle')!.value
+
+      if (!businessName || !ownerName || !phone || !bankName || !accountNumber || !accountHolder) {
+        alert('필수 정보를 모두 입력해주세요')
+        return
+      }
+
+      const { error } = await supabase
+        .from('merchants')
+        .insert([
+          {
+            business_name: businessName,
+            owner_name: ownerName,
+            phone: phone,
+            bank_name: bankName,
+            account_number: accountNumber,
+            account_holder: accountHolder,
+            fee_rate: feeRate,
+            settlement_cycle: settlementCycle
+          }
+        ])
+
+      const resultBox = document.querySelector<HTMLDivElement>('#merchant-result')!
+
+      if (error) {
+        resultBox.innerHTML = `<p>가맹점 등록 실패: ${error.message}</p>`
+        return
+      }
+
+      resultBox.innerHTML = `<p>가맹점 등록 완료</p>`
+    })
+
 } else if (path === '/create') {
   app.innerHTML = `
     <div class="page">
@@ -1090,192 +1187,304 @@ const { error } = await supabase.from('payments').insert([
 
   } else if (path === '/store-admin') {
     app.innerHTML = `
-      <div class="page">
-        <div class="payment-card">
-          <h1>판매자 주문 관리</h1>
-  
-          <div class="input-group">
-            <label>이름</label>
-            <input id="store-admin-name" type="text" placeholder="가입자 이름 입력">
-          </div>
-  
-          <div class="input-group">
-            <label>생년월일</label>
-            <input id="store-admin-birth" type="text" placeholder="예: 1990-01-01">
-          </div>
-  
-          <div class="input-group">
-            <label>고객 확인 비밀번호</label>
-            <input id="store-admin-code" type="password" placeholder="비밀번호 입력">
-          </div>
-  
-          <button id="store-admin-login-button">주문 확인하기</button>
-  
-          <div id="store-admin-result"></div>
+      <div class="admin-wrap">
+        <div class="admin-top-user">
+          haroldkim713 <span>| 로그아웃</span>
         </div>
-      </div>
-    `
   
-    document.querySelector<HTMLButtonElement>('#store-admin-login-button')!
-      .addEventListener('click', async () => {
-        const name = document.querySelector<HTMLInputElement>('#store-admin-name')!.value
-        const birth = document.querySelector<HTMLInputElement>('#store-admin-birth')!.value
-        const code = document.querySelector<HTMLInputElement>('#store-admin-code')!.value
+        <div class="admin-menu">
+  <a class="admin-tab" data-page="merchant">가맹점관리</a>
+  <a class="admin-tab active" data-page="payment">결제관리</a>
+  <a class="admin-tab" data-page="payout">출금관리</a>
+  <a class="admin-tab" data-page="settlement">정산관리</a>
+  <a class="admin-tab" data-page="tax">세무관리</a>
+  <a class="admin-tab" data-page="mini">미니상점</a>
+  <a class="admin-tab" data-page="setting">설정관리</a>
+</div>
   
-        if (!name || !birth || !code) {
-          alert('이름, 생년월일, 비밀번호를 입력해주세요')
-          return
-        }
+        <div class="admin-sub-menu">
+          승인내역조회 | POS주문내역조회 | 승인거절 내역조회 | 카드결제 | 현금영수증 발급
+        </div>
   
-        const resultBox =
-          document.querySelector<HTMLDivElement>('#store-admin-result')!
+        <div class="admin-title">
+          ▶ 결제관리 > 승인내역조회
+        </div>
   
-        resultBox.innerHTML = `<p>로그인 확인 중...</p>`
-        const { data, error } = await supabase
-  .from('events')
-  .select('*')
-  .eq('receiver_name', name)
-  .eq('birth_date', birth)
-  .eq('customer_code', code)
-  .single()
+        <div class="admin-search-box">
+          <div>
+            <select><option>다우데이타</option><option>코페이</option><option>전체</option></select>
+            <select><option>거래일자</option><option>승인일자</option></select>
+            <input value="20260528" />
+            <span>~</span>
+            <input value="20260528" />
+            <button class="quick-btn">오늘</button>
+            <button class="quick-btn">어제</button>
+            <button class="quick-btn">당월</button>
+            <select><option>가맹점ID</option><option>가맹점명</option></select>
+            <input />
+          </div>
+  
+        <div class="filter-row">
+  <div class="tab-group">
+    <button class="tab active">전체</button>
+    <button class="tab">4일결제</button>
+    <button class="tab">3일결제</button>
+    <button class="tab">1일결제</button>
+  </div>
 
-if (error || !data) {
-  resultBox.innerHTML = `
-    <p>일치하는 판매자 정보를 찾을 수 없습니다.</p>
-  `
-  return
-}
+  <div class="tab-group">
+    <button class="tab active">전체</button>
+    <button class="tab">무선단말기</button>
+    <button class="tab">수기결제</button>
+    <button class="tab">QR결제</button>
+  </div>
+</div>
 
-const { data: paymentData, error: paymentError } = await supabase
-  .from('payments')
-  .select('*')
-  .eq('event_id', data.id)
-  .order('created_at', { ascending: false })
-
-if (paymentError) {
-  resultBox.innerHTML = `<p>주문 내역을 불러오지 못했습니다.</p>`
-  return
-}
-
-const popup = window.open('', '_blank', 'width=1200,height=800')
-
-if (!popup) {
-  alert('팝업이 차단되었습니다. 팝업 허용 후 다시 시도해주세요.')
-  return
-}
-
-popup.document.write(`
-  <html>
-    <head>
-      <title>판매자 주문 관리</title>
-      <style>
-        body {
-          font-family: sans-serif;
-          padding: 30px;
-          background: #f9fafb;
-        }
-
-        h1 {
-          margin-bottom: 20px;
-        }
-
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          background: white;
-        }
-
-        th, td {
-          border: 1px solid #ddd;
-          padding: 14px;
-          text-align: center;
-        }
-
-        th {
-          background: #f3f4f6;
-        }
-      </style>
-    </head>
-
-    <body>
-      <h1>판매자 주문 관리</h1>
-      <h2>${data.receiver_name}</h2>
-
-      <table>
-        <thead>
-          <tr>
-            <th>주문번호</th>
-            <th>금액</th>
-            <th>주문내용</th>
-            <th>상태</th>
-            <th>결제시간</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          ${(paymentData || []).map((payment) => `
+<div class="payment-search-line">
+  <select><option>신용카드결제</option></select>
+  <select><option>신용카드전체</option></select>
+  <select><option>기본키</option></select>
+  <button class="search-btn">🔍 검색</button>
+</div>  
+  
+          <div>
+            <select><option>전체</option><option>승인</option><option>취소</option><option>완료</option></select>
+            <select><option>전체</option><option>정산완료</option><option>정산대기</option></select>
+          </div>
+        </div>
+  
+        <div class="admin-summary">
+          검색된 데이터 : 0건 &nbsp;&nbsp;&nbsp;
+          사용자 : 0명 &nbsp;&nbsp;&nbsp;
+          전체금액 : 0원
+          <span>카드취소를 원하는 데이터의 거래번호를 클릭해주세요.</span>
+        </div>
+  
+        <div class="admin-table-top">
+          <button>엑셀 다운로드</button>
+          <select><option>20개씩 보기</option></select>
+        </div>
+  
+        <table class="admin-table">
+          <thead>
             <tr>
-              <td>${payment.order_id}</td>
-              <td>${Number(payment.amount).toLocaleString()}원</td>
-              <td>${payment.message || '-'}</td>
-              <td>${payment.order_status || '준비중'}</td>
-              <td>
- ${
-  payment.order_status !== '완료'
-    ? `
-      <button
-        onclick="window.opener.postMessage(
-          {
-            type: 'completeOrder',
-            id: '${payment.id}'
-          },
-          '*'
-        );
-        this.innerText='처리중...';
-        this.disabled=true;"
-      >
-        완료
-      </button>
-    `
-    : '완료됨'
-}
-</td>
-              <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>
+              <th>No</th>
+              <th>승인일<br/>승인번호</th>
+              <th>취소일<br/>거래번호</th>
+              <th>가맹점아이디/구분<br/>가맹점상호/가맹점명</th>
+              <th>매입사/구매자연락처<br/>구매상품/구매자 성함</th>
+              <th>메모</th>
+              <th>카드번호<br/>할부구분</th>
+              <th>결제수단<br/>결제금액</th>
+              <th>거래방식<br/>물품금액</th>
+              <th>부가세<br/>봉사료</th>
+              <th>거래수수료<br/>가맹점금액</th>
             </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </body>
-  </html>
-`)
+          </thead>
+          <tbody id="paymentTableBody">
+  <tr>
+    <td colspan="11" class="empty-row">검색해주세요.</td>
+  </tr>
+</tbody>
+        </table>
+      </div>
+       `
+       const searchBtn = document.querySelector('.search-btn')
+       const paymentTableBody =
+  document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+       
+       function formatDate(dateText: string) {
+        if (!dateText) return '-'
+      
+        const date = new Date(dateText)
+      
+        return date.toLocaleString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'     
+        })
+      }
+      
+      function getStatusText(status: string) {
+        if (status === 'paid') return '승인'
+        if (status === 'cancel') return '취소'
+        if (status === 'ready') return '대기'
+        return status || '-'
+      }
 
-popup.document.close()
+       searchBtn?.addEventListener('click', async () => {
+         const result = await supabase
+           .from('payments')
+           .select('*')
+           .order('created_at', { ascending: false })
+       
+         if (result.error) {
+           alert('결제내역 조회 실패: ' + result.error.message)
+           return
+         }
+       
+         const payments = result.data || []
 
-window.addEventListener('message', async (event) => {
+         const summaryBox = document.querySelector('.admin-summary')
 
-  if (event.data?.type !== 'completeOrder') {
-    return
-  }
+const totalAmount = payments.reduce((sum, payment) => {
+  return sum + Number(payment.amount || 0)
+}, 0)
 
-  const paymentId = event.data.id
+if (summaryBox) {
+  summaryBox.innerHTML =
+    '검색된 데이터 : ' + payments.length + '건 &nbsp;&nbsp;&nbsp;' +
+    '사용자 : ' + payments.length + '명 &nbsp;&nbsp;&nbsp;' +
+    '전체금액 : ' + totalAmount.toLocaleString() + '원 ' +
+    '<span>카드취소를 원하는 데이터의 거래번호를 클릭해주세요.</span>'
+}
+       
+         paymentTableBody.innerHTML = ''
+       
+         payments.forEach((payment, index) => {
+           const tr = document.createElement('tr')
+       
+           tr.innerHTML =
+             '<td>' + (index + 1) + '</td>' +
+             '<td>' + formatDate(payment.created_at) + '<br/>' + (payment.order_id || '-') + '</td>' +
+             '<td>-<br/>' + (payment.payment_key || '-') + '</td>' +
+             '<td>' + (payment.event_id || '-') + '<br/>-</td>' +
+             '<td>-<br/>-</td>' +
+             '<td>-</td>' +
+             '<td>-<br/>-</td>' +
+             '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+             '<td>온라인<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+             '<td>0원<br/>0원</td>' +
+             '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>'
+       
+           paymentTableBody.appendChild(tr)
+         })
+       })
 
-  const { error } = await supabase
-    .from('payments')
-    .update({
-      order_status: '완료'
-    })
-    .eq('id', Number(paymentId))
+       const adminTabs = document.querySelectorAll('.admin-tab')
 
-  if (error) {
-    alert('완료 처리 실패: ' + error.message)
-    return
-  }
+adminTabs.forEach((tab) => {
+  tab.addEventListener('click', async () => {
+    const page = tab.getAttribute('data-page')
 
-  alert('완료 처리되었습니다')
+    if (page === 'merchant') {
+      const subMenu = document.querySelector('.admin-sub-menu')
+const titleBox = document.querySelector('.admin-title')
+
+if (subMenu) {
+  subMenu.innerHTML =
+'<span class="sub-tab" data-sub="merchant-list">가맹점 관리</span> | ' +
+'<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span> | ' +
+'<span class="sub-tab" data-sub="fee-setting">결제 수수료 설정</span>'    
+}
+
+if (titleBox) {
+  titleBox.innerHTML = '▶ 가맹점관리 > 가맹점 관리'
+}
+const searchBox = document.querySelector('.admin-search-box')
+
+if (searchBox) {
+  searchBox.innerHTML =
+  '<div class="merchant-filter-line">' +
+    '<span class="filter-label">• 검색</span>' +
+    '<select><option>전체</option><option>다우데이타</option><option>코페이</option></select>' +
+    '<input placeholder="시작일" />' +
+    '<span>~</span>' +
+    '<input placeholder="종료일" />' +
+    '<button class="quick-btn">오늘</button>' +
+    '<button class="quick-btn">어제</button>' +
+    '<button class="quick-btn">당월</button>' +
+    '<select><option>전체</option><option>운영</option><option>중지</option><option>가입대기</option></select>' +
+    '<select><option>가맹점명</option><option>담당자명</option><option>대리점명</option><option>지사명</option><option>주민번호</option><option>사업자번호</option><option>단말기CPID</option></select>' +
+    '<input placeholder="검색어 입력" />' +
+    '<button class="merchant-search-btn">검색</button>' +
+  '</div>'
+}
+
+      const result = await supabase
+        .from('merchants')
+        .select('*')
+        .order('id', { ascending: true })
+    
+      if (result.error) {
+        alert('가맹점 조회 실패: ' + result.error.message)
+        return
+      }
+    
+      const keywordInput =
+  document.querySelector<HTMLInputElement>(
+    '.merchant-filter-line input:last-of-type'
+  )
+
+const searchKeyword = keywordInput?.value?.trim() || ''
+      
+      let merchants = result.data || []
+      
+      if (searchKeyword) {
+        merchants = merchants.filter((merchant) => {
+          return (
+            String(merchant.merchant_name || '').includes(searchKeyword) ||
+            String(merchant.owner_name || '').includes(searchKeyword) ||
+            String(merchant.merchant_id || '').includes(searchKeyword)
+          )
+        })
+      }
+
+      const summaryBox = document.querySelector('.admin-summary')
+      const tableHead = document.querySelector('.admin-table thead')
+      const paymentTableBody =
+  document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+      
+      if (summaryBox) {
+        summaryBox.innerHTML =
+          '검색된 데이터 : ' + merchants.length + '건 &nbsp;&nbsp;&nbsp;' +
+          '가맹점 : ' + merchants.length + '개 &nbsp;&nbsp;&nbsp;' +
+          '운영중 : ' + merchants.filter((m) => m.status === '운영').length + '개'
+      }
+      
+      if (tableHead) {
+        tableHead.innerHTML =
+          '<tr>' +
+            '<th>No</th>' +
+            '<th>가맹점ID</th>' +
+            '<th>가맹점명</th>' +
+            '<th>대표자</th>' +
+            '<th>연락처</th>' +
+            '<th>수수료율</th>' +
+            '<th>정산은행</th>' +
+            '<th>계좌번호</th>' +
+            '<th>예금주</th>' +
+            '<th>정산주기</th>' +
+            '<th>상태</th>' +
+          '</tr>'
+      }
+      
+      paymentTableBody.innerHTML = ''
+      
+      merchants.forEach((merchant, index) => {
+        const tr = document.createElement('tr')
+      
+        tr.innerHTML =
+          '<td>' + (index + 1) + '</td>' +
+          '<td>' + (merchant.merchant_id || '-') + '</td>' +
+          '<td>' + (merchant.merchant_name || '-') + '</td>' +
+          '<td>' + (merchant.owner_name || '-') + '</td>' +
+          '<td>' + (merchant.phone || '-') + '</td>' +
+          '<td>' + (merchant.fee_rate || '-') + '%</td>' +
+          '<td>' + (merchant.bank_name || '-') + '</td>' +
+          '<td>' + (merchant.account_number || '-') + '</td>' +
+          '<td>' + (merchant.account_holder || '-') + '</td>' +
+          '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
+          '<td>' + (merchant.status || '-') + '</td>'
+      
+        paymentTableBody.appendChild(tr)
+      })  
+    }
+  })
 })
-
-resultBox.innerHTML = `<p>주문 관리창이 열렸습니다.</p>`
-      })
 
   } else if (path === '/store') {
     const params = new URLSearchParams(window.location.search)
