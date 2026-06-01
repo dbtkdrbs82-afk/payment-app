@@ -267,6 +267,50 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
 })
 
+} else if (path === '/pay') {
+  const params = new URLSearchParams(window.location.search)
+
+  const merchantId = params.get('merchantId') || ''
+  const merchantName = params.get('merchantName') || ''
+  const productName = params.get('productName') || ''
+  const amount = params.get('amount') || ''
+
+  app.innerHTML = `
+    <div class="page">
+      <div class="payment-card">
+        <h1>결제하기</h1>
+
+        <p><strong>가맹점:</strong> ${merchantName}</p>
+        <p><strong>상품명:</strong> ${productName}</p>
+        <p><strong>결제금액:</strong> ${Number(amount).toLocaleString()}원</p>
+
+        <button id="pay-button">결제하기</button>
+      </div>
+    </div>
+  `
+
+  document.querySelector<HTMLButtonElement>('#pay-button')!
+    .addEventListener('click', async () => {
+      const tossPayments = await loadTossPayments(clientKey)
+
+      sessionStorage.setItem('merchantId', merchantId)
+      sessionStorage.setItem('merchantName', merchantName)
+
+      await tossPayments.requestPayment('카드', {
+        amount: Number(amount),
+        orderId: 'order-' + Date.now(),
+        orderName: productName,
+        customerName: merchantName,
+        successUrl:
+  window.location.origin +
+  '/success?merchantId=' +
+  merchantId +
+  '&merchantName=' +
+  encodeURIComponent(merchantName),
+        failUrl: window.location.origin + '/fail',
+      })
+    })
+
 } else if (path === '/payment-link-create') {
   const { data: merchantData, error: merchantError } = await supabase
     .from('merchants')
@@ -356,7 +400,243 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
           })
       })
   }
-  
+} else if (path === '/shop') {
+  const params = new URLSearchParams(window.location.search)
+  const merchantId = params.get('id')
+
+  const { data: merchantData, error: merchantError } = await supabase
+    .from('merchants')
+    .select('*')
+    .eq('id', Number(merchantId))
+    .single()
+
+  const { data: productData, error: productError } = await supabase
+    .from('products')
+    .select('*')
+    .eq('merchant_id', Number(merchantId))
+    .eq('status', '판매중')
+    .order('id', { ascending: true })
+
+  if (merchantError || productError || !merchantData) {
+    app.innerHTML = `<p>상점 정보를 불러오지 못했습니다.</p>`
+  } else {
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card">
+          <h1>${merchantData.merchant_name}</h1>
+          <p>상품을 선택해주세요</p>
+
+          <div class="menu-list">
+            ${(productData || []).map((product) => `
+              <div class="menu-card">
+                ${
+                  product.image_url
+                    ? `<img src="${product.image_url}" alt="${product.product_name}">`
+                    : ''
+                }
+
+                <h3>${product.product_name}</h3>
+                <p>${Number(product.price).toLocaleString()}원</p>
+
+                <button
+                  class="shop-product-button"
+                  data-name="${product.product_name}"
+                  data-price="${product.price}"
+                >
+                  선택
+                </button>
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="input-group">
+            <label>선택 상품</label>
+            <input id="shop-selected-product" type="text" readonly>
+          </div>
+
+          <div class="input-group">
+            <label>결제금액</label>
+            <input id="shop-selected-amount" type="number" readonly>
+          </div>
+
+          <button id="shop-pay-button">결제하기</button>
+        </div>
+      </div>
+    `
+
+    const cart: {
+      name: string
+      price: number
+      quantity: number
+    }[] = []
+    
+    const renderCart = () => {
+      const cartText = cart
+        .map((item) => `${item.name} x ${item.quantity}`)
+        .join(', ')
+    
+      const totalAmount = cart.reduce((sum, item) => {
+        return sum + item.price * item.quantity
+      }, 0)
+    
+      document.querySelector<HTMLInputElement>('#shop-selected-product')!.value =
+        cartText
+    
+      document.querySelector<HTMLInputElement>('#shop-selected-amount')!.value =
+        String(totalAmount)
+    }
+    
+    document.querySelectorAll('.shop-product-button')
+      .forEach((button) => {
+        button.addEventListener('click', () => {
+          const name =
+            (button as HTMLElement).getAttribute('data-name') || ''
+    
+          const price =
+            Number((button as HTMLElement).getAttribute('data-price') || 0)
+    
+          const existingItem = cart.find((item) => item.name === name)
+    
+          if (existingItem) {
+            existingItem.quantity += 1
+          } else {
+            cart.push({
+              name,
+              price,
+              quantity: 1
+            })
+          }
+    
+          renderCart()
+        })
+      })
+    
+    document.querySelector<HTMLButtonElement>('#shop-pay-button')!
+      .addEventListener('click', async () => {
+        const totalAmount = cart.reduce((sum, item) => {
+          return sum + item.price * item.quantity
+        }, 0)
+    
+        const orderName = cart
+          .map((item) => `${item.name} x ${item.quantity}`)
+          .join(', ')
+    
+        if (cart.length === 0 || totalAmount === 0) {
+          alert('상품을 선택해주세요')
+          return
+        }
+    
+        const tossPayments = await loadTossPayments(clientKey)
+    
+        sessionStorage.setItem('merchantId', String(merchantData.id))
+        sessionStorage.setItem('merchantName', merchantData.merchant_name)
+        sessionStorage.setItem('message', orderName)
+    
+        await tossPayments.requestPayment('카드', {
+          amount: totalAmount,
+          orderId: 'order-' + Date.now(),
+          orderName: orderName,
+          customerName: merchantData.merchant_name,
+          successUrl:
+            window.location.origin +
+            '/success?merchantId=' +
+            merchantData.id +
+            '&merchantName=' +
+            encodeURIComponent(merchantData.merchant_name),
+          failUrl: window.location.origin + '/fail',
+        })
+      })
+  }
+
+} else if (path === '/product-create') {
+  const { data: merchantData, error: merchantError } = await supabase
+    .from('merchants')
+    .select('*')
+    .order('id', { ascending: true })
+
+  if (merchantError) {
+    app.innerHTML = `<p>가맹점 목록을 불러오지 못했습니다.</p>`
+  } else {
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card">
+          <h1>상품 등록</h1>
+
+          <div class="input-group">
+            <label>가맹점 선택</label>
+            <select id="product-merchant-select">
+              ${(merchantData || []).map((merchant) => `
+                <option value="${merchant.id}">
+                  ${merchant.merchant_id || 'MER' + String(merchant.id).padStart(4, '0')} / ${merchant.merchant_name}
+                </option>
+              `).join('')}
+            </select>
+          </div>
+
+          <div class="input-group">
+            <label>상품명</label>
+            <input id="product-name" type="text" placeholder="예: 아메리카노">
+          </div>
+
+          <div class="input-group">
+            <label>가격</label>
+            <input id="product-price" type="number" placeholder="예: 4500">
+          </div>
+
+          <div class="input-group">
+            <label>이미지 URL</label>
+            <input id="product-image-url" type="text" placeholder="상품 이미지 주소">
+          </div>
+
+          <button id="product-create-button">상품 등록</button>
+
+          <div id="product-result"></div>
+        </div>
+      </div>
+    `
+
+    document.querySelector<HTMLButtonElement>('#product-create-button')!
+      .addEventListener('click', async () => {
+        const merchantId =
+          document.querySelector<HTMLSelectElement>('#product-merchant-select')!.value
+
+        const productName =
+          document.querySelector<HTMLInputElement>('#product-name')!.value
+
+        const price =
+          Number(document.querySelector<HTMLInputElement>('#product-price')!.value)
+
+        const imageUrl =
+          document.querySelector<HTMLInputElement>('#product-image-url')!.value
+
+        if (!merchantId || !productName || !price) {
+          alert('가맹점, 상품명, 가격을 입력해주세요')
+          return
+        }
+
+        const { error } = await supabase
+          .from('products')
+          .insert([
+            {
+              merchant_id: Number(merchantId),
+              product_name: productName,
+              price: price,
+              image_url: imageUrl
+            }
+          ])
+
+        const resultBox =
+          document.querySelector<HTMLDivElement>('#product-result')!
+
+        if (error) {
+          resultBox.innerHTML = `<p>상품 등록 실패: ${error.message}</p>`
+          return
+        }
+
+        resultBox.innerHTML = `<p>상품 등록 완료</p>`
+      })
+  }
+
 } else if (path === '/merchant-create') {
   app.innerHTML = `
     <div class="page">
@@ -1219,6 +1499,12 @@ const currentEventType =
 const senderName = sessionStorage.getItem('senderName')
 const message = sessionStorage.getItem('message')
 
+const merchantId =
+  params.get('merchantId') || sessionStorage.getItem('merchantId')
+
+const merchantName =
+  params.get('merchantName') || sessionStorage.getItem('merchantName')
+
 const { error } = await supabase.from('payments').insert([
   {
     order_id: orderId,
@@ -1226,9 +1512,10 @@ const { error } = await supabase.from('payments').insert([
     amount: Number(amount),
     status: 'paid',
     event_id: eventId ? Number(eventId) : null,
-  
     sender_name: senderName,
-    message: message
+message: message,
+merchant_id: merchantId ? Number(merchantId) : null,
+merchant_name: merchantName
   }
   ]) 
 
@@ -1369,7 +1656,12 @@ const { error } = await supabase.from('payments').insert([
   
         <div class="admin-table-top">
           <button>엑셀 다운로드</button>
-          <select><option>20개씩 보기</option></select>
+          <select id="admin-page-size">
+  <option value="10">10개씩 보기</option>
+  <option value="20" selected>20개씩 보기</option>
+  <option value="50">50개씩 보기</option>
+  <option value="100">100개씩 보기</option>
+</select>
         </div>
   
         <table class="admin-table">
@@ -1590,6 +1882,197 @@ const searchKeyword = keywordInput?.value?.trim() || ''
       
   paymentTableBody.appendChild(tr)
 })  
+}
+
+if (page === 'settlement') {
+  const subMenu = document.querySelector('.admin-sub-menu')
+  const titleBox = document.querySelector('.admin-title')
+  const searchBox = document.querySelector('.admin-search-box')
+  const summaryBox = document.querySelector('.admin-summary')
+  const tableHead = document.querySelector('.admin-table thead')
+  const paymentTableBody =
+    document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+
+  if (subMenu) {
+    subMenu.innerHTML =
+      '정산예정내역 | 정산완료내역 | 정산보류내역'
+  }
+
+  if (titleBox) {
+    titleBox.innerHTML = '▶ 정산관리 > 정산예정내역'
+  }
+
+  if (searchBox) {
+    searchBox.innerHTML =
+      '<div class="payment-search-line">' +
+        '<button class="settlement-filter-btn" data-status="전체">전체</button>' +
+        '<button class="settlement-filter-btn" data-status="정산대기">정산대기</button>' +
+        '<button class="settlement-filter-btn" data-status="정산완료">정산완료</button>' +
+      '</div>'
+  }
+
+  const { data: payments, error } = await supabase
+    .from('payments')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    alert('정산내역 조회 실패: ' + error.message)
+    return
+  }
+
+  const settlementRows = (payments || []).map((payment) => {
+    const amount = Number(payment.amount || 0)
+    const feeRate = 2
+    const feeAmount = Math.floor(amount * feeRate / 100)
+    const settlementAmount = amount - feeAmount
+
+    const paymentDate = new Date(payment.created_at)
+    const dueDate = new Date(paymentDate)
+    dueDate.setDate(dueDate.getDate() + 1)
+
+    return {
+      ...payment,
+      feeRate,
+      feeAmount,
+      settlementAmount,
+      dueDate
+    }
+  })
+
+  const totalAmount = settlementRows.reduce((sum, row) => {
+    return sum + Number(row.amount || 0)
+  }, 0)
+
+  const totalFee = settlementRows.reduce((sum, row) => {
+    return sum + row.feeAmount
+  }, 0)
+
+  const totalSettlement = settlementRows.reduce((sum, row) => {
+    return sum + row.settlementAmount
+  }, 0)
+
+  if (summaryBox) {
+    summaryBox.innerHTML =
+      '결제금액 : ' + totalAmount.toLocaleString() + '원 &nbsp;&nbsp;&nbsp;' +
+      '수수료 : ' + totalFee.toLocaleString() + '원 &nbsp;&nbsp;&nbsp;' +
+      '정산예정금액 : ' + totalSettlement.toLocaleString() + '원'
+  }
+
+  if (searchBox) {
+    searchBox.innerHTML =
+      '<div class="payment-search-line">' +
+        '<button class="settlement-filter-btn" data-status="전체">전체</button>' +
+        '<button class="settlement-filter-btn" data-status="정산대기">정산대기</button>' +
+        '<button class="settlement-filter-btn" data-status="정산완료">정산완료</button>' +
+      '</div>'
+  }
+
+  if (tableHead) {
+    tableHead.innerHTML =
+      '<tr>' +
+        '<th>No</th>' +
+        '<th>가맹점ID</th>' +
+        '<th>가맹점명</th>' +
+        '<th>결제금액</th>' +
+        '<th>수수료율</th>' +
+        '<th>수수료</th>' +
+        '<th>정산예정금액</th>' +
+        '<th>결제일</th>' +
+        '<th>정산예정일</th>' +
+        '<th>정산상태</th>' +
+      '</tr>'
+  }
+
+  let currentSettlementStatus = '전체'
+let currentSettlementPageSize = 20
+
+const renderSettlementTable = () => {
+  const filteredRows = settlementRows.filter((row) => {
+    const status = row.settlement_status || '정산대기'
+    return currentSettlementStatus === '전체' || status === currentSettlementStatus
+  })
+
+  const visibleRows = filteredRows.slice(0, currentSettlementPageSize)
+
+  paymentTableBody.innerHTML = ''
+
+  visibleRows.forEach((row, index) => {
+    const tr = document.createElement('tr')
+
+    tr.className = 'settlement-row'
+    tr.setAttribute(
+      'data-status',
+      row.settlement_status || '정산대기'
+    )
+
+    tr.innerHTML =
+      '<td>' + (index + 1) + '</td>' +
+      '<td>' +
+        (row.merchant_id
+          ? 'MER' + String(row.merchant_id).padStart(4, '0')
+          : '-') +
+      '</td>' +
+      '<td>' + (row.merchant_name || '-') + '</td>' +
+      '<td>' + Number(row.amount || 0).toLocaleString() + '원</td>' +
+      '<td>' + row.feeRate + '%</td>' +
+      '<td>' + row.feeAmount.toLocaleString() + '원</td>' +
+      '<td>' + row.settlementAmount.toLocaleString() + '원</td>' +
+      '<td>' + formatDate(row.created_at) + '</td>' +
+      '<td>' + row.dueDate.toISOString().slice(0, 10) + '</td>' +
+      '<td>' +
+        (row.settlement_status === '정산완료'
+          ? '정산완료'
+          : '<button class="settlement-complete-button" data-id="' + row.id + '">정산완료</button>') +
+      '</td>'
+
+    paymentTableBody.appendChild(tr)
+  })
+
+  document.querySelectorAll('.settlement-complete-button')
+    .forEach((button) => {
+      button.addEventListener('click', async () => {
+        const paymentId =
+          (button as HTMLElement).getAttribute('data-id')
+
+        const { error } = await supabase
+          .from('payments')
+          .update({
+            settlement_status: '정산완료'
+          })
+          .eq('id', Number(paymentId))
+
+        if (error) {
+          alert('정산완료 처리 실패: ' + error.message)
+          return
+        }
+
+        alert('정산완료 처리되었습니다')
+        location.reload()
+      })
+    })
+}
+
+renderSettlementTable()
+
+document.querySelectorAll('.settlement-filter-btn')
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      currentSettlementStatus =
+        (button as HTMLElement).getAttribute('data-status') || '전체'
+
+      renderSettlementTable()
+    })
+  })
+
+  document.querySelector<HTMLSelectElement>('#admin-page-size')!
+  .addEventListener('change', (event) => {
+    currentSettlementPageSize =
+      Number((event.target as HTMLSelectElement).value)
+
+    renderSettlementTable()
+  })
+  
 }
 
 if (page === 'payment') {
