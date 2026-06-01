@@ -684,7 +684,7 @@ document.querySelector<HTMLButtonElement>('#download-qr-button')!
     merchantList.innerHTML =
       `<p>등록된 가맹점 수: ${(merchantData || []).length}개</p>`
   }
-  
+
       if (error) {
         list.innerHTML = `<p>결제내역 불러오기 실패: ${error.message}</p>`
       } else if (!data || data.length === 0) {
@@ -1202,7 +1202,7 @@ const { error } = await supabase.from('payments').insert([
       window.location.href = '/'
     })
 
-  } else if (path === '/store-admin') {
+  } else if (path === '/pg-admin') {
     app.innerHTML = `
       <div class="admin-wrap">
         <div class="admin-top-user">
@@ -1443,9 +1443,10 @@ const searchKeyword = keywordInput?.value?.trim() || ''
       if (searchKeyword) {
         merchants = merchants.filter((merchant) => {
           return (
-            String(merchant.merchant_name || '').includes(searchKeyword) ||
+            String(merchant.business_name || '').includes(searchKeyword) ||
             String(merchant.owner_name || '').includes(searchKeyword) ||
-            String(merchant.merchant_id || '').includes(searchKeyword)
+            String(merchant.phone || '').includes(searchKeyword) ||
+            String(merchant.account_holder || '').includes(searchKeyword)
           )
         })
       }
@@ -1459,7 +1460,7 @@ const searchKeyword = keywordInput?.value?.trim() || ''
         summaryBox.innerHTML =
           '검색된 데이터 : ' + merchants.length + '건 &nbsp;&nbsp;&nbsp;' +
           '가맹점 : ' + merchants.length + '개 &nbsp;&nbsp;&nbsp;' +
-          '운영중 : ' + merchants.filter((m) => m.status === '운영').length + '개'
+          '운영중 : ' + merchants.length + '개'
       }
       
       if (tableHead) {
@@ -1485,17 +1486,17 @@ const searchKeyword = keywordInput?.value?.trim() || ''
         const tr = document.createElement('tr')
       
         tr.innerHTML =
-          '<td>' + (index + 1) + '</td>' +
-          '<td>' + (merchant.merchant_id || '-') + '</td>' +
-          '<td>' + (merchant.merchant_name || '-') + '</td>' +
-          '<td>' + (merchant.owner_name || '-') + '</td>' +
-          '<td>' + (merchant.phone || '-') + '</td>' +
-          '<td>' + (merchant.fee_rate || '-') + '%</td>' +
-          '<td>' + (merchant.bank_name || '-') + '</td>' +
-          '<td>' + (merchant.account_number || '-') + '</td>' +
-          '<td>' + (merchant.account_holder || '-') + '</td>' +
-          '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
-          '<td>' + (merchant.status || '-') + '</td>'
+  '<td>' + (index + 1) + '</td>' +
+  '<td>MER' + String(merchant.id).padStart(4, '0') + '</td>' +
+  '<td>' + (merchant.business_name || '-') + '</td>' +
+  '<td>' + (merchant.owner_name || '-') + '</td>' +
+  '<td>' + (merchant.phone || '-') + '</td>' +
+  '<td>' + (merchant.fee_rate || 0) + '%</td>' +
+  '<td>' + (merchant.bank_name || '-') + '</td>' +
+  '<td>' + (merchant.account_number || '-') + '</td>' +
+  '<td>' + (merchant.account_holder || '-') + '</td>' +
+  '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
+  '<td>운영</td>'
       
         paymentTableBody.appendChild(tr)
       })  
