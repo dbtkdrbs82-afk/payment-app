@@ -651,7 +651,8 @@ document.querySelector<HTMLButtonElement>('#download-qr-button')!
 </div>
 
 <div id="event-list"></div>
-  
+ <h2>가맹점 목록</h2>
+<div id="merchant-list"></div> 
             <h2>QR 결제</h2>
             <canvas id="qr-canvas"></canvas>
   
@@ -665,9 +666,25 @@ document.querySelector<HTMLButtonElement>('#download-qr-button')!
         .from('payments')
         .select('*')
         .order('created_at', { ascending: false })
-  
+
+        const { data: merchantData, error: merchantError } = await supabase
+  .from('merchants')
+  .select('*')
+  .order('created_at', { ascending: false })
+
       const list = document.querySelector<HTMLDivElement>('#payment-list')!
       const eventList = document.querySelector<HTMLDivElement>('#event-list')!
+      const merchantList =
+  document.querySelector<HTMLDivElement>('#merchant-list')!
+
+  if (merchantError) {
+    merchantList.innerHTML =
+      `<p>가맹점 목록 불러오기 실패: ${merchantError.message}</p>`
+  } else {
+    merchantList.innerHTML =
+      `<p>등록된 가맹점 수: ${(merchantData || []).length}개</p>`
+  }
+  
       if (error) {
         list.innerHTML = `<p>결제내역 불러오기 실패: ${error.message}</p>`
       } else if (!data || data.length === 0) {
