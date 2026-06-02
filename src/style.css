@@ -1288,3 +1288,27 @@ button {
   line-height: 48px !important;
   box-sizing: border-box !important;
 }
+.order-number-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 20px;
+}
+
+.order-number-box {
+  font-size: 64px;
+  font-weight: 900;
+  color: #d4a93d;
+  margin: 15px 0;
+}
+.order-wait-message {
+  margin-top: 20px;
+  font-size: 18px;
+  line-height: 1.8;
+  color: #666;
+}
+
+.payment-amount {
+  margin-top: 20px;
+  font-size: 22px;
+  font-weight: 700;
+}

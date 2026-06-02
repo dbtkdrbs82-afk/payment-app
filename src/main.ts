@@ -400,6 +400,84 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
           })
       })
   }
+
+} else if (path === '/voice-call') {
+  app.innerHTML = `
+    <div class="page">
+      <div class="payment-card">
+        <h1>음성 고객 호출</h1>
+
+        <p id="voice-result">마이크 버튼을 누르고 말해주세요.</p>
+
+        <button id="voice-start-button">🎤 말하기</button>
+        <button id="test-call-button">34번 테스트 호출</button>
+      </div>
+    </div>
+  `
+
+  const speak = (text: string) => {
+    const message = new SpeechSynthesisUtterance(text)
+    message.lang = 'ko-KR'
+    window.speechSynthesis.speak(message)
+  }
+
+  document.querySelector<HTMLButtonElement>('#test-call-button')!
+    .addEventListener('click', () => {
+      speak('삼십사번 고객님 주문 나왔습니다.')
+    
+    })
+
+  document.querySelector<HTMLButtonElement>('#voice-start-button')!
+    .addEventListener('click', () => {
+      const SpeechRecognition =
+        (window as any).SpeechRecognition ||
+        (window as any).webkitSpeechRecognition
+
+      if (!SpeechRecognition) {
+        alert('크롬 브라우저에서 테스트해주세요.')
+        return
+      }
+
+      const recognition = new SpeechRecognition()
+      recognition.lang = 'ko-KR'
+      recognition.start()
+
+      recognition.onresult = (event: any) => {
+        const text = event.results[0][0].transcript
+
+        document.querySelector<HTMLParagraphElement>('#voice-result')!.innerText =
+          '인식된 말: ' + text
+
+        const numberMatch = text.match(/[0-9]+/)
+
+        if (!numberMatch) {
+          speak('번호를 찾지 못했습니다.')
+          return
+        }
+
+        const orderNumber = numberMatch[0]
+
+        const numberToKorean = (num: number) => {
+          const tens = Math.floor(num / 10)
+          const ones = num % 10
+        
+          const tenText = ['', '십', '이십', '삼십', '사십', '오십', '육십', '칠십', '팔십', '구십']
+          const oneText = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
+        
+          return tenText[tens] + oneText[ones]
+        }
+        const message =
+  numberToKorean(Number(orderNumber)) +
+  '번 고객님 주문 나왔습니다.'
+
+speak(message)
+
+setTimeout(() => {
+  speak(message)
+}, 5000)
+      }
+    })
+
 } else if (path === '/shop') {
   const params = new URLSearchParams(window.location.search)
   const merchantId = params.get('id')
@@ -1491,6 +1569,23 @@ document.querySelector<HTMLButtonElement>('#sales-yearly')!
   const orderId = params.get('orderId')
 const amount = params.get('amount')
 const paymentKey = params.get('paymentKey')
+if (!orderId || !paymentKey || !amount) {
+  app.innerHTML = `
+    <div class="page">
+      <div class="payment-card">
+        <h1>이미 처리된 주문입니다</h1>
+        <button id="home-button">확인</button>
+      </div>
+    </div>
+  `
+
+  document.querySelector<HTMLButtonElement>('#home-button')!
+    .addEventListener('click', () => {
+      window.location.href = '/'
+    })
+
+} else {
+
 
 const eventId = sessionStorage.getItem('currentEventId')
 const currentEventType =
@@ -1505,8 +1600,24 @@ const merchantId =
 const merchantName =
   params.get('merchantName') || sessionStorage.getItem('merchantName')
 
+  const { count } = await supabase
+  .from('payments')
+  .select('*', { count: 'exact', head: true })
+
+const nextOrderNumber = (count || 0) + 1
+
+const { data: existingPayment } = await supabase
+  .from('payments')
+  .select('id')
+  .eq('order_id', orderId)
+  .maybeSingle()
+
+if (existingPayment) {
+  console.log('이미 저장된 주문입니다.')
+} else {
 const { error } = await supabase.from('payments').insert([
   {
+    order_number: nextOrderNumber,
     order_id: orderId,
     payment_key: paymentKey,
     amount: Number(amount),
@@ -1524,6 +1635,8 @@ merchant_name: merchantName
   } else {
     alert('DB 저장 성공')
   }
+}
+window.history.replaceState({}, '', '/success')
 
   app.innerHTML = `
     <div class="page">
@@ -1532,12 +1645,24 @@ merchant_name: merchantName
       <h1>
   ${
     currentEventType === 'funeral'
-      ? '<span style="display:block;">명복을 빌어 주셔서</span><span style="display:block;">감사합니다.</span>'
-      : '<span style="display:block;">축하해 주셔서</span><span style="display:block;">감사합니다</span>'
+    ? '<span style="display:block;">명복을 빌어 주셔서</span><span style="display:block;">감사합니다.</span>'
+    : '<span style="display:block;">주문이</span><span style="display:block;">접수되었습니다</span>'
   }
 </h1>
-        <p>주문번호: ${orderId}</p>
-        <p>결제금액: ${Number(amount).toLocaleString()}원</p>
+        <p class="order-number-title">주문번호</p>
+
+<div class="order-number-box">
+  ${nextOrderNumber}번
+</div>
+
+<p class="order-wait-message">
+  고객 호출 시까지<br>
+  잠시만 기다려주세요.
+</p>
+
+<p class="payment-amount">
+  결제금액 : ${Number(amount).toLocaleString()}원
+</p>
         <button id="home-button">확인</button>
         </div>
     </div>
@@ -1556,7 +1681,7 @@ merchant_name: merchantName
         '안녕하세요. 모바일 축의금/부의금 결제 솔루션 도입 문의드립니다.'
       )
   }) 
-
+}
 } else if (path === '/fail') {
   const params = new URLSearchParams(window.location.search)
 
@@ -1587,11 +1712,13 @@ merchant_name: merchantName
         </div>
   
         <div class="admin-menu">
-  <a class="admin-tab" data-page="merchant">가맹점관리</a>
-  <a class="admin-tab active" data-page="payment">결제관리</a>
+  <a class="admin-tab active" data-page="dashboard">대시보드</a>
+<a class="admin-tab" data-page="merchant">가맹점관리</a>
+<a class="admin-tab" data-page="payment">결제관리</a>
   <a class="admin-tab" data-page="payout">출금관리</a>
   <a class="admin-tab" data-page="settlement">정산관리</a>
   <a class="admin-tab" data-page="tax">세무관리</a>
+  <a class="admin-tab" data-page="order">주문관리</a>
   <a class="admin-tab" data-page="mini">미니상점</a>
   <a class="admin-tab" data-page="setting">설정관리</a>
 </div>
@@ -1768,6 +1895,120 @@ if (summaryBox) {
 adminTabs.forEach((tab) => {
   tab.addEventListener('click', async () => {
     const page = tab.getAttribute('data-page')
+
+    if (page === 'dashboard') {
+      const subMenu = document.querySelector('.admin-sub-menu')
+      const titleBox = document.querySelector('.admin-title')
+      const searchBox = document.querySelector('.admin-search-box')
+      const summaryBox = document.querySelector('.admin-summary')
+      const tableHead = document.querySelector('.admin-table thead')
+      const paymentTableBody =
+        document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+    
+      if (subMenu) {
+        subMenu.innerHTML = '오늘 현황 | 월간 현황 | 정산 현황 | 출금 현황'
+      }
+    
+      if (titleBox) {
+        titleBox.innerHTML = '▶ 대시보드 > 오늘 현황'
+      }
+    
+      if (searchBox) {
+        searchBox.innerHTML = ''
+      }
+    
+      const { data: payments, error: paymentError } = await supabase
+        .from('payments')
+        .select('*')
+    
+      const { data: merchants, error: merchantError } = await supabase
+        .from('merchants')
+        .select('*')
+    
+      if (paymentError || merchantError) {
+        alert('대시보드 데이터를 불러오지 못했습니다')
+        return
+      }
+    
+      const today = new Date().toISOString().slice(0, 10)
+    
+      const todayPayments = (payments || []).filter((payment) => {
+        return String(payment.created_at || '').slice(0, 10) === today
+      })
+    
+      const todayAmount = todayPayments.reduce((sum, payment) => {
+        return sum + Number(payment.amount || 0)
+      }, 0)
+    
+      const totalAmount = (payments || []).reduce((sum, payment) => {
+        return sum + Number(payment.amount || 0)
+      }, 0)
+    
+      const settlementWaitingAmount = (payments || []).reduce((sum, payment) => {
+        if (payment.settlement_status === '정산완료') {
+          return sum
+        }
+    
+        const amount = Number(payment.amount || 0)
+        const feeAmount = Math.floor(amount * 0.02)
+    
+        return sum + amount - feeAmount
+      }, 0)
+    
+      const payoutWaitingAmount = (payments || []).reduce((sum, payment) => {
+        if (
+          payment.settlement_status === '정산완료' &&
+          payment.payout_status !== '출금완료'
+        ) {
+          return sum + Number(payment.settlement_amount || payment.amount || 0)
+        }
+    
+        return sum
+      }, 0)
+    
+      if (summaryBox) {
+        summaryBox.innerHTML =
+          '<div class="dashboard-cards">' +
+            '<div class="dashboard-card"><h3>오늘 결제금액</h3><strong>' + todayAmount.toLocaleString() + '원</strong></div>' +
+            '<div class="dashboard-card"><h3>전체 결제금액</h3><strong>' + totalAmount.toLocaleString() + '원</strong></div>' +
+            '<div class="dashboard-card"><h3>정산대기금액</h3><strong>' + settlementWaitingAmount.toLocaleString() + '원</strong></div>' +
+            '<div class="dashboard-card"><h3>출금대기금액</h3><strong>' + payoutWaitingAmount.toLocaleString() + '원</strong></div>' +
+            '<div class="dashboard-card"><h3>가맹점 수</h3><strong>' + (merchants || []).length + '개</strong></div>' +
+          '</div>'
+      }
+    
+      if (tableHead) {
+        tableHead.innerHTML =
+          '<tr>' +
+            '<th>No</th>' +
+            '<th>가맹점명</th>' +
+            '<th>주문번호</th>' +
+            '<th>결제금액</th>' +
+            '<th>결제상태</th>' +
+            '<th>정산상태</th>' +
+            '<th>출금상태</th>' +
+            '<th>결제일</th>' +
+          '</tr>'
+      }
+    
+      paymentTableBody.innerHTML = ''
+    
+      ;(payments || []).slice(0, 10).forEach((payment, index) => {
+        const tr = document.createElement('tr')
+    
+        tr.innerHTML =
+          '<td>' + (index + 1) + '</td>' +
+          '<td>' + (payment.merchant_name || '-') + '</td>' +
+          '<td>' + (payment.order_id || '-') + '</td>' +
+          '<td>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+          '<td>' + (payment.status || '-') + '</td>' +
+          '<td>' + (payment.settlement_status || '정산대기') + '</td>' +
+          '<td>' + (payment.payout_status || '출금대기') + '</td>' +
+          '<td>' + formatDate(payment.created_at) + '</td>'
+    
+        paymentTableBody.appendChild(tr)
+      })
+    }
 
     if (page === 'merchant') {
       const subMenu = document.querySelector('.admin-sub-menu')
@@ -2073,6 +2314,338 @@ document.querySelectorAll('.settlement-filter-btn')
     renderSettlementTable()
   })
   
+}
+
+if (page === 'payout') {
+  const subMenu = document.querySelector('.admin-sub-menu')
+  const titleBox = document.querySelector('.admin-title')
+  const searchBox = document.querySelector('.admin-search-box')
+  const summaryBox = document.querySelector('.admin-summary')
+  const tableHead = document.querySelector('.admin-table thead')
+  const paymentTableBody =
+    document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+
+  if (subMenu) {
+    subMenu.innerHTML = '출금예정내역 | 출금완료내역'
+  }
+
+  if (titleBox) {
+    titleBox.innerHTML = '▶ 출금관리 > 출금예정내역'
+  }
+
+  if (searchBox) {
+    searchBox.innerHTML =
+      '<div class="payment-search-line">' +
+        '<button class="payout-filter-btn" data-status="전체">전체</button>' +
+        '<button class="payout-filter-btn" data-status="출금대기">출금대기</button>' +
+        '<button class="payout-filter-btn" data-status="출금완료">출금완료</button>' +
+      '</div>'
+  }
+
+  const { data: payments, error } = await supabase
+    .from('payments')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    alert('출금내역 조회 실패: ' + error.message)
+    return
+  }
+
+  const payoutRows = (payments || []).filter((payment) => {
+    return payment.settlement_status === '정산완료'
+  })
+
+  const totalPayoutAmount = payoutRows.reduce((sum, payment) => {
+    return sum + Number(payment.settlement_amount || payment.amount || 0)
+  }, 0)
+
+  if (summaryBox) {
+    summaryBox.innerHTML =
+      '출금대상 : ' + payoutRows.length + '건 &nbsp;&nbsp;&nbsp;' +
+      '출금예정금액 : ' + totalPayoutAmount.toLocaleString() + '원 &nbsp;&nbsp;&nbsp;' +
+      '출금시간 : 오후 3시'
+  }
+
+  if (tableHead) {
+    tableHead.innerHTML =
+      '<tr>' +
+        '<th>No</th>' +
+        '<th>가맹점ID</th>' +
+        '<th>가맹점명</th>' +
+        '<th>출금예정금액</th>' +
+        '<th>출금시간</th>' +
+        '<th>출금상태</th>' +
+        '<th>처리</th>' +
+      '</tr>'
+  }
+
+  paymentTableBody.innerHTML = ''
+
+  payoutRows.forEach((row, index) => {
+    const tr = document.createElement('tr')
+
+    const payoutAmount =
+      Number(row.settlement_amount || row.amount || 0)
+
+    tr.innerHTML =
+      '<td>' + (index + 1) + '</td>' +
+      '<td>' +
+        (row.merchant_id
+          ? 'MER' + String(row.merchant_id).padStart(4, '0')
+          : '-') +
+      '</td>' +
+      '<td>' + (row.merchant_name || '-') + '</td>' +
+      '<td>' + payoutAmount.toLocaleString() + '원</td>' +
+      '<td>15:00</td>' +
+      '<td>' + (row.payout_status || '출금대기') + '</td>' +
+      '<td>' +
+        (row.payout_status === '출금완료'
+          ? '출금완료'
+          : '<button class="payout-complete-button" data-id="' + row.id + '">출금완료</button>') +
+      '</td>'
+
+    paymentTableBody.appendChild(tr)
+  })
+
+  document.querySelectorAll('.payout-complete-button')
+    .forEach((button) => {
+      button.addEventListener('click', async () => {
+        const paymentId =
+          (button as HTMLElement).getAttribute('data-id')
+
+        const { error } = await supabase
+          .from('payments')
+          .update({
+            payout_status: '출금완료'
+          })
+          .eq('id', Number(paymentId))
+
+        if (error) {
+          alert('출금완료 처리 실패: ' + error.message)
+          return
+        }
+
+        alert('출금완료 처리되었습니다')
+        location.reload()
+      })
+    })
+}
+
+if (page === 'order') {
+  const subMenu = document.querySelector('.admin-sub-menu')
+  const titleBox = document.querySelector('.admin-title')
+  const searchBox = document.querySelector('.admin-search-box')
+  const summaryBox = document.querySelector('.admin-summary')
+  const tableHead = document.querySelector('.admin-table thead')
+  const paymentTableBody =
+    document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+
+  if (subMenu) {
+    subMenu.innerHTML = '주문접수 | 조리완료 | 고객호출'
+  }
+
+  if (titleBox) {
+    titleBox.innerHTML = '▶ 주문관리 > 주문접수'
+  }
+
+  if (searchBox) {
+    searchBox.innerHTML =
+      '<div class="payment-search-line">' +
+        '<button class="order-filter-btn" data-status="전체">전체</button>' +
+        '<button class="order-filter-btn" data-status="준비중">준비중</button>' +
+        '<button class="order-filter-btn" data-status="완료">완료</button>' +
+      '</div>'
+  }
+
+  const { data: orders, error } = await supabase
+    .from('payments')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    alert('주문내역 조회 실패: ' + error.message)
+    return
+  }
+
+  if (summaryBox) {
+    summaryBox.innerHTML =
+      '주문수 : ' + (orders || []).length + '건'
+  }
+
+  if (tableHead) {
+    tableHead.innerHTML =
+      '<tr>' +
+        '<th>No</th>' +
+        '<th>주문번호</th>' +
+        '<th>가맹점명</th>' +
+        '<th>주문내용</th>' +
+        '<th>결제금액</th>' +
+        '<th>주문상태</th>' +
+        '<th>처리</th>' +
+        '<th>고객호출</th>' +
+      '</tr>'
+  }
+
+  paymentTableBody.innerHTML = ''
+
+  ;(orders || []).forEach((order, index) => {
+    const tr = document.createElement('tr')
+
+    const orderNumber =
+  order.order_number || index + 1
+
+    tr.innerHTML =
+      '<td>' + (index + 1) + '</td>' +
+      '<td>' + orderNumber + '</td>' +
+      '<td>' + (order.merchant_name || '-') + '</td>' +
+      '<td>' + (order.message || order.order_id || '-') + '</td>' +
+      '<td>' + Number(order.amount || 0).toLocaleString() + '원</td>' +
+      '<td>' + (order.order_status || '준비중') + '</td>' +
+      '<td>' +
+        (order.order_status === '완료'
+          ? '완료'
+          : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
+      '</td>' +
+      '<td>' +
+        '<button class="customer-call-button" data-number="' + orderNumber + '">' +
+          '고객호출' +
+        '</button>' +
+      '</td>'
+
+    paymentTableBody.appendChild(tr)
+  })
+
+  const numberToKorean = (num: number) => {
+    const tens = Math.floor(num / 10)
+    const ones = num % 10
+
+    const tenText = ['', '십', '이십', '삼십', '사십', '오십', '육십', '칠십', '팔십', '구십']
+    const oneText = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
+
+    return tenText[tens] + oneText[ones]
+  }
+
+  const speak = (text: string) => {
+    const message = new SpeechSynthesisUtterance(text)
+    message.lang = 'ko-KR'
+    message.rate = 0.95
+    window.speechSynthesis.speak(message)
+  }
+
+  document.querySelectorAll('.customer-call-button')
+    .forEach((button) => {
+      button.addEventListener('click', () => {
+        const number =
+          (button as HTMLElement).getAttribute('data-number') || ''
+
+        const callMessage =
+          numberToKorean(Number(number)) +
+          '번 고객님 주문 나왔습니다.'
+
+        window.speechSynthesis.cancel()
+
+        speak(callMessage)
+
+        setTimeout(() => {
+          speak(callMessage)
+        }, 5000)
+      })
+    })
+
+  document.querySelectorAll('.order-complete-button')
+    .forEach((button) => {
+      button.addEventListener('click', async () => {
+        const paymentId =
+          (button as HTMLElement).getAttribute('data-id')
+
+        const { error } = await supabase
+          .from('payments')
+          .update({
+            order_status: '완료'
+          })
+          .eq('id', Number(paymentId))
+
+        if (error) {
+          alert('주문완료 처리 실패: ' + error.message)
+          return
+        }
+
+        alert('조리완료 처리되었습니다')
+;(button as HTMLButtonElement).disabled = true
+;(button as HTMLButtonElement).innerText = '완료'
+      })
+    })
+}
+
+if (page === 'mini') {
+  const subMenu = document.querySelector('.admin-sub-menu')
+  const titleBox = document.querySelector('.admin-title')
+  const searchBox = document.querySelector('.admin-search-box')
+  const summaryBox = document.querySelector('.admin-summary')
+  const tableHead = document.querySelector('.admin-table thead')
+  const paymentTableBody =
+    document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+
+  if (subMenu) {
+    subMenu.innerHTML =
+      '상품관리 | 쇼핑몰관리 | QR관리'
+  }
+
+  if (titleBox) {
+    titleBox.innerHTML = '▶ 미니상점 > 상품관리'
+  }
+
+  if (searchBox) {
+    searchBox.innerHTML =
+      '<button id="move-product-create">상품등록</button>'
+  }
+
+  const { data: products, error } = await supabase
+    .from('products')
+    .select('*')
+    .order('id', { ascending: false })
+
+  if (error) {
+    alert('상품조회 실패 : ' + error.message)
+    return
+  }
+
+  if (summaryBox) {
+    summaryBox.innerHTML =
+      '상품수 : ' + (products?.length || 0) + '개'
+  }
+
+  if (tableHead) {
+    tableHead.innerHTML =
+      '<tr>' +
+      '<th>No</th>' +
+      '<th>가맹점ID</th>' +
+      '<th>상품명</th>' +
+      '<th>판매가</th>' +
+      '<th>상태</th>' +
+      '</tr>'
+  }
+
+  paymentTableBody.innerHTML = ''
+
+  products?.forEach((product, index) => {
+    const tr = document.createElement('tr')
+
+    tr.innerHTML =
+      '<td>' + (index + 1) + '</td>' +
+      '<td>MER' + String(product.merchant_id).padStart(4, '0') + '</td>' +
+      '<td>' + product.product_name + '</td>' +
+      '<td>' + Number(product.price).toLocaleString() + '원</td>' +
+      '<td>' + (product.status || '판매중') + '</td>'
+
+    paymentTableBody.appendChild(tr)
+  })
+
+  document.querySelector('#move-product-create')
+    ?.addEventListener('click', () => {
+      location.href = '/product-create'
+    })
 }
 
 if (page === 'payment') {
