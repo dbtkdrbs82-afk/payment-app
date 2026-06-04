@@ -1312,3 +1312,70 @@ button {
   font-size: 22px;
   font-weight: 700;
 }
+/* 태블릿/현장 주문관리 최적화 */
+@media (max-width: 1024px) {
+  .admin-wrap {
+    padding: 10px;
+  }
+
+  .admin-menu {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .admin-tab {
+    font-size: 16px;
+    padding: 12px 16px;
+  }
+
+  .admin-summary {
+    font-size: 18px;
+    padding: 16px;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    font-size: 18px;
+    padding: 14px 10px;
+  }
+
+  .order-complete-button,
+  .customer-call-button,
+  .search-btn,
+  .quick-btn {
+    font-size: 18px;
+    padding: 12px 18px;
+    min-width: 110px;
+  }
+
+  .admin-table-wrap {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-table th,
+  .admin-table td {
+    font-size: 16px;
+    padding: 12px 8px;
+  }
+
+  .customer-call-button,
+  .order-complete-button {
+    width: 100%;
+    margin: 4px 0;
+  }
+}
+.mini-shop-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.mini-shop-buttons button {
+  flex: 1;
+  height: 52px;
+  font-size: 16px;
+  font-weight: 700;
+}

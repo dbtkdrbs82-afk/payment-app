@@ -2939,6 +2939,84 @@ const orderIdValue =
         })
       })
   
+    } else if (path === '/shop') {
+      const { data: products } = await supabase
+        .from('products')
+        .select('*')
+        .eq('status', '판매중')
+        .order('id', { ascending: true })
+  
+      app.innerHTML = `
+        <div class="page">
+          <h1>NXG 미니상점</h1>
+  
+          <div class="product-grid">
+            ${(products || []).map((product) => `
+              <div class="product-card">
+                ${product.image_url ? `
+                  <img src="${product.image_url}" alt="${product.product_name}">
+                ` : ''}
+  
+                <h3>${product.product_name}</h3>
+                <p>${Number(product.price).toLocaleString()}원</p>
+  
+                <button onclick="location.href='/product?id=${product.id}'">
+                  주문하기
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `
+  
+    } else if (path === '/product') {
+      const params = new URLSearchParams(window.location.search)
+      const id = Number(params.get('id'))
+  
+      const { data: product } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single()
+  
+      if (!product) {
+        app.innerHTML = `
+          <div class="page">
+            <h1>상품을 찾을 수 없습니다.</h1>
+            <button onclick="location.href='/shop'">상점으로 돌아가기</button>
+          </div>
+        `
+       
+      }
+  
+      app.innerHTML = `
+        <div class="page">
+          <div class="payment-card">
+            <h1>${product.product_name}</h1>
+  
+            ${product.image_url ? `
+              <img 
+                src="${product.image_url}" 
+                alt="${product.product_name}"
+                style="width:100%; max-width:360px; border-radius:12px;"
+              >
+            ` : ''}
+  
+            <h2>${Number(product.price).toLocaleString()}원</h2>
+  
+            <button class="gold-button" id="mini-pay-button">
+              결제하기
+            </button>
+          </div>
+        </div>
+      `
+  
+      document.querySelector<HTMLButtonElement>('#mini-pay-button')!
+        .addEventListener('click', async () => {
+          alert('결제 연결 준비 완료')
+        })
+
+        
   } else {
     app.innerHTML = `
       <div class="page">
