@@ -2441,9 +2441,9 @@ if (page === 'order') {
   const paymentTableBody =
     document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
 
-  if (subMenu) {
-    subMenu.innerHTML = '주문접수 | 조리완료 | 고객호출'
-  }
+    if (subMenu) {
+      subMenu.innerHTML = ''
+    }
 
   if (titleBox) {
     titleBox.innerHTML = '▶ 주문관리 > 주문접수'
@@ -2497,7 +2497,10 @@ if (page === 'order') {
   ;(orders || []).forEach((order, index) => {
     const tr = document.createElement('tr')
 
-    const orderNumber = order.order_no || index + 1
+    const orderNumber =
+  order.order_no?.split('-')[1] ||
+  order.order_no ||
+  index + 1
 
 const orderItems = Array.isArray(order.items)
   ? order.items
@@ -2507,7 +2510,7 @@ const orderItems = Array.isArray(order.items)
 
 tr.innerHTML =
   '<td>' + (index + 1) + '</td>' +
-  '<td>' + orderNumber + '</td>' +
+  '<td>' + orderNumber + '번</td>' +
   '<td>MER' + String(order.merchant_id || 1).padStart(4, '0') + '</td>' +
   '<td>' + orderItems + '</td>' +
   '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
