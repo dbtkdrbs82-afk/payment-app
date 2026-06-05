@@ -676,10 +676,10 @@ setTimeout(() => {
     document.querySelector<HTMLButtonElement>('#product-create-button')!
       .addEventListener('click', async () => {
         const merchantId =
-          document.querySelector<HTMLSelectElement>('#product-merchant-select')!.value
+  sessionStorage.getItem('login_merchant_id')
 
-        const productName =
-          document.querySelector<HTMLInputElement>('#product-name')!.value
+  const productName =
+  document.querySelector<HTMLInputElement>('#product-name')!.value
 
         const price =
           Number(document.querySelector<HTMLInputElement>('#product-price')!.value)
@@ -2458,10 +2458,15 @@ if (page === 'order') {
       '</div>'
   }
 
+  const loginMerchantId = Number(
+    sessionStorage.getItem('login_merchant_id')
+  )
+
   const { data: orders, error } = await supabase
-    .from('payments')
-    .select('*')
-    .order('created_at', { ascending: false })
+  .from('orders')
+  .select('*')
+  .eq('merchant_id', loginMerchantId)
+  .order('created_at', { ascending: false })
 
   if (error) {
     alert('주문내역 조회 실패: ' + error.message)
@@ -2492,23 +2497,28 @@ if (page === 'order') {
   ;(orders || []).forEach((order, index) => {
     const tr = document.createElement('tr')
 
-    const orderNumber =
-  order.order_number || index + 1
+    const orderNumber = order.order_no || index + 1
 
-    tr.innerHTML =
-      '<td>' + (index + 1) + '</td>' +
-      '<td>' + orderNumber + '</td>' +
-      '<td>' + (order.merchant_name || '-') + '</td>' +
-      '<td>' + (order.message || order.order_id || '-') + '</td>' +
-      '<td>' + Number(order.amount || 0).toLocaleString() + '원</td>' +
-      '<td>' + (order.order_status || '준비중') + '</td>' +
+const orderItems = Array.isArray(order.items)
+  ? order.items
+      .map((item: any) => item.name + ' x ' + item.quantity)
+      .join(', ')
+  : '-'
+
+tr.innerHTML =
+  '<td>' + (index + 1) + '</td>' +
+  '<td>' + orderNumber + '</td>' +
+  '<td>MER' + String(order.merchant_id || 1).padStart(4, '0') + '</td>' +
+  '<td>' + orderItems + '</td>' +
+  '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
+  '<td>' + (order.order_status || '접수') + '</td>' +
       '<td>' +
         (order.order_status === '완료'
           ? '완료'
           : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
       '</td>' +
       '<td>' +
-        '<button class="customer-call-button" data-number="' + orderNumber + '">' +
+        '<button class="customer-call-button" data-number="' + (index + 1) + '">' +
           '고객호출' +
         '</button>' +
       '</td>'
@@ -2553,32 +2563,43 @@ if (page === 'order') {
       })
     })
 
-  document.querySelectorAll('.order-complete-button')
+    document.querySelectorAll('.order-complete-button')
     .forEach((button) => {
       button.addEventListener('click', async () => {
-        const paymentId =
+        const orderId =
           (button as HTMLElement).getAttribute('data-id')
-
+  
         const { error } = await supabase
-          .from('payments')
+          .from('orders')
           .update({
             order_status: '완료'
           })
-          .eq('id', Number(paymentId))
-
+          .eq('id', Number(orderId))
+  
         if (error) {
-          alert('주문완료 처리 실패: ' + error.message)
+          alert('조리완료 처리 실패: ' + error.message)
           return
         }
-
+  
         alert('조리완료 처리되었습니다')
-;(button as HTMLButtonElement).disabled = true
-;(button as HTMLButtonElement).innerText = '완료'
+  
+        const tr = (button as HTMLElement).closest('tr')
+        if (tr) {
+          const statusCell = tr.children[5]
+          statusCell.textContent = '완료'
+        }
+  
+        ;(button as HTMLButtonElement).disabled = true
+        ;(button as HTMLButtonElement).innerText = '완료'
       })
     })
 }
 
 if (page === 'mini') {
+
+  document.querySelector('.admin-wrap')
+  ?.classList.add('mini-mode')
+
   const subMenu = document.querySelector('.admin-sub-menu')
   const titleBox = document.querySelector('.admin-title')
   const searchBox = document.querySelector('.admin-search-box')
@@ -2589,8 +2610,149 @@ if (page === 'mini') {
 
   if (subMenu) {
     subMenu.innerHTML =
-      '상품관리 | 쇼핑몰관리 | QR관리'
+  '<button class="mini-sub-tab" id="mini-product-tab">상품관리</button>' +
+  '<button class="mini-sub-tab" id="mini-mall-tab">쇼핑몰관리</button>' +
+  '<button class="mini-sub-tab" id="mini-qr-tab">QR관리</button>'
+  document.querySelector('#mini-product-tab')
+  ?.addEventListener('click', () => {
+    location.reload()
+  })
+
+  document.querySelector('#mini-mall-tab')
+  ?.addEventListener('click', () => {
+    const loginMerchantId =
+      sessionStorage.getItem('login_merchant_id')
+
+    if (!loginMerchantId) {
+      alert('가맹점 로그인 후 이용 가능합니다.')
+      location.href = '/merchant-login'
+      return
+    }
+
+    const kioskUrl =
+      window.location.origin + '/kiosk?merchant_id=' + loginMerchantId
+
+    if (titleBox) {
+      titleBox.innerHTML = '▶ 미니상점 > 쇼핑몰관리'
+    }
+
+    if (searchBox) {
+      searchBox.innerHTML = ''
+    }
+
+    if (summaryBox) {
+      summaryBox.innerHTML =
+        '고객이 접속하는 미니상점 주소입니다.'
+    }
+
+    if (tableHead) {
+      tableHead.innerHTML = ''
+    }
+
+    paymentTableBody.innerHTML =
+      '<tr>' +
+      '<td colspan="8" style="padding:40px; text-align:center;">' +
+      '<h2>내 미니상점 주소</h2>' +
+      '<p id="mall-url-text" style="font-size:18px; font-weight:bold;">' +
+      kioskUrl +
+      '</p>' +
+      '<button id="copy-mall-url">주소복사</button>' +
+      '<button id="open-mall-url" style="margin-left:10px;">새창열기</button>' +
+      '</td>' +
+      '</tr>'
+
+    document.querySelector('#copy-mall-url')
+      ?.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(kioskUrl)
+        alert('상점 주소가 복사되었습니다.')
+      })
+
+    document.querySelector('#open-mall-url')
+      ?.addEventListener('click', () => {
+        window.open(kioskUrl, '_blank')
+      })
+  })
+
+document.querySelector('#mini-qr-tab')
+  ?.addEventListener('click', () => {
+    if (titleBox) {
+      titleBox.innerHTML = '▶ 미니상점 > QR관리'
+    }
+
+    if (searchBox) {
+      searchBox.innerHTML =
+        '<button id="show-kiosk-qr">QR생성</button>' +
+        '<div id="kiosk-qr-box" style="margin-top:20px;"></div>'
+    }
+
+    if (summaryBox) {
+      summaryBox.innerHTML =
+        'QR을 생성해서 매장에 비치할 수 있습니다.'
+    }
+
+    paymentTableBody.innerHTML = ''
+  })
+  document.querySelector('#mini-qr-tab')
+  ?.addEventListener('click', async () => {
+
+    const qrBox =
+      document.querySelector<HTMLDivElement>('#kiosk-qr-box')
+
+    if (!qrBox) {
+      alert('QR 영역을 찾을 수 없습니다.')
+      return
+    }
+
+    const loginMerchantId =
+      sessionStorage.getItem('login_merchant_id')
+
+    if (!loginMerchantId) {
+      alert('가맹점 로그인 후 QR 생성이 가능합니다.')
+      return
+    }
+
+    const kioskUrl =
+      window.location.origin +
+      '/kiosk?merchant_id=' +
+      loginMerchantId
+
+      qrBox.innerHTML =
+      '<div style="text-align:center;">' +
+      '<canvas id="kiosk-qr-canvas"></canvas>' +
+      '<br><br>' +
+      '<button id="copy-kiosk-url">주소복사</button>' +
+'<br><br>' +
+'<button id="download-kiosk-qr">QR다운로드</button>' +
+'</div>'
+
+    const canvas =
+      document.querySelector<HTMLCanvasElement>(
+        '#kiosk-qr-canvas'
+      )!
+
+    await QRCode.toCanvas(canvas, kioskUrl, {
+      width: 180,
+      margin: 2,
+    })
+
+    document.querySelector('#copy-kiosk-url')
+      ?.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(kioskUrl)
+        alert('QR 주소가 복사되었습니다.')
+      })
+      document.querySelector('#download-kiosk-qr')
+  ?.addEventListener('click', () => {
+    const canvas =
+      document.querySelector<HTMLCanvasElement>('#kiosk-qr-canvas')!
+
+    const link = document.createElement('a')
+    link.download = 'NXG-QR.png'
+    link.href = canvas.toDataURL('image/png')
+    link.click()
+  })
+  })
   }
+
 
   if (titleBox) {
     titleBox.innerHTML = '▶ 미니상점 > 상품관리'
@@ -2601,10 +2763,15 @@ if (page === 'mini') {
       '<button id="move-product-create">상품등록</button>'
   }
 
+  const loginMerchantId = Number(
+    sessionStorage.getItem('login_merchant_id')
+  )
+
   const { data: products, error } = await supabase
-    .from('products')
-    .select('*')
-    .order('id', { ascending: false })
+  .from('products')
+  .select('*')
+  .eq('merchant_id', loginMerchantId)
+  .order('id', { ascending: false })
 
   if (error) {
     alert('상품조회 실패 : ' + error.message)
@@ -2624,6 +2791,8 @@ if (page === 'mini') {
       '<th>상품명</th>' +
       '<th>판매가</th>' +
       '<th>상태</th>' +
+      '<th>관리</th>' +
+      '<th>주문링크</th>' +
       '</tr>'
   }
 
@@ -2637,16 +2806,114 @@ if (page === 'mini') {
       '<td>MER' + String(product.merchant_id).padStart(4, '0') + '</td>' +
       '<td>' + product.product_name + '</td>' +
       '<td>' + Number(product.price).toLocaleString() + '원</td>' +
-      '<td>' + (product.status || '판매중') + '</td>'
+      '<td>' + (product.status || '판매중') + '</td>' +
+'<td>' +
+  '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
+    ((product.status || '판매중') === '판매중' ? '판매중지' : '판매재개') +
+  '</button>' +
+  '<button class="product-delete-button" data-id="' + product.id + '" style="margin-left:6px;">삭제</button>' +
+'</td>' +
+
+'<td><button class="quick-btn" onclick="window.open(\'/kiosk?merchant_id=' +
+product.merchant_id +
+'\')">상점보기</button></td>'
 
     paymentTableBody.appendChild(tr)
+  })
+
+  document.querySelectorAll('.product-status-button')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const productId = (button as HTMLElement).getAttribute('data-id')
+      const currentStatus = (button as HTMLElement).getAttribute('data-status')
+
+      const nextStatus =
+        currentStatus === '판매중' ? '판매중지' : '판매중'
+
+      const { error } = await supabase
+        .from('products')
+        .update({
+          status: nextStatus
+        })
+        .eq('id', Number(productId))
+
+      if (error) {
+        alert('상태 변경 실패: ' + error.message)
+        return
+      }
+
+      alert('상품 상태가 변경되었습니다.')
+      location.reload()
+    })
+  })
+
+document.querySelectorAll('.product-delete-button')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const productId = (button as HTMLElement).getAttribute('data-id')
+
+      if (!confirm('정말 이 상품을 삭제할까요?')) {
+        return
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', Number(productId))
+
+      if (error) {
+        alert('상품 삭제 실패: ' + error.message)
+        return
+      }
+
+      alert('상품이 삭제되었습니다.')
+      location.reload()
+    })
   })
 
   document.querySelector('#move-product-create')
     ?.addEventListener('click', () => {
       location.href = '/product-create'
     })
+    document.querySelector('#show-kiosk-qr')
+    ?.addEventListener('click', async () => {
+      const qrBox = document.querySelector<HTMLDivElement>('#kiosk-qr-box')!
+  
+      const loginMerchantId =
+  sessionStorage.getItem('login_merchant_id')
+
+if (!loginMerchantId) {
+  alert('가맹점 로그인 후 QR 생성이 가능합니다.')
+  location.href = '/merchant-login'
+  return
 }
+
+const kioskUrl =
+  window.location.origin + '/kiosk?merchant_id=' + loginMerchantId
+  
+  qrBox.innerHTML =
+  '<p><strong>미니상점 QR 주소</strong></p>' +
+  '<p id="kiosk-url-text">' + kioskUrl + '</p>' +
+  '<canvas id="kiosk-qr-canvas"></canvas>' +
+  '<br>' +
+  '<button id="copy-kiosk-url">주소복사</button>'
+  
+      const canvas =
+        document.querySelector<HTMLCanvasElement>('#kiosk-qr-canvas')!
+  
+        await QRCode.toCanvas(canvas, kioskUrl, {
+          width: 180,
+          margin: 2,
+        })
+        
+        document.querySelector('#copy-kiosk-url')
+          ?.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(kioskUrl)
+            alert('QR 주소가 복사되었습니다.')
+          })
+        
+        })
+        }
 
 if (page === 'payment') {
 const subMenu = document.querySelector('.admin-sub-menu')
@@ -2939,84 +3206,380 @@ const orderIdValue =
         })
       })
   
-    } else if (path === '/shop') {
-      const { data: products } = await supabase
-        .from('products')
-        .select('*')
-        .eq('status', '판매중')
-        .order('id', { ascending: true })
-  
-      app.innerHTML = `
-        <div class="page">
-          <h1>NXG 미니상점</h1>
-  
-          <div class="product-grid">
-            ${(products || []).map((product) => `
-              <div class="product-card">
-                ${product.image_url ? `
-                  <img src="${product.image_url}" alt="${product.product_name}">
-                ` : ''}
-  
-                <h3>${product.product_name}</h3>
-                <p>${Number(product.price).toLocaleString()}원</p>
-  
-                <button onclick="location.href='/product?id=${product.id}'">
-                  주문하기
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `
-  
-    } else if (path === '/product') {
-      const params = new URLSearchParams(window.location.search)
-      const id = Number(params.get('id'))
-  
-      const { data: product } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', id)
-        .single()
-  
-      if (!product) {
-        app.innerHTML = `
-          <div class="page">
-            <h1>상품을 찾을 수 없습니다.</h1>
-            <button onclick="location.href='/shop'">상점으로 돌아가기</button>
-          </div>
-        `
-       
-      }
-  
+    } else if (path === '/merchant-login') {
       app.innerHTML = `
         <div class="page">
           <div class="payment-card">
-            <h1>${product.product_name}</h1>
-  
-            ${product.image_url ? `
-              <img 
-                src="${product.image_url}" 
-                alt="${product.product_name}"
-                style="width:100%; max-width:360px; border-radius:12px;"
-              >
-            ` : ''}
-  
-            <h2>${Number(product.price).toLocaleString()}원</h2>
-  
-            <button class="gold-button" id="mini-pay-button">
-              결제하기
+            <h1>가맹점 로그인</h1>
+
+            <label>아이디</label>
+            <input id="merchant-login-id" placeholder="아이디를 입력하세요" />
+
+            <label>비밀번호</label>
+            <input id="merchant-login-password" type="password" placeholder="비밀번호를 입력하세요" />
+
+            <button class="gold-button" id="merchant-login-button">
+              로그인
             </button>
           </div>
         </div>
       `
-  
-      document.querySelector<HTMLButtonElement>('#mini-pay-button')!
+
+      document.querySelector<HTMLButtonElement>('#merchant-login-button')!
         .addEventListener('click', async () => {
-          alert('결제 연결 준비 완료')
+          const loginId =
+            document.querySelector<HTMLInputElement>('#merchant-login-id')!.value
+
+          const password =
+            document.querySelector<HTMLInputElement>('#merchant-login-password')!.value
+
+          if (!loginId || !password) {
+            alert('아이디와 비밀번호를 입력해주세요.')
+            return
+          }
+
+          const { data: merchant, error } = await supabase
+            .from('merchants')
+            .select('*')
+            .eq('login_id', loginId)
+            .eq('password', password)
+            .single()
+
+          if (error || !merchant) {
+            alert('로그인 정보가 올바르지 않습니다.')
+            return
+          }
+
+          sessionStorage.setItem('login_merchant_id', String(merchant.id))
+          sessionStorage.setItem('login_merchant_code', merchant.merchant_id)
+          sessionStorage.setItem('login_merchant_name', merchant.merchant_name)
+
+          alert(merchant.merchant_name + '님 로그인되었습니다.')
+
+          window.location.href = '/merchant-admin'
         })
 
+
+    } else if (path === '/kiosk') {
+      const params = new URLSearchParams(window.location.search)
+      const merchantId = Number(params.get('merchant_id') || 1)
+
+      const { data: products, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('merchant_id', merchantId)
+        .eq('status', '판매중')
+        .order('id', { ascending: true })
+
+      if (error) {
+        app.innerHTML = `
+          <div class="page">
+            <h1>상품을 불러오지 못했습니다.</h1>
+            <p>${error.message}</p>
+          </div>
+        `
+      } else {
+        app.innerHTML = `
+          <div class="kiosk-page">
+            <div class="kiosk-header">
+              <h1>NXG 미니상점</h1>
+              <div class="cart-badge">
+                장바구니 <span id="cart-count">0</span>
+              </div>
+            </div>
+
+            <div class="kiosk-hero">
+              <h2>어서오세요!</h2>
+              <p>원하시는 상품을 선택해주세요.</p>
+            </div>
+
+            <div class="kiosk-products">
+              ${(products || []).map((product) => `
+                <div class="kiosk-product-card">
+                  ${product.image_url ? `
+                    <img src="${product.image_url}" alt="${product.product_name}">
+                  ` : `
+                    <div class="no-image">이미지 없음</div>
+                  `}
+
+                  <div class="kiosk-product-info">
+                    <h3>${product.product_name}</h3>
+                    <p>${Number(product.price).toLocaleString()}원</p>
+                  </div>
+
+                  <button 
+                    class="add-cart-button"
+                    data-id="${product.id}"
+                    data-name="${product.product_name}"
+                    data-price="${product.price}"
+                  >
+                    담기
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="kiosk-cart">
+              <h2>장바구니</h2>
+              <div id="cart-items">
+                <p class="empty-cart">상품을 선택해주세요.</p>
+              </div>
+
+              <div class="cart-total">
+                <span>총 결제금액</span>
+                <strong id="cart-total-price">0원</strong>
+              </div>
+
+              </div>
+
+<div class="kiosk-bottom-bar">
+  <div class="bottom-total">
+    <span>총 결제금액</span>
+    <strong id="cart-total-price-bottom">0원</strong>
+  </div>
+
+  <button class="gold-button" id="kiosk-pay-button">
+    결제하기
+  </button>
+</div>
+            </div>
+          </div>
+        `
+
+        const cart: {
+          id: number
+          name: string
+          price: number
+          quantity: number
+        }[] = []
+
+        const renderCart = () => {
+          const cartItems = document.querySelector<HTMLDivElement>('#cart-items')!
+          const cartCount = document.querySelector<HTMLSpanElement>('#cart-count')!
+          const cartTotalPrice = document.querySelector<HTMLElement>('#cart-total-price')!
+          const cartTotalPriceBottom =
+            document.querySelector<HTMLElement>('#cart-total-price-bottom')
         
+          const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+          const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+        
+          cartCount.textContent = String(totalCount)
+          cartTotalPrice.textContent = totalPrice.toLocaleString() + '원'
+        
+          if (cartTotalPriceBottom) {
+            cartTotalPriceBottom.textContent = totalPrice.toLocaleString() + '원'
+          }
+          
+          
+
+          if (cart.length === 0) {
+            cartItems.innerHTML = '<p class="empty-cart">상품을 선택해주세요.</p>'
+            return
+          }
+
+          cartItems.innerHTML = cart.map((item) => `
+            <div class="cart-item">
+              <div>
+                <strong>${item.name}</strong>
+                <p>${item.price.toLocaleString()}원 x ${item.quantity}</p>
+              </div>
+              <div class="cart-item-buttons">
+                <button class="cart-minus" data-id="${item.id}">-</button>
+                <span>${item.quantity}</span>
+                <button class="cart-plus" data-id="${item.id}">+</button>
+              </div>
+            </div>
+          `).join('')
+
+          document.querySelectorAll<HTMLButtonElement>('.cart-plus').forEach((button) => {
+            button.addEventListener('click', () => {
+              const id = Number(button.dataset.id)
+              const item = cart.find((cartItem) => cartItem.id === id)
+              if (item) {
+                item.quantity += 1
+                renderCart()
+              }
+            })
+          })
+
+          document.querySelectorAll<HTMLButtonElement>('.cart-minus').forEach((button) => {
+            button.addEventListener('click', () => {
+              const id = Number(button.dataset.id)
+              const item = cart.find((cartItem) => cartItem.id === id)
+
+              if (item) {
+                item.quantity -= 1
+
+                if (item.quantity <= 0) {
+                  const index = cart.findIndex((cartItem) => cartItem.id === id)
+                  cart.splice(index, 1)
+                }
+
+                renderCart()
+              }
+            })
+          })
+        }
+
+        document.querySelectorAll<HTMLButtonElement>('.add-cart-button').forEach((button) => {
+          button.addEventListener('click', () => {
+            const id = Number(button.dataset.id)
+            const name = button.dataset.name || ''
+            const price = Number(button.dataset.price)
+
+            const existingItem = cart.find((item) => item.id === id)
+
+            if (existingItem) {
+              existingItem.quantity += 1
+            } else {
+              cart.push({
+                id,
+                name,
+                price,
+                quantity: 1,
+              })
+            }
+
+            renderCart()
+          })
+        })
+
+        document.querySelector<HTMLButtonElement>('#kiosk-pay-button')!
+  .addEventListener('click', async () => {
+    const totalPrice = cart.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    )
+
+    if (cart.length === 0) {
+      alert('상품을 먼저 선택해주세요.')
+      return
+    }
+
+    const callNumber = Math.floor(1 + Math.random() * 99)
+const orderNo = 'ORD-' + callNumber + '-' + Date.now()
+sessionStorage.setItem('kiosk_call_number', String(callNumber))
+
+    sessionStorage.setItem('kiosk_order_no', orderNo)
+    sessionStorage.setItem('kiosk_merchant_id', String(merchantId))
+    sessionStorage.setItem('kiosk_items', JSON.stringify(cart))
+    sessionStorage.setItem('kiosk_total_amount', String(totalPrice))
+
+    const tossPayments = await loadTossPayments(clientKey)
+
+    await tossPayments.requestPayment('카드', {
+      amount: totalPrice,
+      orderId: orderNo,
+      orderName: 'NXG 미니상점 주문',
+      customerName: '미니상점 고객',
+      successUrl: window.location.origin + '/kiosk-success',
+      failUrl: window.location.origin + '/fail',
+    })
+  })
+          
+      }
+    } else if (path === '/kiosk-success') {
+      const orderNo = sessionStorage.getItem('kiosk_order_no')
+      const merchantId = sessionStorage.getItem('kiosk_merchant_id')
+      const itemsText = sessionStorage.getItem('kiosk_items')
+      const totalAmount = sessionStorage.getItem('kiosk_total_amount')
+      const callNumber = sessionStorage.getItem('kiosk_call_number')
+  
+      const items = itemsText ? JSON.parse(itemsText) : []
+  
+      if (!orderNo || !merchantId || !totalAmount) {
+        app.innerHTML = `
+          <div class="page">
+            <div class="payment-card">
+              <h1>주문 정보가 없습니다.</h1>
+              <button onclick="location.href='/kiosk?merchant_id=1'">상점으로 돌아가기</button>
+            </div>
+          </div>
+        `
+      } else {
+        const { error } = await supabase
+          .from('orders')
+          .insert({
+            merchant_id: Number(merchantId),
+            order_no: orderNo,
+            items: items,
+            total_amount: Number(totalAmount),
+            order_status: '접수',
+            payment_status: '결제완료',
+          })
+  
+        if (error) {
+          app.innerHTML = `
+            <div class="page">
+              <div class="payment-card">
+                <h1>주문 저장 실패</h1>
+                <p>${error.message}</p>
+              </div>
+            </div>
+          `
+        } else {
+          sessionStorage.removeItem('kiosk_order_no')
+          sessionStorage.removeItem('kiosk_merchant_id')
+          sessionStorage.removeItem('kiosk_items')
+          sessionStorage.removeItem('kiosk_total_amount')
+  
+          app.innerHTML = `
+  <div class="page">
+    <div class="payment-card">
+
+      <h1 style="
+  font-size:28px;
+  margin-bottom:20px;
+  font-weight:700;
+">
+  결제가 완료되었습니다.
+</h1>
+
+      <p style="
+  margin-top:25px;
+  font-size:40px;
+  font-weight:800;
+  margin-bottom:10px;
+">
+  주문번호
+</p>
+
+      <div style="
+  font-size:150px;
+  font-weight:900;
+  color:#d4af37;
+  line-height:1;
+  margin:10px 0 30px;
+">
+  ${callNumber}
+</div>
+
+      <div style="
+  background:#f8f5ee;
+  border-radius:12px;
+  padding:20px;
+  margin:20px auto;
+  width:80%;
+  font-size:28px;
+  font-weight:bold;
+">
+  결제금액 :
+  ${Number(totalAmount).toLocaleString()}원
+</div>
+
+      <p style="
+  margin-top:30px;
+  font-size:30px;
+  font-weight:600;
+">
+  잠시만 기다려주세요.
+</p>
+
+    </div>
+  </div>
+`
+        }
+      }
   } else {
     app.innerHTML = `
       <div class="page">
