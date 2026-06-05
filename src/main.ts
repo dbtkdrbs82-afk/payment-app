@@ -2521,7 +2521,7 @@ tr.innerHTML =
           : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
       '</td>' +
       '<td>' +
-        '<button class="customer-call-button" data-number="' + (index + 1) + '">' +
+        '<button class="customer-call-button" data-number="' + orderNumber + '">' +
           '고객호출' +
         '</button>' +
       '</td>'
