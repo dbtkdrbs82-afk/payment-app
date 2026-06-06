@@ -1709,10 +1709,17 @@ window.history.replaceState({}, '', '/success')
     })
 
   } else if (path === '/pg-admin') {
+
+    const adminId =
+      sessionStorage.getItem('admin_id') || 'nxg001'
+  
     app.innerHTML = `
       <div class="admin-wrap">
         <div class="admin-top-user">
-          haroldkim713 <span>| 로그아웃</span>
+          ${adminId}
+          <span id="admin-logout" style="cursor:pointer;">
+            | 로그아웃
+          </span>
         </div>
   
         <div class="admin-menu">
@@ -1893,7 +1900,17 @@ if (summaryBox) {
            paymentTableBody.appendChild(tr)
          })
        })
-
+       document.querySelector('#admin-logout')
+       ?.addEventListener('click', () => {
+     
+         if (!confirm('로그아웃 하시겠습니까?')) {
+           return
+         }
+     
+         sessionStorage.removeItem('admin_id')
+     
+         location.href = '/admin-login'
+       })
        const adminTabs = document.querySelectorAll('.admin-tab')
 
 adminTabs.forEach((tab) => {
