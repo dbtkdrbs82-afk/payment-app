@@ -3003,6 +3003,29 @@ document.querySelectorAll('.product-delete-button')
         
           callSelect.value = savedCallMessage
           newOrderSelect.value = savedNewOrderMessage
+
+          const speakPreview = (text: string) => {
+            const message = new SpeechSynthesisUtterance(text)
+            message.lang = 'ko-KR'
+            message.rate = 0.95
+          
+            window.speechSynthesis.cancel()
+            window.speechSynthesis.speak(message)
+          }
+
+          document.querySelector('#preview-call-message')
+  ?.addEventListener('click', () => {
+    speakPreview(
+      '사십구번 고객님 ' + callSelect.value
+    )
+  })
+
+document.querySelector('#preview-new-order-message')
+  ?.addEventListener('click', () => {
+    speakPreview(
+      newOrderSelect.value
+    )
+  })
         
           document.querySelector('#save-voice-setting')
             ?.addEventListener('click', () => {
