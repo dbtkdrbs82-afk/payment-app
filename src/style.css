@@ -1706,3 +1706,29 @@ button {
     overflow-x: auto !important;
   }
 }
+/* 모바일 관리자 강제 보정 */
+@media (max-width: 768px) {
+  .admin-wrap,
+  .admin-content,
+  .admin-search-box,
+  .admin-summary,
+  .admin-table-top {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow-x: auto !important;
+  }
+
+  .admin-table {
+    width: max-content !important;
+    min-width: 900px !important;
+    max-width: none !important;
+    table-layout: auto !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    white-space: nowrap !important;
+  }
+}
