@@ -1672,3 +1672,50 @@ button {
     flex-wrap: wrap !important;
   }
 }
+/* 모바일 주문관리 화면 보정 */
+@media (max-width: 768px) {
+  .admin-search-box {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 16px !important;
+    overflow: hidden !important;
+  }
+
+  .admin-search-box button {
+    width: calc(33.333% - 8px) !important;
+    min-width: 0 !important;
+    margin: 4px !important;
+    font-size: 14px !important;
+    padding: 12px 0 !important;
+  }
+
+  .admin-table-top {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    overflow: hidden !important;
+  }
+
+  .admin-table-top button {
+    width: 150px !important;
+    font-size: 14px !important;
+  }
+
+  #admin-page-size {
+    width: 100px !important;
+    font-size: 13px !important;
+  }
+
+  .admin-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    font-size: 13px !important;
+    padding: 8px 4px !important;
+    word-break: keep-all !important;
+  }
+}
