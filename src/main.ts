@@ -206,6 +206,10 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
     popup.document.write(`
       <html>
         <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>payment-app</title>
+</head>
           <title>메시지 확인</title>
 
           <style>
