@@ -2649,7 +2649,7 @@ setInterval(async () => {
   
     setTimeout(() => {
       location.reload()
-    }, 1500)
+    }, 7000)
   }
 }, 3000)
 
