@@ -2552,7 +2552,17 @@ tr.innerHTML =
     message.rate = 0.95
     window.speechSynthesis.speak(message)
   }
-
+  const playNewOrderSound = () => {
+    const audio = new Audio(
+      'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
+    )
+  
+    audio.play()
+  
+    setTimeout(() => {
+      speak('새 주문이 접수되었습니다.')
+    }, 1000)
+  }
   document.querySelectorAll('.customer-call-button')
     .forEach((button) => {
       button.addEventListener('click', () => {
@@ -2617,6 +2627,28 @@ if (tr) {
 }
       })
     })
+    let lastOrderCount = (orders || []).length
+
+setInterval(async () => {
+  const loginMerchantId = Number(
+    sessionStorage.getItem('login_merchant_id')
+  )
+
+  const { data, error } = await supabase
+    .from('orders')
+    .select('*')
+    .eq('merchant_id', loginMerchantId)
+
+  if (error || !data) {
+    return
+  }
+
+  if (data.length > lastOrderCount) {
+    playNewOrderSound()
+    lastOrderCount = data.length
+  }
+}, 3000)
+
 }
 
 if (page === 'mini') {
