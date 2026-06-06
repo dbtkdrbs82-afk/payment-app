@@ -2939,7 +2939,74 @@ document.querySelectorAll('.product-delete-button')
         }
 
         if (page === 'setting') {
-          alert('설정관리 테스트 성공')
+          const subMenu = document.querySelector('.admin-sub-menu')
+          const titleBox = document.querySelector('.admin-title')
+          const searchBox = document.querySelector('.admin-search-box')
+          const summaryBox = document.querySelector('.admin-summary')
+          const tableHead = document.querySelector('.admin-table thead')
+          const paymentTableBody =
+            document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+        
+          if (subMenu) subMenu.innerHTML = ''
+          if (titleBox) titleBox.innerHTML = '▶ 설정관리 > 음성설정'
+          if (searchBox) searchBox.innerHTML = ''
+          if (summaryBox) summaryBox.innerHTML = '주문알림과 고객호출 문구를 설정합니다.'
+          if (tableHead) tableHead.innerHTML = ''
+        
+          const savedCallMessage =
+            sessionStorage.getItem('customer_call_message') || '주문 나왔습니다.'
+        
+          const savedNewOrderMessage =
+            sessionStorage.getItem('new_order_message') || '새 주문이 접수되었습니다.'
+        
+          paymentTableBody.innerHTML =
+            '<tr>' +
+            '<td colspan="8" style="padding:40px;">' +
+            '<h2>음성 설정</h2>' +
+        
+            '<div style="margin:20px 0;">' +
+            '<label>고객호출 문구</label><br>' +
+            '<select id="customer-call-message-setting" style="width:360px; height:40px;">' +
+            '<option value="주문 나왔습니다.">주문 나왔습니다.</option>' +
+            '<option value="주문이 준비되었습니다.">주문이 준비되었습니다.</option>' +
+            '<option value="음식을 찾아가 주세요.">음식을 찾아가 주세요.</option>' +
+            '<option value="카운터로 와주세요.">카운터로 와주세요.</option>' +
+            '<option value="픽업 부탁드립니다.">픽업 부탁드립니다.</option>' +
+            '<option value="아따~ 싸게싸게 챙겨가쇼~">아따~ 싸게싸게 챙겨가쇼~</option>' +
+            '<option value="챙겨 갈껀가 말껀가.">챙겨 갈껀가 말껀가.</option>' +
+            '</select>' +
+            '</div>' +
+        
+            '<div style="margin:20px 0;">' +
+            '<label>새 주문 알림 문구</label><br>' +
+            '<select id="new-order-message-setting" style="width:360px; height:40px;">' +
+            '<option value="새 주문이 접수되었습니다.">새 주문이 접수되었습니다.</option>' +
+            '<option value="주문 들어왔습니다.">주문 들어왔습니다.</option>' +
+            '<option value="사장님 주문 들어왔어요.">사장님 주문 들어왔어요.</option>' +
+            '<option value="띵동 새 주문입니다.">띵동 새 주문입니다.</option>' +
+            '</select>' +
+            '</div>' +
+        
+            '<button id="save-voice-setting" style="width:160px; height:40px;">저장</button>' +
+            '</td>' +
+            '</tr>'
+        
+          const callSelect =
+            document.querySelector<HTMLSelectElement>('#customer-call-message-setting')!
+        
+          const newOrderSelect =
+            document.querySelector<HTMLSelectElement>('#new-order-message-setting')!
+        
+          callSelect.value = savedCallMessage
+          newOrderSelect.value = savedNewOrderMessage
+        
+          document.querySelector('#save-voice-setting')
+            ?.addEventListener('click', () => {
+              sessionStorage.setItem('customer_call_message', callSelect.value)
+              sessionStorage.setItem('new_order_message', newOrderSelect.value)
+        
+              alert('음성 설정이 저장되었습니다.')
+            })
         }
 
 if (page === 'payment') {
