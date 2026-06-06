@@ -2983,8 +2983,8 @@ document.querySelectorAll('.product-delete-button')
             '<option value="새 주문이 접수되었습니다.">새 주문이 접수되었습니다.</option>' +
             '<option value="주문 들어왔습니다.">주문 들어왔습니다.</option>' +
             '<option value="사장님 주문 들어왔어요.">사장님 주문 들어왔어요.</option>' +
-            '<option value="🔔 새 주문입니다.">🔔 새 주문입니다.</option>' +
-            '<option value="놀지 말고 일 하세요.">🔔 놀지 말고 일 하세요.</option>' +
+            '<option value="새 주문입니다.">새 주문입니다.</option>' +
+            '<option value="놀지 말고 일 하세요.">놀지 말고 일 하세요.</option>' +
             '<option value="주문 왔다...만들껀가 말껀가.">주문 왔다...만들껀가 말껀가.</option>' +
             '</select>' +
             '</div>' +
@@ -3040,9 +3040,7 @@ document.querySelectorAll('.product-delete-button')
       newOrderSelect.value ===
       '놀지 말고 일 하세요.'
     ) {
-    
-      alert('벨소리 테스트')
-    
+
       const audio = new Audio(
         'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
       )
