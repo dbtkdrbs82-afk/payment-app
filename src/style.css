@@ -1628,3 +1628,47 @@ button {
     white-space: nowrap !important;
   }
 }
+@media (max-width: 768px) {
+
+  .admin-search-box {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+  }
+
+  .admin-search-box select,
+  .admin-search-box input,
+  .admin-search-box button {
+    height: 40px !important;
+    font-size: 13px !important;
+  }
+
+  .admin-tab {
+    font-size: 13px !important;
+    padding: 8px 10px !important;
+  }
+
+  .admin-summary {
+    font-size: 13px !important;
+    padding: 10px !important;
+  }
+
+  .admin-table th,
+  .admin-table td {
+    font-size: 12px !important;
+    padding: 6px !important;
+  }
+
+  .quick-btn,
+  .search-btn,
+  .customer-call-button,
+  .order-complete-button {
+    min-width: auto !important;
+    font-size: 12px !important;
+    padding: 8px 10px !important;
+  }
+
+  .admin-table-top {
+    flex-wrap: wrap !important;
+  }
+}
