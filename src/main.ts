@@ -3040,16 +3040,27 @@ document.querySelectorAll('.product-delete-button')
       newOrderSelect.value ===
       '놀지 말고 일 하세요.'
     ) {
+    
+      alert('벨소리 테스트')
+    
       const audio = new Audio(
         'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
       )
-
+    
+      audio.volume = 1
+    
       audio.play()
-
+        .then(() => {
+          console.log('벨소리 성공')
+        })
+        .catch((err) => {
+          console.log('벨소리 실패', err)
+        })
+    
       setTimeout(() => {
         speakPreview('놀지 말고 일 하세요.')
       }, 1500)
-
+    
       return
     }
 
