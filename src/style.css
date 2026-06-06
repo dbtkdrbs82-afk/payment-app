@@ -1602,3 +1602,29 @@ button {
     padding: 10px 14px !important;
   }
 }
+/* 모바일 관리자 전체 폭 보정 */
+@media (max-width: 768px) {
+  .admin-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .admin-search-box,
+  .admin-summary,
+  .admin-table-top,
+  .admin-table {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .admin-search-box {
+    overflow-x: auto !important;
+  }
+
+  .admin-table {
+    display: block !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+  }
+}
