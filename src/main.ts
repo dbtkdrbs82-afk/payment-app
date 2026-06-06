@@ -2646,6 +2646,10 @@ setInterval(async () => {
   if (data.length > lastOrderCount) {
     playNewOrderSound()
     lastOrderCount = data.length
+  
+    setTimeout(() => {
+      location.reload()
+    }, 1500)
   }
 }, 3000)
 
