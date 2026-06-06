@@ -2521,9 +2521,16 @@ tr.innerHTML =
           : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
       '</td>' +
       '<td>' +
-        '<button class="customer-call-button" data-number="' + orderNumber + '">' +
-          '고객호출' +
-        '</button>' +
+        '<select class="call-message-select">' +
+  '<option value="주문 나왔습니다.">주문 나왔습니다.</option>' +
+  '<option value="주문이 준비되었습니다.">주문이 준비되었습니다.</option>' +
+  '<option value="음식을 찾아가 주세요.">음식을 찾아가 주세요.</option>' +
+  '<option value="카운터로 와주세요.">카운터로 와주세요.</option>' +
+  '<option value="픽업 부탁드립니다.">픽업 부탁드립니다.</option>' +
+'</select>' +
+'<button class="customer-call-button" data-number="' + orderNumber + '">' +
+  '고객호출' +
+'</button>'
       '</td>'
 
     paymentTableBody.appendChild(tr)
@@ -2552,9 +2559,17 @@ tr.innerHTML =
         const number =
           (button as HTMLElement).getAttribute('data-number') || ''
 
-        const callMessage =
-          numberToKorean(Number(number)) +
-          '번 고객님 주문 나왔습니다.'
+          const tr = (button as HTMLElement).closest('tr')
+          const select =
+            tr?.querySelector<HTMLSelectElement>('.call-message-select')
+          
+          const selectedMessage =
+            select?.value || '주문 나왔습니다.'
+          
+          const callMessage =
+            numberToKorean(Number(number)) +
+            '번 고객님 ' +
+            selectedMessage
 
         window.speechSynthesis.cancel()
 
@@ -2587,13 +2602,19 @@ tr.innerHTML =
         alert('조리완료 처리되었습니다')
   
         const tr = (button as HTMLElement).closest('tr')
-        if (tr) {
-          const statusCell = tr.children[5]
-          statusCell.textContent = '완료'
-        }
-  
-        ;(button as HTMLButtonElement).disabled = true
-        ;(button as HTMLButtonElement).innerText = '완료'
+
+if (tr) {
+  const statusCell = tr.children[5]
+  const actionCell = tr.children[6]
+
+  if (statusCell) {
+    statusCell.textContent = '완료'
+  }
+
+  if (actionCell) {
+    actionCell.textContent = '완료'
+  }
+}
       })
     })
 }
