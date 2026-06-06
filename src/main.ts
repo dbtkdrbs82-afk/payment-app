@@ -2935,44 +2935,11 @@ document.querySelectorAll('.product-delete-button')
     ?.addEventListener('click', () => {
       location.href = '/product-create'
     })
-    document.querySelector('#show-kiosk-qr')
-    ?.addEventListener('click', async () => {
-      const qrBox = document.querySelector<HTMLDivElement>('#kiosk-qr-box')!
-  
-      const loginMerchantId =
-  sessionStorage.getItem('login_merchant_id')
+    
+        }
 
-if (!loginMerchantId) {
-  alert('가맹점 로그인 후 QR 생성이 가능합니다.')
-  location.href = '/merchant-login'
-  return
-}
-
-const kioskUrl =
-  window.location.origin + '/kiosk?merchant_id=' + loginMerchantId
-  
-  qrBox.innerHTML =
-  '<p><strong>미니상점 QR 주소</strong></p>' +
-  '<p id="kiosk-url-text">' + kioskUrl + '</p>' +
-  '<canvas id="kiosk-qr-canvas"></canvas>' +
-  '<br>' +
-  '<button id="copy-kiosk-url">주소복사</button>'
-  
-      const canvas =
-        document.querySelector<HTMLCanvasElement>('#kiosk-qr-canvas')!
-  
-        await QRCode.toCanvas(canvas, kioskUrl, {
-          width: 180,
-          margin: 2,
-        })
-        
-        document.querySelector('#copy-kiosk-url')
-          ?.addEventListener('click', async () => {
-            await navigator.clipboard.writeText(kioskUrl)
-            alert('QR 주소가 복사되었습니다.')
-          })
-        
-        })
+        if (page === 'setting') {
+          alert('설정관리 테스트 성공')
         }
 
 if (page === 'payment') {
