@@ -2989,8 +2989,10 @@ document.querySelectorAll('.product-delete-button')
             '</select>' +
             '</div>' +
         
-            '<button id="save-voice-setting" style="width:160px; height:40px;">저장</button>' +
-            '</td>' +
+            '<button id="preview-call-message" style="width:120px; height:40px; margin-right:8px;">호출 미리듣기</button>' +
+'<button id="preview-new-order-message" style="width:140px; height:40px; margin-right:8px;">주문알림 미리듣기</button>' +
+'<button id="save-voice-setting" style="width:160px; height:40px;">저장</button>' +
+'</td>' +
             '</tr>'
         
           const callSelect =
