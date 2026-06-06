@@ -1585,3 +1585,20 @@ button {
 .admin-wrap.mini-mode .admin-table-top {
   display: none;
 }
+/* 모바일 관리자 상단 메뉴 가로 스크롤 */
+@media (max-width: 768px) {
+  .admin-menu {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    gap: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .admin-tab {
+    flex: 0 0 auto !important;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+  }
+}
