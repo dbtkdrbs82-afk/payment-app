@@ -2527,6 +2527,7 @@ tr.innerHTML =
   '<option value="음식을 찾아가 주세요.">음식을 찾아가 주세요.</option>' +
   '<option value="카운터로 와주세요.">카운터로 와주세요.</option>' +
   '<option value="픽업 부탁드립니다.">픽업 부탁드립니다.</option>' +
+  '<option value="아따~싸게싸게 챙겨가쇼~.">아따~싸게싸게 챙겨가쇼.</option>' +
 '</select>' +
 '<button class="customer-call-button" data-number="' + orderNumber + '">' +
   '고객호출' +
