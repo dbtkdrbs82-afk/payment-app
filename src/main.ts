@@ -2647,9 +2647,6 @@ setInterval(async () => {
     playNewOrderSound()
     lastOrderCount = data.length
   
-    setTimeout(() => {
-      location.reload()
-    }, 7000)
   }
 }, 3000)
 
