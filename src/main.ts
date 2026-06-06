@@ -3027,12 +3027,28 @@ document.querySelectorAll('.product-delete-button')
       newOrderSelect.value ===
       '주문 왔다...만들껀가 말껀가.'
     ) {
-
       speakPreview('주문 왔다.')
 
       setTimeout(() => {
         speakPreview('만들껀가 말껀가.')
       }, 1000)
+
+      return
+    }
+
+    if (
+      newOrderSelect.value ===
+      '놀지 말고 일 하세요.'
+    ) {
+      const audio = new Audio(
+        'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
+      )
+
+      audio.play()
+
+      setTimeout(() => {
+        speakPreview('놀지 말고 일 하세요.')
+      }, 1500)
 
       return
     }
