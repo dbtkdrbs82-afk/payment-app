@@ -2236,7 +2236,7 @@ document.querySelector('#copy-merchant-apply-link')
         '</div>' +
       '</div>' +
       '<div style="margin-top:16px;">' +
-        '<button id="copy-merchant-apply-link" class="merchant-search-btn">가입신청 링크 복사</button>' +
+        '<button id="copy-merchant-apply-link" class="merchant-search-btn">🔗 가입신청 링크 생성</button>' +
       '</div>'
   }
   
@@ -2264,6 +2264,7 @@ document.querySelector('#copy-merchant-apply-link')
             '<th>예금주</th>' +
             '<th>정산주기</th>' +
             '<th>상태</th>' +
+            '<th>관리</th>'
           '</tr>'
       }
       
@@ -2283,7 +2284,8 @@ document.querySelector('#copy-merchant-apply-link')
   '<td>' + (merchant.account_number || '-') + '</td>' +
   '<td>' + (merchant.account_holder || '-') + '</td>' +
   '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
-  '<td>운영</td>'
+  '<td>운영</td>' +
+'<td><button class="merchant-view-btn">보기</button></td>'
       
   paymentTableBody.appendChild(tr)
 })  

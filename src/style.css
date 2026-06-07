@@ -1977,3 +1977,16 @@ button {
   font-weight: 700;
   cursor: pointer;
 }
+.merchant-view-btn {
+  background: #0d63b8;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.merchant-view-btn:hover {
+  background: #084f96;
+}
