@@ -1714,8 +1714,8 @@ window.history.replaceState({}, '', '/success')
     <div class="nxg-login-left">
       <div class="nxg-logo">NXG SOFT</div>
       <h1>
-        안전한 결제,<br/>
-        정확한 정산
+        결제부터 정산까지,<br/>
+        통합 정산 솔루션
       </h1>
       <p>
         가맹점 결제와 주문, 정산을 한 곳에서 관리하는<br/>
