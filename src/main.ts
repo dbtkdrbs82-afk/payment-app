@@ -2310,16 +2310,128 @@ document.querySelector('#copy-merchant-apply-link')
 
   tr.querySelector('.merchant-view-btn')
   ?.addEventListener('click', () => {
-    alert(
-      '가맹점 신청서\n\n' +
-      '상호명 : ' + (merchant.merchant_name || '-') + '\n' +
-      '대표자 : ' + (merchant.owner_name || '-') + '\n' +
-      '연락처 : ' + (merchant.phone || '-') + '\n' +
-      '정산은행 : ' + (merchant.bank_name || '-') + '\n' +
-      '계좌번호 : ' + (merchant.account_number || '-') + '\n' +
-      '예금주 : ' + (merchant.account_holder || '-') + '\n' +
-      '정산주기 : ' + (merchant.settlement_cycle || '-')
-    )
+    const modal = document.createElement('div')
+
+    modal.className = 'merchant-modal-backdrop'
+
+    modal.innerHTML =
+      '<div class="merchant-modal">' +
+        '<h2>가맹점 상세정보</h2>' +
+
+        '<div class="merchant-modal-grid">' +
+
+          '<label>가맹점명</label>' +
+          '<input id="edit-merchant-name" value="' + (merchant.merchant_name || '') + '" />' +
+
+          '<label>대표자</label>' +
+          '<input id="edit-owner-name" value="' + (merchant.owner_name || '') + '" />' +
+
+          '<label>연락처</label>' +
+          '<input id="edit-phone" value="' + (merchant.phone || '') + '" />' +
+
+          '<label>수수료율</label>' +
+          '<input id="edit-fee-rate" value="' + (merchant.fee_rate || 0) + '" />' +
+
+          '<label>정산은행</label>' +
+          '<input id="edit-bank-name" value="' + (merchant.bank_name || '') + '" />' +
+
+          '<label>계좌번호</label>' +
+          '<input id="edit-account-number" value="' + (merchant.account_number || '') + '" />' +
+
+          '<label>예금주</label>' +
+          '<input id="edit-account-holder" value="' + (merchant.account_holder || '') + '" />' +
+
+          '<label>정산주기</label>' +
+          '<select id="edit-settlement-cycle">' +
+            '<option value="1일">1일</option>' +
+            '<option value="3일">3일</option>' +
+            '<option value="4일">4일</option>' +
+            '<option value="7일">7일</option>' +
+          '</select>' +
+
+          '<label>상태</label>' +
+          '<select id="edit-merchant-status">' +
+            '<option value="운영">운영</option>' +
+            '<option value="중지">중지</option>' +
+            '<option value="가입대기">가입대기</option>' +
+            '<option value="반려">반려</option>' +
+          '</select>' +
+
+        '</div>' +
+
+        '<div class="merchant-modal-warning">' +
+          '정산계좌 및 정산주기 변경은 운영자만 처리할 수 있습니다.' +
+        '</div>' +
+
+        '<div class="merchant-modal-actions">' +
+          '<button id="save-merchant-edit" class="merchant-save-btn">저장</button>' +
+          '<button id="close-merchant-modal" class="merchant-close-btn">닫기</button>' +
+        '</div>' +
+      '</div>'
+
+    document.body.appendChild(modal)
+
+    const settlementSelect =
+      document.querySelector<HTMLSelectElement>('#edit-settlement-cycle')
+
+    if (settlementSelect) {
+      settlementSelect.value = merchant.settlement_cycle || '4일'
+    }
+
+    document.querySelector('#close-merchant-modal')
+      ?.addEventListener('click', () => {
+        modal.remove()
+      })
+
+    document.querySelector('#save-merchant-edit')
+      ?.addEventListener('click', async () => {
+        const merchantName =
+          (document.querySelector<HTMLInputElement>('#edit-merchant-name')?.value || '').trim()
+
+        const ownerName =
+          (document.querySelector<HTMLInputElement>('#edit-owner-name')?.value || '').trim()
+
+        const phone =
+          (document.querySelector<HTMLInputElement>('#edit-phone')?.value || '').trim()
+
+        const feeRate =
+          Number(document.querySelector<HTMLInputElement>('#edit-fee-rate')?.value || 0)
+
+        const bankName =
+          (document.querySelector<HTMLInputElement>('#edit-bank-name')?.value || '').trim()
+
+        const accountNumber =
+          (document.querySelector<HTMLInputElement>('#edit-account-number')?.value || '').trim()
+
+        const accountHolder =
+          (document.querySelector<HTMLInputElement>('#edit-account-holder')?.value || '').trim()
+
+        const settlementCycle =
+          document.querySelector<HTMLSelectElement>('#edit-settlement-cycle')?.value || '4일'
+
+        const { error } = await supabase
+          .from('merchants')
+          .update({
+            merchant_name: merchantName,
+            owner_name: ownerName,
+            phone: phone,
+            fee_rate: feeRate,
+            bank_name: bankName,
+            account_number: accountNumber,
+            account_holder: accountHolder,
+            settlement_cycle: settlementCycle,
+          })
+          .eq('id', merchant.id)
+
+        if (error) {
+          alert('가맹점 정보 수정 실패: ' + error.message)
+          return
+        }
+
+        alert('가맹점 정보가 수정되었습니다.')
+        modal.remove()
+        location.reload()
+      })
   })
 })  
 }
