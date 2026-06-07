@@ -1916,19 +1916,3 @@ button {
   padding: 0 18px !important;
   box-sizing: border-box !important;
 }
-.nxg-login-right {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.nxg-login-owl {
-  width: 240px;
-  margin-top: 20px;
-  filter: drop-shadow(0 15px 30px rgba(0,0,0,.35));
-  transition: all .3s ease;
-}
-
-.nxg-login-owl:hover {
-  transform: translateY(-8px);
-}
