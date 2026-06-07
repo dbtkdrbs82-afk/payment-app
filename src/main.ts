@@ -2343,6 +2343,49 @@ document.querySelector('#copy-merchant-apply-link')
 
 '<label>회사구분</label>' +
 '<select id="edit-company-type">' +
+'<label>CPID</label>' +
+'<input id="edit-cpid" value="" />' +
+
+'<label>사업자번호</label>' +
+'<input id="edit-business-number" value="" />' +
+
+'<label>과세구분</label>' +
+'<select id="edit-tax-type">' +
+  '<option value="과세">과세</option>' +
+  '<option value="비과세">비과세</option>' +
+'</select>' +
+
+'<label>PG MID</label>' +
+'<input id="edit-pg-mid" value="" />' +
+
+'<label>단말기 MID</label>' +
+'<input id="edit-terminal-mid" value="" />' +
+
+'<label>개통번호</label>' +
+'<input id="edit-terminal-open-no" value="" />' +
+
+'<label>관리번호</label>' +
+'<input id="edit-terminal-manage-no" value="" />' +
+
+'<label>최대할부기간</label>' +
+'<select id="edit-installment">' +
+  '<option>2개월</option>' +
+  '<option>3개월</option>' +
+  '<option>4개월</option>' +
+  '<option>5개월</option>' +
+  '<option>6개월</option>' +
+  '<option>10개월</option>' +
+  '<option>12개월</option>' +
+'</select>' +
+
+'<label>1일 승인한도</label>' +
+'<input id="edit-daily-limit" value="" />' +
+
+'<label>월한도</label>' +
+'<input id="edit-month-limit" value="" />' +
+
+'<label>연한도</label>' +
+'<input id="edit-year-limit" value="" />' +
   '<option value="개인(일반)">개인(일반)</option>' +
   '<option value="개인사업자">개인사업자</option>' +
   '<option value="법인사업자">법인사업자</option>' +
