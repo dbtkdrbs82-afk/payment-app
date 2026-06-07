@@ -1905,7 +1905,7 @@ button {
 }
 .admin-tab.active {
   background: #003f82 !important;
-  color: #ffffff !important;
-  font-weight: 800 !important;
-  border-bottom: 4px solid #e0b93f !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  border-bottom: none !important;
 }
