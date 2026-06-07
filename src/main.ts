@@ -1993,7 +1993,16 @@ adminTabs.forEach((tab) => {
       }
     
       if (titleBox) {
-        titleBox.innerHTML = '▶ 대시보드 > 오늘 현황'
+        titleBox.innerHTML = `
+          <div class="dashboard-title">
+            <h2>NXG 관리자 대시보드</h2>
+            <p>결제, 정산, 출금 현황을 실시간으로 확인할 수 있습니다.</p>
+          </div>
+      
+          <div style="margin-top:10px;">
+            ▶ 대시보드 > 오늘 현황
+          </div>
+        `
       }
     
       if (searchBox) {

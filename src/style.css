@@ -1854,3 +1854,52 @@ button {
     padding: 28px;
   }
 }
+/* NXG 대시보드 카드 */
+
+.dashboard-card,
+.summary-card,
+.stat-card {
+  background: linear-gradient(135deg, #0d2d5c, #123d78) !important;
+  color: white !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+  transition: 0.2s;
+}
+
+.dashboard-card:hover,
+.summary-card:hover,
+.stat-card:hover {
+  transform: translateY(-3px);
+}
+
+.dashboard-card .amount,
+.summary-card .amount,
+.stat-card .amount {
+  font-size: 32px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+}
+
+.dashboard-card .title,
+.summary-card .title,
+.stat-card .title {
+  font-size: 14px !important;
+  color: #c8dcff !important;
+  margin-bottom: 8px !important;
+}
+.dashboard-title {
+  padding: 10px 0 20px 0;
+}
+
+.dashboard-title h2 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0d2d5c;
+  margin: 0 0 8px 0;
+}
+
+.dashboard-title p {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
