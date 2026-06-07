@@ -2114,9 +2114,11 @@ const titleBox = document.querySelector('.admin-title')
 
 if (subMenu) {
   subMenu.innerHTML =
-'<span class="sub-tab" data-sub="merchant-list">가맹점 관리</span> | ' +
-'<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span> | ' +
-'<span class="sub-tab" data-sub="fee-setting">결제 수수료 설정</span>'    
+  subMenu.innerHTML =
+  '<span class="sub-tab" data-sub="merchant-apply">가입신청 관리</span> | ' +
+  '<span class="sub-tab" data-sub="merchant-list">승인가맹점</span> | ' +
+  '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span> | ' +
+  '<span class="sub-tab" data-sub="fee-setting">결제 수수료 설정</span>'    
 }
 
 if (titleBox) {
@@ -2173,6 +2175,42 @@ const searchKeyword = keywordInput?.value?.trim() || ''
       }
 
       const summaryBox = document.querySelector('.admin-summary')
+
+if (summaryBox) {
+  summaryBox.innerHTML =
+    '<div class="merchant-status-cards">' +
+      '<div class="merchant-status-card">' +
+        '<p>신청대기</p>' +
+        '<strong>8건</strong>' +
+      '</div>' +
+      '<div class="merchant-status-card">' +
+        '<p>심사중</p>' +
+        '<strong>3건</strong>' +
+      '</div>' +
+      '<div class="merchant-status-card">' +
+        '<p>승인완료</p>' +
+        '<strong>' + merchants.length + '건</strong>' +
+      '</div>' +
+      '<div class="merchant-status-card danger">' +
+        '<p>반려</p>' +
+        '<strong>2건</strong>' +
+      '</div>' +
+    '</div>' +
+    '<div style="margin-top:16px;">' +
+      '<button id="copy-merchant-apply-link" class="merchant-search-btn">가입신청 링크 복사</button>' +
+    '</div>'
+}
+
+document.querySelector('#copy-merchant-apply-link')
+  ?.addEventListener('click', async () => {
+    const applyUrl =
+      window.location.origin + '/merchant-apply'
+
+    await navigator.clipboard.writeText(applyUrl)
+
+    alert('가입신청 링크가 복사되었습니다.')
+  })
+      
       const tableHead = document.querySelector('.admin-table thead')
       const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!

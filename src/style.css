@@ -1927,3 +1927,38 @@ button {
   font-weight: 800;
   letter-spacing: 1px;
 }
+.merchant-status-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.merchant-status-card {
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  border-radius: 16px;
+  padding: 22px;
+  box-shadow: 0 10px 24px rgba(15, 35, 70, 0.08);
+}
+
+.merchant-status-card p {
+  margin: 0 0 10px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.merchant-status-card strong {
+  color: #0d3b75;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.merchant-status-card.danger strong {
+  color: #d93025;
+}
+
+@media (max-width: 768px) {
+  .merchant-status-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
