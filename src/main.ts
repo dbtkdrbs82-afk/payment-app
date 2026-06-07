@@ -2304,9 +2304,23 @@ document.querySelector('#copy-merchant-apply-link')
   '<td>' + (merchant.account_holder || '-') + '</td>' +
   '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
   '<td>운영</td>' +
-'<td><button class="merchant-view-btn">보기</button></td>'
+'<td><button class="merchant-view-btn" data-id="' + merchant.id + '">보기</button></td>'
       
   paymentTableBody.appendChild(tr)
+
+  tr.querySelector('.merchant-view-btn')
+  ?.addEventListener('click', () => {
+    alert(
+      '가맹점 신청서\n\n' +
+      '상호명 : ' + (merchant.merchant_name || '-') + '\n' +
+      '대표자 : ' + (merchant.owner_name || '-') + '\n' +
+      '연락처 : ' + (merchant.phone || '-') + '\n' +
+      '정산은행 : ' + (merchant.bank_name || '-') + '\n' +
+      '계좌번호 : ' + (merchant.account_number || '-') + '\n' +
+      '예금주 : ' + (merchant.account_holder || '-') + '\n' +
+      '정산주기 : ' + (merchant.settlement_cycle || '-')
+    )
+  })
 })  
 }
 
