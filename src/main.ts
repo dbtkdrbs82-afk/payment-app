@@ -2215,12 +2215,40 @@ document.querySelector('#copy-merchant-apply-link')
       const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
       
-      if (summaryBox) {
-        summaryBox.innerHTML =
-          '검색된 데이터 : ' + merchants.length + '건 &nbsp;&nbsp;&nbsp;' +
-          '가맹점 : ' + merchants.length + '개 &nbsp;&nbsp;&nbsp;' +
-          '운영중 : ' + merchants.length + '개'
-      }
+  if (summaryBox) {
+    summaryBox.innerHTML =
+      '<div class="merchant-status-cards">' +
+        '<div class="merchant-status-card">' +
+          '<p>신청대기</p>' +
+          '<strong>8건</strong>' +
+        '</div>' +
+        '<div class="merchant-status-card">' +
+          '<p>심사중</p>' +
+          '<strong>3건</strong>' +
+        '</div>' +
+        '<div class="merchant-status-card">' +
+          '<p>승인완료</p>' +
+          '<strong>' + merchants.length + '건</strong>' +
+        '</div>' +
+        '<div class="merchant-status-card danger">' +
+          '<p>반려</p>' +
+          '<strong>2건</strong>' +
+        '</div>' +
+      '</div>' +
+      '<div style="margin-top:16px;">' +
+        '<button id="copy-merchant-apply-link" class="merchant-search-btn">가입신청 링크 복사</button>' +
+      '</div>'
+  }
+  
+  document.querySelector('#copy-merchant-apply-link')
+    ?.addEventListener('click', async () => {
+      const applyUrl =
+        window.location.origin + '/merchant-apply'
+  
+      await navigator.clipboard.writeText(applyUrl)
+  
+      alert('가입신청 링크가 복사되었습니다.')
+    })
       
       if (tableHead) {
         tableHead.innerHTML =
