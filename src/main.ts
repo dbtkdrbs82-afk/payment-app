@@ -1741,7 +1741,7 @@ window.history.replaceState({}, '', '/success')
         로그인
       </button>
       <button id="go-merchant-apply-button" class="merchant-join-button">
-  신규 가맹점 가입신청
+  신규 가입
 </button>
 
       <div class="nxg-login-footer">
@@ -1773,7 +1773,7 @@ window.history.replaceState({}, '', '/success')
   ?.addEventListener('click', () => {
     location.href = '/merchant-apply'
   })
-  
+
   } else if (path === '/pg-admin') {
 
   if (!sessionStorage.getItem('admin_id')) {
