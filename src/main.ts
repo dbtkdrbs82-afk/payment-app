@@ -2316,9 +2316,37 @@ document.querySelector('#copy-merchant-apply-link')
 
     modal.innerHTML =
       '<div class="merchant-modal">' +
-        '<h2>가맹점 상세정보</h2>' +
+        '<h2>가맹점 등록/심사 정보</h2>' +
 
         '<div class="merchant-modal-grid">' +
+
+        '<label>등록구분</label>' +
+'<select id="edit-register-type">' +
+  '<option value="가맹점">가맹점</option>' +
+  '<option value="담당자">담당자</option>' +
+  '<option value="대리점">대리점</option>' +
+'</select>' +
+
+'<label>소속 대리점</label>' +
+'<select id="edit-agency-name">' +
+  '<option value="본사">본사</option>' +
+  '<option value="에이드컴퍼니">에이드컴퍼니</option>' +
+  '<option value="영업대리점A">영업대리점A</option>' +
+'</select>' +
+
+'<label>사용 PG사</label>' +
+'<select id="edit-pg-company">' +
+  '<option value="다우데이타">다우데이타</option>' +
+  '<option value="코페이">코페이</option>' +
+  '<option value="토스페이먼츠">토스페이먼츠</option>' +
+'</select>' +
+
+'<label>회사구분</label>' +
+'<select id="edit-company-type">' +
+  '<option value="개인(일반)">개인(일반)</option>' +
+  '<option value="개인사업자">개인사업자</option>' +
+  '<option value="법인사업자">법인사업자</option>' +
+'</select>' +
 
           '<label>가맹점명</label>' +
           '<input id="edit-merchant-name" value="' + (merchant.merchant_name || '') + '" />' +
