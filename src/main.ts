@@ -1785,7 +1785,7 @@ window.history.replaceState({}, '', '/success')
         </div>
   
         <div class="admin-menu">
-  <a class="admin-tab active" data-page="dashboard">대시보드</a>
+  <a class="admin-tab" data-page="dashboard">대시보드</a>
 <a class="admin-tab" data-page="merchant">가맹점관리</a>
 <a class="admin-tab" data-page="payment">결제관리</a>
   <a class="admin-tab" data-page="payout">출금관리</a>
@@ -1975,9 +1975,15 @@ if (summaryBox) {
        })
        const adminTabs = document.querySelectorAll('.admin-tab')
 
-adminTabs.forEach((tab) => {
-  tab.addEventListener('click', async () => {
-    const page = tab.getAttribute('data-page')
+       adminTabs.forEach((tab) => {
+        tab.addEventListener('click', async () => {
+          adminTabs.forEach((item) => {
+            item.classList.remove('active')
+          })
+      
+          tab.classList.add('active')
+      
+          const page = tab.getAttribute('data-page')
 
     if (page === 'dashboard') {
       const subMenu = document.querySelector('.admin-sub-menu')

@@ -1903,3 +1903,9 @@ button {
   color: #666;
   margin: 0;
 }
+.admin-tab.active {
+  background: #003f82 !important;
+  color: #ffffff !important;
+  font-weight: 800 !important;
+  border-bottom: 4px solid #e0b93f !important;
+}
