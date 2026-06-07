@@ -2151,7 +2151,18 @@ if (searchBox) {
     '<button class="merchant-search-btn">검색</button>' +
   '</div>'
 }
+const tableTop = document.querySelector('.admin-table-top')
 
+if (tableTop) {
+  tableTop.innerHTML =
+    '<button>엑셀 다운로드</button>' +
+    '<select id="admin-page-size">' +
+      '<option value="10">10개씩 보기</option>' +
+      '<option value="20" selected>20개씩 보기</option>' +
+      '<option value="50">50개씩 보기</option>' +
+      '<option value="100">100개씩 보기</option>' +
+    '</select>'
+}
       const result = await supabase
         .from('merchants')
         .select('*')

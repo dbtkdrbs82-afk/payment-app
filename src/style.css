@@ -2006,3 +2006,32 @@ button {
 .merchant-join-button:hover {
   background: rgba(21, 120, 255, 0.12);
 }
+.admin-table-top {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 20px !important;
+}
+
+.admin-table-top button {
+  min-width: 160px !important;
+  height: 44px !important;
+  background: #ffffff !important;
+  color: #0d63b8 !important;
+  border: 2px solid #0d63b8 !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+}
+
+#admin-page-size {
+  min-width: 130px !important;
+  height: 40px !important;
+  background: #ffffff !important;
+  color: #111827 !important;
+  border: 1px solid #999 !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+}
