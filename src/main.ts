@@ -1710,6 +1710,10 @@ window.history.replaceState({}, '', '/success')
 
   } else if (path === '/pg-admin') {
 
+  if (!sessionStorage.getItem('admin_id')) {
+    location.href = '/admin-login'
+  }
+
     const adminId =
       sessionStorage.getItem('admin_id') || 'nxg001'
   
