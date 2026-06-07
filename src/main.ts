@@ -2318,117 +2318,130 @@ document.querySelector('#copy-merchant-apply-link')
       '<div class="merchant-modal">' +
         '<h2>가맹점 등록/심사 정보</h2>' +
 
-        '<div class="merchant-modal-grid">' +
+       '<div class="merchant-modal-grid">' +
 
-        '<label>등록구분</label>' +
-'<select id="edit-register-type">' +
-  '<option value="가맹점">가맹점</option>' +
-  '<option value="담당자">담당자</option>' +
-  '<option value="대리점">대리점</option>' +
-'</select>' +
+  '<div class="merchant-section-title">등록정보</div>' +
+  '<div></div><div></div><div></div>' +
 
-'<label>소속 대리점</label>' +
-'<select id="edit-agency-name">' +
-  '<option value="본사">본사</option>' +
-  '<option value="에이드컴퍼니">에이드컴퍼니</option>' +
-  '<option value="영업대리점A">영업대리점A</option>' +
-'</select>' +
+  '<label>등록구분</label>' +
+  '<select id="edit-register-type">' +
+    '<option value="가맹점">가맹점</option>' +
+    '<option value="담당자">담당자</option>' +
+    '<option value="대리점">대리점</option>' +
+  '</select>' +
 
-'<label>사용 PG사</label>' +
-'<select id="edit-pg-company">' +
-  '<option value="다우데이타">다우데이타</option>' +
-  '<option value="코페이">코페이</option>' +
-  '<option value="토스페이먼츠">토스페이먼츠</option>' +
-'</select>' +
+  '<label>소속 대리점</label>' +
+  '<select id="edit-agency-name">' +
+    '<option value="본사">본사</option>' +
+    '<option value="에이드컴퍼니">에이드컴퍼니</option>' +
+    '<option value="영업대리점A">영업대리점A</option>' +
+  '</select>' +
 
-'<label>회사구분</label>' +
-'<select id="edit-company-type">' +
-'<label>CPID</label>' +
-'<input id="edit-cpid" value="" />' +
+  '<label>사용 PG사</label>' +
+  '<select id="edit-pg-company">' +
+    '<option value="다우데이타">다우데이타</option>' +
+    '<option value="코페이">코페이</option>' +
+    '<option value="토스페이먼츠">토스페이먼츠</option>' +
+  '</select>' +
 
-'<label>사업자번호</label>' +
-'<input id="edit-business-number" value="" />' +
+  '<label>회사구분</label>' +
+  '<select id="edit-company-type">' +
+    '<option value="개인(일반)">개인(일반)</option>' +
+    '<option value="개인사업자">개인사업자</option>' +
+    '<option value="법인사업자">법인사업자</option>' +
+  '</select>' +
 
-'<label>과세구분</label>' +
-'<select id="edit-tax-type">' +
-  '<option value="과세">과세</option>' +
-  '<option value="비과세">비과세</option>' +
-'</select>' +
+  '<label>CPID</label>' +
+  '<input id="edit-cpid" value="" />' +
 
-'<label>PG MID</label>' +
-'<input id="edit-pg-mid" value="" />' +
+  '<label>사업자번호</label>' +
+  '<input id="edit-business-number" value="" />' +
 
-'<label>단말기 MID</label>' +
-'<input id="edit-terminal-mid" value="" />' +
+  '<label>과세구분</label>' +
+  '<select id="edit-tax-type">' +
+    '<option value="과세">과세</option>' +
+    '<option value="비과세">비과세</option>' +
+  '</select>' +
 
-'<label>개통번호</label>' +
-'<input id="edit-terminal-open-no" value="" />' +
+  '<label>가맹점명</label>' +
+  '<input id="edit-merchant-name" value="' + (merchant.merchant_name || '') + '" />' +
 
-'<label>관리번호</label>' +
-'<input id="edit-terminal-manage-no" value="" />' +
+  '<label>대표자</label>' +
+  '<input id="edit-owner-name" value="' + (merchant.owner_name || '') + '" />' +
 
-'<label>최대할부기간</label>' +
-'<select id="edit-installment">' +
-  '<option>2개월</option>' +
-  '<option>3개월</option>' +
-  '<option>4개월</option>' +
-  '<option>5개월</option>' +
-  '<option>6개월</option>' +
-  '<option>10개월</option>' +
-  '<option>12개월</option>' +
-'</select>' +
+  '<label>연락처</label>' +
+  '<input id="edit-phone" value="' + (merchant.phone || '') + '" />' +
 
-'<label>1일 승인한도</label>' +
-'<input id="edit-daily-limit" value="" />' +
+  '<div class="merchant-section-title">PG / 단말기 정보</div>' +
+  '<div></div><div></div><div></div>' +
 
-'<label>월한도</label>' +
-'<input id="edit-month-limit" value="" />' +
+  '<label>PG MID</label>' +
+  '<input id="edit-pg-mid" value="" />' +
 
-'<label>연한도</label>' +
-'<input id="edit-year-limit" value="" />' +
-  '<option value="개인(일반)">개인(일반)</option>' +
-  '<option value="개인사업자">개인사업자</option>' +
-  '<option value="법인사업자">법인사업자</option>' +
-'</select>' +
+  '<label>단말기 MID</label>' +
+  '<input id="edit-terminal-mid" value="" />' +
 
-          '<label>가맹점명</label>' +
-          '<input id="edit-merchant-name" value="' + (merchant.merchant_name || '') + '" />' +
+  '<label>개통번호</label>' +
+  '<input id="edit-terminal-open-no" value="" />' +
 
-          '<label>대표자</label>' +
-          '<input id="edit-owner-name" value="' + (merchant.owner_name || '') + '" />' +
+  '<label>관리번호</label>' +
+  '<input id="edit-terminal-manage-no" value="" />' +
 
-          '<label>연락처</label>' +
-          '<input id="edit-phone" value="' + (merchant.phone || '') + '" />' +
+  '<div class="merchant-section-title">정산정보</div>' +
+  '<div></div><div></div><div></div>' +
 
-          '<label>수수료율</label>' +
-          '<input id="edit-fee-rate" value="' + (merchant.fee_rate || 0) + '" />' +
+  '<label>정산은행</label>' +
+  '<input id="edit-bank-name" value="' + (merchant.bank_name || '') + '" />' +
 
-          '<label>정산은행</label>' +
-          '<input id="edit-bank-name" value="' + (merchant.bank_name || '') + '" />' +
+  '<label>계좌번호</label>' +
+  '<input id="edit-account-number" value="' + (merchant.account_number || '') + '" />' +
 
-          '<label>계좌번호</label>' +
-          '<input id="edit-account-number" value="' + (merchant.account_number || '') + '" />' +
+  '<label>예금주</label>' +
+  '<input id="edit-account-holder" value="' + (merchant.account_holder || '') + '" />' +
 
-          '<label>예금주</label>' +
-          '<input id="edit-account-holder" value="' + (merchant.account_holder || '') + '" />' +
+  '<label>정산주기</label>' +
+  '<select id="edit-settlement-cycle">' +
+    '<option value="1일">1일</option>' +
+    '<option value="3일">3일</option>' +
+    '<option value="4일">4일</option>' +
+    '<option value="7일">7일</option>' +
+  '</select>' +
 
-          '<label>정산주기</label>' +
-          '<select id="edit-settlement-cycle">' +
-            '<option value="1일">1일</option>' +
-            '<option value="3일">3일</option>' +
-            '<option value="4일">4일</option>' +
-            '<option value="7일">7일</option>' +
-          '</select>' +
+  '<label>수수료율</label>' +
+  '<input id="edit-fee-rate" value="' + (merchant.fee_rate || 0) + '" />' +
 
-          '<label>상태</label>' +
-          '<select id="edit-merchant-status">' +
-            '<option value="운영">운영</option>' +
-            '<option value="중지">중지</option>' +
-            '<option value="가입대기">가입대기</option>' +
-            '<option value="반려">반려</option>' +
-          '</select>' +
+  '<label>상태</label>' +
+  '<select id="edit-merchant-status">' +
+    '<option value="운영">운영</option>' +
+    '<option value="중지">중지</option>' +
+    '<option value="가입대기">가입대기</option>' +
+    '<option value="반려">반려</option>' +
+  '</select>' +
 
-        '</div>' +
+  '<div class="merchant-section-title">위험관리 / 한도</div>' +
+  '<div></div><div></div><div></div>' +
+
+  '<label>최대할부기간</label>' +
+  '<select id="edit-installment">' +
+    '<option>2개월</option>' +
+    '<option>3개월</option>' +
+    '<option>4개월</option>' +
+    '<option>5개월</option>' +
+    '<option>6개월</option>' +
+    '<option>10개월</option>' +
+    '<option>12개월</option>' +
+  '</select>' +
+
+  '<label>1일 승인한도</label>' +
+  '<input id="edit-daily-limit" value="" />' +
+
+  '<label>월한도</label>' +
+  '<input id="edit-month-limit" value="" />' +
+
+  '<label>연한도</label>' +
+  '<input id="edit-year-limit" value="" />' +
+
+'</div>' +
 
         '<div class="merchant-modal-warning">' +
           '정산계좌 및 정산주기 변경은 운영자만 처리할 수 있습니다.' +

@@ -2119,3 +2119,13 @@ button {
   font-weight: 700;
   cursor: pointer;
 }
+.merchant-section-title {
+  grid-column: 1 / -1;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: #f3f7fc;
+  border-left: 4px solid #0d63b8;
+  color: #0d2d5c;
+  font-size: 16px;
+  font-weight: 800;
+}
