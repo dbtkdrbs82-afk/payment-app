@@ -1740,6 +1740,9 @@ window.history.replaceState({}, '', '/success')
       <button id="admin-login-button">
         로그인
       </button>
+      <button id="go-merchant-apply-button" class="merchant-join-button">
+  신규 가맹점 가입신청
+</button>
 
       <div class="nxg-login-footer">
         NXG Payment Admin System
@@ -1766,6 +1769,11 @@ window.history.replaceState({}, '', '/success')
       alert('아이디 또는 비밀번호가 올바르지 않습니다.')
     })
 
+    document.querySelector('#go-merchant-apply-button')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-apply'
+  })
+  
   } else if (path === '/pg-admin') {
 
   if (!sessionStorage.getItem('admin_id')) {
