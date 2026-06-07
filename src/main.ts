@@ -1731,12 +1731,8 @@ window.history.replaceState({}, '', '/success')
     </div>
 
     <div class="nxg-login-card">
-    <div class="nxg-login-right">
-  <div class="nxg-login-card">
-
-  </div> 
-</div>
-      <h2>관리자 로그인</h2>
+    <div class="nxg-admin-badge">NXG PAYMENT ADMIN</div>  
+    <h2>관리자 로그인</h2>
 
       <input id="admin-login-id" placeholder="아이디" />
       <input id="admin-login-password" type="password" placeholder="비밀번호" />

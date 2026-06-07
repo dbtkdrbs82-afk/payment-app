@@ -1916,3 +1916,14 @@ button {
   padding: 0 18px !important;
   box-sizing: border-box !important;
 }
+.nxg-admin-badge {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(21, 120, 255, 0.14);
+  color: #78b7ff;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
