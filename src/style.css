@@ -1962,3 +1962,18 @@ button {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.merchant-search-btn{
+  min-width:180px;
+}
+.merchant-apply-btn {
+  min-width: 220px;
+  height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 10px;
+  background: #0d63b8;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}

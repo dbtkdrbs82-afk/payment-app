@@ -2197,7 +2197,7 @@ if (summaryBox) {
       '</div>' +
     '</div>' +
     '<div style="margin-top:16px;">' +
-      '<button id="copy-merchant-apply-link" class="merchant-search-btn">가입신청 링크 복사</button>' +
+    '<button id="copy-merchant-apply-link" class="merchant-apply-btn">🔗 가입신청 링크 생성</button>' +
     '</div>'
 }
 
