@@ -1719,3 +1719,138 @@ button {
     word-break: keep-all !important;
   }
 }
+.nxg-login-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #061428, #0b2d5c, #07111f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+  padding: 40px;
+  box-sizing: border-box;
+  color: white;
+}
+
+.nxg-login-left {
+  max-width: 520px;
+}
+
+.nxg-logo {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 40px;
+}
+
+.nxg-login-left h1 {
+  font-size: 52px;
+  line-height: 1.25;
+  margin-bottom: 24px;
+}
+
+.nxg-login-left p {
+  font-size: 18px;
+  line-height: 1.7;
+  color: #d6e4ff;
+}
+
+.nxg-login-features {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-top: 36px;
+}
+
+.nxg-login-features div {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 14px;
+  padding: 18px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.nxg-login-card {
+  width: 380px;
+  background: rgba(7, 18, 38, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+}
+
+.nxg-login-card h2 {
+  font-size: 30px;
+  margin-bottom: 10px;
+}
+
+.nxg-login-card p {
+  color: #aebed6;
+  margin-bottom: 28px;
+}
+
+.nxg-login-card input {
+  width: 100%;
+  height: 48px;
+  margin-bottom: 14px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid #25466d;
+  background: #0d213f;
+  color: white;
+  font-size: 15px;
+}
+
+.nxg-login-card input::placeholder {
+  color: #8da1bd;
+}
+
+.nxg-login-card button {
+  width: 100%;
+  height: 52px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1578ff, #0a54c8);
+  color: white;
+  font-size: 17px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.nxg-login-footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #7f92ae;
+}
+
+@media (max-width: 768px) {
+  .nxg-login-page {
+    flex-direction: column;
+    gap: 24px;
+    padding: 24px;
+  }
+
+  .nxg-login-left {
+    text-align: center;
+  }
+
+  .nxg-login-left h1 {
+    font-size: 34px;
+  }
+
+  .nxg-login-left p {
+    font-size: 14px;
+  }
+
+  .nxg-login-features {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .nxg-login-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 28px;
+  }
+}

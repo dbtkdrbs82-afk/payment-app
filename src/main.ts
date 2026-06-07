@@ -1710,33 +1710,43 @@ window.history.replaceState({}, '', '/success')
 
     } else if (path === '/admin-login' || path === '/') {
   app.innerHTML = `
-    <div class="page">
-      <div class="landing-card" style="max-width:420px;">
-        <p class="brand-title">NXG ADMIN</p>
-        <h1>관리자 로그인</h1>
+  <div class="nxg-login-page">
+    <div class="nxg-login-left">
+      <div class="nxg-logo">NXG Soft</div>
+      <h1>
+        안전한 결제,<br/>
+        정확한 정산
+      </h1>
+      <p>
+        가맹점 결제와 주문, 정산을 한 곳에서 관리하는<br/>
+        NXG 관리자 시스템입니다.
+      </p>
 
-        <input
-          id="admin-login-id"
-          placeholder="아이디"
-          style="width:100%; height:46px; margin-bottom:12px; padding:0 14px; box-sizing:border-box;"
-        />
-
-        <input
-          id="admin-login-password"
-          type="password"
-          placeholder="비밀번호"
-          style="width:100%; height:46px; margin-bottom:20px; padding:0 14px; box-sizing:border-box;"
-        />
-
-        <button class="gold-button" id="admin-login-button" style="width:100%;">
-          로그인
-        </button>
-
-        <p style="margin-top:16px; font-size:13px; color:#777;">
-          시연 계정 : nxg001 / 1234
-        </p>
+      <div class="nxg-login-features">
+        <div>통합관리</div>
+        <div>QR결제</div>
+        <div>주문관리</div>
+        <div>실시간 정산</div>
       </div>
     </div>
+
+    <div class="nxg-login-card">
+      <h2>관리자 로그인</h2>
+      <p>안전한 시스템 접속을 위해 로그인해주세요.</p>
+
+      <input id="admin-login-id" placeholder="아이디" />
+      <input id="admin-login-password" type="password" placeholder="비밀번호" />
+
+      <button id="admin-login-button">
+        로그인
+      </button>
+
+      <div class="nxg-login-footer">
+        NXG Payment Admin System
+      </div>
+    </div>
+  </div>
+
   `
 
   document.querySelector<HTMLButtonElement>('#admin-login-button')
