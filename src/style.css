@@ -2063,22 +2063,17 @@ button {
 
 .merchant-modal-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
 }
 
 .merchant-modal-grid label {
-  font-weight: 700;
-  color: #333;
+  margin-top: 8px !important;
 }
 
 .merchant-modal-grid input,
 .merchant-modal-grid select {
-  height: 42px;
-  border: 1px solid #cfd8e3;
-  border-radius: 8px;
-  padding: 0 12px;
-  font-size: 14px;
+  width: 100% !important;
 }
 
 .merchant-modal-warning {
@@ -2144,4 +2139,10 @@ button {
 .merchant-field select {
   width: 100%;
   height: 42px;
+}
+.merchant-modal {
+  width: 760px !important;
+  max-width: 95vw !important;
+  max-height: 85vh !important;
+  overflow-y: auto !important;
 }
