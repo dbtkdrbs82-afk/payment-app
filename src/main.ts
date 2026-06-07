@@ -1708,11 +1708,59 @@ window.history.replaceState({}, '', '/success')
       window.location.href = '/'
     })
 
+    } else if (path === '/admin-login' || path === '/') {
+  app.innerHTML = `
+    <div class="page">
+      <div class="landing-card" style="max-width:420px;">
+        <p class="brand-title">NXG ADMIN</p>
+        <h1>관리자 로그인</h1>
+
+        <input
+          id="admin-login-id"
+          placeholder="아이디"
+          style="width:100%; height:46px; margin-bottom:12px; padding:0 14px; box-sizing:border-box;"
+        />
+
+        <input
+          id="admin-login-password"
+          type="password"
+          placeholder="비밀번호"
+          style="width:100%; height:46px; margin-bottom:20px; padding:0 14px; box-sizing:border-box;"
+        />
+
+        <button class="gold-button" id="admin-login-button" style="width:100%;">
+          로그인
+        </button>
+
+        <p style="margin-top:16px; font-size:13px; color:#777;">
+          시연 계정 : nxg001 / 1234
+        </p>
+      </div>
+    </div>
+  `
+
+  document.querySelector<HTMLButtonElement>('#admin-login-button')
+    ?.addEventListener('click', () => {
+      const loginId =
+        (document.querySelector<HTMLInputElement>('#admin-login-id')?.value || '').trim()
+
+      const password =
+        (document.querySelector<HTMLInputElement>('#admin-login-password')?.value || '').trim()
+
+      if (loginId === 'nxg001' && password === '1234') {
+        sessionStorage.setItem('admin_id', loginId)
+        location.href = '/pg-admin'
+        return
+      }
+
+      alert('아이디 또는 비밀번호가 올바르지 않습니다.')
+    })
+
   } else if (path === '/pg-admin') {
 
   if (!sessionStorage.getItem('admin_id')) {
-    location.href = '/admin-login'
-  }
+  location.href = '/admin-login'
+}
 
     const adminId =
       sessionStorage.getItem('admin_id') || 'nxg001'
