@@ -1712,7 +1712,7 @@ window.history.replaceState({}, '', '/success')
   app.innerHTML = `
   <div class="nxg-login-page">
     <div class="nxg-login-left">
-      <div class="nxg-logo">NXG Soft</div>
+      <div class="nxg-logo">NXG SOFT</div>
       <h1>
         안전한 결제,<br/>
         정확한 정산
