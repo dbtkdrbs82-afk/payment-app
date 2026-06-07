@@ -1909,3 +1909,10 @@ button {
   font-weight: 700 !important;
   border-bottom: none !important;
 }
+.admin-tab,
+.admin-tab.active {
+  height: 40px !important;
+  line-height: 40px !important;
+  padding: 0 18px !important;
+  box-sizing: border-box !important;
+}
