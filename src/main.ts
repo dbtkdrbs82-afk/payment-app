@@ -3320,7 +3320,7 @@ if (summaryBox) {
 if (tableHead) {
   tableHead.innerHTML =
     '<tr>' +
-      '<th>아니</th>' +
+      '<th>No</th>' +
       '<th>승인일<br/>승인번호</th>' +
       '<th>취소일<br/>거래번호</th>' +
       '<th>가맹점아이디/구분<br/>가맹점상호/가맹점명</th>' +
