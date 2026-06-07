@@ -1731,6 +1731,19 @@ window.history.replaceState({}, '', '/success')
     </div>
 
     <div class="nxg-login-card">
+    <div class="nxg-login-right">
+  <div class="nxg-login-card">
+
+    ...로그인폼...
+
+  </div>
+
+  <img
+    src="/images/owl.png"
+    alt="NXG Owl"
+    class="nxg-login-owl"
+  />
+</div>
       <h2>관리자 로그인</h2>
       <p>안전한 시스템 접속을 위해 로그인해주세요.</p>
 
