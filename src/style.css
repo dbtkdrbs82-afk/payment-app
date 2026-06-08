@@ -2230,3 +2230,59 @@ button {
   font-weight: 900 !important;
   border-bottom: 2px solid #0d63b8;
 }
+:root {
+  --nxg-blue: #123d75;
+  --nxg-blue-hover: #0d2f5f;
+  --nxg-blue-light: #eaf2fb;
+}
+
+/* 전체 주요 버튼 통일 */
+button,
+.merchant-search-btn,
+.merchant-apply-btn,
+.merchant-view-btn,
+.merchant-save-btn,
+.gold-button,
+#admin-login-button,
+#go-merchant-apply-button {
+  background: var(--nxg-blue) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 800 !important;
+}
+
+/* 버튼 hover */
+button:hover,
+.merchant-search-btn:hover,
+.merchant-apply-btn:hover,
+.merchant-view-btn:hover,
+.merchant-save-btn:hover,
+.gold-button:hover,
+#admin-login-button:hover,
+#go-merchant-apply-button:hover {
+  background: var(--nxg-blue-hover) !important;
+  color: #ffffff !important;
+}
+
+/* 선택된 메뉴 */
+.admin-tab.active,
+.sub-tab.active {
+  background: var(--nxg-blue) !important;
+  color: #ffffff !important;
+  font-weight: 900 !important;
+}
+
+/* 엑셀 다운로드 같은 보조 버튼 */
+.admin-table-top button {
+  background: #ffffff !important;
+  color: var(--nxg-blue) !important;
+  border: 2px solid var(--nxg-blue) !important;
+}
+
+/* 선택된 필터 버튼 */
+.quick-btn.active,
+.filter-btn.active {
+  background: var(--nxg-blue) !important;
+  color: #ffffff !important;
+}
