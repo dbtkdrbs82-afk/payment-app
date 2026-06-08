@@ -2308,26 +2308,23 @@ document.querySelector('#copy-merchant-apply-link')
       
   paymentTableBody.appendChild(tr)
 
-  tr.querySelector('.merchant-view-btn')
-  ?.addEventListener('click', () => {
-  
-    sessionStorage.setItem(
-      'selected_merchant_id',
-      String(merchant.id)
-    )
-  
-    const addTab =
-      document.querySelector('[data-sub="merchant-add"]')
-  
+  const merchantButtons = tr.querySelectorAll('.merchant-link-btn')
+
+merchantButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    sessionStorage.setItem('selected_merchant_id', String(merchant.id))
+
+    const addTab = document.querySelector('[data-sub="merchant-add"]')
+
     if (addTab instanceof HTMLElement) {
       addTab.click()
     }
-  
   })
-      })
-    }
+})
+})
+    }  
+    
    
-
 if (page === 'settlement') {
   const subMenu = document.querySelector('.admin-sub-menu')
   const titleBox = document.querySelector('.admin-title')
