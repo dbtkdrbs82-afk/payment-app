@@ -2466,7 +2466,7 @@ merchantButtons.forEach((button) => {
                 '<div class="merchant-detail-section">' +
   '<h3>위험관리 / 한도설정</h3>' +
 
-  '<div class="merchant-detail-grid">' +
+  '<div class="merchant-detail-grid merchant-risk-grid">' +
 
     '<label>최대할부기간</label>' +
     '<select>' +
