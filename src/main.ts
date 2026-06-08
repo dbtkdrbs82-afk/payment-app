@@ -2406,6 +2406,18 @@ merchantButtons.forEach((button) => {
                 '<label>회사구분</label><select><option>개인(일반)</option><option>개인사업자</option><option>법인사업자</option></select>' +
                 '<label>CPID</label><input value="MER' + String(merchant.id).padStart(4, '0') + '" />' +
                 '<label>사업자번호</label><input value="" />' +
+                '<label>운영상태</label>' +
+'<select>' +
+  '<option>운영</option>' +
+  '<option>중지</option>' +
+'</select>' +
+'<label>개통일자</label>' +
+'<input type="date" value="" />' +
+'<label>비밀번호 초기화</label>' +
+'<div class="password-reset-row">' +
+  '<input placeholder="초기 비밀번호 입력" />' +
+  '<button type="button" class="reset-password-btn">초기화</button>' +
+
               '</div>' +
             '</div>' +
     
