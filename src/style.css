@@ -2452,3 +2452,28 @@ body {
   align-items: center !important;
   justify-content: center !important;
 }
+.merchant-file-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 14px 18px;
+  align-items: center;
+}
+
+.merchant-file-grid label {
+  font-weight: 800;
+  color: #333;
+}
+
+.merchant-file-grid input,
+.merchant-file-grid textarea {
+  width: 100%;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.merchant-file-grid textarea {
+  min-height: 90px;
+  resize: vertical;
+}

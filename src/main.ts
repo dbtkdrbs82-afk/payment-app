@@ -2501,6 +2501,18 @@ merchantButtons.forEach((button) => {
   '</div>' +
 '</div>' +
     
+'<div class="merchant-detail-section">' +
+  '<h3>첨부서류</h3>' +
+  '<div class="merchant-file-grid">' +
+    '<label>사업자등록증</label><input type="file" />' +
+    '<label>통장사본</label><input type="file" />' +
+    '<label>대표자 신분증</label><input type="file" />' +
+    '<label>판매상품 사진</label><input type="file" />' +
+    '<label>기타서류</label><input type="file" />' +
+    '<label>메모</label><textarea placeholder="심사 메모를 입력하세요"></textarea>' +
+  '</div>' +
+'</div>' +
+
             '<div class="merchant-detail-actions">' +
               '<button class="merchant-save-btn">저장</button>' +
               '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
