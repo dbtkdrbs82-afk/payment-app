@@ -2131,7 +2131,52 @@ document.querySelector('[data-sub="merchant-add"]')
   ?.addEventListener('click', () => {
     sessionStorage.setItem('selected_merchant_id', '')
     sessionStorage.setItem('merchant_sub_page', 'merchant-add')
-    location.reload()
+    document.querySelector('[data-sub="merchant-add"]')
+  ?.addEventListener('click', () => {
+    sessionStorage.setItem('selected_merchant_id', '')
+    sessionStorage.setItem('merchant_sub_page', 'merchant-add')
+
+    const titleBox = document.querySelector('.admin-title')
+    const searchBox = document.querySelector('.admin-search-box')
+    const summaryBox = document.querySelector('.admin-summary')
+    const tableTop = document.querySelector('.admin-table-top')
+    const tableHead = document.querySelector('.admin-table thead')
+    const paymentTableBody =
+      document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+
+    document.querySelectorAll('.sub-tab')
+      .forEach((item) => item.classList.remove('active'))
+
+    document.querySelector('[data-sub="merchant-add"]')
+      ?.classList.add('active')
+
+    if (titleBox) {
+      titleBox.innerHTML = '▶ 가맹점관리 > 업체/가맹점 등록'
+    }
+
+    if (searchBox) {
+      searchBox.innerHTML = ''
+    }
+
+    if (summaryBox) {
+      summaryBox.innerHTML =
+        '<div class="merchant-detail-header">' +
+          '<h2>업체/가맹점 등록 정보</h2>' +
+          '<p>신규 가맹점 등록 또는 기존 가맹점 정보를 확인합니다.</p>' +
+        '</div>'
+    }
+
+    if (tableTop) {
+      tableTop.innerHTML = ''
+    }
+
+    if (tableHead) {
+      tableHead.innerHTML = ''
+    }
+
+    paymentTableBody.innerHTML =
+      '<tr><td colspan="12">업체/가맹점 등록 화면 준비중</td></tr>'
+  })
   })
 
 if (titleBox) {

@@ -2225,3 +2225,8 @@ button {
     grid-template-columns: 1fr;
   }
 }
+.sub-tab.active {
+  color: #0d63b8 !important;
+  font-weight: 900 !important;
+  border-bottom: 2px solid #0d63b8;
+}
