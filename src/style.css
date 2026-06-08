@@ -2399,7 +2399,7 @@ body {
 }
 .address-one-line {
   display: grid;
-  grid-template-columns: 120px 120px 1.5fr 1fr;
+  grid-template-columns: 100px 120px 2.5fr 1fr;
   gap: 8px;
   align-items: center;
 }
