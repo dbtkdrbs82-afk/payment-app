@@ -2416,8 +2416,33 @@ merchantButtons.forEach((button) => {
                 '<label>대표자</label><input value="' + (merchant.owner_name || '') + '" />' +
                 '<label>연락처</label><input value="' + (merchant.phone || '') + '" />' +
                 '<label>수수료율</label><input value="' + (merchant.fee_rate || 0) + '" />' +
+                '<label>주민등록번호</label><input value="" />' +
+
+'<label>이메일</label><input value="" />' +
+
+'<label>우편번호</label><input value="" />' +
+
+'<label>주소</label><input value="" />' +
+
+'<label>상세주소</label><input value="" />' +
+
+'<label>업태</label><input value="" />' +
+
+'<label>종목</label><input value="" />' +
+
+'<label>취급품목</label><input value="" />' +
+
+'<label>법인번호</label><input value="" />' +
+
+'<label>과세구분</label>' +
+'<select>' +
+  '<option>과세</option>' +
+  '<option>비과세</option>' +
+'</select>' +
               '</div>' +
             '</div>' +
+
+
     
             '<div class="merchant-detail-section">' +
               '<h3>PG / 단말기 정보</h3>' +
@@ -2426,6 +2451,8 @@ merchantButtons.forEach((button) => {
                 '<label>단말기 MID</label><input value="" />' +
                 '<label>개통번호</label><input value="" />' +
                 '<label>관리번호</label><input value="" />' +
+                '<label>무선단말기 개통번호</label><input value="" />' +
+                '<label>무선단말기 관리번호</label><input value="" />' +
               '</div>' +
             '</div>' +
     
@@ -2436,7 +2463,31 @@ merchantButtons.forEach((button) => {
                 '<label>계좌번호</label><input value="' + (merchant.account_number || '') + '" />' +
                 '<label>예금주</label><input value="' + (merchant.account_holder || '') + '" />' +
                 '<label>정산주기</label><select><option>' + (merchant.settlement_cycle || '4일') + '</option><option>1일</option><option>3일</option><option>4일</option><option>7일</option></select>' +
-              '</div>' +
+                '<div class="merchant-detail-section">' +
+  '<h3>위험관리 / 한도설정</h3>' +
+
+  '<div class="merchant-detail-grid">' +
+
+    '<label>최대할부기간</label>' +
+    '<select>' +
+      '<option>2개월</option>' +
+      '<option>3개월</option>' +
+      '<option>4개월</option>' +
+      '<option>5개월</option>' +
+      '<option>6개월</option>' +
+      '<option>10개월</option>' +
+      '<option>12개월</option>' +
+    '</select>' +
+
+    '<label>1일 승인한도</label><input value="" />' +
+
+    '<label>월한도</label><input value="" />' +
+
+    '<label>연한도</label><input value="" />' +
+
+  '</div>' +
+'</div>' +
+                '</div>' +
             '</div>' +
     
             '<div class="merchant-detail-actions">' +
