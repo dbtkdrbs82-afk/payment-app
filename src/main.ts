@@ -2314,11 +2314,94 @@ merchantButtons.forEach((button) => {
   button.addEventListener('click', () => {
     sessionStorage.setItem('selected_merchant_id', String(merchant.id))
 
-    const addTab = document.querySelector('[data-sub="merchant-add"]')
-
-    if (addTab instanceof HTMLElement) {
-      addTab.click()
+    if (titleBox) {
+      titleBox.innerHTML = '▶ 가맹점관리 > 업체/가맹점 등록'
     }
+    
+    if (searchBox) {
+      searchBox.innerHTML = ''
+    }
+    
+    if (summaryBox) {
+      summaryBox.innerHTML =
+        '<div class="merchant-detail-header">' +
+          '<h2>업체/가맹점 등록 정보</h2>' +
+          '<p>가맹점 등록정보, PG정보, 정산정보를 확인하고 수정합니다.</p>' +
+        '</div>'
+    }
+    
+    if (tableTop) {
+      tableTop.innerHTML = ''
+    }
+    
+    const tableHead = document.querySelector('.admin-table thead')
+    const paymentTableBody =
+      document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+    
+    if (tableHead) {
+      tableHead.innerHTML = ''
+    }
+    
+    paymentTableBody.innerHTML =
+      '<tr>' +
+        '<td colspan="12">' +
+          '<div class="merchant-detail-page">' +
+    
+            '<div class="merchant-detail-section">' +
+              '<h3>등록정보</h3>' +
+              '<div class="merchant-detail-grid">' +
+                '<label>등록구분</label><select><option>가맹점</option><option>담당자</option><option>대리점</option></select>' +
+                '<label>소속 대리점</label><select><option>본사</option><option>에이드컴퍼니</option></select>' +
+                '<label>사용 PG사</label><select><option>다우데이타</option><option>코페이</option></select>' +
+                '<label>회사구분</label><select><option>개인(일반)</option><option>개인사업자</option><option>법인사업자</option></select>' +
+                '<label>CPID</label><input value="MER' + String(merchant.id).padStart(4, '0') + '" />' +
+                '<label>사업자번호</label><input value="" />' +
+              '</div>' +
+            '</div>' +
+    
+            '<div class="merchant-detail-section">' +
+              '<h3>기본정보</h3>' +
+              '<div class="merchant-detail-grid">' +
+                '<label>가맹점명</label><input value="' + (merchant.merchant_name || '') + '" />' +
+                '<label>대표자</label><input value="' + (merchant.owner_name || '') + '" />' +
+                '<label>연락처</label><input value="' + (merchant.phone || '') + '" />' +
+                '<label>수수료율</label><input value="' + (merchant.fee_rate || 0) + '" />' +
+              '</div>' +
+            '</div>' +
+    
+            '<div class="merchant-detail-section">' +
+              '<h3>PG / 단말기 정보</h3>' +
+              '<div class="merchant-detail-grid">' +
+                '<label>PG MID</label><input value="" />' +
+                '<label>단말기 MID</label><input value="" />' +
+                '<label>개통번호</label><input value="" />' +
+                '<label>관리번호</label><input value="" />' +
+              '</div>' +
+            '</div>' +
+    
+            '<div class="merchant-detail-section">' +
+              '<h3>정산정보</h3>' +
+              '<div class="merchant-detail-grid">' +
+                '<label>정산은행</label><input value="' + (merchant.bank_name || '') + '" />' +
+                '<label>계좌번호</label><input value="' + (merchant.account_number || '') + '" />' +
+                '<label>예금주</label><input value="' + (merchant.account_holder || '') + '" />' +
+                '<label>정산주기</label><select><option>' + (merchant.settlement_cycle || '4일') + '</option><option>1일</option><option>3일</option><option>4일</option><option>7일</option></select>' +
+              '</div>' +
+            '</div>' +
+    
+            '<div class="merchant-detail-actions">' +
+              '<button class="merchant-save-btn">저장</button>' +
+              '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
+            '</div>' +
+    
+          '</div>' +
+        '</td>' +
+      '</tr>'
+    
+    document.querySelector('#back-merchant-list')
+      ?.addEventListener('click', () => {
+        location.reload()
+      })
   })
 })
 })

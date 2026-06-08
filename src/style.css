@@ -2163,3 +2163,65 @@ button {
   border-radius: 8px;
   text-decoration: none;
 }
+.merchant-detail-page {
+  padding: 24px;
+  background: #f6f8fb;
+}
+
+.merchant-detail-header h2 {
+  margin: 0 0 8px;
+  color: #0d2d5c;
+}
+
+.merchant-detail-header p {
+  margin: 0;
+  color: #666;
+}
+
+.merchant-detail-section {
+  background: white;
+  border: 1px solid #dbe4f0;
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 18px;
+}
+
+.merchant-detail-section h3 {
+  margin: 0 0 18px;
+  color: #0d2d5c;
+  font-size: 18px;
+}
+
+.merchant-detail-grid {
+  display: grid;
+  grid-template-columns: 140px 1fr 140px 1fr;
+  gap: 14px 18px;
+  align-items: center;
+}
+
+.merchant-detail-grid label {
+  font-weight: 800;
+  color: #333;
+}
+
+.merchant-detail-grid input,
+.merchant-detail-grid select {
+  height: 42px;
+  border: 1px solid #cfd8e3;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+.merchant-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+@media (max-width: 768px) {
+  .merchant-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
