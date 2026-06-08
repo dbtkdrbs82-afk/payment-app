@@ -2486,3 +2486,7 @@ body {
   width: 120px;
   flex-shrink: 0;
 }
+.reset-password-btn {
+  width: 160px;
+  height: 42px;
+}

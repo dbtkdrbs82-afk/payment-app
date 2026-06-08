@@ -2414,9 +2414,7 @@ merchantButtons.forEach((button) => {
 '<label>개통일자</label>' +
 '<input type="date" value="" />' +
 '<label>비밀번호 초기화</label>' +
-'<div class="password-reset-row">' +
-  '<input placeholder="초기 비밀번호 입력" />' +
-  '<button type="button" class="reset-password-btn">초기화</button>' +
+'<button type="button" id="reset-merchant-password" class="reset-password-btn">1234로 초기화</button>' +
 
               '</div>' +
             '</div>' +
