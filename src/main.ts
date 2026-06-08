@@ -2457,17 +2457,18 @@ merchantButtons.forEach((button) => {
             '</div>' +
     
             '<div class="merchant-detail-section">' +
-              '<h3>정산정보</h3>' +
-              '<div class="merchant-detail-grid">' +
-                '<label>정산은행</label><input value="' + (merchant.bank_name || '') + '" />' +
-                '<label>계좌번호</label><input value="' + (merchant.account_number || '') + '" />' +
-                '<label>예금주</label><input value="' + (merchant.account_holder || '') + '" />' +
-                '<label>정산주기</label><select><option>' + (merchant.settlement_cycle || '4일') + '</option><option>1일</option><option>3일</option><option>4일</option><option>7일</option></select>' +
-                '<div class="merchant-detail-section">' +
+  '<h3>정산정보</h3>' +
+  '<div class="merchant-detail-grid">' +
+    '<label>정산은행</label><input value="' + (merchant.bank_name || '') + '" />' +
+    '<label>계좌번호</label><input value="' + (merchant.account_number || '') + '" />' +
+    '<label>예금주</label><input value="' + (merchant.account_holder || '') + '" />' +
+    '<label>정산주기</label><select><option>' + (merchant.settlement_cycle || '4일') + '</option><option>1일</option><option>3일</option><option>4일</option><option>7일</option></select>' +
+  '</div>' +
+'</div>' +
+
+'<div class="merchant-detail-section">' +
   '<h3>위험관리 / 한도설정</h3>' +
-
   '<div class="merchant-detail-grid merchant-risk-grid">' +
-
     '<label>최대할부기간</label>' +
     '<select>' +
       '<option>2개월</option>' +
@@ -2478,17 +2479,11 @@ merchantButtons.forEach((button) => {
       '<option>10개월</option>' +
       '<option>12개월</option>' +
     '</select>' +
-
     '<label>1일 승인한도</label><input value="" />' +
-
     '<label>월한도</label><input value="" />' +
-
     '<label>연한도</label><input value="" />' +
-
   '</div>' +
 '</div>' +
-                '</div>' +
-            '</div>' +
     
             '<div class="merchant-detail-actions">' +
               '<button class="merchant-save-btn">저장</button>' +
