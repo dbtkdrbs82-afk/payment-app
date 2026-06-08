@@ -2398,10 +2398,26 @@ body {
   flex: 1;
 }
 .address-one-line {
-  display: grid;
-  grid-template-columns: 100px 120px 4fr 1.5fr;
+  display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.zipcode-input {
+  width: 100px !important;
+}
+
+.address-search-btn {
+  width: 120px !important;
+  flex-shrink: 0;
+}
+
+.address-main-input {
+  flex: 3;
+}
+
+.address-detail-input {
+  flex: 1;
 }
 
 .address-one-line input,
