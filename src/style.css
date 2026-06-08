@@ -2432,3 +2432,23 @@ body {
   border-radius: 8px !important;
   font-weight: 800 !important;
 }
+.address-one-line {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.address-one-line input,
+.address-one-line button {
+  height: 42px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
+.address-search-btn {
+  padding: 0 16px !important;
+  line-height: 42px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
