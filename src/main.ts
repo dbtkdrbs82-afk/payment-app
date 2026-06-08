@@ -2294,8 +2294,8 @@ document.querySelector('#copy-merchant-apply-link')
       
         tr.innerHTML =
   '<td>' + (index + 1) + '</td>' +
-  '<td>MER' + String(merchant.id).padStart(4, '0') + '</td>' +
-  '<td>' + (merchant.merchant_name || '-') + '</td>' +
+  '<td><button class="merchant-link-btn" data-id="' + merchant.id + '">MER' + String(merchant.id).padStart(4, '0') + '</button></td>' +
+'<td><button class="merchant-link-btn" data-id="' + merchant.id + '">' + (merchant.merchant_name || '-') + '</button></td>' +
   '<td>' + (merchant.owner_name || '-') + '</td>' +
   '<td>' + (merchant.phone || '-') + '</td>' +
   '<td>' + (merchant.fee_rate || 0) + '%</td>' +
@@ -2304,221 +2304,29 @@ document.querySelector('#copy-merchant-apply-link')
   '<td>' + (merchant.account_holder || '-') + '</td>' +
   '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
   '<td>운영</td>' +
-'<td><button class="merchant-view-btn" data-id="' + merchant.id + '">보기</button></td>'
+'<td><button class="merchant-link-btn merchant-view-btn" data-id="' + merchant.id + '">보기</button></td>'
       
   paymentTableBody.appendChild(tr)
 
   tr.querySelector('.merchant-view-btn')
   ?.addEventListener('click', () => {
-    const modal = document.createElement('div')
-
-    modal.className = 'merchant-modal-backdrop'
-
-    modal.innerHTML =
-      '<div class="merchant-modal">' +
-        '<h2>가맹점 등록/심사 정보</h2>' +
-
-       '<div class="merchant-modal-grid">' +
-
-  '<div class="merchant-section-title">등록정보</div>' +
-  '<div></div><div></div><div></div>' +
-
-  '<label>등록구분</label>' +
-  '<select id="edit-register-type">' +
-    '<option value="가맹점">가맹점</option>' +
-    '<option value="담당자">담당자</option>' +
-    '<option value="대리점">대리점</option>' +
-  '</select>' +
-
-  '<label>소속 대리점</label>' +
-  '<select id="edit-agency-name">' +
-    '<option value="본사">본사</option>' +
-    '<option value="에이드컴퍼니">에이드컴퍼니</option>' +
-    '<option value="영업대리점A">영업대리점A</option>' +
-  '</select>' +
-
-  '<label>사용 PG사</label>' +
-  '<select id="edit-pg-company">' +
-    '<option value="다우데이타">다우데이타</option>' +
-    '<option value="코페이">코페이</option>' +
-    '<option value="토스페이먼츠">토스페이먼츠</option>' +
-  '</select>' +
-
-  '<label>회사구분</label>' +
-  '<select id="edit-company-type">' +
-    '<option value="개인(일반)">개인(일반)</option>' +
-    '<option value="개인사업자">개인사업자</option>' +
-    '<option value="법인사업자">법인사업자</option>' +
-  '</select>' +
-
-  '<label>CPID</label>' +
-  '<input id="edit-cpid" value="" />' +
-
-  '<label>사업자번호</label>' +
-  '<input id="edit-business-number" value="" />' +
-
-  '<label>과세구분</label>' +
-  '<select id="edit-tax-type">' +
-    '<option value="과세">과세</option>' +
-    '<option value="비과세">비과세</option>' +
-  '</select>' +
-
-  '<label>가맹점명</label>' +
-  '<input id="edit-merchant-name" value="' + (merchant.merchant_name || '') + '" />' +
-
-  '<label>대표자</label>' +
-  '<input id="edit-owner-name" value="' + (merchant.owner_name || '') + '" />' +
-
-  '<label>연락처</label>' +
-  '<input id="edit-phone" value="' + (merchant.phone || '') + '" />' +
-
-  '<div class="merchant-section-title">PG / 단말기 정보</div>' +
-  '<div></div><div></div><div></div>' +
-
-  '<label>PG MID</label>' +
-  '<input id="edit-pg-mid" value="" />' +
-
-  '<label>단말기 MID</label>' +
-  '<input id="edit-terminal-mid" value="" />' +
-
-  '<label>개통번호</label>' +
-  '<input id="edit-terminal-open-no" value="" />' +
-
-  '<label>관리번호</label>' +
-  '<input id="edit-terminal-manage-no" value="" />' +
-
-  '<div class="merchant-section-title">정산정보</div>' +
-  '<div></div><div></div><div></div>' +
-
-  '<label>정산은행</label>' +
-  '<input id="edit-bank-name" value="' + (merchant.bank_name || '') + '" />' +
-
-  '<label>계좌번호</label>' +
-  '<input id="edit-account-number" value="' + (merchant.account_number || '') + '" />' +
-
-  '<label>예금주</label>' +
-  '<input id="edit-account-holder" value="' + (merchant.account_holder || '') + '" />' +
-
-  '<label>정산주기</label>' +
-  '<select id="edit-settlement-cycle">' +
-    '<option value="1일">1일</option>' +
-    '<option value="3일">3일</option>' +
-    '<option value="4일">4일</option>' +
-    '<option value="7일">7일</option>' +
-  '</select>' +
-
-  '<label>수수료율</label>' +
-  '<input id="edit-fee-rate" value="' + (merchant.fee_rate || 0) + '" />' +
-
-  '<label>상태</label>' +
-  '<select id="edit-merchant-status">' +
-    '<option value="운영">운영</option>' +
-    '<option value="중지">중지</option>' +
-    '<option value="가입대기">가입대기</option>' +
-    '<option value="반려">반려</option>' +
-  '</select>' +
-
-  '<div class="merchant-section-title">위험관리 / 한도</div>' +
-  '<div></div><div></div><div></div>' +
-
-  '<label>최대할부기간</label>' +
-  '<select id="edit-installment">' +
-    '<option>2개월</option>' +
-    '<option>3개월</option>' +
-    '<option>4개월</option>' +
-    '<option>5개월</option>' +
-    '<option>6개월</option>' +
-    '<option>10개월</option>' +
-    '<option>12개월</option>' +
-  '</select>' +
-
-  '<label>1일 승인한도</label>' +
-  '<input id="edit-daily-limit" value="" />' +
-
-  '<label>월한도</label>' +
-  '<input id="edit-month-limit" value="" />' +
-
-  '<label>연한도</label>' +
-  '<input id="edit-year-limit" value="" />' +
-
-'</div>' +
-
-        '<div class="merchant-modal-warning">' +
-          '정산계좌 및 정산주기 변경은 운영자만 처리할 수 있습니다.' +
-        '</div>' +
-
-        '<div class="merchant-modal-actions">' +
-          '<button id="save-merchant-edit" class="merchant-save-btn">저장</button>' +
-          '<button id="close-merchant-modal" class="merchant-close-btn">닫기</button>' +
-        '</div>' +
-      '</div>'
-
-    document.body.appendChild(modal)
-
-    const settlementSelect =
-      document.querySelector<HTMLSelectElement>('#edit-settlement-cycle')
-
-    if (settlementSelect) {
-      settlementSelect.value = merchant.settlement_cycle || '4일'
+  
+    sessionStorage.setItem(
+      'selected_merchant_id',
+      String(merchant.id)
+    )
+  
+    const addTab =
+      document.querySelector('[data-sub="merchant-add"]')
+  
+    if (addTab instanceof HTMLElement) {
+      addTab.click()
     }
-
-    document.querySelector('#close-merchant-modal')
-      ?.addEventListener('click', () => {
-        modal.remove()
-      })
-
-    document.querySelector('#save-merchant-edit')
-      ?.addEventListener('click', async () => {
-        const merchantName =
-          (document.querySelector<HTMLInputElement>('#edit-merchant-name')?.value || '').trim()
-
-        const ownerName =
-          (document.querySelector<HTMLInputElement>('#edit-owner-name')?.value || '').trim()
-
-        const phone =
-          (document.querySelector<HTMLInputElement>('#edit-phone')?.value || '').trim()
-
-        const feeRate =
-          Number(document.querySelector<HTMLInputElement>('#edit-fee-rate')?.value || 0)
-
-        const bankName =
-          (document.querySelector<HTMLInputElement>('#edit-bank-name')?.value || '').trim()
-
-        const accountNumber =
-          (document.querySelector<HTMLInputElement>('#edit-account-number')?.value || '').trim()
-
-        const accountHolder =
-          (document.querySelector<HTMLInputElement>('#edit-account-holder')?.value || '').trim()
-
-        const settlementCycle =
-          document.querySelector<HTMLSelectElement>('#edit-settlement-cycle')?.value || '4일'
-
-        const { error } = await supabase
-          .from('merchants')
-          .update({
-            merchant_name: merchantName,
-            owner_name: ownerName,
-            phone: phone,
-            fee_rate: feeRate,
-            bank_name: bankName,
-            account_number: accountNumber,
-            account_holder: accountHolder,
-            settlement_cycle: settlementCycle,
-          })
-          .eq('id', merchant.id)
-
-        if (error) {
-          alert('가맹점 정보 수정 실패: ' + error.message)
-          return
-        }
-
-        alert('가맹점 정보가 수정되었습니다.')
-        modal.remove()
-        location.reload()
-      })
+  
   })
-})  
-}
+      })
+    }
+   
 
 if (page === 'settlement') {
   const subMenu = document.querySelector('.admin-sub-menu')
