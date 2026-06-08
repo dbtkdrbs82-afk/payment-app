@@ -2425,20 +2425,11 @@ merchantButtons.forEach((button) => {
     '<label>연락처</label>' +
     '<input value="' + (merchant.phone || '') + '" />' +
 
-    '<label>주소</label>' +
-    '<div class="address-row">' +
-      '<input value="" placeholder="우편번호" />' +
-      '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
-    '</div>' +
-
     '<label>이메일</label>' +
-    '<input value="" />' +
+'<input value="" />' +
 
-    '<label>상세주소</label>' +
-    '<input value="" />' +
-
-    '<label>법인번호</label>' +
-    '<input value="" />' +
+'<label>법인번호</label>' +
+'<input value="" />' +
 
     '<label>과세구분</label>' +
     '<select>' +
@@ -2457,6 +2448,17 @@ merchantButtons.forEach((button) => {
 
     '<label>수수료율</label>' +
     '<input value="' + (merchant.fee_rate || 0) + '" />' +
+
+    '<label>주소</label>' +
+'<div class="full-width address-row">' +
+  '<input placeholder="우편번호" class="zipcode-input" />' +
+  '<button type="button" class="address-search-btn">찾기</button>' +
+  '<input placeholder="기본주소" class="address-input" />' +
+'</div>' +
+
+'<label>상세주소</label>' +
+'<div class="full-width">' +
+  '<input placeholder="상세주소 입력" />' +
 
   '</div>' +
 '</div>' +

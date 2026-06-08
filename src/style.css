@@ -2375,3 +2375,25 @@ body {
   border-radius: 8px !important;
   font-weight: 800 !important;
 }
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.address-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.zipcode-input {
+  width: 90px !important;
+}
+
+.address-search-btn {
+  width: 80px !important;
+  flex-shrink: 0;
+}
+
+.address-input {
+  flex: 1;
+}
