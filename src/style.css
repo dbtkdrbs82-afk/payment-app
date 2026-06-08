@@ -2292,3 +2292,13 @@ button.merchant-search-btn {
   color: #ffffff !important;
   border: none !important;
 }
+.merchant-search-btn {
+  background: #123d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.merchant-search-btn:hover {
+  background: #0d2f5f !important;
+  color: #ffffff !important;
+}
