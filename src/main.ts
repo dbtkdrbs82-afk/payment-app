@@ -2450,15 +2450,12 @@ merchantButtons.forEach((button) => {
     '<input value="' + (merchant.fee_rate || 0) + '" />' +
 
     '<label>주소</label>' +
-'<div class="full-width address-row">' +
+'<div class="address-one-line">' +
   '<input placeholder="우편번호" class="zipcode-input" />' +
-  '<button type="button" class="address-search-btn">찾기</button>' +
-  '<input placeholder="기본주소" class="address-input" />' +
-'</div>' +
+  '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
+  '<input placeholder="기본주소" class="address-main-input" />' +
+  '<input placeholder="상세주소" class="address-detail-input" />' +
 
-'<label>상세주소</label>' +
-'<div class="full-width">' +
-  '<input placeholder="상세주소 입력" />' +
 
   '</div>' +
 '</div>' +

@@ -2397,3 +2397,22 @@ body {
 .address-input {
   flex: 1;
 }
+.address-one-line {
+  display: grid;
+  grid-template-columns: 120px 120px 1.5fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.address-one-line input,
+.address-one-line button {
+  height: 42px !important;
+}
+
+.address-search-btn {
+  background: #123d75 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 800 !important;
+}
