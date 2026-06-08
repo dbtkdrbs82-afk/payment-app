@@ -2410,37 +2410,56 @@ merchantButtons.forEach((button) => {
             '</div>' +
     
             '<div class="merchant-detail-section">' +
-              '<h3>기본정보</h3>' +
-              '<div class="merchant-detail-grid">' +
-                '<label>가맹점명</label><input value="' + (merchant.merchant_name || '') + '" />' +
-                '<label>대표자</label><input value="' + (merchant.owner_name || '') + '" />' +
-                '<label>연락처</label><input value="' + (merchant.phone || '') + '" />' +
-                '<label>수수료율</label><input value="' + (merchant.fee_rate || 0) + '" />' +
-                '<label>주민등록번호</label><input value="" />' +
+  '<h3>기본정보</h3>' +
+  '<div class="merchant-detail-grid">' +
 
-'<label>이메일</label><input value="" />' +
+    '<label>가맹점명</label>' +
+    '<input value="' + (merchant.merchant_name || '') + '" />' +
 
-'<label>우편번호</label><input value="" />' +
+    '<label>대표자</label>' +
+    '<input value="' + (merchant.owner_name || '') + '" />' +
 
-'<label>주소</label><input value="" />' +
+    '<label>주민번호</label>' +
+    '<input value="" placeholder="000000-0000000" />' +
 
-'<label>상세주소</label><input value="" />' +
+    '<label>연락처</label>' +
+    '<input value="' + (merchant.phone || '') + '" />' +
 
-'<label>업태</label><input value="" />' +
+    '<label>주소</label>' +
+    '<div class="address-row">' +
+      '<input value="" placeholder="우편번호" />' +
+      '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
+    '</div>' +
 
-'<label>종목</label><input value="" />' +
+    '<label>이메일</label>' +
+    '<input value="" />' +
 
-'<label>취급품목</label><input value="" />' +
+    '<label>상세주소</label>' +
+    '<input value="" />' +
 
-'<label>법인번호</label><input value="" />' +
+    '<label>법인번호</label>' +
+    '<input value="" />' +
 
-'<label>과세구분</label>' +
-'<select>' +
-  '<option>과세</option>' +
-  '<option>비과세</option>' +
-'</select>' +
-              '</div>' +
-            '</div>' +
+    '<label>과세구분</label>' +
+    '<select>' +
+      '<option>과세</option>' +
+      '<option>비과세</option>' +
+    '</select>' +
+
+    '<label>업태/종목</label>' +
+    '<div class="business-type-row">' +
+      '<input value="" placeholder="업태" />' +
+      '<input value="" placeholder="종목" />' +
+    '</div>' +
+
+    '<label>취급품목</label>' +
+    '<input value="" />' +
+
+    '<label>수수료율</label>' +
+    '<input value="' + (merchant.fee_rate || 0) + '" />' +
+
+  '</div>' +
+'</div>' +
 
 
     

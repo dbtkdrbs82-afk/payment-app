@@ -2356,3 +2356,22 @@ body {
   font-size: 18px !important;
   font-weight: 900 !important;
 }
+.address-row,
+.business-type-row {
+  display: flex;
+  gap: 8px;
+}
+
+.address-row input,
+.business-type-row input {
+  flex: 1;
+}
+
+.address-search-btn {
+  min-width: 120px;
+  background: #123d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 800 !important;
+}
