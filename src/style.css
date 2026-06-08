@@ -2286,3 +2286,9 @@ button:hover,
   background: var(--nxg-blue) !important;
   color: #ffffff !important;
 }
+.merchant-search-btn,
+button.merchant-search-btn {
+  background: #123d75 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
