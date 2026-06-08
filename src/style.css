@@ -2338,3 +2338,21 @@ body {
   grid-template-columns: 180px 1fr 180px 1fr;
   gap: 16px;
 }
+.merchant-detail-section h3 {
+  display: block !important;
+  width: fit-content !important;
+  min-width: 190px !important;
+  text-align: center !important;
+
+  margin: 0 auto 22px auto !important;
+  padding: 10px 20px !important;
+
+  border: 2px solid #123d75 !important;
+  border-radius: 8px !important;
+
+  background: #ffffff !important;
+  color: #123d75 !important;
+
+  font-size: 18px !important;
+  font-weight: 900 !important;
+}
