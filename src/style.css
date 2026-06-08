@@ -2398,10 +2398,26 @@ body {
   flex: 1;
 }
 .address-one-line {
-  display: grid;
-  grid-template-columns: 100px 120px 2.5fr 1fr;
+  display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.address-one-line input:nth-child(1) {
+  width: 100px;
+}
+
+.address-search-btn {
+  width: 120px;
+  flex-shrink: 0;
+}
+
+.address-main-input {
+  flex: 3;
+}
+
+.address-detail-input {
+  flex: 1;
 }
 
 .address-one-line input,
