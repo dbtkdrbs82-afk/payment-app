@@ -2122,12 +2122,17 @@ const titleBox = document.querySelector('.admin-title')
 
 if (subMenu) {
   subMenu.innerHTML =
-  subMenu.innerHTML =
   '<span class="sub-tab" data-sub="merchant-apply">가입신청 관리</span> | ' +
   '<span class="sub-tab" data-sub="merchant-list">승인가맹점</span> | ' +
   '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span> | ' +
-  '<span class="sub-tab" data-sub="fee-setting">결제 수수료 설정</span>'    
+  '<span class="sub-tab" data-sub="fee-setting">결제 수수료 설정</span>'
 }
+document.querySelector('[data-sub="merchant-add"]')
+  ?.addEventListener('click', () => {
+    sessionStorage.setItem('selected_merchant_id', '')
+    sessionStorage.setItem('merchant_sub_page', 'merchant-add')
+    location.reload()
+  })
 
 if (titleBox) {
   titleBox.innerHTML = '▶ 가맹점관리 > 가맹점 관리'
