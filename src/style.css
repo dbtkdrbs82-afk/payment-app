@@ -2665,3 +2665,15 @@ body {
   font-weight: 700;
   cursor: pointer;
 }
+.address-row input,
+.address-row-full input,
+.address-row button {
+  height: 46px !important;
+  min-height: 46px !important;
+  box-sizing: border-box !important;
+}
+
+.address-row {
+  grid-template-columns: 120px 1fr 180px !important;
+  align-items: center !important;
+}
