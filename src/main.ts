@@ -2555,41 +2555,41 @@ merchantButtons.forEach((button) => {
       Number(document.querySelector<HTMLInputElement>('#fee-rate')?.value || 0)
 
       const { error } = await supabase
-      .from('merchants')
-      .update({
-        merchant_name: merchantName,
-        owner_name: ownerName,
-        phone: phone,
-        fee_rate: feeRate,
-    
-        business_number:
-          (document.querySelector<HTMLInputElement>('#business-number')?.value || ''),
-    
-        email:
-          (document.querySelector<HTMLInputElement>('#merchant-email')?.value || ''),
-    
-        zipcode:
-          (document.querySelector<HTMLInputElement>('#zipcode')?.value || ''),
-    
-        address:
-          (document.querySelector<HTMLInputElement>('#address')?.value || ''),
-    
-        address_detail:
-          (document.querySelector<HTMLInputElement>('#address-detail')?.value || ''),
-    
-        cpid:
-          (document.querySelector<HTMLInputElement>('#cpid')?.value || ''),
-    
-        pg_mid:
-          (document.querySelector<HTMLInputElement>('#pg-mid')?.value || ''),
-    
-        terminal_mid:
-          (document.querySelector<HTMLInputElement>('#terminal-mid')?.value || ''),
-    
-        opened_at:
-          (document.querySelector<HTMLInputElement>('#opened-at')?.value || null)
-      })
-      .eq('id', merchant.id)
+  .from('merchants')
+  .update({
+    merchant_name: merchantName,
+    owner_name: ownerName,
+    phone: phone,
+    fee_rate: feeRate,
+
+    business_number:
+      (document.querySelector<HTMLInputElement>('#business_number')?.value || ''),
+
+    email:
+      (document.querySelector<HTMLInputElement>('#email')?.value || ''),
+
+    zipcode:
+      (document.querySelector<HTMLInputElement>('#zipcode')?.value || ''),
+
+    address:
+      (document.querySelector<HTMLInputElement>('#address')?.value || ''),
+
+    address_detail:
+      (document.querySelector<HTMLInputElement>('#address_detail')?.value || ''),
+
+    cpid:
+      (document.querySelector<HTMLInputElement>('#cpid')?.value || ''),
+
+    pg_mid:
+      (document.querySelector<HTMLInputElement>('#pg_mid')?.value || ''),
+
+    terminal_mid:
+      (document.querySelector<HTMLInputElement>('#terminal_mid')?.value || ''),
+
+    opened_at:
+      (document.querySelector<HTMLInputElement>('#opened_at')?.value || null)
+  })
+  .eq('id', merchant.id)
 
     if (error) {
       alert('저장 실패: ' + error.message)
