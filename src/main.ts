@@ -878,9 +878,12 @@ setTimeout(() => {
       }
 
       resultBox.innerHTML = `<p>가맹점 등록 완료</p>`
-      setTimeout(() => {
-        location.href = '/merchant-admin'
-      }, 800)
+
+alert('가맹점 등록 완료')
+
+setTimeout(() => {
+  location.href = '/merchant-admin'
+}, 800)
     })
 
 } else if (path === '/create') {
@@ -2551,9 +2554,9 @@ merchantButtons.forEach((button) => {
             '<div class="merchant-detail-section">' +
   '<h3>정산정보</h3>' +
   '<div class="merchant-detail-grid">' +
-    '<label>정산은행</label><input value="' + (merchant.bank_name || '') + '" />' +
-    '<label>계좌번호</label><input value="' + (merchant.account_number || '') + '" />' +
-    '<label>예금주</label><input value="' + (merchant.account_holder || '') + '" />' +
+   '<label>정산은행</label><input id="bank_name" value="' + (merchant.bank_name || '') + '" />' +
+'<label>계좌번호</label><input id="account_number" value="' + (merchant.account_number || '') + '" />' +
+'<label>예금주</label><input id="account_holder" value="' + (merchant.account_holder || '') + '" />' +
     '<label>정산주기</label><select><option>' + (merchant.settlement_cycle || '4일') + '</option><option>1일</option><option>3일</option><option>4일</option><option>7일</option></select>' +
   '</div>' +
 '</div>' +
@@ -2633,7 +2636,7 @@ merchantButtons.forEach((button) => {
 
       const getValue = (id: string) =>
         (document.getElementById(id) as HTMLInputElement | null)?.value || ''
-      
+
       const updateData = {
         merchant_name: merchantName,
         owner_name: ownerName,
@@ -2648,9 +2651,14 @@ merchantButtons.forEach((button) => {
         cpid: getValue('cpid'),
         pg_mid: getValue('pg_mid'),
         terminal_mid: getValue('terminal_mid'),
-        opened_at: getValue('opened_at') || null
-      }
+        opened_at: getValue('opened_at') || null,
       
+        bank_name: getValue('bank_name'),
+        account_number: getValue('account_number'),
+        account_holder: getValue('account_holder'),
+        settlement_cycle: getValue('settlement_cycle')
+      }
+    
       console.log('실제 저장 데이터:', updateData)
       
       const { data, error } = await supabase
