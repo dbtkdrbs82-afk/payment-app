@@ -2557,7 +2557,13 @@ merchantButtons.forEach((button) => {
    '<label>정산은행</label><input id="bank_name" value="' + (merchant.bank_name || '') + '" />' +
 '<label>계좌번호</label><input id="account_number" value="' + (merchant.account_number || '') + '" />' +
 '<label>예금주</label><input id="account_holder" value="' + (merchant.account_holder || '') + '" />' +
-    '<label>정산주기</label><select><option>' + (merchant.settlement_cycle || '4일') + '</option><option>1일</option><option>3일</option><option>4일</option><option>7일</option></select>' +
+'<label>정산주기</label>' +
+'<select id="settlement_cycle">' +
+  '<option value="1일" ' + (merchant.settlement_cycle === '1일' ? 'selected' : '') + '>1일</option>' +
+  '<option value="3일" ' + (merchant.settlement_cycle === '3일' ? 'selected' : '') + '>3일</option>' +
+  '<option value="4일" ' + ((merchant.settlement_cycle || '4일') === '4일' ? 'selected' : '') + '>4일</option>' +
+  '<option value="7일" ' + (merchant.settlement_cycle === '7일' ? 'selected' : '') + '>7일</option>' +
+'</select>' +
   '</div>' +
 '</div>' +
 
@@ -2635,7 +2641,7 @@ merchantButtons.forEach((button) => {
       })
 
       const getValue = (id: string) =>
-        (document.getElementById(id) as HTMLInputElement | null)?.value || ''
+  (document.getElementById(id) as HTMLInputElement | HTMLSelectElement | null)?.value || ''
 
       const updateData = {
         merchant_name: merchantName,
