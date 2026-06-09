@@ -2459,7 +2459,7 @@ merchantButtons.forEach((button) => {
 
    '<label>주소</label>' +
 '<div class="address-one-line">' +
-  '<input id="zipcode" class="zipcode-input" placeholder="우편번호" value="' + (merchant.zipcode || '') + '" />' +
+ '<input id="zipcode" class="zipcode-input" placeholder="우편번호" value="' + (merchant.zipcode || '') + '" />' +
 '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
 '<input id="address" class="address-main-input" placeholder="기본주소" value="' + (merchant.address || '') + '" />' +
 '<input id="address_detail" class="address-detail-input" placeholder="상세주소" value="' + (merchant.address_detail || '') + '" />' +
