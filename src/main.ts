@@ -719,6 +719,83 @@ setTimeout(() => {
       })
   }
 
+} else if (path === '/merchant-apply') {
+  app.innerHTML = `
+    <div class="page">
+      <div class="payment-card">
+        <h1>가맹점 가입 신청</h1>
+        <p>서비스 이용을 위해 아래 약관에 동의해주세요.</p>
+
+        <div class="terms-box">
+          <h3>서비스 이용약관</h3>
+          <div class="terms-content">
+            본 신청서는 가맹점 결제서비스 이용을 위한 사전 신청 절차입니다.
+            신청자는 입력한 정보가 사실과 다름없음을 확인하며,
+            허위 정보 입력 시 서비스 이용이 제한될 수 있습니다.
+            회사는 신청 정보를 바탕으로 가맹 심사, 계약 안내,
+            정산 및 결제서비스 제공을 진행할 수 있습니다.
+          </div>
+
+          <label>
+            <input type="checkbox" id="agree-service">
+            서비스 이용약관에 동의합니다.
+          </label>
+        </div>
+
+        <div class="terms-box">
+          <h3>개인정보 수집 및 이용 동의</h3>
+          <div class="terms-content">
+            수집 항목: 대표자명, 연락처, 이메일, 주소, 계좌정보, 신분증 및 사업 관련 서류.
+            이용 목적: 가맹점 심사, 계약 진행, 정산, 고객 안내 및 서비스 운영.
+            보유 기간: 관련 법령 및 계약 종료 후 보관 의무 기간까지 보관됩니다.
+          </div>
+
+          <label>
+            <input type="checkbox" id="agree-private">
+            개인정보 수집 및 이용에 동의합니다.
+          </label>
+        </div>
+
+        <div class="terms-box">
+          <h3>정산 및 결제서비스 안내 동의</h3>
+          <div class="terms-content">
+            결제수수료, 정산주기, 추가수수료 및 서비스 이용 조건은
+            심사 결과와 계약 조건에 따라 달라질 수 있습니다.
+            신청자는 최종 계약 전 안내받은 조건을 확인해야 합니다.
+          </div>
+
+          <label>
+            <input type="checkbox" id="agree-payment">
+            정산 및 결제서비스 안내에 동의합니다.
+          </label>
+        </div>
+
+        <button id="go-apply-form">가입신청서 작성하기</button>
+
+        <div id="apply-message"></div>
+      </div>
+    </div>
+  `
+
+  document.querySelector<HTMLButtonElement>('#go-apply-form')!
+    .addEventListener('click', () => {
+      const agreeService =
+        document.querySelector<HTMLInputElement>('#agree-service')?.checked
+
+      const agreePrivate =
+        document.querySelector<HTMLInputElement>('#agree-private')?.checked
+
+      const agreePayment =
+        document.querySelector<HTMLInputElement>('#agree-payment')?.checked
+
+      if (!agreeService || !agreePrivate || !agreePayment) {
+        alert('필수 약관에 모두 동의해주세요.')
+        return
+      }
+
+      location.href = '/merchant-apply-form'
+    })
+    
 } else if (path === '/merchant-create') {
   app.innerHTML = `
     <div class="page">
