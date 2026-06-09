@@ -826,24 +826,27 @@ setTimeout(() => {
       </div>
 
       <div class="apply-section">
-        <h3>2. 사업자 / 판매정보</h3>
-        <div class="apply-grid">
-          <label>상호명 *</label>
-          <input id="apply-merchant-name" type="text">
+  <h3>2. 사업자 / 판매정보</h3>
+  <div class="apply-grid">
+    <label>상호명 *</label>
+    <input id="apply-merchant-name" type="text">
 
-          <label>사업자번호/주민번호 *</label>
-          <input id="apply-business-number" type="text">
+    <label>사업자번호 *</label>
+    <input id="apply-business-number" type="text" placeholder="사업자번호">
 
-          <label>업태 *</label>
-          <input id="apply-business-category" type="text">
+    <label>주민번호 *</label>
+    <input id="apply-resident-number" type="text" placeholder="주민등록번호">
 
-          <label>종목 *</label>
-          <input id="apply-business-item" type="text">
+    <label>업태/종목 *</label>
+    <div class="apply-two-inputs">
+      <input id="apply-business-category" type="text" placeholder="업태">
+      <input id="apply-business-item" type="text" placeholder="종목">
+    </div>
 
-          <label>취급품목 *</label>
-          <input id="apply-product-item" type="text">
-        </div>
-      </div>
+    <label>취급품목 *</label>
+    <input id="apply-product-item" type="text">
+  </div>
+</div>
 
       <div class="apply-section">
         <h3>3. 주소정보</h3>
@@ -898,7 +901,7 @@ setTimeout(() => {
           <label>결제수수료 *</label>
           <input id="apply-payment-fee" type="text" placeholder="예: 협의 / 3.5%">
 
-          <label>추천인 전화번호</label>
+          <label>담당자 전화번호</label>
           <input id="apply-recommender-phone" type="text">
         </div>
       </div>
@@ -916,7 +919,47 @@ setTimeout(() => {
     </div>
   </div>
 `
-  
+ 
+document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
+?.addEventListener('click', async () => {
+
+  const insertData = {
+    merchant_name: (document.getElementById('apply-merchant-name') as HTMLInputElement)?.value || '',
+    owner_name: (document.getElementById('apply-owner-name') as HTMLInputElement)?.value || '',
+    phone: (document.getElementById('apply-phone') as HTMLInputElement)?.value || '',
+
+    business_number: (document.getElementById('apply-business-number') as HTMLInputElement)?.value || '',
+    resident_number: (document.getElementById('apply-resident-number') as HTMLInputElement)?.value || '',
+
+    email: (document.getElementById('apply-email') as HTMLInputElement)?.value || '',
+
+    zipcode: (document.getElementById('apply-zipcode') as HTMLInputElement)?.value || '',
+    address: (document.getElementById('apply-address') as HTMLInputElement)?.value || '',
+    address_detail: (document.getElementById('apply-address-detail') as HTMLInputElement)?.value || '',
+
+    bank_name: (document.getElementById('apply-bank-name') as HTMLInputElement)?.value || '',
+    account_number: (document.getElementById('apply-account-number') as HTMLInputElement)?.value || '',
+    account_holder: (document.getElementById('apply-account-holder') as HTMLInputElement)?.value || '',
+
+    settlement_cycle: (document.getElementById('apply-settlement-cycle') as HTMLSelectElement)?.value || '',
+
+    status: '신청'
+  }
+
+  const { error } = await supabase
+    .from('merchants')
+    .insert([insertData])
+
+  if (error) {
+    alert('신청 실패 : ' + error.message)
+    return
+  }
+
+  alert('가입신청이 완료되었습니다.')
+
+  location.href = '/'
+})
+
   } else if (path === '/merchant-create') {
 
 
