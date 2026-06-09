@@ -836,50 +836,39 @@ setTimeout(() => {
         return
       }
 
-      const { error } = await supabase
-  .from('merchants')
-  .insert([
-    {
-      business_name: businessName,
-      merchant_name: businessName,
-      owner_name: ownerName,
-      phone: phone,
-      bank_name: bankName,
-      account_number: accountNumber,
-      account_holder: accountHolder,
-      fee_rate: feeRate,
-      settlement_cycle: settlementCycle,
-
-      business_number:
-        (document.querySelector<HTMLInputElement>('#business-number')?.value || ''),
-
-      email:
-        (document.querySelector<HTMLInputElement>('#merchant-email')?.value || ''),
-
-      zipcode:
-        (document.querySelector<HTMLInputElement>('#merchant-zipcode')?.value || ''),
-
-      address:
-        (document.querySelector<HTMLInputElement>('#merchant-address')?.value || ''),
-
-      address_detail:
-        (document.querySelector<HTMLInputElement>('#merchant-address-detail')?.value || ''),
-
-      cpid:
-        (document.querySelector<HTMLInputElement>('#merchant-cpid')?.value || ''),
-
-      pg_mid:
-        (document.querySelector<HTMLInputElement>('#merchant-pg-mid')?.value || ''),
-
-      terminal_mid:
-        (document.querySelector<HTMLInputElement>('#merchant-terminal-mid')?.value || ''),
-
-      opened_at:
-        (document.querySelector<HTMLInputElement>('#merchant-opened-at')?.value || null),
-
-      status: '대기'
-    }
-  ])
+      const insertData = {
+        business_name: businessName,
+        merchant_name: businessName,
+        owner_name: ownerName,
+        phone: phone,
+        bank_name: bankName,
+        account_number: accountNumber,
+        account_holder: accountHolder,
+        fee_rate: feeRate,
+        settlement_cycle: settlementCycle,
+      
+        business_number: document.querySelector<HTMLInputElement>('#business-number')?.value || '',
+        email: document.querySelector<HTMLInputElement>('#merchant-email')?.value || '',
+        zipcode: document.querySelector<HTMLInputElement>('#merchant-zipcode')?.value || '',
+        address: document.querySelector<HTMLInputElement>('#merchant-address')?.value || '',
+        address_detail: document.querySelector<HTMLInputElement>('#merchant-address-detail')?.value || '',
+        cpid: document.querySelector<HTMLInputElement>('#merchant-cpid')?.value || '',
+        pg_mid: document.querySelector<HTMLInputElement>('#merchant-pg-mid')?.value || '',
+        terminal_mid: document.querySelector<HTMLInputElement>('#merchant-terminal-mid')?.value || '',
+        opened_at: document.querySelector<HTMLInputElement>('#merchant-opened-at')?.value || null,
+      
+        status: '대기'
+      }
+      
+      console.log('등록 저장 데이터:', insertData)
+      
+      const { data, error } = await supabase
+        .from('merchants')
+        .insert([insertData])
+        .select()
+      
+      console.log('등록 결과 data:', data)
+      console.log('등록 error:', error)
 
       const resultBox = document.querySelector<HTMLDivElement>('#merchant-result')!
 
