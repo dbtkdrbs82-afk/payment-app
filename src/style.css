@@ -2631,53 +2631,31 @@ body {
   gap: 10px;
 }
 .address-row {
-  display: grid;
-  grid-template-columns: 120px 1fr 180px;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 10px;
+  display: grid !important;
+  grid-template-columns: 120px 1fr 180px !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin-bottom: 10px !important;
 }
 
 .address-row-full {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 10px;
-}
-.address-row input,
-.address-row-full input {
-  width: 100%;
-  height: 48px;
-  padding: 0 14px;
-  border: 1px solid #d7dce5;
-  border-radius: 10px;
-  font-size: 15px;
+  display: grid !important;
+  grid-template-columns: 120px 1fr !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin-bottom: 10px !important;
 }
 
-.address-row button {
-  height: 48px;
-  padding: 0 20px;
-  border: 0;
-  border-radius: 10px;
-  background: #174a86;
-  color: white;
-  font-weight: 700;
-  cursor: pointer;
-}
 .address-row input,
 .address-row-full input,
 .address-row button {
-  height: 46px !important;
-  min-height: 46px !important;
+  height: 48px !important;
+  padding: 0 14px !important;
+  border-radius: 10px !important;
   box-sizing: border-box !important;
 }
 
-.address-row {
-  grid-template-columns: 120px 1fr 180px !important;
-  align-items: center !important;
-}
 .address-row button {
+  width: 180px !important;
   padding: 0 !important;
-  line-height: 46px !important;
 }
