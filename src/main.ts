@@ -838,10 +838,10 @@ setTimeout(() => {
     <input id="apply-resident-number" type="text" placeholder="주민등록번호">
 
     <label>업태/종목 *</label>
-    <div class="apply-two-inputs">
-      <input id="apply-business-category" type="text" placeholder="업태">
-      <input id="apply-business-item" type="text" placeholder="종목">
-    </div>
+<div class="apply-two-inputs">
+  <input id="apply-business-category" type="text" placeholder="업태">
+  <input id="apply-business-item" type="text" placeholder="종목">
+</div>
 
     <label>취급품목 *</label>
     <input id="apply-product-item" type="text">
