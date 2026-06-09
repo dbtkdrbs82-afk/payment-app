@@ -849,12 +849,10 @@ setTimeout(() => {
 </div>
 
       <div class="apply-section">
-        <h3>3. 주소정보</h3>
-        <div class="apply-grid">
-         <label>주소 *</label>
-<div class="apply-address-box">
+  <h3>3. 주소정보</h3>
 
-  <div class="apply-address-row">
+  <div class="address-row">
+    <label>우편번호 *</label>
     <input
       id="apply-zipcode"
       type="text"
@@ -869,20 +867,24 @@ setTimeout(() => {
     </button>
   </div>
 
-  <input
-    id="apply-address"
-    type="text"
-    placeholder="기본주소"
-  >
+  <div class="address-row-full">
+    <label>기본주소 *</label>
+    <input
+      id="apply-address"
+      type="text"
+      placeholder="기본주소"
+    >
+  </div>
 
-  <input
-    id="apply-address-detail"
-    type="text"
-    placeholder="상세주소"
-  >
-
+  <div class="address-row-full">
+    <label>상세주소 *</label>
+    <input
+      id="apply-address-detail"
+      type="text"
+      placeholder="상세주소"
+    >
+  </div>
 </div>
-      </div>
 
       <div class="apply-section">
         <h3>4. 정산정보</h3>

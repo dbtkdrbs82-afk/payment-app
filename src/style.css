@@ -2630,3 +2630,18 @@ body {
   grid-template-columns: 1fr 180px;
   gap: 10px;
 }
+.address-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 180px;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.address-row-full {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
