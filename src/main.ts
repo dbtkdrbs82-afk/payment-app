@@ -792,10 +792,23 @@ setTimeout(() => {
         alert('필수 약관에 모두 동의해주세요.')
         return
       }
-
+      
       location.href = '/merchant-apply-form'
     })
-    
+  } else if (path === '/merchant-apply-form') {
+
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card">
+          <h1>가입신청서</h1>
+          <p>신청서 페이지 연결 성공</p>
+        </div>
+      </div>
+    `
+  
+  } else if (path === '/merchant-create') {
+
+
 } else if (path === '/merchant-create') {
   app.innerHTML = `
     <div class="page">
