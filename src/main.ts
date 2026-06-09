@@ -2459,13 +2459,13 @@ merchantButtons.forEach((button) => {
       '<input id="business-category" value="" placeholder="종목" />' +
     '</div>' +
 
-    '<label>주소</label>' +
-    '<div class="address-one-line">' +
-      '<input id="zipcode" class="zipcode-input" placeholder="우편번호" value="' + (merchant.zipcode || '') + '" />' +
-'<button type="button" class="address-search-btn">우편번호 찾기</button>' +
-'<input id="address" class="address-main-input" placeholder="기본주소" value="' + (merchant.address || '') + '" />' +
-'<input id="address_detail" class="address-detail-input" placeholder="상세주소" value="' + (merchant.address_detail || '') + '" />'
-    '</div>' +
+   '<label>주소</label>' +
+'<div class="address-one-line">' +
+  '<input id="zipcode" class="zipcode-input" placeholder="우편번호" value="' + (merchant.zipcode || '') + '" />' +
+  '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
+  '<input id="address" class="address-main-input" placeholder="기본주소" value="' + (merchant.address || '') + '" />' +
+  '<input id="address_detail" class="address-detail-input" placeholder="상세주소" value="' + (merchant.address_detail || '') + '" />' +
+'</div>' +
 
   '</div>' +
 '</div>' +
