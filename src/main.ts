@@ -2404,8 +2404,8 @@ merchantButtons.forEach((button) => {
                 '<label>소속 대리점</label><select><option>본사</option><option>에이드컴퍼니</option></select>' +
                 '<label>사용 PG사</label><select><option>다우데이타</option><option>코페이</option></select>' +
                 '<label>회사구분</label><select><option>개인(일반)</option><option>개인사업자</option><option>법인사업자</option></select>' +
-                '<label>CPID</label><input value="MER' + String(merchant.id).padStart(4, '0') + '" />' +
-                '<label>사업자번호</label><input value="" />' +
+                '<label>CPID</label><input id="cpid" value="' + (merchant.cpid || ('MER' + String(merchant.id).padStart(4, '0'))) + '" />' +
+                '<label>사업자번호</label><input id="business_number" value="' + (merchant.business_number || '') + '" />' +
                 '<label>운영상태</label>' +
 '<select>' +
   '<option>운영</option>' +
@@ -2564,42 +2564,37 @@ merchantButtons.forEach((button) => {
         opened_at: document.querySelector<HTMLInputElement>('#opened_at')?.value
       })
 
-      const { error } = await supabase
+      const getValue = (id: string) =>
+        (document.getElementById(id) as HTMLInputElement | null)?.value || ''
+      
+      const updateData = {
+        merchant_name: merchantName,
+        owner_name: ownerName,
+        phone: phone,
+        fee_rate: feeRate,
+      
+        business_number: getValue('business_number'),
+        email: getValue('email'),
+        zipcode: getValue('zipcode'),
+        address: getValue('address'),
+        address_detail: getValue('address_detail'),
+        cpid: getValue('cpid'),
+        pg_mid: getValue('pg_mid'),
+        terminal_mid: getValue('terminal_mid'),
+        opened_at: getValue('opened_at') || null
+      }
+      
+      console.log('실제 저장 데이터:', updateData)
+      
+      const { data, error } = await supabase
   .from('merchants')
-  .update({
-    merchant_name: merchantName,
-    owner_name: ownerName,
-    phone: phone,
-    fee_rate: feeRate,
-
-    business_number:
-      (document.querySelector<HTMLInputElement>('#business_number')?.value || ''),
-
-    email:
-      (document.querySelector<HTMLInputElement>('#email')?.value || ''),
-
-    zipcode:
-      (document.querySelector<HTMLInputElement>('#zipcode')?.value || ''),
-
-    address:
-      (document.querySelector<HTMLInputElement>('#address')?.value || ''),
-
-    address_detail:
-      (document.querySelector<HTMLInputElement>('#address_detail')?.value || ''),
-
-    cpid:
-      (document.querySelector<HTMLInputElement>('#cpid')?.value || ''),
-
-    pg_mid:
-      (document.querySelector<HTMLInputElement>('#pg_mid')?.value || ''),
-
-    terminal_mid:
-      (document.querySelector<HTMLInputElement>('#terminal_mid')?.value || ''),
-
-    opened_at:
-      (document.querySelector<HTMLInputElement>('#opened_at')?.value || null)
-  })
+  .update(updateData)
   .eq('id', merchant.id)
+  .select()
+
+console.log('저장 대상 merchant.id:', merchant.id)
+console.log('저장 결과 data:', data)
+console.log('저장 error:', error)
 
     if (error) {
       alert('저장 실패: ' + error.message)
