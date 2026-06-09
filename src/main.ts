@@ -853,36 +853,18 @@ setTimeout(() => {
 
   <div class="address-row">
     <label>우편번호 *</label>
-    <input
-      id="apply-zipcode"
-      type="text"
-      placeholder="우편번호"
-    >
-
-    <button
-      type="button"
-      id="apply-address-search"
-    >
-      우편번호 찾기
-    </button>
+    <input id="apply-zipcode">
+    <button>우편번호 찾기</button>
   </div>
 
   <div class="address-row-full">
     <label>기본주소 *</label>
-    <input
-      id="apply-address"
-      type="text"
-      placeholder="기본주소"
-    >
+    <input id="apply-address">
   </div>
 
   <div class="address-row-full">
     <label>상세주소 *</label>
-    <input
-      id="apply-address-detail"
-      type="text"
-      placeholder="상세주소"
-    >
+    <input id="apply-address-detail">
   </div>
 </div>
 
