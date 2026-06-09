@@ -878,6 +878,9 @@ setTimeout(() => {
       }
 
       resultBox.innerHTML = `<p>가맹점 등록 완료</p>`
+      setTimeout(() => {
+        location.href = '/merchant-admin'
+      }, 800)
     })
 
 } else if (path === '/create') {
