@@ -851,18 +851,37 @@ setTimeout(() => {
       <div class="apply-section">
         <h3>3. 주소정보</h3>
         <div class="apply-grid">
-          <label>우편번호 *</label>
-          <div class="apply-address-row">
-            <input id="apply-zipcode" type="text">
-            <button type="button" id="apply-address-search">우편번호 찾기</button>
-          </div>
+         <label>주소 *</label>
+<div class="apply-address-box">
 
-          <label>주소 *</label>
-          <input id="apply-address" type="text">
+  <div class="apply-address-row">
+    <input
+      id="apply-zipcode"
+      type="text"
+      placeholder="우편번호"
+    >
 
-          <label>상세주소 *</label>
-          <input id="apply-address-detail" type="text">
-        </div>
+    <button
+      type="button"
+      id="apply-address-search"
+    >
+      우편번호 찾기
+    </button>
+  </div>
+
+  <input
+    id="apply-address"
+    type="text"
+    placeholder="기본주소"
+  >
+
+  <input
+    id="apply-address-detail"
+    type="text"
+    placeholder="상세주소"
+  >
+
+</div>
       </div>
 
       <div class="apply-section">

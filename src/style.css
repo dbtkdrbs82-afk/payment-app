@@ -2619,3 +2619,14 @@ body {
     grid-template-columns: 1fr;
   }
 }
+.apply-address-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apply-address-row {
+  display: grid;
+  grid-template-columns: 1fr 180px;
+  gap: 10px;
+}
