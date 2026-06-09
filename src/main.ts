@@ -798,13 +798,111 @@ setTimeout(() => {
   } else if (path === '/merchant-apply-form') {
 
     app.innerHTML = `
-      <div class="page">
-        <div class="payment-card">
-          <h1>가입신청서</h1>
-          <p>신청서 페이지 연결 성공</p>
-        </div>
+  <div class="page">
+    <div class="payment-card">
+      <h1>가맹점 가입신청서</h1>
+      <p>신청자의 기본정보와 정산정보를 입력해주세요.</p>
+
+      <div class="input-group">
+        <label>대표자명</label>
+        <input id="apply-owner-name" type="text" placeholder="대표자명">
       </div>
-    `
+
+      <div class="input-group">
+        <label>휴대폰번호</label>
+        <input id="apply-phone" type="text" placeholder="010-0000-0000">
+      </div>
+
+      <div class="input-group">
+        <label>사업자유형</label>
+        <select id="apply-business-type">
+          <option value="일반(비사업자)">일반(비사업자)</option>
+          <option value="개인사업자">개인사업자</option>
+          <option value="법인사업자">법인사업자</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>상호명</label>
+        <input id="apply-merchant-name" type="text" placeholder="상호명">
+      </div>
+
+      <div class="input-group">
+        <label>사업자번호/주민번호</label>
+        <input id="apply-business-number" type="text" placeholder="사업자번호 또는 주민번호">
+      </div>
+
+      <div class="input-group">
+        <label>이메일</label>
+        <input id="apply-email" type="email" placeholder="example@email.com">
+      </div>
+
+      <div class="input-group">
+        <label>업태</label>
+        <input id="apply-business-category" type="text" placeholder="예: 음식점업">
+      </div>
+
+      <div class="input-group">
+        <label>종목</label>
+        <input id="apply-business-item" type="text" placeholder="예: 한식">
+      </div>
+
+      <div class="input-group">
+        <label>취급품목</label>
+        <input id="apply-product-item" type="text" placeholder="실제 판매 물품을 입력해주세요.">
+      </div>
+
+      <div class="input-group">
+        <label>우편번호</label>
+        <input id="apply-zipcode" type="text" placeholder="우편번호">
+      </div>
+
+      <div class="input-group">
+        <label>주소</label>
+        <input id="apply-address" type="text" placeholder="기본주소">
+      </div>
+
+      <div class="input-group">
+        <label>상세주소</label>
+        <input id="apply-address-detail" type="text" placeholder="상세주소">
+      </div>
+
+      <h3>결제 후 입금받을 계좌정보</h3>
+
+      <div class="input-group">
+        <label>예금주</label>
+        <input id="apply-account-holder" type="text" placeholder="예금주">
+      </div>
+
+      <div class="input-group">
+        <label>은행명</label>
+        <input id="apply-bank-name" type="text" placeholder="예: 국민은행">
+      </div>
+
+      <div class="input-group">
+        <label>계좌번호</label>
+        <input id="apply-account-number" type="text" placeholder="계좌번호">
+      </div>
+
+      <div class="input-group">
+        <label>정산주기</label>
+        <select id="apply-settlement-cycle">
+          <option value="일반">일반</option>
+          <option value="익일">익일</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>메모</label>
+        <textarea id="apply-memo" placeholder="추가 요청사항"></textarea>
+      </div>
+
+      <button id="merchant-apply-submit">가입신청</button>
+
+      <div id="merchant-apply-result"></div>
+    </div>
+  </div>
+`
   
   } else if (path === '/merchant-create') {
 
