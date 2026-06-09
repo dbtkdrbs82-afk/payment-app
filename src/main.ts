@@ -2438,11 +2438,9 @@ merchantButtons.forEach((button) => {
     '<label>수수료율</label>' +
     '<input id="fee-rate" value="' + (merchant.fee_rate || 0) + '" />' +
 
-    '<label>이메일</label>' +
-    '<input id="email" value="" />' +
+    '<label>이메일</label><input id="email" value="' + (merchant.email || '') + '" />'
 
-    '<label>법인번호</label>' +
-    '<input id="corporate-number" value="" />' +
+    '<label>법인번호</label><input id="business_number" value="' + (merchant.business_number || '') + '" />'
 
     '<label>과세구분</label>' +
     '<select id="tax-type">' +
@@ -2462,9 +2460,9 @@ merchantButtons.forEach((button) => {
    '<label>주소</label>' +
 '<div class="address-one-line">' +
   '<input id="zipcode" class="zipcode-input" placeholder="우편번호" value="' + (merchant.zipcode || '') + '" />' +
-  '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
-  '<input id="address" class="address-main-input" placeholder="기본주소" value="' + (merchant.address || '') + '" />' +
-  '<input id="address_detail" class="address-detail-input" placeholder="상세주소" value="' + (merchant.address_detail || '') + '" />' +
+'<button type="button" class="address-search-btn">우편번호 찾기</button>' +
+'<input id="address" class="address-main-input" placeholder="기본주소" value="' + (merchant.address || '') + '" />' +
+'<input id="address_detail" class="address-detail-input" placeholder="상세주소" value="' + (merchant.address_detail || '') + '" />'
 '</div>' +
 
   '</div>' +
@@ -2553,6 +2551,18 @@ merchantButtons.forEach((button) => {
 
     const feeRate =
       Number(document.querySelector<HTMLInputElement>('#fee-rate')?.value || 0)
+
+      console.log('저장할 값 확인', {
+        business_number: document.querySelector<HTMLInputElement>('#business_number')?.value,
+        email: document.querySelector<HTMLInputElement>('#email')?.value,
+        zipcode: document.querySelector<HTMLInputElement>('#zipcode')?.value,
+        address: document.querySelector<HTMLInputElement>('#address')?.value,
+        address_detail: document.querySelector<HTMLInputElement>('#address_detail')?.value,
+        cpid: document.querySelector<HTMLInputElement>('#cpid')?.value,
+        pg_mid: document.querySelector<HTMLInputElement>('#pg_mid')?.value,
+        terminal_mid: document.querySelector<HTMLInputElement>('#terminal_mid')?.value,
+        opened_at: document.querySelector<HTMLInputElement>('#opened_at')?.value
+      })
 
       const { error } = await supabase
   .from('merchants')
