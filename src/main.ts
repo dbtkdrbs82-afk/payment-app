@@ -2353,7 +2353,7 @@ document.querySelector('#copy-merchant-apply-link')
   '<td>' + (merchant.account_number || '-') + '</td>' +
   '<td>' + (merchant.account_holder || '-') + '</td>' +
   '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
-  '<td>운영</td>' +
+  '<td>' + (merchant.status || '운영') + '</td>' +
 '<td><button class="merchant-link-btn merchant-view-btn" data-id="' + merchant.id + '">보기</button></td>'
       
   paymentTableBody.appendChild(tr)
