@@ -2461,10 +2461,10 @@ merchantButtons.forEach((button) => {
 
     '<label>주소</label>' +
     '<div class="address-one-line">' +
-      '<input id="zipcode" class="zipcode-input" placeholder="우편번호" />' +
-      '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
-      '<input id="address" class="address-main-input" placeholder="기본주소" />' +
-      '<input id="address-detail" class="address-detail-input" placeholder="상세주소" />' +
+      '<input id="zipcode" class="zipcode-input" placeholder="우편번호" value="' + (merchant.zipcode || '') + '" />' +
+'<button type="button" class="address-search-btn">우편번호 찾기</button>' +
+'<input id="address" class="address-main-input" placeholder="기본주소" value="' + (merchant.address || '') + '" />' +
+'<input id="address_detail" class="address-detail-input" placeholder="상세주소" value="' + (merchant.address_detail || '') + '" />'
     '</div>' +
 
   '</div>' +
@@ -2474,12 +2474,12 @@ merchantButtons.forEach((button) => {
             '<div class="merchant-detail-section">' +
               '<h3>PG / 단말기 정보</h3>' +
               '<div class="merchant-detail-grid">' +
-                '<label>PG MID</label><input value="" />' +
-                '<label>단말기 MID</label><input value="" />' +
-                '<label>개통번호</label><input value="" />' +
-                '<label>관리번호</label><input value="" />' +
-                '<label>무선단말기 개통번호</label><input value="" />' +
-                '<label>무선단말기 관리번호</label><input value="" />' +
+                '<label>PG MID</label><input id="pg_mid" value="' + (merchant.pg_mid || '') + '" />' +
+'<label>단말기 MID</label><input id="terminal_mid" value="' + (merchant.terminal_mid || '') + '" />' +
+'<label>개통번호</label><input id="opened_at" value="' + (merchant.opened_at || '') + '" />' +
+'<label>관리번호</label><input value="" />' +
+'<label>무선단말기 개통번호</label><input value="" />' +
+'<label>무선단말기 관리번호</label><input value="" />' +
               '</div>' +
             '</div>' +
     
