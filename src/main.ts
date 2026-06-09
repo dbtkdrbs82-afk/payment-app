@@ -741,6 +741,51 @@ setTimeout(() => {
         </div>
 
         <div class="input-group">
+  <label>사업자번호</label>
+  <input id="business-number" type="text" placeholder="사업자번호 입력">
+</div>
+
+<div class="input-group">
+  <label>이메일</label>
+  <input id="merchant-email" type="text" placeholder="이메일 입력">
+</div>
+
+<div class="input-group">
+  <label>우편번호</label>
+  <input id="merchant-zipcode" type="text" placeholder="우편번호">
+</div>
+
+<div class="input-group">
+  <label>주소</label>
+  <input id="merchant-address" type="text" placeholder="기본주소">
+</div>
+
+<div class="input-group">
+  <label>상세주소</label>
+  <input id="merchant-address-detail" type="text" placeholder="상세주소">
+</div>
+
+<div class="input-group">
+  <label>CPID</label>
+  <input id="merchant-cpid" type="text" placeholder="예: MER0001">
+</div>
+
+<div class="input-group">
+  <label>PG MID</label>
+  <input id="merchant-pg-mid" type="text" placeholder="PG MID">
+</div>
+
+<div class="input-group">
+  <label>단말기 MID</label>
+  <input id="merchant-terminal-mid" type="text" placeholder="단말기 MID">
+</div>
+
+<div class="input-group">
+  <label>개통일자</label>
+  <input id="merchant-opened-at" type="date">
+</div>
+
+        <div class="input-group">
           <label>은행명</label>
           <input id="merchant-bank" type="text" placeholder="예: 국민은행">
         </div>
