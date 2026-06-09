@@ -2524,8 +2524,9 @@ merchantButtons.forEach((button) => {
 '</div>' +
 
             '<div class="merchant-detail-actions">' +
-              '<button class="merchant-save-btn">저장</button>' +
-              '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
+              '<button class="merchant-save-btn" id="approve-merchant">승인</button>' +
+'<button class="merchant-reject-btn" id="reject-merchant">반려</button>' +
+'<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
             '</div>' +
     
           '</div>' +

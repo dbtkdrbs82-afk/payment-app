@@ -2495,3 +2495,10 @@ body {
   height: 46px !important;
   font-weight: 800;
 }
+.merchant-reject-btn {
+  background: #d93025 !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-weight: 800 !important;
+}
