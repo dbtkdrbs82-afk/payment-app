@@ -798,107 +798,120 @@ setTimeout(() => {
   } else if (path === '/merchant-apply-form') {
 
     app.innerHTML = `
-  <div class="page">
-    <div class="payment-card">
+  <div class="apply-page">
+    <div class="apply-card">
       <h1>가맹점 가입신청서</h1>
-      <p>신청자의 기본정보와 정산정보를 입력해주세요.</p>
+      <p class="apply-desc">PG 등록 심사를 위해 모든 필수항목을 정확히 입력해주세요.</p>
 
-      <div class="input-group">
-        <label>대표자명</label>
-        <input id="apply-owner-name" type="text" placeholder="대표자명">
+      <div class="apply-section">
+        <h3>1. 신청자 기본정보</h3>
+        <div class="apply-grid">
+          <label>대표자명 *</label>
+          <input id="apply-owner-name" type="text">
+
+          <label>휴대폰번호 *</label>
+          <input id="apply-phone" type="text" placeholder="010-0000-0000">
+
+          <label>이메일 *</label>
+          <input id="apply-email" type="email">
+
+          <label>사업자유형 *</label>
+          <select id="apply-business-type">
+            <option value="">선택</option>
+            <option value="일반(비사업자)">일반(비사업자)</option>
+            <option value="개인사업자">개인사업자</option>
+            <option value="법인사업자">법인사업자</option>
+          </select>
+        </div>
       </div>
 
-      <div class="input-group">
-        <label>휴대폰번호</label>
-        <input id="apply-phone" type="text" placeholder="010-0000-0000">
+      <div class="apply-section">
+        <h3>2. 사업자 / 판매정보</h3>
+        <div class="apply-grid">
+          <label>상호명 *</label>
+          <input id="apply-merchant-name" type="text">
+
+          <label>사업자번호/주민번호 *</label>
+          <input id="apply-business-number" type="text">
+
+          <label>업태 *</label>
+          <input id="apply-business-category" type="text">
+
+          <label>종목 *</label>
+          <input id="apply-business-item" type="text">
+
+          <label>취급품목 *</label>
+          <input id="apply-product-item" type="text">
+        </div>
       </div>
 
-      <div class="input-group">
-        <label>사업자유형</label>
-        <select id="apply-business-type">
-          <option value="일반(비사업자)">일반(비사업자)</option>
-          <option value="개인사업자">개인사업자</option>
-          <option value="법인사업자">법인사업자</option>
-        </select>
+      <div class="apply-section">
+        <h3>3. 주소정보</h3>
+        <div class="apply-grid">
+          <label>우편번호 *</label>
+          <div class="apply-address-row">
+            <input id="apply-zipcode" type="text">
+            <button type="button" id="apply-address-search">우편번호 찾기</button>
+          </div>
+
+          <label>주소 *</label>
+          <input id="apply-address" type="text">
+
+          <label>상세주소 *</label>
+          <input id="apply-address-detail" type="text">
+        </div>
       </div>
 
-      <div class="input-group">
-        <label>상호명</label>
-        <input id="apply-merchant-name" type="text" placeholder="상호명">
+      <div class="apply-section">
+        <h3>4. 정산정보</h3>
+        <div class="apply-grid">
+          <label>예금주 *</label>
+          <input id="apply-account-holder" type="text">
+
+          <label>은행명 *</label>
+          <input id="apply-bank-name" type="text">
+
+          <label>계좌번호 *</label>
+          <input id="apply-account-number" type="text">
+
+          <label>정산주기 *</label>
+          <select id="apply-settlement-cycle">
+            <option value="">선택</option>
+            <option value="일반">일반</option>
+            <option value="익일">익일</option>
+          </select>
+        </div>
       </div>
 
-      <div class="input-group">
-        <label>사업자번호/주민번호</label>
-        <input id="apply-business-number" type="text" placeholder="사업자번호 또는 주민번호">
+      <div class="apply-section">
+        <h3>5. 결제조건</h3>
+        <div class="apply-grid">
+          <label>결제방법 *</label>
+          <select id="apply-payment-method">
+            <option value="">선택</option>
+            <option value="수기결제">수기결제</option>
+            <option value="QR결제">QR결제</option>
+            <option value="무선단말기">무선단말기</option>
+            <option value="전체">전체</option>
+          </select>
+
+          <label>결제수수료 *</label>
+          <input id="apply-payment-fee" type="text" placeholder="예: 협의 / 3.5%">
+
+          <label>추천인 전화번호</label>
+          <input id="apply-recommender-phone" type="text">
+        </div>
       </div>
 
-      <div class="input-group">
-        <label>이메일</label>
-        <input id="apply-email" type="email" placeholder="example@email.com">
+      <div class="apply-section">
+        <h3>6. 첨부서류 / 메모</h3>
+        <div class="apply-grid">
+          <label>메모</label>
+          <textarea id="apply-memo" placeholder="추가 요청사항"></textarea>
+        </div>
       </div>
 
-      <div class="input-group">
-        <label>업태</label>
-        <input id="apply-business-category" type="text" placeholder="예: 음식점업">
-      </div>
-
-      <div class="input-group">
-        <label>종목</label>
-        <input id="apply-business-item" type="text" placeholder="예: 한식">
-      </div>
-
-      <div class="input-group">
-        <label>취급품목</label>
-        <input id="apply-product-item" type="text" placeholder="실제 판매 물품을 입력해주세요.">
-      </div>
-
-      <div class="input-group">
-        <label>우편번호</label>
-        <input id="apply-zipcode" type="text" placeholder="우편번호">
-      </div>
-
-      <div class="input-group">
-        <label>주소</label>
-        <input id="apply-address" type="text" placeholder="기본주소">
-      </div>
-
-      <div class="input-group">
-        <label>상세주소</label>
-        <input id="apply-address-detail" type="text" placeholder="상세주소">
-      </div>
-
-      <h3>결제 후 입금받을 계좌정보</h3>
-
-      <div class="input-group">
-        <label>예금주</label>
-        <input id="apply-account-holder" type="text" placeholder="예금주">
-      </div>
-
-      <div class="input-group">
-        <label>은행명</label>
-        <input id="apply-bank-name" type="text" placeholder="예: 국민은행">
-      </div>
-
-      <div class="input-group">
-        <label>계좌번호</label>
-        <input id="apply-account-number" type="text" placeholder="계좌번호">
-      </div>
-
-      <div class="input-group">
-        <label>정산주기</label>
-        <select id="apply-settlement-cycle">
-          <option value="일반">일반</option>
-          <option value="익일">익일</option>
-        </select>
-      </div>
-
-      <div class="input-group">
-        <label>메모</label>
-        <textarea id="apply-memo" placeholder="추가 요청사항"></textarea>
-      </div>
-
-      <button id="merchant-apply-submit">가입신청</button>
-
+      <button id="merchant-apply-submit" class="apply-submit-btn">가입신청</button>
       <div id="merchant-apply-result"></div>
     </div>
   </div>
