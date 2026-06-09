@@ -2419,55 +2419,56 @@ merchantButtons.forEach((button) => {
               '</div>' +
             '</div>' +
     
-            '<div class="merchant-detail-section">' +
+           '<div class="merchant-detail-section">' +
   '<h3>기본정보</h3>' +
   '<div class="merchant-detail-grid">' +
 
     '<label>가맹점명</label>' +
-    '<input value="' + (merchant.merchant_name || '') + '" />' +
+    '<input id="merchant-name" value="' + (merchant.merchant_name || '') + '" />' +
 
     '<label>대표자</label>' +
-    '<input value="' + (merchant.owner_name || '') + '" />' +
+    '<input id="owner-name" value="' + (merchant.owner_name || '') + '" />' +
 
     '<label>주민번호</label>' +
-    '<input value="" placeholder="000000-0000000" />' +
+    '<input id="resident-number" value="" placeholder="000000-0000000" />' +
 
     '<label>연락처</label>' +
-    '<input value="' + (merchant.phone || '') + '" />' +
+    '<input id="phone" value="' + (merchant.phone || '') + '" />' +
+
+    '<label>수수료율</label>' +
+    '<input id="fee-rate" value="' + (merchant.fee_rate || 0) + '" />' +
 
     '<label>이메일</label>' +
-'<input value="" />' +
+    '<input id="email" value="" />' +
 
-'<label>법인번호</label>' +
-'<input value="" />' +
+    '<label>법인번호</label>' +
+    '<input id="corporate-number" value="" />' +
 
     '<label>과세구분</label>' +
-    '<select>' +
+    '<select id="tax-type">' +
       '<option>과세</option>' +
       '<option>비과세</option>' +
     '</select>' +
 
+    '<label>취급품목</label>' +
+    '<input id="product-item" value="" />' +
+
     '<label>업태/종목</label>' +
     '<div class="business-type-row">' +
-      '<input value="" placeholder="업태" />' +
-      '<input value="" placeholder="종목" />' +
+      '<input id="business-type" value="" placeholder="업태" />' +
+      '<input id="business-category" value="" placeholder="종목" />' +
     '</div>' +
 
-    '<label>취급품목</label>' +
-    '<input value="" />' +
-
-    '<label>수수료율</label>' +
-    '<input value="' + (merchant.fee_rate || 0) + '" />' +
-
     '<label>주소</label>' +
-'<div class="address-one-line">' +
-  '<input class="zipcode-input" placeholder="우편번호" />' +
-  '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
-  '<input class="address-main-input" placeholder="기본주소" />' +
-  '<input class="address-detail-input" placeholder="상세주소" />' +
-'</div>' +
-'</div>' +
+    '<div class="address-one-line">' +
+      '<input id="zipcode" class="zipcode-input" placeholder="우편번호" />' +
+      '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
+      '<input id="address" class="address-main-input" placeholder="기본주소" />' +
+      '<input id="address-detail" class="address-detail-input" placeholder="상세주소" />' +
+    '</div>' +
 
+  '</div>' +
+'</div>' +
 
     
             '<div class="merchant-detail-section">' +
@@ -2524,6 +2525,7 @@ merchantButtons.forEach((button) => {
 '</div>' +
 
             '<div class="merchant-detail-actions">' +
+            '<button class="merchant-save-btn" id="save-merchant-info">저장</button>' +
               '<button class="merchant-save-btn" id="approve-merchant">승인</button>' +
 '<button class="merchant-reject-btn" id="reject-merchant">반려</button>' +
 '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
@@ -2538,6 +2540,38 @@ merchantButtons.forEach((button) => {
         location.reload()
       })
     
+      document.querySelector('#save-merchant-info')
+  ?.addEventListener('click', async () => {
+    const merchantName =
+      (document.querySelector<HTMLInputElement>('#merchant-name')?.value || '').trim()
+
+    const ownerName =
+      (document.querySelector<HTMLInputElement>('#owner-name')?.value || '').trim()
+
+    const phone =
+      (document.querySelector<HTMLInputElement>('#phone')?.value || '').trim()
+
+    const feeRate =
+      Number(document.querySelector<HTMLInputElement>('#fee-rate')?.value || 0)
+
+    const { error } = await supabase
+      .from('merchants')
+      .update({
+        merchant_name: merchantName,
+        owner_name: ownerName,
+        phone: phone,
+        fee_rate: feeRate
+      })
+      .eq('id', merchant.id)
+
+    if (error) {
+      alert('저장 실패: ' + error.message)
+      return
+    }
+
+    alert('저장되었습니다.')
+    location.reload()
+  })
     document.querySelector('#approve-merchant')
       ?.addEventListener('click', async () => {
         if (!confirm('이 가맹점을 승인하시겠습니까?')) return
