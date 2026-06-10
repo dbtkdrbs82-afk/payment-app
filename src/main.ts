@@ -2946,7 +2946,10 @@ merchantButtons.forEach((button) => {
   '<div class="merchant-file-grid">' +
     '<label>사업자등록증</label>' +
 '<div><input type="file" />' +
-'<p>기존 파일: ' + (merchant.business_license_url || '첨부파일 없음') + '</p></div>' +
+'<p>기존 파일: ' + (merchant.business_license_url || '첨부파일 없음') + '</p>' +
+(merchant.business_license_url
+  ? '<button onclick="window.open(\'' + supabase.storage.from('merchant-files').getPublicUrl(merchant.business_license_url).data.publicUrl + '\')">보기</button>'
+  : '')
 
 '<label>통장사본</label>' +
 '<div><input type="file" />' +
