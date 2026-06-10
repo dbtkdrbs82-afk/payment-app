@@ -4437,22 +4437,90 @@ const orderIdValue =
           location.href = '/merchant-login'
         }
 
+        const { data: orders, error } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('merchant_id', merchantId)
+        .order('created_at', { ascending: false })
+      
+      if (error) {
+        alert('주문내역 조회 실패: ' + error.message)
+      }
+      
       app.innerHTML = `
-        <div class="page">
-          <div class="payment-card">
-            <h1>가맹점 관리자</h1>
-            <p>${merchantName}님 환영합니다.</p>
-
-            <div style="display:grid;gap:12px;margin-top:20px;">
-              <button>상품관리</button>
-              <button>주문관리</button>
-              <button>결제내역</button>
-              <button>정산내역</button>
+        <div class="pg-admin-page">
+          <div class="pg-admin-header">
+            <h1>가맹점 주문관리</h1>
+            <div>
+              <strong>${merchantName}</strong>
               <button id="merchant-logout">로그아웃</button>
             </div>
           </div>
+      
+          <div class="admin-search-box">
+            <button class="order-filter-btn" data-status="전체">전체</button>
+            <button class="order-filter-btn" data-status="준비중">준비중</button>
+            <button class="order-filter-btn" data-status="완료">완료</button>
+          </div>
+      
+          <div class="admin-summary">
+            주문수 : ${(orders || []).length}건
+          </div>
+      
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>주문번호</th>
+                  <th>주문내용</th>
+                  <th>결제금액</th>
+                  <th>주문상태</th>
+                  <th>처리</th>
+                  <th>고객호출</th>
+                </tr>
+              </thead>
+              <tbody id="merchantOrderBody"></tbody>
+            </table>
+          </div>
         </div>
       `
+      const merchantOrderBody =
+  document.querySelector<HTMLTableSectionElement>('#merchantOrderBody')!
+
+merchantOrderBody.innerHTML = ''
+
+;(orders || []).forEach((order, index) => {
+  const tr = document.createElement('tr')
+
+  const orderNumber =
+    order.order_no?.split('-')[1] ||
+    order.order_no ||
+    index + 1
+
+  const orderItems = Array.isArray(order.items)
+    ? order.items
+        .map((item: any) => item.name + ' x ' + item.quantity)
+        .join(', ')
+    : '-'
+
+  tr.innerHTML =
+    '<td>' + (index + 1) + '</td>' +
+    '<td>' + orderNumber + '번</td>' +
+    '<td>' + orderItems + '</td>' +
+    '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
+    '<td>' + (order.order_status || '접수') + '</td>' +
+    '<td>' +
+      (order.order_status === '완료'
+        ? '완료'
+        : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
+    '</td>' +
+    '<td>' +
+      '<button class="customer-call-button" data-number="' + orderNumber + '">고객호출</button>' +
+    '</td>'
+
+  merchantOrderBody.appendChild(tr)
+})
 
       document.querySelector('#merchant-logout')
         ?.addEventListener('click', () => {
