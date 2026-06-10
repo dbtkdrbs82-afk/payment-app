@@ -3072,26 +3072,36 @@ console.log('저장 error:', error)
     alert('저장되었습니다.')
     location.reload()
   })
-    document.querySelector('#approve-merchant')
-      ?.addEventListener('click', async () => {
-        if (!confirm('이 가맹점을 승인하시겠습니까?')) return
-    
-        const { error } = await supabase
-          .from('merchants')
-          .update({
-            status: '운영'
-          })
-          .eq('id', merchant.id)
-    
-        if (error) {
-          alert('승인 실패: ' + error.message)
-          return
-        }
-    
-        alert('승인되었습니다.')
-        location.reload()
+  document.querySelector('#approve-merchant')
+  ?.addEventListener('click', async () => {
+  
+    if (!confirm('이 가맹점을 승인하시겠습니까?')) return
+  
+    const loginId = 'MER' + String(merchant.id).padStart(4, '0')
+  
+    const { error } = await supabase
+      .from('merchants')
+      .update({
+        status: '운영',
+        merchant_login_id: loginId,
+        merchant_password: '1234'
       })
-    
+      .eq('id', merchant.id)
+  
+    if (error) {
+      alert('승인 실패: ' + error.message)
+      return
+    }
+  
+    alert(
+      '승인완료\n\n' +
+      '아이디 : ' + loginId +
+      '\n비밀번호 : 1234'
+    )
+  
+    location.reload()
+  })
+
     document.querySelector('#reject-merchant')
       ?.addEventListener('click', async () => {
         if (!confirm('이 가맹점을 반려하시겠습니까?')) return
