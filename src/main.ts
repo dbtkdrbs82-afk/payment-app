@@ -2963,7 +2963,8 @@ merchantButtons.forEach((button) => {
 '<label>기타서류</label>' +
 '<div><input type="file" />' +
 '<p>기존 파일: ' + (merchant.extra_file_url || '첨부파일 없음') + '</p></div>' +
-    '<label>메모</label><textarea placeholder="심사 메모를 입력하세요"></textarea>' +
+'<label>메모</label>' +
+'<textarea id="merchant-memo" placeholder="심사 메모를 입력하세요">' + (merchant.memo || '') + '</textarea>' +
   '</div>' +
 '</div>' +
 
