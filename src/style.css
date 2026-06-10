@@ -2645,12 +2645,6 @@ body {
   align-items: center !important;
   margin-bottom: 10px !important;
 }
-.address-row input,
-.address-row-full input {
-  height: inherit !important;
-  border: inherit !important;
-  border-radius: inherit !important;
-}
 
 .address-row button {
   height: 48px !important;
@@ -2660,4 +2654,25 @@ body {
 .address-row button {
   width: 180px !important;
   padding: 0 !important;
+}
+.address-row input,
+.address-row-full input {
+  display: block !important;
+  width: 100% !important;
+  height: 46px !important;
+  padding: 0 14px !important;
+  border: 1px solid #d7dce5 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
+  box-sizing: border-box !important;
+}
+
+.address-row button {
+  height: 46px !important;
+  width: 180px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: #174a86 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
 }
