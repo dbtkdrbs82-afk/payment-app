@@ -2943,45 +2943,11 @@ merchantButtons.forEach((button) => {
     
 '<div class="merchant-detail-section">' +
   '<h3>첨부서류</h3>' +
-'<label>사업자등록증</label>' +
-'<div><input type="file" />' +
-'<p>기존 파일: ' + (merchant.business_license_url || '첨부파일 없음') + '</p>' +
-(merchant.business_license_url
- ? '<button class="merchant-file-view-btn" onclick="window.open(\'' + supabase.storage.from('merchant-files').getPublicUrl(merchant.business_license_url).data.publicUrl + '\')">보기</button>'
- : '') +
-'</div>' +
-
-'<label>통장사본</label>' +
-'<div><input type="file" />' +
-'<p>기존 파일: ' + (merchant.bankbook_url || '첨부파일 없음') + '</p>' +
-(merchant.bankbook_url
- ? '<button class="merchant-file-view-btn" onclick="window.open(\'' + supabase.storage.from('merchant-files').getPublicUrl(merchant.bankbook_url).data.publicUrl + '\')">보기</button>'
- : '') +
-'</div>' +
-
-'<label>대표자 신분증</label>' +
-'<div><input type="file" />' +
-'<p>기존 파일: ' + (merchant.id_card_url || '첨부파일 없음') + '</p>' +
-(merchant.id_card_url
- ? '<button class="merchant-file-view-btn" onclick="window.open(\'' + supabase.storage.from('merchant-files').getPublicUrl(merchant.id_card_url).data.publicUrl + '\')">보기</button>'
- : '') +
-'</div>' +
-
-'<label>판매상품 사진</label>' +
-'<div><input type="file" />' +
-'<p>기존 파일: ' + (merchant.product_photo_url || '첨부파일 없음') + '</p>' +
-(merchant.product_photo_url
- ? '<button class="merchant-file-view-btn" onclick="window.open(\'' + supabase.storage.from('merchant-files').getPublicUrl(merchant.product_photo_url).data.publicUrl + '\')">보기</button>'
- : '') +
-'</div>' +
-
-'<label>기타서류</label>' +
-'<div><input type="file" />' +
-'<p>기존 파일: ' + (merchant.extra_file_url || '첨부파일 없음') + '</p>' +
-(merchant.extra_file_url
- ? '<button class="merchant-file-view-btn" onclick="window.open(\'' + supabase.storage.from('merchant-files').getPublicUrl(merchant.extra_file_url).data.publicUrl + '\')">보기</button>'
- : '') +
-'</div>' +
+'<label>사업자등록증</label><input type="file" />' +
+'<label>통장사본</label><input type="file" />' +
+'<label>대표자 신분증</label><input type="file" />' +
+'<label>판매상품 사진</label><input type="file" />' +
+'<label>기타서류</label><input type="file" />' +
 '<label>메모</label>' +
 '<textarea id="merchant-memo" placeholder="심사 메모를 입력하세요">' + (merchant.memo || '') + '</textarea>' +
   '</div>' +
