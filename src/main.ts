@@ -3018,6 +3018,7 @@ merchantButtons.forEach((button) => {
         phone: phone,
         fee_rate: feeRate,
       
+        resident_number: getValue('resident-number'),
         business_number: getValue('business_number'),
         email: getValue('email'),
         zipcode: getValue('zipcode'),
