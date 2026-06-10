@@ -2634,20 +2634,21 @@ body {
   display: grid !important;
   grid-template-columns: 120px 1fr 180px !important;
   gap: 10px !important;
-  align-items: center !important;
+  align-items: stretch !important;
   margin-bottom: 10px !important;
 }
 
-.address-row-full {
+.address-row {
   display: grid !important;
-  grid-template-columns: 120px 1fr !important;
+  grid-template-columns: 120px 1fr 180px !important;
   gap: 10px !important;
-  align-items: center !important;
+  align-items: stretch !important;
   margin-bottom: 10px !important;
 }
 
 .address-row button {
-  height: 48px !important;
+  height: 100% !important;
+  min-height: 48px !important;
   width: 180px !important;
 }
 
