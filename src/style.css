@@ -2681,3 +2681,12 @@ display: grid !important;
   padding: 10px;
   background: #f8fafc;
 }
+.merchant-file-view-btn {
+  margin-top: 6px;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #1d4b8f;
+  color: white;
+  cursor: pointer;
+}
