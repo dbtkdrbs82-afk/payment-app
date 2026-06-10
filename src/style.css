@@ -2690,3 +2690,29 @@ display: grid !important;
   color: white;
   cursor: pointer;
 }
+.merchant-file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.merchant-file-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.merchant-file-row label {
+  font-weight: 700;
+}
+
+.merchant-file-row input,
+.merchant-file-row textarea {
+  width: 100%;
+}
+
+.merchant-file-row span {
+  font-size: 13px;
+  color: #333;
+}
