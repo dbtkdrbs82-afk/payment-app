@@ -2681,41 +2681,6 @@ display: grid !important;
   padding: 10px;
   background: #f8fafc;
 }
-.merchant-file-view-btn {
-  margin-top: 6px;
-  padding: 6px 14px;
-  border: 0;
-  border-radius: 6px;
-  background: #1d4b8f;
-  color: white;
-  cursor: pointer;
-}
-.merchant-file-list {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.merchant-file-row {
-  display: grid;
-  grid-template-columns: 140px 1fr 1fr;
-  align-items: center;
-  gap: 12px;
-}
-
-.merchant-file-row label {
-  font-weight: 700;
-}
-
-.merchant-file-row input,
-.merchant-file-row textarea {
-  width: 100%;
-}
-
-.merchant-file-row span {
-  font-size: 13px;
-  color: #333;
-}
 .merchant-file-list {
   display: flex;
   flex-direction: column;
@@ -2729,47 +2694,23 @@ display: grid !important;
   gap: 12px;
 }
 
-.merchant-file-row label {
-  font-weight: 700;
-}
-
-.merchant-file-row span {
-  font-size: 13px;
-  color: #555;
+.merchant-file-row input[type="file"] {
+  width: 320px;
 }
 
 .merchant-file-row textarea {
+  width: 100%;
   min-height: 80px;
 }
-.merchant-file-list {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
+
+.merchant-detail-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 28px;
+  clear: both;
 }
 
-.merchant-file-row {
-  display: grid !important;
-  grid-template-columns: 140px 320px 1fr !important;
-  align-items: center !important;
-  gap: 12px !important;
-  width: 100% !important;
-}
-
-.merchant-file-row label {
-  font-weight: 700 !important;
-}
-
-.merchant-file-row input[type="file"] {
-  width: 320px !important;
-}
-
-.merchant-file-row span {
-  font-size: 13px !important;
-  color: #555 !important;
-  text-align: left !important;
-}
-
-.merchant-file-row textarea {
-  width: 100% !important;
-  min-height: 80px !important;
+.merchant-detail-actions button {
+  flex: 1;
 }
