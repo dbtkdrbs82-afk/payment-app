@@ -2741,3 +2741,35 @@ display: grid !important;
 .merchant-file-row textarea {
   min-height: 80px;
 }
+.merchant-file-list {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+}
+
+.merchant-file-row {
+  display: grid !important;
+  grid-template-columns: 140px 320px 1fr !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+}
+
+.merchant-file-row label {
+  font-weight: 700 !important;
+}
+
+.merchant-file-row input[type="file"] {
+  width: 320px !important;
+}
+
+.merchant-file-row span {
+  font-size: 13px !important;
+  color: #555 !important;
+  text-align: left !important;
+}
+
+.merchant-file-row textarea {
+  width: 100% !important;
+  min-height: 80px !important;
+}
