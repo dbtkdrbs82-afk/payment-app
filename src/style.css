@@ -2714,3 +2714,53 @@ display: grid !important;
 .merchant-detail-actions button {
   flex: 1;
 }
+.pg-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.admin-search-box {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.order-filter-btn {
+  flex: 1;
+  height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: #1d4b8f;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-summary {
+  margin: 20px 0;
+  font-weight: 700;
+}
+
+.admin-table-wrap {
+  overflow-x: auto;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-table th,
+.admin-table td {
+  border: 1px solid #d9dee7;
+  padding: 12px;
+  text-align: center;
+}
+
+.pg-admin-page {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+}
