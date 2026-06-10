@@ -940,27 +940,27 @@ setTimeout(() => {
 document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
 ?.addEventListener('click', async () => {
 
- const businessFile =
-    document.querySelector<HTMLInputElement>(
-      '#apply-file-business-license'
-    )?.files?.[0]
+  const businessFile =
+  document.querySelector<HTMLInputElement>('#apply-file-business-license')?.files?.[0]
 
-  const bankbookFile =
-    document.querySelector<HTMLInputElement>(
-      '#apply-file-bankbook'
-    )?.files?.[0]
+const bankbookFile =
+  document.querySelector<HTMLInputElement>('#apply-file-bankbook')?.files?.[0]
 
-  const idCardFile =
-    document.querySelector<HTMLInputElement>(
-      '#apply-file-id-card'
-    )?.files?.[0]
+const idCardFile =
+  document.querySelector<HTMLInputElement>('#apply-file-id-card')?.files?.[0]
 
-  if (!businessFile || !bankbookFile || !idCardFile) {
-    alert('필수 서류를 모두 첨부해주세요.')
-    return
-  }
+const productPhotoFile =
+  document.querySelector<HTMLInputElement>('#apply-file-product-photo')?.files?.[0]
 
-  const safeTime = Date.now()
+const extraFile =
+  document.querySelector<HTMLInputElement>('#apply-file-extra')?.files?.[0]
+
+if (!businessFile || !bankbookFile || !idCardFile) {
+  alert('필수 서류를 모두 첨부해주세요.')
+  return
+}
+
+const safeTime = Date.now()
 
 const businessFileName =
   `${safeTime}_business.${businessFile.name.split('.').pop() || 'file'}`
@@ -971,10 +971,18 @@ const bankbookFileName =
 const idCardFileName =
   `${safeTime}_idcard.${idCardFile.name.split('.').pop() || 'file'}`
 
-  const businessUpload = await supabase.storage
+const productPhotoFileName = productPhotoFile
+  ? `${safeTime}_product.${productPhotoFile.name.split('.').pop() || 'file'}`
+  : ''
+
+const extraFileName = extraFile
+  ? `${safeTime}_extra.${extraFile.name.split('.').pop() || 'file'}`
+  : ''
+
+const businessUpload = await supabase.storage
   .from('merchant-files')
   .upload(businessFileName, businessFile)
-  alert(JSON.stringify(businessUpload))
+
 if (businessUpload.error) {
   alert('사업자등록증 업로드 실패: ' + businessUpload.error.message)
   return
@@ -996,6 +1004,28 @@ const idCardUpload = await supabase.storage
 if (idCardUpload.error) {
   alert('신분증 업로드 실패: ' + idCardUpload.error.message)
   return
+}
+
+if (productPhotoFile) {
+  const productPhotoUpload = await supabase.storage
+    .from('merchant-files')
+    .upload(productPhotoFileName, productPhotoFile)
+
+  if (productPhotoUpload.error) {
+    alert('판매상품 사진 업로드 실패: ' + productPhotoUpload.error.message)
+    return
+  }
+}
+
+if (extraFile) {
+  const extraUpload = await supabase.storage
+    .from('merchant-files')
+    .upload(extraFileName, extraFile)
+
+  if (extraUpload.error) {
+    alert('기타서류 업로드 실패: ' + extraUpload.error.message)
+    return
+  }
 }
 
   const insertData = {
@@ -1021,7 +1051,9 @@ if (idCardUpload.error) {
     business_license_url: businessFileName,
 bankbook_url: bankbookFileName,
 id_card_url: idCardFileName,
-
+product_photo_url: productPhotoFileName,
+extra_file_url: extraFileName,
+memo: (document.getElementById('apply-memo') as HTMLTextAreaElement)?.value || '',
     status: '신청'
   }
 
@@ -1038,9 +1070,6 @@ id_card_url: idCardFileName,
 
   location.href = '/'
 })
-
-  } else if (path === '/merchant-create') {
-
 
 } else if (path === '/merchant-create') {
   app.innerHTML = `
