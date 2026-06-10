@@ -910,12 +910,26 @@ setTimeout(() => {
       </div>
 
       <div class="apply-section">
-        <h3>6. 첨부서류 / 메모</h3>
-        <div class="apply-grid">
-          <label>메모</label>
-          <textarea id="apply-memo" placeholder="추가 요청사항"></textarea>
-        </div>
-      </div>
+  <h3>6. 첨부서류 / 메모</h3>
+  <p class="apply-help">PG 심사를 위해 필수 서류를 첨부해주세요.</p>
+
+  <div class="apply-grid">
+    <label>사업자등록증 *</label>
+    <input id="apply-file-business-license" type="file">
+
+    <label>통장사본 *</label>
+    <input id="apply-file-bankbook" type="file">
+
+    <label>대표자 신분증 *</label>
+    <input id="apply-file-id-card" type="file">
+
+    <label>기타서류</label>
+    <input id="apply-file-etc" type="file">
+
+    <label>메모</label>
+    <textarea id="apply-memo" placeholder="추가 요청사항"></textarea>
+  </div>
+</div>
 
       <button id="merchant-apply-submit" class="apply-submit-btn">가입신청</button>
       <div id="merchant-apply-result"></div>
