@@ -2773,13 +2773,3 @@ display: grid !important;
   width: 100% !important;
   min-height: 80px !important;
 }
-.merchant-file-btn{
-  margin-left:8px;
-  padding:4px 10px;
-  border:none;
-  border-radius:4px;
-  background:#1d4b8f;
-  color:#fff;
-  cursor:pointer;
-  font-size:12px;
-}
