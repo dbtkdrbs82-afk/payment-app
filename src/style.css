@@ -2669,5 +2669,5 @@ display: grid !important;
   font-weight: 700 !important;
 }
 .address-row button {
-  transform: translateY(2px) !important;
+  transform: translateY(1px) !important;
 }
