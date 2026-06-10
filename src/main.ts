@@ -973,19 +973,28 @@ const idCardFileName =
   .from('merchant-files')
   .upload(businessFileName, businessFile)
 
-console.log('사업자등록증 업로드', businessUpload)
+if (businessUpload.error) {
+  alert('사업자등록증 업로드 실패: ' + businessUpload.error.message)
+  return
+}
 
 const bankbookUpload = await supabase.storage
   .from('merchant-files')
   .upload(bankbookFileName, bankbookFile)
 
-console.log('통장사본 업로드', bankbookUpload)
+if (bankbookUpload.error) {
+  alert('통장사본 업로드 실패: ' + bankbookUpload.error.message)
+  return
+}
 
 const idCardUpload = await supabase.storage
   .from('merchant-files')
   .upload(idCardFileName, idCardFile)
 
-console.log('신분증 업로드', idCardUpload)
+if (idCardUpload.error) {
+  alert('신분증 업로드 실패: ' + idCardUpload.error.message)
+  return
+}
 
   const insertData = {
     merchant_name: (document.getElementById('apply-merchant-name') as HTMLInputElement)?.value || '',
