@@ -4424,6 +4424,45 @@ const orderIdValue =
           window.location.href = '/merchant-admin'
         })
 
+    } else if (path === '/merchant-admin') {
+
+      const merchantId =
+        Number(sessionStorage.getItem('login_merchant_id'))
+
+      const merchantName =
+        sessionStorage.getItem('login_merchant_name') || ''
+
+      if (!merchantId) {
+        alert('로그인이 필요합니다.')
+        location.href = '/merchant-login'
+        return
+      }
+
+      app.innerHTML = `
+        <div class="page">
+          <div class="payment-card">
+            <h1>가맹점 관리자</h1>
+            <p>${merchantName}님 환영합니다.</p>
+
+            <div style="display:grid;gap:12px;margin-top:20px;">
+              <button>상품관리</button>
+              <button>주문관리</button>
+              <button>결제내역</button>
+              <button>정산내역</button>
+              <button id="merchant-logout">로그아웃</button>
+            </div>
+          </div>
+        </div>
+      `
+
+      document.querySelector('#merchant-logout')
+        ?.addEventListener('click', () => {
+          sessionStorage.removeItem('login_merchant_id')
+          sessionStorage.removeItem('login_merchant_name')
+          sessionStorage.removeItem('login_merchant_code')
+          location.href = '/merchant-login'
+        })
+
 
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
