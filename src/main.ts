@@ -960,6 +960,27 @@ document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
     return
   }
 
+  const businessFileName =
+  `${Date.now()}_business_${businessFile.name}`
+
+const bankbookFileName =
+  `${Date.now()}_bank_${bankbookFile.name}`
+
+const idCardFileName =
+  `${Date.now()}_id_${idCardFile.name}`
+
+await supabase.storage
+  .from('merchant-files')
+  .upload(businessFileName, businessFile)
+
+await supabase.storage
+  .from('merchant-files')
+  .upload(bankbookFileName, bankbookFile)
+
+await supabase.storage
+  .from('merchant-files')
+  .upload(idCardFileName, idCardFile)
+
   const insertData = {
     merchant_name: (document.getElementById('apply-merchant-name') as HTMLInputElement)?.value || '',
     owner_name: (document.getElementById('apply-owner-name') as HTMLInputElement)?.value || '',
@@ -980,9 +1001,9 @@ document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
 
     settlement_cycle: (document.getElementById('apply-settlement-cycle') as HTMLSelectElement)?.value || '',
 
-    business_license_url: '',
-bankbook_url: '',
-id_card_url: '',
+    business_license_url: businessFileName,
+bankbook_url: bankbookFileName,
+id_card_url: idCardFileName,
 
     status: '신청'
   }
