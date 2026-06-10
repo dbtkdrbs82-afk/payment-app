@@ -915,19 +915,22 @@ setTimeout(() => {
 
   <div class="apply-grid">
     <label>사업자등록증 *</label>
-    <input id="apply-file-business-license" type="file">
+<input id="apply-file-business-license" type="file">
 
-    <label>통장사본 *</label>
-    <input id="apply-file-bankbook" type="file">
+<label>통장사본 *</label>
+<input id="apply-file-bankbook" type="file">
 
-    <label>대표자 신분증 *</label>
-    <input id="apply-file-id-card" type="file">
+<label>대표자 신분증 *</label>
+<input id="apply-file-id-card" type="file">
 
-    <label>기타서류</label>
-    <input id="apply-file-etc" type="file">
+<label>판매상품 사진</label>
+<input id="apply-file-product-photo" type="file">
 
-    <label>메모</label>
-    <textarea id="apply-memo" placeholder="추가 요청사항"></textarea>
+<label>기타서류</label>
+<input id="apply-file-extra" type="file">
+
+<label>메모</label>
+<textarea id="apply-memo" placeholder="추가 요청사항"></textarea>
   </div>
 </div>
 
