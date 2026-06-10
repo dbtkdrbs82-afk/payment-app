@@ -3010,8 +3010,8 @@ merchantButtons.forEach((button) => {
       })
 
       const getValue = (id: string) =>
-  (document.getElementById(id) as HTMLInputElement | HTMLSelectElement | null)?.value || ''
-
+  (document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null)?.value || ''
+      
       const updateData = {
         merchant_name: merchantName,
         owner_name: ownerName,
@@ -3031,7 +3031,8 @@ merchantButtons.forEach((button) => {
         bank_name: getValue('bank_name'),
         account_number: getValue('account_number'),
         account_holder: getValue('account_holder'),
-        settlement_cycle: getValue('settlement_cycle')
+        settlement_cycle: getValue('settlement_cycle'),
+        memo: getValue('merchant-memo')
       }
     
       console.log('실제 저장 데이터:', updateData)
