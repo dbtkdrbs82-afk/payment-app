@@ -2941,11 +2941,25 @@ merchantButtons.forEach((button) => {
 '<div class="merchant-detail-section">' +
   '<h3>첨부서류</h3>' +
   '<div class="merchant-file-grid">' +
-    '<label>사업자등록증</label><input type="file" />' +
-    '<label>통장사본</label><input type="file" />' +
-    '<label>대표자 신분증</label><input type="file" />' +
-    '<label>판매상품 사진</label><input type="file" />' +
-    '<label>기타서류</label><input type="file" />' +
+    '<label>사업자등록증</label>' +
+'<div><input type="file" />' +
+'<p>기존 파일: ' + (merchant.business_license_url || '첨부파일 없음') + '</p></div>' +
+
+'<label>통장사본</label>' +
+'<div><input type="file" />' +
+'<p>기존 파일: ' + (merchant.bankbook_url || '첨부파일 없음') + '</p></div>' +
+
+'<label>대표자 신분증</label>' +
+'<div><input type="file" />' +
+'<p>기존 파일: ' + (merchant.id_card_url || '첨부파일 없음') + '</p></div>' +
+
+'<label>판매상품 사진</label>' +
+'<div><input type="file" />' +
+'<p>기존 파일: ' + (merchant.product_photo_url || '첨부파일 없음') + '</p></div>' +
+
+'<label>기타서류</label>' +
+'<div><input type="file" />' +
+'<p>기존 파일: ' + (merchant.extra_file_url || '첨부파일 없음') + '</p></div>' +
     '<label>메모</label><textarea placeholder="심사 메모를 입력하세요"></textarea>' +
   '</div>' +
 '</div>' +
