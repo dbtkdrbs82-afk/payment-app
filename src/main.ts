@@ -4401,11 +4401,11 @@ const orderIdValue =
           }
 
           const { data: merchant, error } = await supabase
-            .from('merchants')
-            .select('*')
-            .eq('login_id', loginId)
-            .eq('password', password)
-            .single()
+  .from('merchants')
+  .select('*')
+  .eq('merchant_login_id', loginId)
+  .eq('merchant_password', password)
+  .single()
 
           if (error || !merchant) {
             alert('로그인 정보가 올바르지 않습니다.')
@@ -4413,7 +4413,10 @@ const orderIdValue =
           }
 
           sessionStorage.setItem('login_merchant_id', String(merchant.id))
-          sessionStorage.setItem('login_merchant_code', merchant.merchant_id)
+          sessionStorage.setItem(
+            'login_merchant_code',
+            merchant.merchant_login_id || ''
+          )
           sessionStorage.setItem('login_merchant_name', merchant.merchant_name)
 
           alert(merchant.merchant_name + '님 로그인되었습니다.')
