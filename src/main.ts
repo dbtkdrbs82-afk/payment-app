@@ -960,14 +960,16 @@ document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
     return
   }
 
-  const businessFileName =
-  `${Date.now()}_business_${businessFile.name}`
+  const safeTime = Date.now()
+
+const businessFileName =
+  `${safeTime}_business.${businessFile.name.split('.').pop() || 'file'}`
 
 const bankbookFileName =
-  `${Date.now()}_bank_${bankbookFile.name}`
+  `${safeTime}_bankbook.${bankbookFile.name.split('.').pop() || 'file'}`
 
 const idCardFileName =
-  `${Date.now()}_id_${idCardFile.name}`
+  `${safeTime}_idcard.${idCardFile.name.split('.').pop() || 'file'}`
 
   const businessUpload = await supabase.storage
   .from('merchant-files')
