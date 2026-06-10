@@ -4432,11 +4432,10 @@ const orderIdValue =
       const merchantName =
         sessionStorage.getItem('login_merchant_name') || ''
 
-      if (!merchantId) {
-        alert('로그인이 필요합니다.')
-        location.href = '/merchant-login'
-        return
-      }
+        if (!merchantId) {
+          alert('로그인이 필요합니다.')
+          location.href = '/merchant-login'
+        }
 
       app.innerHTML = `
         <div class="page">
