@@ -940,6 +940,26 @@ setTimeout(() => {
 document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
 ?.addEventListener('click', async () => {
 
+ const businessFile =
+    document.querySelector<HTMLInputElement>(
+      '#apply-file-business-license'
+    )?.files?.[0]
+
+  const bankbookFile =
+    document.querySelector<HTMLInputElement>(
+      '#apply-file-bankbook'
+    )?.files?.[0]
+
+  const idCardFile =
+    document.querySelector<HTMLInputElement>(
+      '#apply-file-id-card'
+    )?.files?.[0]
+
+  if (!businessFile || !bankbookFile || !idCardFile) {
+    alert('필수 서류를 모두 첨부해주세요.')
+    return
+  }
+
   const insertData = {
     merchant_name: (document.getElementById('apply-merchant-name') as HTMLInputElement)?.value || '',
     owner_name: (document.getElementById('apply-owner-name') as HTMLInputElement)?.value || '',
@@ -959,6 +979,10 @@ document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
     account_holder: (document.getElementById('apply-account-holder') as HTMLInputElement)?.value || '',
 
     settlement_cycle: (document.getElementById('apply-settlement-cycle') as HTMLSelectElement)?.value || '',
+
+    business_license_url: '',
+bankbook_url: '',
+id_card_url: '',
 
     status: '신청'
   }
