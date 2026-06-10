@@ -974,7 +974,7 @@ const idCardFileName =
   const businessUpload = await supabase.storage
   .from('merchant-files')
   .upload(businessFileName, businessFile)
-
+  alert(JSON.stringify(businessUpload))
 if (businessUpload.error) {
   alert('사업자등록증 업로드 실패: ' + businessUpload.error.message)
   return
