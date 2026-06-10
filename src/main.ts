@@ -969,17 +969,23 @@ const bankbookFileName =
 const idCardFileName =
   `${Date.now()}_id_${idCardFile.name}`
 
-await supabase.storage
+  const businessUpload = await supabase.storage
   .from('merchant-files')
   .upload(businessFileName, businessFile)
 
-await supabase.storage
+console.log('사업자등록증 업로드', businessUpload)
+
+const bankbookUpload = await supabase.storage
   .from('merchant-files')
   .upload(bankbookFileName, bankbookFile)
 
-await supabase.storage
+console.log('통장사본 업로드', bankbookUpload)
+
+const idCardUpload = await supabase.storage
   .from('merchant-files')
   .upload(idCardFileName, idCardFile)
+
+console.log('신분증 업로드', idCardUpload)
 
   const insertData = {
     merchant_name: (document.getElementById('apply-merchant-name') as HTMLInputElement)?.value || '',
