@@ -3849,7 +3849,7 @@ document.querySelector('#mini-qr-tab')
   if (tableHead) {
     tableHead.innerHTML =
       '<tr>' +
-      '<th>No</th>' +
+      '<th>순번</th>' +
       '<th>가맹점ID</th>' +
       '<th>상품명</th>' +
       '<th>판매가</th>' +
