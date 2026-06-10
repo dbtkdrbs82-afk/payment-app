@@ -2379,12 +2379,6 @@ body {
   grid-column: 1 / -1;
 }
 
-.address-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
 .zipcode-input {
   width: 90px !important;
 }
@@ -2631,7 +2625,7 @@ body {
   gap: 10px;
 }
 .address-row {
-  display: grid !important;
+display: grid !important;
   grid-template-columns: 120px 1fr 180px !important;
   gap: 10px !important;
   align-items: stretch !important;
@@ -2642,35 +2636,32 @@ body {
   display: grid !important;
   grid-template-columns: 120px 1fr 180px !important;
   gap: 10px !important;
-  align-items: stretch !important;
+  align-items: center !important;
   margin-bottom: 10px !important;
 }
 
-.address-row button {
-  height: 100% !important;
-  min-height: 48px !important;
-  width: 180px !important;
+.address-row-full {
+  display: grid !important;
+  grid-template-columns: 120px 1fr !important;
+  gap: 10px !important;
+  align-items: center !important;
+  margin-bottom: 10px !important;
 }
 
-.address-row button {
-  width: 180px !important;
-  padding: 0 !important;
-}
 .address-row input,
 .address-row-full input {
-  display: block !important;
   width: 100% !important;
   height: 46px !important;
   padding: 0 14px !important;
   border: 1px solid #d7dce5 !important;
   border-radius: 10px !important;
-  background: #fff !important;
   box-sizing: border-box !important;
 }
 
 .address-row button {
-  height: 46px !important;
   width: 180px !important;
+  height: 46px !important;
+  padding: 0 !important;
   border: 0 !important;
   border-radius: 10px !important;
   background: #174a86 !important;
