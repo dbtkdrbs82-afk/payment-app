@@ -4525,8 +4525,7 @@ const channel = supabase
     }, 0).toLocaleString()}원
   </div>
 
-  <select>
-    <select id="merchant-page-size">
+  <select id="merchant-page-size">
   <option value="10">10개씩 보기</option>
   <option value="20" selected>20개씩 보기</option>
   <option value="30">30개씩 보기</option>
