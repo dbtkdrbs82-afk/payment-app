@@ -4516,7 +4516,7 @@ setInterval(async () => {
   
     setTimeout(() => {
       location.reload()
-    }, 1500)
+    }, 5000)
   }
 }, 5000)
 
