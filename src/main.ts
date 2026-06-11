@@ -5157,14 +5157,15 @@ document.querySelector('#merchant-product-image-file')
             ${kioskUrl}
           </div>
   
-          <div class="qr-action-row">
-          <div style="
+      <div style="
+  width:320px;
+  margin:20px auto 0;
   display:flex;
+  justify-content:center;
   gap:12px;
-  margin-top:20px;
 ">
   <button id="copy-kiosk-url" style="
-    flex:1;
+    width:154px;
     height:44px;
     padding:0;
     border:0;
@@ -5172,10 +5173,11 @@ document.querySelector('#merchant-product-image-file')
     background:#1d4b8f;
     color:white;
     font-weight:700;
+    font-size:14px;
   ">주소 복사</button>
 
   <button id="print-qr" style="
-    flex:1;
+    width:154px;
     height:44px;
     padding:0;
     border:0;
@@ -5183,14 +5185,14 @@ document.querySelector('#merchant-product-image-file')
     background:#1d4b8f;
     color:white;
     font-weight:700;
+    font-size:14px;
   ">인쇄</button>
 </div>
-</div>
-        </div>
       </div>
-    `
-  
-    const qrBox =
+    </div>
+  `
+
+  const qrBox =
       document.querySelector<HTMLDivElement>('#merchant-qr-box')!
   
     QRCode.toCanvas(kioskUrl, { width: 240 }, (error, canvas) => {
