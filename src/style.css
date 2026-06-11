@@ -2925,3 +2925,18 @@ display: grid !important;
   padding: 0 10px;
   border: 1px solid #999;
 }
+.merchant-sales-filter {
+  display: flex;
+  align-items: center;   /* 세로 가운데 정렬 */
+  gap: 8px;
+}
+
+.merchant-sales-filter input {
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid #cfd8e3;
+  border-radius: 6px;
+
+  position: relative;
+  top: 2px;   /* 날짜칸을 살짝 아래로 */
+}
