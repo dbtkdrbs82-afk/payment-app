@@ -2940,3 +2940,41 @@ display: grid !important;
   position: relative;
   top: 2px;   /* 날짜칸을 살짝 아래로 */
 }
+/* NXG PICK 날짜 검색 줄 강제 정렬 */
+.merchant-sales-filter {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  margin: 16px 0 18px !important;
+  height: 36px !important;
+}
+
+.merchant-sales-filter button {
+  height: 36px !important;
+  min-width: 74px !important;
+  padding: 0 14px !important;
+  line-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.merchant-sales-filter input[type="date"] {
+  width: 150px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  padding: 0 10px !important;
+  margin: 0 !important;
+  line-height: 36px !important;
+  box-sizing: border-box !important;
+  vertical-align: middle !important;
+  position: static !important;
+  transform: translateY(0) !important;
+}
+
+.merchant-sales-filter span {
+  height: 36px !important;
+  line-height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+}
