@@ -4870,10 +4870,10 @@ document.querySelector('#sales-search')
       </div>
 
       <div class="payment-card">
-        <div class="merchant-product-layout">
+  <div class="merchant-product-layout">
 
-  <div class="payment-card product-create-card">
-    <h2>상품 등록</h2>
+    <div class="product-create-card">
+      <h2>상품 등록</h2>
 
     <div class="input-group">
       <label>상품명</label>
@@ -4903,7 +4903,7 @@ document.querySelector('#sales-search')
     <button id="merchant-product-create">상품 등록</button>
   </div>
 
-  <div class="payment-card product-list-card">
+  <div class="product-list-card">
     <h2>등록된 상품</h2>
 
     <div class="product-summary-row">
@@ -4976,7 +4976,7 @@ document.querySelector('#merchant-product-image-file')
     preview.style.display = 'block'
     previewText.style.display = 'none'
   })
-  
+
   document.querySelector('#merchant-product-create')
     ?.addEventListener('click', async () => {
       const productName =
