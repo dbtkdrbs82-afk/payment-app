@@ -2987,7 +2987,7 @@ display: grid !important;
 .date-wave {
   display: inline-flex !important;
   align-items: center !important;
-  transform: translateY(3px) !important;
+  transform: translateY(5px) !important;
 }
 
 .date-wrap input[type="date"] {
