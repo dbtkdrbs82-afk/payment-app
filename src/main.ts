@@ -4483,6 +4483,43 @@ if (startDate && endDate) {
 const { data: orders, error } = await orderQuery
   .order('created_at', { ascending: false })
 
+  let lastOrderCount = (orders || []).length
+
+setInterval(async () => {
+  const { data: latestOrders } = await supabase
+    .from('orders')
+    .select('id')
+    .eq('merchant_id', merchantId)
+
+  const latestCount = (latestOrders || []).length
+
+  if (latestCount > lastOrderCount) {
+    lastOrderCount = latestCount
+  
+    const audio = new Audio(
+      'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
+    )
+  
+    audio.play()
+  
+    setTimeout(() => {
+      const message =
+        new SpeechSynthesisUtterance(
+          '새 주문이 접수되었습니다.'
+        )
+  
+      message.lang = 'ko-KR'
+      message.rate = 0.95
+  
+      window.speechSynthesis.speak(message)
+    }, 1000)
+  
+    setTimeout(() => {
+      location.reload()
+    }, 1500)
+  }
+}, 5000)
+
 if (error) {
   alert('주문내역 조회 실패: ' + error.message)
 }
