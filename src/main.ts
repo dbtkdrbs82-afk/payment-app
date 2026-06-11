@@ -4507,9 +4507,26 @@ const channel = supabase
             <button class="order-filter-btn" data-status="완료">완료</button>
           </div>
       
-          <div class="admin-summary">
-            주문수 : ${(orders || []).length}건
-          </div>
+          <div class="merchant-sales-filter">
+  <button id="sales-today">오늘</button>
+  <button id="sales-month">이번달</button>
+  <button id="sales-year">올해</button>
+
+  <input id="sales-start-date" type="date" />
+  <span>~</span>
+  <input id="sales-end-date" type="date" />
+
+  <button id="sales-search">검색</button>
+</div>
+
+<div class="admin-summary">
+  주문수 : ${(orders || []).length}건
+  /
+  매출합계 :
+  ${(orders || []).reduce((sum, order) => {
+    return sum + Number(order.total_amount || 0)
+  }, 0).toLocaleString()}원
+</div>
       
           <div class="admin-table-wrap">
             <table class="admin-table">

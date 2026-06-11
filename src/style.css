@@ -2803,3 +2803,28 @@ display: grid !important;
   width: 120px;
   height: 42px;
 }
+.merchant-sales-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.merchant-sales-filter button {
+  height: 34px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 6px;
+  background: #1d4b8f;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.merchant-sales-filter input {
+  height: 34px;
+  border: 1px solid #cfd8e3;
+  border-radius: 6px;
+  padding: 0 8px;
+}
