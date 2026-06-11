@@ -630,30 +630,15 @@ setTimeout(() => {
       })
   }
 
-} else if (path === '/product-create') {
-  const { data: merchantData, error: merchantError } = await supabase
-    .from('merchants')
-    .select('*')
-    .order('id', { ascending: true })
+  const productMerchantId =
+  Number(sessionStorage.getItem('login_merchant_id'))
 
-  if (merchantError) {
-    app.innerHTML = `<p>가맹점 목록을 불러오지 못했습니다.</p>`
-  } else {
+
     app.innerHTML = `
       <div class="page">
         <div class="payment-card">
           <h1>상품 등록</h1>
 
-          <div class="input-group">
-            <label>가맹점 선택</label>
-            <select id="product-merchant-select">
-              ${(merchantData || []).map((merchant) => `
-                <option value="${merchant.id}">
-                  ${merchant.merchant_id || 'MER' + String(merchant.id).padStart(4, '0')} / ${merchant.merchant_name}
-                </option>
-              `).join('')}
-            </select>
-          </div>
 
           <div class="input-group">
             <label>상품명</label>
@@ -670,9 +655,9 @@ setTimeout(() => {
             <input id="product-image-url" type="text" placeholder="상품 이미지 주소">
           </div>
 
-          <button id="product-create-button">상품 등록</button>
+          <h2 style="margin-top:30px;">등록된 상품</h2>
 
-          <div id="product-result"></div>
+<div id="merchant-product-list"></div>
         </div>
       </div>
     `
@@ -700,7 +685,7 @@ setTimeout(() => {
           .from('products')
           .insert([
             {
-              merchant_id: Number(merchantId),
+              merchant_id: productMerchantId,
               product_name: productName,
               price: price,
               image_url: imageUrl
@@ -717,7 +702,7 @@ setTimeout(() => {
 
         resultBox.innerHTML = `<p>상품 등록 완료</p>`
       })
-  }
+  
 
 } else if (path === '/merchant-apply') {
   app.innerHTML = `
