@@ -3257,3 +3257,31 @@ display: grid !important;
 
   flex: none !important;
 }
+.qr-button-group {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.qr-button-group button {
+  width: 160px;
+  height: 48px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #1d4b8f;
+  color: white;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.qr-button-group button:hover {
+  opacity: 0.9;
+}

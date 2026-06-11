@@ -5157,10 +5157,10 @@ document.querySelector('#merchant-product-image-file')
             ${kioskUrl}
           </div>
   
-          <div style="display:flex;gap:10px;">
-            <button id="copy-kiosk-url">주소 복사</button>
-            <button id="print-qr">인쇄</button>
-          </div>
+          <div class="qr-button-group">
+  <button id="copy-kiosk-url">주소 복사</button>
+  <button id="print-qr">인쇄</button>
+</div>
         </div>
       </div>
     `
@@ -5211,7 +5211,7 @@ document.querySelector('#merchant-product-image-file')
         sessionStorage.removeItem('login_merchant_code')
         location.href = '/merchant-login'
       })
-      
+
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
