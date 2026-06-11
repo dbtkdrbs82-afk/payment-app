@@ -3011,3 +3011,132 @@ display: grid !important;
   font-size: 12px;
   font-weight: 700;
 }
+.merchant-product-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: 16px;
+}
+
+.product-create-card {
+  width: 340px;
+  flex-shrink: 0;
+}
+
+.product-list-card {
+  flex: 1;
+  min-height: 420px;
+}
+
+.product-summary-row {
+  display: flex;
+  gap: 16px;
+  margin: 10px 0 20px;
+  font-weight: 700;
+}
+
+.product-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.product-item-card {
+  display: grid;
+  grid-template-columns: 90px 1fr 260px;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #d9dee7;
+  border-radius: 12px;
+  padding: 14px;
+  background: #fff;
+}
+
+.product-thumb {
+  width: 90px;
+  height: 90px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #f3f5f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-no-image {
+  font-size: 12px;
+  color: #777;
+}
+
+.product-info h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.product-info p {
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+.product-on,
+.product-off {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.product-on {
+  background: #22c55e;
+}
+
+.product-off {
+  background: #9ca3af;
+}
+
+.product-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.product-actions button {
+  min-width: 72px;
+  height: 34px;
+  border: 0;
+  border-radius: 6px;
+  background: #1d4b8f;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.product-image-preview-box {
+  width: 100%;
+  height: 180px;
+  border: 1px dashed #cfd8e3;
+  border-radius: 10px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 20px;
+  overflow: hidden;
+  color: #777;
+  font-size: 14px;
+}
+
+.product-image-preview-box img {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

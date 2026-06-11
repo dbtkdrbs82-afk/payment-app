@@ -4002,7 +4002,7 @@ product.merchant_id +
     })
 
   })
-  
+
 document.querySelectorAll('.product-delete-button')
   .forEach((button) => {
     button.addEventListener('click', async () => {
@@ -4870,76 +4870,113 @@ document.querySelector('#sales-search')
       </div>
 
       <div class="payment-card">
-        <h2>상품 등록</h2>
+        <div class="merchant-product-layout">
 
-        <div class="input-group">
-          <label>상품명</label>
-          <input id="merchant-product-name" placeholder="예: 아메리카노" />
-        </div>
+  <div class="payment-card product-create-card">
+    <h2>상품 등록</h2>
 
-        <div class="input-group">
-          <label>가격</label>
-          <input id="merchant-product-price" type="number" placeholder="예: 4500" />
-        </div>
+    <div class="input-group">
+      <label>상품명</label>
+      <input id="merchant-product-name" placeholder="예: 아메리카노" />
+    </div>
 
-        <div class="input-group">
-          <label>상품 이미지</label>
-<input
-  id="merchant-product-image-file"
-  type="file"
-  accept="image/*"
-  capture="environment"
-/>
-        </div>
+    <div class="input-group">
+      <label>가격</label>
+      <input id="merchant-product-price" type="number" placeholder="예: 4500" />
+    </div>
 
-        <button id="merchant-product-create">상품 등록</button>
-      </div>
+    <div class="input-group">
+      <label>상품 이미지</label>
+      <input
+        id="merchant-product-image-file"
+        type="file"
+        accept="image/*"
+        capture="environment"
+      />
+    </div>
 
-      <div class="payment-card" style="margin-top:20px;">
-        <h2>등록된 상품</h2>
+    <div class="product-image-preview-box">
+      <img id="product-image-preview" />
+      <span id="product-image-preview-text">이미지 미리보기</span>
+    </div>
 
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>상품명</th>
-              <th>가격</th>
-              <th>상태</th>
-              <th>관리</th>
-            </tr>
-          </thead>
-          <tbody id="merchantProductBody"></tbody>
-        </table>
-      </div>
+    <button id="merchant-product-create">상품 등록</button>
+  </div>
+
+  <div class="payment-card product-list-card">
+    <h2>등록된 상품</h2>
+
+    <div class="product-summary-row">
+      <span>총 상품 : ${(products || []).length}개</span>
+      <span>판매중 : ${(products || []).filter((p) => (p.status || '판매중') === '판매중').length}개</span>
+      <span>판매중지 : ${(products || []).filter((p) => p.status === '판매중지').length}개</span>
+    </div>
+
+    <div id="merchantProductBody" class="product-card-list"></div>
+  </div>
+
+</div>
     </div>
   `
 
   const productBody =
-    document.querySelector<HTMLTableSectionElement>('#merchantProductBody')!
+  document.querySelector<HTMLDivElement>('#merchantProductBody')!
 
-  productBody.innerHTML = ''
+productBody.innerHTML = ''
 
-  ;(products || []).forEach((product, index) => {
-    const tr = document.createElement('tr')
+;(products || []).forEach((product) => {
+  const item = document.createElement('div')
 
-    tr.innerHTML =
-      '<td>' + (index + 1) + '</td>' +
-      '<td>' + (product.product_name || '-') + '</td>' +
-      '<td>' + Number(product.price || 0).toLocaleString() + '원</td>' +
-      '<td>' + (product.status || '판매중') + '</td>' +
-      '<td>' +
-  '<button class="product-edit-button" data-id="' + product.id + '">수정</button> ' +
+  const productImage =
+    product.image_url
+      ? '<img src="' + product.image_url + '" />'
+      : '<div class="product-no-image">이미지 없음</div>'
 
-  '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
-    ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
-  '</button> ' +
+  item.className = 'product-item-card'
 
-  '<button class="product-delete-button" data-id="' + product.id + '">삭제</button>' +
-'</td>'
+  item.innerHTML =
+    '<div class="product-thumb">' +
+      productImage +
+    '</div>' +
 
-    productBody.appendChild(tr)
+    '<div class="product-info">' +
+      '<h3>' + (product.product_name || '-') + '</h3>' +
+      '<p>' + Number(product.price || 0).toLocaleString() + '원</p>' +
+      '<span class="' + ((product.status || '판매중') === '판매중' ? 'product-on' : 'product-off') + '">' +
+        (product.status || '판매중') +
+      '</span>' +
+    '</div>' +
+
+    '<div class="product-actions">' +
+      '<button class="product-edit-button" data-id="' + product.id + '">수정</button>' +
+      '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
+        ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
+      '</button>' +
+      '<button class="product-delete-button" data-id="' + product.id + '">삭제</button>' +
+    '</div>'
+
+  productBody.appendChild(item)
+})
+  
+document.querySelector('#merchant-product-image-file')
+  ?.addEventListener('change', () => {
+    const file =
+      (document.getElementById('merchant-product-image-file') as HTMLInputElement)
+        ?.files?.[0]
+
+    const preview =
+      document.getElementById('product-image-preview') as HTMLImageElement
+
+    const previewText =
+      document.getElementById('product-image-preview-text') as HTMLSpanElement
+
+    if (!file) return
+
+    preview.src = URL.createObjectURL(file)
+    preview.style.display = 'block'
+    previewText.style.display = 'none'
   })
-
+  
   document.querySelector('#merchant-product-create')
     ?.addEventListener('click', async () => {
       const productName =
