@@ -2760,7 +2760,28 @@ display: grid !important;
 }
 
 .pg-admin-page {
-  max-width: 1600px;
+  width: 100%;
+  max-width: 1800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 20px 30px;
+  box-sizing: border-box;
+}
+.pg-admin-table-wrap {
+  overflow-x: auto;
+}
+.merchant-top-menu {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.merchant-top-menu button {
+  flex: 1;
+  height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: #1d4b8f;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
 }
