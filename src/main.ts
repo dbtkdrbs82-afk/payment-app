@@ -5157,9 +5157,9 @@ document.querySelector('#merchant-product-image-file')
             ${kioskUrl}
           </div>
   
-          <div class="qr-button-group">
-  <button id="copy-kiosk-url">주소 복사</button>
-  <button id="print-qr">인쇄</button>
+          <div class="qr-action-row">
+  <button id="copy-kiosk-url" class="qr-action-button">주소 복사</button>
+  <button id="print-qr" class="qr-action-button">인쇄</button>
 </div>
         </div>
       </div>

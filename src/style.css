@@ -3285,3 +3285,25 @@ display: grid !important;
 .qr-button-group button:hover {
   opacity: 0.9;
 }
+.qr-action-row {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-top: 20px !important;
+}
+
+.qr-action-button {
+  width: 150px !important;
+  height: 46px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 8px !important;
+  background: #1d4b8f !important;
+  color: white !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  text-align: center !important;
+  cursor: pointer !important;
+}
