@@ -4437,10 +4437,22 @@ const orderIdValue =
           location.href = '/merchant-login'
         }
 
-        const { data: orders, error } = await supabase
+        const params = new URLSearchParams(location.search)
+const startDate = params.get('start')
+const endDate = params.get('end')
+
+let orderQuery = supabase
   .from('orders')
   .select('*')
   .eq('merchant_id', merchantId)
+
+if (startDate && endDate) {
+  orderQuery = orderQuery
+    .gte('created_at', startDate + 'T00:00:00')
+    .lte('created_at', endDate + 'T23:59:59')
+}
+
+const { data: orders, error } = await orderQuery
   .order('created_at', { ascending: false })
 
 if (error) {
@@ -4607,6 +4619,48 @@ document.querySelector('#merchant-qr-tab')
     '/kiosk?merchant_id=' + merchantId
 
 })
+document.querySelector('#sales-today')
+  ?.addEventListener('click', () => {
+    const today = new Date().toISOString().slice(0, 10)
+    location.href = '/merchant-admin?start=' + today + '&end=' + today
+  })
+
+document.querySelector('#sales-month')
+  ?.addEventListener('click', () => {
+    const now = new Date()
+    const start = new Date(now.getFullYear(), now.getMonth(), 1)
+      .toISOString()
+      .slice(0, 10)
+
+    const end = new Date().toISOString().slice(0, 10)
+
+    location.href = '/merchant-admin?start=' + start + '&end=' + end
+  })
+
+document.querySelector('#sales-year')
+  ?.addEventListener('click', () => {
+    const now = new Date()
+    const start = now.getFullYear() + '-01-01'
+    const end = new Date().toISOString().slice(0, 10)
+
+    location.href = '/merchant-admin?start=' + start + '&end=' + end
+  })
+
+document.querySelector('#sales-search')
+  ?.addEventListener('click', () => {
+    const start =
+      (document.getElementById('sales-start-date') as HTMLInputElement)?.value
+
+    const end =
+      (document.getElementById('sales-end-date') as HTMLInputElement)?.value
+
+    if (!start || !end) {
+      alert('시작일과 종료일을 선택해주세요.')
+      return
+    }
+
+    location.href = '/merchant-admin?start=' + start + '&end=' + end
+  })
 
       document.querySelector('#merchant-logout')
         ?.addEventListener('click', () => {
