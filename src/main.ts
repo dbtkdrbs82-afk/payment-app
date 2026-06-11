@@ -4808,6 +4808,7 @@ document.querySelector('#sales-search')
   id="merchant-product-image-file"
   type="file"
   accept="image/*"
+  capture="environment"
 />
         </div>
 
