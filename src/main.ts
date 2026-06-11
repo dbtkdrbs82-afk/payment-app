@@ -3923,6 +3923,86 @@ product.merchant_id +
     })
   })
 
+  document.querySelectorAll('.product-delete-button')
+  .forEach((button) => {
+
+    button.addEventListener('click', async () => {
+
+      const productId =
+        (button as HTMLElement).getAttribute('data-id')
+
+      if (!confirm('정말 삭제하시겠습니까?')) {
+        return
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', Number(productId))
+
+      if (error) {
+        alert('삭제 실패 : ' + error.message)
+        return
+      }
+
+      alert('삭제되었습니다.')
+
+      location.reload()
+    })
+
+  })
+
+  document.querySelectorAll('.product-edit-button')
+  .forEach((button) => {
+
+    button.addEventListener('click', async () => {
+
+      const productId =
+        Number(
+          (button as HTMLElement).getAttribute('data-id')
+        )
+
+      const product =
+        products?.find((p) => p.id === productId)
+
+      if (!product) {
+        return
+      }
+
+      const newName =
+        prompt('상품명', product.product_name)
+
+      if (!newName) {
+        return
+      }
+
+      const newPrice =
+        prompt('가격', String(product.price))
+
+      if (!newPrice) {
+        return
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .update({
+          product_name: newName,
+          price: Number(newPrice)
+        })
+        .eq('id', productId)
+
+      if (error) {
+        alert('수정 실패 : ' + error.message)
+        return
+      }
+
+      alert('수정되었습니다.')
+
+      location.reload()
+    })
+
+  })
+  
 document.querySelectorAll('.product-delete-button')
   .forEach((button) => {
     button.addEventListener('click', async () => {
@@ -4848,10 +4928,14 @@ document.querySelector('#sales-search')
       '<td>' + Number(product.price || 0).toLocaleString() + '원</td>' +
       '<td>' + (product.status || '판매중') + '</td>' +
       '<td>' +
-        '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
-          ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
-        '</button>' +
-      '</td>'
+  '<button class="product-edit-button" data-id="' + product.id + '">수정</button> ' +
+
+  '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
+    ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
+  '</button> ' +
+
+  '<button class="product-delete-button" data-id="' + product.id + '">삭제</button>' +
+'</td>'
 
     productBody.appendChild(tr)
   })
