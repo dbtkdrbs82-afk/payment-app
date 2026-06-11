@@ -4594,7 +4594,13 @@ merchantOrderBody.innerHTML = ''
     '<td>' + new Date(order.created_at).toLocaleString('ko-KR') + '</td>' +
     '<td>' + orderItems + '</td>' +
     '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
-    '<td>' + (order.order_status || '접수') + '</td>' +
+    '<td>' +
+  (
+    order.order_status === '완료'
+      ? '<span class="order-status-complete">완료</span>'
+      : '<span class="order-status-received">접수</span>'
+  ) +
+'</td>' +
     '<td>' +
       (order.order_status === '완료'
         ? '완료'
