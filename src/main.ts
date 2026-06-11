@@ -4513,11 +4513,22 @@ setInterval(async () => {
       String(latestOrderId)
     )
 
-    const audio = new Audio(
-      'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
-    )
+    const audioContext = new AudioContext()
+const oscillator = audioContext.createOscillator()
+const gainNode = audioContext.createGain()
 
-    audio.play()
+oscillator.connect(gainNode)
+gainNode.connect(audioContext.destination)
+
+oscillator.frequency.value = 880
+gainNode.gain.value = 0.3
+
+oscillator.start()
+
+setTimeout(() => {
+  oscillator.stop()
+  audioContext.close()
+}, 300)
 
     setTimeout(() => {
       const message =
