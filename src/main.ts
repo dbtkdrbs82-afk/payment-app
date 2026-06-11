@@ -4507,6 +4507,11 @@ const channel = supabase
   <button id="sales-today">오늘</button>
   <button id="sales-month">이번달</button>
   <button id="sales-year">올해</button>
+
+  <input id="sales-start-date" type="date" />
+  <span>~</span>
+  <input id="sales-end-date" type="date" />
+
   <button id="sales-search">검색</button>
 </div>
 
@@ -4521,8 +4526,13 @@ const channel = supabase
   </div>
 
   <select>
-    <option>20개씩 보기</option>
-  </select>
+    <select id="merchant-page-size">
+  <option value="10">10개씩 보기</option>
+  <option value="20" selected>20개씩 보기</option>
+  <option value="30">30개씩 보기</option>
+  <option value="50">50개씩 보기</option>
+  <option value="100">100개씩 보기</option>
+</select>
 </div>
       
           <div class="admin-table-wrap">

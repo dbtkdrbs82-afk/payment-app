@@ -2914,3 +2914,14 @@ display: grid !important;
   border-radius: 6px !important;
   padding: 0 8px !important;
 }
+.merchant-sales-filter input {
+  display: inline-block !important;
+  width: 140px !important;
+  height: 34px !important;
+}
+
+#merchant-page-size {
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid #999;
+}
