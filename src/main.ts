@@ -4803,8 +4803,12 @@ document.querySelector('#sales-search')
         </div>
 
         <div class="input-group">
-          <label>이미지 URL</label>
-          <input id="merchant-product-image" placeholder="상품 이미지 주소" />
+          <label>상품 이미지</label>
+<input
+  id="merchant-product-image-file"
+  type="file"
+  accept="image/*"
+/>
         </div>
 
         <button id="merchant-product-create">상품 등록</button>
@@ -4859,8 +4863,39 @@ document.querySelector('#sales-search')
       const price =
         Number((document.getElementById('merchant-product-price') as HTMLInputElement)?.value || 0)
 
-      const imageUrl =
-        (document.getElementById('merchant-product-image') as HTMLInputElement)?.value || ''
+        const imageFile =
+        (document.getElementById(
+          'merchant-product-image-file'
+        ) as HTMLInputElement)?.files?.[0]
+      
+      let imageUrl = ''
+      
+      if (imageFile) {
+        const fileExt =
+          imageFile.name.split('.').pop() || 'png'
+      
+        const fileName =
+          Date.now() + '_product.' + fileExt
+      
+        const { error: uploadError } =
+          await supabase.storage
+            .from('product-images')
+            .upload(fileName, imageFile)
+      
+        if (uploadError) {
+          alert(
+            '상품 이미지 업로드 실패: ' +
+            uploadError.message
+          )
+          return
+        }
+      
+        const { data } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(fileName)
+      
+        imageUrl = data.publicUrl
+      }
 
       if (!productName || !price) {
         alert('상품명과 가격을 입력해주세요.')
@@ -4936,7 +4971,7 @@ document.querySelector('#sales-search')
       sessionStorage.removeItem('login_merchant_code')
       location.href = '/merchant-login'
     })
-    
+
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
