@@ -4438,14 +4438,49 @@ const orderIdValue =
         }
 
         const { data: orders, error } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('merchant_id', merchantId)
-        .order('created_at', { ascending: false })
-      
-      if (error) {
-        alert('주문내역 조회 실패: ' + error.message)
-      }
+  .from('orders')
+  .select('*')
+  .eq('merchant_id', merchantId)
+  .order('created_at', { ascending: false })
+
+if (error) {
+  alert('주문내역 조회 실패: ' + error.message)
+}
+
+const channel = supabase
+  .channel('merchant-orders-' + merchantId)
+  .on(
+    'postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'orders',
+      filter: 'merchant_id=eq.' + merchantId
+    },
+    () => {
+      const audio = new Audio(
+        'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
+      )
+
+      audio.play()
+
+      const message = new SpeechSynthesisUtterance(
+        '새 주문이 접수되었습니다.'
+      )
+
+      message.lang = 'ko-KR'
+
+      window.speechSynthesis.cancel()
+      window.speechSynthesis.speak(message)
+
+      setTimeout(() => {
+        location.reload()
+      }, 1000)
+    }
+  )
+  .subscribe()
+
+
       
       app.innerHTML = `
         <div class="pg-admin-page">
@@ -4456,7 +4491,13 @@ const orderIdValue =
               <button id="merchant-logout">로그아웃</button>
             </div>
           </div>
-      
+          
+          '<div class="merchant-top-menu">' +
+'<button id="merchant-order-tab">주문관리</button>' +
+'<button id="merchant-product-tab">상품관리</button>' +
+'<button id="merchant-qr-tab">QR관리</button>' +
+'</div>' +
+
           <div class="admin-search-box">
             <button class="order-filter-btn" data-status="전체">전체</button>
             <button class="order-filter-btn" data-status="준비중">준비중</button>
@@ -4521,9 +4562,27 @@ merchantOrderBody.innerHTML = ''
 
   merchantOrderBody.appendChild(tr)
 })
+document.querySelector('#merchant-product-tab')
+?.addEventListener('click', () => {
+
+  location.href =
+    '/product-create?merchant_id=' + merchantId
+
+})
+      
+document.querySelector('#merchant-qr-tab')
+?.addEventListener('click', () => {
+
+  location.href =
+    '/kiosk?merchant_id=' + merchantId
+
+})
 
       document.querySelector('#merchant-logout')
         ?.addEventListener('click', () => {
+
+          channel.unsubscribe()
+
           sessionStorage.removeItem('login_merchant_id')
           sessionStorage.removeItem('login_merchant_name')
           sessionStorage.removeItem('login_merchant_code')
