@@ -3257,7 +3257,24 @@ display: grid !important;
 
   flex: none !important;
 }
+.qr-button-row {
+  width: 320px;
+  margin: 20px auto 0;
+  display: flex;
+  gap: 12px;
+}
 
+.qr-button {
+  flex: 1;
+  height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #1d4b8f;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
 
 
 
