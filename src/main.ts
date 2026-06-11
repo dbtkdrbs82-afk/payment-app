@@ -4484,48 +4484,45 @@ const channel = supabase
       
       app.innerHTML = `
         <div class="pg-admin-page">
-          <div class="merchant-header">
+          <div class="merchant-pick-header">
+  <h1>NXG PICK 주문관리</h1>
 
-  <h1>가맹점 주문관리</h1>
-
-  <div class="merchant-header-right">
-    <strong>${merchantName}</strong>
+  <div class="merchant-user-box">
+    <strong>${merchantName}님</strong>
     <button id="merchant-logout">로그아웃</button>
   </div>
-
 </div>
 
-<div class="merchant-top-menu">
+<div class="merchant-toolbar">
   <button id="merchant-order-tab">주문관리</button>
   <button id="merchant-product-tab">상품관리</button>
   <button id="merchant-qr-tab">PICK QR</button>
+  <span class="toolbar-divider"></span>
+  <button class="order-filter-btn" data-status="전체">전체</button>
+  <button class="order-filter-btn" data-status="준비중">준비중</button>
+  <button class="order-filter-btn" data-status="완료">완료</button>
 </div>
 
-          <div class="admin-search-box">
-            <button class="order-filter-btn" data-status="전체">전체</button>
-            <button class="order-filter-btn" data-status="준비중">준비중</button>
-            <button class="order-filter-btn" data-status="완료">완료</button>
-          </div>
-      
-          <div class="merchant-sales-filter">
+<div class="merchant-sales-filter">
   <button id="sales-today">오늘</button>
   <button id="sales-month">이번달</button>
   <button id="sales-year">올해</button>
-
-  <input id="sales-start-date" type="date" />
-  <span>~</span>
-  <input id="sales-end-date" type="date" />
-
   <button id="sales-search">검색</button>
 </div>
 
-<div class="admin-summary">
-  주문수 : ${(orders || []).length}건
-  /
-  매출합계 :
-  ${(orders || []).reduce((sum, order) => {
-    return sum + Number(order.total_amount || 0)
-  }, 0).toLocaleString()}원
+<div class="merchant-summary-row">
+  <div>
+    주문수 : ${(orders || []).length}건
+    &nbsp;&nbsp;&nbsp;
+    매출합계 :
+    ${(orders || []).reduce((sum, order) => {
+      return sum + Number(order.total_amount || 0)
+    }, 0).toLocaleString()}원
+  </div>
+
+  <select>
+    <option>20개씩 보기</option>
+  </select>
 </div>
       
           <div class="admin-table-wrap">
