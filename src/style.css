@@ -3142,3 +3142,32 @@ display: grid !important;
   height: 100%;
   object-fit: cover;
 }
+.product-item-card {
+  grid-template-columns: 110px 1fr 120px !important;
+}
+
+.product-list-card {
+  min-width: 760px !important;
+}
+
+.product-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  align-items: stretch !important;
+}
+
+.product-actions button {
+  width: 100px !important;
+  min-width: 100px !important;
+  height: 34px !important;
+  padding: 0 !important;
+}
+
+.product-info {
+  min-width: 180px !important;
+}
+
+.product-info h3 {
+  white-space: nowrap !important;
+}
