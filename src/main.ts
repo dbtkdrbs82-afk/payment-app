@@ -5094,6 +5094,124 @@ document.querySelector('#merchant-product-image-file')
       location.href = '/merchant-login'
     })
 
+  } else if (path === '/merchant-qr') {
+
+    const merchantId =
+      Number(sessionStorage.getItem('login_merchant_id'))
+  
+    const merchantName =
+      sessionStorage.getItem('login_merchant_name') || ''
+  
+    if (!merchantId) {
+      alert('로그인이 필요합니다.')
+      location.href = '/merchant-login'
+    }
+  
+    const kioskUrl =
+      window.location.origin + '/kiosk?merchant_id=' + merchantId
+  
+    app.innerHTML = `
+      <div class="pg-admin-page">
+        <div class="merchant-pick-header">
+          <h1>NXG PICK QR관리</h1>
+  
+          <div class="merchant-user-box">
+            <strong>${merchantName}님</strong>
+            <button id="merchant-qr-logout">로그아웃</button>
+          </div>
+        </div>
+  
+        <div class="merchant-toolbar">
+          <button id="qr-go-order">주문관리</button>
+          <button id="qr-go-product">상품관리</button>
+          <button id="qr-go-qr">PICK QR</button>
+        </div>
+  
+        <div class="payment-card" style="max-width:720px;">
+          <h2>가맹점 주문 QR</h2>
+  
+          <p style="font-weight:700;margin-top:16px;">
+            ${merchantName}
+          </p>
+  
+          <div id="merchant-qr-box" style="
+            width:260px;
+            height:260px;
+            margin:24px auto;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border:1px solid #d9dee7;
+            border-radius:16px;
+            background:white;
+          "></div>
+  
+          <div style="
+            padding:14px;
+            border:1px solid #d9dee7;
+            border-radius:8px;
+            background:#f8fafc;
+            word-break:break-all;
+            margin-bottom:18px;
+          ">
+            ${kioskUrl}
+          </div>
+  
+          <div style="display:flex;gap:10px;">
+            <button id="copy-kiosk-url">주소 복사</button>
+            <button id="print-qr">인쇄</button>
+          </div>
+        </div>
+      </div>
+    `
+  
+    const qrBox =
+      document.querySelector<HTMLDivElement>('#merchant-qr-box')!
+  
+    QRCode.toCanvas(kioskUrl, { width: 240 }, (error, canvas) => {
+      if (error) {
+        alert('QR 생성 실패')
+        return
+      }
+  
+      qrBox.innerHTML = ''
+      qrBox.appendChild(canvas)
+    })
+  
+    document.querySelector('#copy-kiosk-url')
+      ?.addEventListener('click', async () => {
+        await navigator.clipboard.writeText(kioskUrl)
+        alert('주소가 복사되었습니다.')
+      })
+  
+    document.querySelector('#print-qr')
+      ?.addEventListener('click', () => {
+        window.print()
+      })
+  
+    document.querySelector('#qr-go-order')
+      ?.addEventListener('click', () => {
+        location.href = '/merchant-admin'
+      })
+  
+    document.querySelector('#qr-go-product')
+      ?.addEventListener('click', () => {
+        location.href = '/merchant-product'
+      })
+  
+    document.querySelector('#qr-go-qr')
+      ?.addEventListener('click', () => {
+        location.href = '/merchant-qr'
+      })
+  
+    document.querySelector('#merchant-qr-logout')
+      ?.addEventListener('click', () => {
+        sessionStorage.removeItem('login_merchant_id')
+        sessionStorage.removeItem('login_merchant_name')
+        sessionStorage.removeItem('login_merchant_code')
+        location.href = '/merchant-login'
+      })
+      
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
