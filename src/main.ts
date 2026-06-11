@@ -5157,40 +5157,14 @@ document.querySelector('#merchant-product-image-file')
             ${kioskUrl}
           </div>
   
-      <div style="
-  width:320px;
-  margin:20px auto 0;
-  display:flex;
-  justify-content:center;
-  gap:12px;
-">
-  <button id="copy-kiosk-url" style="
-    width:154px;
-    height:44px;
-    padding:0;
-    border:0;
-    border-radius:8px;
-    background:#1d4b8f;
-    color:white;
-    font-weight:700;
-    font-size:14px;
-  ">주소 복사</button>
-
-  <button id="print-qr" style="
-    width:154px;
-    height:44px;
-    padding:0;
-    border:0;
-    border-radius:8px;
-    background:#1d4b8f;
-    color:white;
-    font-weight:700;
-    font-size:14px;
-  ">인쇄</button>
+      <div style="display:flex;gap:10px;margin-top:18px;">
+  <button id="copy-kiosk-url">주소 복사</button>
+  <button id="print-qr">인쇄</button>
 </div>
-      </div>
-    </div>
-  `
+</div>
+</div>
+</div>
+`
 
   const qrBox =
       document.querySelector<HTMLDivElement>('#merchant-qr-box')!
