@@ -4628,11 +4628,7 @@ merchantOrderBody.innerHTML = ''
       : '<span class="order-status-received">접수</span>'
   ) +
 '</td>' +
-    '<td>' +
-      (order.order_status === '완료'
-        ? '완료'
-        : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
-    '</td>' +
+    
     '<td>' +
       '<button class="customer-call-button" data-id="' + order.id + '" data-number="' + orderNumber + '">' +
   '고객호출' +
