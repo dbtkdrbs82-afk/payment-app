@@ -2772,16 +2772,34 @@ display: grid !important;
 .merchant-top-menu {
   display: flex;
   gap: 12px;
-  margin-bottom: 20px;
+  margin: 20px 0 30px;
 }
 
 .merchant-top-menu button {
-  flex: 1;
-  height: 48px;
+  width: 180px;          /* 3분의 1 정도 */
+  height: 42px;
   border: 0;
   border-radius: 8px;
   background: #1d4b8f;
   color: white;
+  font-size: 14px;
   font-weight: 700;
   cursor: pointer;
+}
+
+.merchant-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.merchant-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+#merchant-logout {
+  width: 120px;
+  height: 42px;
 }

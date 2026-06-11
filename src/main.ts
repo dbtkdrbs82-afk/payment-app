@@ -4484,18 +4484,21 @@ const channel = supabase
       
       app.innerHTML = `
         <div class="pg-admin-page">
-          <div class="pg-admin-header">
-            <h1>가맹점 주문관리</h1>
-            <div>
-              <strong>${merchantName}</strong>
-              <button id="merchant-logout">로그아웃</button>
-            </div>
-          </div>
-          
-          <div class="merchant-top-menu">
+          <div class="merchant-header">
+
+  <h1>가맹점 주문관리</h1>
+
+  <div class="merchant-header-right">
+    <strong>${merchantName}</strong>
+    <button id="merchant-logout">로그아웃</button>
+  </div>
+
+</div>
+
+<div class="merchant-top-menu">
   <button id="merchant-order-tab">주문관리</button>
   <button id="merchant-product-tab">상품관리</button>
-  <button id="merchant-qr-tab">QR관리</button>
+  <button id="merchant-qr-tab">PICK QR</button>
 </div>
 
           <div class="admin-search-box">
