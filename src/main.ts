@@ -4492,11 +4492,11 @@ const channel = supabase
             </div>
           </div>
           
-          '<div class="merchant-top-menu">' +
-'<button id="merchant-order-tab">주문관리</button>' +
-'<button id="merchant-product-tab">상품관리</button>' +
-'<button id="merchant-qr-tab">QR관리</button>' +
-'</div>' +
+          <div class="merchant-top-menu">
+  <button id="merchant-order-tab">주문관리</button>
+  <button id="merchant-product-tab">상품관리</button>
+  <button id="merchant-qr-tab">QR관리</button>
+</div>
 
           <div class="admin-search-box">
             <button class="order-filter-btn" data-status="전체">전체</button>
