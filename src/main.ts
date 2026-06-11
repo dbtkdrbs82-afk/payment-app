@@ -4686,20 +4686,15 @@ merchantOrderBody.innerHTML = ''
   merchantOrderBody.appendChild(tr)
 })
 document.querySelector('#merchant-product-tab')
-?.addEventListener('click', () => {
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-product'
+  })
 
-  location.href =
-    '/product-create?merchant_id=' + merchantId
-
-})
-      
 document.querySelector('#merchant-qr-tab')
-?.addEventListener('click', () => {
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-qr'
+  })
 
-  location.href =
-    '/kiosk?merchant_id=' + merchantId
-
-})
 document.querySelector('#sales-today')
   ?.addEventListener('click', () => {
     const today = new Date().toISOString().slice(0, 10)
@@ -4754,7 +4749,194 @@ document.querySelector('#sales-search')
           location.href = '/merchant-login'
         })
 
+} else if (path === '/merchant-product') {
 
+  const merchantId =
+    Number(sessionStorage.getItem('login_merchant_id'))
+
+  const merchantName =
+    sessionStorage.getItem('login_merchant_name') || ''
+
+  if (!merchantId) {
+    alert('로그인이 필요합니다.')
+    location.href = '/merchant-login'
+  }
+
+  const { data: products, error } = await supabase
+    .from('products')
+    .select('*')
+    .eq('merchant_id', merchantId)
+    .order('id', { ascending: false })
+
+  if (error) {
+    alert('상품 목록 조회 실패: ' + error.message)
+  }
+
+  app.innerHTML = `
+    <div class="pg-admin-page">
+      <div class="merchant-pick-header">
+        <h1>NXG PICK 상품관리</h1>
+
+        <div class="merchant-user-box">
+          <strong>${merchantName}님</strong>
+          <button id="merchant-product-logout">로그아웃</button>
+        </div>
+      </div>
+
+      <div class="merchant-toolbar">
+        <button id="go-merchant-order">주문관리</button>
+        <button id="go-merchant-product">상품관리</button>
+        <button id="go-merchant-qr">PICK QR</button>
+      </div>
+
+      <div class="payment-card">
+        <h2>상품 등록</h2>
+
+        <div class="input-group">
+          <label>상품명</label>
+          <input id="merchant-product-name" placeholder="예: 아메리카노" />
+        </div>
+
+        <div class="input-group">
+          <label>가격</label>
+          <input id="merchant-product-price" type="number" placeholder="예: 4500" />
+        </div>
+
+        <div class="input-group">
+          <label>이미지 URL</label>
+          <input id="merchant-product-image" placeholder="상품 이미지 주소" />
+        </div>
+
+        <button id="merchant-product-create">상품 등록</button>
+      </div>
+
+      <div class="payment-card" style="margin-top:20px;">
+        <h2>등록된 상품</h2>
+
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>상품명</th>
+              <th>가격</th>
+              <th>상태</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="merchantProductBody"></tbody>
+        </table>
+      </div>
+    </div>
+  `
+
+  const productBody =
+    document.querySelector<HTMLTableSectionElement>('#merchantProductBody')!
+
+  productBody.innerHTML = ''
+
+  ;(products || []).forEach((product, index) => {
+    const tr = document.createElement('tr')
+
+    tr.innerHTML =
+      '<td>' + (index + 1) + '</td>' +
+      '<td>' + (product.product_name || '-') + '</td>' +
+      '<td>' + Number(product.price || 0).toLocaleString() + '원</td>' +
+      '<td>' + (product.status || '판매중') + '</td>' +
+      '<td>' +
+        '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
+          ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
+        '</button>' +
+      '</td>'
+
+    productBody.appendChild(tr)
+  })
+
+  document.querySelector('#merchant-product-create')
+    ?.addEventListener('click', async () => {
+      const productName =
+        (document.getElementById('merchant-product-name') as HTMLInputElement)?.value || ''
+
+      const price =
+        Number((document.getElementById('merchant-product-price') as HTMLInputElement)?.value || 0)
+
+      const imageUrl =
+        (document.getElementById('merchant-product-image') as HTMLInputElement)?.value || ''
+
+      if (!productName || !price) {
+        alert('상품명과 가격을 입력해주세요.')
+        return
+      }
+
+      const { error } = await supabase
+        .from('products')
+        .insert({
+          merchant_id: merchantId,
+          product_name: productName,
+          price: price,
+          image_url: imageUrl,
+          status: '판매중'
+        })
+
+      if (error) {
+        alert('상품 등록 실패: ' + error.message)
+        return
+      }
+
+      alert('상품이 등록되었습니다.')
+      location.reload()
+    })
+
+  document.querySelectorAll('.product-status-button')
+    .forEach((button) => {
+      button.addEventListener('click', async () => {
+        const productId =
+          (button as HTMLElement).getAttribute('data-id')
+
+        const currentStatus =
+          (button as HTMLElement).getAttribute('data-status') || '판매중'
+
+        const nextStatus =
+          currentStatus === '판매중' ? '판매중지' : '판매중'
+
+        const { error } = await supabase
+          .from('products')
+          .update({
+            status: nextStatus
+          })
+          .eq('id', Number(productId))
+
+        if (error) {
+          alert('상태 변경 실패: ' + error.message)
+          return
+        }
+
+        location.reload()
+      })
+    })
+
+  document.querySelector('#go-merchant-order')
+    ?.addEventListener('click', () => {
+      location.href = '/merchant-admin'
+    })
+
+  document.querySelector('#go-merchant-product')
+    ?.addEventListener('click', () => {
+      location.href = '/merchant-product'
+    })
+
+  document.querySelector('#go-merchant-qr')
+    ?.addEventListener('click', () => {
+      location.href = '/merchant-qr'
+    })
+
+  document.querySelector('#merchant-product-logout')
+    ?.addEventListener('click', () => {
+      sessionStorage.removeItem('login_merchant_id')
+      sessionStorage.removeItem('login_merchant_name')
+      sessionStorage.removeItem('login_merchant_code')
+      location.href = '/merchant-login'
+    })
+    
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
