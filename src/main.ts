@@ -5158,8 +5158,35 @@ document.querySelector('#merchant-product-image-file')
           </div>
   
           <div class="qr-action-row">
-  <button id="copy-kiosk-url" class="qr-action-button">주소 복사</button>
-  <button id="print-qr" class="qr-action-button">인쇄</button>
+  <div style="
+  width:320px;
+  margin:20px auto 0;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+">
+  <button id="copy-kiosk-url" style="
+    width:100%;
+    height:44px;
+    padding:0;
+    border:0;
+    border-radius:8px;
+    background:#1d4b8f;
+    color:white;
+    font-weight:700;
+  ">주소 복사</button>
+
+  <button id="print-qr" style="
+    width:100%;
+    height:44px;
+    padding:0;
+    border:0;
+    border-radius:8px;
+    background:#1d4b8f;
+    color:white;
+    font-weight:700;
+  ">인쇄</button>
+</div>
 </div>
         </div>
       </div>
