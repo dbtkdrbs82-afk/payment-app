@@ -3571,7 +3571,7 @@ tr.innerHTML =
   }
   document.querySelectorAll('.customer-call-button')
     .forEach((button) => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', async () => {
         const number =
           (button as HTMLElement).getAttribute('data-number') || ''
 
@@ -3590,6 +3590,34 @@ tr.innerHTML =
         window.speechSynthesis.cancel()
 
         speak(callMessage)
+        
+        const orderId =
+  (button as HTMLElement).getAttribute('data-id')
+
+if (orderId) {
+  const { error } = await supabase
+    .from('orders')
+    .update({
+      order_status: '완료'
+    })
+    .eq('id', Number(orderId))
+
+  if (error) {
+    alert('주문상태 변경 실패: ' + error.message)
+    return
+  }
+
+  const tr = (button as HTMLElement).closest('tr')
+
+  if (tr) {
+    const statusCell = tr.children[4]
+
+    if (statusCell) {
+      statusCell.innerHTML =
+        '<span class="order-status-complete">완료</span>'
+    }
+  }
+}
 
         setTimeout(() => {
           speak(callMessage)
@@ -4560,7 +4588,6 @@ const channel = supabase
                   <th>주문내용</th>
                   <th>결제금액</th>
                   <th>주문상태</th>
-                  <th>처리</th>
                   <th>고객호출</th>
                 </tr>
               </thead>
@@ -4607,7 +4634,9 @@ merchantOrderBody.innerHTML = ''
         : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
     '</td>' +
     '<td>' +
-      '<button class="customer-call-button" data-number="' + orderNumber + '">고객호출</button>' +
+      '<button class="customer-call-button" data-id="' + order.id + '" data-number="' + orderNumber + '">' +
+  '고객호출' +
+'</button>'
     '</td>'
 
   merchantOrderBody.appendChild(tr)
