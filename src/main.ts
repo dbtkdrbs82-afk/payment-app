@@ -4556,6 +4556,7 @@ const channel = supabase
                 <tr>
                   <th>No</th>
                   <th>주문번호</th>
+                  <th>결제일시</th>
                   <th>주문내용</th>
                   <th>결제금액</th>
                   <th>주문상태</th>
@@ -4590,6 +4591,7 @@ merchantOrderBody.innerHTML = ''
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
     '<td>' + orderNumber + '번</td>' +
+    '<td>' + new Date(order.created_at).toLocaleString('ko-KR') + '</td>' +
     '<td>' + orderItems + '</td>' +
     '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
     '<td>' + (order.order_status || '접수') + '</td>' +
