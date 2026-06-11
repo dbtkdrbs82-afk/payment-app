@@ -3171,3 +3171,45 @@ display: grid !important;
 .product-info h3 {
   white-space: nowrap !important;
 }
+.product-item-card {
+  min-height: 82px !important;
+  padding: 10px 14px !important;
+  grid-template-columns: 80px 1fr 110px !important;
+}
+
+.product-thumb {
+  width: 70px !important;
+  height: 70px !important;
+}
+
+.product-info h3 {
+  margin: 0 0 4px !important;
+  font-size: 16px !important;
+}
+
+.product-info p {
+  margin: 0 0 4px !important;
+  font-size: 14px !important;
+}
+
+.product-on,
+.product-off {
+  padding: 3px 8px !important;
+  font-size: 11px !important;
+}
+
+.product-actions button {
+  width: 90px !important;
+  min-width: 90px !important;
+  height: 28px !important;
+  font-size: 12px !important;
+}
+
+.product-actions {
+  gap: 6px !important;
+}
+
+.product-list-card {
+  max-height: 640px !important;
+  overflow-y: auto !important;
+}
