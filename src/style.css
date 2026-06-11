@@ -2978,3 +2978,19 @@ display: grid !important;
   display: inline-flex !important;
   align-items: center !important;
 }
+.date-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  transform: translateY(3px) !important;
+}
+
+.date-wave {
+  display: inline-flex !important;
+  align-items: center !important;
+  transform: translateY(3px) !important;
+}
+
+.date-wrap input[type="date"] {
+  height: 36px !important;
+  line-height: 36px !important;
+}

@@ -4508,9 +4508,13 @@ const channel = supabase
   <button id="sales-month">이번달</button>
   <button id="sales-year">올해</button>
 
+  <span class="date-wrap">
   <input id="sales-start-date" type="date" />
-  <span>~</span>
+</span>
+<span class="date-wave">~</span>
+<span class="date-wrap">
   <input id="sales-end-date" type="date" />
+</span>
 
   <button id="sales-search">검색</button>
 </div>
