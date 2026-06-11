@@ -4483,37 +4483,52 @@ if (startDate && endDate) {
 const { data: orders, error } = await orderQuery
   .order('created_at', { ascending: false })
 
-  let lastOrderCount = (orders || []).length
+  let lastCheckedOrderId =
+  Number(sessionStorage.getItem('last_checked_order_id_' + merchantId) || 0)
+
+const newestOrderId =
+  (orders || [])[0]?.id || 0
+
+if (!lastCheckedOrderId && newestOrderId) {
+  sessionStorage.setItem(
+    'last_checked_order_id_' + merchantId,
+    String(newestOrderId)
+  )
+  lastCheckedOrderId = newestOrderId
+}
 
 setInterval(async () => {
   const { data: latestOrders } = await supabase
     .from('orders')
     .select('id')
     .eq('merchant_id', merchantId)
+    .order('id', { ascending: false })
+    .limit(1)
 
-  const latestCount = (latestOrders || []).length
+  const latestOrderId = latestOrders?.[0]?.id || 0
 
-  if (latestCount > lastOrderCount) {
-    lastOrderCount = latestCount
-  
+  if (latestOrderId > lastCheckedOrderId) {
+    sessionStorage.setItem(
+      'last_checked_order_id_' + merchantId,
+      String(latestOrderId)
+    )
+
     const audio = new Audio(
       'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
     )
-  
+
     audio.play()
-  
+
     setTimeout(() => {
       const message =
-        new SpeechSynthesisUtterance(
-          '새 주문이 접수되었습니다.'
-        )
-  
+        new SpeechSynthesisUtterance('새 주문이 접수되었습니다.')
+
       message.lang = 'ko-KR'
       message.rate = 0.95
-  
+
       window.speechSynthesis.speak(message)
     }, 1000)
-  
+
     setTimeout(() => {
       location.reload()
     }, 5000)
