@@ -4832,8 +4832,12 @@ if (merchantOrderCardList) {
     '</div>' +
 
     '<div class="merchant-order-card-status">' +
-      (order.order_status || '접수') +
-    '</div>' +
+  (
+    order.order_status === '완료'
+      ? '<span class="order-status-complete">완료</span>'
+      : '<span class="order-status-received">접수중</span>'
+  ) +
+'</div>' +
 
       '<button class="customer-call-button merchant-card-call-button" ' +
         'data-id="' + order.id + '" ' +

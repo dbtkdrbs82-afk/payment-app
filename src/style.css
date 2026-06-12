@@ -3410,6 +3410,23 @@ display: grid !important;
     font-size: 14px !important;
   }
 }
+.order-status-received {
+  display: inline-block;
+  background: #ffe8b3;
+  color: #d17d00;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+}
+
+.order-status-complete {
+  display: inline-block;
+  background: #d9f7df;
+  color: #16833a;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+}
 
 
 
