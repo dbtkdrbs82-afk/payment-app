@@ -4547,7 +4547,23 @@ if (startDate && endDate) {
 
 const { data: orders, error } = await orderQuery
   .order('created_at', { ascending: false })
+ 
+  const receivedOrders =
+  (orders || []).filter((order) => order.order_status !== '완료')
 
+const completedOrders =
+  (orders || []).filter((order) => order.order_status === '완료')
+
+const totalSales =
+  (orders || []).reduce((sum, order) => {
+    return sum + Number(order.total_amount || 0)
+  }, 0)
+
+const averageAmount =
+  (orders || []).length > 0
+    ? Math.floor(totalSales / (orders || []).length)
+    : 0
+    
   let lastCheckedOrderId =
   Number(sessionStorage.getItem('last_checked_order_id_' + merchantId) || 0)
 
@@ -4687,15 +4703,33 @@ const channel = supabase
   <button id="sales-search">검색</button>
 </div>
 
-<div class="merchant-summary-row">
+
+  <div class="merchant-sales-summary">
   <div>
-    주문수 : ${(orders || []).length}건
-    &nbsp;&nbsp;&nbsp;
-    매출합계 :
-    ${(orders || []).reduce((sum, order) => {
-      return sum + Number(order.total_amount || 0)
-    }, 0).toLocaleString()}원
+    <strong>주문수</strong>
+    <span>${(orders || []).length}건</span>
   </div>
+
+  <div>
+    <strong>접수</strong>
+    <span>${receivedOrders.length}건</span>
+  </div>
+
+  <div>
+    <strong>완료</strong>
+    <span>${completedOrders.length}건</span>
+  </div>
+
+  <div>
+    <strong>매출합계</strong>
+    <span>${totalSales.toLocaleString()}원</span>
+  </div>
+
+  <div>
+    <strong>평균객단가</strong>
+    <span>${averageAmount.toLocaleString()}원</span>
+  </div>
+</div>
 
   <select id="merchant-page-size">
   <option value="10">10개씩 보기</option>
