@@ -3347,7 +3347,55 @@ display: grid !important;
     min-width: 0 !important;
   }
 }
+/* 태블릿/모바일 주문 카드 */
+.merchant-order-card-list {
+  display: none;
+}
 
+@media (max-width: 1024px) {
+  .admin-table {
+    display: none !important;
+  }
+
+  .merchant-order-card-list {
+    display: grid !important;
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .merchant-order-card {
+    background: #fff;
+    border: 1px solid #d9dee7;
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  }
+
+  .merchant-order-card-top {
+    display: flex;
+    justify-content: space-between;
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .merchant-order-card-date {
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+
+  .merchant-order-card-status {
+    margin-bottom: 12px;
+  }
+
+  .merchant-card-call-button {
+    width: 100% !important;
+    height: 48px !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+  }
+}
 
 
 

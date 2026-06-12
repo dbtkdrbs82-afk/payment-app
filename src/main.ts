@@ -4752,9 +4752,11 @@ const channel = supabase
                   <th>주문상태</th>
                   <th>고객호출</th>
                 </tr>
-              </thead>
+                            </thead>
               <tbody id="merchantOrderBody"></tbody>
             </table>
+
+            <div id="merchantOrderCardList" class="merchant-order-card-list"></div>
           </div>
         </div>
       `
@@ -4762,6 +4764,12 @@ const channel = supabase
   document.querySelector<HTMLTableSectionElement>('#merchantOrderBody')!
 
 merchantOrderBody.innerHTML = ''
+const merchantOrderCardList =
+  document.querySelector<HTMLDivElement>('#merchantOrderCardList')
+
+if (merchantOrderCardList) {
+  merchantOrderCardList.innerHTML = ''
+}
 
 ;(orders || []).forEach((order, index) => {
   const tr = document.createElement('tr')
@@ -4797,7 +4805,41 @@ merchantOrderBody.innerHTML = ''
 '</button>'
     '</td>'
 
-  merchantOrderBody.appendChild(tr)
+    merchantOrderBody.appendChild(tr)
+
+  const cardList =
+    document.querySelector<HTMLDivElement>('#merchantOrderCardList')
+
+  if (cardList) {
+    const card = document.createElement('div')
+    card.className = 'merchant-order-card'
+
+    card.innerHTML =
+      '<div class="merchant-order-card-top">' +
+        '<strong>' + orderNumber + '번</strong>' +
+        '<span>' +
+          Number(order.total_amount || 0).toLocaleString() +
+          '원' +
+        '</span>' +
+      '</div>' +
+
+      '<div class="merchant-order-card-date">' +
+        new Date(order.created_at).toLocaleString('ko-KR') +
+      '</div>' +
+
+      '<div class="merchant-order-card-status">' +
+        (order.order_status || '접수') +
+      '</div>' +
+
+      '<button class="customer-call-button merchant-card-call-button" ' +
+        'data-id="' + order.id + '" ' +
+        'data-number="' + orderNumber + '">' +
+        '고객호출' +
+      '</button>'
+
+    cardList.appendChild(card)
+  }
+
 })
 document.querySelector('#merchant-product-tab')
   ?.addEventListener('click', () => {
