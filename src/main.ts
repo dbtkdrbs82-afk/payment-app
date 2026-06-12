@@ -4827,9 +4827,13 @@ if (merchantOrderCardList) {
         new Date(order.created_at).toLocaleString('ko-KR') +
       '</div>' +
 
-      '<div class="merchant-order-card-status">' +
-        (order.order_status || '접수') +
-      '</div>' +
+    '<div class="merchant-order-card-items">' +
+      orderItems +
+    '</div>' +
+
+    '<div class="merchant-order-card-status">' +
+      (order.order_status || '접수') +
+    '</div>' +
 
       '<button class="customer-call-button merchant-card-call-button" ' +
         'data-id="' + order.id + '" ' +
