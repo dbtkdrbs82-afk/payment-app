@@ -3301,6 +3301,52 @@ display: grid !important;
   font-size: 20px;
   font-weight: 800;
 }
+@media (max-width: 1024px) {
+  .pg-admin-page {
+    padding: 14px !important;
+  }
+
+  .merchant-pick-header h1 {
+    font-size: 22px !important;
+  }
+
+  .merchant-toolbar {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .merchant-toolbar button,
+  .order-filter-btn,
+  .merchant-sales-filter button,
+  #merchant-logout {
+    height: 34px !important;
+    min-width: 80px !important;
+    font-size: 12px !important;
+    padding: 0 10px !important;
+  }
+
+  .merchant-sales-summary {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .admin-table-wrap {
+    overflow-x: auto !important;
+  }
+
+  .admin-table {
+    min-width: 900px !important;
+  }
+
+  .merchant-product-layout {
+    flex-direction: column !important;
+  }
+
+  .product-create-card,
+  .product-list-card {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
 
 
 
