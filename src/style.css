@@ -1313,7 +1313,7 @@ button {
   font-weight: 700;
 }
 /* 태블릿/현장 주문관리 최적화 */
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
   .admin-wrap {
     padding: 10px;
   }
@@ -3301,7 +3301,7 @@ display: grid !important;
   font-size: 20px;
   font-weight: 800;
 }
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
   .pg-admin-page {
     padding: 14px !important;
   }
@@ -3352,7 +3352,7 @@ display: grid !important;
   display: none;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
   .admin-table {
     display: none !important;
   }
@@ -3396,7 +3396,20 @@ display: grid !important;
     font-weight: 800 !important;
   }
 }
+@media (max-width: 600px) {
+  .merchant-order-card {
+    padding: 10px !important;
+  }
 
+  .merchant-order-card-top {
+    font-size: 16px !important;
+  }
+
+  .merchant-card-call-button {
+    height: 42px !important;
+    font-size: 14px !important;
+  }
+}
 
 
 
