@@ -3579,10 +3579,10 @@ tr.innerHTML =
   document.querySelectorAll('.customer-call-button')
     .forEach((button) => {
       button.addEventListener('click', async () => {
-        
+        alert('고객호출 버튼 눌림') 
         const number =
   (button as HTMLElement).getAttribute('data-number') || '0'
-  
+
         const savedCallMessage =
   (
     document.querySelector(
