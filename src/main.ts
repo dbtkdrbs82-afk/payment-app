@@ -4933,19 +4933,32 @@ document.querySelector('#merchant-setting-modal')
 })
 
 function convertNumberToKorean(num: number) {
-  const units = ['', '십', '백', '천']
-  const numbers = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
+  const ones = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
 
-  const digits = String(num).split('').reverse()
+  if (num === 0) {
+    return '영'
+  }
+
+  const hundreds = Math.floor(num / 100)
+  const tens = Math.floor((num % 100) / 10)
+  const units = num % 10
 
   let result = ''
 
-  for (let i = digits.length - 1; i >= 0; i--) {
-    const digit = Number(digits[i])
+  if (hundreds > 0) {
+    result += hundreds === 1
+      ? '백'
+      : ones[hundreds] + '백'
+  }
 
-    if (digit === 0) continue
+  if (tens > 0) {
+    result += tens === 1
+      ? '십'
+      : ones[tens] + '십'
+  }
 
-    result += numbers[digit] + units[i]
+  if (units > 0) {
+    result += ones[units]
   }
 
   return result
