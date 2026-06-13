@@ -4932,6 +4932,25 @@ document.querySelector('#merchant-setting-modal')
     }
 })
 
+function convertNumberToKorean(num: number) {
+  const units = ['', '십', '백', '천']
+  const numbers = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
+
+  const digits = String(num).split('').reverse()
+
+  let result = ''
+
+  for (let i = digits.length - 1; i >= 0; i--) {
+    const digit = Number(digits[i])
+
+    if (digit === 0) continue
+
+    result += numbers[digit] + units[i]
+  }
+
+  return result
+}
+
 document.querySelector('#preview-call-message')
   ?.addEventListener('click', () => {
 
@@ -4943,10 +4962,12 @@ document.querySelector('#preview-call-message')
       )?.value ||
       '주문이 준비되었습니다.'
 
-    // 기존 고객호출 음성 함수 사용
+      const koreanNumber =
+      convertNumberToKorean(18)
+    
     speechSynthesis.speak(
       new SpeechSynthesisUtterance(
-        '18번 고객님 ' + message
+        koreanNumber + '번 고객님 ' + message
       )
     )
 })
