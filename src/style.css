@@ -3433,14 +3433,13 @@ display: grid !important;
 }
 
 .merchant-setting-button {
-  width: 36px;
-  height: 36px;
-  border: 0;
-  border-radius: 50%;
-  background: #1d4b8f;
-  color: white;
-  font-size: 18px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
   cursor: pointer;
+  padding: 0;
+  margin-left: 6px;
+  line-height: 1;
 }
 .merchant-setting-modal {
   display: none;
