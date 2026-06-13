@@ -3527,38 +3527,6 @@ tr.innerHTML =
     paymentTableBody.appendChild(tr)
   })
 
-  const numberToKorean = (num: number) => {
-    const ones = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
-  
-    if (num === 0) {
-      return '영'
-    }
-  
-    const hundreds = Math.floor(num / 100)
-    const tens = Math.floor((num % 100) / 10)
-    const units = num % 10
-  
-    let result = ''
-  
-    if (hundreds > 0) {
-      result += hundreds === 1
-        ? '백'
-        : ones[hundreds] + '백'
-    }
-  
-    if (tens > 0) {
-      result += tens === 1
-        ? '십'
-        : ones[tens] + '십'
-    }
-  
-    if (units > 0) {
-      result += ones[units]
-    }
-  
-    return result
-  }
-
   const speak = (text: string) => {
     const message = new SpeechSynthesisUtterance(text)
     message.lang = 'ko-KR'
