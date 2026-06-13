@@ -3576,62 +3576,51 @@ tr.innerHTML =
       speak('새 주문이 접수되었습니다.')
     }, 1000)
   }
-  document.querySelectorAll('.customer-call-button')
-    .forEach((button) => {
-      button.addEventListener('click', async () => {
-        alert('고객호출 버튼 눌림') 
-        const number =
-  (button as HTMLElement).getAttribute('data-number') || '0'
-
-        const savedCallMessage =
-  (
-    document.querySelector(
-      '#merchant-call-message'
-    ) as HTMLInputElement
-  )?.value || '주문이 준비되었습니다.'
-
-  const callMessage =
-  numberToKorean(Number(number)) +
-  '번 고객님 ' +
-  savedCallMessage
-
-        window.speechSynthesis.cancel()
-
-        speak(callMessage)
-        
-        const orderId =
-  (button as HTMLElement).getAttribute('data-id')
-
-if (orderId) {
-  const { error } = await supabase
-    .from('orders')
-    .update({
-      order_status: '완료'
-    })
-    .eq('id', Number(orderId))
-
-  if (error) {
-    alert('주문상태 변경 실패: ' + error.message)
-    return
-  }
-
-  const tr = (button as HTMLElement).closest('tr')
-
-  if (tr) {
-    const statusCell = tr.children[4]
-
-    if (statusCell) {
-      statusCell.innerHTML =
-        '<span class="order-status-complete">완료</span>'
+  document.addEventListener('click', async (event) => {
+    const button =
+      (event.target as HTMLElement).closest('.customer-call-button') as HTMLButtonElement | null
+  
+    if (!button) {
+      return
     }
-  }
-}
-
-        setTimeout(() => {
-          speak(callMessage)
-        }, 5000)
-      })
-    })
+  
+    const number =
+      button.getAttribute('data-number') || '0'
+  
+    const orderId =
+      button.getAttribute('data-id')
+  
+    const savedCallMessage =
+      (
+        document.querySelector('#merchant-call-message') as HTMLInputElement
+      )?.value || '주문이 준비되었습니다.'
+  
+    const callMessage =
+      numberToKorean(Number(number)) +
+      '번 고객님 ' +
+      savedCallMessage
+  
+    window.speechSynthesis.cancel()
+    speak(callMessage)
+  
+    button.textContent = '호출완료'
+    button.style.background = '#6b7280'
+  
+    if (orderId) {
+      const { error } = await supabase
+        .from('orders')
+        .update({
+          order_status: '완료'
+        })
+        .eq('id', Number(orderId))
+  
+      if (error) {
+        alert('주문상태 변경 실패: ' + error.message)
+        return
+      }
+    }
+  })
+        
 
     document.querySelectorAll('.order-complete-button')
     .forEach((button) => {
