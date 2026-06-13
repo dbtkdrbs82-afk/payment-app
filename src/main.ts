@@ -4674,13 +4674,13 @@ const channel = supabase
   <div class="merchant-user-box">
   <strong>${merchantName}님</strong>
 
+   <button id="merchant-logout">
+    로그아웃
+  </button>
+
   <button id="merchant-setting-button"
           class="merchant-setting-button">
     ⚙️
-  </button>
-
-  <button id="merchant-logout">
-    로그아웃
   </button>
 </div>
   </div>
