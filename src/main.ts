@@ -3581,7 +3581,7 @@ tr.innerHTML =
       (event.target as HTMLElement).closest('.customer-call-button') as HTMLButtonElement | null
   
     if (!button) return
-  
+
     const number =
       button.getAttribute('data-number') || '0'
   
