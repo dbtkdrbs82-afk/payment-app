@@ -4932,6 +4932,76 @@ document.querySelector('#merchant-setting-modal')
     }
 })
 
+document.querySelector('#preview-call-message')
+  ?.addEventListener('click', () => {
+
+    const message =
+      (
+        document.querySelector(
+          '#merchant-call-message'
+        ) as HTMLInputElement
+      )?.value ||
+      '주문이 준비되었습니다.'
+
+    // 기존 고객호출 음성 함수 사용
+    speechSynthesis.speak(
+      new SpeechSynthesisUtterance(
+        '18번 고객님 ' + message
+      )
+    )
+})
+
+document.querySelector('#preview-order-message')
+  ?.addEventListener('click', () => {
+
+    const message =
+      (
+        document.querySelector(
+          '#merchant-order-message'
+        ) as HTMLInputElement
+      )?.value ||
+      '새로운 주문이 접수되었습니다.'
+
+    speechSynthesis.speak(
+      new SpeechSynthesisUtterance(
+        message
+      )
+    )
+})
+
+document.querySelector('#save-call-message')
+  ?.addEventListener('click', async () => {
+
+    const callMessage =
+      (
+        document.querySelector(
+          '#merchant-call-message'
+        ) as HTMLInputElement
+      )?.value || ''
+
+    const orderMessage =
+      (
+        document.querySelector(
+          '#merchant-order-message'
+        ) as HTMLInputElement
+      )?.value || ''
+
+      const { error } = await supabase
+      .from('merchants')
+      .update({
+        call_message: callMessage,
+        order_message: orderMessage
+      })
+      .eq('id', merchantId)
+    
+    if (error) {
+      alert('설정 저장 실패: ' + error.message)
+      return
+    }
+    
+    alert('설정이 저장되었습니다.')
+})
+
 document.querySelector('#sales-today')
   ?.addEventListener('click', () => {
     const today = new Date().toISOString().slice(0, 10)
