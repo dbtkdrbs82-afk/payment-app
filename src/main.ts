@@ -4669,12 +4669,18 @@ const channel = supabase
       app.innerHTML = `
         <div class="pg-admin-page">
           <div class="merchant-pick-header">
-  <h1>NXG PICK 주문관리</h1>
+  <h1 class="merchant-title">
+  NXG PICK 주문관리
+  <button id="merchant-setting-button" class="merchant-setting-button">
+    ⚙️
+  </button>
+</h1>
 
   <div class="merchant-user-box">
     <strong>${merchantName}님</strong>
     <button id="merchant-logout">로그아웃</button>
   </div>
+</div>
 </div>
 
 <div class="merchant-toolbar">
@@ -4759,6 +4765,28 @@ const channel = supabase
             <div id="merchantOrderCardList" class="merchant-order-card-list"></div>
           </div>
         </div>
+
+        <div id="merchant-setting-modal"
+             class="merchant-setting-modal">
+
+          <div class="merchant-setting-box">
+            <h3>⚙️ 매장 설정</h3>
+
+            <label>호출 기본 문구</label>
+
+            <input
+              id="merchant-call-message"
+              class="merchant-call-message"
+              placeholder="예) 주문이 준비되었습니다."
+            />
+
+            <div class="setting-button-row">
+              <button id="preview-call-message">미리듣기</button>
+              <button id="save-call-message">저장</button>
+            </div>
+          </div>
+        </div>
+      
       `
       const merchantOrderBody =
   document.querySelector<HTMLTableSectionElement>('#merchantOrderBody')!
@@ -4858,6 +4886,35 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-qr'
   })
+
+  document.querySelector('#merchant-setting-button')
+  ?.addEventListener('click', () => {
+
+    const modal =
+      document.querySelector<HTMLElement>(
+        '#merchant-setting-modal'
+      )
+
+    if (modal) {
+      modal.style.display = 'flex'
+    }
+})
+
+document.querySelector('#merchant-setting-modal')
+  ?.addEventListener('click', (e) => {
+
+    if (e.target === e.currentTarget) {
+
+      const modal =
+        document.querySelector<HTMLElement>(
+          '#merchant-setting-modal'
+        )
+
+      if (modal) {
+        modal.style.display = 'none'
+      }
+    }
+})
 
 document.querySelector('#sales-today')
   ?.addEventListener('click', () => {
