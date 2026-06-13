@@ -4741,6 +4741,29 @@ const channel = supabase
         </div>
       
       `
+
+      const { data: merchantSetting } = await supabase
+  .from('merchants')
+  .select('call_message, order_message')
+  .eq('id', merchantId)
+  .single()
+
+if (merchantSetting) {
+  const callInput =
+    document.querySelector('#merchant-call-message') as HTMLInputElement | null
+
+  const orderInput =
+    document.querySelector('#merchant-order-message') as HTMLInputElement | null
+
+  if (callInput) {
+    callInput.value = merchantSetting.call_message || ''
+  }
+
+  if (orderInput) {
+    orderInput.value = merchantSetting.order_message || ''
+  }
+}
+
       const merchantOrderBody =
   document.querySelector<HTMLTableSectionElement>('#merchantOrderBody')!
 
@@ -4852,6 +4875,13 @@ if (merchantOrderCardList) {
   
     cardCallButton.textContent = '호출완료'
     cardCallButton.style.background = '#6b7280'
+    const statusBox =
+  card.querySelector('.merchant-order-card-status')
+
+if (statusBox) {
+  statusBox.innerHTML =
+    '<span class="order-status-complete">완료</span>'
+}
   
     const { error } = await supabase
       .from('orders')
