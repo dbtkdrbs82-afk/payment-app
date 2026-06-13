@@ -3576,48 +3576,7 @@ tr.innerHTML =
       speak('새 주문이 접수되었습니다.')
     }, 1000)
   }
-  document.addEventListener('click', async (event) => {
-    const button =
-      (event.target as HTMLElement).closest('.customer-call-button') as HTMLButtonElement | null
   
-    if (!button) return
-
-    const number =
-      button.getAttribute('data-number') || '0'
-  
-    const orderId =
-      button.getAttribute('data-id')
-  
-    const callMessageInput =
-      document.querySelector('#merchant-call-message') as HTMLInputElement | null
-  
-    const savedCallMessage =
-      callMessageInput?.value || '주문이 준비되었습니다.'
-  
-    const callMessage =
-      numberToKorean(Number(number)) +
-      '번 고객님 ' +
-      savedCallMessage
-  
-    window.speechSynthesis.cancel()
-    speak(callMessage)
-  
-    button.textContent = '호출완료'
-    button.style.background = '#6b7280'
-  
-    if (!orderId) return
-  
-    const { error } = await supabase
-      .from('orders')
-      .update({
-        order_status: '완료'
-      })
-      .eq('id', Number(orderId))
-  
-    if (error) {
-      alert('주문상태 변경 실패: ' + error.message)
-    }
-  })
         
 
     document.querySelectorAll('.order-complete-button')
@@ -4900,6 +4859,43 @@ if (merchantOrderCardList) {
       '</button>'
 
     cardList.appendChild(card)
+
+    const cardCallButton =
+    card.querySelector<HTMLButtonElement>('.customer-call-button')
+  
+  cardCallButton?.addEventListener('click', async () => {
+    const savedCallMessage =
+      (
+        document.querySelector(
+          '#merchant-call-message'
+        ) as HTMLInputElement
+      )?.value || '주문이 준비되었습니다.'
+  
+      const callMessage =
+      Number(orderNumber) +
+      '번 고객님 ' +
+      savedCallMessage
+    
+    window.speechSynthesis.cancel()
+    
+    speechSynthesis.speak(
+      new SpeechSynthesisUtterance(callMessage)
+    )
+  
+    cardCallButton.textContent = '호출완료'
+    cardCallButton.style.background = '#6b7280'
+  
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        order_status: '완료'
+      })
+      .eq('id', Number(order.id))
+  
+    if (error) {
+      alert('주문상태 변경 실패: ' + error.message)
+    }
+  }) 
   }
 
 })
