@@ -4669,16 +4669,20 @@ const channel = supabase
       app.innerHTML = `
         <div class="pg-admin-page">
           <div class="merchant-pick-header">
-  <h1 class="merchant-title">
-  NXG PICK 주문관리
-  <button id="merchant-setting-button" class="merchant-setting-button">
-    ⚙️
-  </button>
-</h1>
+         <h1>NXG PICK 주문관리</h1>
 
   <div class="merchant-user-box">
-    <strong>${merchantName}님</strong>
-    <button id="merchant-logout">로그아웃</button>
+  <strong>${merchantName}님</strong>
+
+  <button id="merchant-setting-button"
+          class="merchant-setting-button">
+    ⚙️
+  </button>
+
+  <button id="merchant-logout">
+    로그아웃
+  </button>
+</div>
   </div>
 </div>
 </div>
