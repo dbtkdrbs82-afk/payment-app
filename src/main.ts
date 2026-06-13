@@ -3580,9 +3580,7 @@ tr.innerHTML =
     const button =
       (event.target as HTMLElement).closest('.customer-call-button') as HTMLButtonElement | null
   
-    if (!button) {
-      return
-    }
+    if (!button) return
   
     const number =
       button.getAttribute('data-number') || '0'
@@ -3590,10 +3588,11 @@ tr.innerHTML =
     const orderId =
       button.getAttribute('data-id')
   
+    const callMessageInput =
+      document.querySelector('#merchant-call-message') as HTMLInputElement | null
+  
     const savedCallMessage =
-      (
-        document.querySelector('#merchant-call-message') as HTMLInputElement
-      )?.value || '주문이 준비되었습니다.'
+      callMessageInput?.value || '주문이 준비되었습니다.'
   
     const callMessage =
       numberToKorean(Number(number)) +
@@ -3606,18 +3605,17 @@ tr.innerHTML =
     button.textContent = '호출완료'
     button.style.background = '#6b7280'
   
-    if (orderId) {
-      const { error } = await supabase
-        .from('orders')
-        .update({
-          order_status: '완료'
-        })
-        .eq('id', Number(orderId))
+    if (!orderId) return
   
-      if (error) {
-        alert('주문상태 변경 실패: ' + error.message)
-        return
-      }
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        order_status: '완료'
+      })
+      .eq('id', Number(orderId))
+  
+    if (error) {
+      alert('주문상태 변경 실패: ' + error.message)
     }
   })
         
