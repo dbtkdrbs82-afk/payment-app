@@ -3528,13 +3528,35 @@ tr.innerHTML =
   })
 
   const numberToKorean = (num: number) => {
-    const tens = Math.floor(num / 10)
-    const ones = num % 10
-
-    const tenText = ['', '십', '이십', '삼십', '사십', '오십', '육십', '칠십', '팔십', '구십']
-    const oneText = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
-
-    return tenText[tens] + oneText[ones]
+    const ones = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
+  
+    if (num === 0) {
+      return '영'
+    }
+  
+    const hundreds = Math.floor(num / 100)
+    const tens = Math.floor((num % 100) / 10)
+    const units = num % 10
+  
+    let result = ''
+  
+    if (hundreds > 0) {
+      result += hundreds === 1
+        ? '백'
+        : ones[hundreds] + '백'
+    }
+  
+    if (tens > 0) {
+      result += tens === 1
+        ? '십'
+        : ones[tens] + '십'
+    }
+  
+    if (units > 0) {
+      result += ones[units]
+    }
+  
+    return result
   }
 
   const speak = (text: string) => {
@@ -3557,20 +3579,21 @@ tr.innerHTML =
   document.querySelectorAll('.customer-call-button')
     .forEach((button) => {
       button.addEventListener('click', async () => {
+        
         const number =
-          (button as HTMLElement).getAttribute('data-number') || ''
+  (button as HTMLElement).getAttribute('data-number') || '0'
+  
+        const savedCallMessage =
+  (
+    document.querySelector(
+      '#merchant-call-message'
+    ) as HTMLInputElement
+  )?.value || '주문이 준비되었습니다.'
 
-          const tr = (button as HTMLElement).closest('tr')
-          const select =
-            tr?.querySelector<HTMLSelectElement>('.call-message-select')
-          
-          const selectedMessage =
-            select?.value || '주문 나왔습니다.'
-          
-          const callMessage =
-            numberToKorean(Number(number)) +
-            '번 고객님 ' +
-            selectedMessage
+  const callMessage =
+  numberToKorean(Number(number)) +
+  '번 고객님 ' +
+  savedCallMessage
 
         window.speechSynthesis.cancel()
 
