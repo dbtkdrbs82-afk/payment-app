@@ -4783,9 +4783,21 @@ const channel = supabase
               class="merchant-call-message"
               placeholder="예) 주문이 준비되었습니다."
             />
+            <label style="margin-top:20px;display:block;">
+  주문 접수 멘트
+</label>
+
+<input
+  id="merchant-order-message"
+  class="merchant-call-message"
+  placeholder="예) 새로운 주문이 접수되었습니다."
+/>
 
             <div class="setting-button-row">
-              <button id="preview-call-message">미리듣기</button>
+              <button id="preview-call-message">호출 미리듣기</button>
+              <button id="preview-order-message">
+  주문 미리듣기
+</button>
               <button id="save-call-message">저장</button>
             </div>
           </div>
