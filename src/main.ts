@@ -4752,9 +4752,31 @@ const channel = supabase
   주문 미리듣기
 </button>
               <button id="save-call-message">저장</button>
-            </div>
-          </div>
-        </div>
+            
+             <div id="cancel-modal" class="cancel-modal">
+  <div class="cancel-box">
+    <h3>결제 취소</h3>
+
+    <p id="cancel-order-info">결제를 취소하시겠습니까?</p>
+
+    <input
+      id="cancel-password"
+      type="password"
+      placeholder="취소 비밀번호 입력"
+    />
+
+    <textarea
+      id="cancel-reason"
+      placeholder="취소 사유 입력"
+    ></textarea>
+
+    <div class="cancel-button-row">
+      <button id="direct-cancel-button">직접 취소</button>
+      <button id="request-cancel-button">본사 승인요청</button>
+      <button id="close-cancel-modal">닫기</button>
+    </div>
+  </div>
+</div>
       
       `
 
@@ -4842,7 +4864,12 @@ if (merchantOrderCardList) {
     '<td>' + orderNumber + '번</td>' +
     '<td>' +
   '<div>' + new Date(order.created_at).toLocaleString('ko-KR') + '</div>' +
-  '<div class="approval-number">승인번호 ' + (order.payment_key || '-') + '</div>' +
+ '<div class="approval-number cancel-approval-link" ' +
+  'data-id="' + order.id + '" ' +
+  'data-created-at="' + order.created_at + '" ' +
+  'data-amount="' + order.total_amount + '">' +
+  '승인번호 ' + (order.payment_key || '-') +
+'</div>' + 
 '</td>' +
     '<td>' + orderItems + '</td>' +
     '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
@@ -4881,11 +4908,16 @@ if (merchantOrderCardList) {
       '</div>' +
 
       '<div class="merchant-order-card-date">' +
-        new Date(order.created_at).toLocaleString('ko-KR') +
-      '</div>' +
-      '<div class="merchant-order-card-approval">' +
+  new Date(order.created_at).toLocaleString('ko-KR') +
+'</div>' +
+
+'<div class="approval-number cancel-approval-link" ' +
+  'data-id="' + order.id + '" ' +
+  'data-created-at="' + order.created_at + '" ' +
+  'data-amount="' + order.total_amount + '">' +
   '승인번호 : ' + (order.payment_key || '-') +
 '</div>' +
+      
 
     '<div class="merchant-order-card-items">' +
       orderItems +
@@ -5306,6 +5338,50 @@ document.querySelector('#sales-search')
     }
 
     location.href = '/merchant-admin?start=' + start + '&end=' + end
+  })
+
+  let selectedCancelOrderId = ''
+let selectedCancelCreatedAt = ''
+
+document.querySelectorAll('.cancel-approval-link')
+  .forEach((item) => {
+    item.addEventListener('click', () => {
+      selectedCancelOrderId =
+        (item as HTMLElement).getAttribute('data-id') || ''
+
+      selectedCancelCreatedAt =
+        (item as HTMLElement).getAttribute('data-created-at') || ''
+
+      const amount =
+        (item as HTMLElement).getAttribute('data-amount') || '0'
+
+      const info =
+        document.querySelector('#cancel-order-info')
+
+      if (info) {
+        info.textContent =
+          '결제금액 ' +
+          Number(amount).toLocaleString() +
+          '원을 취소하시겠습니까?'
+      }
+
+      const modal =
+        document.querySelector<HTMLElement>('#cancel-modal')
+
+      if (modal) {
+        modal.style.display = 'flex'
+      }
+    })
+  })
+
+document.querySelector('#close-cancel-modal')
+  ?.addEventListener('click', () => {
+    const modal =
+      document.querySelector<HTMLElement>('#cancel-modal')
+
+    if (modal) {
+      modal.style.display = 'none'
+    }
   })
 
       document.querySelector('#merchant-logout')

@@ -3619,4 +3619,49 @@ display: grid !important;
   color: #64748b;
   font-weight: 700;
 }
+.cancel-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+}
 
+.cancel-box {
+  width: 360px;
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+}
+
+#cancel-password,
+#cancel-reason {
+  width: 100%;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid #d0d7e2;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+#cancel-reason {
+  height: 80px;
+  resize: none;
+}
+
+.cancel-button-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.cancel-button-row button {
+  flex: 1;
+  height: 38px;
+  border-radius: 8px;
+  border: 0;
+  font-weight: 700;
+  cursor: pointer;
+}
