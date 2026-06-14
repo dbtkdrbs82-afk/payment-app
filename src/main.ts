@@ -4685,6 +4685,11 @@ const channel = supabase
   <option value="50">50개씩 보기</option>
   <option value="100">100개씩 보기</option>
 </select>
+<div class="order-pagination">
+  <button id="order-prev-page">이전</button>
+  <span id="order-page-info">1 / 1</span>
+  <button id="order-next-page">다음</button>
+</div>
 </div>
       
           <div class="admin-table-wrap">
@@ -5000,12 +5005,16 @@ document.querySelector('#merchant-qr-tab')
 
   let currentOrderFilter = '전체'
 let currentPageSize = 20
+let currentPage = 1
 
 function applyOrderFilter() {
-  const rows = document.querySelectorAll<HTMLTableRowElement>('#merchantOrderBody tr')
-  const cards = document.querySelectorAll<HTMLElement>('.merchant-order-card')
+  const rows = Array.from(
+    document.querySelectorAll<HTMLTableRowElement>('#merchantOrderBody tr')
+  )
 
-  let visibleCount = 0
+  const cards = Array.from(
+    document.querySelectorAll<HTMLElement>('.merchant-order-card')
+  )
 
   const checkVisible = (status: string) => {
     if (currentOrderFilter === '전체') return true
@@ -5013,25 +5022,52 @@ function applyOrderFilter() {
     return status === '완료'
   }
 
-  rows.forEach((row) => {
+  const filteredRows = rows.filter((row) => {
     const status = row.getAttribute('data-status') || '접수'
-    const show = checkVisible(status) && visibleCount < currentPageSize
-
-    row.style.display = show ? '' : 'none'
-
-    if (show) visibleCount++
+    return checkVisible(status)
   })
 
-  visibleCount = 0
+  const filteredCards = cards.filter((card) => {
+    const status = card.getAttribute('data-status') || '접수'
+    return checkVisible(status)
+  })
+
+  const totalItems = filteredRows.length || filteredCards.length
+  const totalPages = Math.max(1, Math.ceil(totalItems / currentPageSize))
+
+  if (currentPage > totalPages) {
+    currentPage = totalPages
+  }
+
+  const startIndex = (currentPage - 1) * currentPageSize
+  const endIndex = startIndex + currentPageSize
+
+  rows.forEach((row) => {
+    row.style.display = 'none'
+  })
+
+  filteredRows
+    .slice(startIndex, endIndex)
+    .forEach((row) => {
+      row.style.display = ''
+    })
 
   cards.forEach((card) => {
-    const status = card.getAttribute('data-status') || '접수'
-    const show = checkVisible(status) && visibleCount < currentPageSize
-
-    card.style.display = show ? '' : 'none'
-
-    if (show) visibleCount++
+    card.style.display = 'none'
   })
+
+  filteredCards
+    .slice(startIndex, endIndex)
+    .forEach((card) => {
+      card.style.display = ''
+    })
+
+  const pageInfo =
+    document.querySelector('#order-page-info')
+
+  if (pageInfo) {
+    pageInfo.textContent = currentPage + ' / ' + totalPages
+  }
 }
 
 document.querySelectorAll('.order-filter-btn')
@@ -5039,6 +5075,8 @@ document.querySelectorAll('.order-filter-btn')
     button.addEventListener('click', () => {
       currentOrderFilter =
         (button as HTMLElement).getAttribute('data-status') || '전체'
+
+        currentPage = 1
 
       applyOrderFilter()
     })
@@ -5051,6 +5089,26 @@ document.querySelector('#merchant-page-size')
       Number(
         (e.target as HTMLSelectElement).value
       )
+
+      currentPage = 1
+
+    applyOrderFilter()
+  })
+
+  document.querySelector('#order-prev-page')
+  ?.addEventListener('click', () => {
+
+    if (currentPage > 1) {
+      currentPage--
+
+      applyOrderFilter()
+    }
+  })
+
+document.querySelector('#order-next-page')
+  ?.addEventListener('click', () => {
+
+    currentPage++
 
     applyOrderFilter()
   })
