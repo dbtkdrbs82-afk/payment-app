@@ -4503,6 +4503,11 @@ const orderIdValue =
           window.location.href = '/merchant-admin'
         })
 
+        document.querySelector('#merchant-signup-button')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-create'
+  })
+
       } else if (path === '/merchant-admin') {
 
       const merchantId =
