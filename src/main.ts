@@ -5340,17 +5340,11 @@ document.querySelector('#sales-search')
     location.href = '/merchant-admin?start=' + start + '&end=' + end
   })
 
-  let selectedCancelOrderId = ''
-let selectedCancelCreatedAt = ''
 
 document.querySelectorAll('.cancel-approval-link')
   .forEach((item) => {
     item.addEventListener('click', () => {
-      selectedCancelOrderId =
-        (item as HTMLElement).getAttribute('data-id') || ''
-
-      selectedCancelCreatedAt =
-        (item as HTMLElement).getAttribute('data-created-at') || ''
+      
 
       const amount =
         (item as HTMLElement).getAttribute('data-amount') || '0'
