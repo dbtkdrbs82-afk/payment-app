@@ -3551,16 +3551,24 @@ display: grid !important;
   color: white;
 }
 .order-bottom-toolbar {
+  position: relative;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
 
   margin: 12px 0 20px;
 }
 
 .order-pagination {
+  position: absolute;
+
+  left: 50%;
+
+  transform: translateX(-50%);
+
   display: flex;
   align-items: center;
+
   gap: 12px;
 }
 
