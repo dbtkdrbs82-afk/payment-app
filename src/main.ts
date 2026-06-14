@@ -4723,7 +4723,7 @@ const channel = supabase
           </div>
         </div>
 
-        <div id="merchant-setting-modal"
+                <div id="merchant-setting-modal"
              class="merchant-setting-modal">
 
           <div class="merchant-setting-box">
@@ -4736,47 +4736,49 @@ const channel = supabase
               class="merchant-call-message"
               placeholder="예) 주문이 준비되었습니다."
             />
-            <label style="margin-top:20px;display:block;">
-  주문 접수 멘트
-</label>
 
-<input
-  id="merchant-order-message"
-  class="merchant-call-message"
-  placeholder="예) 새로운 주문이 접수되었습니다."
-/>
+            <label style="margin-top:20px;display:block;">
+              주문 접수 멘트
+            </label>
+
+            <input
+              id="merchant-order-message"
+              class="merchant-call-message"
+              placeholder="예) 새로운 주문이 접수되었습니다."
+            />
 
             <div class="setting-button-row">
               <button id="preview-call-message">호출 미리듣기</button>
-              <button id="preview-order-message">
-  주문 미리듣기
-</button>
+              <button id="preview-order-message">주문 미리듣기</button>
               <button id="save-call-message">저장</button>
-            
-             <div id="cancel-modal" class="cancel-modal">
-  <div class="cancel-box">
-    <h3>결제 취소</h3>
+            </div>
+          </div>
+        </div>
 
-    <p id="cancel-order-info">결제를 취소하시겠습니까?</p>
+        <div id="cancel-modal" class="cancel-modal">
+          <div class="cancel-box">
+            <h3>결제 취소</h3>
 
-    <input
-      id="cancel-password"
-      type="password"
-      placeholder="취소 비밀번호 입력"
-    />
+            <p id="cancel-order-info">결제를 취소하시겠습니까?</p>
 
-    <textarea
-      id="cancel-reason"
-      placeholder="취소 사유 입력"
-    ></textarea>
+            <input
+              id="cancel-password"
+              type="password"
+              placeholder="취소 비밀번호 입력"
+            />
 
-    <div class="cancel-button-row">
-      <button id="direct-cancel-button">직접 취소</button>
-      <button id="request-cancel-button">본사 승인요청</button>
-      <button id="close-cancel-modal">닫기</button>
-    </div>
-  </div>
-</div>
+            <textarea
+              id="cancel-reason"
+              placeholder="취소 사유 입력"
+            ></textarea>
+
+            <div class="cancel-button-row">
+              <button id="direct-cancel-button">직접 취소</button>
+              <button id="request-cancel-button">본사 승인요청</button>
+              <button id="close-cancel-modal">닫기</button>
+            </div>
+          </div>
+        </div>
       
       `
 
