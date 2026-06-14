@@ -5344,6 +5344,7 @@ document.querySelector('#sales-search')
 document.querySelectorAll('.cancel-approval-link')
   .forEach((item) => {
     item.addEventListener('click', () => {
+      alert('승인번호 클릭됨')
       
 
       const amount =
