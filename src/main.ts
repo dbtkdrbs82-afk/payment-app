@@ -4451,8 +4451,8 @@ const orderIdValue =
           </button>
     
           <button
-            id="go-merchant-apply-button"
-            class="merchant-join-button"
+  id="merchant-signup-button"
+  class="merchant-join-button"
           >
             신규 가입
           </button>
