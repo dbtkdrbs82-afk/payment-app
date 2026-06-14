@@ -5344,7 +5344,7 @@ document.querySelector('#sales-search')
 document.querySelectorAll('.cancel-approval-link')
   .forEach((item) => {
     item.addEventListener('click', () => {
-      alert('승인번호 클릭됨')
+      
       
 
       const amount =
@@ -5366,7 +5366,7 @@ document.querySelectorAll('.cancel-approval-link')
 console.log(modal)
 
 if (modal) {
-  alert('모달 찾음')
+  
   modal.style.display = 'flex'
 } else {
   alert('cancel-modal 없음')
