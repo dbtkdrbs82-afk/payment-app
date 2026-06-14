@@ -3681,3 +3681,20 @@ display: grid !important;
   border-radius: 16px;
   padding: 22px;
 }
+.order-status-cancel {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-weight: 700;
+  font-size: 12px;
+}
+
+.cancel-info {
+  margin-top: 5px;
+  font-size: 12px;
+  color: #b91c1c;
+  font-weight: 700;
+  line-height: 1.5;
+}

@@ -4872,14 +4872,28 @@ if (merchantOrderCardList) {
   'data-amount="' + order.total_amount + '">' +
   '승인번호 ' + (order.payment_key || '-') +
 '</div>' + 
+(
+  order.cancel_status === '취소완료'
+    ? '<div class="cancel-info">' +
+        '취소시각: ' +
+        (order.cancel_requested_at
+          ? new Date(order.cancel_requested_at).toLocaleString('ko-KR')
+          : '-') +
+        '<br />취소사유: ' +
+        (order.cancel_reason || '-') +
+      '</div>'
+    : ''
+) +
 '</td>' +
     '<td>' + orderItems + '</td>' +
     '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
     '<td>' +
   (
-    order.order_status === '완료'
-      ? '<span class="order-status-complete">완료</span>'
-      : '<span class="order-status-received">접수</span>'
+    order.order_status === '취소완료'
+  ? '<span class="order-status-cancel">취소완료</span>'
+  : order.order_status === '완료'
+    ? '<span class="order-status-complete">완료</span>'
+    : '<span class="order-status-received">접수</span>'
   ) +
 '</td>' +
     
@@ -4927,9 +4941,11 @@ if (merchantOrderCardList) {
 
     '<div class="merchant-order-card-status">' +
   (
-    order.order_status === '완료'
-      ? '<span class="order-status-complete">완료</span>'
-      : '<span class="order-status-received">접수중</span>'
+    order.order_status === '취소완료'
+  ? '<span class="order-status-cancel">취소완료</span>'
+  : order.order_status === '완료'
+    ? '<span class="order-status-complete">완료</span>'
+    : '<span class="order-status-received">접수</span>'
   ) +
 '</div>' +
 
