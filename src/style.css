@@ -3590,6 +3590,17 @@ display: grid !important;
   left: 50%;
   transform: translateX(-50%);
 }
-
+#merchant-page-size {
+  width: 130px !important;
+  min-width: 130px !important;
+  height: 38px !important;
+  padding: 0 10px !important;
+  color: #111 !important;
+  background: #fff !important;
+  font-size: 14px !important;
+  line-height: 38px !important;
+  box-sizing: border-box !important;
+  appearance: auto !important;
+}
 
 
