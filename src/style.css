@@ -3571,8 +3571,25 @@ display: grid !important;
 
   gap: 12px;
 }
+#merchant-page-size {
+  width: 120px;
+  min-width: 120px;
+  height: 36px;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+.order-bottom-toolbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin: 12px 0 20px;
+}
 
-
+.order-pagination {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
 
 
