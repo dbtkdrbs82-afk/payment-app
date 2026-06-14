@@ -4841,6 +4841,8 @@ if (merchantOrderCardList) {
 '</button>'
     '</td>'
 
+    tr.setAttribute('data-status', order.order_status || '접수')
+
     merchantOrderBody.appendChild(tr)
 
   const cardList =
@@ -4880,6 +4882,8 @@ if (merchantOrderCardList) {
         'data-number="' + orderNumber + '">' +
         '고객호출' +
       '</button>'
+
+      card.setAttribute('data-status', order.order_status || '접수')
 
     cardList.appendChild(card)
 
@@ -4993,6 +4997,65 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-qr'
   })
+
+  let currentOrderFilter = '전체'
+let currentPageSize = 20
+
+function applyOrderFilter() {
+  const rows = document.querySelectorAll<HTMLTableRowElement>('#merchantOrderBody tr')
+  const cards = document.querySelectorAll<HTMLElement>('.merchant-order-card')
+
+  let visibleCount = 0
+
+  const checkVisible = (status: string) => {
+    if (currentOrderFilter === '전체') return true
+    if (currentOrderFilter === '준비중') return status !== '완료'
+    return status === '완료'
+  }
+
+  rows.forEach((row) => {
+    const status = row.getAttribute('data-status') || '접수'
+    const show = checkVisible(status) && visibleCount < currentPageSize
+
+    row.style.display = show ? '' : 'none'
+
+    if (show) visibleCount++
+  })
+
+  visibleCount = 0
+
+  cards.forEach((card) => {
+    const status = card.getAttribute('data-status') || '접수'
+    const show = checkVisible(status) && visibleCount < currentPageSize
+
+    card.style.display = show ? '' : 'none'
+
+    if (show) visibleCount++
+  })
+}
+
+document.querySelectorAll('.order-filter-btn')
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      currentOrderFilter =
+        (button as HTMLElement).getAttribute('data-status') || '전체'
+
+      applyOrderFilter()
+    })
+  })
+
+document.querySelector('#merchant-page-size')
+  ?.addEventListener('change', (e) => {
+
+    currentPageSize =
+      Number(
+        (e.target as HTMLSelectElement).value
+      )
+
+    applyOrderFilter()
+  })
+
+applyOrderFilter()
 
   document.querySelector('#merchant-setting-button')
   ?.addEventListener('click', () => {
