@@ -4400,17 +4400,19 @@ const orderIdValue =
   
     } else if (path === '/merchant-login') {
       app.innerHTML = `
-        <div class="page">
-          <div class="payment-card">
+        <div class="pg-login-page">
+          <div class="pg-login-card">
+            <div class="pg-login-logo">NXG PICK</div>
             <h1>가맹점 로그인</h1>
-
+            <p>가맹점 주문관리 · 상품관리 · QR 관리</p>
+    
             <label>아이디</label>
             <input id="merchant-login-id" placeholder="아이디를 입력하세요" />
-
+    
             <label>비밀번호</label>
             <input id="merchant-login-password" type="password" placeholder="비밀번호를 입력하세요" />
-
-            <button class="gold-button" id="merchant-login-button">
+    
+            <button id="merchant-login-button">
               로그인
             </button>
           </div>
