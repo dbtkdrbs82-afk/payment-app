@@ -4897,6 +4897,59 @@ if (statusBox) {
   }
 
 })
+document.querySelectorAll('.admin-table .customer-call-button')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const number =
+        (button as HTMLElement).getAttribute('data-number') || '0'
+
+      const orderId =
+        (button as HTMLElement).getAttribute('data-id')
+
+      const callInput =
+        document.querySelector('#merchant-call-message') as HTMLInputElement | null
+
+      const savedCallMessage =
+        callInput?.value || '주문이 준비되었습니다.'
+
+      const callMessage =
+        Number(number) + '번 고객님 ' + savedCallMessage
+
+      window.speechSynthesis.cancel()
+
+      speechSynthesis.speak(
+        new SpeechSynthesisUtterance(callMessage)
+      )
+
+      ;(button as HTMLButtonElement).textContent = '호출완료'
+      ;(button as HTMLButtonElement).style.background = '#6b7280'
+
+      const tr = (button as HTMLElement).closest('tr')
+
+      if (tr) {
+        const statusCell = tr.children[5]
+
+        if (statusCell) {
+          statusCell.innerHTML =
+            '<span class="order-status-complete">완료</span>'
+        }
+      }
+
+      if (orderId) {
+        const { error } = await supabase
+          .from('orders')
+          .update({
+            order_status: '완료'
+          })
+          .eq('id', Number(orderId))
+
+        if (error) {
+          alert('주문상태 변경 실패: ' + error.message)
+        }
+      }
+    })
+  })
+  
 document.querySelector('#merchant-product-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-product'
