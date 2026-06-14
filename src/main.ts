@@ -2136,7 +2136,7 @@ window.history.replaceState({}, '', '/success')
         <div>통합관리</div>
         <div>QR결제</div>
         <div>주문관리</div>
-        <div>실시간 정산</div>
+        <div>자동정산</div>
       </div>
     </div>
 
@@ -4400,24 +4400,66 @@ const orderIdValue =
   
     } else if (path === '/merchant-login') {
       app.innerHTML = `
-        <div class="pg-login-page">
-          <div class="pg-login-card">
-            <div class="pg-login-logo">NXG PICK</div>
-            <h1>가맹점 로그인</h1>
-            <p>가맹점 주문관리 · 상품관리 · QR 관리</p>
+      <div class="nxg-login-page">
+        <div class="nxg-login-left">
+          <div class="nxg-logo">NXG SOFT</div>
     
-            <label>아이디</label>
-            <input id="merchant-login-id" placeholder="아이디를 입력하세요" />
+          <h1>
+            주문부터 운영까지,<br/>
+            가맹점 통합 관리
+          </h1>
     
-            <label>비밀번호</label>
-            <input id="merchant-login-password" type="password" placeholder="비밀번호를 입력하세요" />
+          <p>
+            주문과 상품, QR을 한 곳에서 관리하는<br/>
+            NXG PICK 가맹점 시스템입니다.
+          </p>
     
-            <button id="merchant-login-button">
-              로그인
-            </button>
+          <div class="nxg-login-features">
+            <div>주문관리</div>
+            <div>상품관리</div>
+            <div>PICK QR</div>
+            <div>실시간 주문</div>
           </div>
         </div>
+    
+        <div class="nxg-login-card">
+    
+          <div class="nxg-admin-badge">
+            NXG PICK ADMIN
+          </div>
+    
+          <h2>가맹점 로그인</h2>
+    
+          <input
+            id="merchant-login-id"
+            placeholder="아이디"
+          />
+    
+          <input
+            id="merchant-login-password"
+            type="password"
+            placeholder="비밀번호"
+          />
+    
+          <button id="merchant-login-button">
+            로그인
+          </button>
+    
+          <button
+            id="go-merchant-apply-button"
+            class="merchant-join-button"
+          >
+            신규 가입
+          </button>
+    
+          <div class="nxg-login-footer">
+            NXG PICK Merchant System
+          </div>
+    
+        </div>
+      </div>
       `
+    
 
       document.querySelector<HTMLButtonElement>('#merchant-login-button')!
         .addEventListener('click', async () => {
@@ -4456,7 +4498,7 @@ const orderIdValue =
           window.location.href = '/merchant-admin'
         })
 
-    } else if (path === '/merchant-admin') {
+      } else if (path === '/merchant-admin') {
 
       const merchantId =
         Number(sessionStorage.getItem('login_merchant_id'))
