@@ -5367,7 +5367,18 @@ document.querySelectorAll('.cancel-approval-link')
 
 if (modal) {
   
-  modal.style.display = 'flex'
+  modal.setAttribute(
+    'style',
+    `
+    display:flex !important;
+    position:fixed !important;
+    inset:0 !important;
+    background:rgba(0,0,0,.45) !important;
+    z-index:999999 !important;
+    align-items:center !important;
+    justify-content:center !important;
+    `
+  )
 } else {
   alert('cancel-modal 없음')
 }
