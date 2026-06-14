@@ -4648,6 +4648,7 @@ const channel = supabase
 </span>
 
   <button id="sales-search">검색</button>
+  <button id="excel-download">엑셀 다운로드</button>
 </div>
 
 
@@ -4839,7 +4840,10 @@ if (merchantOrderCardList) {
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
     '<td>' + orderNumber + '번</td>' +
-    '<td>' + new Date(order.created_at).toLocaleString('ko-KR') + '</td>' +
+    '<td>' +
+  '<div>' + new Date(order.created_at).toLocaleString('ko-KR') + '</div>' +
+  '<div class="approval-number">승인번호 ' + (order.payment_key || '-') + '</div>' +
+'</td>' +
     '<td>' + orderItems + '</td>' +
     '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
     '<td>' +
@@ -4879,6 +4883,9 @@ if (merchantOrderCardList) {
       '<div class="merchant-order-card-date">' +
         new Date(order.created_at).toLocaleString('ko-KR') +
       '</div>' +
+      '<div class="merchant-order-card-approval">' +
+  '승인번호 : ' + (order.payment_key || '-') +
+'</div>' +
 
     '<div class="merchant-order-card-items">' +
       orderItems +

@@ -3602,5 +3602,21 @@ display: grid !important;
   box-sizing: border-box !important;
   appearance: auto !important;
 }
-
+#excel-download {
+  height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 6px;
+  background: #1d4b8f;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+.approval-number,
+.merchant-order-card-approval {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 700;
+}
 
