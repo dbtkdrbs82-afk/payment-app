@@ -4505,7 +4505,7 @@ const orderIdValue =
 
         document.querySelector('#merchant-signup-button')
   ?.addEventListener('click', () => {
-    location.href = '/merchant-create'
+    location.href = '/merchant-apply'
   })
 
       } else if (path === '/merchant-admin') {
