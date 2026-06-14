@@ -2901,8 +2901,17 @@ display: grid !important;
   color: white !important;
   border: 0 !important;
   border-radius: 6px !important;
-  height: 34px !important;
-  padding: 0 14px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  height: 38px !important;
+  padding: 0 16px !important;
+
+  position: relative;
+  top: -2px;
+
   font-size: 13px !important;
   font-weight: 700 !important;
   cursor: pointer;
@@ -3491,8 +3500,7 @@ display: grid !important;
 .merchant-user-box {
   display: flex;
   align-items: center;
-  gap: 10px;
-  white-space: nowrap;
+  gap: 12px;
 }
 
 .merchant-user-box strong {
