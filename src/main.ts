@@ -5344,11 +5344,11 @@ document.querySelector('#sales-search')
   })
 
 
-document.querySelectorAll('.cancel-approval-link')
+  document.querySelectorAll('.cancel-approval-link')
   .forEach((item) => {
     item.addEventListener('click', () => {
-      
-      
+      const modal =
+        document.querySelector<HTMLElement>('#cancel-modal')
 
       const amount =
         (item as HTMLElement).getAttribute('data-amount') || '0'
@@ -5363,30 +5363,18 @@ document.querySelectorAll('.cancel-approval-link')
           '원을 취소하시겠습니까?'
       }
 
-      const modal =
-  document.querySelector<HTMLElement>('#cancel-modal')
+      if (modal) {
+        modal.setAttribute(
+          'data-order-id',
+          (item as HTMLElement).getAttribute('data-id') || ''
+        )
 
-  console.log(modal?.outerHTML)
-
-if (modal) {
-  
-  modal.setAttribute(
-    'style',
-    `
-    display:flex !important;
-    position:fixed !important;
-    inset:0 !important;
-    background:rgba(0,0,0,.45) !important;
-    z-index:999999 !important;
-    align-items:center !important;
-    justify-content:center !important;
-    `
-  )
-} else {
-  alert('cancel-modal 없음')
-}
+        modal.style.display = 'flex'
+      }
     })
   })
+
+  document.querySelector<HTMLElement>('#cancel-modal')
 
 document.querySelector('#close-cancel-modal')
   ?.addEventListener('click', () => {
