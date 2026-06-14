@@ -5363,7 +5363,7 @@ document.querySelectorAll('.cancel-approval-link')
       const modal =
   document.querySelector<HTMLElement>('#cancel-modal')
 
-console.log(modal)
+  console.log(modal?.outerHTML)
 
 if (modal) {
   
