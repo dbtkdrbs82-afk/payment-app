@@ -4678,18 +4678,24 @@ const channel = supabase
   </div>
 </div>
 
+  <div class="order-bottom-toolbar">
+
   <select id="merchant-page-size">
-  <option value="10">10개씩 보기</option>
-  <option value="20" selected>20개씩 보기</option>
-  <option value="30">30개씩 보기</option>
-  <option value="50">50개씩 보기</option>
-  <option value="100">100개씩 보기</option>
-</select>
-<div class="order-pagination">
-  <button id="order-prev-page">이전</button>
-  <span id="order-page-info">1 / 1</span>
-  <button id="order-next-page">다음</button>
-</div>
+    ...
+  </select>
+
+  <div class="order-pagination">
+    <button id="order-prev-page">이전</button>
+
+    <span id="order-page-info">
+      1 / 2
+    </span>
+
+    <button id="order-next-page">
+      다음
+    </button>
+  </div>
+
 </div>
       
           <div class="admin-table-wrap">
