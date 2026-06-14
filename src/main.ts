@@ -5385,6 +5385,11 @@ document.querySelector('#sales-search')
           (item as HTMLElement).getAttribute('data-id') || ''
         )
 
+        modal.setAttribute(
+          'data-created-at',
+          (item as HTMLElement).getAttribute('data-created-at') || ''
+        )
+
         modal.style.display = 'flex'
       }
     })
@@ -5413,13 +5418,27 @@ document.querySelector('#close-cancel-modal')
     const password = passwordInput?.value || ''
     const reason = reasonInput?.value || ''
 
+    const modal =
+    document.querySelector<HTMLElement>('#cancel-modal')
+
+const orderCreatedAt =
+  modal?.getAttribute('data-created-at') || ''
+
+const today =
+  new Date().toISOString().slice(0, 10)
+
+const orderDate =
+  orderCreatedAt.slice(0, 10)
+
+if (orderDate !== today) {
+  alert('당일 결제건만 직접 취소할 수 있습니다.\n본사 승인요청을 이용해주세요.')
+  return
+}
+
     if (password !== '1234') {
       alert('취소 비밀번호가 일치하지 않습니다.')
       return
     }
-
-    const modal =
-      document.querySelector<HTMLElement>('#cancel-modal')
 
     const orderId =
       modal?.getAttribute('data-order-id') || ''
