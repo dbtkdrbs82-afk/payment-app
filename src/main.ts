@@ -2181,6 +2181,11 @@ window.history.replaceState({}, '', '/success')
 
     document.querySelector('#go-merchant-apply-button')
   ?.addEventListener('click', () => {
+    location.href = '/merchant-create'
+  })
+
+    document.querySelector('#go-merchant-apply-button')
+  ?.addEventListener('click', () => {
     location.href = '/merchant-apply'
   })
 
