@@ -5174,9 +5174,10 @@ applyOrderFilter()
         '#merchant-setting-modal'
       )
 
-    if (modal) {
-      modal.style.display = 'flex'
-    }
+      if (modal) {
+      
+        modal.style.display = 'flex'
+      }
 })
 
 document.querySelector('#merchant-setting-modal')
@@ -5395,6 +5396,54 @@ document.querySelector('#close-cancel-modal')
     if (modal) {
       modal.style.display = 'none'
     }
+  })
+
+  document.querySelector('#direct-cancel-button')
+  ?.addEventListener('click', async () => {
+    const passwordInput =
+      document.querySelector('#cancel-password') as HTMLInputElement | null
+
+    const reasonInput =
+      document.querySelector('#cancel-reason') as HTMLTextAreaElement | null
+
+    const password = passwordInput?.value || ''
+    const reason = reasonInput?.value || ''
+
+    if (password !== '1234') {
+      alert('취소 비밀번호가 일치하지 않습니다.')
+      return
+    }
+
+    const modal =
+      document.querySelector<HTMLElement>('#cancel-modal')
+
+    const orderId =
+      modal?.getAttribute('data-order-id') || ''
+
+    if (!orderId) {
+      alert('취소할 주문을 찾을 수 없습니다.')
+      return
+    }
+
+    const { error } = await supabase
+      .from('orders')
+      .update({
+        order_status: '취소완료',
+        payment_status: '취소완료',
+        cancel_status: '취소완료',
+        cancel_reason: reason,
+        cancel_requested_at: new Date().toISOString()
+      })
+      .eq('id', Number(orderId))
+
+    if (error) {
+      alert('결제취소 처리 실패: ' + error.message)
+      return
+    }
+
+    alert('결제취소 처리되었습니다.')
+
+    location.reload()
   })
 
       document.querySelector('#merchant-logout')
