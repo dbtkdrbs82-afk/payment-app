@@ -5361,11 +5361,16 @@ document.querySelectorAll('.cancel-approval-link')
       }
 
       const modal =
-        document.querySelector<HTMLElement>('#cancel-modal')
+  document.querySelector<HTMLElement>('#cancel-modal')
 
-      if (modal) {
-        modal.style.display = 'flex'
-      }
+console.log(modal)
+
+if (modal) {
+  alert('모달 찾음')
+  modal.style.display = 'flex'
+} else {
+  alert('cancel-modal 없음')
+}
     })
   })
 
