@@ -3665,3 +3665,19 @@ display: grid !important;
   font-weight: 700;
   cursor: pointer;
 }
+#cancel-modal {
+  display: none;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,.45) !important;
+  z-index: 999999 !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+#cancel-modal .cancel-box {
+  width: 360px;
+  background: white;
+  border-radius: 16px;
+  padding: 22px;
+}
