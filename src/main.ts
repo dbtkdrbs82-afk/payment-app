@@ -2210,6 +2210,7 @@ window.history.replaceState({}, '', '/success')
         <div class="admin-menu">
   <a class="admin-tab" data-page="dashboard">대시보드</a>
 <a class="admin-tab" data-page="merchant">가맹점관리</a>
+<a class="admin-tab" data-page="merchant-apply">가입신청 관리</a>
 <a class="admin-tab" data-page="payment">결제관리</a>
   <a class="admin-tab" data-page="payout">출금관리</a>
   <a class="admin-tab" data-page="settlement">정산관리</a>
@@ -4110,6 +4111,12 @@ document.querySelectorAll('.product-delete-button')
         
               alert('음성 설정이 저장되었습니다.')
             })
+        }
+
+        if (page === 'merchant-apply') {
+
+          alert('가입신청 관리 테스트')
+        
         }
 
 if (page === 'payment') {
