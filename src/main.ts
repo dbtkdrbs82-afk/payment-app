@@ -4113,8 +4113,74 @@ document.querySelectorAll('.product-delete-button')
 
         if (page === 'merchant-apply') {
 
-          alert('가입신청 관리 테스트')
+          const { data: applyList, error } = await supabase
+            .from('merchants')
+            .select('*')
+            .eq('status', '신청')
+            .order('created_at', { ascending: false })
         
+          if (error) {
+            alert('가입신청 조회 실패 : ' + error.message)
+            return
+          }
+        
+          const subMenu = document.querySelector('.admin-sub-menu')
+          const titleBox = document.querySelector('.admin-title')
+          const summaryBox = document.querySelector('.admin-summary')
+          const tableHead = document.querySelector('.admin-table thead')
+          const paymentTableBody =
+            document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+        
+          if (subMenu) {
+            subMenu.innerHTML = '가입신청 조회'
+          }
+        
+          if (titleBox) {
+            titleBox.innerHTML = '▶ 가맹점관리 > 가입신청 관리'
+          }
+        
+          if (summaryBox) {
+            summaryBox.innerHTML =
+              '가입신청 : ' + (applyList || []).length + '건'
+          }
+        
+          if (tableHead) {
+            tableHead.innerHTML =
+              '<tr>' +
+              '<th>No</th>' +
+              '<th>신청일</th>' +
+              '<th>상호명</th>' +
+              '<th>대표자</th>' +
+              '<th>사업자번호</th>' +
+              '<th>상태</th>' +
+              '<th>처리</th>' +
+              '</tr>'
+          }
+        
+          paymentTableBody.innerHTML = ''
+        
+          ;(applyList || []).forEach((merchant, index) => {
+        
+            const tr = document.createElement('tr')
+        
+            tr.innerHTML =
+              '<td>' + (index + 1) + '</td>' +
+              '<td>' +
+              new Date(merchant.created_at).toLocaleDateString('ko-KR') +
+              '</td>' +
+              '<td>' + (merchant.merchant_name || '-') + '</td>' +
+              '<td>' + (merchant.ceo_name || '-') + '</td>' +
+              '<td>' + (merchant.business_number || '-') + '</td>' +
+              '<td>' + merchant.status + '</td>' +
+              '<td>' +
+              '<button class="merchant-approve" data-id="' +
+              merchant.id +
+              '">승인</button>' +
+              '</td>'
+        
+            paymentTableBody.appendChild(tr)
+        
+          })
         }
 
 if (page === 'payment') {
