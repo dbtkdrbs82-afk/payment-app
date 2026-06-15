@@ -2215,9 +2215,7 @@ window.history.replaceState({}, '', '/success')
   <a class="admin-tab" data-page="payout">출금관리</a>
   <a class="admin-tab" data-page="settlement">정산관리</a>
   <a class="admin-tab" data-page="tax">세무관리</a>
-  <a class="admin-tab" data-page="order">주문관리</a>
-  <a class="admin-tab" data-page="mini">미니상점</a>
-  <a class="admin-tab" data-page="setting">설정관리</a>
+  
 </div>
   
         <div class="admin-sub-menu">
