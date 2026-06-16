@@ -2528,6 +2528,11 @@ document.querySelector('[data-sub="merchant-add"]')
   })
   })
 
+  const defaultMerchantTab =
+  document.querySelector<HTMLElement>('[data-page="merchant"]')
+
+defaultMerchantTab?.click()
+
   document.addEventListener('change', (event) => {
     const target = event.target as HTMLElement
   
