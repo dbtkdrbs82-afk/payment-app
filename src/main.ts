@@ -2217,11 +2217,12 @@ window.history.replaceState({}, '', '/success')
 </div>
   
         <div class="admin-sub-menu">
-          승인내역조회 | POS주문내역조회 | 승인거절 내역조회 | 카드결제 | 현금영수증 발급
-        </div>
-  
-        <div class="admin-title">
-          ▶ 결제관리 > 승인내역조회
+  업체/가맹점 등록 | 결제 수수료 설정
+</div>
+
+<div class="admin-title">
+  ▶ 가맹점관리 > 가맹점 관리
+</div>
         </div>
   
         <div class="admin-search-box">
@@ -2308,6 +2309,14 @@ window.history.replaceState({}, '', '/success')
         </table>
       </div>
        `
+
+       const firstMerchantTab =
+  document.querySelector<HTMLElement>('[data-page="merchant"]')
+
+if (firstMerchantTab) {
+  firstMerchantTab.click()
+}
+
        const searchBtn = document.querySelector('.search-btn')
        const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
@@ -2603,15 +2612,6 @@ document.querySelector('[data-sub="merchant-add"]')
       'admin_page_size',
       select.value
     )
-  
-    setTimeout(() => {
-      const merchantTab =
-        document.querySelector<HTMLElement>(
-          '[data-page="merchant"]'
-        )
-    
-      merchantTab?.click()
-    }, 300)
   })
 
 if (titleBox) {
