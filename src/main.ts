@@ -2592,6 +2592,28 @@ document.querySelector('[data-sub="merchant-add"]')
   })
   })
 
+  document.addEventListener('change', (event) => {
+    const target = event.target as HTMLElement
+  
+    if (target.id !== 'admin-page-size') {
+      return
+    }
+  
+    const select = target as HTMLSelectElement
+  
+    sessionStorage.setItem(
+      'admin_page_size',
+      select.value
+    )
+  
+    const merchantTab =
+      document.querySelector<HTMLElement>(
+        '[data-page="merchant"]'
+      )
+  
+    merchantTab?.click()
+  })
+  
 if (titleBox) {
   titleBox.innerHTML = '▶ 가맹점관리 > 가맹점 관리'
 }
@@ -2732,8 +2754,24 @@ const rejectedCount =
       
       paymentTableBody.innerHTML = ''
       
-      merchants.forEach((merchant, index) => {
-        const tr = document.createElement('tr')
+      const savedAdminPageSize =
+  sessionStorage.getItem('admin_page_size') || '20'
+
+const pageSizeSelect =
+  document.querySelector('#admin-page-size') as HTMLSelectElement | null
+
+if (pageSizeSelect) {
+  pageSizeSelect.value = savedAdminPageSize
+}
+
+const adminPageSize =
+  Number(savedAdminPageSize) || 20
+
+merchants
+  .slice(0, adminPageSize)
+  .forEach((merchant, index) => {
+       
+    const tr = document.createElement('tr')
       
         tr.innerHTML =
   '<td>' + (index + 1) + '</td>' +
