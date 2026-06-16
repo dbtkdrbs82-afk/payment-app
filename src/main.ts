@@ -2208,8 +2208,7 @@ window.history.replaceState({}, '', '/success')
         </div>
   
         <div class="admin-menu">
-  <a class="admin-tab" data-page="dashboard">대시보드</a>
-<a class="admin-tab" data-page="merchant">가맹점관리</a>
+  <a class="admin-tab" data-page="merchant">가맹점관리</a>
 <a class="admin-tab" data-page="payment">결제관리</a>
   <a class="admin-tab" data-page="payout">출금관리</a>
   <a class="admin-tab" data-page="settlement">정산관리</a>
@@ -2406,7 +2405,7 @@ if (summaryBox) {
       
           const page = tab.getAttribute('data-page')
 
-    if (page === 'dashboard') {
+          if (page === 'dashboard') {
       const subMenu = document.querySelector('.admin-sub-menu')
       const titleBox = document.querySelector('.admin-title')
       const searchBox = document.querySelector('.admin-search-box')
@@ -2535,8 +2534,7 @@ const titleBox = document.querySelector('.admin-title')
 
 if (subMenu) {
   subMenu.innerHTML =
-  '<span class="sub-tab" data-sub="merchant-apply">가입신청 관리</span> | ' +
-  '<span class="sub-tab" data-sub="merchant-list">승인가맹점</span> | ' +
+  
   '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span> | ' +
   '<span class="sub-tab" data-sub="fee-setting">결제 수수료 설정</span>'
 }
@@ -2606,12 +2604,14 @@ document.querySelector('[data-sub="merchant-add"]')
       select.value
     )
   
-    const merchantTab =
-      document.querySelector<HTMLElement>(
-        '[data-page="merchant"]'
-      )
-  
-    merchantTab?.click()
+    setTimeout(() => {
+      const merchantTab =
+        document.querySelector<HTMLElement>(
+          '[data-page="merchant"]'
+        )
+    
+      merchantTab?.click()
+    }, 300)
   })
 
 if (titleBox) {
