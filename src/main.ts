@@ -2223,92 +2223,28 @@ window.history.replaceState({}, '', '/success')
 <div class="admin-title">
   ▶ 가맹점관리 > 가맹점 관리
 </div>
-        </div>
-  
-        <div class="admin-search-box">
-          <div>
-            <select><option>다우데이타</option><option>코페이</option><option>전체</option></select>
-            <select><option>거래일자</option><option>승인일자</option></select>
-            <input value="20260528" />
-            <span>~</span>
-            <input value="20260528" />
-            <button class="quick-btn">오늘</button>
-            <button class="quick-btn">어제</button>
-            <button class="quick-btn">당월</button>
-            <select><option>가맹점ID</option><option>가맹점명</option></select>
-            <input />
-          </div>
-  
-        <div class="filter-row">
-  <div class="tab-group">
-    <button class="tab active">전체</button>
-    <button class="tab">4일결제</button>
-    <button class="tab">3일결제</button>
-    <button class="tab">1일결제</button>
-  </div>
 
-  <div class="tab-group">
-    <button class="tab active">전체</button>
-    <button class="tab">무선단말기</button>
-    <button class="tab">수기결제</button>
-    <button class="tab">QR결제</button>
-  </div>
+<div class="admin-search-box"></div>
+
+<div class="admin-summary"></div>
+
+<div class="admin-table-top">
+  <button>엑셀 다운로드</button>
+
+  <select id="admin-page-size">
+    <option value="10">10개씩 보기</option>
+    <option value="20" selected>20개씩 보기</option>
+    <option value="50">50개씩 보기</option>
+    <option value="100">100개씩 보기</option>
+  </select>
 </div>
 
-<div class="payment-search-line">
-  <select><option>신용카드결제</option></select>
-  <select><option>신용카드전체</option></select>
-  <select><option>기본키</option></select>
-  <button class="search-btn">🔍 검색</button>
-</div>  
-  
-          <div>
-            <select><option>전체</option><option>승인</option><option>취소</option><option>완료</option></select>
-            <select><option>전체</option><option>정산완료</option><option>정산대기</option></select>
-          </div>
-        </div>
-  
-        <div class="admin-summary">
-          검색된 데이터 : 0건 &nbsp;&nbsp;&nbsp;
-          사용자 : 0명 &nbsp;&nbsp;&nbsp;
-          전체금액 : 0원
-          <span>카드취소를 원하는 데이터의 거래번호를 클릭해주세요.</span>
-        </div>
-  
-        <div class="admin-table-top">
-          <button>엑셀 다운로드</button>
-          <select id="admin-page-size">
-  <option value="10">10개씩 보기</option>
-  <option value="20" selected>20개씩 보기</option>
-  <option value="50">50개씩 보기</option>
-  <option value="100">100개씩 보기</option>
-</select>
-        </div>
-  
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>승인일<br/>승인번호</th>
-              <th>취소일<br/>거래번호</th>
-              <th>가맹점아이디/구분<br/>가맹점상호/가맹점명</th>
-              <th>매입사/구매자연락처<br/>구매상품/구매자 성함</th>
-              <th>메모</th>
-              <th>카드번호<br/>할부구분</th>
-              <th>결제수단<br/>결제금액</th>
-              <th>거래방식<br/>물품금액</th>
-              <th>부가세<br/>봉사료</th>
-              <th>거래수수료<br/>가맹점금액</th>
-            </tr>
-          </thead>
-          <tbody id="paymentTableBody">
-  <tr>
-    <td colspan="11" class="empty-row">검색해주세요.</td>
-  </tr>
-</tbody>
-        </table>
-      </div>
-       `
+<table class="admin-table">
+  <thead></thead>
+  <tbody id="paymentTableBody"></tbody>
+</table>
+</div>
+`
 
        const searchBtn = document.querySelector('.search-btn')
        const paymentTableBody =
@@ -2607,7 +2543,7 @@ document.querySelector('[data-sub="merchant-add"]')
     )
   })
 
-  
+
 if (titleBox) {
   titleBox.innerHTML = '▶ 가맹점관리 > 가맹점 관리'
 }
