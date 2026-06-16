@@ -2680,7 +2680,11 @@ const rejectedCount =
   if (summaryBox) {
     summaryBox.innerHTML =
       '<div class="merchant-status-cards">' +
-        '<div class="merchant-status-card">' +
+      '<div class="merchant-status-card">' +
+  '<p>전체 가맹점</p>' +
+  '<strong>' + totalMerchantCount + '건</strong>' +
+'</div>' +  
+      '<div class="merchant-status-card">' +
           '<p>신청대기</p>' +
           '<strong>' + waitingCount + '건</strong>' +
         '</div>' +
@@ -2692,10 +2696,6 @@ const rejectedCount =
           '<p>반려</p>' +
           '<strong>' + rejectedCount + '건</strong>' +
         '</div>' +
-        '<div class="merchant-status-card">' +
-  '<p>전체 가맹점</p>' +
-  '<strong>' + totalMerchantCount + '건</strong>' +
-'</div>' +
       '</div>' +
       '<div style="margin-top:16px;">' +
         '<button id="copy-merchant-apply-link" class="merchant-search-btn">🔗 가입신청 링크 생성</button>' +
