@@ -2528,6 +2528,7 @@ document.querySelector('[data-sub="merchant-add"]')
   })
   })
 
+
   const defaultMerchantTab =
   document.querySelector<HTMLElement>('[data-page="merchant"]')
 
