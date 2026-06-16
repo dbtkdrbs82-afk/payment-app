@@ -4182,6 +4182,47 @@ document.querySelectorAll('.product-delete-button')
           })
         }
 
+        document.querySelectorAll('.merchant-approve')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const merchantId =
+        (button as HTMLElement).getAttribute('data-id')
+
+      if (!merchantId) {
+        alert('가맹점 ID를 찾을 수 없습니다.')
+        return
+      }
+
+      const loginId =
+        'MER' + String(merchantId).padStart(5, '0')
+
+      const tempPassword =
+        '1234'
+
+      const { error } = await supabase
+        .from('merchants')
+        .update({
+          status: '승인',
+          merchant_login_id: loginId,
+          merchant_password: tempPassword
+        })
+        .eq('id', Number(merchantId))
+
+      if (error) {
+        alert('승인 실패: ' + error.message)
+        return
+      }
+
+      alert(
+        '승인 완료\n' +
+        '가맹점 아이디: ' + loginId + '\n' +
+        '임시 비밀번호: ' + tempPassword
+      )
+
+      location.reload()
+    })
+  })
+
 if (page === 'payment') {
 const subMenu = document.querySelector('.admin-sub-menu')
 const titleBox = document.querySelector('.admin-title')
