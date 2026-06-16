@@ -2613,7 +2613,7 @@ document.querySelector('[data-sub="merchant-add"]')
   
     merchantTab?.click()
   })
-  
+
 if (titleBox) {
   titleBox.innerHTML = '▶ 가맹점관리 > 가맹점 관리'
 }
@@ -2693,7 +2693,9 @@ const waitingCount =
   allMerchants?.filter((item) => item.status === '신청').length || 0
 
 const approvedCount =
-  allMerchants?.filter((item) => item.status === '승인').length || 0
+  allMerchants?.filter((item) =>
+    ['승인', '승인완료', '운영', '대기'].includes(item.status || '')
+  ).length || 0
 
 const rejectedCount =
   allMerchants?.filter((item) => item.status === '반려').length || 0
