@@ -3766,3 +3766,14 @@ display: grid !important;
 .pg-login-card button:hover {
   background: #163c74;
 }
+.admin-search-box {
+  margin-top: 12px !important;
+}
+
+.admin-title {
+  margin-bottom: 12px !important;
+}
+
+.admin-wrap {
+  padding-top: 0 !important;
+}
