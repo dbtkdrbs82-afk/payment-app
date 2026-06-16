@@ -2657,64 +2657,46 @@ const searchKeyword = keywordInput?.value?.trim() || ''
       }
 
       const summaryBox = document.querySelector('.admin-summary')
-
-if (summaryBox) {
-  summaryBox.innerHTML =
-    '<div class="merchant-status-cards">' +
-      '<div class="merchant-status-card">' +
-        '<p>신청대기</p>' +
-        '<strong>8건</strong>' +
-      '</div>' +
-      '<div class="merchant-status-card">' +
-        '<p>심사중</p>' +
-        '<strong>3건</strong>' +
-      '</div>' +
-      '<div class="merchant-status-card">' +
-        '<p>승인완료</p>' +
-        '<strong>' + merchants.length + '건</strong>' +
-      '</div>' +
-      '<div class="merchant-status-card danger">' +
-        '<p>반려</p>' +
-        '<strong>2건</strong>' +
-      '</div>' +
-    '</div>' +
-    '<div style="margin-top:16px;">' +
-    '<button id="copy-merchant-apply-link" class="merchant-apply-btn">🔗 가입신청 링크 생성</button>' +
-    '</div>'
-}
-
-document.querySelector('#copy-merchant-apply-link')
-  ?.addEventListener('click', async () => {
-    const applyUrl =
-      window.location.origin + '/merchant-apply'
-
-    await navigator.clipboard.writeText(applyUrl)
-
-    alert('가입신청 링크가 복사되었습니다.')
-  })
       
       const tableHead = document.querySelector('.admin-table thead')
+      
       const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
       
+  const { data: allMerchants } = await supabase
+  .from('merchants')
+  .select('status')
+
+const waitingCount =
+  allMerchants?.filter((item) => item.status === '신청').length || 0
+
+const reviewingCount =
+  allMerchants?.filter((item) => item.status === '심사중').length || 0
+
+const approvedCount =
+  allMerchants?.filter((item) => item.status === '승인').length || 0
+
+const rejectedCount =
+  allMerchants?.filter((item) => item.status === '반려').length || 0
+
   if (summaryBox) {
     summaryBox.innerHTML =
       '<div class="merchant-status-cards">' +
         '<div class="merchant-status-card">' +
           '<p>신청대기</p>' +
-          '<strong>8건</strong>' +
+          '<strong>' + waitingCount + '건</strong>' +
         '</div>' +
         '<div class="merchant-status-card">' +
           '<p>심사중</p>' +
-          '<strong>3건</strong>' +
+          '<strong>' + reviewingCount + '건</strong>' +
         '</div>' +
         '<div class="merchant-status-card">' +
           '<p>승인완료</p>' +
-          '<strong>' + merchants.length + '건</strong>' +
+          '<strong>' + approvedCount + '건</strong>' +
         '</div>' +
         '<div class="merchant-status-card danger">' +
           '<p>반려</p>' +
-          '<strong>2건</strong>' +
+          '<strong>' + rejectedCount + '건</strong>' +
         '</div>' +
       '</div>' +
       '<div style="margin-top:16px;">' +
