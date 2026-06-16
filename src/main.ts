@@ -2476,7 +2476,7 @@ if (subMenu) {
   '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span> | ' +
   '<span class="sub-tab" data-sub="fee-setting">결제 수수료 설정</span>'
 }
-document.querySelector('[data-sub="merchant-add"]')
+    document.querySelector('[data-sub="merchant-add"]')
   ?.addEventListener('click', () => {
     sessionStorage.setItem('selected_merchant_id', '')
     sessionStorage.setItem('merchant_sub_page', 'merchant-add')
@@ -2524,7 +2524,8 @@ document.querySelector('[data-sub="merchant-add"]')
     }
 
     paymentTableBody.innerHTML =
-      '<tr><td colspan="12">업체/가맹점 등록 화면 준비중</td></tr>'
+      paymentTableBody.innerHTML =
+  '<tr><td colspan="12">신규 업체/가맹점 등록 화면 준비 예정</td></tr>'
   })
   })
 
