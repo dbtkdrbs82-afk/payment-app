@@ -2310,13 +2310,6 @@ window.history.replaceState({}, '', '/success')
       </div>
        `
 
-       const firstMerchantTab =
-  document.querySelector<HTMLElement>('[data-page="merchant"]')
-
-if (firstMerchantTab) {
-  firstMerchantTab.click()
-}
-
        const searchBtn = document.querySelector('.search-btn')
        const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
