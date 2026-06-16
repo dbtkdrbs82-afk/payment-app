@@ -2607,6 +2607,7 @@ document.querySelector('[data-sub="merchant-add"]')
     )
   })
 
+  
 if (titleBox) {
   titleBox.innerHTML = '▶ 가맹점관리 > 가맹점 관리'
 }
