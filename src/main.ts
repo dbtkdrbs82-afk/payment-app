@@ -2673,7 +2673,8 @@ const uploadMerchantFile = async (inputId: string, folderName: string) => {
 
   if (!file) return ''
 
-  const filePath = folderName + '/' + Date.now() + '-' + file.name
+  const fileExt = file.name.split('.').pop() || 'file'
+const filePath = folderName + '/' + Date.now() + '-' + Math.random().toString(36).slice(2) + '.' + fileExt
 
   const { error } = await supabase.storage
     .from('merchant-files')
