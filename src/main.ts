@@ -2645,7 +2645,28 @@ const settlementCycle = (document.querySelector<HTMLSelectElement>('#settlement_
 const zipcode = (document.querySelector<HTMLInputElement>('#zipcode')?.value || '').trim()
 const address = (document.querySelector<HTMLInputElement>('#address')?.value || '').trim()
 const addressDetail = (document.querySelector<HTMLInputElement>('#address_detail')?.value || '').trim()
-    
+const registerType = (document.querySelector<HTMLSelectElement>('#register-type')?.value || '').trim()
+const agencyName = (document.querySelector<HTMLSelectElement>('#agency-name')?.value || '').trim()
+const pgCompany = (document.querySelector<HTMLSelectElement>('#pg-company')?.value || '').trim()
+const companyType = (document.querySelector<HTMLSelectElement>('#company-type')?.value || '').trim()
+const merchantStatus = (document.querySelector<HTMLSelectElement>('#status')?.value || '').trim()
+const openedAt = (document.querySelector<HTMLInputElement>('#opened_at')?.value || '').trim()
+const residentNumber = (document.querySelector<HTMLInputElement>('#resident-number')?.value || '').trim()
+const corporateNumber = (document.querySelector<HTMLInputElement>('#corporate-number')?.value || '').trim()
+const taxType = (document.querySelector<HTMLSelectElement>('#tax-type')?.value || '').trim()
+const productItem = (document.querySelector<HTMLInputElement>('#product-item')?.value || '').trim()
+const businessType = (document.querySelector<HTMLInputElement>('#business-type')?.value || '').trim()
+const businessCategory = (document.querySelector<HTMLInputElement>('#business-category')?.value || '').trim()
+const openNumber = (document.querySelector<HTMLInputElement>('#open-number')?.value || '').trim()
+const manageNumber = (document.querySelector<HTMLInputElement>('#manage-number')?.value || '').trim()
+const wirelessOpenNumber = (document.querySelector<HTMLInputElement>('#wireless-open-number')?.value || '').trim()
+const wirelessManageNumber = (document.querySelector<HTMLInputElement>('#wireless-manage-number')?.value || '').trim()
+const installmentMonth = (document.querySelector<HTMLSelectElement>('#installment-month')?.value || '').trim()
+const dailyLimit = (document.querySelector<HTMLInputElement>('#daily-limit')?.value || '').trim()
+const monthlyLimit = (document.querySelector<HTMLInputElement>('#monthly-limit')?.value || '').trim()
+const yearlyLimit = (document.querySelector<HTMLInputElement>('#yearly-limit')?.value || '').trim()
+const memo = (document.querySelector<HTMLTextAreaElement>('#merchant-memo')?.value || '').trim()
+
 if (!merchantName) {
       alert('가맹점명을 입력해주세요.')
       return
@@ -2675,7 +2696,29 @@ if (!merchantName) {
   zipcode: zipcode,
   address: address,
   address_detail: addressDetail,
-  status: '신청'
+
+  register_type: registerType,
+  agency_name: agencyName,
+  pg_company: pgCompany,
+  company_type: companyType,
+  opened_at: openedAt,
+  resident_number: residentNumber,
+  corporate_number: corporateNumber,
+  tax_type: taxType,
+  product_item: productItem,
+  business_type: businessType,
+  business_category: businessCategory,
+  open_number: openNumber,
+  manage_number: manageNumber,
+  wireless_open_number: wirelessOpenNumber,
+  wireless_manage_number: wirelessManageNumber,
+  installment_month: installmentMonth,
+  daily_limit: dailyLimit,
+  monthly_limit: monthlyLimit,
+  yearly_limit: yearlyLimit,
+  memo: memo,
+
+  status: merchantStatus || '신청'
 })
 
     if (error) {
