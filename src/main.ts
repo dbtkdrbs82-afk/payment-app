@@ -6472,6 +6472,7 @@ document.querySelector('#merchant-product-image-file')
             )
         
             const text = result.data.text
+            alert(text)
 
 const cardNumberMatch =
   text.match(/\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}/)
