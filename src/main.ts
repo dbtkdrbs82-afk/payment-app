@@ -2634,8 +2634,19 @@ document.querySelector('#save-new-merchant')
     const businessNumber = (document.querySelector<HTMLInputElement>('#business_number')?.value || '').trim()
     const phone = (document.querySelector<HTMLInputElement>('#phone')?.value || '').trim()
     const email = (document.querySelector<HTMLInputElement>('#email')?.value || '').trim()
-
-    if (!merchantName) {
+    const cpid = (document.querySelector<HTMLInputElement>('#cpid')?.value || '').trim()
+const feeRate = Number((document.querySelector<HTMLInputElement>('#fee-rate')?.value || '0').trim())
+const pgMid = (document.querySelector<HTMLInputElement>('#pg_mid')?.value || '').trim()
+const terminalMid = (document.querySelector<HTMLInputElement>('#terminal_mid')?.value || '').trim()
+const bankName = (document.querySelector<HTMLInputElement>('#bank_name')?.value || '').trim()
+const accountNumber = (document.querySelector<HTMLInputElement>('#account_number')?.value || '').trim()
+const accountHolder = (document.querySelector<HTMLInputElement>('#account_holder')?.value || '').trim()
+const settlementCycle = (document.querySelector<HTMLSelectElement>('#settlement_cycle')?.value || '').trim()
+const zipcode = (document.querySelector<HTMLInputElement>('#zipcode')?.value || '').trim()
+const address = (document.querySelector<HTMLInputElement>('#address')?.value || '').trim()
+const addressDetail = (document.querySelector<HTMLInputElement>('#address_detail')?.value || '').trim()
+    
+if (!merchantName) {
       alert('가맹점명을 입력해주세요.')
       return
     }
@@ -2648,13 +2659,24 @@ document.querySelector('#save-new-merchant')
     const { error } = await supabase
       .from('merchants')
       .insert({
-        merchant_name: merchantName,
-        owner_name: ownerName,
-        business_number: businessNumber,
-        phone: phone,
-        email: email,
-        status: '신청'
-      })
+  merchant_name: merchantName,
+  owner_name: ownerName,
+  business_number: businessNumber,
+  phone: phone,
+  email: email,
+  cpid: cpid,
+  fee_rate: feeRate,
+  pg_mid: pgMid,
+  terminal_mid: terminalMid,
+  bank_name: bankName,
+  account_number: accountNumber,
+  account_holder: accountHolder,
+  settlement_cycle: settlementCycle,
+  zipcode: zipcode,
+  address: address,
+  address_detail: addressDetail,
+  status: '신청'
+})
 
     if (error) {
       alert('저장 실패: ' + error.message)
