@@ -2626,8 +2626,6 @@ paymentTableBody.innerHTML =
       '</div>' +
     '</td>' +
   '</tr>'
-  })
-  })
 
 document.querySelector('#save-new-merchant')
   ?.addEventListener('click', async () => {
@@ -2666,7 +2664,8 @@ document.querySelector('#save-new-merchant')
     alert('신규가입신청서가 저장되었습니다.')
     location.reload()
   })
-
+ })
+  })
 
   const defaultMerchantTab =
   document.querySelector<HTMLElement>('[data-page="merchant"]')
