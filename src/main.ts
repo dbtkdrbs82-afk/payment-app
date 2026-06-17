@@ -1,6 +1,7 @@
 import './style.css'
 import { loadTossPayments } from '@tosspayments/payment-sdk'
 import { createClient } from '@supabase/supabase-js'
+import Tesseract from 'tesseract.js'
 import QRCode from 'qrcode'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
@@ -6420,9 +6421,27 @@ document.querySelector('#merchant-product-image-file')
             reader.readAsDataURL(file)
           })
       
-        document.querySelector('#ocr-start-btn')
-          ?.addEventListener('click', () => {
-            alert('OCR 인식 기능은 다음 단계에서 연결합니다.')
+          document.querySelector('#ocr-start-btn')
+          ?.addEventListener('click', async () => {
+        
+            const image =
+              document.querySelector<HTMLImageElement>('#ocr-preview-image')
+        
+            if (!image?.src) {
+              alert('카드를 먼저 촬영해주세요.')
+              return
+            }
+        
+            alert('카드 인식 중입니다. 잠시만 기다려주세요.')
+        
+            const result = await Tesseract.recognize(
+              image.src,
+              'eng'
+            )
+        
+            console.log(result.data.text)
+        
+            alert(result.data.text)
           })
       
     } else if (path === '/kiosk') {
