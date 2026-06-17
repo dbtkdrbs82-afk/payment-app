@@ -3834,3 +3834,51 @@ display: grid !important;
 .merchant-card-payment-box:hover span {
   color: #4b5563 !important;
 }
+.merchant-card-ocr-page {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 30px;
+}
+
+.ocr-upload-box {
+  margin-top: 30px;
+  padding: 30px;
+  border: 2px dashed #d5dce8;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.ocr-preview-box {
+  margin-top: 20px;
+  text-align: center;
+}
+
+#ocr-preview-image {
+  max-width: 100%;
+  border-radius: 12px;
+  border: 1px solid #dbe3ef;
+}
+
+.ocr-action-box {
+  display: flex;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+#ocr-start-btn,
+#ocr-back-btn {
+  width: 220px;
+  height: 50px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+#ocr-start-btn {
+  background: #174a8b;
+  color: white;
+}
+
+#ocr-back-btn {
+  background: #f1f5f9;
+}
