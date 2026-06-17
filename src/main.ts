@@ -2609,11 +2609,11 @@ paymentTableBody.innerHTML =
         '<div class="merchant-detail-section">' +
           '<h3>첨부서류</h3>' +
           '<div class="merchant-file-list">' +
-            '<div class="merchant-file-row"><label>사업자등록증</label><input type="file" /></div>' +
-            '<div class="merchant-file-row"><label>통장사본</label><input type="file" /></div>' +
-            '<div class="merchant-file-row"><label>대표자 신분증</label><input type="file" /></div>' +
-            '<div class="merchant-file-row"><label>판매상품 사진</label><input type="file" /></div>' +
-            '<div class="merchant-file-row"><label>기타서류</label><input type="file" /></div>' +
+            '<div class="merchant-file-row"><label>사업자등록증</label><input id="business-license-file" type="file" /></div>' +
+'<div class="merchant-file-row"><label>통장사본</label><input id="bankbook-file" type="file" /></div>' +
+'<div class="merchant-file-row"><label>대표자 신분증</label><input id="id-card-file" type="file" /></div>' +
+'<div class="merchant-file-row"><label>판매상품 사진</label><input id="product-photo-file" type="file" /></div>' +
+'<div class="merchant-file-row"><label>기타서류</label><input id="extra-file" type="file" /></div>' +
             '<div class="merchant-file-row"><label>메모</label><textarea id="merchant-memo" placeholder="심사 메모를 입력하세요"></textarea></div>' +
           '</div>' +
         '</div>' +
@@ -3001,11 +3001,13 @@ merchantButtons.forEach((button) => {
                 '<label>사업자번호</label><input id="business_number" value="' + (merchant.business_number || '') + '" />' +
                 '<label>운영상태</label>' +
 '<select>' +
-  '<option>운영</option>' +
-  '<option>중지</option>' +
+  '<option ' + (merchant.status === '신청' ? 'selected' : '') + '>신청</option>' +
+  '<option ' + (merchant.status === '심사중' ? 'selected' : '') + '>심사중</option>' +
+  '<option ' + (merchant.status === '운영' ? 'selected' : '') + '>운영</option>' +
+  '<option ' + (merchant.status === '중지' ? 'selected' : '') + '>중지</option>' +
 '</select>' +
 '<label>개통일자</label>' +
-'<input type="date" value="" />' +
+'<input type="date" value="' + (merchant.opened_at || '') + '" />'
 '<label>비밀번호 초기화</label>' +
 '<button type="button" id="reset-merchant-password" class="reset-password-btn">1234로 초기화</button>' +
 
@@ -3023,7 +3025,7 @@ merchantButtons.forEach((button) => {
     '<input id="owner-name" value="' + (merchant.owner_name || '') + '" />' +
 
     '<label>주민번호</label>' +
-    '<input id="resident-number" value="" placeholder="000000-0000000" />' +
+'<input id="resident-number" value="' + (merchant.resident_number || '') + '" placeholder="000000-0000000" />'
 
     '<label>연락처</label>' +
     '<input id="phone" value="' + (merchant.phone || '') + '" />' +
@@ -3033,21 +3035,21 @@ merchantButtons.forEach((button) => {
 
    '<label>이메일</label><input id="email" value="' + (merchant.email || '') + '" />' +
 
-'<label>법인번호</label><input id="business_number" value="' + (merchant.business_number || '') + '" />' +
+'<label>법인번호</label><input id="corporate-number" value="' + (merchant.corporate_number || '') + '" />'
 
     '<label>과세구분</label>' +
-    '<select id="tax-type">' +
-      '<option>과세</option>' +
-      '<option>비과세</option>' +
-    '</select>' +
+'<select id="tax-type">' +
+  '<option ' + (merchant.tax_type === '과세' ? 'selected' : '') + '>과세</option>' +
+  '<option ' + (merchant.tax_type === '비과세' ? 'selected' : '') + '>비과세</option>' +
+'</select>' +
 
     '<label>취급품목</label>' +
-    '<input id="product-item" value="" />' +
+'<input id="product-item" value="' + (merchant.product_item || '') + '" />'
 
     '<label>업태/종목</label>' +
     '<div class="business-type-row">' +
-      '<input id="business-type" value="" placeholder="업태" />' +
-      '<input id="business-category" value="" placeholder="종목" />' +
+      '<input id="business-type" value="' + (merchant.business_type || '') + '" placeholder="업태" />'
+      '<input id="business-category" value="' + (merchant.business_category || '') + '" placeholder="종목" />'
     '</div>' +
 
    '<label>주소</label>' +
@@ -3067,10 +3069,10 @@ merchantButtons.forEach((button) => {
               '<div class="merchant-detail-grid">' +
                 '<label>PG MID</label><input id="pg_mid" value="' + (merchant.pg_mid || '') + '" />' +
 '<label>단말기 MID</label><input id="terminal_mid" value="' + (merchant.terminal_mid || '') + '" />' +
-'<label>개통번호</label><input id="opened_at" value="' + (merchant.opened_at || '') + '" />' +
-'<label>관리번호</label><input value="" />' +
-'<label>무선단말기 개통번호</label><input value="" />' +
-'<label>무선단말기 관리번호</label><input value="" />' +
+'<label>개통번호</label><input id="open-number" value="' + (merchant.open_number || '') + '" />'
+'<label>관리번호</label><input id="manage-number" value="' + (merchant.manage_number || '') + '" />'
+'<label>무선단말기 개통번호</label><input id="wireless-open-number" value="' + (merchant.wireless_open_number || '') + '" />'
+'<label>무선단말기 관리번호</label><input id="wireless-manage-number" value="' + (merchant.wireless_manage_number || '') + '" />'
               '</div>' +
             '</div>' +
     
@@ -3094,18 +3096,18 @@ merchantButtons.forEach((button) => {
   '<h3>위험관리 / 한도설정</h3>' +
   '<div class="merchant-detail-grid merchant-risk-grid">' +
     '<label>최대할부기간</label>' +
-    '<select>' +
-      '<option>2개월</option>' +
-      '<option>3개월</option>' +
-      '<option>4개월</option>' +
-      '<option>5개월</option>' +
-      '<option>6개월</option>' +
-      '<option>10개월</option>' +
-      '<option>12개월</option>' +
+'<select id="installment-month">' +
+      '<option ' + (merchant.installment_month === '2개월' ? 'selected' : '') + '>2개월</option>' +
+'<option ' + (merchant.installment_month === '3개월' ? 'selected' : '') + '>3개월</option>' +
+'<option ' + (merchant.installment_month === '4개월' ? 'selected' : '') + '>4개월</option>' +
+'<option ' + (merchant.installment_month === '5개월' ? 'selected' : '') + '>5개월</option>' +
+'<option ' + (merchant.installment_month === '6개월' ? 'selected' : '') + '>6개월</option>' +
+'<option ' + (merchant.installment_month === '10개월' ? 'selected' : '') + '>10개월</option>' +
+'<option ' + (merchant.installment_month === '12개월' ? 'selected' : '') + '>12개월</option>' +
     '</select>' +
-    '<label>1일 승인한도</label><input value="" />' +
-    '<label>월한도</label><input value="" />' +
-    '<label>연한도</label><input value="" />' +
+    '<label>1일 승인한도</label><input id="daily-limit" value="' + (merchant.daily_limit || '') + '" />'
+    '<label>월한도</label><input id="monthly-limit" value="' + (merchant.monthly_limit || '') + '" />'
+    '<label>연한도</label><input id="yearly-limit" value="' + (merchant.yearly_limit || '') + '" />'
   '</div>' +
 '</div>' +
     
