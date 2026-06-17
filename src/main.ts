@@ -6337,9 +6337,9 @@ document.querySelector('#merchant-product-image-file')
           location.href = '/merchant-login'
         })
     
-      document.querySelector('#ocr-card-payment')
+        document.querySelector('#ocr-card-payment')
         ?.addEventListener('click', () => {
-          alert('OCR 카드결제 화면은 다음 단계에서 연결합니다.')
+          location.href = '/merchant-card-ocr'
         })
     
       document.querySelector('#manual-card-payment')
@@ -6352,6 +6352,73 @@ document.querySelector('#merchant-product-image-file')
           location.href = '/kiosk?merchant_id=' + merchantId
         })
     
+      } else if (path === '/merchant-card-ocr') {
+
+        app.innerHTML = `
+          <div class="merchant-card-ocr-page">
+      
+            <h1>OCR 카드결제</h1>
+            <p>카드를 촬영하거나 이미지를 업로드해주세요.</p>
+      
+            <div class="ocr-upload-box">
+              <input
+                type="file"
+                id="ocr-card-image"
+                accept="image/*"
+              />
+            </div>
+      
+            <div class="ocr-preview-box">
+              <img
+                id="ocr-preview-image"
+                style="max-width:400px; display:none;"
+              />
+            </div>
+      
+            <div class="ocr-action-box">
+              <button id="ocr-start-btn">
+                카드정보 인식하기
+              </button>
+      
+              <button id="ocr-back-btn">
+                이전으로
+              </button>
+            </div>
+      
+          </div>
+        `
+      
+        document.querySelector('#ocr-back-btn')
+          ?.addEventListener('click', () => {
+            location.href = '/merchant-card'
+          })
+      
+        document.querySelector('#ocr-card-image')
+          ?.addEventListener('change', (e: any) => {
+      
+            const file = e.target.files?.[0]
+            if (!file) return
+      
+            const reader = new FileReader()
+      
+            reader.onload = (event) => {
+              const img =
+                document.querySelector<HTMLImageElement>('#ocr-preview-image')
+      
+              if (!img) return
+      
+              img.src = String(event.target?.result)
+              img.style.display = 'block'
+            }
+      
+            reader.readAsDataURL(file)
+          })
+      
+        document.querySelector('#ocr-start-btn')
+          ?.addEventListener('click', () => {
+            alert('OCR 인식 기능은 다음 단계에서 연결합니다.')
+          })
+      
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
