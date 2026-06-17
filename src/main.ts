@@ -3048,7 +3048,7 @@ merchantButtons.forEach((button) => {
 
     '<label>업태/종목</label>' +
     '<div class="business-type-row">' +
-      '<label>개통번호</label><input id="open-number" value="' + (merchant.open_number || '') + '" />' +
+      '<input id="business-type" value="' + (merchant.business_type || '') + '" placeholder="업태" />' +
       '<input id="business-category" value="' + (merchant.business_category || '') + '" placeholder="종목" />'
     '</div>' +
 
