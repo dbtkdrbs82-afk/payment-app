@@ -3170,26 +3170,38 @@ merchantButtons.forEach((button) => {
     '<div class="merchant-file-row">' +
       '<label>통장사본</label>' +
       '<input type="file" />' +
-      '<span>기존 파일: ' + (merchant.bankbook_url || '첨부파일 없음') + '</span>' +
-    '</div>' +
+      '<span>기존 파일: ' +
+  (merchant.bankbook_url
+    ? '<a href="' + merchant.bankbook_url + '" target="_blank">보기</a>'
+    : '첨부파일 없음') +
+'</span>' +
 
     '<div class="merchant-file-row">' +
       '<label>대표자 신분증</label>' +
       '<input type="file" />' +
-      '<span>기존 파일: ' + (merchant.id_card_url || '첨부파일 없음') + '</span>' +
-    '</div>' +
+      '<span>기존 파일: ' +
+  (merchant.id_card_url
+    ? '<a href="' + merchant.id_card_url + '" target="_blank">보기</a>'
+    : '첨부파일 없음') +
+'</span>' +
 
     '<div class="merchant-file-row">' +
       '<label>판매상품 사진</label>' +
       '<input type="file" />' +
-      '<span>기존 파일: ' + (merchant.product_photo_url || '첨부파일 없음') + '</span>' +
-    '</div>' +
+      '<span>기존 파일: ' +
+  (merchant.product_photo_url
+    ? '<a href="' + merchant.product_photo_url + '" target="_blank">보기</a>'
+    : '첨부파일 없음') +
+'</span>' +
 
     '<div class="merchant-file-row">' +
       '<label>기타서류</label>' +
       '<input type="file" />' +
-      '<span>기존 파일: ' + (merchant.extra_file_url || '첨부파일 없음') + '</span>' +
-    '</div>' +
+      '<span>기존 파일: ' +
+  (merchant.extra_file_url
+    ? '<a href="' + merchant.extra_file_url + '" target="_blank">보기</a>'
+    : '첨부파일 없음') +
+'</span>' +
 
     '<div class="merchant-file-row">' +
       '<label>메모</label>' +
