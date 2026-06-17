@@ -3766,4 +3766,43 @@ display: grid !important;
 .pg-login-card button:hover {
   background: #163c74;
 }
+.merchant-card-payment-page {
+  padding: 32px;
+}
 
+.merchant-card-payment-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.merchant-card-payment-box {
+  min-height: 180px;
+  border: 1px solid #d6e0ef;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #123;
+  cursor: pointer;
+  padding: 28px;
+  text-align: left;
+}
+
+.merchant-card-payment-box strong {
+  display: block;
+  font-size: 24px;
+  margin-bottom: 18px;
+  color: #0f3f7a;
+}
+
+.merchant-card-payment-box span {
+  display: block;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #4b5563;
+}
+
+.merchant-card-payment-box:hover {
+  border-color: #174a8b;
+  box-shadow: 0 8px 20px rgba(15, 63, 122, 0.12);
+}
