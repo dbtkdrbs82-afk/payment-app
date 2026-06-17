@@ -6305,6 +6305,12 @@ document.querySelector('#merchant-product-image-file')
           <strong>메뉴 선택 결제</strong>
           <span>상품을 선택한 뒤 카드결제를 진행합니다.</span>
         </button>
+
+        <button class="merchant-card-payment-box" id="batch-card-payment">
+  <strong>일괄승인</strong>
+  <span>학원비, 관리비, 회비 등을 한 번에 승인합니다.</span>
+</button>
+
       </div>
     </div>
   </div>
@@ -6352,7 +6358,11 @@ document.querySelector('#merchant-product-image-file')
         ?.addEventListener('click', () => {
           location.href = '/kiosk?merchant_id=' + merchantId
         })
-    
+        document.querySelector('#batch-card-payment')
+        ?.addEventListener('click', () => {
+          location.href = '/merchant-batch-payment'
+        })
+
       } else if (path === '/merchant-card-ocr') {
 
         app.innerHTML = `
@@ -6491,6 +6501,51 @@ const cardNumberMatch =
   }
           })
       
+        } else if (path === '/merchant-batch-payment') {
+
+          app.innerHTML = `
+            <div class="merchant-card-ocr-page">
+        
+              <h1>일괄승인</h1>
+              <p>여러 건의 결제를 한 번에 승인할 수 있습니다.</p>
+        
+              <div class="ocr-action-box">
+                <button id="batch-add-row">
+                  회원 추가
+                </button>
+        
+                <button id="batch-excel-upload">
+                  엑셀 업로드
+                </button>
+        
+                <button id="batch-submit">
+                  승인 실행
+                </button>
+              </div>
+        
+              <table class="merchant-table">
+                <thead>
+                  <tr>
+                    <th>이름</th>
+                    <th>연락처</th>
+                    <th>금액</th>
+                    <th>상태</th>
+                  </tr>
+                </thead>
+        
+                <tbody id="batch-payment-body">
+                  <tr>
+                    <td><input placeholder="홍길동" /></td>
+                    <td><input placeholder="01012345678" /></td>
+                    <td><input placeholder="100000" /></td>
+                    <td>대기</td>
+                  </tr>
+                </tbody>
+              </table>
+        
+            </div>
+          `
+          
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
