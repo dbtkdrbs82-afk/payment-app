@@ -2971,10 +2971,17 @@ merchantButtons.forEach((button) => {
             '<div class="merchant-detail-section">' +
               '<h3>등록정보</h3>' +
               '<div class="merchant-detail-grid">' +
-                '<label>등록구분</label><select><option>가맹점</option><option>담당자</option><option>대리점</option></select>' +
-                '<label>소속 대리점</label><select><option>본사</option><option>에이드컴퍼니</option></select>' +
-                '<label>사용 PG사</label><select><option>다우데이타</option><option>코페이</option></select>' +
-                '<label>회사구분</label><select><option>개인(일반)</option><option>개인사업자</option><option>법인사업자</option></select>' +
+                '<label>등록구분</label>' +
+'<select><option ' + (merchant.register_type === '가맹점' ? 'selected' : '') + '>가맹점</option><option ' + (merchant.register_type === '담당자' ? 'selected' : '') + '>담당자</option><option ' + (merchant.register_type === '대리점' ? 'selected' : '') + '>대리점</option></select>' +
+
+'<label>소속 대리점</label>' +
+'<select><option ' + (merchant.agency_name === '본사' ? 'selected' : '') + '>본사</option><option ' + (merchant.agency_name === '에이드컴퍼니' ? 'selected' : '') + '>에이드컴퍼니</option></select>' +
+
+'<label>사용 PG사</label>' +
+'<select><option ' + (merchant.pg_company === '다우데이타' ? 'selected' : '') + '>다우데이타</option><option ' + (merchant.pg_company === '코페이' ? 'selected' : '') + '>코페이</option><option ' + (merchant.pg_company === '토스페이먼츠' ? 'selected' : '') + '>토스페이먼츠</option></select>' +
+
+'<label>회사구분</label>' +
+'<select><option ' + (merchant.company_type === '개인(일반)' ? 'selected' : '') + '>개인(일반)</option><option ' + (merchant.company_type === '개인사업자' ? 'selected' : '') + '>개인사업자</option><option ' + (merchant.company_type === '법인사업자' ? 'selected' : '') + '>법인사업자</option></select>' +
                 '<label>CPID</label><input id="cpid" value="' + (merchant.cpid || ('MER' + String(merchant.id).padStart(4, '0'))) + '" />' +
                 '<label>사업자번호</label><input id="business_number" value="' + (merchant.business_number || '') + '" />' +
                 '<label>운영상태</label>' +
