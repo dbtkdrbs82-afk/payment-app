@@ -3207,7 +3207,7 @@ merchantButtons.forEach((button) => {
             '<div class="merchant-detail-actions">' +
             '<button class="merchant-save-btn" id="save-merchant-info">저장</button>' +
               '<button class="merchant-save-btn" id="approve-merchant">승인</button>' +
-'<button class="merchant-reject-btn" id="reject-merchant">반려</button>' +
+'<button class="merchant-reject-btn" id="delete-merchant">삭제</button>' +
 '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
             '</div>' +
     
@@ -3323,25 +3323,23 @@ console.log('저장 error:', error)
     location.reload()
   })
 
-    document.querySelector('#reject-merchant')
-      ?.addEventListener('click', async () => {
-        if (!confirm('이 가맹점을 반려하시겠습니까?')) return
-    
-        const { error } = await supabase
-          .from('merchants')
-          .update({
-            status: '반려'
-          })
-          .eq('id', merchant.id)
-    
-        if (error) {
-          alert('반려 실패: ' + error.message)
-          return
-        }
-    
-        alert('반려되었습니다.')
-        location.reload()
-      })
+  document.querySelector('#delete-merchant')
+  ?.addEventListener('click', async () => {
+    if (!confirm('이 신청내역을 삭제하시겠습니까?')) return
+
+    const { error } = await supabase
+      .from('merchants')
+      .delete()
+      .eq('id', merchant.id)
+
+    if (error) {
+      alert('삭제 실패: ' + error.message)
+      return
+    }
+
+    alert('삭제되었습니다.')
+    location.reload()
+  })
     
     })
     })
