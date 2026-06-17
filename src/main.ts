@@ -2629,6 +2629,43 @@ paymentTableBody.innerHTML =
   })
   })
 
+document.querySelector('#save-new-merchant')
+  ?.addEventListener('click', async () => {
+    const merchantName = (document.querySelector<HTMLInputElement>('#merchant-name')?.value || '').trim()
+    const ownerName = (document.querySelector<HTMLInputElement>('#owner-name')?.value || '').trim()
+    const businessNumber = (document.querySelector<HTMLInputElement>('#business_number')?.value || '').trim()
+    const phone = (document.querySelector<HTMLInputElement>('#phone')?.value || '').trim()
+    const email = (document.querySelector<HTMLInputElement>('#email')?.value || '').trim()
+
+    if (!merchantName) {
+      alert('가맹점명을 입력해주세요.')
+      return
+    }
+
+    if (!ownerName) {
+      alert('대표자명을 입력해주세요.')
+      return
+    }
+
+    const { error } = await supabase
+      .from('merchants')
+      .insert({
+        merchant_name: merchantName,
+        owner_name: ownerName,
+        business_number: businessNumber,
+        phone: phone,
+        email: email,
+        status: '신청'
+      })
+
+    if (error) {
+      alert('저장 실패: ' + error.message)
+      return
+    }
+
+    alert('신규가입신청서가 저장되었습니다.')
+    location.reload()
+  })
 
 
   const defaultMerchantTab =
