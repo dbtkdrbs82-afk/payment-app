@@ -3820,3 +3820,17 @@ display: grid !important;
 .merchant-card-payment-box span {
   color: #6b7280 !important;
 }
+.merchant-card-payment-box:hover {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #174a8b !important;
+  box-shadow: 0 10px 24px rgba(15, 63, 122, 0.14);
+}
+
+.merchant-card-payment-box:hover strong {
+  color: #0f3f7a !important;
+}
+
+.merchant-card-payment-box:hover span {
+  color: #4b5563 !important;
+}
