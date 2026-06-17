@@ -3767,31 +3767,33 @@ display: grid !important;
   background: #163c74;
 }
 .merchant-card-payment-page {
-  padding: 32px;
+  padding: 28px;
+  background: #f5f7fb;
+  min-height: calc(100vh - 220px);
 }
 
 .merchant-card-payment-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 22px;
   margin-top: 24px;
 }
 
 .merchant-card-payment-box {
   min-height: 180px;
-  border: 1px solid #d6e0ef;
-  border-radius: 14px;
+  border: 1px solid #d8e2ef;
+  border-radius: 12px;
   background: #ffffff;
-  color: #123;
+  color: #111827;
   cursor: pointer;
-  padding: 28px;
+  padding: 30px;
   text-align: left;
 }
 
 .merchant-card-payment-box strong {
   display: block;
-  font-size: 24px;
-  margin-bottom: 18px;
+  font-size: 22px;
+  margin-bottom: 16px;
   color: #0f3f7a;
 }
 
@@ -3804,5 +3806,6 @@ display: grid !important;
 
 .merchant-card-payment-box:hover {
   border-color: #174a8b;
-  box-shadow: 0 8px 20px rgba(15, 63, 122, 0.12);
+  box-shadow: 0 10px 24px rgba(15, 63, 122, 0.14);
+  transform: translateY(-2px);
 }
