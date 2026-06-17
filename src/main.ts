@@ -2667,6 +2667,46 @@ const monthlyLimit = (document.querySelector<HTMLInputElement>('#monthly-limit')
 const yearlyLimit = (document.querySelector<HTMLInputElement>('#yearly-limit')?.value || '').trim()
 const memo = (document.querySelector<HTMLTextAreaElement>('#merchant-memo')?.value || '').trim()
 
+const uploadMerchantFile = async (inputId: string, folderName: string) => {
+  const fileInput = document.querySelector<HTMLInputElement>(inputId)
+  const file = fileInput?.files?.[0]
+
+  if (!file) return ''
+
+  const filePath = folderName + '/' + Date.now() + '-' + file.name
+
+  const { error } = await supabase.storage
+    .from('merchant-files')
+    .upload(filePath, file)
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  const { data } = supabase.storage
+    .from('merchant-files')
+    .getPublicUrl(filePath)
+
+  return data.publicUrl
+}
+
+let businessLicenseUrl = ''
+let bankbookUrl = ''
+let idCardUrl = ''
+let productPhotoUrl = ''
+let extraFileUrl = ''
+
+try {
+  businessLicenseUrl = await uploadMerchantFile('#business-license-file', 'business-license')
+  bankbookUrl = await uploadMerchantFile('#bankbook-file', 'bankbook')
+  idCardUrl = await uploadMerchantFile('#id-card-file', 'id-card')
+  productPhotoUrl = await uploadMerchantFile('#product-photo-file', 'product-photo')
+  extraFileUrl = await uploadMerchantFile('#extra-file', 'extra')
+} catch (uploadError) {
+  alert('파일 업로드 실패: ' + (uploadError as Error).message)
+  return
+}
+
 if (!merchantName) {
       alert('가맹점명을 입력해주세요.')
       return
@@ -2718,7 +2758,13 @@ if (!merchantName) {
   yearly_limit: yearlyLimit,
   memo: memo,
 
-  status: merchantStatus || '신청'
+business_license_url: businessLicenseUrl,
+bankbook_url: bankbookUrl,
+id_card_url: idCardUrl,
+product_photo_url: productPhotoUrl,
+extra_file_url: extraFileUrl,
+
+status: merchantStatus || '신청'
 })
 
     if (error) {
