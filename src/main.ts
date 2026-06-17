@@ -6278,42 +6278,39 @@ document.querySelector('#merchant-product-image-file')
       }
     
       app.innerHTML = `
-        <div class="merchant-admin-page">
-          <div class="merchant-admin-header">
-            <div>
-              <h1>카드결제</h1>
-              <p>${merchantName} 가맹점 카드결제 메뉴입니다.</p>
-            </div>
-            <button id="merchant-card-logout">로그아웃</button>
-          </div>
-    
-          <div class="merchant-toolbar">
-            <button id="card-go-order">주문관리</button>
-            <button id="card-go-product">상품관리</button>
-            <button id="card-go-qr">PICK QR</button>
-            <button id="card-go-card" class="active">카드결제</button>
-          </div>
-    
-          <div class="merchant-card-payment-page">
-            <div class="merchant-card-payment-grid">
-              <button class="merchant-card-payment-box" id="ocr-card-payment">
-                <strong>OCR 카드결제</strong>
-                <span>실물카드 촬영 후 카드번호를 자동 인식하여 결제합니다.</span>
-              </button>
-    
-              <button class="merchant-card-payment-box" id="manual-card-payment">
-                <strong>일반 수기결제</strong>
-                <span>카드번호와 유효기간을 직접 입력하여 결제합니다.</span>
-              </button>
-    
-              <button class="merchant-card-payment-box" id="menu-card-payment">
-                <strong>메뉴 선택 결제</strong>
-                <span>상품을 선택한 뒤 카드결제를 진행합니다.</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      `
+  <div class="merchant-admin-page">
+    <div class="merchant-card-header">
+      <h1>카드결제</h1>
+      <p>${merchantName} 가맹점 카드결제 메뉴입니다.</p>
+    </div>
+
+    <div class="merchant-toolbar">
+      <button id="card-go-order">주문관리</button>
+      <button id="card-go-product">상품관리</button>
+      <button id="card-go-qr">PICK QR</button>
+      <button id="card-go-card" class="active">카드결제</button>
+    </div>
+
+    <div class="merchant-card-payment-page">
+      <div class="merchant-card-payment-grid">
+        <button class="merchant-card-payment-box" id="ocr-card-payment">
+          <strong>OCR 카드결제</strong>
+          <span>실물카드 촬영 후 카드번호를 자동 인식하여 결제합니다.</span>
+        </button>
+
+        <button class="merchant-card-payment-box" id="manual-card-payment">
+          <strong>일반 수기결제</strong>
+          <span>카드번호와 유효기간을 직접 입력하여 결제합니다.</span>
+        </button>
+
+        <button class="merchant-card-payment-box" id="menu-card-payment">
+          <strong>메뉴 선택 결제</strong>
+          <span>상품을 선택한 뒤 카드결제를 진행합니다.</span>
+        </button>
+      </div>
+    </div>
+  </div>
+`
     
       document.querySelector('#card-go-order')
         ?.addEventListener('click', () => {
