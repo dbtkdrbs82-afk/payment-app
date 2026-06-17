@@ -6358,14 +6358,15 @@ document.querySelector('#merchant-product-image-file')
           <div class="merchant-card-ocr-page">
       
             <h1>OCR 카드결제</h1>
-            <p>카드를 촬영하거나 이미지를 업로드해주세요.</p>
+            <p>카드 스캔.</p>
       
             <div class="ocr-upload-box">
               <input
-                type="file"
-                id="ocr-card-image"
-                accept="image/*"
-              />
+  type="file"
+  id="ocr-card-image"
+  accept="image/*"
+  capture="environment"
+/>
             </div>
       
             <div class="ocr-preview-box">
