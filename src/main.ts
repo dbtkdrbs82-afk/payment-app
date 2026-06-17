@@ -5466,6 +5466,11 @@ document.querySelector('#merchant-qr-tab')
     location.href = '/merchant-qr'
   })
 
+  document.querySelector('#merchant-card-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-card'
+  })
+
   let currentOrderFilter = '전체'
 let currentPageSize = 20
 let currentPage = 1
@@ -6260,6 +6265,99 @@ document.querySelector('#merchant-product-image-file')
         location.href = '/merchant-login'
       })
 
+    } else if (path === '/merchant-card') {
+      const merchantId =
+        Number(sessionStorage.getItem('login_merchant_id'))
+    
+      const merchantName =
+        sessionStorage.getItem('login_merchant_name') || ''
+    
+      if (!merchantId) {
+        alert('로그인이 필요합니다.')
+        location.href = '/merchant-login'
+      }
+    
+      app.innerHTML = `
+        <div class="merchant-admin-page">
+          <div class="merchant-admin-header">
+            <div>
+              <h1>카드결제</h1>
+              <p>${merchantName} 가맹점 카드결제 메뉴입니다.</p>
+            </div>
+            <button id="merchant-card-logout">로그아웃</button>
+          </div>
+    
+          <div class="merchant-toolbar">
+            <button id="card-go-order">주문관리</button>
+            <button id="card-go-product">상품관리</button>
+            <button id="card-go-qr">PICK QR</button>
+            <button id="card-go-card" class="active">카드결제</button>
+          </div>
+    
+          <div class="merchant-card-payment-page">
+            <div class="merchant-card-payment-grid">
+              <button class="merchant-card-payment-box" id="ocr-card-payment">
+                <strong>OCR 카드결제</strong>
+                <span>실물카드 촬영 후 카드번호를 자동 인식하여 결제합니다.</span>
+              </button>
+    
+              <button class="merchant-card-payment-box" id="manual-card-payment">
+                <strong>일반 수기결제</strong>
+                <span>카드번호와 유효기간을 직접 입력하여 결제합니다.</span>
+              </button>
+    
+              <button class="merchant-card-payment-box" id="menu-card-payment">
+                <strong>메뉴 선택 결제</strong>
+                <span>상품을 선택한 뒤 카드결제를 진행합니다.</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      `
+    
+      document.querySelector('#card-go-order')
+        ?.addEventListener('click', () => {
+          location.href = '/merchant-admin'
+        })
+    
+      document.querySelector('#card-go-product')
+        ?.addEventListener('click', () => {
+          location.href = '/merchant-product'
+        })
+    
+      document.querySelector('#card-go-qr')
+        ?.addEventListener('click', () => {
+          location.href = '/merchant-qr'
+        })
+    
+      document.querySelector('#card-go-card')
+        ?.addEventListener('click', () => {
+          location.href = '/merchant-card'
+        })
+    
+      document.querySelector('#merchant-card-logout')
+        ?.addEventListener('click', () => {
+          sessionStorage.removeItem('login_merchant_id')
+          sessionStorage.removeItem('login_merchant_name')
+          sessionStorage.removeItem('login_merchant_code')
+          location.href = '/merchant-login'
+        })
+    
+      document.querySelector('#ocr-card-payment')
+        ?.addEventListener('click', () => {
+          alert('OCR 카드결제 화면은 다음 단계에서 연결합니다.')
+        })
+    
+      document.querySelector('#manual-card-payment')
+        ?.addEventListener('click', () => {
+          alert('일반 수기결제 화면은 다음 단계에서 연결합니다.')
+        })
+    
+      document.querySelector('#menu-card-payment')
+        ?.addEventListener('click', () => {
+          location.href = '/kiosk?merchant_id=' + merchantId
+        })
+    
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
