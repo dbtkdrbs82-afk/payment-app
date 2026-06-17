@@ -2473,8 +2473,7 @@ const titleBox = document.querySelector('.admin-title')
 if (subMenu) {
   subMenu.innerHTML =
   
-  '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span> | ' +
-  '<span class="sub-tab" data-sub="fee-setting">결제 수수료 설정</span>'
+  '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span>'
 }
     document.querySelector('[data-sub="merchant-add"]')
   ?.addEventListener('click', () => {
