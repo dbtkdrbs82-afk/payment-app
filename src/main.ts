@@ -6281,7 +6281,7 @@ document.querySelector('#merchant-product-image-file')
   <div class="merchant-admin-page">
     <div class="merchant-card-header">
       <h1>카드결제</h1>
-      <p>${merchantName} 가맹점 카드결제 메뉴입니다.</p>
+      <p>카드결제 서비스를 선택해주세요.</p>
     </div>
 
     <div class="merchant-toolbar">
