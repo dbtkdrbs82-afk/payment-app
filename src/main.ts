@@ -6357,15 +6357,20 @@ document.querySelector('#merchant-product-image-file')
         app.innerHTML = `
           <div class="merchant-card-ocr-page">
       
-            <h1>OCR 카드결제</h1>
-            <p>카드 스캔.</p>
+            <h1>카드 스캔 결제</h1>
+<p>실물카드를 직접 촬영해주세요.</p>
       
             <div class="ocr-upload-box">
-              <input
+         <label class="card-scan-button" for="ocr-card-image">
+  카드 촬영하기
+</label>
+
+<input
   type="file"
   id="ocr-card-image"
   accept="image/*"
   capture="environment"
+  style="display:none"
 />
             </div>
       

@@ -3882,3 +3882,15 @@ display: grid !important;
 #ocr-back-btn {
   background: #f1f5f9;
 }
+.card-scan-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 220px;
+  height: 54px;
+  background: #174a8b;
+  color: #ffffff;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+}
