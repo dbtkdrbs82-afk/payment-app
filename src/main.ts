@@ -3158,14 +3158,14 @@ merchantButtons.forEach((button) => {
   '<div class="merchant-file-list">' +
 
     '<div class="merchant-file-row">' +
-      '<label>사업자등록증</label>' +
-      '<input type="file" />' +
-      '<span>기존 파일: ' +
-  (merchant.business_license_url
-    ? '<a href="' + merchant.business_license_url + '" target="_blank">보기</a>'
-    : '첨부파일 없음') +
-'</span>'
-    '</div>' +
+  '<label>사업자등록증</label>' +
+  '<input type="file" />' +
+  '<span>기존 파일: ' +
+    (merchant.business_license_url
+      ? '<a href="' + merchant.business_license_url + '" target="_blank">보기</a>'
+      : '첨부파일 없음') +
+  '</span>' +
+'</div>' +
 
     '<div class="merchant-file-row">' +
       '<label>통장사본</label>' +
