@@ -5023,6 +5023,7 @@ const channel = supabase
   <button id="merchant-order-tab">주문관리</button>
   <button id="merchant-product-tab">상품관리</button>
   <button id="merchant-qr-tab">PICK QR</button>
+  <button id="merchant-card-tab">카드결제</button>
   <span class="toolbar-divider"></span>
   <button class="order-filter-btn" data-status="전체">전체</button>
   <button class="order-filter-btn" data-status="준비중">준비중</button>
