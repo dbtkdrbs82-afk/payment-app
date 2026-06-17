@@ -3035,7 +3035,7 @@ merchantButtons.forEach((button) => {
 
    '<label>이메일</label><input id="email" value="' + (merchant.email || '') + '" />' +
 
-'<label>법인번호</label><input id="corporate-number" value="' + (merchant.corporate_number || '') + '" />'
+'<label>법인번호</label><input id="corporate-number" value="' + (merchant.corporate_number || '') + '" />' +
 
     '<label>과세구분</label>' +
 '<select id="tax-type">' +
@@ -3044,11 +3044,11 @@ merchantButtons.forEach((button) => {
 '</select>' +
 
     '<label>취급품목</label>' +
-'<input id="product-item" value="' + (merchant.product_item || '') + '" />'
+'<input id="product-item" value="' + (merchant.product_item || '') + '" />' +
 
     '<label>업태/종목</label>' +
     '<div class="business-type-row">' +
-      '<input id="business-type" value="' + (merchant.business_type || '') + '" placeholder="업태" />'
+      '<label>개통번호</label><input id="open-number" value="' + (merchant.open_number || '') + '" />' +
       '<input id="business-category" value="' + (merchant.business_category || '') + '" placeholder="종목" />'
     '</div>' +
 
@@ -3069,9 +3069,9 @@ merchantButtons.forEach((button) => {
               '<div class="merchant-detail-grid">' +
                 '<label>PG MID</label><input id="pg_mid" value="' + (merchant.pg_mid || '') + '" />' +
 '<label>단말기 MID</label><input id="terminal_mid" value="' + (merchant.terminal_mid || '') + '" />' +
-'<label>개통번호</label><input id="open-number" value="' + (merchant.open_number || '') + '" />'
-'<label>관리번호</label><input id="manage-number" value="' + (merchant.manage_number || '') + '" />'
-'<label>무선단말기 개통번호</label><input id="wireless-open-number" value="' + (merchant.wireless_open_number || '') + '" />'
+'<label>개통번호</label><input id="open-number" value="' + (merchant.open_number || '') + '" />' +
+'<label>관리번호</label><input id="manage-number" value="' + (merchant.manage_number || '') + '" />' +
+'<label>무선단말기 개통번호</label><input id="wireless-open-number" value="' + (merchant.wireless_open_number || '') + '" />' +
 '<label>무선단말기 관리번호</label><input id="wireless-manage-number" value="' + (merchant.wireless_manage_number || '') + '" />'
               '</div>' +
             '</div>' +
@@ -3105,8 +3105,8 @@ merchantButtons.forEach((button) => {
 '<option ' + (merchant.installment_month === '10개월' ? 'selected' : '') + '>10개월</option>' +
 '<option ' + (merchant.installment_month === '12개월' ? 'selected' : '') + '>12개월</option>' +
     '</select>' +
-    '<label>1일 승인한도</label><input id="daily-limit" value="' + (merchant.daily_limit || '') + '" />'
-    '<label>월한도</label><input id="monthly-limit" value="' + (merchant.monthly_limit || '') + '" />'
+    '<label>1일 승인한도</label><input id="daily-limit" value="' + (merchant.daily_limit || '') + '" />' +
+    '<label>월한도</label><input id="monthly-limit" value="' + (merchant.monthly_limit || '') + '" />' +
     '<label>연한도</label><input id="yearly-limit" value="' + (merchant.yearly_limit || '') + '" />'
   '</div>' +
 '</div>' +
