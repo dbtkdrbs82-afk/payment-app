@@ -3007,7 +3007,7 @@ merchantButtons.forEach((button) => {
   '<option ' + (merchant.status === '중지' ? 'selected' : '') + '>중지</option>' +
 '</select>' +
 '<label>개통일자</label>' +
-'<input type="date" value="' + (merchant.opened_at || '') + '" />'
+'<input type="date" value="' + (merchant.opened_at || '') + '" />' +
 '<label>비밀번호 초기화</label>' +
 '<button type="button" id="reset-merchant-password" class="reset-password-btn">1234로 초기화</button>' +
 
@@ -3025,7 +3025,7 @@ merchantButtons.forEach((button) => {
     '<input id="owner-name" value="' + (merchant.owner_name || '') + '" />' +
 
     '<label>주민번호</label>' +
-'<input id="resident-number" value="' + (merchant.resident_number || '') + '" placeholder="000000-0000000" />'
+'<input id="resident-number" value="' + (merchant.resident_number || '') + '" placeholder="000000-0000000" />' +
 
     '<label>연락처</label>' +
     '<input id="phone" value="' + (merchant.phone || '') + '" />' +
