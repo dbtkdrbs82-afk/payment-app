@@ -2520,7 +2520,112 @@ if (tableHead) {
 }
 
 paymentTableBody.innerHTML =
-  '<tr><td colspan="12">신규 업체/가맹점 등록 화면 준비 예정</td></tr>'
+  '<tr>' +
+    '<td colspan="12">' +
+      '<div class="merchant-detail-page">' +
+
+        '<div class="merchant-detail-section">' +
+          '<h3>등록정보</h3>' +
+          '<div class="merchant-detail-grid">' +
+            '<label>등록구분</label><select id="register-type"><option>가맹점</option><option>담당자</option><option>대리점</option></select>' +
+            '<label>소속 대리점</label><select id="agency-name"><option>본사</option><option>에이드컴퍼니</option></select>' +
+            '<label>사용 PG사</label><select id="pg-company"><option>다우데이타</option><option>코페이</option><option>토스페이먼츠</option></select>' +
+            '<label>회사구분</label><select id="company-type"><option>개인(일반)</option><option>개인사업자</option><option>법인사업자</option></select>' +
+            '<label>CPID</label><input id="cpid" placeholder="자동생성 또는 직접입력" />' +
+            '<label>사업자번호</label><input id="business_number" />' +
+            '<label>운영상태</label><select id="status"><option>신청</option><option>심사중</option><option>운영</option><option>중지</option></select>' +
+            '<label>개통일자</label><input id="opened_at" type="date" />' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="merchant-detail-section">' +
+          '<h3>기본정보</h3>' +
+          '<div class="merchant-detail-grid">' +
+            '<label>가맹점명</label><input id="merchant-name" />' +
+            '<label>대표자</label><input id="owner-name" />' +
+            '<label>주민번호</label><input id="resident-number" placeholder="000000-0000000" />' +
+            '<label>연락처</label><input id="phone" />' +
+            '<label>수수료율</label><input id="fee-rate" value="0" />' +
+            '<label>이메일</label><input id="email" />' +
+            '<label>법인번호</label><input id="corporate-number" />' +
+            '<label>과세구분</label><select id="tax-type"><option>과세</option><option>비과세</option></select>' +
+            '<label>취급품목</label><input id="product-item" />' +
+            '<label>업태/종목</label>' +
+            '<div class="business-type-row">' +
+              '<input id="business-type" placeholder="업태" />' +
+              '<input id="business-category" placeholder="종목" />' +
+            '</div>' +
+            '<label>주소</label>' +
+            '<div class="address-one-line">' +
+              '<input id="zipcode" class="zipcode-input" placeholder="우편번호" />' +
+              '<button type="button" class="address-search-btn">우편번호 찾기</button>' +
+              '<input id="address" class="address-main-input" placeholder="기본주소" />' +
+              '<input id="address_detail" class="address-detail-input" placeholder="상세주소" />' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="merchant-detail-section">' +
+          '<h3>PG / 단말기 정보</h3>' +
+          '<div class="merchant-detail-grid">' +
+            '<label>PG MID</label><input id="pg_mid" />' +
+            '<label>단말기 MID</label><input id="terminal_mid" />' +
+            '<label>개통번호</label><input id="open-number" />' +
+            '<label>관리번호</label><input id="manage-number" />' +
+            '<label>무선단말기 개통번호</label><input id="wireless-open-number" />' +
+            '<label>무선단말기 관리번호</label><input id="wireless-manage-number" />' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="merchant-detail-section">' +
+          '<h3>정산정보</h3>' +
+          '<div class="merchant-detail-grid">' +
+            '<label>정산은행</label><input id="bank_name" />' +
+            '<label>계좌번호</label><input id="account_number" />' +
+            '<label>예금주</label><input id="account_holder" />' +
+            '<label>정산주기</label>' +
+            '<select id="settlement_cycle">' +
+              '<option value="1일">1일</option>' +
+              '<option value="3일">3일</option>' +
+              '<option value="4일" selected>4일</option>' +
+              '<option value="7일">7일</option>' +
+            '</select>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="merchant-detail-section">' +
+          '<h3>위험관리 / 한도설정</h3>' +
+          '<div class="merchant-detail-grid merchant-risk-grid">' +
+            '<label>최대할부기간</label>' +
+            '<select id="installment-month">' +
+              '<option>2개월</option><option>3개월</option><option>4개월</option><option>5개월</option><option>6개월</option><option>10개월</option><option>12개월</option>' +
+            '</select>' +
+            '<label>1일 승인한도</label><input id="daily-limit" />' +
+            '<label>월한도</label><input id="monthly-limit" />' +
+            '<label>연한도</label><input id="yearly-limit" />' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="merchant-detail-section">' +
+          '<h3>첨부서류</h3>' +
+          '<div class="merchant-file-list">' +
+            '<div class="merchant-file-row"><label>사업자등록증</label><input type="file" /></div>' +
+            '<div class="merchant-file-row"><label>통장사본</label><input type="file" /></div>' +
+            '<div class="merchant-file-row"><label>대표자 신분증</label><input type="file" /></div>' +
+            '<div class="merchant-file-row"><label>판매상품 사진</label><input type="file" /></div>' +
+            '<div class="merchant-file-row"><label>기타서류</label><input type="file" /></div>' +
+            '<div class="merchant-file-row"><label>메모</label><textarea id="merchant-memo" placeholder="심사 메모를 입력하세요"></textarea></div>' +
+          '</div>' +
+        '</div>' +
+
+        '<div class="merchant-detail-actions">' +
+          '<button class="merchant-save-btn" id="save-new-merchant">저장</button>' +
+          '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
+        '</div>' +
+
+      '</div>' +
+    '</td>' +
+  '</tr>'
   })
   })
 
