@@ -2486,7 +2486,6 @@ if (subMenu) {
     sessionStorage.setItem('merchant_sub_page', 'merchant-add')
 
     const titleBox = document.querySelector('.admin-title')
-    const searchBox = document.querySelector('.admin-search-box')
     const summaryBox = document.querySelector('.admin-summary')
     const tableTop = document.querySelector('.admin-table-top')
     const tableHead = document.querySelector('.admin-table thead')
@@ -2503,31 +2502,28 @@ if (subMenu) {
       titleBox.innerHTML = '▶ 가맹점관리 > 업체/가맹점 등록'
     }
 
-    if (searchBox) {
-      searchBox.innerHTML = ''
-    }
-
+    
     if (summaryBox) {
-      summaryBox.innerHTML =
-        '<div class="merchant-detail-header">' +
-          '<h2>업체/가맹점 등록 정보</h2>' +
-          '<p>신규 가맹점 등록 또는 기존 가맹점 정보를 확인합니다.</p>' +
-        '</div>'
-    }
+  summaryBox.innerHTML =
+    '<div class="merchant-detail-header">' +
+      '<h2>신규가입신청서</h2>' +
+      '<p>신규 가맹점 가입신청 정보를 입력합니다.</p>' +
+    '</div>'
+}
 
-    if (tableTop) {
-      tableTop.innerHTML = ''
-    }
+if (tableTop) {
+  tableTop.innerHTML = ''
+}
 
-    if (tableHead) {
-      tableHead.innerHTML = ''
-    }
+if (tableHead) {
+  tableHead.innerHTML = ''
+}
 
-    paymentTableBody.innerHTML =
-      paymentTableBody.innerHTML =
+paymentTableBody.innerHTML =
   '<tr><td colspan="12">신규 업체/가맹점 등록 화면 준비 예정</td></tr>'
   })
   })
+
 
 
   const defaultMerchantTab =
