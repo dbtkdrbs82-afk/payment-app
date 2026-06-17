@@ -3063,18 +3063,13 @@ merchantButtons.forEach((button) => {
   '</div>' +
 '</div>' +
 
-    
-            '<div class="merchant-detail-section">' +
-              '<h3>PG / 단말기 정보</h3>' +
-              '<div class="merchant-detail-grid">' +
-                '<label>PG MID</label><input id="pg_mid" value="' + (merchant.pg_mid || '') + '" />' +
-'<label>단말기 MID</label><input id="terminal_mid" value="' + (merchant.terminal_mid || '') + '" />' +
-'<label>개통번호</label><input id="open-number" value="' + (merchant.open_number || '') + '" />' +
-'<label>관리번호</label><input id="manage-number" value="' + (merchant.manage_number || '') + '" />' +
-'<label>무선단말기 개통번호</label><input id="wireless-open-number" value="' + (merchant.wireless_open_number || '') + '" />' +
-'<label>무선단말기 관리번호</label><input id="wireless-manage-number" value="' + (merchant.wireless_manage_number || '') + '" />'
-              '</div>' +
-            '</div>' +
+'<div class="merchant-detail-section">' +
+  '<h3>PG / 단말기 정보</h3>' +
+  '<div class="merchant-detail-grid">' +
+    '<label>PG MID</label><input id="pg_mid" value="' + (merchant.pg_mid || '') + '" />' +
+    '<label>단말기 MID</label><input id="terminal_mid" value="' + (merchant.terminal_mid || '') + '" />' +
+  '</div>' +
+'</div>' +
     
             '<div class="merchant-detail-section">' +
   '<h3>정산정보</h3>' +
