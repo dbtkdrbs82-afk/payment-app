@@ -3049,7 +3049,7 @@ merchantButtons.forEach((button) => {
     '<label>업태/종목</label>' +
     '<div class="business-type-row">' +
       '<input id="business-type" value="' + (merchant.business_type || '') + '" placeholder="업태" />' +
-      '<input id="business-category" value="' + (merchant.business_category || '') + '" placeholder="종목" />'
+      '<input id="business-category" value="' + (merchant.business_category || '') + '" placeholder="종목" />' +
     '</div>' +
 
    '<label>주소</label>' +
@@ -3102,7 +3102,7 @@ merchantButtons.forEach((button) => {
     '</select>' +
     '<label>1일 승인한도</label><input id="daily-limit" value="' + (merchant.daily_limit || '') + '" />' +
     '<label>월한도</label><input id="monthly-limit" value="' + (merchant.monthly_limit || '') + '" />' +
-    '<label>연한도</label><input id="yearly-limit" value="' + (merchant.yearly_limit || '') + '" />'
+    '<label>연한도</label><input id="yearly-limit" value="' + (merchant.yearly_limit || '') + '" />' +
   '</div>' +
 '</div>' +
     
