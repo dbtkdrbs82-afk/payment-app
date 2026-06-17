@@ -6392,7 +6392,39 @@ document.querySelector('#merchant-product-image-file')
               </button>
             </div>
       
-          </div>
+          
+
+          <div class="ocr-payment-form">
+  <label>상품명</label>
+  <input id="ocr-product-name" placeholder="상품명을 입력하세요" />
+
+  <label>구매자 연락처</label>
+  <input id="ocr-customer-phone" placeholder="010-0000-0000" />
+
+  <label>결제금액</label>
+  <input id="ocr-amount" placeholder="결제금액" />
+
+  <label>카드번호</label>
+  <input id="ocr-card-number" placeholder="카드 스캔 후 자동 입력됩니다" />
+
+  <label>유효기간</label>
+  <div>
+    <input id="ocr-exp-month" placeholder="월" />
+    <input id="ocr-exp-year" placeholder="년" />
+  </div>
+
+  <label>할부방법</label>
+  <select id="ocr-installment">
+    <option>일시불</option>
+    <option>2개월</option>
+    <option>3개월</option>
+    <option>6개월</option>
+    <option>12개월</option>
+  </select>
+
+  <button id="ocr-payment-submit">결제하기</button>
+</div>
+</div>
         `
       
         document.querySelector('#ocr-back-btn')
@@ -6439,9 +6471,23 @@ document.querySelector('#merchant-product-image-file')
               'eng'
             )
         
-            console.log(result.data.text)
-        
-            alert(result.data.text)
+            const text = result.data.text
+
+const cardNumberMatch =
+  text.match(/\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}/)
+
+  if (cardNumberMatch) {
+    const cardNumberInput =
+      document.querySelector<HTMLInputElement>('#ocr-card-number')
+  
+    if (cardNumberInput) {
+      cardNumberInput.value = cardNumberMatch[0].replace(/\D/g, '')
+    }
+  
+    alert('카드번호를 인식했습니다.')
+  } else {
+    alert('카드번호를 찾지 못했습니다. 직접 입력해주세요.')
+  }
           })
       
     } else if (path === '/kiosk') {
