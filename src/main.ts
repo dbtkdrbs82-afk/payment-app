@@ -5546,6 +5546,10 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-card'
   })
+  document.querySelector('#merchant-member-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-members'
+  })
 
   let currentOrderFilter = '전체'
 let currentPageSize = 20
@@ -6411,10 +6415,58 @@ document.querySelector('#merchant-product-image-file')
         location.href = '/merchant-login'
       })
 
-    } else if (path === '/merchant-card') {
+    } else if (path === '/merchant-members') {
+
       const merchantId =
         Number(sessionStorage.getItem('login_merchant_id'))
     
+      if (!merchantId) {
+        alert('로그인이 필요합니다.')
+        location.href = '/merchant-login'
+      }
+    
+      const { data: members } = await supabase
+        .from('members')
+        .select('*')
+        .eq('merchant_id', merchantId)
+        .order('id', { ascending: false })
+    
+      app.innerHTML = `
+        <div class="page">
+    
+          <h1>회원관리</h1>
+    
+          <div style="margin-bottom:16px;">
+            <button id="add-member-btn">
+              회원 추가
+            </button>
+          </div>
+    
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>이름</th>
+                <th>연락처</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+    
+            <tbody>
+              ${(members || []).map(member => `
+                <tr>
+                  <td>${member.member_name || ''}</td>
+                  <td>${member.phone || ''}</td>
+                  <td>${member.status || '사용중'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+    
+        </div>
+      `
+    } else if (path === '/merchant-card') { 
+      const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
+  
       if (!merchantId) {
         alert('로그인이 필요합니다.')
         location.href = '/merchant-login'
