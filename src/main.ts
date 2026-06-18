@@ -6440,6 +6440,7 @@ document.querySelector('#merchant-product-image-file')
             <button id="add-member-btn">
               회원 추가
             </button>
+            </div>
             document.querySelector('#add-member-btn')
   ?.addEventListener('click', async () => {
 
@@ -6469,7 +6470,7 @@ document.querySelector('#merchant-product-image-file')
 
     location.reload()
   })
-          </div>
+          
     
           <table class="admin-table">
             <thead>
