@@ -2650,6 +2650,7 @@ const agencyName = (document.querySelector<HTMLSelectElement>('#agency-name')?.v
 const pgCompany = (document.querySelector<HTMLSelectElement>('#pg-company')?.value || '').trim()
 const companyType = (document.querySelector<HTMLSelectElement>('#company-type')?.value || '').trim()
 const merchantStatus = (document.querySelector<HTMLSelectElement>('#status')?.value || '').trim()
+const merchantType =(document.querySelector('#merchant-type') as HTMLSelectElement)?.value || '일반매장'
 const openedAt = (document.querySelector<HTMLInputElement>('#opened_at')?.value || '').trim()
 const residentNumber = (document.querySelector<HTMLInputElement>('#resident-number')?.value || '').trim()
 const corporateNumber = (document.querySelector<HTMLInputElement>('#corporate-number')?.value || '').trim()
@@ -2722,6 +2723,7 @@ if (!merchantName) {
       .from('merchants')
       .insert({
   merchant_name: merchantName,
+  merchant_type: merchantType,
   owner_name: ownerName,
   business_number: businessNumber,
   phone: phone,
@@ -3067,6 +3069,22 @@ merchantButtons.forEach((button) => {
 
     '<label>가맹점명</label>' +
     '<input id="merchant-name" value="' + (merchant.merchant_name || '') + '" />' +
+    '<label>가맹점 유형</label>' +
+'<select id="merchant-type">' +
+'<option value="일반매장" ' + (merchant.merchant_type === '일반매장' ? 'selected' : '') + '>일반매장</option>' +
+'<option value="학원" ' + (merchant.merchant_type === '학원' ? 'selected' : '') + '>학원</option>' +
+'<option value="아파트관리" ' + (merchant.merchant_type === '아파트관리' ? 'selected' : '') + '>아파트관리</option>' +
+'<option value="청소업체" ' + (merchant.merchant_type === '청소업체' ? 'selected' : '') + '>청소업체</option>' +
+'<option value="렌탈" ' + (merchant.merchant_type === '렌탈' ? 'selected' : '') + '>렌탈</option>' +
+'</select>' +
+   '<label>가맹점 유형</label>' +
+'<select id="merchant-type">' +
+'<option value="일반매장">일반매장</option>' +
+'<option value="학원">학원</option>' +
+'<option value="아파트관리">아파트관리</option>' +
+'<option value="청소업체">청소업체</option>' +
+'<option value="렌탈">렌탈</option>' +
+'</select>' +
 
     '<label>대표자</label>' +
     '<input id="owner-name" value="' + (merchant.owner_name || '') + '" />' +
@@ -3251,6 +3269,7 @@ merchantButtons.forEach((button) => {
       
       const updateData = {
         merchant_name: merchantName,
+        merchant_type: getValue('merchant-type'),
         owner_name: ownerName,
         phone: phone,
         fee_rate: feeRate,
@@ -4840,6 +4859,11 @@ const orderIdValue =
           )
           sessionStorage.setItem('login_merchant_name', merchant.merchant_name)
 
+          sessionStorage.setItem(
+            'login_merchant_type',
+            merchant.merchant_type || '일반매장'
+          )
+          
           alert(merchant.merchant_name + '님 로그인되었습니다.')
 
           window.location.href = '/merchant-admin'
@@ -6080,7 +6104,7 @@ document.querySelectorAll('.product-delete-button')
       location.reload()
     })
   })
-  
+
 document.querySelector('#merchant-product-image-file')
   ?.addEventListener('change', () => {
     const file =
