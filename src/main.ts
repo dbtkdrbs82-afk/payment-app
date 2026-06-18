@@ -3079,16 +3079,6 @@ merchantButtons.forEach((button) => {
 '<option value="결혼" ' + (merchant.merchant_type === '결혼' ? 'selected' : '') + '>결혼</option>' +
 '<option value="장례" ' + (merchant.merchant_type === '장례' ? 'selected' : '') + '>장례</option>' +
 '</select>' +
-   '<label>가맹점 유형</label>' +
-'<select id="merchant-type">' +
-'<option value="일반매장">일반매장</option>' +
-'<option value="학원">학원</option>' +
-'<option value="아파트관리">아파트관리</option>' +
-'<option value="청소업체">청소업체</option>' +
-'<option value="렌탈">렌탈</option>' +
-'<option value="결혼">결혼</option>' +
-'<option value="장례">장례</option>' +
-'</select>' +
 
     '<label>대표자</label>' +
     '<input id="owner-name" value="' + (merchant.owner_name || '') + '" />' +
@@ -4924,6 +4914,24 @@ const averageAmount =
   (orders || []).length > 0
     ? Math.floor(totalSales / (orders || []).length)
     : 0
+
+    const merchantType =
+  sessionStorage.getItem('login_merchant_type') || '일반매장'
+
+const merchantMenu =
+  merchantType === '일반매장'
+    ? `
+      <button id="merchant-order-tab">주문관리</button>
+      <button id="merchant-product-tab">상품관리</button>
+      <button id="merchant-qr-tab">PICK QR</button>
+      <button id="merchant-card-tab">카드결제</button>
+    `
+    : `
+      <button id="merchant-member-tab">회원관리</button>
+      <button id="merchant-billing-tab">청구관리</button>
+      <button id="merchant-batch-tab">일괄승인</button>
+      <button id="merchant-payment-list-tab">결제내역</button>
+    `
     
   let lastCheckedOrderId =
   Number(sessionStorage.getItem('last_checked_order_id_' + merchantId) || 0)
@@ -5049,10 +5057,7 @@ const channel = supabase
 </div>
 
 <div class="merchant-toolbar">
-  <button id="merchant-order-tab">주문관리</button>
-  <button id="merchant-product-tab">상품관리</button>
-  <button id="merchant-qr-tab">PICK QR</button>
-  <button id="merchant-card-tab">카드결제</button>
+  ${merchantMenu}
   <span class="toolbar-divider"></span>
   <button class="order-filter-btn" data-status="전체">전체</button>
   <button class="order-filter-btn" data-status="준비중">준비중</button>
