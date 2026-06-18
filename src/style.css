@@ -4108,3 +4108,24 @@ display: grid !important;
   margin: 0 auto;
   table-layout: fixed;
 }
+.merchant-members-page {
+  max-width: 1500px;
+  margin: 40px auto;
+  padding: 32px;
+}
+
+.merchant-members-page > h1,
+.merchant-members-page > div:first-of-type {
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.merchant-members-page > div:first-of-type {
+  margin-bottom: 20px;
+}
+
+.merchant-members-page .admin-table {
+  max-width: 1400px;
+  margin: 0 auto;
+}
