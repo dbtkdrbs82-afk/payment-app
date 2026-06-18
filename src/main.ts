@@ -6484,15 +6484,16 @@ document.querySelector('#merchant-product-image-file')
         status: '사용중'
       })
 
-    if (error) {
-      alert('회원 저장 실패')
-      return
-    }
+      if (error) {
+        alert('회원 저장 실패: ' + error.message)
+        return
+      }
 
     alert('회원이 등록되었습니다.')
 
     location.reload()
   })
+
     } else if (path === '/merchant-card') { 
       const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
   
