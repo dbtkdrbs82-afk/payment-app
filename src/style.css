@@ -4007,3 +4007,6 @@ display: grid !important;
     box-sizing: border-box;
   }
 }
+.hide-for-type {
+  display: none !important;
+}
