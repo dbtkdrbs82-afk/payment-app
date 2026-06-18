@@ -4011,7 +4011,8 @@ display: grid !important;
   display: none !important;
 }
 .merchant-members-page {
-  max-width: 1200px;
+  width: 100%;
+  max-width: 1800px;
   margin: 40px auto;
   padding: 32px;
   background: #ffffff;
@@ -4085,4 +4086,14 @@ display: grid !important;
 .merchant-members-page .admin-table td {
   height: 48px;
   padding: 10px 12px;
+}
+.merchant-members-page .admin-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.merchant-members-page .admin-table th,
+.merchant-members-page .admin-table td {
+  text-align: center;
+  vertical-align: middle;
 }
