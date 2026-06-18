@@ -5094,15 +5094,19 @@ const channel = supabase
 
 <div class="merchant-toolbar">
   ${merchantMenu}
-  <span class="toolbar-divider"></span>
-  <button class="order-filter-btn" data-status="전체">전체</button>
-  <button class="order-filter-btn" data-status="준비중">준비중</button>
-  <button class="order-filter-btn" data-status="완료">완료</button>
+
+  ${isNormalStore ? `
+    <span class="toolbar-divider"></span>
+    <button class="order-filter-btn" data-status="전체">전체</button>
+    <button class="order-filter-btn" data-status="준비중">준비중</button>
+    <button class="order-filter-btn" data-status="완료">완료</button>
+  ` : ''}
+
 </div>
 
 ${merchantContent}
 
-<div class="merchant-sales-filter">
+<div class="merchant-sales-filter ${isNormalStore ? '' : 'hide-for-type'}">
   <button id="sales-today">오늘</button>
   <button id="sales-month">이번달</button>
   <button id="sales-year">올해</button>
@@ -5120,7 +5124,7 @@ ${merchantContent}
 </div>
 
 
-  <div class="merchant-sales-summary">
+  <div class="merchant-sales-summary ${isNormalStore ? '' : 'hide-for-type'}">
   <div>
     <strong>주문수</strong>
     <span>${(orders || []).length}건</span>
@@ -5170,8 +5174,8 @@ ${merchantContent}
   </div>
 
 </div>
-      
-          <div class="admin-table-wrap">
+   
+          <div class="admin-table-wrap ${isNormalStore ? '' : 'hide-for-type'}">
             <table class="admin-table">
               <thead>
                 <tr>
