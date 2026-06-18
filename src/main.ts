@@ -4921,6 +4921,7 @@ const averageAmount =
 const merchantMenu =
   merchantType === '일반매장'
     ? `
+
       <button id="merchant-order-tab">주문관리</button>
       <button id="merchant-product-tab">상품관리</button>
       <button id="merchant-qr-tab">PICK QR</button>
@@ -4933,6 +4934,41 @@ const merchantMenu =
       <button id="merchant-payment-list-tab">결제내역</button>
     `
     
+    const isNormalStore =
+  merchantType === '일반매장'
+
+const merchantContent =
+  isNormalStore
+    ? ''
+    : `
+      <div class="merchant-type-ready-box">
+        <h2>${merchantType} 관리</h2>
+        <p>${merchantType} 전용 관리 화면을 준비 중입니다.</p>
+
+        <div class="merchant-type-card-grid">
+          <div class="merchant-type-card">
+            <strong>회원관리</strong>
+            <span>회원 정보를 관리합니다.</span>
+          </div>
+
+          <div class="merchant-type-card">
+            <strong>청구관리</strong>
+            <span>월별 청구금액을 관리합니다.</span>
+          </div>
+
+          <div class="merchant-type-card">
+            <strong>일괄승인</strong>
+            <span>여러 건을 한 번에 승인합니다.</span>
+          </div>
+
+          <div class="merchant-type-card">
+            <strong>결제내역</strong>
+            <span>결제내역을 조회합니다.</span>
+          </div>
+        </div>
+      </div>
+    `
+
   let lastCheckedOrderId =
   Number(sessionStorage.getItem('last_checked_order_id_' + merchantId) || 0)
 
@@ -5063,6 +5099,8 @@ const channel = supabase
   <button class="order-filter-btn" data-status="준비중">준비중</button>
   <button class="order-filter-btn" data-status="완료">완료</button>
 </div>
+
+${merchantContent}
 
 <div class="merchant-sales-filter">
   <button id="sales-today">오늘</button>
