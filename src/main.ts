@@ -6447,6 +6447,10 @@ document.querySelector('#merchant-product-image-file')
               <tr>
                 <th>이름</th>
                 <th>연락처</th>
+                <th>이메일</th>
+                <th>주소</th>
+                <th>결제방식</th>
+                <th>메모</th>
                 <th>상태</th>
               </tr>
             </thead>
@@ -6455,8 +6459,12 @@ document.querySelector('#merchant-product-image-file')
               ${(members || []).map(member => `
                 <tr>
                   <td>${member.member_name || ''}</td>
-                  <td>${member.phone || ''}</td>
-                  <td>${member.status || '사용중'}</td>
+<td>${member.phone || ''}</td>
+<td>${member.email || ''}</td>
+<td>${member.address || ''}</td>
+<td>${member.payment_method || 'SMS결제'}</td>
+<td>${member.memo || ''}</td>
+<td>${member.status || '사용중'}</td>
                 </tr>
               `).join('')}
             </tbody>

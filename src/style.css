@@ -4081,3 +4081,8 @@ display: grid !important;
   flex: 1;
   height: 44px;
 }
+.merchant-members-page .admin-table th,
+.merchant-members-page .admin-table td {
+  height: 48px;
+  padding: 10px 12px;
+}
