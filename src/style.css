@@ -4010,3 +4010,28 @@ display: grid !important;
 .hide-for-type {
   display: none !important;
 }
+.merchant-members-page {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 32px;
+  background: #ffffff;
+}
+
+.merchant-members-page h1 {
+  font-size: 32px;
+  margin-bottom: 24px;
+}
+
+.merchant-members-page #add-member-btn {
+  width: 140px;
+  height: 46px;
+  border-radius: 8px;
+  background: #174a8b;
+  color: #fff;
+  font-weight: 700;
+}
+
+.merchant-members-page .admin-table {
+  width: 100%;
+  margin-top: 20px;
+}

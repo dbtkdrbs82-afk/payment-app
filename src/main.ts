@@ -6432,7 +6432,7 @@ document.querySelector('#merchant-product-image-file')
         .order('id', { ascending: false })
     
       app.innerHTML = `
-        <div class="page">
+        <div class="merchant-members-page">
     
           <h1>회원관리</h1>
     
