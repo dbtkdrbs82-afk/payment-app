@@ -5944,7 +5944,6 @@ if (orderDate !== today) {
         id="merchant-product-image-file"
         type="file"
         accept="image/*"
-        capture="environment"
       />
     </div>
 
@@ -6052,9 +6051,9 @@ document.querySelector('#merchant-product-image-file')
         const fileName =
           Date.now() + '_product.' + fileExt
       
-        const { error: uploadError } =
+          const { error: uploadError } =
           await supabase.storage
-            .from('product-images')
+            .from('merchant-files')
             .upload(fileName, imageFile)
       
         if (uploadError) {
@@ -6066,8 +6065,8 @@ document.querySelector('#merchant-product-image-file')
         }
       
         const { data } = supabase.storage
-          .from('product-images')
-          .getPublicUrl(fileName)
+  .from('merchant-files')
+  .getPublicUrl(fileName)
       
         imageUrl = data.publicUrl
       }
