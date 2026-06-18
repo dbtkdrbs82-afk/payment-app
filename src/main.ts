@@ -3076,6 +3076,8 @@ merchantButtons.forEach((button) => {
 '<option value="아파트관리" ' + (merchant.merchant_type === '아파트관리' ? 'selected' : '') + '>아파트관리</option>' +
 '<option value="청소업체" ' + (merchant.merchant_type === '청소업체' ? 'selected' : '') + '>청소업체</option>' +
 '<option value="렌탈" ' + (merchant.merchant_type === '렌탈' ? 'selected' : '') + '>렌탈</option>' +
+'<option value="결혼" ' + (merchant.merchant_type === '결혼' ? 'selected' : '') + '>결혼</option>' +
+'<option value="장례" ' + (merchant.merchant_type === '장례' ? 'selected' : '') + '>장례</option>' +
 '</select>' +
    '<label>가맹점 유형</label>' +
 '<select id="merchant-type">' +
@@ -3084,6 +3086,8 @@ merchantButtons.forEach((button) => {
 '<option value="아파트관리">아파트관리</option>' +
 '<option value="청소업체">청소업체</option>' +
 '<option value="렌탈">렌탈</option>' +
+'<option value="결혼">결혼</option>' +
+'<option value="장례">장례</option>' +
 '</select>' +
 
     '<label>대표자</label>' +
@@ -4863,7 +4867,7 @@ const orderIdValue =
             'login_merchant_type',
             merchant.merchant_type || '일반매장'
           )
-          
+
           alert(merchant.merchant_name + '님 로그인되었습니다.')
 
           window.location.href = '/merchant-admin'
