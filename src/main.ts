@@ -5151,7 +5151,7 @@ ${merchantContent}
   </div>
 </div>
 
-  <div class="order-bottom-toolbar">
+  <div class="order-bottom-toolbar ${isNormalStore ? '' : 'hide-for-type'}">
 
    <select id="merchant-page-size">
     <option value="10">10개씩 보기</option>
