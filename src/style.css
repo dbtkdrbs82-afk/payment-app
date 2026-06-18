@@ -4035,3 +4035,49 @@ display: grid !important;
   width: 100%;
   margin-top: 20px;
 }
+.member-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.member-modal-box {
+  width: 420px;
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px;
+}
+
+.member-modal-box label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 700;
+}
+
+.member-modal-box input,
+.member-modal-box textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px;
+  border: 1px solid #d5dce8;
+  border-radius: 8px;
+}
+
+.member-modal-box textarea {
+  min-height: 90px;
+}
+
+.member-modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.member-modal-actions button {
+  flex: 1;
+  height: 44px;
+}

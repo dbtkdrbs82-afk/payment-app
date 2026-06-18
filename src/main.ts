@@ -6461,36 +6461,85 @@ document.querySelector('#merchant-product-image-file')
               `).join('')}
             </tbody>
           </table>
-    
-        </div>
+
+<div id="member-modal" class="member-modal">
+  <div class="member-modal-box">
+    <h2>회원 추가</h2>
+
+    <label>회원명</label>
+    <input id="member-name" placeholder="회원명" />
+
+    <label>연락처</label>
+    <input id="member-phone" placeholder="010-0000-0000" />
+
+    <label>이메일</label>
+    <input id="member-email" placeholder="email@example.com" />
+
+    <label>주소</label>
+    <input id="member-address" placeholder="주소" />
+
+    <label>메모</label>
+    <textarea id="member-memo" placeholder="메모"></textarea>
+
+    <div class="member-modal-actions">
+      <button id="save-member-btn">저장</button>
+      <button id="close-member-modal">닫기</button>
+    </div>
+  </div>
+</div>
+
+</div>
       `
       document.querySelector('#add-member-btn')
+  ?.addEventListener('click', () => {
+    document.querySelector<HTMLElement>('#member-modal')!.style.display = 'flex'
+  })
+
+document.querySelector('#close-member-modal')
+  ?.addEventListener('click', () => {
+    document.querySelector<HTMLElement>('#member-modal')!.style.display = 'none'
+  })
+
+document.querySelector('#save-member-btn')
   ?.addEventListener('click', async () => {
-
     const memberName =
-      prompt('회원명을 입력하세요.')
-
-    if (!memberName) return
+      (document.querySelector<HTMLInputElement>('#member-name')?.value || '').trim()
 
     const phone =
-      prompt('연락처를 입력하세요.')
+      (document.querySelector<HTMLInputElement>('#member-phone')?.value || '').trim()
+
+    const email =
+      (document.querySelector<HTMLInputElement>('#member-email')?.value || '').trim()
+
+    const address =
+      (document.querySelector<HTMLInputElement>('#member-address')?.value || '').trim()
+
+    const memo =
+      (document.querySelector<HTMLTextAreaElement>('#member-memo')?.value || '').trim()
+
+    if (!memberName) {
+      alert('회원명을 입력해주세요.')
+      return
+    }
 
     const { error } = await supabase
       .from('members')
       .insert({
         merchant_id: merchantId,
         member_name: memberName,
-        phone: phone || '',
+        phone,
+        email,
+        address,
+        memo,
         status: '사용중'
       })
 
-      if (error) {
-        alert('회원 저장 실패: ' + error.message)
-        return
-      }
+    if (error) {
+      alert('회원 저장 실패: ' + error.message)
+      return
+    }
 
     alert('회원이 등록되었습니다.')
-
     location.reload()
   })
 
