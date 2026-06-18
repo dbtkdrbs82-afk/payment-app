@@ -6440,6 +6440,35 @@ document.querySelector('#merchant-product-image-file')
             <button id="add-member-btn">
               회원 추가
             </button>
+            document.querySelector('#add-member-btn')
+  ?.addEventListener('click', async () => {
+
+    const memberName =
+      prompt('회원명을 입력하세요.')
+
+    if (!memberName) return
+
+    const phone =
+      prompt('연락처를 입력하세요.')
+
+    const { error } = await supabase
+      .from('members')
+      .insert({
+        merchant_id: merchantId,
+        member_name: memberName,
+        phone: phone || '',
+        status: '사용중'
+      })
+
+    if (error) {
+      alert('회원 저장 실패')
+      return
+    }
+
+    alert('회원이 등록되었습니다.')
+
+    location.reload()
+  })
           </div>
     
           <table class="admin-table">
