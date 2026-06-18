@@ -6452,6 +6452,8 @@ document.querySelector('#merchant-product-image-file')
                 <th>결제방식</th>
                 <th>메모</th>
                 <th>상태</th>
+                <th>수정</th>
+                <th>삭제</th>
               </tr>
             </thead>
     
@@ -6465,6 +6467,21 @@ document.querySelector('#merchant-product-image-file')
 <td>${member.payment_method || 'SMS결제'}</td>
 <td>${member.memo || ''}</td>
 <td>${member.status || '사용중'}</td>
+<td>
+  <button
+    class="member-edit-btn"
+    data-id="${member.id}">
+    수정
+  </button>
+</td>
+
+<td>
+  <button
+    class="member-delete-btn"
+    data-id="${member.id}">
+    삭제
+  </button>
+</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -6549,6 +6566,35 @@ document.querySelector('#save-member-btn')
 
     alert('회원이 등록되었습니다.')
     location.reload()
+  })
+
+  document.querySelectorAll('.member-delete-btn')
+  .forEach((button) => {
+
+    button.addEventListener('click', async () => {
+
+      const memberId =
+        Number((button as HTMLElement).dataset.id)
+
+      if (!confirm('삭제하시겠습니까?')) {
+        return
+      }
+
+      const { error } = await supabase
+        .from('members')
+        .delete()
+        .eq('id', memberId)
+
+      if (error) {
+        alert('삭제 실패')
+        return
+      }
+
+      alert('삭제되었습니다.')
+
+      location.reload()
+    })
+
   })
 
     } else if (path === '/merchant-card') { 

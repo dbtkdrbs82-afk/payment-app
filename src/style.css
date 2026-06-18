@@ -4013,9 +4013,8 @@ display: grid !important;
 .merchant-members-page {
   width: 100%;
   max-width: 1800px;
-  margin: 40px auto;
-  padding: 32px;
-  background: #ffffff;
+  margin: 0 auto;
+  padding: 40px;
 }
 
 .merchant-members-page h1 {
@@ -4096,4 +4095,16 @@ display: grid !important;
 .merchant-members-page .admin-table td {
   text-align: center;
   vertical-align: middle;
+}
+.member-header {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto 24px auto;
+}
+
+.merchant-members-page .admin-table {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  table-layout: fixed;
 }
