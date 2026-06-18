@@ -6441,7 +6441,30 @@ document.querySelector('#merchant-product-image-file')
               회원 추가
             </button>
             </div>
-            document.querySelector('#add-member-btn')
+        
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>이름</th>
+                <th>연락처</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+    
+            <tbody>
+              ${(members || []).map(member => `
+                <tr>
+                  <td>${member.member_name || ''}</td>
+                  <td>${member.phone || ''}</td>
+                  <td>${member.status || '사용중'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+    
+        </div>
+      `
+      document.querySelector('#add-member-btn')
   ?.addEventListener('click', async () => {
 
     const memberName =
@@ -6470,30 +6493,6 @@ document.querySelector('#merchant-product-image-file')
 
     location.reload()
   })
-          
-    
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>이름</th>
-                <th>연락처</th>
-                <th>상태</th>
-              </tr>
-            </thead>
-    
-            <tbody>
-              ${(members || []).map(member => `
-                <tr>
-                  <td>${member.member_name || ''}</td>
-                  <td>${member.phone || ''}</td>
-                  <td>${member.status || '사용중'}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-    
-        </div>
-      `
     } else if (path === '/merchant-card') { 
       const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
   
