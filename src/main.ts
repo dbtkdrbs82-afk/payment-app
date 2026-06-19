@@ -6683,6 +6683,20 @@ document.querySelector('#save-member-btn')
 </div>
 </div>
   `
+  document.querySelector('#add-billing-btn')
+  ?.addEventListener('click', () => {
+    document.querySelector<HTMLElement>('#billing-modal')!.style.display = 'flex'
+  })
+
+document.querySelector('#close-billing-modal')
+  ?.addEventListener('click', () => {
+    document.querySelector<HTMLElement>('#billing-modal')!.style.display = 'none'
+  })
+
+document.querySelector('#billing-back-btn')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-admin'
+  })
 
     } else if (path === '/merchant-card') { 
       const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
