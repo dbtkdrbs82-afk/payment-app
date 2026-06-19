@@ -6627,6 +6627,12 @@ document.querySelector('#save-member-btn')
   .select('*')
   .eq('merchant_id', merchantId)
 
+  const { data: billings } = await supabase
+  .from('billings')
+  .select('*')
+  .eq('merchant_id', merchantId)
+  .order('id', { ascending: false })
+
   app.innerHTML = `
     <div class="merchant-members-page">
       <h1>청구관리</h1>
@@ -6650,7 +6656,15 @@ document.querySelector('#save-member-btn')
         </thead>
 
         <tbody id="billingBody">
-        </tbody>
+  ${(billings || []).map(billing => `
+    <tr>
+      <td>${billing.member_id || ''}</td>
+      <td>${billing.billing_month || ''}</td>
+      <td>${Number(billing.amount || 0).toLocaleString()}원</td>
+      <td>${billing.payment_status || '미납'}</td>
+    </tr>
+  `).join('')}
+</tbody>
       </table>
 
       <div id="billing-modal" class="member-modal">
@@ -6736,7 +6750,7 @@ document.querySelector('#billing-back-btn')
     alert('청구가 등록되었습니다.')
     location.reload()
   })
-    
+  
     } else if (path === '/merchant-card') { 
       const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
   
