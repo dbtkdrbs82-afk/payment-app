@@ -5550,7 +5550,11 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-members'
   })
-
+  document.querySelector('#merchant-billing-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-billings'
+  })
+  
   let currentOrderFilter = '전체'
 let currentPageSize = 20
 let currentPage = 1
