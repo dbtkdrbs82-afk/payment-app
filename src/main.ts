@@ -6950,17 +6950,14 @@ const cardNumberMatch =
 
               <div class="kiosk-company-info">
 
-  <div><strong>NXG Soft</strong></div>
+  <div><strong>NXG 소프트</strong></div>
 
   <div>
     대표 : 유상균
   </div>
 
   <div>
-    사업자등록번호 : 245-81-01732
-  </div>
-
-  <div>
+    사업자등록번호 : 245-81-01732 |
     통신판매업신고번호 : 2024-서울금천-2499
   </div>
 
@@ -6969,11 +6966,12 @@ const cardNumberMatch =
   </div>
 
   <div>
-    고객센터 : 02-431-1252
+    고객센터 : 02-431-1252 |
+    이메일 : nxgsoft@naver.com
   </div>
 
   <div>
-    nxgsoft@naver.com
+    Copyright © NXG Soft. All rights reserved.
   </div>
 
 </div>
