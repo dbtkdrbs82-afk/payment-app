@@ -4147,3 +4147,12 @@ display: grid !important;
 .kiosk-company-info strong {
   font-size: 16px;
 }
+#member-back-btn {
+  width: 140px;
+  height: 46px;
+  margin-left: 10px;
+  border-radius: 8px;
+  background: #64748b;
+  color: #fff;
+  font-weight: 700;
+}
