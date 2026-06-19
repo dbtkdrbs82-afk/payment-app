@@ -5554,7 +5554,11 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-billings'
   })
-  
+  document.querySelector('#billing-back-btn')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-admin'
+  })
+
   let currentOrderFilter = '전체'
 let currentPageSize = 20
 let currentPage = 1
@@ -6618,6 +6622,10 @@ document.querySelector('#save-member-btn')
       alert('로그인이 필요합니다.')
       location.href = '/merchant-login'
     }
+    const { data: members } = await supabase
+  .from('members')
+  .select('*')
+  .eq('merchant_id', merchantId)
 
   app.innerHTML = `
     <div class="merchant-members-page">
@@ -6626,6 +6634,10 @@ document.querySelector('#save-member-btn')
       <button id="add-billing-btn">
         청구 등록
       </button>
+      
+      <button id="billing-back-btn">
+  관리홈
+</button>
 
       <table class="admin-table">
         <thead>
@@ -6640,7 +6652,36 @@ document.querySelector('#save-member-btn')
         <tbody id="billingBody">
         </tbody>
       </table>
+
+      <div id="billing-modal" class="member-modal">
+  <div class="member-modal-box">
+    <h2>청구 등록</h2>
+
+    <label>회원명</label>
+    <select id="billing-member-id">
+      ${(members || []).map(member => `
+        <option value="${member.id}">
+          ${member.member_name || ''}
+        </option>
+      `).join('')}
+    </select>
+
+    <label>청구월</label>
+    <input id="billing-month" type="month" />
+
+    <label>금액</label>
+    <input id="billing-amount" placeholder="금액" />
+
+    <label>메모</label>
+    <textarea id="billing-memo" placeholder="메모"></textarea>
+
+    <div class="member-modal-actions">
+      <button id="save-billing-btn">저장</button>
+      <button id="close-billing-modal">닫기</button>
     </div>
+  </div>
+</div>
+</div>
   `
 
     } else if (path === '/merchant-card') { 
@@ -6651,6 +6692,7 @@ document.querySelector('#save-member-btn')
         location.href = '/merchant-login'
       }
     
+
       app.innerHTML = `
   <div class="merchant-admin-page">
     <div class="merchant-card-header">
