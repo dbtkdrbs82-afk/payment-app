@@ -6440,6 +6440,9 @@ document.querySelector('#merchant-product-image-file')
             <button id="add-member-btn">
               회원 추가
             </button>
+            <button id="member-back-btn">
+  관리홈
+</button>
             </div>
         
           <table class="admin-table">
@@ -6520,6 +6523,11 @@ document.querySelector('#merchant-product-image-file')
     document.querySelector<HTMLElement>('#member-modal')!.style.display = 'flex'
   })
 
+  document.querySelector('#member-back-btn')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-admin'
+  })
+
 document.querySelector('#close-member-modal')
   ?.addEventListener('click', () => {
     document.querySelector<HTMLElement>('#member-modal')!.style.display = 'none'
@@ -6596,6 +6604,40 @@ document.querySelector('#save-member-btn')
     })
 
   })
+
+} else if (path === '/merchant-billings') {
+
+  const merchantId =
+    Number(sessionStorage.getItem('login_merchant_id'))
+
+    if (!merchantId) {
+      alert('로그인이 필요합니다.')
+      location.href = '/merchant-login'
+    }
+
+  app.innerHTML = `
+    <div class="merchant-members-page">
+      <h1>청구관리</h1>
+
+      <button id="add-billing-btn">
+        청구 등록
+      </button>
+
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>회원명</th>
+            <th>청구월</th>
+            <th>금액</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+
+        <tbody id="billingBody">
+        </tbody>
+      </table>
+    </div>
+  `
 
     } else if (path === '/merchant-card') { 
       const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
