@@ -6698,6 +6698,45 @@ document.querySelector('#billing-back-btn')
     location.href = '/merchant-admin'
   })
 
+  document.querySelector('#save-billing-btn')
+  ?.addEventListener('click', async () => {
+    const memberId =
+      Number((document.querySelector<HTMLSelectElement>('#billing-member-id')?.value || 0))
+
+    const billingMonth =
+      (document.querySelector<HTMLInputElement>('#billing-month')?.value || '').trim()
+
+    const amount =
+      Number(document.querySelector<HTMLInputElement>('#billing-amount')?.value || 0)
+
+    const memo =
+      (document.querySelector<HTMLTextAreaElement>('#billing-memo')?.value || '').trim()
+
+    if (!memberId || !billingMonth || !amount) {
+      alert('회원명, 청구월, 금액을 입력해주세요.')
+      return
+    }
+
+    const { error } = await supabase
+      .from('billings')
+      .insert({
+        merchant_id: merchantId,
+        member_id: memberId,
+        billing_month: billingMonth,
+        amount: amount,
+        memo: memo,
+        payment_status: '미납'
+      })
+
+    if (error) {
+      alert('청구 저장 실패: ' + error.message)
+      return
+    }
+
+    alert('청구가 등록되었습니다.')
+    location.reload()
+  })
+    
     } else if (path === '/merchant-card') { 
       const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
   
