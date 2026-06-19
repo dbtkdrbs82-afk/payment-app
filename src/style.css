@@ -4130,18 +4130,12 @@ display: grid !important;
   margin: 0 auto;
 }
 .kiosk-company-info {
-  margin: 40px auto 90px auto;
-  padding: 30px 20px;
-  width: 100%;
-  max-width: 1200px;
-
+  margin: 20px auto 90px auto;
+  padding: 16px 20px;
   text-align: center;
-
-  font-size: 14px;
-  line-height: 2;
-
+  font-size: 13px;
+  line-height: 1.7;
   color: #666;
-
   border-top: 1px solid #e5e7eb;
 }
 
@@ -4149,4 +4143,7 @@ display: grid !important;
   display: block;
   font-size: 18px;
   margin-bottom: 10px;
+}
+.kiosk-company-info strong {
+  font-size: 16px;
 }
