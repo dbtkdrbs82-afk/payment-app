@@ -4156,3 +4156,20 @@ display: grid !important;
   color: #fff;
   font-weight: 700;
 }
+.merchant-terms-card {
+  max-width: 1000px !important;
+}
+
+.full-terms-scroll {
+  height: 360px !important;
+  max-height: 360px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  text-align: left !important;
+  white-space: pre-wrap !important;
+  line-height: 1.8 !important;
+  padding: 20px !important;
+  border: 1px solid #d5dce8;
+  border-radius: 10px;
+  background: #fafafa;
+}

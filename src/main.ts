@@ -708,7 +708,7 @@ setTimeout(() => {
 } else if (path === '/merchant-apply') {
   app.innerHTML = `
     <div class="page">
-      <div class="payment-card">
+      <div class="payment-card merchant-terms-card">
         <h1>가맹점 가입 신청</h1>
         <p>서비스 이용을 위해 아래 약관에 동의해주세요.</p>
 
