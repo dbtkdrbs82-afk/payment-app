@@ -1503,7 +1503,7 @@ button {
   }
 
   .kiosk-cart {
-    padding-bottom: 160px;
+    padding-bottom: 60px;
   }
 }
 .kiosk-bottom-bar {
@@ -1533,11 +1533,11 @@ button {
   font-size: 22px;
 }
 .kiosk-page {
-  padding-bottom: 180px;
+  padding-bottom: 100px;
 }
 
 .kiosk-cart {
-  margin-bottom: 140px;
+  margin-bottom: 40px;
 }
 
 .kiosk-bottom-bar {
