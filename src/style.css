@@ -4129,3 +4129,11 @@ display: grid !important;
   max-width: 1400px;
   margin: 0 auto;
 }
+.kiosk-company-info {
+  padding: 20px;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #666;
+  border-top: 1px solid #e5e7eb;
+}
