@@ -4187,3 +4187,14 @@ display: grid !important;
   gap: 8px;
   font-size: 15px;
 }
+.address-row {
+  display: grid;
+  grid-template-columns: 120px 1fr 180px;
+  gap: 12px;
+  align-items: center;
+}
+
+.address-row button {
+  height: 46px;
+  margin: 0;
+}
