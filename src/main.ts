@@ -7670,6 +7670,11 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
     </div>
   </div>
 `
+document.querySelector('#receipt-view-btn')
+  ?.addEventListener('click', () => {
+    alert('영수증 버튼 클릭됨')
+  })
+  
         }
       }
   } else {
