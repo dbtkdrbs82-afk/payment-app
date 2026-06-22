@@ -1839,7 +1839,7 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
       )
     })
   })
-  
+
 document.querySelectorAll('.complete-order-button')
   .forEach((button) => {
 
@@ -4867,6 +4867,7 @@ if (tableHead) {
       '<th>거래방식<br/>물품금액</th>' +
       '<th>부가세<br/>봉사료</th>' +
       '<th>거래수수료<br/>가맹점금액</th>' +
+      '<th>영수증</th>' +
     '</tr>'
 }
 
@@ -4886,10 +4887,50 @@ payments.forEach((payment, index) => {
     '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
     '<td>온라인<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
     '<td>0원<br/>0원</td>' +
-    '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>'
+    '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+'<td>' +
+  '<button ' +
+    'class="admin-receipt-btn" ' +
+    'data-order="' + (payment.order_id || '') + '" ' +
+    'data-order-number="' + (payment.order_number || '') + '" ' +
+    'data-amount="' + (payment.amount || 0) + '" ' +
+    'data-sender="' + (payment.sender_name || '') + '" ' +
+    'data-merchant="' + (payment.merchant_name || '') + '" ' +
+    'data-date="' + (payment.created_at || '') + '"' +
+  '>' +
+    '보기' +
+  '</button>' +
+'</td>'
 
-  paymentTableBody.appendChild(tr)
+paymentTableBody.appendChild(tr)
 })
+
+document.querySelectorAll('.admin-receipt-btn')
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = button as HTMLElement
+
+      const orderId = target.dataset.order || '-'
+      const orderNumber = target.dataset.orderNumber || '-'
+      const amount = Number(target.dataset.amount || 0)
+      const sender = target.dataset.sender || '-'
+      const merchant = target.dataset.merchant || '-'
+      const date = target.dataset.date
+        ? new Date(target.dataset.date).toLocaleString('ko-KR')
+        : '-'
+
+      alert(
+        'NXG PICK 영수증\\n\\n' +
+        '주문번호: ' + orderNumber + '\\n' +
+        '주문ID: ' + orderId + '\\n' +
+        '상점명: ' + merchant + '\\n' +
+        '주문자명: ' + sender + '\\n' +
+        '결제금액: ' + amount.toLocaleString() + '원\\n' +
+        '결제일시: ' + date
+      )
+    })
+  })
+
 }
 })
 })
