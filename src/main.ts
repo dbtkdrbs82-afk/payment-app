@@ -4919,15 +4919,107 @@ document.querySelectorAll('.admin-receipt-btn')
         ? new Date(target.dataset.date).toLocaleString('ko-KR')
         : '-'
 
-      alert(
-        'NXG PICK 영수증\\n\\n' +
-        '주문번호: ' + orderNumber + '\\n' +
-        '주문ID: ' + orderId + '\\n' +
-        '상점명: ' + merchant + '\\n' +
-        '주문자명: ' + sender + '\\n' +
-        '결제금액: ' + amount.toLocaleString() + '원\\n' +
-        '결제일시: ' + date
-      )
+        const receiptHtml = `
+        <div id="admin-receipt-modal" class="receipt-modal">
+          <div class="receipt-box receipt-approve">
+      
+            <div class="receipt-header">
+              <h2>NXG PICK</h2>
+              <h3>신용카드 매출전표 <span>(승인)</span></h3>
+            </div>
+      
+            <section>
+              <h4>결제정보</h4>
+              <table>
+                <tr>
+                  <th>카드번호</th>
+                  <td>결제사 제공값</td>
+                  <th>카드종류</th>
+                  <td>신용카드</td>
+                </tr>
+                <tr>
+                  <th>거래종류</th>
+                  <td>승인성공</td>
+                  <th>할부개월</th>
+                  <td>일시불</td>
+                </tr>
+                <tr>
+                  <th>거래일시</th>
+                  <td colspan="3">${date}</td>
+                </tr>
+              </table>
+            </section>
+      
+            <div class="receipt-grid">
+              <section>
+                <h4>구매정보</h4>
+                <table>
+                  <tr><th>주문자명</th><td>${sender}</td></tr>
+                  <tr><th>승인번호</th><td>${orderId}</td></tr>
+                  <tr><th>주문번호</th><td>${orderNumber}</td></tr>
+                  <tr><th>상품명 / 구매자</th><td>${merchant}</td></tr>
+                </table>
+              </section>
+      
+              <section>
+                <h4>결제금액정보</h4>
+                <table>
+                  <tr><th>과세금액</th><td>${Math.floor(amount / 1.1).toLocaleString()}원</td></tr>
+                  <tr><th>비과세금액</th><td>0원</td></tr>
+                  <tr><th>부가세</th><td>${(amount - Math.floor(amount / 1.1)).toLocaleString()}원</td></tr>
+                  <tr><th>주문금액</th><td>${amount.toLocaleString()}원</td></tr>
+                  <tr><th>할인금액</th><td>0원</td></tr>
+                  <tr class="receipt-total">
+                    <th>총 결제금액</th>
+                    <td>${amount.toLocaleString()}원</td>
+                  </tr>
+                </table>
+              </section>
+            </div>
+      
+            <section>
+              <h4>상점정보</h4>
+              <table>
+                <tr><th>상점명</th><td>${merchant}</td><th>대표자명</th><td>-</td></tr>
+                <tr><th>URL주소</th><td>-</td><th>사업자번호</th><td>-</td></tr>
+                <tr><th>이용문의</th><td colspan="3">-</td></tr>
+                <tr><th>주소</th><td colspan="3">-</td></tr>
+              </table>
+            </section>
+      
+            <section>
+              <h4>결제서비스업체(PG)정보</h4>
+              <table>
+                <tr><th>카드사 가맹점명</th><td>토스페이먼츠</td><th>사업자번호</th><td>-</td></tr>
+                <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>-</td></tr>
+                <tr><th>주소</th><td colspan="3">-</td></tr>
+              </table>
+            </section>
+      
+            <div class="receipt-notice">
+              * 신용카드 청구서에는 실제 결제 PG사명으로 표시됩니다.<br>
+              * 본 매출전표는 부가가치세법 기준에 따라 발행되었습니다.
+            </div>
+      
+            <div class="receipt-actions">
+              <button>이메일 발송</button>
+              <button onclick="window.print()">인쇄하기</button>
+              <button id="admin-receipt-close-btn">닫기</button>
+            </div>
+      
+          </div>
+        </div>
+      `
+      
+      document.querySelector('#admin-receipt-modal')?.remove()
+      document.body.insertAdjacentHTML('beforeend', receiptHtml)
+      
+      document.querySelector<HTMLElement>('#admin-receipt-modal')!.style.display = 'flex'
+      
+      document.querySelector('#admin-receipt-close-btn')
+        ?.addEventListener('click', () => {
+          document.querySelector('#admin-receipt-modal')?.remove()
+        })
     })
   })
 
