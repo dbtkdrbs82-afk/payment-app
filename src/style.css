@@ -4324,3 +4324,14 @@ display: grid !important;
   background: #0b3b82;
   color: #fff;
 }
+.receipt-view-btn {
+  width: 100%;
+  height: 56px;
+  margin: 20px 0;
+  border-radius: 12px;
+  border: 0;
+  background: #174a8b;
+  color: white;
+  font-size: 18px;
+  font-weight: 800;
+}
