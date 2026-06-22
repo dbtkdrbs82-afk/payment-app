@@ -4335,3 +4335,20 @@ display: grid !important;
   font-size: 18px;
   font-weight: 800;
 }
+#receipt-view-btn {
+  display: block !important;
+  width: 100% !important;
+  height: 56px !important;
+  margin: 20px 0 !important;
+  border: 0 !important;
+  border-radius: 12px !important;
+  background: #174a8b !important;
+  color: #fff !important;
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+}
+
+.payment-card {
+  overflow: visible !important;
+}
