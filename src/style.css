@@ -4351,3 +4351,12 @@ display: grid !important;
 .payment-card {
   overflow: visible !important;
 }
+.receipt-box table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.receipt-box th {
+  min-width: 120px;
+  white-space: nowrap;
+}

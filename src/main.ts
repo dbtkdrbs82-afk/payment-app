@@ -2363,7 +2363,7 @@ window.history.replaceState({}, '', '/success')
           <td>-</td>
         </tr>
         <tr>
-          <th>이용문의</th>
+          <th>이용/환불문의</th>
           <td colspan="3">-</td>
         </tr>
         <tr>
@@ -2377,17 +2377,19 @@ window.history.replaceState({}, '', '/success')
       <h4>결제서비스업체(PG)정보</h4>
       <table>
         <tr>
-          <th>카드사 가맹점명</th>
-          <td>토스페이먼츠</td>
-          <th>사업자번호</th>
-          <td>-</td>
-        </tr>
-        <tr>
-          <th>대표자명</th>
-          <td>-</td>
-          <th>가맹점번호</th>
-          <td>-</td>
-        </tr>
+          <tr>
+  <th style="width:180px">카드사 가맹점명</th>
+  <td>토스페이먼츠</td>
+  <th style="width:140px">사업자번호</th>
+  <td style="width:180px">-</td>
+</tr>
+
+<tr>
+  <th>대표자명</th>
+  <td>-</td>
+  <th>가맹점번호</th>
+  <td style="width:180px">-</td>
+</tr>
         <tr>
           <th>주소</th>
           <td colspan="3">-</td>
