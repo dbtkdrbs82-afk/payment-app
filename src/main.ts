@@ -6748,8 +6748,10 @@ productBody.innerHTML = ''
     '</div>' +
 
     '<div class="product-actions">' +
-  '<button class="product-up-button" data-id="' + product.id + '" data-sort="' + (product.sort_order || 0) + '">▲ 위로</button>' +
-  '<button class="product-down-button" data-id="' + product.id + '" data-sort="' + (product.sort_order || 0) + '">▼ 아래로</button>' +
+    '<div class="product-sort-row">' +
+  '<button class="product-up-button" data-id="' + product.id + '" data-sort="' + (product.sort_order || 0) + '">▲</button>' +
+  '<button class="product-down-button" data-id="' + product.id + '" data-sort="' + (product.sort_order || 0) + '">▼</button>' +
+'</div>' +
   '<button class="product-edit-button" data-id="' + product.id + '">수정</button>' +
   '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
     ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
@@ -6850,7 +6852,7 @@ document.querySelectorAll('.product-down-button')
       location.reload()
     })
   })
-  
+
 document.querySelectorAll('.product-edit-button')
   .forEach((button) => {
     button.addEventListener('click', async () => {
