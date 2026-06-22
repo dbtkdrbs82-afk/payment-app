@@ -1764,6 +1764,7 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
 <th>보낸 사람</th>
 <th>메시지</th>
 <th>상태</th>
+<th>영수증</th>
 <th>결제시간</th>
               </tr>
             </thead>
@@ -1790,14 +1791,55 @@ const todayAmount = todayPayments.reduce((sum, payment) => {
       : ''
   }
 </td>
-            <td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>      
-                </tr>
+
+<td>
+  <button
+    class="admin-receipt-btn"
+    data-order="${payment.order_id || ''}"
+    data-order-number="${payment.order_number || ''}"
+    data-amount="${payment.amount || 0}"
+    data-sender="${payment.sender_name || ''}"
+    data-merchant="${payment.merchant_name || ''}"
+    data-date="${payment.created_at || ''}"
+  >
+    보기
+  </button>
+</td>
+
+<td>${new Date(payment.created_at).toLocaleString('ko-KR')}</td>      
+</tr>
               `).join('')}
             </tbody>
           </table>
         </div>
  `
 
+ document.querySelectorAll('.admin-receipt-btn')
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      const target = button as HTMLElement
+
+      const orderId = target.dataset.order || '-'
+      const orderNumber = target.dataset.orderNumber || '-'
+      const amount = Number(target.dataset.amount || 0)
+      const sender = target.dataset.sender || '-'
+      const merchant = target.dataset.merchant || '-'
+      const date = target.dataset.date
+        ? new Date(target.dataset.date).toLocaleString('ko-KR')
+        : '-'
+
+      alert(
+        'NXG PICK 영수증\\n\\n' +
+        '주문번호: ' + orderNumber + '\\n' +
+        '주문ID: ' + orderId + '\\n' +
+        '상점명: ' + merchant + '\\n' +
+        '주문자명: ' + sender + '\\n' +
+        '결제금액: ' + amount.toLocaleString() + '원\\n' +
+        '결제일시: ' + date
+      )
+    })
+  })
+  
 document.querySelectorAll('.complete-order-button')
   .forEach((button) => {
 
