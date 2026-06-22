@@ -2233,7 +2233,8 @@ const { error } = await supabase.from('payments').insert([
     sender_name: senderName,
 message: message,
 merchant_id: merchantId ? Number(merchantId) : null,
-merchant_name: merchantName
+merchant_name: merchantName,
+pg_company: '토스페이먼츠'
   }
   ]) 
 
@@ -4910,6 +4911,7 @@ payments.forEach((payment, index) => {
     'data-amount="' + (payment.amount || 0) + '" ' +
     'data-sender="' + (payment.sender_name || '') + '" ' +
     'data-merchant="' + (payment.merchant_name || '') + '" ' +
+    'data-pg="' + (payment.pg_company || '토스페이먼츠') + '" ' +
     'data-merchant-id="' + (payment.merchant_id || '') + '" ' +
     'data-date="' + (payment.created_at || '') + '"' +
   '>' +
@@ -4930,6 +4932,8 @@ document.querySelectorAll('.admin-receipt-btn')
       const amount = Number(target.dataset.amount || 0)
       const sender = target.dataset.sender || '-'
       const merchant = target.dataset.merchant || '-'
+      const pgCompany = target.dataset.pg || '토스페이먼츠'
+
       
       const date = target.dataset.date
         ? new Date(target.dataset.date).toLocaleString('ko-KR')
@@ -5006,7 +5010,7 @@ document.querySelectorAll('.admin-receipt-btn')
             <section>
               <h4>결제서비스업체(PG)정보</h4>
               <table>
-                <tr><th>카드사 가맹점명</th><td>토스페이먼츠</td><th>사업자번호</th><td>-</td></tr>
+                <tr><th>카드사 가맹점명</th><td>${pgCompany}</td><th>사업자번호</th><td>-</td></tr>
                 <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>-</td></tr>
                 <tr><th>주소</th><td colspan="3">-</td></tr>
               </table>
