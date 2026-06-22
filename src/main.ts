@@ -4082,6 +4082,8 @@ tr.innerHTML =
     'data-amount="' + (order.total_amount || 0) + '" ' +
     'data-date="' + (order.created_at || '') + '" ' +
     'data-items="' + orderItems + '"' +
+    'data-payment-key="' + (order.payment_key || '-') + '" ' +
+    'data-customer="' + (order.customer_name || '현장고객') + '"' +
   '>' +
     orderNumber + '번' +
   '</button>' +
@@ -5956,6 +5958,12 @@ receiptButtons.forEach((button) => {
     const items =
       target.getAttribute('data-items') || '-'
 
+      const paymentKey =
+      target.getAttribute('data-payment-key') || '-'
+
+    const customerName =
+      target.getAttribute('data-customer') || '현장고객'
+
       const receiptHtml = `
       <div id="admin-receipt-modal" class="receipt-modal">
         <div class="receipt-box receipt-approve">
@@ -5991,10 +5999,10 @@ receiptButtons.forEach((button) => {
             <section>
               <h4>구매정보</h4>
               <table>
-                <tr><th>주문자명</th><td>-</td></tr>
-                <tr><th>승인번호</th><td>-</td></tr>
-                <tr><th>주문번호</th><td>${orderNo}</td></tr>
-                <tr><th>상품명 / 구매자</th><td>${items}</td></tr>
+                <tr><th>주문자명</th><td>${customerName}</td></tr>
+<tr><th>승인번호</th><td>${paymentKey}</td></tr>
+<tr><th>주문번호</th><td>${orderNo}</td></tr>
+<tr><th>상품명 / 구매자</th><td>${items}</td></tr>
               </table>
             </section>
     
