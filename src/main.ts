@@ -5729,7 +5729,17 @@ ${merchantContent}
 
       const { data: merchantSetting } = await supabase
   .from('merchants')
-  .select('call_message, order_message')
+  .select(`
+    call_message,
+    order_message,
+    merchant_name,
+    owner_name,
+    corporate_number,
+    business_number,
+    phone,
+    address,
+    address_detail
+  `)
   .eq('id', merchantId)
   .single()
 
@@ -6007,10 +6017,31 @@ receiptButtons.forEach((button) => {
           <section>
             <h4>상점정보</h4>
             <table>
-              <tr><th>상점명</th><td>${sessionStorage.getItem('login_merchant_name') || '-'}</td><th>대표자명</th><td>-</td></tr>
-              <tr><th>URL주소</th><td>-</td><th>사업자번호</th><td>-</td></tr>
-              <tr><th>이용문의</th><td colspan="3">-</td></tr>
-              <tr><th>주소</th><td colspan="3">-</td></tr>
+              <tr>
+  <th>상점명</th>
+  <td>${merchantSetting?.merchant_name || '-'}</td>
+  <th>대표자명</th>
+  <td>${merchantSetting?.owner_name || '-'}</td>
+</tr>
+
+<tr>
+  <th>URL주소</th>
+  <td>-</td>
+  <th>사업자번호</th>
+  <td>${merchantSetting?.business_number || merchantSetting?.corporate_number || '-'}</td>
+</tr>
+
+<tr>
+  <th>이용문의</th>
+  <td colspan="3">${merchantSetting?.phone || '-'}</td>
+</tr>
+
+<tr>
+  <th>주소</th>
+  <td colspan="3">
+    ${(merchantSetting?.address || '') + ' ' + (merchantSetting?.address_detail || '')}
+  </td>
+</tr>
             </table>
           </section>
     
