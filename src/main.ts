@@ -4924,7 +4924,7 @@ paymentTableBody.appendChild(tr)
 
 document.querySelectorAll('.admin-receipt-btn')
   .forEach((button) => {
-    button.addEventListener('click', () => {
+    button.addEventListener('click', async () => {
       const target = button as HTMLElement
 
       const orderId = target.dataset.order || '-'
@@ -4932,11 +4932,15 @@ document.querySelectorAll('.admin-receipt-btn')
       const amount = Number(target.dataset.amount || 0)
       const sender = target.dataset.sender || '-'
       const merchant = target.dataset.merchant || '-'
-      
-      const pgCompany = target.dataset.pg || '토스페이먼츠'
 
-      
-      const date = target.dataset.date
+
+
+const pgCompany =
+  target.dataset.pg || '토스페이먼츠'
+
+
+
+const date = target.dataset.date
         ? new Date(target.dataset.date).toLocaleString('ko-KR')
         : '-'
 
