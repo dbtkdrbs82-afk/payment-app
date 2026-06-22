@@ -4910,6 +4910,7 @@ payments.forEach((payment, index) => {
     'data-amount="' + (payment.amount || 0) + '" ' +
     'data-sender="' + (payment.sender_name || '') + '" ' +
     'data-merchant="' + (payment.merchant_name || '') + '" ' +
+    'data-merchant-id="' + (payment.merchant_id || '') + '" ' +
     'data-date="' + (payment.created_at || '') + '"' +
   '>' +
     '보기' +
@@ -4929,6 +4930,7 @@ document.querySelectorAll('.admin-receipt-btn')
       const amount = Number(target.dataset.amount || 0)
       const sender = target.dataset.sender || '-'
       const merchant = target.dataset.merchant || '-'
+      const merchantId = Number(target.dataset.merchantId || 0)
       const date = target.dataset.date
         ? new Date(target.dataset.date).toLocaleString('ko-KR')
         : '-'
@@ -7683,6 +7685,66 @@ const cardNumberMatch =
         
             </div>
           `
+
+        } else if (path === '/terms') {
+          app.innerHTML = `
+            <div class="page">
+              <div class="payment-card merchant-terms-card">
+                <h1>이용약관</h1>
+                <div class="terms-content full-terms-scroll">
+                  NXG PICK 이용약관
+
+NXG PICK은 안전한 결제 서비스를 제공하기 위해 운영됩니다.
+
+이용자는 관련 법령 및 본 약관을 준수하여 서비스를 이용하여야 합니다.
+
+회사는 서비스 품질 향상을 위해 시스템 점검 및 유지보수를 진행할 수 있으며, 필요한 경우 서비스 제공이 일시 중단될 수 있습니다.
+
+이용자는 부정한 방법으로 서비스를 이용할 수 없으며, 관련 법령을 위반하는 경우 서비스 이용이 제한될 수 있습니다.
+
+본 서비스 이용 시 본 약관에 동의한 것으로 간주됩니다.
+                </div>
+              </div>
+            </div>
+          `
+        } else if (path === '/privacy') {
+          app.innerHTML = `
+            <div class="page">
+              <div class="payment-card merchant-terms-card">
+                <h1>개인정보처리방침</h1>
+                <div class="terms-content full-terms-scroll">
+                  개인정보처리방침
+
+NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개인정보를 수집합니다.
+
+수집된 개인정보는 결제 처리, 주문 확인, 고객 문의 응대 및 관련 법령 준수를 위해 사용됩니다.
+
+회사는 이용자의 개인정보를 안전하게 관리하며, 법령에 따른 경우를 제외하고 제3자에게 제공하지 않습니다.
+
+개인정보는 관련 법령에서 정한 기간 동안 보관 후 안전하게 파기됩니다.
+                </div>
+              </div>
+            </div>
+          `
+        } else if (path === '/refund') {
+          app.innerHTML = `
+            <div class="page">
+              <div class="payment-card merchant-terms-card">
+                <h1>환불정책</h1>
+                <div class="terms-content full-terms-scroll">
+                  환불정책
+
+환불 및 결제 취소는 상품 또는 서비스를 제공한 가맹점의 정책에 따라 처리됩니다.
+
+환불 요청은 해당 가맹점 또는 고객센터를 통해 접수할 수 있습니다.
+
+카드 결제 취소 후 실제 환불 반영 시점은 카드사 정책에 따라 달라질 수 있습니다.
+
+이미 제공이 완료된 상품 또는 서비스는 환불이 제한될 수 있습니다.
+                </div>
+              </div>
+            </div>
+          `
           
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
@@ -7774,13 +7836,27 @@ const cardNumberMatch =
   </div>
 
   <div>
-    고객센터 : 02-431-1252 |
-    이메일 : nxgsoft@naver.com
-  </div>
+  고객센터 : 02-431-1252 |
+  이메일 : nxgsoft@naver.com
+</div>
 
-  <div>
-    Copyright © NXG Soft. All rights reserved.
-  </div>
+<div>
+  Copyright © NXG Soft. All rights reserved.
+</div>
+
+<div class="footer-links">
+  <a href="/terms" target="_blank">이용약관 보기</a>
+  <span>|</span>
+
+  <a href="/privacy" target="_blank">
+    개인정보처리방침 보기
+  </a>
+  <span>|</span>
+
+  <a href="/refund" target="_blank">
+    환불정책 보기
+  </a>
+</div>
 
 </div>
 

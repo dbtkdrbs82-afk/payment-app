@@ -4225,7 +4225,7 @@ display: grid !important;
 .receipt-box {
   width: 620px;
   max-width: 92vw;
-  max-height: 85vh;
+  max-height: 90vh;
   overflow-y: auto;
 
   background: #fff;
@@ -4359,4 +4359,24 @@ display: grid !important;
 .receipt-box th {
   min-width: 120px;
   white-space: nowrap;
+}
+.footer-links {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.footer-links a {
+  color: #1e4f95;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+}
+
+.footer-links span {
+  margin: 0 8px;
+  color: #999;
 }
