@@ -6643,10 +6643,11 @@ if (orderDate !== today) {
   }
 
   const { data: products, error } = await supabase
-    .from('products')
-    .select('*')
-    .eq('merchant_id', merchantId)
-    .order('id', { ascending: false })
+  .from('products')
+  .select('*')
+  .eq('merchant_id', merchantId)
+  .order('sort_order', { ascending: true })
+  .order('id', { ascending: false })
 
   if (error) {
     alert('상품 목록 조회 실패: ' + error.message)
@@ -6747,15 +6748,108 @@ productBody.innerHTML = ''
     '</div>' +
 
     '<div class="product-actions">' +
-      '<button class="product-edit-button" data-id="' + product.id + '">수정</button>' +
-      '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
-        ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
-      '</button>' +
-      '<button class="product-delete-button" data-id="' + product.id + '">삭제</button>' +
-    '</div>'
+  '<button class="product-up-button" data-id="' + product.id + '" data-sort="' + (product.sort_order || 0) + '">▲ 위로</button>' +
+  '<button class="product-down-button" data-id="' + product.id + '" data-sort="' + (product.sort_order || 0) + '">▼ 아래로</button>' +
+  '<button class="product-edit-button" data-id="' + product.id + '">수정</button>' +
+  '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
+    ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
+  '</button>' +
+  '<button class="product-delete-button" data-id="' + product.id + '">삭제</button>' +
+'</div>'
 
   productBody.appendChild(item)
 })
+ 
+document.querySelectorAll('.product-up-button')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const productId =
+        Number((button as HTMLElement).getAttribute('data-id'))
+
+      const currentProduct =
+        products?.find((p) => p.id === productId)
+
+      if (!currentProduct) {
+        return
+      }
+
+      const currentIndex =
+        (products || []).findIndex((p) => p.id === productId)
+
+      if (currentIndex <= 0) {
+        alert('이미 맨 위 상품입니다.')
+        return
+      }
+
+      const prevProduct =
+        (products || [])[currentIndex - 1]
+
+      const currentSort =
+        Number(currentProduct.sort_order || currentIndex)
+
+      const prevSort =
+        Number(prevProduct.sort_order || currentIndex - 1)
+
+      await supabase
+        .from('products')
+        .update({ sort_order: prevSort })
+        .eq('id', currentProduct.id)
+
+      await supabase
+        .from('products')
+        .update({ sort_order: currentSort })
+        .eq('id', prevProduct.id)
+
+      location.reload()
+    })
+  })
+
+document.querySelectorAll('.product-down-button')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const productId =
+        Number((button as HTMLElement).getAttribute('data-id'))
+
+      const currentProduct =
+        products?.find((p) => p.id === productId)
+
+      if (!currentProduct) {
+        return
+      }
+
+      const currentIndex =
+        (products || []).findIndex((p) => p.id === productId)
+
+      if (
+        currentIndex < 0 ||
+        currentIndex >= (products || []).length - 1
+      ) {
+        alert('이미 맨 아래 상품입니다.')
+        return
+      }
+
+      const nextProduct =
+        (products || [])[currentIndex + 1]
+
+      const currentSort =
+        Number(currentProduct.sort_order || currentIndex)
+
+      const nextSort =
+        Number(nextProduct.sort_order || currentIndex + 1)
+
+      await supabase
+        .from('products')
+        .update({ sort_order: nextSort })
+        .eq('id', currentProduct.id)
+
+      await supabase
+        .from('products')
+        .update({ sort_order: currentSort })
+        .eq('id', nextProduct.id)
+
+      location.reload()
+    })
+  })
   
 document.querySelectorAll('.product-edit-button')
   .forEach((button) => {
