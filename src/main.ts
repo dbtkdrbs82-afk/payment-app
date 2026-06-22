@@ -4932,6 +4932,7 @@ document.querySelectorAll('.admin-receipt-btn')
       const amount = Number(target.dataset.amount || 0)
       const sender = target.dataset.sender || '-'
       const merchant = target.dataset.merchant || '-'
+      
       const pgCompany = target.dataset.pg || '토스페이먼츠'
 
       
