@@ -7663,6 +7663,9 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
 ">
   잠시만 기다려주세요.
 </p>
+<button id="receipt-view-btn" class="receipt-view-btn">
+  영수증 확인
+</button>
 
     </div>
   </div>
