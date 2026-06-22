@@ -5021,7 +5021,7 @@ document.querySelectorAll('.admin-receipt-btn')
       
           </div>
         </div>
-      `
+      ` 
       
       document.querySelector('#admin-receipt-modal')?.remove()
       document.body.insertAdjacentHTML('beforeend', receiptHtml)
