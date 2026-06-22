@@ -4930,7 +4930,7 @@ document.querySelectorAll('.admin-receipt-btn')
       const amount = Number(target.dataset.amount || 0)
       const sender = target.dataset.sender || '-'
       const merchant = target.dataset.merchant || '-'
-      const merchantId = Number(target.dataset.merchantId || 0)
+      
       const date = target.dataset.date
         ? new Date(target.dataset.date).toLocaleString('ko-KR')
         : '-'
