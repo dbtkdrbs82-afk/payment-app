@@ -4075,7 +4075,17 @@ const orderItems = Array.isArray(order.items)
 
 tr.innerHTML =
   '<td>' + (index + 1) + '</td>' +
-  '<td>' + orderNumber + '번</td>' +
+  '<td>' +
+  '<button ' +
+    'class="merchant-receipt-link" ' +
+    'data-order="' + orderNumber + '" ' +
+    'data-amount="' + (order.total_amount || 0) + '" ' +
+    'data-date="' + (order.created_at || '') + '" ' +
+    'data-items="' + orderItems + '"' +
+  '>' +
+    orderNumber + '번' +
+  '</button>' +
+'</td>' +
   '<td>MER' + String(order.merchant_id || 1).padStart(4, '0') + '</td>' +
   '<td>' + orderItems + '</td>' +
   '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
@@ -5798,7 +5808,17 @@ if (merchantOrderCardList) {
 
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
-    '<td>' + orderNumber + '번</td>' +
+    '<td>' +
+  '<button ' +
+    'class="merchant-receipt-link" ' +
+    'data-id="' + order.id + '" ' +
+    'data-order="' + orderNumber + '" ' +
+    'data-amount="' + (order.total_amount || 0) + '" ' +
+    'data-date="' + (order.created_at || '') + '" ' +
+  '>' +
+    orderNumber + '번' +
+  '</button>' +
+'</td>' +
     '<td>' +
   '<div>' + new Date(order.created_at).toLocaleString('ko-KR') + '</div>' +
  '<div class="approval-number cancel-approval-link" ' +
@@ -5851,7 +5871,15 @@ if (merchantOrderCardList) {
 
     card.innerHTML =
       '<div class="merchant-order-card-top">' +
-        '<strong>' + orderNumber + '번</strong>' +
+        '<button ' +
+  'class="merchant-receipt-link merchant-card-receipt-link" ' +
+  'data-order="' + orderNumber + '" ' +
+  'data-amount="' + (order.total_amount || 0) + '" ' +
+  'data-date="' + (order.created_at || '') + '" ' +
+  'data-items="' + orderItems + '"' +
+'>' +
+  orderNumber + '번' +
+'</button>' +
         '<span>' +
           Number(order.total_amount || 0).toLocaleString() +
           '원' +
@@ -5897,6 +5925,37 @@ if (merchantOrderCardList) {
     const cardCallButton =
     card.querySelector<HTMLButtonElement>('.customer-call-button')
   
+    const receiptButtons =
+  document.querySelectorAll('.merchant-receipt-link')
+
+receiptButtons.forEach((button) => {
+  button.addEventListener('click', () => {
+    const target = button as HTMLElement
+
+    const orderNo =
+      target.getAttribute('data-order') || '-'
+
+    const amount =
+      Number(target.getAttribute('data-amount') || 0)
+
+    const date =
+      target.getAttribute('data-date')
+        ? new Date(target.getAttribute('data-date')!).toLocaleString('ko-KR')
+        : '-'
+
+    const items =
+      target.getAttribute('data-items') || '-'
+
+    alert(
+      'NXG PICK 영수증\n\n' +
+      '주문번호 : ' + orderNo + '\n' +
+      '주문내용 : ' + items + '\n' +
+      '결제금액 : ' + amount.toLocaleString() + '원\n' +
+      '결제일시 : ' + date
+    )
+  })
+})
+
   cardCallButton?.addEventListener('click', async () => {
     const savedCallMessage =
       (
