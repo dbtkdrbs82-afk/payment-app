@@ -7726,7 +7726,7 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
       <table>
         <tr><th>상점명</th><td>-</td><th>대표자명</th><td>-</td></tr>
         <tr><th>URL주소</th><td>-</td><th>사업자번호</th><td>-</td></tr>
-        <tr><th>이용문의</th><td colspan="3">-</td></tr>
+        <tr><th>이용/환불문의</th><td colspan="3">-</td></tr>
         <tr><th>주소</th><td colspan="3">-</td></tr>
       </table>
     </section>

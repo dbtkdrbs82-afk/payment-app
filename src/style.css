@@ -4223,13 +4223,15 @@ display: grid !important;
 }
 
 .receipt-box {
-  width: 900px;
-  max-width: 96vw;
+  width: 620px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
+
   background: #fff;
   border: 2px solid #0b3b82;
   border-radius: 14px;
-  padding: 28px;
-  color: #0f172a;
+  padding: 18px;
 }
 
 .receipt-header {
@@ -4241,14 +4243,14 @@ display: grid !important;
 
 .receipt-header h2 {
   margin: 0;
-  font-size: 42px;
+  font-size: 28px;
   color: #0b3b82;
   letter-spacing: 2px;
 }
 
 .receipt-header h3 {
   margin: 6px 0 0;
-  font-size: 24px;
+  font-size: 18px;
 }
 
 .receipt-box section {
@@ -4258,7 +4260,7 @@ display: grid !important;
 .receipt-box h4 {
   margin: 0 0 8px;
   color: #0b3b82;
-  font-size: 18px;
+  font-size: 15px;
 }
 
 .receipt-box table {
@@ -4270,8 +4272,8 @@ display: grid !important;
 .receipt-box th,
 .receipt-box td {
   border: 1px solid #d5dce8;
-  padding: 10px;
-  font-size: 14px;
+  padding: 6px;
+  font-size: 12px;
 }
 
 .receipt-box th {
@@ -4313,11 +4315,8 @@ display: grid !important;
 }
 
 .receipt-actions button {
-  height: 48px;
-  border-radius: 8px;
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  font-weight: 800;
+  height: 40px;
+  font-size: 13px;
 }
 
 .receipt-actions button:last-child {
