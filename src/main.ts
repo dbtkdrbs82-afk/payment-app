@@ -6685,6 +6685,18 @@ if (orderDate !== today) {
       <label>가격</label>
       <input id="merchant-product-price" type="number" placeholder="예: 4500" />
     </div>
+    <div class="input-group">
+  <label>카테고리</label>
+
+  <select id="merchant-product-category">
+    <option value="커피">커피</option>
+    <option value="에이드">에이드</option>
+    <option value="음료">음료</option>
+    <option value="식사">식사</option>
+    <option value="디저트">디저트</option>
+    <option value="기타">기타</option>
+  </select>
+</div>
 
     <div class="input-group">
       <label>상품 이미지</label>
@@ -6951,6 +6963,9 @@ document.querySelector('#merchant-product-image-file')
       const price =
         Number((document.getElementById('merchant-product-price') as HTMLInputElement)?.value || 0)
 
+        const category =
+        (document.getElementById('merchant-product-category') as HTMLSelectElement)?.value || '기타'
+
         const imageFile =
         (document.getElementById(
           'merchant-product-image-file'
@@ -6996,10 +7011,11 @@ document.querySelector('#merchant-product-image-file')
           merchant_id: merchantId,
           product_name: productName,
           price: price,
+          category: category,
           image_url: imageUrl,
           status: '판매중'
         })
-
+        
       if (error) {
         alert('상품 등록 실패: ' + error.message)
         return
