@@ -8235,7 +8235,7 @@ const paymentData = {
 console.log('paymentData', paymentData)
 console.log('KorpaySdk', (window as any).KorpaySdk)
 
-const korpay = new (window as any).KorpaySdk({
+const korpay = (window as any).KorpaySdk({
   baseUrl: 'https://payments.korpay.com/v1',
   paymentTimeout: 30000
 })
