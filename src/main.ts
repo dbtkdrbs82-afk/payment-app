@@ -8236,7 +8236,7 @@ console.log('paymentData', paymentData)
 console.log('KorpaySdk', (window as any).KorpaySdk)
 
 ;(window as any).KorpaySdk.payment(
-  'https://payments.korpay.com',
+  'payments.korpay.com/v1',
   paymentData,
   {
     onStart: () => {
