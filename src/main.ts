@@ -8182,16 +8182,72 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
     sessionStorage.setItem('kiosk_items', JSON.stringify(cart))
     sessionStorage.setItem('kiosk_total_amount', String(totalPrice))
 
-    const tossPayments = await loadTossPayments(clientKey)
+    const { data: payMerchant, error: payMerchantError } = await supabase
+  .from('merchants')
+  .select('pg_mid, korpay_mkey, merchant_name')
+  .eq('id', Number(merchantId))
+  .single()
 
-    await tossPayments.requestPayment('카드', {
-      amount: totalPrice,
-      orderId: orderNo,
-      orderName: 'NXG 미니상점 주문',
-      customerName: '미니상점 고객',
-      successUrl: window.location.origin + '/kiosk-success',
-      failUrl: window.location.origin + '/fail',
-    })
+if (payMerchantError || !payMerchant) {
+  alert('가맹점 결제 정보를 불러오지 못했습니다.')
+  return
+}
+
+if (!payMerchant.pg_mid || !payMerchant.korpay_mkey) {
+  alert('코페이 MID 또는 mKey가 등록되지 않았습니다.')
+  return
+}
+
+const ediDate = getKorpayEdiDate()
+const hashKey = await createKorpayHash(
+  payMerchant.pg_mid,
+  ediDate,
+  totalPrice,
+  payMerchant.korpay_mkey
+)
+
+const paymentData = {
+  merchantId: payMerchant.pg_mid,
+  productName: 'NXG 미니상점 주문',
+  orderNumber: orderNo.replace(/[^a-zA-Z0-9]/g, ''),
+  amount: totalPrice,
+  payMethod: 'card',
+  returnUrl: window.location.origin + '/kiosk-success',
+  ediDate: ediDate,
+  hashKey: hashKey,
+  customerName: '미니상점 고객',
+  reserved: String(merchantId),
+  language: 'ko',
+}
+
+;(window as any).KorpaySDK.payment(
+  'https://payments.korpay.com/v1',
+  paymentData,
+  {
+    onStart: () => {
+      const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+      if (payButton) {
+        payButton.disabled = true
+        payButton.innerText = '결제창 호출 중...'
+      }
+    },
+    onError: (err: any) => {
+      alert(String(err))
+      const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+      if (payButton) {
+        payButton.disabled = false
+        payButton.innerText = '결제하기'
+      }
+    },
+    onClose: () => {
+      const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+      if (payButton) {
+        payButton.disabled = false
+        payButton.innerText = '결제하기'
+      }
+    },
+  }
+)
   })
           
       }
@@ -8477,3 +8533,31 @@ document.querySelector('#receipt-view-btn')
       )
   })
   }  
+  function getKorpayEdiDate() {
+    const now = new Date()
+    const yyyy = String(now.getFullYear())
+    const MM = String(now.getMonth() + 1).padStart(2, '0')
+    const dd = String(now.getDate()).padStart(2, '0')
+    const HH = String(now.getHours()).padStart(2, '0')
+    const mm = String(now.getMinutes()).padStart(2, '0')
+    const ss = String(now.getSeconds()).padStart(2, '0')
+  
+    return yyyy + MM + dd + HH + mm + ss
+  }
+  
+  async function createKorpayHash(
+    merchantId: string,
+    ediDate: string,
+    amount: number,
+    mKey: string
+  ) {
+    const text = merchantId + ediDate + String(amount) + mKey
+    const encoder = new TextEncoder()
+    const data = encoder.encode(text)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+  
+    return hashArray
+      .map((byte) => byte.toString(16).padStart(2, '0'))
+      .join('')
+  }
