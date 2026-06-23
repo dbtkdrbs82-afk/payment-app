@@ -8234,7 +8234,7 @@ console.log('KorpaySDK = ', (window as any).KorpaySDK)
 
 alert('코페이 결제창을 호출합니다.')
 
-;(window as any).KorpaySDK.payment(
+;(window as any).KorpaySdK.payment(
   'https://payments.korpay.com/v1',
   paymentData,
   {
