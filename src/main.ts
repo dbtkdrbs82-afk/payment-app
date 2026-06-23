@@ -8220,6 +8220,8 @@ const paymentData = {
   language: 'ko',
 }
 
+console.log('KorpaySDK = ', (window as any).KorpaySDK)
+
 ;(window as any).KorpaySDK.payment(
   'https://payments.korpay.com/v1',
   paymentData,
