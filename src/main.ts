@@ -8167,16 +8167,12 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
         document.querySelector<HTMLButtonElement>('#kiosk-pay-button')!
   .addEventListener('click', async () => {
     console.log('결제 버튼 클릭됨')
-    alert('결제 버튼 클릭됨')
-    
-    
+      
     const totalPrice = cart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     )
     
-    alert('2 totalPrice: ' + totalPrice)
-
     if (cart.length === 0) {
       alert('상품을 먼저 선택해주세요.')
       return
@@ -8196,10 +8192,7 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
   .select('pg_mid, korpay_mkey, merchant_name')
   .eq('id', Number(merchantId))
   .single()
-
-  alert('3 가맹점 조회 완료')
-alert(JSON.stringify(payMerchant))
-
+   
 if (payMerchantError) {
   alert(JSON.stringify(payMerchantError))
 }
@@ -8215,7 +8208,6 @@ if (!payMerchant.pg_mid || !payMerchant.korpay_mkey) {
   return
 }
 
-alert('4 hash 시작')
 const ediDate = getKorpayEdiDate()
 const hashKey = await createKorpayHash(
   payMerchant.pg_mid,
@@ -8239,6 +8231,8 @@ const paymentData = {
 }
 
 console.log('KorpaySDK = ', (window as any).KorpaySDK)
+
+alert('코페이 결제창을 호출합니다.')
 
 ;(window as any).KorpaySDK.payment(
   'https://payments.korpay.com/v1',
