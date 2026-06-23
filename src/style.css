@@ -4464,3 +4464,15 @@ display: grid !important;
   padding: 0 !important;
   font-size: 12px !important;
 }
+.kiosk-category-section {
+  margin-bottom: 36px;
+}
+
+.kiosk-category-title {
+  font-size: 26px;
+  font-weight: 900;
+  margin: 30px 0 18px;
+  color: #174a8b;
+  border-left: 6px solid #174a8b;
+  padding-left: 12px;
+}

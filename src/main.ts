@@ -7015,7 +7015,7 @@ document.querySelector('#merchant-product-image-file')
           image_url: imageUrl,
           status: '판매중'
         })
-        
+
       if (error) {
         alert('상품 등록 실패: ' + error.message)
         return
@@ -7887,6 +7887,20 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
           </div>
         `
       } else {
+
+        const groupedProducts =
+  (products || []).reduce((groups: any, product: any) => {
+    const category = product.category || '기타'
+
+    if (!groups[category]) {
+      groups[category] = []
+    }
+
+    groups[category].push(product)
+
+    return groups
+  }, {})
+
         app.innerHTML = `
           <div class="kiosk-page">
             <div class="kiosk-header">
@@ -7901,31 +7915,39 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
               <p>원하시는 상품을 선택해주세요.</p>
             </div>
 
-            <div class="kiosk-products">
-              ${(products || []).map((product) => `
-                <div class="kiosk-product-card">
-                  ${product.image_url ? `
-                    <img src="${product.image_url}" alt="${product.product_name}">
-                  ` : `
-                    <div class="no-image">이미지 없음</div>
-                  `}
+            <div class="kiosk-category-list">
+  ${Object.keys(groupedProducts).map((category) => `
+    <section class="kiosk-category-section">
+      <h2 class="kiosk-category-title">${category}</h2>
 
-                  <div class="kiosk-product-info">
-                    <h3>${product.product_name}</h3>
-                    <p>${Number(product.price).toLocaleString()}원</p>
-                  </div>
+      <div class="kiosk-products">
+        ${groupedProducts[category].map((product: any) => `
+          <div class="kiosk-product-card">
+            ${product.image_url ? `
+              <img src="${product.image_url}" alt="${product.product_name}">
+            ` : `
+              <div class="no-image">이미지 없음</div>
+            `}
 
-                  <button 
-                    class="add-cart-button"
-                    data-id="${product.id}"
-                    data-name="${product.product_name}"
-                    data-price="${product.price}"
-                  >
-                    담기
-                  </button>
-                </div>
-              `).join('')}
+            <div class="kiosk-product-info">
+              <h3>${product.product_name}</h3>
+              <p>${Number(product.price).toLocaleString()}원</p>
             </div>
+
+            <button 
+              class="add-cart-button"
+              data-id="${product.id}"
+              data-name="${product.product_name}"
+              data-price="${product.price}"
+            >
+              담기
+            </button>
+          </div>
+        `).join('')}
+      </div>
+    </section>
+  `).join('')}
+</div>
 
             <div class="kiosk-cart">
               <h2>장바구니</h2>
