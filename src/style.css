@@ -4476,3 +4476,31 @@ display: grid !important;
   border-left: 6px solid #174a8b;
   padding-left: 12px;
 }
+.kiosk-category-tabs {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin: 24px 0;
+  padding-bottom: 8px;
+}
+
+.kiosk-category-tab {
+  min-width: 90px;
+  height: 42px;
+  border: 1px solid #174a8b;
+  border-radius: 999px;
+  background: white;
+  color: #174a8b;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.kiosk-category-tab.active {
+  background: #174a8b;
+  color: white;
+}
+
+.hidden-category {
+  display: none !important;
+}

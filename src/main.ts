@@ -7915,9 +7915,23 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
               <p>원하시는 상품을 선택해주세요.</p>
             </div>
 
+            <div class="kiosk-category-tabs">
+  ${Object.keys(groupedProducts).map((category, index) => `
+    <button
+      class="kiosk-category-tab ${index === 0 ? 'active' : ''}"
+      data-category="${category}"
+    >
+      ${category}
+    </button>
+  `).join('')}
+</div>
+
             <div class="kiosk-category-list">
   ${Object.keys(groupedProducts).map((category) => `
-    <section class="kiosk-category-section">
+    <section
+  class="kiosk-category-section ${Object.keys(groupedProducts)[0] === category ? '' : 'hidden-category'}"
+  data-category-section="${category}"
+>
       <h2 class="kiosk-category-title">${category}</h2>
 
       <div class="kiosk-products">
@@ -8017,6 +8031,31 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
             </div>
           </div>
         `
+
+        document.querySelectorAll('.kiosk-category-tab')
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      const category =
+        (button as HTMLElement).getAttribute('data-category')
+
+      document.querySelectorAll('.kiosk-category-tab')
+        .forEach((tab) => tab.classList.remove('active'))
+
+      button.classList.add('active')
+
+      document.querySelectorAll('.kiosk-category-section')
+        .forEach((section) => {
+          const sectionCategory =
+            (section as HTMLElement).getAttribute('data-category-section')
+
+          if (sectionCategory === category) {
+            section.classList.remove('hidden-category')
+          } else {
+            section.classList.add('hidden-category')
+          }
+        })
+    })
+  })
 
         const cart: {
           id: number
