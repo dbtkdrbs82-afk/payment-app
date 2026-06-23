@@ -8078,7 +8078,10 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
             document.querySelector<HTMLElement>('#cart-total-price-bottom')
         
           const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0)
-          const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0)
+          const totalPrice = cart.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          )
         
           cartCount.textContent = String(totalCount)
           cartTotalPrice.textContent = totalPrice.toLocaleString() + '원'
@@ -8165,11 +8168,14 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
   .addEventListener('click', async () => {
     console.log('결제 버튼 클릭됨')
     alert('결제 버튼 클릭됨')
- 
+    
+    
     const totalPrice = cart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     )
+    
+    alert('2 totalPrice: ' + totalPrice)
 
     if (cart.length === 0) {
       alert('상품을 먼저 선택해주세요.')
@@ -8190,6 +8196,13 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
   .select('pg_mid, korpay_mkey, merchant_name')
   .eq('id', Number(merchantId))
   .single()
+
+  alert('3 가맹점 조회 완료')
+alert(JSON.stringify(payMerchant))
+
+if (payMerchantError) {
+  alert(JSON.stringify(payMerchantError))
+}
 
 if (payMerchantError || !payMerchant) {
   alert('가맹점 결제 정보를 불러오지 못했습니다.')
