@@ -8204,6 +8204,7 @@ if (payMerchantError) {
   alert(JSON.stringify(payMerchantError))
 }
 
+
 if (payMerchantError || !payMerchant) {
   alert('가맹점 결제 정보를 불러오지 못했습니다.')
   return
@@ -8214,6 +8215,7 @@ if (!payMerchant.pg_mid || !payMerchant.korpay_mkey) {
   return
 }
 
+alert('4 hash 시작')
 const ediDate = getKorpayEdiDate()
 const hashKey = await createKorpayHash(
   payMerchant.pg_mid,
