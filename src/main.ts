@@ -8235,10 +8235,10 @@ const paymentData = {
 console.log('paymentData', paymentData)
 console.log('KorpaySdk', (window as any).KorpaySdk)
 
-const korpay = (window as any).KorpaySdk({
-  baseUrl: 'https://payments.korpay.com/v1',
-  paymentTimeout: 30000
-})
+const korpay = (window as any).KorpaySdk
+
+korpay.baseUrl = 'https://payments.korpay.com/v1'
+korpay.paymentTimeout = 30000
 
 korpay.requestPayment(paymentData, {
     onStart: () => {
