@@ -2905,6 +2905,7 @@ paymentTableBody.innerHTML =
             '<label>관리번호</label><input id="manage-number" />' +
             '<label>무선단말기 개통번호</label><input id="wireless-open-number" />' +
             '<label>무선단말기 관리번호</label><input id="wireless-manage-number" />' +
+            '<label>코페이 mKey</label><input id="korpay_mkey" />' +
           '</div>' +
         '</div>' +
 
@@ -3458,6 +3459,9 @@ merchantButtons.forEach((button) => {
   '<div class="merchant-detail-grid">' +
     '<label>PG MID</label><input id="pg_mid" value="' + (merchant.pg_mid || '') + '" />' +
     '<label>단말기 MID</label><input id="terminal_mid" value="' + (merchant.terminal_mid || '') + '" />' +
+
+    '<label>코페이 mKey</label><input id="korpay_mkey" value="' + (merchant.korpay_mkey || '') + '" />' +
+
   '</div>' +
 '</div>' +
     
@@ -3586,6 +3590,7 @@ merchantButtons.forEach((button) => {
         cpid: document.querySelector<HTMLInputElement>('#cpid')?.value,
         pg_mid: document.querySelector<HTMLInputElement>('#pg_mid')?.value,
         terminal_mid: document.querySelector<HTMLInputElement>('#terminal_mid')?.value,
+        korpay_mkey: document.querySelector<HTMLInputElement>('#korpay_mkey')?.value,
         opened_at: document.querySelector<HTMLInputElement>('#opened_at')?.value
       })
 
@@ -3608,6 +3613,7 @@ merchantButtons.forEach((button) => {
         cpid: getValue('cpid'),
         pg_mid: getValue('pg_mid'),
         terminal_mid: getValue('terminal_mid'),
+        korpay_mkey: getValue('korpay_mkey'),
         opened_at: getValue('opened_at') || null,
       
         bank_name: getValue('bank_name'),
