@@ -8230,7 +8230,7 @@ const paymentData = {
   language: 'ko',
 }
 
-console.log('KorpaySDK = ', (window as any).KorpaySDK)
+console.log('KorpaySdK = ', (window as any).KorpaySdK)
 
 alert('코페이 결제창을 호출합니다.')
 console.log('paymentData', paymentData)
