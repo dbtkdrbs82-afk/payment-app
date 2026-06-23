@@ -8222,7 +8222,7 @@ const paymentData = {
   orderNumber: orderNo.replace(/[^a-zA-Z0-9]/g, ''),
   amount: totalPrice,
   payMethod: 'card',
-  returnUrl: window.location.origin + '/kiosk-success?orderNo=' + orderNo.replace(/[^a-zA-Z0-9]/g, ''),
+  returnUrl: window.location.origin + '/api/korpay-return',
   ediDate: ediDate,
   hashKey: hashKey,
   customerName: '미니상점 고객',
