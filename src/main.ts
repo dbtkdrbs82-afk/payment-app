@@ -8231,12 +8231,12 @@ const paymentData = {
 }
 
 
-alert('코페이 결제창을 호출합니다.')
+
 console.log('paymentData', paymentData)
 console.log('KorpaySdk', (window as any).KorpaySdk)
 
 ;(window as any).KorpaySdk.payment(
-  'https://payments.korpay.com/v1',
+  'https://payments.korpay.com',
   paymentData,
   {
     onStart: () => {
