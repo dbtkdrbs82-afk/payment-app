@@ -8237,10 +8237,10 @@ console.log('KorpaySdk', (window as any).KorpaySdk)
 
 const korpay = (window as any).KorpaySdk
 
-korpay.baseUrl = 'https://payments.korpay.com/v1'
+
 korpay.paymentTimeout = 30000
 
-korpay.payment(paymentData, {
+korpay.payment('https://payments.korpay.com/v1', paymentData, {
     onStart: () => {
       const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
       if (payButton) {
