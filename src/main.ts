@@ -8163,6 +8163,9 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
 
         document.querySelector<HTMLButtonElement>('#kiosk-pay-button')!
   .addEventListener('click', async () => {
+    console.log('결제 버튼 클릭됨')
+    alert('결제 버튼 클릭됨')
+ 
     const totalPrice = cart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
