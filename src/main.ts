@@ -7860,6 +7860,7 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
         .select('*')
         .eq('merchant_id', merchantId)
         .eq('status', '판매중')
+        .order('sort_order', { ascending: true })
         .order('id', { ascending: true })
 
       if (error) {
