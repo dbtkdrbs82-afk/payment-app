@@ -4504,3 +4504,24 @@ display: grid !important;
 .hidden-category {
   display: none !important;
 }
+.admin-table {
+  display: table !important;
+  width: 100% !important;
+}
+
+.admin-table thead {
+  display: table-header-group !important;
+}
+
+.admin-table tbody {
+  display: table-row-group !important;
+}
+
+.admin-table tr {
+  display: table-row !important;
+}
+
+.admin-table th,
+.admin-table td {
+  display: table-cell !important;
+}

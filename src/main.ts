@@ -2572,7 +2572,17 @@ document.querySelector('#receipt-close-btn')
 </div>
 
 <table class="admin-table">
-  <thead></thead>
+  <thead>
+  <tr>
+    <th>승인일</th>
+    <th>승인번호</th>
+    <th>가맹점</th>
+    <th>주문번호</th>
+    <th>결제키</th>
+    <th>상태</th>
+    <th>금액</th>
+  </tr>
+</thead>
   <tbody id="paymentTableBody"></tbody>
 </table>
 </div>
