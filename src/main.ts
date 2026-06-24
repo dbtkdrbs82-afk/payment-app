@@ -5472,28 +5472,6 @@ const merchantContent =
   </div>
 
 </div> 
-
-        <div class="merchant-type-card-grid">
-          <div class="merchant-type-card">
-            <strong>회원관리</strong>
-            <span>회원 정보를 관리합니다.</span>
-          </div>
-
-          <div class="merchant-type-card">
-            <strong>청구관리</strong>
-            <span>월별 청구금액을 관리합니다.</span>
-          </div>
-
-          <div class="merchant-type-card">
-            <strong>일괄승인</strong>
-            <span>여러 건을 한 번에 승인합니다.</span>
-          </div>
-
-          <div class="merchant-type-card">
-            <strong>결제내역</strong>
-            <span>결제내역을 조회합니다.</span>
-          </div>
-        </div>
       </div>
     `
 
@@ -7622,6 +7600,110 @@ document.querySelector('#billing-back-btn')
     alert('수납 완료 처리되었습니다.')
     location.reload()
   })
+
+} else if (path === '/merchant-batch') {
+
+  const merchantId =
+    Number(sessionStorage.getItem('login_merchant_id'))
+
+  if (!merchantId) {
+    alert('로그인이 필요합니다.')
+    location.href = '/merchant-login'
+  }
+
+  const { data: members } = await supabase
+    .from('members')
+    .select('*')
+    .eq('merchant_id', merchantId)
+
+  const { data: billings } = await supabase
+    .from('billings')
+    .select('*')
+    .eq('merchant_id', merchantId)
+    .eq('payment_status', '미납')
+    .order('id', { ascending: false })
+
+  app.innerHTML = `
+    <div class="merchant-members-page">
+      <h1>일괄승인</h1>
+
+      <div class="billing-button-group">
+        <button id="batch-back-btn">관리홈</button>
+        <button id="batch-complete-btn">선택건 일괄승인</button>
+      </div>
+
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>선택</th>
+            <th>회원명</th>
+            <th>청구월</th>
+            <th>금액</th>
+            <th>상태</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${(billings || []).map((billing) => `
+            <tr>
+              <td>
+                <input
+                  type="checkbox"
+                  class="batch-billing-check"
+                  data-id="${billing.id}"
+                />
+              </td>
+              <td>${
+                (members || []).find((member) => member.id === billing.member_id)?.member_name || ''
+              }</td>
+              <td>${billing.billing_month || ''}</td>
+              <td>${Number(billing.amount || 0).toLocaleString()}원</td>
+              <td>${billing.payment_status || '미납'}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `
+
+  document.querySelector('#batch-back-btn')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-admin'
+  })
+
+  document.querySelector('#batch-complete-btn')
+  ?.addEventListener('click', async () => {
+    const checkedItems = Array.from(
+      document.querySelectorAll<HTMLInputElement>('.batch-billing-check:checked')
+    )
+
+    const ids = checkedItems.map((item) => Number(item.dataset.id))
+
+    if (ids.length === 0) {
+      alert('승인할 청구건을 선택해주세요.')
+      return
+    }
+
+    if (!confirm(ids.length + '건을 일괄승인 처리하시겠습니까?')) {
+      return
+    }
+
+    const { error } = await supabase
+      .from('billings')
+      .update({
+        payment_status: '완료'
+      })
+      .in('id', ids)
+
+    if (error) {
+      alert('일괄승인 실패: ' + error.message)
+      return
+    }
+
+    alert('일괄승인 완료')
+    location.reload()
+  })
+
 
 
     } else if (path === '/merchant-card') { 
