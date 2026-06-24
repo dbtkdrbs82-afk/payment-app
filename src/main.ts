@@ -7255,6 +7255,7 @@ document.querySelector('#merchant-product-image-file')
   <th>이름</th>
   <th>생년월일</th>
   <th>청구일</th>
+  <th>월회비</th>
   <th>연락처</th>
   <th>이메일</th>
   <th>주소</th>
@@ -7274,14 +7275,18 @@ document.querySelector('#merchant-product-image-file')
   <td>${member.birth_date || '-'}</td>
 
   <td>
-    ${
-      member.billing_day
-        ? member.billing_day + '일'
-        : '-'
-    }
-  </td>
+  ${
+    member.billing_day
+      ? member.billing_day + '일'
+      : '-'
+  }
+</td>
 
-  <td>${member.phone || ''}</td>
+<td>
+  ${Number(member.monthly_fee || 0).toLocaleString()}원
+</td>
+
+<td>${member.phone || ''}</td>
   <td>${member.email || ''}</td>
 <td>${member.address || ''}</td>
 <td>${member.payment_method || 'SMS결제'}</td>
@@ -7327,6 +7332,12 @@ document.querySelector('#merchant-product-image-file')
      min="1"
      max="31"
      placeholder="예: 25"
+/>
+     <label>월 회비</label>
+<input
+  id="member-monthly-fee"
+  type="number"
+  placeholder="예: 100000"
 />
 
     <label>이메일</label>
@@ -7387,6 +7398,11 @@ const billingDay =
     document.querySelector<HTMLInputElement>('#member-billing-day')?.value || 0
   )
 
+  const monthlyFee =
+  Number(
+    document.querySelector<HTMLInputElement>('#member-monthly-fee')?.value || 0
+  )
+
     if (!memberName) {
       alert('회원명을 입력해주세요.')
       return
@@ -7403,6 +7419,7 @@ const billingDay =
     memo,
     birth_date: birthDate,
     billing_day: billingDay,
+    monthly_fee: monthlyFee,
     status: '사용중'
   })
 
