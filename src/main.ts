@@ -6230,6 +6230,10 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-members'
   })
+  document.querySelector('#merchant-batch-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-batch'
+  })
   document.querySelector('#merchant-billing-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-billings'
