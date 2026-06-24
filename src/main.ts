@@ -7453,7 +7453,6 @@ document.querySelector('#save-member-btn')
         <thead>
           <tr>
   <th>
-  <th>
   <input type="checkbox" id="billing-check-all" />
 </th>
 <th>회원명</th>
