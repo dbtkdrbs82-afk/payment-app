@@ -7564,7 +7564,7 @@ document.querySelector('#billing-back-btn')
     if (!target.classList.contains('billing-complete-btn')) {
       return
     }
-    alert('버튼 클릭')
+    
 
     const billingId = target.getAttribute('data-id')
   
@@ -7584,8 +7584,7 @@ document.querySelector('#billing-back-btn')
   .eq('id', Number(billingId))
   .select()
 
-console.log('billingId', billingId)
-console.log('update result', data)
+
   
     if (error) {
       alert('수납 처리 실패: ' + error.message)
@@ -7596,7 +7595,7 @@ console.log('update result', data)
       alert('수정된 데이터가 없습니다. billingId=' + billingId)
       return
     }
-    
+
     alert('수납 완료 처리되었습니다.')
     location.reload()
   })
