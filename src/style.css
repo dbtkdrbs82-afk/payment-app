@@ -4570,21 +4570,18 @@ display: grid !important;
 .admin-table {
   min-width: 1200px;
 }
-.admin-filter,
-.admin-search-box,
-.search-box {
+.merchant-filter-line {
+  width: 100%;
   max-width: 100%;
   overflow-x: auto;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
 }
 
-.admin-filter input,
-.admin-filter select,
-.admin-filter button,
-.admin-search-box input,
-.admin-search-box select,
-.admin-search-box button,
-.search-box input,
-.search-box select,
-.search-box button {
-  flex-shrink: 0;
+.merchant-filter-line select,
+.merchant-filter-line input,
+.merchant-filter-line button,
+.merchant-filter-line span {
+  flex: 0 0 auto;
 }
