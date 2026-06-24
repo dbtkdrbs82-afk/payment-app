@@ -5449,8 +5449,29 @@ const merchantContent =
     ? ''
     : `
       <div class="merchant-type-ready-box">
-        <h2>${merchantType} 관리</h2>
-        <p>${merchantType} 전용 관리 화면을 준비 중입니다.</p>
+       <div class="academy-dashboard">
+
+  <div class="academy-card">
+    <span>회원 수</span>
+    <strong>3명</strong>
+  </div>
+
+  <div class="academy-card">
+    <span>미납 건수</span>
+    <strong>3건</strong>
+  </div>
+
+  <div class="academy-card">
+    <span>완료 건수</span>
+    <strong>1건</strong>
+  </div>
+
+  <div class="academy-card">
+    <span>이번달 청구금액</span>
+    <strong>350,000원</strong>
+  </div>
+
+</div> 
 
         <div class="merchant-type-card-grid">
           <div class="merchant-type-card">
