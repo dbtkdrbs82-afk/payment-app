@@ -4548,3 +4548,15 @@ display: grid !important;
 .admin-table {
   min-width: 1200px;
 }
+.admin-table td,
+.admin-table th {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (min-width: 769px) and (max-width: 1200px) {
+  .admin-page,
+  .page {
+    zoom: 0.8;
+  }
+}
