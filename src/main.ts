@@ -7453,14 +7453,16 @@ document.querySelector('#save-member-btn')
         <thead>
           <tr>
   <th>
+  <th>
   <input type="checkbox" id="billing-check-all" />
 </th>
-  <th>회원명</th>
-  <th>청구월</th>
-  <th>금액</th>
-  <th>메모</th>
-  <th>상태</th>
-  <th>처리</th>
+<th>회원명</th>
+<th>청구월</th>
+<th>금액</th>
+<th>메모</th>
+<th>발송상태</th>
+<th>결제상태</th>
+<th>처리</th>
 </tr>
         </thead>
 
@@ -7482,7 +7484,17 @@ document.querySelector('#save-member-btn')
 <td>${billing.billing_month || ''}</td>
 <td>${Number(billing.amount || 0).toLocaleString()}원</td>
 <td>${billing.memo || ''}</td>
+
+<td>
+  ${
+    billing.send_status === '발송완료'
+      ? '📨 발송완료'
+      : '미발송'
+  }
+</td>
+
 <td>${billing.payment_status || '미납'}</td>
+
 <td>
   ${
     (billing.payment_status || '미납') === '미납'
