@@ -608,6 +608,9 @@ setTimeout(() => {
           alert('상품을 선택해주세요')
           return
         }
+
+        alert('QR 결제로 전환 준비 중입니다.')
+return
     
         const tossPayments = await loadTossPayments(clientKey)
     
@@ -7435,6 +7438,10 @@ document.querySelector('#save-member-btn')
   관리홈
 </button>
 
+<button id="billing-payment-btn">
+  수납 처리
+</button>
+
       <table class="admin-table">
         <thead>
           <tr>
@@ -7443,6 +7450,7 @@ document.querySelector('#save-member-btn')
 <th>금액</th>
 <th>메모</th>
 <th>상태</th>
+<th>처리</th>
           </tr>
         </thead>
 
@@ -7456,6 +7464,13 @@ document.querySelector('#save-member-btn')
 <td>${Number(billing.amount || 0).toLocaleString()}원</td>
 <td>${billing.memo || ''}</td>
 <td>${billing.payment_status || '미납'}</td>
+<td>
+  ${
+    (billing.payment_status || '미납') === '미납'
+      ? `<button class="billing-complete-btn" data-id="${billing.id}">완료처리</button>`
+      : '-'
+  }
+</td>
     </tr>
   `).join('')}
 </tbody>
@@ -7545,6 +7560,40 @@ document.querySelector('#billing-back-btn')
     location.reload()
   })
   
+  document.addEventListener('click', async (event) => {
+    const target = event.target as HTMLElement
+  
+    if (!target.classList.contains('billing-complete-btn')) {
+      return
+    }
+  
+    const billingId = target.getAttribute('data-id')
+  
+    if (!billingId) {
+      return
+    }
+  
+    if (!confirm('수납 완료 처리하시겠습니까?')) {
+      return
+    }
+  
+    const { error } = await supabase
+      .from('billings')
+      .update({
+        payment_status: '완료'
+      })
+      .eq('id', Number(billingId))
+  
+    if (error) {
+      alert('수납 처리 실패: ' + error.message)
+      return
+    }
+  
+    alert('수납 완료 처리되었습니다.')
+    location.reload()
+  })
+
+
     } else if (path === '/merchant-card') { 
       const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
   
