@@ -7490,6 +7490,10 @@ const billingDay =
     청구 등록
   </button>
 
+  <button id="auto-billing-btn">
+  이번달 청구 생성
+</button>
+
   <button id="billing-kakao-send-btn">
     선택건 카카오발송
   </button>
@@ -7634,6 +7638,10 @@ document.querySelector('#close-billing-modal')
 document.querySelector('#billing-back-btn')
   ?.addEventListener('click', () => {
     location.href = '/merchant-admin'
+  })
+  document.querySelector('#auto-billing-btn')
+  ?.addEventListener('click', async () => {
+    alert('자동청구 기능 준비중')
   })
   document.querySelector('#billing-check-all')
 ?.addEventListener('change', (event) => {
