@@ -7565,7 +7565,7 @@ document.querySelector('#billing-back-btn')
       return
     }
     alert('버튼 클릭')
-    
+
     const billingId = target.getAttribute('data-id')
   
     if (!billingId) {
@@ -7576,18 +7576,27 @@ document.querySelector('#billing-back-btn')
       return
     }
   
-    const { error } = await supabase
-      .from('billings')
-      .update({
-        payment_status: '완료'
-      })
-      .eq('id', Number(billingId))
+    const { data, error } = await supabase
+  .from('billings')
+  .update({
+    payment_status: '완료'
+  })
+  .eq('id', Number(billingId))
+  .select()
+
+console.log('billingId', billingId)
+console.log('update result', data)
   
     if (error) {
       alert('수납 처리 실패: ' + error.message)
       return
     }
   
+    if (!data || data.length === 0) {
+      alert('수정된 데이터가 없습니다. billingId=' + billingId)
+      return
+    }
+    
     alert('수납 완료 처리되었습니다.')
     location.reload()
   })
