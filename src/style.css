@@ -4629,3 +4629,13 @@ display: grid !important;
   font-size: 32px;
   color: #17458a;
 }
+#add-billing-btn,
+#billing-kakao-send-btn,
+#billing-back-btn {
+  width: 180px !important;
+  height: 56px !important;
+}
+
+#billing-kakao-send-btn {
+  flex: 0 0 180px !important;
+}

@@ -7452,7 +7452,9 @@ document.querySelector('#save-member-btn')
       <table class="admin-table">
         <thead>
           <tr>
-  <th>선택</th>
+  <th>
+  <input type="checkbox" id="billing-check-all" />
+</th>
   <th>회원명</th>
   <th>청구월</th>
   <th>금액</th>
@@ -7570,6 +7572,16 @@ document.querySelector('#billing-back-btn')
   ?.addEventListener('click', () => {
     location.href = '/merchant-admin'
   })
+  document.querySelector('#billing-check-all')
+?.addEventListener('change', (event) => {
+  const checked = (event.target as HTMLInputElement).checked
+
+  document
+    .querySelectorAll<HTMLInputElement>('.billing-send-check')
+    .forEach((checkbox) => {
+      checkbox.checked = checked
+    })
+})
 
   document.querySelector('#save-billing-btn')
   ?.addEventListener('click', async () => {
