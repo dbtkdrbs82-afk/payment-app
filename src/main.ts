@@ -7252,24 +7252,37 @@ document.querySelector('#merchant-product-image-file')
           <table class="admin-table">
             <thead>
               <tr>
-                <th>이름</th>
-                <th>연락처</th>
-                <th>이메일</th>
-                <th>주소</th>
-                <th>결제방식</th>
-                <th>메모</th>
-                <th>상태</th>
-                <th>수정</th>
-                <th>삭제</th>
-              </tr>
+  <th>이름</th>
+  <th>생년월일</th>
+  <th>청구일</th>
+  <th>연락처</th>
+  <th>이메일</th>
+  <th>주소</th>
+  <th>결제방식</th>
+  <th>메모</th>
+  <th>상태</th>
+  <th>수정</th>
+  <th>삭제</th>
+</tr>
             </thead>
     
             <tbody>
               ${(members || []).map(member => `
                 <tr>
-                  <td>${member.member_name || ''}</td>
-<td>${member.phone || ''}</td>
-<td>${member.email || ''}</td>
+  <td>${member.member_name || ''}</td>
+
+  <td>${member.birth_date || '-'}</td>
+
+  <td>
+    ${
+      member.billing_day
+        ? member.billing_day + '일'
+        : '-'
+    }
+  </td>
+
+  <td>${member.phone || ''}</td>
+  <td>${member.email || ''}</td>
 <td>${member.address || ''}</td>
 <td>${member.payment_method || 'SMS결제'}</td>
 <td>${member.memo || ''}</td>
@@ -7301,8 +7314,20 @@ document.querySelector('#merchant-product-image-file')
     <label>회원명</label>
     <input id="member-name" placeholder="회원명" />
 
+    <label>생년월일</label>
+    <input id="member-birth-date" type="date" />
+
     <label>연락처</label>
     <input id="member-phone" placeholder="010-0000-0000" />
+
+    <label>청구일</label>
+    <input
+     id="member-billing-day"
+     type="number"
+     min="1"
+     max="31"
+     placeholder="예: 25"
+/>
 
     <label>이메일</label>
     <input id="member-email" placeholder="email@example.com" />
@@ -7354,22 +7379,32 @@ document.querySelector('#save-member-btn')
     const memo =
       (document.querySelector<HTMLTextAreaElement>('#member-memo')?.value || '').trim()
 
+      const birthDate =
+  document.querySelector<HTMLInputElement>('#member-birth-date')?.value || ''
+
+const billingDay =
+  Number(
+    document.querySelector<HTMLInputElement>('#member-billing-day')?.value || 0
+  )
+
     if (!memberName) {
       alert('회원명을 입력해주세요.')
       return
     }
 
     const { error } = await supabase
-      .from('members')
-      .insert({
-        merchant_id: merchantId,
-        member_name: memberName,
-        phone,
-        email,
-        address,
-        memo,
-        status: '사용중'
-      })
+  .from('members')
+  .insert({
+    merchant_id: merchantId,
+    member_name: memberName,
+    phone,
+    email,
+    address,
+    memo,
+    birth_date: birthDate,
+    billing_day: billingDay,
+    status: '사용중'
+  })
 
     if (error) {
       alert('회원 저장 실패: ' + error.message)
