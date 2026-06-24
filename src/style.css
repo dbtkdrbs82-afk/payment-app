@@ -4570,3 +4570,21 @@ display: grid !important;
 .admin-table {
   min-width: 1200px;
 }
+.admin-filter,
+.admin-search-box,
+.search-box {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.admin-filter input,
+.admin-filter select,
+.admin-filter button,
+.admin-search-box input,
+.admin-search-box select,
+.admin-search-box button,
+.search-box input,
+.search-box select,
+.search-box button {
+  flex-shrink: 0;
+}
