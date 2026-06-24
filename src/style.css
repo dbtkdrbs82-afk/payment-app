@@ -4585,3 +4585,21 @@ display: grid !important;
 .merchant-filter-line span {
   flex: 0 0 auto;
 }
+.billing-button-group{
+  display:flex;
+  gap:12px;
+  margin-bottom:20px;
+}
+
+#add-billing-btn,
+#billing-back-btn{
+  width:220px !important;
+  height:56px;
+  border:none;
+  border-radius:12px;
+  background:#17458a;
+  color:#fff;
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+}

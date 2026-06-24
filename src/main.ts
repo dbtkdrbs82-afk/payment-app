@@ -7430,13 +7430,15 @@ document.querySelector('#save-member-btn')
     <div class="merchant-members-page">
       <h1>청구관리</h1>
 
-      <button id="add-billing-btn">
-        청구 등록
-      </button>
-      
-      <button id="billing-back-btn">
-  관리홈
-</button>
+      <div class="billing-button-group">
+  <button id="add-billing-btn">
+    청구 등록
+  </button>
+
+  <button id="billing-back-btn">
+    관리홈
+  </button>
+</div>
 
 
 
