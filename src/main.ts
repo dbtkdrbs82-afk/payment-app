@@ -7438,9 +7438,7 @@ document.querySelector('#save-member-btn')
   관리홈
 </button>
 
-<button id="billing-payment-btn">
-  수납 처리
-</button>
+
 
       <table class="admin-table">
         <thead>
@@ -7566,7 +7564,8 @@ document.querySelector('#billing-back-btn')
     if (!target.classList.contains('billing-complete-btn')) {
       return
     }
-  
+    alert('버튼 클릭')
+    
     const billingId = target.getAttribute('data-id')
   
     if (!billingId) {
