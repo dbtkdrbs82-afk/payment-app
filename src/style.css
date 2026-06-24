@@ -4639,3 +4639,37 @@ display: grid !important;
 #billing-kakao-send-btn {
   flex: 0 0 180px !important;
 }
+#merchant-member-tab,
+#merchant-billing-tab,
+#merchant-batch-tab,
+#merchant-payment-list-tab,
+#add-member-btn,
+#member-back-btn,
+#add-billing-btn,
+#billing-kakao-send-btn,
+#billing-back-btn,
+#batch-back-btn,
+#batch-complete-btn {
+  width: 150px !important;
+  height: 48px !important;
+  border: none;
+  border-radius: 8px;
+  background: #17458a;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#billing-kakao-send-btn,
+#batch-complete-btn {
+  width: 170px !important;
+}
+
+.billing-button-group,
+.member-button-group {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 20px 0;
+}
