@@ -7528,11 +7528,11 @@ const billingDay =
 
       <div class="billing-button-group">
   <button id="add-billing-btn">
-    청구 등록
-  </button>
+  ➕ 추가 청구
+</button>
 
   <button id="auto-billing-btn">
-  이번달 청구 생성
+  📅 오늘 청구 생성
 </button>
 
   <button id="billing-kakao-send-btn">
@@ -7602,7 +7602,7 @@ const billingDay =
 
       <div id="billing-modal" class="member-modal">
   <div class="member-modal-box">
-    <h2>청구 등록</h2>
+    <h2>➕ 추가 청구</h2>
 
     <label>회원명</label>
     <select id="billing-member-id">
@@ -7684,7 +7684,7 @@ document.querySelector('#close-billing-modal')
     const billingMonth =
       today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
 
-    if (!confirm(billingMonth + ' 청구를 생성하시겠습니까?')) {
+      if (!confirm('오늘 청구일에 해당하는 회원의 ' + billingMonth + ' 청구를 생성하시겠습니까?')) {
       return
     }
 
@@ -7806,7 +7806,7 @@ const billingRows = newTargetMembers.map((member) => {
       return
     }
 
-    alert('청구가 등록되었습니다.')
+    alert('추가 청구가 등록되었습니다.')
     location.reload()
   })
   
