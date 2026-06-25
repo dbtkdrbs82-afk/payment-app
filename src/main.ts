@@ -5416,9 +5416,6 @@ const orderIdValue =
 
 } else if (path === '/member-pay') {
 
-  
-  
-
   app.innerHTML = `
     <div class="member-pay-page">
       <div class="member-pay-card">
@@ -5439,10 +5436,11 @@ const orderIdValue =
       </div>
     </div>
   `
-
+  document.querySelector('#member-search-btn')
+  ?.addEventListener('click', async () => {
+    alert('조회 버튼 클릭됨')
+  })
  
-
-
       } else if (path === '/merchant-admin') {
 
       const merchantId =
