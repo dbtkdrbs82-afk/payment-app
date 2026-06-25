@@ -5414,7 +5414,7 @@ const orderIdValue =
     location.href = '/merchant-apply'
   })
 
-} else if (path === '/pay') {
+} else if (path === '/member-pay') {
 
   const params = new URLSearchParams(window.location.search)
   const merchantId = params.get('merchant_id')
@@ -5445,7 +5445,7 @@ const orderIdValue =
       alert('다음 단계에서 회원조회 기능을 연결합니다. merchant_id=' + merchantId)
     })
 
-    
+
       } else if (path === '/merchant-admin') {
 
       const merchantId =
@@ -9088,9 +9088,40 @@ document.querySelector('#receipt-view-btn')
   })
         }
       }
-  } else {
-    app.innerHTML = `
-      <div class="page">
+    } else if (path === '/member-pay') {
+
+      const params = new URLSearchParams(window.location.search)
+      const merchantId = params.get('merchant_id')
+  
+      app.innerHTML = `
+        <div class="member-pay-page">
+          <div class="member-pay-card">
+            <h1>수강료 결제</h1>
+            <p>이름과 생년월일을 입력해주세요.</p>
+  
+            <label>이름</label>
+            <input id="member-pay-name" placeholder="홍길동" />
+  
+            <label>생년월일</label>
+            <input id="member-pay-birth" type="date" />
+  
+            <button id="member-search-btn">
+              미납내역 조회
+            </button>
+  
+            <div id="member-search-result"></div>
+          </div>
+        </div>
+      `
+  
+      document.querySelector('#member-search-btn')
+        ?.addEventListener('click', () => {
+          alert('회원조회 연결 예정입니다. merchant_id=' + merchantId)
+        })
+  
+    } else {
+      app.innerHTML = `
+        <div class="page">
         <div class="landing-card">
          <p class="brand-title">PAY FLOW</p>
          <h1>모바일 축의금 · 부의금 결제 솔루션</h1> 
