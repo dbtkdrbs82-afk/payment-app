@@ -7673,7 +7673,30 @@ document.querySelector('#billing-back-btn')
       return
     }
 
-    const billingRows = targetMembers.map((member) => {
+    const { data: existingBillings, error: existingError } = await supabase
+  .from('billings')
+  .select('member_id')
+  .eq('merchant_id', merchantId)
+  .eq('billing_month', billingMonth)
+
+if (existingError) {
+  alert('기존 청구 조회 실패: ' + existingError.message)
+  return
+}
+
+const existingMemberIds =
+  (existingBillings || []).map((billing) => billing.member_id)
+
+const newTargetMembers = targetMembers.filter((member) => {
+  return !existingMemberIds.includes(member.id)
+})
+
+if (newTargetMembers.length === 0) {
+  alert('이미 이번달 청구가 모두 생성되어 있습니다.')
+  return
+}
+
+const billingRows = newTargetMembers.map((member) => {
       return {
         merchant_id: merchantId,
         member_id: member.id,
@@ -7694,7 +7717,7 @@ document.querySelector('#billing-back-btn')
       return
     }
 
-    alert(targetMembers.length + '건의 청구가 생성되었습니다.')
+    alert(newTargetMembers.length + '건의 청구가 생성되었습니다.')
     location.reload()
   })
   document.querySelector('#billing-check-all')
