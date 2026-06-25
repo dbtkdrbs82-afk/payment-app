@@ -8031,7 +8031,7 @@ ${getMemberMenuHtml('batch')}
       .in('id', ids)
 
     if (error) {
-      alert('일괄승인 실패: ' + error.message)
+      alert('일괄승인 실패: ' + (error?.message || '알 수 없는 오류'))
       return
     }
 
