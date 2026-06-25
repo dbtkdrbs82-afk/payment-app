@@ -21,7 +21,7 @@ function getMemberMenuHtml(activeMenu: string) {
       <button id="merchant-home-tab" class="${activeMenu === 'home' ? 'active' : ''}">관리홈</button>
       <button id="merchant-member-tab" class="${activeMenu === 'members' ? 'active' : ''}">회원관리</button>
       <button id="merchant-billing-tab" class="${activeMenu === 'billings' ? 'active' : ''}">청구관리</button>
-      <button id="merchant-batch-tab" class="${activeMenu === 'batch' ? 'active' : ''}">일괄승인</button>
+      <button id="merchant-batch-tab" class="${activeMenu === 'batch' ? 'active' : ''}">수기결제</button>
       <button id="merchant-payment-list-tab" class="${activeMenu === 'payments' ? 'active' : ''}">결제내역</button>
     </div>
   `
@@ -7942,12 +7942,12 @@ const billingRows = newTargetMembers.map((member) => {
 
   app.innerHTML = `
     <div class="merchant-members-page">
-      <h1>일괄승인</h1>
+      <h1>수기결제</h1>
 
 ${getMemberMenuHtml('batch')}
 
       <div class="billing-button-group">
-        <button id="batch-complete-btn">선택건 일괄승인</button>
+        <button id="batch-complete-btn">선택건 수기결제</button>
       </div>
 
       <table class="admin-table">
