@@ -7989,6 +7989,11 @@ ${getMemberMenuHtml('batch')}
 
     <h2>💳 결제방식 선택</h2>
 
+    <div id="payment-method-summary" class="payment-method-summary">
+  선택건수: 0건<br />
+  총 결제금액: 0원
+</div>
+
     <button id="pay-card-btn" class="payment-method-btn">
       💳 카드번호 결제
     </button>
@@ -8040,6 +8045,23 @@ ${getMemberMenuHtml('batch')}
       return
     }
 
+    const selectedBillings = (billings || []).filter((billing) => {
+      return ids.includes(billing.id)
+    })
+    
+    const totalAmount = selectedBillings.reduce((sum, billing) => {
+      return sum + Number(billing.amount || 0)
+    }, 0)
+    
+    const summaryBox =
+      document.querySelector<HTMLElement>('#payment-method-summary')
+    
+    if (summaryBox) {
+      summaryBox.innerHTML =
+        '선택건수: ' + ids.length + '건<br />' +
+        '총 결제금액: ' + totalAmount.toLocaleString() + '원'
+    }
+    
     const paymentModal =
   document.querySelector<HTMLElement>('#payment-method-modal')
 

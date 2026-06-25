@@ -4828,3 +4828,13 @@ display: grid !important;
   font-weight: 800;
   cursor: pointer;
 }
+.payment-method-summary {
+  background: #f4f7fb;
+  border: 1px solid #d9e1ec;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 16px 0 18px;
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.7;
+}
