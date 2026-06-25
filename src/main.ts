@@ -5416,8 +5416,7 @@ const orderIdValue =
 
 } else if (path === '/member-pay') {
 
-  const params = new URLSearchParams(window.location.search)
-  const merchantId = params.get('merchant_id')
+  
 
   app.innerHTML = `
     <div class="member-pay-page">
