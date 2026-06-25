@@ -9166,27 +9166,71 @@ if ((billings || []).length === 0) {
 } else {
 
   result.innerHTML =
-    (billings || []).map((billing) => `
-      <div class="member-billing-card">
+  '<h2>' + member.member_name + '님 미납내역</h2>' +
 
-        <label>
+  (billings || []).map((billing) => `
+    <div class="member-billing-card">
 
-          <input
-            type="checkbox"
-            class="member-billing-check"
-            data-id="${billing.id}"
-            data-amount="${billing.amount}"
-          />
+      <label>
 
-          ${billing.billing_month}
-          -
-          ${Number(billing.amount).toLocaleString()}원
+        <input
+          type="checkbox"
+          class="member-billing-check"
+          data-id="${billing.id}"
+          data-amount="${billing.amount}"
+        />
 
-        </label>
+        <strong>${billing.billing_month}</strong>
 
-      </div>
-    `).join('')
+        ${Number(billing.amount).toLocaleString()}원
 
+      </label>
+
+    </div>
+  `).join('') +
+
+  `
+  <div class="member-pay-total">
+
+    총 결제금액
+
+    <strong id="member-pay-total-amount">
+      0원
+    </strong>
+
+  </div>
+
+  <button id="member-pay-button">
+
+    결제하기
+
+  </button>
+`
+document
+  .querySelectorAll<HTMLInputElement>('.member-billing-check')
+  .forEach((checkbox) => {
+    checkbox.addEventListener('change', () => {
+      const checkedItems = Array.from(
+        document.querySelectorAll<HTMLInputElement>('.member-billing-check:checked')
+      )
+
+      const total = checkedItems.reduce((sum, item) => {
+        return sum + Number(item.dataset.amount || 0)
+      }, 0)
+
+      const totalBox =
+        document.querySelector<HTMLElement>('#member-pay-total-amount')
+
+      if (totalBox) {
+        totalBox.textContent = total.toLocaleString() + '원'
+      }
+    })
+  })
+
+document.querySelector('#member-pay-button')
+  ?.addEventListener('click', () => {
+    alert('결제 기능 연결 예정입니다.')
+  })
 }
 
 }
