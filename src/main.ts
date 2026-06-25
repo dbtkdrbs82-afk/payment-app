@@ -7641,7 +7641,58 @@ document.querySelector('#billing-back-btn')
   })
   document.querySelector('#auto-billing-btn')
   ?.addEventListener('click', async () => {
-    alert('자동청구 기능 준비중')
+    const today = new Date()
+
+    const billingMonth =
+      today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
+
+    if (!confirm(billingMonth + ' 청구를 생성하시겠습니까?')) {
+      return
+    }
+
+    const { data: membersData, error: memberError } = await supabase
+      .from('members')
+      .select('*')
+      .eq('merchant_id', merchantId)
+      .eq('status', '사용중')
+
+    if (memberError) {
+      alert('회원 조회 실패: ' + memberError.message)
+      return
+    }
+
+    const targetMembers = (membersData || []).filter((member) => {
+      return Number(member.monthly_fee || 0) > 0
+    })
+
+    if (targetMembers.length === 0) {
+      alert('월회비가 등록된 회원이 없습니다.')
+      return
+    }
+
+    const billingRows = targetMembers.map((member) => {
+      return {
+        merchant_id: merchantId,
+        member_id: member.id,
+        billing_month: billingMonth,
+        amount: Number(member.monthly_fee || 0),
+        memo: '자동청구',
+        payment_status: '미납',
+        send_status: '미발송',
+      }
+    })
+
+    const { error } = await supabase
+      .from('billings')
+      .insert(billingRows)
+
+    if (error) {
+      alert('자동청구 생성 실패: ' + error.message)
+      return
+    }
+
+    alert(targetMembers.length + '건의 청구가 생성되었습니다.')
+    location.reload()
   })
   document.querySelector('#billing-check-all')
 ?.addEventListener('change', (event) => {
