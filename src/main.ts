@@ -9115,9 +9115,35 @@ document.querySelector('#receipt-view-btn')
       `
   
       document.querySelector('#member-search-btn')
-        ?.addEventListener('click', () => {
-          alert('회원조회 연결 예정입니다. merchant_id=' + merchantId)
-        })
+  ?.addEventListener('click', async () => {
+
+    const memberName =
+      (document.querySelector('#member-pay-name') as HTMLInputElement).value
+
+    const birth =
+      (document.querySelector('#member-pay-birth') as HTMLInputElement).value
+
+    if (!memberName || !birth) {
+      alert('이름과 생년월일을 입력해주세요.')
+      return
+    }
+
+    const { data: member, error: memberError } = await supabase
+  .from('members')
+  .select('*')
+  .eq('merchant_id', Number(merchantId))
+  .eq('member_name', memberName)
+  .eq('birth_date', birth)
+  .single()
+
+if (memberError) {
+  alert('회원 조회 실패: ' + memberError.message)
+  return
+}
+
+    alert(member.member_name + ' 회원을 찾았습니다.')
+
+  })
   
     } else {
       app.innerHTML = `
