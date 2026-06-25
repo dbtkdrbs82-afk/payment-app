@@ -4673,3 +4673,17 @@ display: grid !important;
   align-items: center;
   margin: 20px 0;
 }
+.member-main-tabs {
+  display: flex;
+  gap: 10px;
+  margin: 24px 0 28px;
+}
+
+.member-main-tabs button {
+  width: 150px !important;
+  height: 48px !important;
+}
+
+.member-main-tabs button.active {
+  background: #0f356c;
+}
