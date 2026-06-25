@@ -5417,6 +5417,7 @@ const orderIdValue =
 } else if (path === '/member-pay') {
 
   
+  
 
   app.innerHTML = `
     <div class="member-pay-page">
