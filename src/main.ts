@@ -7953,7 +7953,9 @@ ${getMemberMenuHtml('batch')}
       <table class="admin-table">
         <thead>
           <tr>
-            <th>선택</th>
+            <th>
+  <input type="checkbox" id="batch-check-all" />
+</th>
             <th>회원명</th>
             <th>청구월</th>
             <th>금액</th>
@@ -7985,6 +7987,17 @@ ${getMemberMenuHtml('batch')}
   `
 
   bindMemberMenuEvents()
+
+  document.querySelector('#batch-check-all')
+  ?.addEventListener('change', (event) => {
+    const checked = (event.target as HTMLInputElement).checked
+
+    document
+      .querySelectorAll<HTMLInputElement>('.batch-billing-check')
+      .forEach((checkbox) => {
+        checkbox.checked = checked
+      })
+  })
 
   document.querySelector('#batch-complete-btn')
   ?.addEventListener('click', async () => {
