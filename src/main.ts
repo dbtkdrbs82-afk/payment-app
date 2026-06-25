@@ -7640,6 +7640,74 @@ document.querySelector('#close-billing-modal')
   ?.addEventListener('click', () => {
     document.querySelector<HTMLElement>('#billing-modal')!.style.display = 'none'
   })
+  document.querySelector('#bulk-add-billing-btn')
+  ?.addEventListener('click', async () => {
+    const checkedItems = Array.from(
+      document.querySelectorAll<HTMLInputElement>(
+        '.billing-send-check:checked'
+      )
+    )
+
+    const ids = checkedItems.map((item) =>
+      Number(item.dataset.id)
+    )
+
+    if (ids.length === 0) {
+      alert('추가청구할 청구건을 선택해주세요.')
+      return
+    }
+
+    const amountText = prompt('추가할 금액을 입력해주세요. 예: 30000')
+
+    if (!amountText) {
+      return
+    }
+
+    const addAmount = Number(amountText)
+
+    if (!addAmount || addAmount <= 0) {
+      alert('추가금액을 올바르게 입력해주세요.')
+      return
+    }
+
+    const addMemo = prompt('추가청구 메모를 입력해주세요. 예: 교재비') || '추가청구'
+
+    const { data: selectedBillings, error: selectError } = await supabase
+      .from('billings')
+      .select('*')
+      .in('id', ids)
+
+    if (selectError) {
+      alert('청구 조회 실패: ' + selectError.message)
+      return
+    }
+
+    for (const billing of selectedBillings || []) {
+      const currentAmount = Number(billing.amount || 0)
+      const currentMemo = billing.memo || ''
+
+      const nextMemo =
+        currentMemo
+          ? currentMemo + ' / ' + addMemo + '(+' + addAmount.toLocaleString() + '원)'
+          : addMemo + '(+' + addAmount.toLocaleString() + '원)'
+
+      const { error } = await supabase
+        .from('billings')
+        .update({
+          amount: currentAmount + addAmount,
+          memo: nextMemo
+        })
+        .eq('id', billing.id)
+
+      if (error) {
+        alert('추가청구 실패: ' + error.message)
+        return
+      }
+    }
+
+    alert(ids.length + '건에 추가청구가 반영되었습니다.')
+    location.reload()
+  })  
   document.querySelector('#billing-kakao-send-btn')
   ?.addEventListener('click', async () => {
   
