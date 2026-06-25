@@ -7983,6 +7983,34 @@ ${getMemberMenuHtml('batch')}
           `).join('')}
         </tbody>
       </table>
+
+      <div id="payment-method-modal" class="modal-overlay" style="display:none;">
+  <div class="modal-box">
+
+    <h2>💳 결제방식 선택</h2>
+
+    <button id="pay-card-btn" class="payment-method-btn">
+      💳 카드번호 결제
+    </button>
+
+    <button id="pay-phone-btn" class="payment-method-btn">
+      📱 휴대폰페이
+    </button>
+
+    <button id="pay-qr-btn" class="payment-method-btn">
+      🔳 QR결제
+    </button>
+
+    <button id="pay-link-btn" class="payment-method-btn">
+      🔗 결제링크 발송
+    </button>
+
+    <button id="close-payment-method-modal">
+      닫기
+    </button>
+
+  </div>
+</div>
     </div>
   `
 
@@ -8012,16 +8040,8 @@ ${getMemberMenuHtml('batch')}
       return
     }
 
-    const payMethod = prompt(
-      '결제방식을 선택해주세요.\n\n1. 카드번호 결제\n2. 휴대폰페이\n3. QR결제\n4. 결제링크 발송'
-    )
-    
-    if (!payMethod) {
-      return
-    }
-    
-    alert('선택한 결제방식: ' + payMethod + '\n선택건수: ' + ids.length + '건')
-    return
+    alert('결제방식 선택창을 준비 중입니다.')
+return
 
     const { error } = await supabase
       .from('billings')
