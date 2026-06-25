@@ -4732,3 +4732,52 @@ display: grid !important;
   font-size: 11px;
   font-weight: 900;
 }
+.billing-button-group {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 12px !important;
+  width: 100% !important;
+  margin: 20px 0 !important;
+}
+
+.billing-button-group .billing-action-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 48px !important;
+  padding: 0 12px !important;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.auto-billing-btn {
+  background: #17458a;
+  color: #fff;
+}
+
+.bulk-add-billing-btn {
+  background: #1f8f4d;
+  color: #fff;
+}
+
+.kakao-send-btn {
+  background: #fee500 !important;
+  color: #191919 !important;
+}
+
+.kakao-talk-badge {
+  background: #3c1e1e;
+  color: #fee500;
+  border-radius: 999px;
+  padding: 4px 7px;
+  font-size: 11px;
+  font-weight: 900;
+}
