@@ -4588,7 +4588,10 @@ display: grid !important;
 .billing-button-group{
   display:flex;
   gap:12px;
-  margin-bottom:20px;
+}
+
+.billing-button-group > button{
+  flex:1;
 }
 
 #add-billing-btn,
@@ -4630,7 +4633,6 @@ display: grid !important;
   color: #17458a;
 }
 #add-billing-btn,
-#billing-kakao-send-btn,
 #billing-back-btn {
   width: 180px !important;
   height: 56px !important;
@@ -4643,7 +4645,6 @@ display: grid !important;
 #add-member-btn,
 #member-back-btn,
 #add-billing-btn,
-#billing-kakao-send-btn,
 #billing-back-btn,
 #batch-back-btn,
 #batch-complete-btn {
@@ -4657,12 +4658,6 @@ display: grid !important;
   font-weight: 700;
   cursor: pointer;
 }
-
-#billing-kakao-send-btn,
-#batch-complete-btn {
-  width: 170px !important;
-}
-
 .billing-button-group,
 .member-button-group {
   display: flex;
@@ -4714,16 +4709,6 @@ display: grid !important;
   background: #1f8f4d;
   color: #fff;
 }
-
-.kakao-send-btn {
-  background: #fee500 !important;
-  color: #191919 !important;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
 .kakao-talk-badge {
   background: #3c1e1e;
   color: #fee500;
@@ -4767,12 +4752,6 @@ display: grid !important;
   background: #1f8f4d;
   color: #fff;
 }
-
-.kakao-send-btn {
-  background: #fee500 !important;
-  color: #191919 !important;
-}
-
 .kakao-talk-badge {
   background: #3c1e1e;
   color: #fee500;
@@ -4780,4 +4759,18 @@ display: grid !important;
   padding: 4px 7px;
   font-size: 11px;
   font-weight: 900;
+}
+.kakao-send-btn {
+  background: #FEE500 !important;
+  color: #191919 !important;
+
+  width: 100% !important;
+  height: 48px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+
+  flex: 1 !important;
 }
