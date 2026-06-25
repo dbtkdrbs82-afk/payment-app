@@ -8040,7 +8040,13 @@ ${getMemberMenuHtml('batch')}
       return
     }
 
-    alert('결제방식 선택창을 준비 중입니다.')
+    const paymentModal =
+  document.querySelector<HTMLElement>('#payment-method-modal')
+
+if (paymentModal) {
+  paymentModal.style.display = 'flex'
+}
+
 return
 
     const { error } = await supabase
@@ -8057,6 +8063,16 @@ return
 
     alert('일괄승인 완료')
     location.reload()
+  })
+
+document.querySelector('#close-payment-method-modal')
+  ?.addEventListener('click', () => {
+    const paymentModal =
+      document.querySelector<HTMLElement>('#payment-method-modal')
+
+    if (paymentModal) {
+      paymentModal.style.display = 'none'
+    }
   })
 
 
