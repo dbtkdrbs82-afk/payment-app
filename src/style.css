@@ -4585,13 +4585,18 @@ display: grid !important;
 .merchant-filter-line span {
   flex: 0 0 auto;
 }
-.billing-button-group{
-  display:flex;
-  gap:12px;
+.billing-button-group {
+  display: flex;
+  gap: 12px;
+
+  width: 100%;
+  max-width: 1420px;   /* 테이블 폭과 맞춤 */
+  margin: 20px auto;
+  box-sizing: border-box;
 }
 
-.billing-button-group > button{
-  flex:1;
+.billing-button-group > button {
+  flex: 1;
 }
 
 #add-billing-btn,
@@ -4773,4 +4778,14 @@ display: grid !important;
   gap: 8px;
 
   flex: 1 !important;
+}
+.kakao-send-btn {
+  justify-content: center !important;
+  text-align: center !important;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+}
+
+.kakao-send-btn .kakao-talk-badge {
+  margin-right: 8px;
 }
