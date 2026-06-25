@@ -7254,6 +7254,7 @@ document.querySelector('#merchant-product-image-file')
               <tr>
   <th>이름</th>
   <th>생년월일</th>
+  <th>가입일</th>
   <th>청구일</th>
   <th>월회비</th>
   <th>연락처</th>
@@ -7274,6 +7275,7 @@ document.querySelector('#merchant-product-image-file')
 
   <td>${member.birth_date || '-'}</td>
 
+  <td>${member.joined_at || '-'}</td>
   <td>
   ${
     member.billing_day
@@ -7420,6 +7422,7 @@ const billingDay =
     birth_date: birthDate,
     billing_day: billingDay,
     monthly_fee: monthlyFee,
+    joined_at: new Date().toISOString().slice(0, 10),
     status: '사용중'
   })
 
