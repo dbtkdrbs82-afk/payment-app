@@ -15,6 +15,45 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
 
+function getMemberMenuHtml(activeMenu: string) {
+  return `
+    <div class="member-main-tabs">
+      <button id="merchant-home-tab" class="${activeMenu === 'home' ? 'active' : ''}">관리홈</button>
+      <button id="merchant-member-tab" class="${activeMenu === 'members' ? 'active' : ''}">회원관리</button>
+      <button id="merchant-billing-tab" class="${activeMenu === 'billings' ? 'active' : ''}">청구관리</button>
+      <button id="merchant-batch-tab" class="${activeMenu === 'batch' ? 'active' : ''}">일괄승인</button>
+      <button id="merchant-payment-list-tab" class="${activeMenu === 'payments' ? 'active' : ''}">결제내역</button>
+    </div>
+  `
+}
+
+function bindMemberMenuEvents() {
+  document.querySelector('#merchant-home-tab')
+    ?.addEventListener('click', () => {
+      location.href = '/merchant-admin'
+    })
+
+  document.querySelector('#merchant-member-tab')
+    ?.addEventListener('click', () => {
+      location.href = '/merchant-members'
+    })
+
+  document.querySelector('#merchant-billing-tab')
+    ?.addEventListener('click', () => {
+      location.href = '/merchant-billings'
+    })
+
+  document.querySelector('#merchant-batch-tab')
+    ?.addEventListener('click', () => {
+      location.href = '/merchant-batch'
+    })
+
+    document.querySelector('#merchant-payment-list-tab')
+    ?.addEventListener('click', () => {
+      alert('결제내역 화면 준비중입니다.')
+    })
+}
+
 const isFuneral = path.includes('funeral')
 
 const params = new URLSearchParams(window.location.search)
@@ -7239,8 +7278,10 @@ document.querySelector('#merchant-product-image-file')
         <div class="merchant-members-page">
     
           <h1>회원관리</h1>
-    
-          <div style="margin-bottom:16px;">
+
+${getMemberMenuHtml('members')}
+
+<div style="margin-bottom:16px;">
             <button id="add-member-btn">
               회원 추가
             </button>
@@ -7360,6 +7401,9 @@ document.querySelector('#merchant-product-image-file')
 
 </div>
       `
+
+      bindMemberMenuEvents()
+
       document.querySelector('#add-member-btn')
   ?.addEventListener('click', () => {
     document.querySelector<HTMLElement>('#member-modal')!.style.display = 'flex'
@@ -7487,6 +7531,7 @@ const billingDay =
   app.innerHTML = `
     <div class="merchant-members-page">
       <h1>청구관리</h1>
+      ${getMemberMenuHtml('billings')}
 
       <div class="billing-button-group">
   <button id="add-billing-btn">
@@ -7595,6 +7640,9 @@ const billingDay =
 </div>
 </div>
   `
+
+  bindMemberMenuEvents()
+
   document.querySelector('#add-billing-btn')
   ?.addEventListener('click', () => {
     document.querySelector<HTMLElement>('#billing-modal')!.style.display = 'flex'
@@ -7838,6 +7886,8 @@ const billingRows = newTargetMembers.map((member) => {
     <div class="merchant-members-page">
       <h1>일괄승인</h1>
 
+${getMemberMenuHtml('batch')}
+
       <div class="billing-button-group">
         <button id="batch-back-btn">관리홈</button>
         <button id="batch-complete-btn">선택건 일괄승인</button>
@@ -7876,6 +7926,8 @@ const billingRows = newTargetMembers.map((member) => {
       </table>
     </div>
   `
+
+  bindMemberMenuEvents()
 
   document.querySelector('#batch-back-btn')
   ?.addEventListener('click', () => {
