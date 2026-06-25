@@ -9141,7 +9141,55 @@ if (memberError) {
   return
 }
 
-    alert(member.member_name + ' 회원을 찾았습니다.')
+const { data: billings, error: billingError } = await supabase
+.from('billings')
+.select('*')
+.eq('member_id', member.id)
+.eq('payment_status', '미납')
+
+if (billingError) {
+alert('미납 조회 실패 : ' + billingError.message)
+return
+}
+
+const result =
+document.querySelector<HTMLElement>('#member-search-result')
+
+if (result) {
+
+if ((billings || []).length === 0) {
+
+  result.innerHTML = `
+    <p>미납내역이 없습니다.</p>
+  `
+
+} else {
+
+  result.innerHTML =
+    (billings || []).map((billing) => `
+      <div class="member-billing-card">
+
+        <label>
+
+          <input
+            type="checkbox"
+            class="member-billing-check"
+            data-id="${billing.id}"
+            data-amount="${billing.amount}"
+          />
+
+          ${billing.billing_month}
+          -
+          ${Number(billing.amount).toLocaleString()}원
+
+        </label>
+
+      </div>
+    `).join('')
+
+}
+
+}
 
   })
   
