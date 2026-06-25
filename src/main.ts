@@ -5414,6 +5414,38 @@ const orderIdValue =
     location.href = '/merchant-apply'
   })
 
+} else if (path === '/pay') {
+
+  const params = new URLSearchParams(window.location.search)
+  const merchantId = params.get('merchant_id')
+
+  app.innerHTML = `
+    <div class="member-pay-page">
+      <div class="member-pay-card">
+        <h1>수강료 결제</h1>
+        <p>이름과 생년월일을 입력해주세요.</p>
+
+        <label>이름</label>
+        <input id="member-pay-name" placeholder="홍길동" />
+
+        <label>생년월일</label>
+        <input id="member-pay-birth" type="date" />
+
+        <button id="member-search-btn">
+          미납내역 조회
+        </button>
+
+        <div id="member-search-result"></div>
+      </div>
+    </div>
+  `
+
+  document.querySelector('#member-search-btn')
+    ?.addEventListener('click', () => {
+      alert('다음 단계에서 회원조회 기능을 연결합니다. merchant_id=' + merchantId)
+    })
+
+    
       } else if (path === '/merchant-admin') {
 
       const merchantId =
@@ -8061,7 +8093,7 @@ ${getMemberMenuHtml('batch')}
         '선택건수: ' + ids.length + '건<br />' +
         '총 결제금액: ' + totalAmount.toLocaleString() + '원'
     }
-    
+
     const paymentModal =
   document.querySelector<HTMLElement>('#payment-method-modal')
 
