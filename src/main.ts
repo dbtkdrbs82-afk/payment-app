@@ -5416,6 +5416,9 @@ const orderIdValue =
 
 } else if (path === '/member-pay') {
 
+  const params = new URLSearchParams(window.location.search)
+  const merchantId = Number(params.get('merchant_id'))
+  
   app.innerHTML = `
     <div class="member-pay-page">
       <div class="member-pay-card">
@@ -5438,7 +5441,116 @@ const orderIdValue =
   `
   document.querySelector('#member-search-btn')
   ?.addEventListener('click', async () => {
-    alert('조회 버튼 클릭됨')
+    const memberName =
+      (document.querySelector<HTMLInputElement>('#member-pay-name')?.value || '').trim()
+
+    const birth =
+      (document.querySelector<HTMLInputElement>('#member-pay-birth')?.value || '').trim()
+
+    if (!merchantId) {
+      alert('가맹점 정보가 없습니다.')
+      return
+    }
+
+    if (!memberName || !birth) {
+      alert('이름과 생년월일을 입력해주세요.')
+      return
+    }
+
+    const { data: member, error: memberError } = await supabase
+      .from('members')
+      .select('*')
+      .eq('merchant_id', merchantId)
+      .eq('member_name', memberName)
+      .eq('birth_date', birth)
+      .single()
+
+    if (memberError || !member) {
+      alert('회원을 찾을 수 없습니다.')
+      return
+    }
+
+    const { data: billings, error: billingError } = await supabase
+      .from('billings')
+      .select('*')
+      .eq('merchant_id', merchantId)
+      .eq('member_id', member.id)
+      .eq('payment_status', '미납')
+      .order('id', { ascending: false })
+
+    if (billingError) {
+      alert('미납내역 조회 실패: ' + billingError.message)
+      return
+    }
+
+    const result =
+      document.querySelector<HTMLElement>('#member-search-result')
+
+    if (!result) {
+      return
+    }
+
+    if (!billings || billings.length === 0) {
+      result.innerHTML = `
+        <p>미납내역이 없습니다.</p>
+      `
+      return
+    }
+
+    result.innerHTML =
+      '<h2>' + member.member_name + '님 미납내역</h2>' +
+      billings.map((billing) => `
+        <div class="member-billing-card">
+          <label>
+            <input
+              type="checkbox"
+              class="member-billing-check"
+              data-id="${billing.id}"
+              data-amount="${billing.amount}"
+            />
+
+            <strong>${billing.billing_month || ''}</strong>
+            -
+            ${Number(billing.amount || 0).toLocaleString()}원
+          </label>
+        </div>
+      `).join('') +
+      `
+        <div class="member-pay-total">
+          총 결제금액:
+          <strong id="member-pay-total-amount">0원</strong>
+        </div>
+
+        <button id="member-pay-button">
+          결제하기
+        </button>
+      `
+
+    document
+      .querySelectorAll<HTMLInputElement>('.member-billing-check')
+      .forEach((checkbox) => {
+        checkbox.addEventListener('change', () => {
+          const checkedItems = Array.from(
+            document.querySelectorAll<HTMLInputElement>('.member-billing-check:checked')
+          )
+
+          const total = checkedItems.reduce((sum, item) => {
+            return sum + Number(item.dataset.amount || 0)
+          }, 0)
+
+          const totalBox =
+            document.querySelector<HTMLElement>('#member-pay-total-amount')
+
+          if (totalBox) {
+            totalBox.textContent = total.toLocaleString() + '원'
+          }
+        })
+      })
+
+    document.querySelector('#member-pay-button')
+      ?.addEventListener('click', () => {
+        alert('결제 기능 연결 예정입니다.')
+      })
   })
  
       } else if (path === '/merchant-admin') {
