@@ -4687,3 +4687,40 @@ display: grid !important;
 .member-main-tabs button.active {
   background: #0f356c;
 }
+.billing-action-btn {
+  height: 48px !important;
+  border: none;
+  border-radius: 8px;
+  padding: 0 28px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.auto-billing-btn {
+  background: #17458a;
+  color: #fff;
+}
+
+.bulk-add-billing-btn {
+  background: #1f8f4d;
+  color: #fff;
+}
+
+.kakao-send-btn {
+  background: #fee500 !important;
+  color: #191919 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.kakao-talk-badge {
+  background: #3c1e1e;
+  color: #fee500;
+  border-radius: 999px;
+  padding: 4px 7px;
+  font-size: 11px;
+  font-weight: 900;
+}

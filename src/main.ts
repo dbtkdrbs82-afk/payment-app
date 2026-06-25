@@ -7527,21 +7527,19 @@ const billingDay =
       ${getMemberMenuHtml('billings')}
 
       <div class="billing-button-group">
-  <button id="add-billing-btn">
-  ➕ 추가 청구
-</button>
-
-  <button id="auto-billing-btn">
-  📅 오늘 청구 생성
-</button>
-
-  <button id="billing-kakao-send-btn">
-    선택건 카카오발송
+  <button id="auto-billing-btn" class="billing-action-btn auto-billing-btn">
+    📅 오늘 청구 생성
   </button>
 
+  <button id="bulk-add-billing-btn" class="billing-action-btn bulk-add-billing-btn">
+    ➕ 선택건 추가청구
+  </button>
+
+  <button id="billing-kakao-send-btn" class="billing-action-btn kakao-send-btn">
+    <span class="kakao-talk-badge">TALK</span>
+    선택건 카카오발송
+  </button>
 </div>
-
-
 
       <table class="admin-table">
         <thead>
