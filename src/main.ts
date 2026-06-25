@@ -7947,7 +7947,7 @@ const billingRows = newTargetMembers.map((member) => {
 ${getMemberMenuHtml('batch')}
 
       <div class="billing-button-group">
-        <button id="batch-complete-btn">선택건 수기결제</button>
+        <button id="batch-complete-btn">💳 선택건 결제</button>
       </div>
 
       <table class="admin-table">
@@ -8012,9 +8012,16 @@ ${getMemberMenuHtml('batch')}
       return
     }
 
-    if (!confirm(ids.length + '건을 일괄승인 처리하시겠습니까?')) {
+    const payMethod = prompt(
+      '결제방식을 선택해주세요.\n\n1. 카드번호 결제\n2. 휴대폰페이\n3. QR결제\n4. 결제링크 발송'
+    )
+    
+    if (!payMethod) {
       return
     }
+    
+    alert('선택한 결제방식: ' + payMethod + '\n선택건수: ' + ids.length + '건')
+    return
 
     const { error } = await supabase
       .from('billings')
