@@ -4636,9 +4636,6 @@ display: grid !important;
   height: 56px !important;
 }
 
-#billing-kakao-send-btn {
-  flex: 0 0 180px !important;
-}
 #merchant-member-tab,
 #merchant-billing-tab,
 #merchant-batch-tab,
@@ -4687,14 +4684,25 @@ display: grid !important;
 .member-main-tabs button.active {
   background: #0f356c;
 }
+.billing-button-group {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
 .billing-action-btn {
-  height: 48px !important;
+  flex: 1;
+  height: 48px;
   border: none;
   border-radius: 8px;
-  padding: 0 28px;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
 }
 
 .auto-billing-btn {
