@@ -7699,12 +7699,17 @@ document.querySelector('#close-billing-modal')
       return
     }
 
-    const targetMembers = (membersData || []).filter((member) => {
-      return Number(member.monthly_fee || 0) > 0
-    })
+    const todayDay = today.getDate()
+
+const targetMembers = (membersData || []).filter((member) => {
+  return (
+    Number(member.monthly_fee || 0) > 0 &&
+    Number(member.billing_day || 0) === todayDay
+  )
+})
 
     if (targetMembers.length === 0) {
-      alert('월회비가 등록된 회원이 없습니다.')
+      alert('오늘 청구일에 해당하는 회원이 없습니다.')
       return
     }
 
