@@ -5418,7 +5418,7 @@ const orderIdValue =
 
   const params = new URLSearchParams(window.location.search)
   const merchantId = Number(params.get('merchant_id'))
-  
+
   app.innerHTML = `
     <div class="member-pay-page">
       <div class="member-pay-card">
@@ -5548,9 +5548,27 @@ const orderIdValue =
       })
 
     document.querySelector('#member-pay-button')
-      ?.addEventListener('click', () => {
-        alert('결제 기능 연결 예정입니다.')
-      })
+  ?.addEventListener('click', () => {
+    const checkedItems = Array.from(
+      document.querySelectorAll<HTMLInputElement>('.member-billing-check:checked')
+    )
+
+    if (checkedItems.length === 0) {
+      alert('결제할 항목을 선택해주세요.')
+      return
+    }
+
+    const total = checkedItems.reduce((sum, item) => {
+      return sum + Number(item.dataset.amount || 0)
+    }, 0)
+
+    alert(
+      '결제방식 선택\n\n' +
+      '선택건수: ' + checkedItems.length + '건\n' +
+      '총 결제금액: ' + total.toLocaleString() + '원\n\n' +
+      '다음 단계에서 카드결제 / 간편결제 선택창을 연결합니다.'
+    )
+  })
   })
  
       } else if (path === '/merchant-admin') {
