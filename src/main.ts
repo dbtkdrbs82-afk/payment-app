@@ -5440,10 +5440,7 @@ const orderIdValue =
     </div>
   `
 
-  document.querySelector('#member-search-btn')
-    ?.addEventListener('click', () => {
-      alert('다음 단계에서 회원조회 기능을 연결합니다. merchant_id=' + merchantId)
-    })
+ 
 
 
       } else if (path === '/merchant-admin') {
