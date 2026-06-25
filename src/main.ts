@@ -7285,9 +7285,7 @@ ${getMemberMenuHtml('members')}
             <button id="add-member-btn">
               회원 추가
             </button>
-            <button id="member-back-btn">
-  관리홈
-</button>
+            
             </div>
         
           <table class="admin-table">
@@ -7407,11 +7405,6 @@ ${getMemberMenuHtml('members')}
       document.querySelector('#add-member-btn')
   ?.addEventListener('click', () => {
     document.querySelector<HTMLElement>('#member-modal')!.style.display = 'flex'
-  })
-
-  document.querySelector('#member-back-btn')
-  ?.addEventListener('click', () => {
-    location.href = '/merchant-admin'
   })
 
 document.querySelector('#close-member-modal')
@@ -7546,9 +7539,6 @@ const billingDay =
     선택건 카카오발송
   </button>
 
-  <button id="billing-back-btn">
-    관리홈
-  </button>
 </div>
 
 
@@ -7686,10 +7676,7 @@ document.querySelector('#close-billing-modal')
   
     location.reload()
   })
-document.querySelector('#billing-back-btn')
-  ?.addEventListener('click', () => {
-    location.href = '/merchant-admin'
-  })
+
   document.querySelector('#auto-billing-btn')
   ?.addEventListener('click', async () => {
     const today = new Date()
@@ -7889,7 +7876,6 @@ const billingRows = newTargetMembers.map((member) => {
 ${getMemberMenuHtml('batch')}
 
       <div class="billing-button-group">
-        <button id="batch-back-btn">관리홈</button>
         <button id="batch-complete-btn">선택건 일괄승인</button>
       </div>
 
@@ -7928,11 +7914,6 @@ ${getMemberMenuHtml('batch')}
   `
 
   bindMemberMenuEvents()
-
-  document.querySelector('#batch-back-btn')
-  ?.addEventListener('click', () => {
-    location.href = '/merchant-admin'
-  })
 
   document.querySelector('#batch-complete-btn')
   ?.addEventListener('click', async () => {
