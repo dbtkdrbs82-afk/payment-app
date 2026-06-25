@@ -8075,6 +8075,25 @@ document.querySelector('#close-payment-method-modal')
     }
   })
 
+  document.querySelector('#pay-card-btn')
+  ?.addEventListener('click', () => {
+    alert('카드번호 결제 연결 예정입니다.')
+  })
+
+document.querySelector('#pay-phone-btn')
+  ?.addEventListener('click', () => {
+    alert('휴대폰페이 연결 예정입니다.')
+  })
+
+document.querySelector('#pay-qr-btn')
+  ?.addEventListener('click', () => {
+    alert('QR결제 연결 예정입니다.')
+  })
+
+document.querySelector('#pay-link-btn')
+  ?.addEventListener('click', () => {
+    alert('결제링크 발송 연결 예정입니다.')
+  })
 
 
     } else if (path === '/merchant-card') { 
