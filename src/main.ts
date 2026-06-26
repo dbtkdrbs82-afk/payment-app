@@ -3443,6 +3443,71 @@ status: merchantStatus || '신청'
 
 defaultMerchantTab?.click()
 
+document.addEventListener('click', async (event) => {
+  const target = event.target as HTMLElement
+
+  if (target.dataset.sub !== 'admin-users') return
+
+  document.querySelectorAll('.sub-tab')
+    .forEach((tab) => tab.classList.remove('active'))
+
+  target.classList.add('active')
+
+  const titleBox = document.querySelector('.admin-title')
+  const summaryBox = document.querySelector('.admin-summary')
+  const tableTop = document.querySelector('.admin-table-top')
+  const tableHead = document.querySelector('.admin-table thead')
+  const paymentTableBody =
+    document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
+
+  if (titleBox) {
+    titleBox.innerHTML = '▶ 가맹점관리 > 담당자관리'
+  }
+
+  if (tableTop) tableTop.innerHTML = ''
+  if (tableHead) tableHead.innerHTML = ''
+  if (paymentTableBody) paymentTableBody.innerHTML = ''
+
+  const { data: adminUsers, error } = await supabase
+    .from('admin_users')
+    .select('*')
+    .order('id', { ascending: true })
+
+  if (error) {
+    alert('담당자 조회 실패: ' + error.message)
+    return
+  }
+
+  if (!summaryBox) return
+
+  summaryBox.innerHTML =
+    '<div class="merchant-detail-header">' +
+      '<h2>담당자관리</h2>' +
+      '<p>운영자, 지사, 대리점, 담당자 계정을 관리합니다.</p>' +
+    '</div>' +
+
+    '<table class="admin-table">' +
+      '<thead>' +
+        '<tr>' +
+          '<th>이름</th>' +
+          '<th>아이디</th>' +
+          '<th>권한</th>' +
+          '<th>상태</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>' +
+        (adminUsers || []).map((user) =>
+          '<tr>' +
+            '<td>' + (user.admin_name || '-') + '</td>' +
+            '<td>' + (user.login_id || '-') + '</td>' +
+            '<td>' + (user.role || '-') + '</td>' +
+            '<td>' + (user.status || '-') + '</td>' +
+          '</tr>'
+        ).join('') +
+      '</tbody>' +
+    '</table>'
+})
+
   document.addEventListener('change', (event) => {
     const target = event.target as HTMLElement
   
