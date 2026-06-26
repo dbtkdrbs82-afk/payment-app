@@ -3539,6 +3539,85 @@ document.addEventListener('click', async (event) => {
         '<button id="safe-save-admin-user" class="merchant-save-btn">저장</button>' +
         '<button id="safe-back-admin-user-list" class="merchant-close-btn">목록</button>' +
       '</div>'
+
+      document.querySelector('#safe-back-admin-user-list')
+  ?.addEventListener('click', () => {
+    document.querySelector('[data-sub="admin-users"]')
+      ?.dispatchEvent(new Event('click'))
+  })
+
+document.querySelector('#safe-save-admin-user')
+  ?.addEventListener('click', async () => {
+    const role =
+      (document.querySelector<HTMLSelectElement>('#safe-admin-role')?.value || 'MANAGER').trim()
+
+    const adminName =
+      (document.querySelector<HTMLInputElement>('#safe-admin-name')?.value || '').trim()
+
+    const password =
+      (document.querySelector<HTMLInputElement>('#safe-admin-password')?.value || '1234').trim()
+
+    if (!adminName) {
+      alert('이름을 입력해주세요.')
+      return
+    }
+
+    const prefix =
+      role === 'BRANCH'
+        ? 'S'
+        : role === 'AGENCY'
+          ? 'A'
+          : 'B'
+
+    const { data: lastUsers, error: lastError } = await supabase
+      .from('admin_users')
+      .select('login_id')
+      .like('login_id', prefix + '%')
+      .order('id', { ascending: false })
+      .limit(1)
+
+    if (lastError) {
+      alert('아이디 생성 실패: ' + lastError.message)
+      return
+    }
+
+    let nextNumber = 1
+
+    if (lastUsers && lastUsers.length > 0) {
+      const lastLoginId = lastUsers[0].login_id || ''
+      const numberPart = Number(lastLoginId.replace(prefix, ''))
+
+      if (!isNaN(numberPart)) {
+        nextNumber = numberPart + 1
+      }
+    }
+
+    const loginId = prefix + String(nextNumber).padStart(4, '0')
+
+    const { error } = await supabase
+      .from('admin_users')
+      .insert({
+        admin_name: adminName,
+        login_id: loginId,
+        password: password,
+        role: role,
+        status: '사용중'
+      })
+
+    if (error) {
+      alert('담당자 저장 실패: ' + error.message)
+      return
+    }
+
+    alert(
+      '등록되었습니다.\n\n' +
+      '아이디: ' + loginId + '\n' +
+      '비밀번호: ' + password
+    )
+
+    document.querySelector('[data-sub="admin-users"]')
+      ?.dispatchEvent(new Event('click'))
+  })
   })
 })
 
