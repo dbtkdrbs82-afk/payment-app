@@ -3484,9 +3484,13 @@ document.addEventListener('click', async (event) => {
     '<div class="merchant-detail-header">' +
       '<h2>담당자관리</h2>' +
       '<p>운영자, 지사, 대리점, 담당자 계정을 관리합니다.</p>' +
-    '</div>' +
+'</div>' +
 
-    '<table class="admin-table">' +
+'<div style="margin-bottom:16px;">' +
+  '<button id="safe-add-admin-user-btn" class="merchant-save-btn">+ 담당자 등록</button>' +
+'</div>' +
+
+'<table class="admin-table">' +
       '<thead>' +
         '<tr>' +
           '<th>이름</th>' +
@@ -3506,6 +3510,36 @@ document.addEventListener('click', async (event) => {
         ).join('') +
       '</tbody>' +
     '</table>'
+    document.querySelector('#safe-add-admin-user-btn')
+  ?.addEventListener('click', () => {
+    if (!summaryBox) return
+
+    summaryBox.innerHTML =
+      '<div class="merchant-detail-header">' +
+        '<h2>담당자 등록</h2>' +
+        '<p>담당자 계정을 등록합니다.</p>' +
+      '</div>' +
+
+      '<div class="merchant-detail-grid">' +
+        '<label>권한</label>' +
+        '<select id="safe-admin-role">' +
+          '<option value="BRANCH">지사</option>' +
+          '<option value="AGENCY">대리점</option>' +
+          '<option value="MANAGER" selected>담당자</option>' +
+        '</select>' +
+
+        '<label>이름</label>' +
+        '<input id="safe-admin-name" />' +
+
+        '<label>비밀번호</label>' +
+        '<input id="safe-admin-password" value="1234" />' +
+      '</div>' +
+
+      '<div class="merchant-detail-actions">' +
+        '<button id="safe-save-admin-user" class="merchant-save-btn">저장</button>' +
+        '<button id="safe-back-admin-user-list" class="merchant-close-btn">목록</button>' +
+      '</div>'
+  })
 })
 
   document.addEventListener('change', (event) => {
