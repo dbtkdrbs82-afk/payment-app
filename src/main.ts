@@ -2954,9 +2954,204 @@ if (subMenu) {
     }
 
     document.querySelector('#add-admin-user-btn')
-      ?.addEventListener('click', () => {
-        alert('다음 단계에서 담당자 등록창을 연결합니다.')
+  ?.addEventListener('click', () => {
+
+    document.querySelectorAll<HTMLButtonElement>('.admin-user-edit-btn')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const adminUserId = Number(button.dataset.id)
+
+      const { data: adminUser, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('id', adminUserId)
+        .single()
+
+      if (error || !adminUser) {
+        alert('담당자 정보를 불러오지 못했습니다.')
+        return
+      }
+
+      if (!summaryBox) return
+
+      summaryBox.innerHTML =
+        '<div class="merchant-detail-header">' +
+          '<h2>담당자 수정</h2>' +
+          '<p>담당자 계정 정보를 수정합니다.</p>' +
+        '</div>' +
+
+        '<div class="merchant-detail-grid">' +
+
+          '<label>권한</label>' +
+          '<select id="edit-admin-role">' +
+            '<option value="MASTER" ' + (adminUser.role === 'MASTER' ? 'selected' : '') + '>최고관리자</option>' +
+            '<option value="BRANCH" ' + (adminUser.role === 'BRANCH' ? 'selected' : '') + '>지사</option>' +
+            '<option value="AGENCY" ' + (adminUser.role === 'AGENCY' ? 'selected' : '') + '>대리점</option>' +
+            '<option value="MANAGER" ' + (adminUser.role === 'MANAGER' ? 'selected' : '') + '>담당자</option>' +
+          '</select>' +
+
+          '<label>이름</label>' +
+          '<input id="edit-admin-name" value="' + (adminUser.admin_name || '') + '" />' +
+
+          '<label>아이디</label>' +
+          '<input id="edit-admin-login-id" value="' + (adminUser.login_id || '') + '" readonly />' +
+
+          '<label>비밀번호</label>' +
+          '<input id="edit-admin-password" value="' + (adminUser.password || '') + '" />' +
+
+          '<label>상태</label>' +
+          '<select id="edit-admin-status">' +
+            '<option value="사용중" ' + (adminUser.status === '사용중' ? 'selected' : '') + '>사용중</option>' +
+            '<option value="사용정지" ' + (adminUser.status === '사용정지' ? 'selected' : '') + '>사용정지</option>' +
+          '</select>' +
+
+        '</div>' +
+
+        '<div class="merchant-detail-actions">' +
+          '<button id="update-admin-user" class="merchant-save-btn">저장</button>' +
+          '<button id="back-admin-user-list" class="merchant-close-btn">목록</button>' +
+        '</div>'
+
+      document.querySelector('#back-admin-user-list')
+        ?.addEventListener('click', () => {
+          document.querySelector('[data-sub="admin-users"]')
+            ?.dispatchEvent(new Event('click'))
+        })
+
+      document.querySelector('#update-admin-user')
+        ?.addEventListener('click', async () => {
+          const { error: updateError } = await supabase
+            .from('admin_users')
+            .update({
+              admin_name: (document.querySelector<HTMLInputElement>('#edit-admin-name')?.value || '').trim(),
+              password: (document.querySelector<HTMLInputElement>('#edit-admin-password')?.value || '').trim(),
+              role: (document.querySelector<HTMLSelectElement>('#edit-admin-role')?.value || '').trim(),
+              status: (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || '').trim()
+            })
+            .eq('id', adminUser.id)
+
+          if (updateError) {
+            alert('수정 실패: ' + updateError.message)
+            return
+          }
+
+          alert('수정되었습니다.')
+
+          document.querySelector('[data-sub="admin-users"]')
+            ?.dispatchEvent(new Event('click'))
+        })
+    })
+  })
+
+    if (!summaryBox) return
+
+    summaryBox.innerHTML =
+
+      '<div class="merchant-detail-header">' +
+        '<h2>담당자 등록</h2>' +
+        '<p>지사 / 대리점 / 담당자를 등록합니다.</p>' +
+      '</div>' +
+
+      '<div class="merchant-detail-grid">' +
+
+        '<label>권한</label>' +
+        '<select id="admin-role">' +
+          '<option value="BRANCH">지사</option>' +
+          '<option value="AGENCY">대리점</option>' +
+          '<option value="MANAGER" selected>담당자</option>' +
+        '</select>' +
+
+        '<label>이름</label>' +
+        '<input id="admin-name" />' +
+
+        '<label>비밀번호</label>' +
+        '<input id="admin-password" value="1234" />' +
+
+      '</div>' +
+
+      '<div class="merchant-detail-actions">' +
+        '<button id="save-admin-user" class="merchant-save-btn">저장</button>' +
+        '<button id="back-admin-user-list" class="merchant-close-btn">목록</button>' +
+      '</div>'
+      document.querySelector('#back-admin-user-list')
+  ?.addEventListener('click', () => {
+    document.querySelector('[data-sub="admin-users"]')
+      ?.dispatchEvent(new Event('click'))
+  })
+
+document.querySelector('#save-admin-user')
+  ?.addEventListener('click', async () => {
+    const role =
+  (document.querySelector<HTMLSelectElement>('#admin-role')?.value || '').trim()
+
+const adminName =
+  (document.querySelector<HTMLInputElement>('#admin-name')?.value || '').trim()
+
+const password =
+  (document.querySelector<HTMLInputElement>('#admin-password')?.value || '1234').trim()
+
+    if (!adminName) {
+      alert('이름을 입력해주세요.')
+      return
+    }
+
+    const prefix =
+      role === 'BRANCH'
+        ? 'S'
+        : role === 'AGENCY'
+          ? 'A'
+          : 'B'
+
+    const { data: lastUsers, error: lastError } = await supabase
+      .from('admin_users')
+      .select('login_id')
+      .like('login_id', prefix + '%')
+      .order('id', { ascending: false })
+      .limit(1)
+
+    if (lastError) {
+      alert('아이디 생성 실패: ' + lastError.message)
+      return
+    }
+
+    let nextNumber = 1
+
+    if (lastUsers && lastUsers.length > 0) {
+      const lastLoginId = lastUsers[0].login_id || ''
+      const numberPart = Number(lastLoginId.replace(prefix, ''))
+
+      if (!isNaN(numberPart)) {
+        nextNumber = numberPart + 1
+      }
+    }
+
+    const loginId = prefix + String(nextNumber).padStart(4, '0')
+
+    const { error } = await supabase
+      .from('admin_users')
+      .insert({
+        admin_name: adminName,
+        login_id: loginId,
+        password: password,
+        role: role,
+        status: '사용중'
       })
+
+    if (error) {
+      alert('담당자 저장 실패: ' + error.message)
+      return
+    }
+
+    alert(
+      '등록되었습니다.\n\n' +
+      '아이디: ' + loginId + '\n' +
+      '비밀번호: ' + password
+    )
+
+    document.querySelector('[data-sub="admin-users"]')
+      ?.dispatchEvent(new Event('click'))
+  })
+  })
   })
 
     if (titleBox) {
