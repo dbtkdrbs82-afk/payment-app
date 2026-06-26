@@ -8958,7 +8958,7 @@ if (payMerchantError || !payMerchant) {
 }
 
 if (!payMerchant.pg_mid || !payMerchant.korpay_mkey) {
-  alert('코페이 MID 또는 mKey가 등록되지 않았습니다.')
+  alert(' MID 또는 mKey가 등록되지 않았습니다.')
   return
 }
 
@@ -8994,7 +8994,7 @@ const korpay = (window as any).KorpaySdk
 
 korpay.paymentTimeout = 30000
 
-alert('코페이 웹승인 MKEY 수신 후 결제 연결 예정입니다.')
+alert(' 웹승인 MKEY 수신 후 결제 연결 예정입니다.')
 return
 
 korpay.payment('https://payments.korpay.com/v1', paymentData, {
