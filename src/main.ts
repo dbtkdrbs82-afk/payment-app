@@ -3443,8 +3443,8 @@ merchantButtons.forEach((button) => {
 '</select>' +
 '<label>개통일자</label>' +
 '<input type="date" value="' + (merchant.opened_at || '') + '" />' +
-'<label>비밀번호 초기화</label>' +
-'<button type="button" id="reset-merchant-password" class="reset-password-btn">1234로 초기화</button>' +
+'<label>비밀번호</label>' +
+'<input id="merchant-password-input" type="text" value="' + (merchant.merchant_password || '') + '" placeholder="비밀번호 입력" />' +
 
               '</div>' +
             '</div>' +
@@ -3652,13 +3652,14 @@ merchantButtons.forEach((button) => {
   (document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null)?.value || ''
       
       const updateData = {
-        merchant_name: merchantName,
-        merchant_type: getValue('merchant-type'),
-        owner_name: ownerName,
-        phone: phone,
-        fee_rate: feeRate,
-      
-        resident_number: getValue('resident-number'),
+  merchant_name: merchantName,
+  merchant_type: getValue('merchant-type'),
+  owner_name: ownerName,
+  phone: phone,
+  fee_rate: feeRate,
+  merchant_password: getValue('merchant-password-input'),
+
+  resident_number: getValue('resident-number'),
         business_number: getValue('business_number'),
         email: getValue('email'),
         zipcode: getValue('zipcode'),
