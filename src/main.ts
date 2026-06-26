@@ -3542,8 +3542,10 @@ document.addEventListener('click', async (event) => {
 
       document.querySelector('#safe-back-admin-user-list')
   ?.addEventListener('click', () => {
-    document.querySelector('[data-sub="admin-users"]')
-      ?.dispatchEvent(new Event('click'))
+    const adminUsersTab =
+      document.querySelector<HTMLElement>('[data-sub="admin-users"]')
+
+    adminUsersTab?.click()
   })
 
 document.querySelector('#safe-save-admin-user')
