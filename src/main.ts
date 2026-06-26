@@ -2537,18 +2537,29 @@ document.querySelector('#receipt-close-btn')
   `
 
   document.querySelector<HTMLButtonElement>('#admin-login-button')
-    ?.addEventListener('click', () => {
+    ?.addEventListener('click', async () => {
       const loginId =
         (document.querySelector<HTMLInputElement>('#admin-login-id')?.value || '').trim()
 
       const password =
         (document.querySelector<HTMLInputElement>('#admin-login-password')?.value || '').trim()
 
-      if (loginId === 'nxg001' && password === '1234') {
-        sessionStorage.setItem('admin_id', loginId)
-        location.href = '/pg-admin'
-        return
-      }
+      const { data: adminUser, error: adminLoginError } = await supabase
+  .from('admin_users')
+  .select('*')
+  .eq('login_id', loginId)
+  .eq('password', password)
+  .eq('status', '사용중')
+  .single()
+
+if (adminUser && !adminLoginError) {
+  sessionStorage.setItem('admin_id', adminUser.login_id)
+  sessionStorage.setItem('admin_name', adminUser.admin_name || '')
+  sessionStorage.setItem('admin_role', adminUser.role || '')
+
+  location.href = '/pg-admin'
+  return
+}
 
       alert('아이디 또는 비밀번호가 올바르지 않습니다.')
     })
