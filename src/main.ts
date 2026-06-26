@@ -2869,8 +2869,8 @@ const titleBox = document.querySelector('.admin-title')
 
 if (subMenu) {
   subMenu.innerHTML =
-  
-  '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span>'
+    '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span>' +
+    '<span class="sub-tab" data-sub="admin-users">담당자관리</span>'
 }
     document.querySelector('[data-sub="merchant-add"]')
   ?.addEventListener('click', () => {
@@ -2893,6 +2893,71 @@ if (subMenu) {
 
     document.querySelector('[data-sub="merchant-add"]')
       ?.classList.add('active')
+
+      document.querySelector('[data-sub="admin-users"]')
+  ?.addEventListener('click', async () => {
+    document.querySelectorAll('.sub-tab')
+      .forEach((tab) => tab.classList.remove('active'))
+
+    document.querySelector('[data-sub="admin-users"]')
+      ?.classList.add('active')
+
+    if (titleBox) {
+      titleBox.innerHTML = '▶ 가맹점관리 > 담당자관리'
+    }
+
+    const { data: adminUsers, error } = await supabase
+      .from('admin_users')
+      .select('*')
+      .order('id', { ascending: true })
+
+    if (error) {
+      alert('담당자 조회 실패: ' + error.message)
+      return
+    }
+
+    if (summaryBox) {
+      summaryBox.innerHTML =
+        '<div class="merchant-detail-header">' +
+          '<h2>담당자관리</h2>' +
+          '<p>운영자, 지사, 대리점, 담당자 계정을 관리합니다.</p>' +
+        '</div>' +
+
+        '<div style="margin-bottom:16px;">' +
+          '<button id="add-admin-user-btn" class="merchant-save-btn">+ 담당자 등록</button>' +
+        '</div>' +
+
+        '<table class="admin-table">' +
+          '<thead>' +
+            '<tr>' +
+              '<th>이름</th>' +
+              '<th>아이디</th>' +
+              '<th>권한</th>' +
+              '<th>상태</th>' +
+              '<th>관리</th>' +
+            '</tr>' +
+          '</thead>' +
+          '<tbody>' +
+            (adminUsers || []).map((user) =>
+              '<tr>' +
+                '<td>' + (user.admin_name || '-') + '</td>' +
+                '<td>' + (user.login_id || '-') + '</td>' +
+                '<td>' + (user.role || '-') + '</td>' +
+                '<td>' + (user.status || '-') + '</td>' +
+                '<td>' +
+                  '<button class="admin-user-edit-btn" data-id="' + user.id + '">수정</button>' +
+                '</td>' +
+              '</tr>'
+            ).join('') +
+          '</tbody>' +
+        '</table>'
+    }
+
+    document.querySelector('#add-admin-user-btn')
+      ?.addEventListener('click', () => {
+        alert('다음 단계에서 담당자 등록창을 연결합니다.')
+      })
+  })
 
     if (titleBox) {
       titleBox.innerHTML = '▶ 가맹점관리 > 업체/가맹점 등록'
