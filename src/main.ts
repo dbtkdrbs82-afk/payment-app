@@ -2744,21 +2744,98 @@ if (summaryBox) {
             const subMenu = document.querySelector('.admin-sub-menu')
             const titleBox = document.querySelector('.admin-title')
             const searchBox = document.querySelector('.admin-search-box')
+            const summaryBox = document.querySelector('.admin-summary')
+            const tableTop = document.querySelector('.admin-table-top')
+            const tableHead = document.querySelector('.admin-table thead')
+            const paymentTableBody =
+              document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
           
             if (subMenu) {
-              subMenu.innerHTML =
-                '<span class="sub-tab active" data-sub="admin-users">조직관리</span>'
+              subMenu.innerHTML = '조직도'
             }
           
             if (titleBox) {
-              titleBox.innerHTML = '▶ 조직관리'
+              titleBox.innerHTML = '▶ 조직관리 > 조직도'
             }
           
-            if (searchBox) {
-              searchBox.innerHTML = ''
+            if (searchBox) searchBox.innerHTML = ''
+            if (tableTop) tableTop.innerHTML = ''
+            if (tableHead) tableHead.innerHTML = ''
+            if (paymentTableBody) paymentTableBody.innerHTML = ''
+          
+            const { data: adminUsers, error } = await supabase
+              .from('admin_users')
+              .select('*')
+              .order('id', { ascending: true })
+          
+            if (error) {
+              alert('조직 정보를 불러오지 못했습니다: ' + error.message)
+              return
             }
           
-            document.querySelector<HTMLElement>('[data-sub="admin-users"]')?.click()
+            const rootUsers = (adminUsers || []).filter((user) =>
+              user.login_id === 'NXGMASTER16'
+            )
+          
+            const branchUsers = (adminUsers || []).filter((user) =>
+              user.role === 'BRANCH'
+            )
+          
+            const agencyUsers = (adminUsers || []).filter((user) =>
+              user.role === 'AGENCY'
+            )
+          
+            const managerUsers = (adminUsers || []).filter((user) =>
+              user.role === 'MANAGER'
+            )
+          
+            if (summaryBox) {
+              summaryBox.innerHTML =
+                '<div class="merchant-detail-header">' +
+                  '<h2>조직관리</h2>' +
+                  '<p>지사, 대리점, 담당자 조직 구조를 확인합니다.</p>' +
+                '</div>' +
+          
+                '<div class="merchant-detail-page">' +
+                  rootUsers.map((root) =>
+                    '<div style="padding:16px; border:1px solid #ddd; border-radius:10px; margin-bottom:16px;">' +
+                      '<h3>👑 ' + (root.admin_name || '-') + ' (' + (root.login_id || '-') + ')</h3>' +
+          
+                      branchUsers
+                        .filter((branch) => branch.parent_admin_id === root.id)
+                        .map((branch) =>
+                          '<div style="margin-left:24px; margin-top:12px;">' +
+                            '<strong>🏢 ' + (branch.admin_name || '-') + ' (' + (branch.login_id || '-') + ')</strong>' +
+          
+                            agencyUsers
+                              .filter((agency) => agency.parent_admin_id === branch.id)
+                              .map((agency) =>
+                                '<div style="margin-left:24px; margin-top:8px;">' +
+                                  '🏬 ' + (agency.admin_name || '-') + ' (' + (agency.login_id || '-') + ')' +
+          
+                                  managerUsers
+                                    .filter((manager) => manager.parent_admin_id === agency.id)
+                                    .map((manager) =>
+                                      '<div style="margin-left:24px; margin-top:6px;">' +
+                                        '👤 ' + (manager.admin_name || '-') + ' (' + (manager.login_id || '-') + ')' +
+                                      '</div>'
+                                    ).join('') +
+                                '</div>'
+                              ).join('') +
+          
+                            managerUsers
+                              .filter((manager) => manager.parent_admin_id === branch.id)
+                              .map((manager) =>
+                                '<div style="margin-left:24px; margin-top:6px;">' +
+                                  '👤 ' + (manager.admin_name || '-') + ' (' + (manager.login_id || '-') + ')' +
+                                '</div>'
+                              ).join('') +
+                          '</div>'
+                        ).join('') +
+                    '</div>'
+                  ).join('') +
+                '</div>'
+            }
           
             return
           }
