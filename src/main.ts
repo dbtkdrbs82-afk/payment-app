@@ -2782,11 +2782,15 @@ if (cancelError) {
   return
 }
 
-const cancelRequestCount = cancelRequests?.length || 0
-const cancelBadge =
-  cancelRequestCount > 0
-    ? ' <span style="color:red; font-weight:700;">🔴' + cancelRequestCount + '</span>'
+const getManagerCancelBadge = (managerId: number) => {
+  const count = (cancelRequests || []).filter((request) =>
+    request.manager_admin_id === managerId
+  ).length
+
+  return count > 0
+    ? ' <span style="color:red; font-weight:700;">🔴' + count + '</span>'
     : ''
+}
           
             const rootUsers = (adminUsers || []).filter((user) =>
               user.login_id === 'NXGMASTER16'
@@ -2814,7 +2818,7 @@ const cancelBadge =
                 '<div class="merchant-detail-page">' +
                   rootUsers.map((root) =>
                     '<div style="padding:16px; border:1px solid #ddd; border-radius:10px; margin-bottom:16px;">' +
-                      '<h3>👑 ' + (root.admin_name || '-') + cancelBadge + '</h3>' +
+                      '<h3>👑 ' + (root.admin_name || '-') + '</h3>' +
           
                       branchUsers
                         .filter((branch) => branch.parent_admin_id === root.id)
@@ -2832,7 +2836,7 @@ const cancelBadge =
                                     .filter((manager) => manager.parent_admin_id === agency.id)
                                     .map((manager) =>
                                       '<div style="margin-left:24px; margin-top:6px;">' +
-                                        '👤 ' + (manager.admin_name || '-') +
+                                        '👤 ' + (manager.admin_name || '-') + getManagerCancelBadge(manager.id) +
                                       '</div>'
                                     ).join('') +
                                 '</div>'
@@ -2842,7 +2846,7 @@ const cancelBadge =
                               .filter((manager) => manager.parent_admin_id === branch.id)
                               .map((manager) =>
                                 '<div style="margin-left:24px; margin-top:6px;">' +
-                                  '👤 ' + (manager.admin_name || '-') +
+                                  '👤 ' + (manager.admin_name || '-') + getManagerCancelBadge(manager.id) +
                                 '</div>'
                               ).join('') +
                           '</div>'
