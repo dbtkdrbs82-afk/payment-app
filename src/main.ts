@@ -3536,12 +3536,62 @@ document.addEventListener('click', async (event) => {
     if (!appWindow.adminUserEditClickReady) {
       appWindow.adminUserEditClickReady = true
     
-      document.addEventListener('click', (event) => {
+      document.addEventListener('click', async (event) => {
         const target = event.target as HTMLElement
     
         if (!target.classList.contains('admin-user-edit-btn')) return
-    
-        alert('수정화면 연결 성공')
+
+const adminUserId = Number(target.dataset.id)
+
+const { data: adminUser, error } = await supabase
+  .from('admin_users')
+  .select('*')
+  .eq('id', adminUserId)
+  .single()
+
+if (error || !adminUser) {
+  alert('담당자 정보를 불러오지 못했습니다.')
+  return
+}
+
+if (!summaryBox) return
+
+summaryBox.innerHTML =
+  '<div class="merchant-detail-header">' +
+    '<h2>담당자 수정</h2>' +
+    '<p>담당자 계정 정보를 수정합니다.</p>' +
+  '</div>' +
+
+  '<div class="merchant-detail-grid">' +
+    '<label>권한</label>' +
+    '<select id="edit-admin-role" ' + (adminUser.login_id === 'NXGMASTER16' ? 'disabled' : '') + '>' +
+      '<option value="MASTER" ' + (adminUser.role === 'MASTER' ? 'selected' : '') + '>최고관리자</option>' +
+      '<option value="BRANCH" ' + (adminUser.role === 'BRANCH' ? 'selected' : '') + '>지사</option>' +
+      '<option value="AGENCY" ' + (adminUser.role === 'AGENCY' ? 'selected' : '') + '>대리점</option>' +
+      '<option value="MANAGER" ' + (adminUser.role === 'MANAGER' ? 'selected' : '') + '>담당자</option>' +
+    '</select>' +
+
+    '<label>이름</label>' +
+    '<input id="edit-admin-name" value="' + (adminUser.admin_name || '') + '" />' +
+
+    '<label>아이디</label>' +
+    '<input id="edit-admin-login-id" value="' + (adminUser.login_id || '') + '" readonly />' +
+
+    '<label>비밀번호</label>' +
+    '<input id="edit-admin-password" value="' + (adminUser.password || '') + '" />' +
+
+    '<label>상태</label>' +
+    '<select id="edit-admin-status" ' + (adminUser.login_id === 'NXGMASTER16' ? 'disabled' : '') + '>' +
+      '<option value="사용중" ' + (adminUser.status === '사용중' ? 'selected' : '') + '>사용중</option>' +
+      '<option value="사용정지" ' + (adminUser.status === '사용정지' ? 'selected' : '') + '>사용정지</option>' +
+      '<option value="퇴사" ' + (adminUser.status === '퇴사' ? 'selected' : '') + '>퇴사</option>' +
+    '</select>' +
+  '</div>' +
+
+  '<div class="merchant-detail-actions">' +
+    '<button id="safe-update-admin-user" class="merchant-save-btn" data-id="' + adminUser.id + '">저장</button>' +
+    '<button id="safe-cancel-admin-user-edit" class="merchant-close-btn">취소</button>' +
+  '</div>'
       })
     }
     
