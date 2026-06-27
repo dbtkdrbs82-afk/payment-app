@@ -2799,25 +2799,25 @@ if (summaryBox) {
                 '<div class="merchant-detail-page">' +
                   rootUsers.map((root) =>
                     '<div style="padding:16px; border:1px solid #ddd; border-radius:10px; margin-bottom:16px;">' +
-                      '<h3>👑 ' + (root.admin_name || '-') + ' (' + (root.login_id || '-') + ')</h3>' +
+                      '<h3>👑 ' + (root.admin_name || '-') + '</h3>' +
           
                       branchUsers
                         .filter((branch) => branch.parent_admin_id === root.id)
                         .map((branch) =>
                           '<div style="margin-left:24px; margin-top:12px;">' +
-                            '<strong>🏢 ' + (branch.admin_name || '-') + ' (' + (branch.login_id || '-') + ')</strong>' +
+                            '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
           
                             agencyUsers
                               .filter((agency) => agency.parent_admin_id === branch.id)
                               .map((agency) =>
                                 '<div style="margin-left:24px; margin-top:8px;">' +
-                                  '🏬 ' + (agency.admin_name || '-') + ' (' + (agency.login_id || '-') + ')' +
+                                  '🏬 ' + (agency.admin_name || '-') +
           
                                   managerUsers
                                     .filter((manager) => manager.parent_admin_id === agency.id)
                                     .map((manager) =>
                                       '<div style="margin-left:24px; margin-top:6px;">' +
-                                        '👤 ' + (manager.admin_name || '-') + ' (' + (manager.login_id || '-') + ')' +
+                                        '👤 ' + (manager.admin_name || '-') +
                                       '</div>'
                                     ).join('') +
                                 '</div>'
@@ -2827,7 +2827,7 @@ if (summaryBox) {
                               .filter((manager) => manager.parent_admin_id === branch.id)
                               .map((manager) =>
                                 '<div style="margin-left:24px; margin-top:6px;">' +
-                                  '👤 ' + (manager.admin_name || '-') + ' (' + (manager.login_id || '-') + ')' +
+                                  '👤 ' + (manager.admin_name || '-') +
                                 '</div>'
                               ).join('') +
                           '</div>'
