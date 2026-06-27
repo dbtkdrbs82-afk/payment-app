@@ -2852,14 +2852,14 @@ const getManagerCancelBadge = (managerId: number) => {
                               ).join('') +
                           '</div>'
                         ).join('') +
+                        '</div>'
+                      ).join('') +
+                      '</div>' +
+                      '<div id="organization-work-panel" style="border:1px solid #ddd; border-radius:10px; padding:16px; background:#fff;">' +
+                        '<h3>업무 패널</h3>' +
+                        '<p>왼쪽 조직도에서 담당자 또는 알림을 선택하면 상세 업무가 표시됩니다.</p>' +
+                      '</div>' +
                     '</div>'
-                  ).join('') +
-'</div>' +
-'</div>' +
-'<div id="organization-work-panel" style="border:1px solid #ddd; border-radius:10px; padding:16px; background:#fff;">' +
-  '<h3>업무 패널</h3>' +
-  '<p>왼쪽 조직도에서 담당자 또는 알림을 선택하면 상세 업무가 표시됩니다.</p>' +
-'</div>'
             }
           
             return
