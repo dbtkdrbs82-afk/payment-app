@@ -2784,7 +2784,7 @@ if (cancelError) {
 
 const getManagerCancelBadge = (managerId: number) => {
   const count = (cancelRequests || []).filter((request) =>
-    request.manager_admin_id === managerId
+    Number(request.manager_admin_id) === Number(managerId)
   ).length
 
   return count > 0
