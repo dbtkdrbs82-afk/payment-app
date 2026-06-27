@@ -3497,6 +3497,7 @@ document.addEventListener('click', async (event) => {
           '<th>아이디</th>' +
           '<th>권한</th>' +
           '<th>상태</th>' +
+          '<th>관리</th>' +
         '</tr>' +
       '</thead>' +
       '<tbody>' +
@@ -3506,6 +3507,11 @@ document.addEventListener('click', async (event) => {
             '<td>' + (user.login_id || '-') + '</td>' +
             '<td>' + (user.role || '-') + '</td>' +
             '<td>' + (user.status || '-') + '</td>' +
+            '<td>' +
+  '<button class="admin-user-edit-btn" data-id="' + user.id + '">' +
+    '수정' +
+  '</button>' +
+'</td>' +
           '</tr>'
         ).join('') +
       '</tbody>' +
