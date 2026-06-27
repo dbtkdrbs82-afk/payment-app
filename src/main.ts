@@ -3134,7 +3134,8 @@ const password =
         login_id: loginId,
         password: password,
         role: role,
-        status: '사용중'
+status: '사용중',
+parent_admin_id: 2
       })
 
     if (error) {
@@ -3783,7 +3784,8 @@ document.querySelector('#safe-save-admin-user')
         login_id: loginId,
         password: password,
         role: role,
-        status: '사용중'
+        status: '사용중',
+        parent_admin_id: 2
       })
 
     if (error) {
