@@ -3565,13 +3565,21 @@ document.addEventListener('click', async (event) => {
 
     adminUsersTab?.click()
   })
-  document.addEventListener('click', (event) => {
-    const target = event.target as HTMLElement
+  const appWindow = window as Window & {
+    adminUserEditClickReady?: boolean
+  }
   
-    if (!target.classList.contains('admin-user-edit-btn')) return
+  if (!appWindow.adminUserEditClickReady) {
+    appWindow.adminUserEditClickReady = true
   
-    alert('수정화면 연결 성공')
-  })
+    document.addEventListener('click', (event) => {
+      const target = event.target as HTMLElement
+  
+      if (!target.classList.contains('admin-user-edit-btn')) return
+  
+      alert('수정화면 연결 성공')
+    })
+  }
 
 document.querySelector('#safe-save-admin-user')
   ?.addEventListener('click', async () => {
