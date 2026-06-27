@@ -3592,6 +3592,100 @@ summaryBox.innerHTML =
     '<button id="safe-update-admin-user" class="merchant-save-btn" data-id="' + adminUser.id + '">저장</button>' +
     '<button id="safe-cancel-admin-user-edit" class="merchant-close-btn">취소</button>' +
   '</div>'
+
+  document.querySelector('#safe-cancel-admin-user-edit')
+  ?.addEventListener('click', () => {
+    document.querySelector<HTMLElement>('[data-sub="admin-users"]')?.click()
+  })
+
+document.querySelector('#safe-update-admin-user')
+  ?.addEventListener('click', async () => {
+    const newRole =
+      (document.querySelector<HTMLSelectElement>('#edit-admin-role')?.value || adminUser.role).trim()
+
+    const newName =
+      (document.querySelector<HTMLInputElement>('#edit-admin-name')?.value || '').trim()
+
+    const newPassword =
+      (document.querySelector<HTMLInputElement>('#edit-admin-password')?.value || '').trim()
+
+    const newStatus =
+      (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || adminUser.status).trim()
+
+    if (!newName) {
+      alert('이름을 입력해주세요.')
+      return
+    }
+
+    const isRootMaster = adminUser.login_id === 'NXGMASTER16'
+
+    let newLoginId = adminUser.login_id
+
+    if (!isRootMaster && adminUser.role !== newRole) {
+      const prefix =
+        newRole === 'BRANCH'
+          ? 'S'
+          : newRole === 'AGENCY'
+            ? 'A'
+            : newRole === 'MANAGER'
+              ? 'B'
+              : 'NXGMASTER'
+
+      if (newRole !== 'MASTER') {
+        const { data: lastUsers, error: lastError } = await supabase
+          .from('admin_users')
+          .select('login_id')
+          .like('login_id', prefix + '%')
+          .order('id', { ascending: false })
+          .limit(1)
+
+        if (lastError) {
+          alert('아이디 생성 실패: ' + lastError.message)
+          return
+        }
+
+        let nextNumber = 1
+
+        if (lastUsers && lastUsers.length > 0) {
+          const lastLoginId = lastUsers[0].login_id || ''
+          const numberPart = Number(lastLoginId.replace(prefix, ''))
+
+          if (!isNaN(numberPart)) {
+            nextNumber = numberPart + 1
+          }
+        }
+
+        newLoginId = prefix + String(nextNumber).padStart(4, '0')
+      }
+    }
+
+    const updateData = isRootMaster
+      ? {
+          admin_name: newName,
+          password: newPassword
+        }
+      : {
+          admin_name: newName,
+          password: newPassword,
+          role: newRole,
+          status: newStatus,
+          login_id: newLoginId
+        }
+
+    const { error } = await supabase
+      .from('admin_users')
+      .update(updateData)
+      .eq('id', adminUser.id)
+
+    if (error) {
+      alert('수정 실패: ' + error.message)
+      return
+    }
+
+    alert('수정되었습니다.')
+
+    document.querySelector<HTMLElement>('[data-sub="admin-users"]')?.click()
+  })
       })
     }
     
