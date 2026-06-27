@@ -3565,6 +3565,16 @@ document.addEventListener('click', async (event) => {
 
     adminUsersTab?.click()
   })
+  document.querySelectorAll<HTMLButtonElement>('.admin-user-edit-btn')
+  .forEach((button) => {
+
+    button.addEventListener('click', async () => {
+
+      alert('수정화면 연결 성공')
+
+    })
+
+  })
 
 document.querySelector('#safe-save-admin-user')
   ?.addEventListener('click', async () => {
