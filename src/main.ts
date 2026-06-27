@@ -3505,7 +3505,19 @@ document.addEventListener('click', async (event) => {
           '<tr>' +
             '<td>' + (user.admin_name || '-') + '</td>' +
             '<td>' + (user.login_id || '-') + '</td>' +
-            '<td>' + (user.role || '-') + '</td>' +
+            '<td>' +
+  (
+    user.role === 'MASTER'
+      ? '최고관리자'
+      : user.role === 'BRANCH'
+        ? '지사'
+        : user.role === 'AGENCY'
+          ? '대리점'
+          : user.role === 'MANAGER'
+            ? '담당자'
+            : '-'
+  ) +
+'</td>' +
             '<td>' + (user.status || '-') + '</td>' +
             '<td>' +
   '<button class="admin-user-edit-btn" data-id="' + user.id + '">' +
