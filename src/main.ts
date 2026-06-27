@@ -2740,6 +2740,28 @@ if (summaryBox) {
           tab.classList.add('active')
       
           const page = tab.getAttribute('data-page')
+          if (page === 'organization') {
+            const subMenu = document.querySelector('.admin-sub-menu')
+            const titleBox = document.querySelector('.admin-title')
+            const searchBox = document.querySelector('.admin-search-box')
+          
+            if (subMenu) {
+              subMenu.innerHTML =
+                '<span class="sub-tab active" data-sub="admin-users">조직관리</span>'
+            }
+          
+            if (titleBox) {
+              titleBox.innerHTML = '▶ 조직관리'
+            }
+          
+            if (searchBox) {
+              searchBox.innerHTML = ''
+            }
+          
+            document.querySelector<HTMLElement>('[data-sub="admin-users"]')?.click()
+          
+            return
+          }
 
           if (page === 'dashboard') {
       const subMenu = document.querySelector('.admin-sub-menu')
