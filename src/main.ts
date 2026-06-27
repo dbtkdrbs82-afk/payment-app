@@ -3528,8 +3528,25 @@ document.addEventListener('click', async (event) => {
         ).join('') +
       '</tbody>' +
     '</table>'
+
+    const appWindow = window as Window & {
+      adminUserEditClickReady?: boolean
+    }
+    
+    if (!appWindow.adminUserEditClickReady) {
+      appWindow.adminUserEditClickReady = true
+    
+      document.addEventListener('click', (event) => {
+        const target = event.target as HTMLElement
+    
+        if (!target.classList.contains('admin-user-edit-btn')) return
+    
+        alert('수정화면 연결 성공')
+      })
+    }
+    
     document.querySelector('#safe-add-admin-user-btn')
-  ?.addEventListener('click', () => {
+      ?.addEventListener('click', () => {
     if (!summaryBox) return
 
     summaryBox.innerHTML =
@@ -3565,21 +3582,7 @@ document.addEventListener('click', async (event) => {
 
     adminUsersTab?.click()
   })
-  const appWindow = window as Window & {
-    adminUserEditClickReady?: boolean
-  }
   
-  if (!appWindow.adminUserEditClickReady) {
-    appWindow.adminUserEditClickReady = true
-  
-    document.addEventListener('click', (event) => {
-      const target = event.target as HTMLElement
-  
-      if (!target.classList.contains('admin-user-edit-btn')) return
-  
-      alert('수정화면 연결 성공')
-    })
-  }
 
 document.querySelector('#safe-save-admin-user')
   ?.addEventListener('click', async () => {
