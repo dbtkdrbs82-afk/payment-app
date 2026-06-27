@@ -2772,6 +2772,21 @@ if (summaryBox) {
               alert('조직 정보를 불러오지 못했습니다: ' + error.message)
               return
             }
+            const { data: cancelRequests, error: cancelError } = await supabase
+  .from('cancel_requests')
+  .select('*')
+  .eq('status', '요청중')
+
+if (cancelError) {
+  alert('취소요청 정보를 불러오지 못했습니다: ' + cancelError.message)
+  return
+}
+
+const cancelRequestCount = cancelRequests?.length || 0
+const cancelBadge =
+  cancelRequestCount > 0
+    ? ' <span style="color:red; font-weight:700;">🔴' + cancelRequestCount + '</span>'
+    : ''
           
             const rootUsers = (adminUsers || []).filter((user) =>
               user.login_id === 'NXGMASTER16'
@@ -2799,7 +2814,7 @@ if (summaryBox) {
                 '<div class="merchant-detail-page">' +
                   rootUsers.map((root) =>
                     '<div style="padding:16px; border:1px solid #ddd; border-radius:10px; margin-bottom:16px;">' +
-                      '<h3>👑 ' + (root.admin_name || '-') + '</h3>' +
+                      '<h3>👑 ' + (root.admin_name || '-') + cancelBadge + '</h3>' +
           
                       branchUsers
                         .filter((branch) => branch.parent_admin_id === root.id)
