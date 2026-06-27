@@ -2594,11 +2594,11 @@ if (adminUser && !adminLoginError) {
   
         <div class="admin-menu">
   <a class="admin-tab" data-page="merchant">가맹점관리</a>
-  <a class="admin-tab" data-page="organization">조직관리</a>
 <a class="admin-tab" data-page="payment">결제관리</a>
-  <a class="admin-tab" data-page="payout">출금관리</a>
-  <a class="admin-tab" data-page="settlement">정산관리</a>
-  <a class="admin-tab" data-page="tax">세무관리</a>
+<a class="admin-tab" data-page="payout">출금관리</a>
+<a class="admin-tab" data-page="settlement">정산관리</a>
+<a class="admin-tab" data-page="tax">세무관리</a>
+<a class="admin-tab" data-page="organization">조직관리</a>
   
 </div>
   
@@ -2750,13 +2750,13 @@ if (summaryBox) {
             const paymentTableBody =
               document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
           
-            if (subMenu) {
-              subMenu.innerHTML = '조직도'
-            }
-          
-            if (titleBox) {
-              titleBox.innerHTML = '▶ 조직관리 > 조직도'
-            }
+              if (subMenu) {
+                subMenu.innerHTML = ''
+              }
+              
+              if (titleBox) {
+                titleBox.innerHTML = '▶ 조직관리'
+              }
           
             if (searchBox) searchBox.innerHTML = ''
             if (tableTop) tableTop.innerHTML = ''
