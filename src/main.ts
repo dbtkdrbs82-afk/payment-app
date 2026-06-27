@@ -2867,7 +2867,7 @@ const getManagerCancelBadge = (managerId: number) => {
             document.querySelectorAll('.manager-cancel-btn')
   .forEach((button) => {
 
-    button.addEventListener('click', () => {
+    button.addEventListener('click', async () => {
 
       const managerId = Number(
         (button as HTMLButtonElement).dataset.managerId
@@ -2877,11 +2877,36 @@ const getManagerCancelBadge = (managerId: number) => {
         document.querySelector<HTMLElement>('#organization-work-panel')
 
       if (!workPanel) return
+      
+      const { data: requests, error } = await supabase
+  .from('cancel_requests')
+  .select('*')
+  .eq('manager_admin_id', managerId)
+  .eq('status', '요청중')
+  .order('id', { ascending: false })
 
-      workPanel.innerHTML =
-        '<h3>취소 요청</h3>' +
-        '<p>담당자 ID : ' + managerId + '</p>' +
-        '<p>여기에 취소요청 목록이 표시됩니다.</p>'
+if (error) {
+  alert('취소요청 조회 실패: ' + error.message)
+  return
+}
+
+workPanel.innerHTML =
+'<h3>취소 요청</h3>' +
+'<p>총 ' + ((requests || []).length) + '건</p>' +
+
+((requests || []).length === 0
+  ? '<p>현재 취소요청이 없습니다.</p>'
+  : (requests || []).map((request) =>
+      '<div style="border:1px solid #ddd; border-radius:8px; padding:12px; margin-top:12px;">' +
+        '<p><b>가맹점 ID</b> : ' + (request.merchant_id || '-') + '</p>' +
+        '<p><b>결제 ID</b> : ' + (request.payment_id || '-') + '</p>' +
+        '<p><b>사유</b> : ' + (request.reason || '-') + '</p>' +
+        '<p><b>상태</b> : ' + (request.status || '-') + '</p>' +
+        '<button class="cancel-approve-btn" data-id="' + request.id + '">승인</button> ' +
+        '<button class="cancel-reject-btn" data-id="' + request.id + '">반려</button>' +
+      '</div>'
+    ).join('')
+)
 
     })
 
