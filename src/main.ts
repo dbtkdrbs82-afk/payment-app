@@ -2815,7 +2815,8 @@ const getManagerCancelBadge = (managerId: number) => {
                   '<p>지사, 대리점, 담당자 조직 구조를 확인합니다.</p>' +
                 '</div>' +
           
-                '<div class="merchant-detail-page">' +
+                '<div class="merchant-detail-page" style="display:grid; grid-template-columns: 1fr 420px; gap:20px; align-items:start;">' +
+                  '<div id="organization-tree-panel">' +
                   rootUsers.map((root) =>
                     '<div style="padding:16px; border:1px solid #ddd; border-radius:10px; margin-bottom:16px;">' +
                       '<h3>👑 ' + (root.admin_name || '-') + '</h3>' +
@@ -2853,7 +2854,12 @@ const getManagerCancelBadge = (managerId: number) => {
                         ).join('') +
                     '</div>'
                   ).join('') +
-                '</div>'
+'</div>' +
+'</div>' +
+'<div id="organization-work-panel" style="border:1px solid #ddd; border-radius:10px; padding:16px; background:#fff;">' +
+  '<h3>업무 패널</h3>' +
+  '<p>왼쪽 조직도에서 담당자 또는 알림을 선택하면 상세 업무가 표시됩니다.</p>' +
+'</div>'
             }
           
             return
