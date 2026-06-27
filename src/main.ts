@@ -2788,8 +2788,8 @@ const getManagerCancelBadge = (managerId: number) => {
   ).length
 
   return count > 0
-    ? ' <span style="color:red; font-weight:700;">🔴' + count + '</span>'
-    : ''
+  ? ' <button class="manager-cancel-btn" data-manager-id="' + managerId + '" style="margin-left:8px; border:none; background:none; cursor:pointer; font-weight:700; color:red;">🔴' + count + '</button>'
+  : ''
 }
           
             const rootUsers = (adminUsers || []).filter((user) =>
@@ -2861,6 +2861,29 @@ const getManagerCancelBadge = (managerId: number) => {
                       '</div>' +
                     '</div>'
             }
+
+            document.querySelectorAll('.manager-cancel-btn')
+  .forEach((button) => {
+
+    button.addEventListener('click', () => {
+
+      const managerId = Number(
+        (button as HTMLButtonElement).dataset.managerId
+      )
+
+      const workPanel =
+        document.querySelector<HTMLElement>('#organization-work-panel')
+
+      if (!workPanel) return
+
+      workPanel.innerHTML =
+        '<h3>취소 요청</h3>' +
+        '<p>담당자 ID : ' + managerId + '</p>' +
+        '<p>여기에 취소요청 목록이 표시됩니다.</p>'
+
+    })
+
+  })
           
             return
           }
