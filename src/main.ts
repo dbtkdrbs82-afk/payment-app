@@ -2788,7 +2788,7 @@ const getManagerCancelBadge = (managerId: number) => {
   ).length
 
   return count > 0
-  ? ' <button class="manager-cancel-btn" data-manager-id="' + managerId + '" style="margin-left:8px; border:none; background:none; cursor:pointer; font-weight:700; color:red;">🔴' + count + '</button>'
+  ? ' <span class="manager-cancel-btn" data-manager-id="' + managerId + '" style="display:inline-block; cursor:pointer; color:red; font-weight:700; margin-left:8px;">🔴' + count + '</span>'
   : ''
 }
           
@@ -2855,7 +2855,7 @@ const getManagerCancelBadge = (managerId: number) => {
                         '</div>'
                       ).join('') +
                       '</div>' +
-                      '<div id="organization-work-panel" style="border:1px solid #ddd; border-radius:10px; padding:16px; background:#fff;">' +
+                      '<div id="organization-work-panel" style="border:1px solid #ddd; border-radius:10px; padding:24px; background:#fff; min-height:150px;">' +
                         '<h3>업무 패널</h3>' +
                         '<p>왼쪽 조직도에서 담당자 또는 알림을 선택하면 상세 업무가 표시됩니다.</p>' +
                       '</div>' +
