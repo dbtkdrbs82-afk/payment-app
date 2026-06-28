@@ -2249,6 +2249,22 @@ const merchantId =
 const merchantName =
   params.get('merchantName') || sessionStorage.getItem('merchantName')
 
+  let feeRate = 0
+
+if (merchantId) {
+  const { data: merchantFeeData } = await supabase
+    .from('merchants')
+    .select('fee_rate')
+    .eq('id', Number(merchantId))
+    .maybeSingle()
+
+  feeRate = Number(merchantFeeData?.fee_rate || 0)
+}
+
+const paymentAmount = Number(amount)
+const feeAmount = Math.floor(paymentAmount * feeRate / 100)
+const settlementAmount = paymentAmount - feeAmount
+
   const { count } = await supabase
   .from('payments')
   .select('*', { count: 'exact', head: true })
@@ -2264,21 +2280,24 @@ const { data: existingPayment } = await supabase
 if (existingPayment) {
   console.log('이미 저장된 주문입니다.')
 } else {
-const { error } = await supabase.from('payments').insert([
-  {
-    order_number: nextOrderNumber,
-    order_id: orderId,
-    payment_key: paymentKey,
-    amount: Number(amount),
-    status: 'paid',
-    event_id: eventId ? Number(eventId) : null,
-    sender_name: senderName,
-message: message,
-merchant_id: merchantId ? Number(merchantId) : null,
-merchant_name: merchantName,
-pg_company: '토스페이먼츠'
-  }
-  ]) 
+  const { error } = await supabase.from('payments').insert([
+    {
+      order_number: nextOrderNumber,
+      order_id: orderId,
+      payment_key: paymentKey,
+      amount: paymentAmount,
+      fee_rate: feeRate,
+      fee_amount: feeAmount,
+      settlement_amount: settlementAmount,
+      status: 'paid',
+      event_id: eventId ? Number(eventId) : null,
+      sender_name: senderName,
+      message: message,
+      merchant_id: merchantId ? Number(merchantId) : null,
+      merchant_name: merchantName,
+      pg_company: '토스페이먼츠'
+    }
+  ])
 
   if (error) {
     alert('DB 저장 실패: ' + error.message)
@@ -2902,6 +2921,7 @@ workPanel.innerHTML =
         '<p><b>결제 ID</b> : ' + (request.payment_id || '-') + '</p>' +
         '<p><b>사유</b> : ' + (request.reason || '-') + '</p>' +
         '<p><b>상태</b> : ' + (request.status || '-') + '</p>' +
+        
         '<button class="cancel-approve-btn" data-id="' + request.id + '">승인</button> ' +
         '<button class="cancel-reject-btn" data-id="' + request.id + '">반려</button>' +
       '</div>'
