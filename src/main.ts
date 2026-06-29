@@ -2908,7 +2908,19 @@ if (error) {
   alert('취소요청 조회 실패: ' + error.message)
   return
 }
+const paymentIds = (requests || [])
+  .map((request) => request.payment_id)
+  .filter((paymentId) => paymentId)
 
+const { data: cancelPayments, error: paymentError } = await supabase
+  .from('payments')
+  .select('*')
+  .in('id', paymentIds)
+
+if (paymentError) {
+  alert('결제정보 조회 실패: ' + paymentError.message)
+  return
+}
 workPanel.innerHTML =
 '<h3>취소 요청</h3>' +
 '<p>총 ' + ((requests || []).length) + '건</p>' +
@@ -2918,6 +2930,27 @@ workPanel.innerHTML =
   : (requests || []).map((request) =>
       '<div style="border:1px solid #ddd; border-radius:8px; padding:12px; margin-top:12px;">' +
         '<p><b>가맹점 ID</b> : ' + (request.merchant_id || '-') + '</p>' +
+        (() => {
+          const payment = (cancelPayments || []).find((item) =>
+            Number(item.id) === Number(request.payment_id)
+          )
+        
+          const amount = Number(payment?.amount || 0)
+          const feeAmount = Number(payment?.fee_amount || 0)
+          const settlementAmount = Number(payment?.settlement_amount || 0)
+          const cancelTransferFee = 500
+          const totalRefundDepositAmount = settlementAmount + cancelTransferFee
+        
+          return (
+            '<p><b>결제금액</b> : ' + amount.toLocaleString() + '원</p>' +
+            '<p><b>수수료</b> : ' + feeAmount.toLocaleString() + '원</p>' +
+            '<p><b>환수금액</b> : ' + settlementAmount.toLocaleString() + '원</p>' +
+            '<p><b>결제취소이체수수료</b> : ' + cancelTransferFee.toLocaleString() + '원</p>' +
+            '<p style="font-size:18px;font-weight:700;color:#d32f2f;">' +
+              '총 입금금액 : ' + totalRefundDepositAmount.toLocaleString() + '원' +
+            '</p>'
+          )
+        })() +
         '<p><b>결제 ID</b> : ' + (request.payment_id || '-') + '</p>' +
         '<p><b>사유</b> : ' + (request.reason || '-') + '</p>' +
         '<p><b>상태</b> : ' + (request.status || '-') + '</p>' +
