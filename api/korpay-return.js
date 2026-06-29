@@ -6,28 +6,26 @@ module.exports = function handler(req, res) {
 
   const body = req.body || {}
 
-  const params = new URLSearchParams({
-    source: 'kiosk',
-    orderId: body.orderNumber || '',
-    amount: body.amount || '',
-    paymentKey: body.paymentKey || '',
-    merchantId: body.reserved || '',
-  })
+  const orderId = encodeURIComponent(body.orderNumber || '')
+  const amount = encodeURIComponent(body.amount || '')
+  const paymentKey = encodeURIComponent(body.paymentKey || '')
+  const merchantId = encodeURIComponent(body.reserved || '')
 
   const redirectUrl =
-    'https://payment-app-ybtf.vercel.app/success?' + params.toString()
+    'https://payment-app-ybtf.vercel.app/success' +
+    '?source=kiosk' +
+    '&orderId=' + orderId +
+    '&amount=' + amount +
+    '&paymentKey=' + paymentKey +
+    '&merchantId=' + merchantId
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
-  res.status(200).send(`
-    <!doctype html>
-    <html>
-      <head>
-        <meta charset="utf-8" />
-        <script>
-          window.location.replace("${redirectUrl}");
-        </script>
-      </head>
-      <body>결제 완료 처리 중입니다...</body>
-    </html>
-  `)
+  res.status(200).send(
+    '<!doctype html>' +
+    '<html><head><meta charset="utf-8"></head>' +
+    '<body>' +
+    '<script>window.location.href="' + redirectUrl + '";</script>' +
+    '결제 완료 처리 중입니다...' +
+    '</body></html>'
+  )
 }
