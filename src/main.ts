@@ -3477,17 +3477,43 @@ paymentTableBody.innerHTML =
         '</div>' +
 
         '<div class="merchant-detail-section">' +
-          '<h3>PG / 단말기 정보</h3>' +
-          '<div class="merchant-detail-grid">' +
-            '<label>PG MID</label><input id="pg_mid" />' +
-            '<label>단말기 MID</label><input id="terminal_mid" />' +
-            '<label>개통번호</label><input id="open-number" />' +
-            '<label>관리번호</label><input id="manage-number" />' +
-            '<label>무선단말기 개통번호</label><input id="wireless-open-number" />' +
-            '<label>무선단말기 관리번호</label><input id="wireless-manage-number" />' +
-            '<label>코페이 mKey</label><input id="korpay_mkey" />' +
-          '</div>' +
-        '</div>' +
+  '<h3>PG / 단말기 정보</h3>' +
+
+  '<h4>코페이</h4>' +
+  '<div class="merchant-detail-grid">' +
+    '<label>코페이 PG MID</label><input id="korpay_pg_mid" />' +
+    '<label>코페이 PG Mkey</label><input id="korpay_pg_mkey" />' +
+    '<label>코페이 단말기 MID</label><input id="korpay_terminal_mid" />' +
+    '<label>코페이 단말기 Mkey</label><input id="korpay_terminal_mkey" />' +
+    '<label>코페이 수기 MID</label><input id="korpay_manual_mid" />' +
+    '<label>코페이 수기 Mkey</label><input id="korpay_manual_mkey" />' +
+  '</div>' +
+
+  '<h4>토스</h4>' +
+  '<div class="merchant-detail-grid">' +
+    '<label>토스 Client Key</label><input id="toss_client_key" />' +
+    '<label>토스 Secret Key</label><input id="toss_secret_key" />' +
+    '<label>토스 MID</label><input id="toss_mid" />' +
+  '</div>' +
+
+  '<h4>다우데이타</h4>' +
+  '<div class="merchant-detail-grid">' +
+    '<label>다우 PG MID</label><input id="daou_pg_mid" />' +
+    '<label>다우 PG Mkey</label><input id="daou_pg_mkey" />' +
+    '<label>다우 단말기 MID</label><input id="daou_terminal_mid" />' +
+    '<label>다우 단말기 Mkey</label><input id="daou_terminal_mkey" />' +
+    '<label>다우 수기 MID</label><input id="daou_manual_mid" />' +
+    '<label>다우 수기 Mkey</label><input id="daou_manual_mkey" />' +
+  '</div>' +
+
+  '<h4>기존 관리번호</h4>' +
+  '<div class="merchant-detail-grid">' +
+    '<label>개통번호</label><input id="open-number" />' +
+    '<label>관리번호</label><input id="manage-number" />' +
+    '<label>무선단말기 개통번호</label><input id="wireless-open-number" />' +
+    '<label>무선단말기 관리번호</label><input id="wireless-manage-number" />' +
+  '</div>' +
+'</div>' +
 
         '<div class="merchant-detail-section">' +
           '<h3>정산정보</h3>' +
