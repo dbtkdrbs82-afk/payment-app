@@ -648,9 +648,19 @@ setTimeout(() => {
           return
         }
 
-        alert('QR 결제로 전환 준비 중입니다.')
-return
-    
+        if (!merchantData.korpay_pg_mid || !merchantData.korpay_pg_mkey) {
+          alert('코페이 인증결제 MID 또는 MKEY가 등록되지 않았습니다.')
+          return
+        }
+        
+        alert(
+          '코페이 인증결제 준비 완료\n\n' +
+          'MID 등록 확인됨\n' +
+          'MKEY 등록 확인됨'
+        )
+        
+        return
+        
         const tossPayments = await loadTossPayments(clientKey)
     
         sessionStorage.setItem('merchantId', String(merchantData.id))
@@ -9870,7 +9880,7 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
 
     const { data: payMerchant, error: payMerchantError } = await supabase
   .from('merchants')
-  .select('pg_mid, korpay_mkey, merchant_name')
+  .select('korpay_pg_mid, korpay_pg_mkey, merchant_name')
   .eq('id', Number(merchantId))
   .single()
    
@@ -9884,21 +9894,21 @@ if (payMerchantError || !payMerchant) {
   return
 }
 
-if (!payMerchant.pg_mid || !payMerchant.korpay_mkey) {
-  alert(' MID 또는 mKey가 등록되지 않았습니다.')
+if (!payMerchant.korpay_pg_mid || !payMerchant.korpay_pg_mkey) {
+  alert('코페이 PG MID 또는 MKEY가 등록되지 않았습니다.')
   return
 }
 
 const ediDate = getKorpayEdiDate()
 const hashKey = await createKorpayHash(
-  payMerchant.pg_mid,
+  payMerchant.korpay_pg_mid,
   ediDate,
   totalPrice,
-  payMerchant.korpay_mkey
+  payMerchant.korpay_pg_mkey
 )
 
 const paymentData = {
-  merchantId: payMerchant.pg_mid,
+  merchantId: payMerchant.korpay_pg_mid,
   productName: 'NXG 미니상점 주문',
   orderNumber: orderNo.replace(/[^a-zA-Z0-9]/g, ''),
   amount: totalPrice,
