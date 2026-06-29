@@ -2258,19 +2258,23 @@ const source = params.get('source')
 const merchantId =
   params.get('merchantId') || sessionStorage.getItem('merchantId')
 
-const merchantName =
-  params.get('merchantName') || sessionStorage.getItem('merchantName')
+let merchantName =
+  params.get('merchantName') || sessionStorage.getItem('merchantName') || ''
 
   let feeRate = 0
 
 if (merchantId) {
   const { data: merchantFeeData } = await supabase
     .from('merchants')
-    .select('fee_rate')
+    .select('fee_rate, merchant_name')
     .eq('id', Number(merchantId))
     .maybeSingle()
 
   feeRate = Number(merchantFeeData?.fee_rate || 0)
+
+  if (!merchantName) {
+    merchantName = merchantFeeData?.merchant_name || ''
+  }
 }
 
 const paymentAmount = Number(amount)
@@ -2307,7 +2311,7 @@ if (existingPayment) {
       message: message,
       merchant_id: merchantId ? Number(merchantId) : null,
       merchant_name: merchantName,
-      pg_company: '토스페이먼츠'
+      pg_company: source === 'kiosk' ? '코페이' : '토스페이먼츠'
     }
   ])
 
@@ -2761,12 +2765,12 @@ if (summaryBox) {
              '<td>' + (index + 1) + '</td>' +
              '<td>' + formatDate(payment.created_at) + '<br/>' + (payment.order_id || '-') + '</td>' +
              '<td>-<br/>' + (payment.payment_key || '-') + '</td>' +
-             '<td>' + (payment.event_id || '-') + '<br/>-</td>' +
+             '<td>' + (payment.merchant_name || '-') + '<br/>' + (payment.merchant_id || '-') + '</td>' +
              '<td>-<br/>-</td>' +
              '<td>-</td>' +
              '<td>-<br/>-</td>' +
              '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-             '<td>온라인<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+             '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
              '<td>0원<br/>0원</td>' +
              '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>'
        
@@ -5904,12 +5908,12 @@ payments.forEach((payment, index) => {
     '<td>' + (index + 1) + '</td>' +
     '<td>' + formatDate(payment.created_at) + '<br/>' + (payment.order_id || '-') + '</td>' +
     '<td>-<br/>' + (payment.payment_key || '-') + '</td>' +
-    '<td>' + (payment.event_id || '-') + '<br/>-</td>' +
+    '<td>' + (payment.merchant_name || '-') + '<br/>' + (payment.merchant_id || '-') + '</td>' +
     '<td>-<br/>' + (payment.sender_name || '-') + '</td>' +
     '<td>' + (payment.message || '-') + '</td>' +
     '<td>-<br/>일시불</td>' +
     '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-    '<td>온라인<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+    '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
     '<td>0원<br/>0원</td>' +
     '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
 '<td>' +
@@ -10015,7 +10019,7 @@ const { error: paymentSaveError } = await supabase
     merchant_id: Number(merchantId),
     merchant_name: merchantData?.merchant_name || '',
     order_status: '준비중',
-    pg_company: '토스페이먼츠'
+    pg_company: '코페이'
   })
 
 if (paymentSaveError) {
