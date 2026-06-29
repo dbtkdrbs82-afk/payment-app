@@ -663,11 +663,11 @@ return
           orderName: orderName,
           customerName: merchantData.merchant_name,
           successUrl:
-            window.location.origin +
-            '/success?merchantId=' +
-            merchantData.id +
-            '&merchantName=' +
-            encodeURIComponent(merchantData.merchant_name),
+  window.location.origin +
+  '/success?source=kiosk&merchantId=' +
+  merchantData.id +
+  '&merchantName=' +
+  encodeURIComponent(merchantData.merchant_name),
           failUrl: window.location.origin + '/fail',
         })
       })
@@ -2243,6 +2243,8 @@ const currentEventType =
 const senderName = sessionStorage.getItem('senderName')
 const message = sessionStorage.getItem('message')
 
+const source = params.get('source')
+
 const merchantId =
   params.get('merchantId') || sessionStorage.getItem('merchantId')
 
@@ -2303,6 +2305,30 @@ if (existingPayment) {
     alert('DB 저장 실패: ' + error.message)
   } else {
     alert('DB 저장 성공')
+  }
+  if (source === 'kiosk') {
+    const orderNo = sessionStorage.getItem('kiosk_order_no')
+    const merchantId = sessionStorage.getItem('kiosk_merchant_id')
+    const itemsText = sessionStorage.getItem('kiosk_items')
+    const totalAmount = sessionStorage.getItem('kiosk_total_amount')
+  
+    if (orderNo && merchantId && totalAmount) {
+      const items = itemsText ? JSON.parse(itemsText) : []
+  
+      await supabase.from('orders').insert({
+        merchant_id: Number(merchantId),
+        order_no: orderNo,
+        items,
+        total_amount: Number(totalAmount),
+        order_status: '접수',
+        payment_status: '결제완료',
+      })
+  
+      sessionStorage.removeItem('kiosk_order_no')
+      sessionStorage.removeItem('kiosk_merchant_id')
+      sessionStorage.removeItem('kiosk_items')
+      sessionStorage.removeItem('kiosk_total_amount')
+    }
   }
 }
 window.history.replaceState({}, '', '/success')
