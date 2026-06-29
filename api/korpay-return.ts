@@ -9,7 +9,8 @@ export default async function handler(req: any, res: any) {
     merchantId: body.reserved || '',
   })
 
-  const redirectUrl = `/success?${params.toString()}`
+  const redirectUrl =
+    'https://payment-app-ybtf.vercel.app/success?' + params.toString()
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8')
   res.status(200).send(`
@@ -18,7 +19,7 @@ export default async function handler(req: any, res: any) {
       <head>
         <meta charset="utf-8" />
         <script>
-          window.location.href = "${redirectUrl}";
+          window.location.replace("${redirectUrl}");
         </script>
       </head>
       <body>
