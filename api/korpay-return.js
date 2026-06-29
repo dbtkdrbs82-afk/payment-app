@@ -1,4 +1,9 @@
-export default async function handler(req: any, res: any) {
+module.exports = function handler(req, res) {
+  if (req.method === 'GET') {
+    res.status(200).send('korpay-return api ok')
+    return
+  }
+
   const body = req.body || {}
 
   const params = new URLSearchParams({
@@ -22,9 +27,7 @@ export default async function handler(req: any, res: any) {
           window.location.replace("${redirectUrl}");
         </script>
       </head>
-      <body>
-        결제 완료 처리 중입니다...
-      </body>
+      <body>결제 완료 처리 중입니다...</body>
     </html>
   `)
 }
