@@ -4454,6 +4454,8 @@ merchantButtons.forEach((button) => {
 
   '</div>' +
 '</div>' +
+'</div>' +
+'</div>' +
     
             '<div class="merchant-detail-section">' +
   '<h3>정산정보</h3>' +
