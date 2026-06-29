@@ -4424,10 +4424,36 @@ merchantButtons.forEach((button) => {
 '<div class="merchant-detail-section">' +
   '<h3>PG / 단말기 정보</h3>' +
   '<div class="merchant-detail-grid">' +
-    '<label>PG MID</label><input id="pg_mid" value="' + (merchant.pg_mid || '') + '" />' +
-    '<label>단말기 MID</label><input id="terminal_mid" value="' + (merchant.terminal_mid || '') + '" />' +
+    '<div class="merchant-detail-section">' +
+  '<h3>PG / 단말기 정보</h3>' +
+  '<div class="merchant-detail-grid">' +
 
-    '<label>코페이 mKey</label><input id="korpay_mkey" value="' + (merchant.korpay_mkey || '') + '" />' +
+    '<label>코페이 PG MID</label><input id="korpay_pg_mid" value="' + (merchant.korpay_pg_mid || '') + '" />' +
+    '<label>코페이 PG MKEY</label><input id="korpay_pg_mkey" value="' + (merchant.korpay_pg_mkey || '') + '" />' +
+
+    '<label>코페이 단말기 MID</label><input id="korpay_terminal_mid" value="' + (merchant.korpay_terminal_mid || '') + '" />' +
+    '<label>코페이 단말기 MKEY</label><input id="korpay_terminal_mkey" value="' + (merchant.korpay_terminal_mkey || '') + '" />' +
+
+    '<label>코페이 수기 MID</label><input id="korpay_manual_mid" value="' + (merchant.korpay_manual_mid || '') + '" />' +
+    '<label>코페이 수기 MKEY</label><input id="korpay_manual_mkey" value="' + (merchant.korpay_manual_mkey || '') + '" />' +
+
+    '<label>토스 Client Key</label><input id="toss_client_key" value="' + (merchant.toss_client_key || '') + '" />' +
+    '<label>토스 Secret Key</label><input id="toss_secret_key" value="' + (merchant.toss_secret_key || '') + '" />' +
+
+    '<label>토스 MID</label><input id="toss_mid" value="' + (merchant.toss_mid || '') + '" />' +
+    '<label></label><div></div>' +
+
+    '<label>다우 PG MID</label><input id="daou_pg_mid" value="' + (merchant.daou_pg_mid || '') + '" />' +
+    '<label>다우 PG MKEY</label><input id="daou_pg_mkey" value="' + (merchant.daou_pg_mkey || '') + '" />' +
+
+    '<label>다우 단말기 MID</label><input id="daou_terminal_mid" value="' + (merchant.daou_terminal_mid || '') + '" />' +
+    '<label>다우 단말기 MKEY</label><input id="daou_terminal_mkey" value="' + (merchant.daou_terminal_mkey || '') + '" />' +
+
+    '<label>다우 수기 MID</label><input id="daou_manual_mid" value="' + (merchant.daou_manual_mid || '') + '" />' +
+    '<label>다우 수기 MKEY</label><input id="daou_manual_mkey" value="' + (merchant.daou_manual_mkey || '') + '" />' +
+
+  '</div>' +
+'</div>' +
 
   '</div>' +
 '</div>' +
