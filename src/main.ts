@@ -4424,9 +4424,6 @@ merchantButtons.forEach((button) => {
 '<div class="merchant-detail-section">' +
   '<h3>PG / 단말기 정보</h3>' +
   '<div class="merchant-detail-grid">' +
-    '<div class="merchant-detail-section">' +
-  '<h3>PG / 단말기 정보</h3>' +
-  '<div class="merchant-detail-grid">' +
 
     '<label>코페이 PG MID</label><input id="korpay_pg_mid" value="' + (merchant.korpay_pg_mid || '') + '" />' +
     '<label>코페이 PG MKEY</label><input id="korpay_pg_mkey" value="' + (merchant.korpay_pg_mkey || '') + '" />' +
