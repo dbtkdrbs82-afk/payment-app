@@ -9905,6 +9905,37 @@ korpay.payment('https://payments.korpay.com/v1', paymentData, {
             payment_status: '결제완료',
           })
   
+          const { data: merchantData } = await supabase
+  .from('merchants')
+  .select('merchant_name, fee_rate')
+  .eq('id', Number(merchantId))
+  .maybeSingle()
+
+const kioskAmount = Number(totalAmount)
+const kioskFeeRate = Number(merchantData?.fee_rate || 0)
+const kioskFeeAmount = Math.floor(kioskAmount * kioskFeeRate / 100)
+const kioskSettlementAmount = kioskAmount - kioskFeeAmount
+
+const { error: paymentSaveError } = await supabase
+  .from('payments')
+  .insert({
+    order_id: orderNo,
+    payment_key: 'kiosk-' + orderNo,
+    amount: kioskAmount,
+    fee_rate: kioskFeeRate,
+    fee_amount: kioskFeeAmount,
+    settlement_amount: kioskSettlementAmount,
+    status: 'paid',
+    merchant_id: Number(merchantId),
+    merchant_name: merchantData?.merchant_name || '',
+    order_status: '준비중',
+    pg_company: '토스페이먼츠'
+  })
+
+if (paymentSaveError) {
+  alert('결제내역 저장 실패: ' + paymentSaveError.message)
+}
+
         if (error) {
           app.innerHTML = `
             <div class="page">
