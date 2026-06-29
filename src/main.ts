@@ -9931,8 +9931,7 @@ const korpay = (window as any).KorpaySdk
 
 korpay.paymentTimeout = 30000
 
-alert(' 웹승인 MKEY 수신 후 결제 연결 예정입니다.')
-return
+
 
 korpay.payment('https://payments.korpay.com/v1', paymentData, {
     onStart: () => {
