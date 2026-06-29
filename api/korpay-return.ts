@@ -9,9 +9,21 @@ export default async function handler(req: any, res: any) {
     merchantId: body.reserved || '',
   })
 
-  res.writeHead(302, {
-    Location: `/success?${params.toString()}`
-  })
+  const redirectUrl = `/success?${params.toString()}`
 
-  res.end()
+  res.setHeader('Content-Type', 'text/html; charset=utf-8')
+  res.status(200).send(`
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <script>
+          window.location.href = "${redirectUrl}";
+        </script>
+      </head>
+      <body>
+        결제 완료 처리 중입니다...
+      </body>
+    </html>
+  `)
 }
