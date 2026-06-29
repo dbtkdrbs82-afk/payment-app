@@ -4570,18 +4570,7 @@ merchantButtons.forEach((button) => {
     const feeRate =
       Number(document.querySelector<HTMLInputElement>('#fee-rate')?.value || 0)
 
-      console.log('저장할 값 확인', {
-        business_number: document.querySelector<HTMLInputElement>('#business_number')?.value,
-        email: document.querySelector<HTMLInputElement>('#email')?.value,
-        zipcode: document.querySelector<HTMLInputElement>('#zipcode')?.value,
-        address: document.querySelector<HTMLInputElement>('#address')?.value,
-        address_detail: document.querySelector<HTMLInputElement>('#address_detail')?.value,
-        cpid: document.querySelector<HTMLInputElement>('#cpid')?.value,
-        pg_mid: document.querySelector<HTMLInputElement>('#pg_mid')?.value,
-        terminal_mid: document.querySelector<HTMLInputElement>('#terminal_mid')?.value,
-        korpay_mkey: document.querySelector<HTMLInputElement>('#korpay_mkey')?.value,
-        opened_at: document.querySelector<HTMLInputElement>('#opened_at')?.value
-      })
+      
 
       const getValue = (id: string) =>
   (document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null)?.value || ''
@@ -4601,9 +4590,23 @@ merchantButtons.forEach((button) => {
         address: getValue('address'),
         address_detail: getValue('address_detail'),
         cpid: getValue('cpid'),
-        pg_mid: getValue('pg_mid'),
-        terminal_mid: getValue('terminal_mid'),
-        korpay_mkey: getValue('korpay_mkey'),
+        korpay_pg_mid: getValue('korpay_pg_mid'),
+korpay_pg_mkey: getValue('korpay_pg_mkey'),
+korpay_terminal_mid: getValue('korpay_terminal_mid'),
+korpay_terminal_mkey: getValue('korpay_terminal_mkey'),
+korpay_manual_mid: getValue('korpay_manual_mid'),
+korpay_manual_mkey: getValue('korpay_manual_mkey'),
+
+toss_client_key: getValue('toss_client_key'),
+toss_secret_key: getValue('toss_secret_key'),
+toss_mid: getValue('toss_mid'),
+
+daou_pg_mid: getValue('daou_pg_mid'),
+daou_pg_mkey: getValue('daou_pg_mkey'),
+daou_terminal_mid: getValue('daou_terminal_mid'),
+daou_terminal_mkey: getValue('daou_terminal_mkey'),
+daou_manual_mid: getValue('daou_manual_mid'),
+daou_manual_mkey: getValue('daou_manual_mkey'),
         opened_at: getValue('opened_at') || null,
       
         bank_name: getValue('bank_name'),
