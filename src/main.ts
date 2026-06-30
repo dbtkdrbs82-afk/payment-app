@@ -9936,7 +9936,13 @@ const korpay = (window as any).KorpaySdk
 korpay.paymentTimeout = 30000
 
 
+console.log('mobile userAgent:', navigator.userAgent)
+console.log('korpay orderNo:', orderNo)
 
+alert(
+  'User-Agent:\n' + navigator.userAgent +
+  '\n\n주문번호:\n' + orderNo
+)
 korpay.payment('https://payments.korpay.com/v1', paymentData, {
     onStart: () => {
       const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
