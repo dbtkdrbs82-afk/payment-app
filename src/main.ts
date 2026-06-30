@@ -5908,7 +5908,7 @@ payments.forEach((payment, index) => {
     '<td>' + (index + 1) + '</td>' +
     '<td>' + formatDate(payment.created_at) + '<br/>' + (payment.order_id || '-') + '</td>' +
     '<td>-<br/>' + (payment.payment_key || '-') + '</td>' +
-    '<td>' + (payment.merchant_name || '-') + '<br/>' + (payment.merchant_id || '-') + '</td>' +
+    '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
     '<td>-<br/>' + (payment.sender_name || '-') + '</td>' +
     '<td>' + (payment.message || '-') + '</td>' +
     '<td>-<br/>일시불</td>' +
@@ -9943,7 +9943,10 @@ alert(
   'User-Agent:\n' + navigator.userAgent +
   '\n\n주문번호:\n' + orderNo
 )
-korpay.payment('https://payments.korpay.com/v1', paymentData, {
+korpay.payment(
+  'https://staging-payments.korpay.com/v1',
+  paymentData,
+  {
     onStart: () => {
       const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
       if (payButton) {
