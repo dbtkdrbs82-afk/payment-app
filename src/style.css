@@ -4838,3 +4838,11 @@ display: grid !important;
   font-weight: 800;
   line-height: 1.7;
 }
+.admin-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-table {
+  min-width: 1800px;
+}
