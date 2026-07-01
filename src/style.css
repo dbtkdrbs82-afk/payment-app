@@ -4849,22 +4849,24 @@ display: grid !important;
 /* 결제관리 테이블 압축 */
 .payment-table-scroll {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
 }
 
 .payment-admin-table {
-  min-width: 1500px;
+  width: 100%;
+  min-width: 0;
   table-layout: fixed;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .payment-admin-table th,
 .payment-admin-table td {
-  padding: 6px 5px;
-  font-size: 12px;
-  line-height: 1.35;
+  padding: 5px 3px;
+  font-size: 11px;
+  line-height: 1.3;
   white-space: normal;
   word-break: break-all;
+  text-align: center;
 }
 
 .payment-admin-table th:nth-child(1),
@@ -4874,55 +4876,61 @@ display: grid !important;
 
 .payment-admin-table th:nth-child(2),
 .payment-admin-table td:nth-child(2) {
-  width: 170px;
+  width: 210px;
 }
 
 .payment-admin-table th:nth-child(3),
 .payment-admin-table td:nth-child(3) {
-  width: 260px;
+  width: 310px;
 }
 
 .payment-admin-table th:nth-child(4),
 .payment-admin-table td:nth-child(4) {
-  width: 150px;
+  width: 190px;
 }
 
 .payment-admin-table th:nth-child(5),
 .payment-admin-table td:nth-child(5) {
-  width: 150px;
+  width: 190px;
 }
 
 .payment-admin-table th:nth-child(6),
 .payment-admin-table td:nth-child(6) {
-  width: 100px;
+  width: 130px;
 }
 
 .payment-admin-table th:nth-child(7),
 .payment-admin-table td:nth-child(7) {
-  width: 90px;
+  width: 120px;
 }
 
 .payment-admin-table th:nth-child(8),
 .payment-admin-table td:nth-child(8) {
-  width: 95px;
+  width: 125px;
 }
 
 .payment-admin-table th:nth-child(9),
 .payment-admin-table td:nth-child(9) {
-  width: 95px;
+  width: 125px;
 }
 
 .payment-admin-table th:nth-child(10),
 .payment-admin-table td:nth-child(10) {
-  width: 80px;
+  width: 110px;
 }
 
 .payment-admin-table th:nth-child(11),
 .payment-admin-table td:nth-child(11) {
-  width: 105px;
+  width: 140px;
 }
 
 .payment-admin-table th:nth-child(12),
 .payment-admin-table td:nth-child(12) {
-  width: 75px;
+  width: 85px;
+}
+
+.payment-admin-table button {
+  padding: 8px 12px;
+  font-size: 12px;
+  min-width: 60px;
 }
