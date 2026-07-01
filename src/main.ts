@@ -4362,7 +4362,7 @@ merchantButtons.forEach((button) => {
                 '<label>CPID</label><input id="cpid" value="' + (merchant.cpid || ('MER' + String(merchant.id).padStart(4, '0'))) + '" />' +
                 '<label>사업자번호</label><input id="business_number" value="' + (merchant.business_number || '') + '" />' +
                 '<label>운영상태</label>' +
-'<select>' +
+'<select id="merchant_status">' +
   '<option ' + (merchant.status === '신청' ? 'selected' : '') + '>신청</option>' +
   '<option ' + (merchant.status === '심사중' ? 'selected' : '') + '>심사중</option>' +
   '<option ' + (merchant.status === '운영' ? 'selected' : '') + '>운영</option>' +
