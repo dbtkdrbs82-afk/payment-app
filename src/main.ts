@@ -6067,8 +6067,32 @@ const date = target.dataset.date
           document.querySelector('#admin-receipt-modal')?.remove()
         })
     })
-  })
+    document.querySelectorAll('.payment-cancel-btn')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const paymentId = Number((button as HTMLElement).dataset.id)
 
+      if (!confirm('이 결제를 취소 처리할까요?')) {
+        return
+      }
+
+      const { error } = await supabase
+        .from('payments')
+        .update({
+          status: 'cancel'
+        })
+        .eq('id', paymentId)
+
+      if (error) {
+        alert('취소 처리 실패: ' + error.message)
+        return
+      }
+
+      alert('취소 처리되었습니다.')
+      location.reload()
+    })
+  })
+  })
 }
 })
 })
