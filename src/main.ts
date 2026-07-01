@@ -5915,7 +5915,8 @@ payments.forEach((payment, index) => {
     'data-merchant="' + (payment.merchant_name || '') + '" ' +
     'data-pg="' + (payment.pg_company || '토스페이먼츠') + '" ' +
     'data-merchant-id="' + (payment.merchant_id || '') + '" ' +
-    'data-date="' + (payment.created_at || '') + '"' +
+    'data-date="' + (payment.created_at || '') + '" ' +
+    'data-status="' + (payment.status || '') + '"' +
   '>' +
     (payment.order_id || '-') +
   '</button>' +
@@ -5948,6 +5949,10 @@ document.querySelectorAll('.admin-receipt-btn')
       const amount = Number(target.dataset.amount || 0)
       const sender = target.dataset.sender || '-'
       const merchant = target.dataset.merchant || '-'
+      const status = target.dataset.status || ''
+      const isCanceled = status === 'cancel'
+
+      console.log('status =', status)
 
 
 
@@ -5966,7 +5971,7 @@ const date = target.dataset.date
       
             <div class="receipt-header">
               <h2>NXG PICK</h2>
-              <h3>신용카드 매출전표 <span>(승인)</span></h3>
+              <h3>신용카드 매출전표 <span>${isCanceled ? '(취소)' : '(승인)'}</span></h3>
             </div>
       
             <section>
@@ -5980,7 +5985,7 @@ const date = target.dataset.date
                 </tr>
                 <tr>
                   <th>거래종류</th>
-                  <td>승인성공</td>
+                  <td>${isCanceled ? '취소완료' : '승인성공'}</td>
                   <th>할부개월</th>
                   <td>일시불</td>
                 </tr>
