@@ -5906,7 +5906,7 @@ payments.forEach((payment, index) => {
     '<td>' + (index + 1) + '</td>' +
     '<td>' +
   formatDate(payment.created_at) + '<br/>' +
-  '<button ' +
+  '<button type="button" ' +
     'class="admin-receipt-btn admin-receipt-link" ' +
     'data-order="' + (payment.order_id || '') + '" ' +
     'data-order-number="' + (payment.order_number || '') + '" ' +
@@ -5922,7 +5922,7 @@ payments.forEach((payment, index) => {
   '</button>' +
 '</td>' +
     '<td>' +
-  '<button class="payment-cancel-link" data-id="' + payment.id + '">' +
+  '<button type="button" class="payment-cancel-link" data-id="' + payment.id + '">' +
     (payment.status === 'cancel' ? '취소완료' : '-') +
     '<br/>' +
     '<span title="' + (payment.payment_key || '-') + '">' +
@@ -6074,7 +6074,10 @@ const date = target.dataset.date
       })
       document.querySelectorAll('.payment-cancel-link')
   .forEach((button) => {
-    button.addEventListener('click', async () => {
+    button.addEventListener('click', async (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+
       const paymentId = Number((button as HTMLElement).dataset.id)
 
       const cancelConfirm = window.confirm('이 결제를 취소 처리할까요?')
