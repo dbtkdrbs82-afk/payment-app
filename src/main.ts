@@ -5935,19 +5935,6 @@ payments.forEach((payment, index) => {
   '>' +
     '보기' +
 '</button>' +
-
-'<button ' +
-  'class="admin-payment-cancel-btn" ' +
-  'data-id="' + payment.id + '" ' +
-  'data-order="' + (payment.order_id || '') + '" ' +
-  'data-payment-key="' + (payment.payment_key || '') + '" ' +
-  'data-pg="' + (payment.pg_company || '') + '" ' +
-  'data-amount="' + (payment.amount || 0) + '" ' +
-  'style="display:block; margin-top:6px; width:100%; background:#dc2626; color:white; border:none; border-radius:6px; padding:6px 10px; cursor:pointer;"' +
-'>' +
-  '취소' +
-'</button>' +
-
 '</td>'
 
 paymentTableBody.appendChild(tr)
