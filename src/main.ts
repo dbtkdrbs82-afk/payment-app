@@ -5934,7 +5934,7 @@ payments.forEach((payment, index) => {
     '<td>-<br/>일시불</td>' +
     '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
     '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-    '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+    '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' 
 
 
 paymentTableBody.appendChild(tr)
