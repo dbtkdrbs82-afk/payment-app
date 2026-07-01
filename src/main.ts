@@ -5900,9 +5900,7 @@ if (tableHead) {
       '<th>카드번호<br/>할부구분</th>' +
       '<th>결제수단<br/>결제금액</th>' +
       '<th>거래방식<br/>물품금액</th>' +
-      '<th>부가세<br/>봉사료</th>' +
       '<th>거래수수료<br/>가맹점금액</th>' +
-      '<th>영수증</th>' +
     '</tr>'
 }
 
@@ -5913,19 +5911,10 @@ payments.forEach((payment, index) => {
 
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
-    '<td>' + formatDate(payment.created_at) + '<br/>' + (payment.order_id || '-') + '</td>' +
-    '<td>-<br/>' + (payment.payment_key || '-') + '</td>' +
-    '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
-    '<td>-<br/>' + (payment.sender_name || '-') + '</td>' +
-    '<td>' + (payment.message || '-') + '</td>' +
-    '<td>-<br/>일시불</td>' +
-    '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-    '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-    '<td>0원<br/>0원</td>' +
-    '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-'<td>' +
+    '<td>' +
+  formatDate(payment.created_at) + '<br/>' +
   '<button ' +
-    'class="admin-receipt-btn" ' +
+    'class="admin-receipt-btn admin-receipt-link" ' +
     'data-order="' + (payment.order_id || '') + '" ' +
     'data-order-number="' + (payment.order_number || '') + '" ' +
     'data-amount="' + (payment.amount || 0) + '" ' +
@@ -5935,9 +5924,18 @@ payments.forEach((payment, index) => {
     'data-merchant-id="' + (payment.merchant_id || '') + '" ' +
     'data-date="' + (payment.created_at || '') + '"' +
   '>' +
-    '보기' +
-'</button>' +
-'</td>'
+    (payment.order_id || '-') +
+  '</button>' +
+'</td>' +
+    '<td>-<br/>' + (payment.payment_key || '-') + '</td>' +
+    '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
+    '<td>-<br/>' + (payment.sender_name || '-') + '</td>' +
+    '<td>' + (payment.message || '-') + '</td>' +
+    '<td>-<br/>일시불</td>' +
+    '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+    '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+    '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+
 
 paymentTableBody.appendChild(tr)
 })
