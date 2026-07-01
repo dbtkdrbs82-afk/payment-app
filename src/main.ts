@@ -6005,7 +6005,10 @@ const date = target.dataset.date
       
             <div class="receipt-header">
               <h2>NXG PICK</h2>
-              <h3>신용카드 매출전표 <span>${isCanceled ? '(취소)' : '(승인)'}</span></h3>
+              <h3 class="${isCanceled ? 'receipt-cancel-title' : 'receipt-approve-title'}">
+  신용카드 매출전표
+  <span>${isCanceled ? '(취소)' : '(승인)'}</span>
+</h3>
             </div>
       
             <section>
@@ -6019,7 +6022,9 @@ const date = target.dataset.date
                 </tr>
                 <tr>
                   <th>거래종류</th>
-                  <td>${isCanceled ? '취소완료' : '승인성공'}</td>
+                  <td class="${isCanceled ? 'receipt-cancel-text' : 'receipt-approve-text'}">
+  ${isCanceled ? '취소완료' : '승인성공'}
+</td>
                   <th>할부개월</th>
                   <td>일시불</td>
                 </tr>
@@ -6049,10 +6054,10 @@ const date = target.dataset.date
                   <tr><th>부가세</th><td>${(amount - Math.floor(amount / 1.1)).toLocaleString()}원</td></tr>
                   <tr><th>주문금액</th><td>${amount.toLocaleString()}원</td></tr>
                   <tr><th>할인금액</th><td>0원</td></tr>
-                  <tr class="receipt-total">
-                    <th>총 결제금액</th>
-                    <td>${amount.toLocaleString()}원</td>
-                  </tr>
+                  <tr class="${isCanceled ? 'receipt-total receipt-total-cancel' : 'receipt-total'}">
+  <th>총 결제금액</th>
+  <td>${isCanceled ? '-' : ''}${amount.toLocaleString()}원</td>
+</tr>
                 </table>
               </section>
             </div>

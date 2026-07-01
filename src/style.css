@@ -4960,3 +4960,34 @@ display: grid !important;
   font-weight: 700;
   color: #dc2626;
 }
+/* 승인 */
+.receipt-approve-title{
+  color:#0d4fa8;
+}
+
+.receipt-approve-text{
+  color:#0d4fa8;
+  font-weight:700;
+}
+
+/* 취소 */
+.receipt-cancel-title{
+  color:#d32f2f;
+}
+
+.receipt-cancel-title span{
+  color:#d32f2f;
+  font-weight:700;
+}
+
+.receipt-cancel-text{
+  color:#d32f2f;
+  font-weight:700;
+}
+
+.receipt-total-cancel{
+  background:#d32f2f;
+  color:#fff;
+  font-size:28px;
+  font-weight:700;
+}
