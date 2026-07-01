@@ -6077,9 +6077,11 @@ const date = target.dataset.date
     button.addEventListener('click', async () => {
       const paymentId = Number((button as HTMLElement).dataset.id)
 
-      if (!confirm('이 결제를 취소 처리할까요?')) {
-        return
-      }
+      const cancelConfirm = window.confirm('이 결제를 취소 처리할까요?')
+
+if (!cancelConfirm) {
+  return
+}
 
       const { error } = await supabase
         .from('payments')
