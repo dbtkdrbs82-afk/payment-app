@@ -2706,7 +2706,9 @@ if (adminUser && !adminLoginError) {
        const searchBtn = document.querySelector('.search-btn')
        const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
-       
+   
+  document.querySelector('.admin-table-scroll')?.classList.add('payment-table-scroll')
+document.querySelector('.admin-table')?.classList.add('payment-admin-table')
        function formatDate(dateText: string) {
         if (!dateText) return '-'
       

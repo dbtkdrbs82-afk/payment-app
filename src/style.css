@@ -4846,3 +4846,83 @@ display: grid !important;
 .admin-table {
   min-width: 1800px;
 }
+/* 결제관리 테이블 압축 */
+.payment-table-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.payment-admin-table {
+  min-width: 1500px;
+  table-layout: fixed;
+  font-size: 12px;
+}
+
+.payment-admin-table th,
+.payment-admin-table td {
+  padding: 6px 5px;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-all;
+}
+
+.payment-admin-table th:nth-child(1),
+.payment-admin-table td:nth-child(1) {
+  width: 45px;
+}
+
+.payment-admin-table th:nth-child(2),
+.payment-admin-table td:nth-child(2) {
+  width: 170px;
+}
+
+.payment-admin-table th:nth-child(3),
+.payment-admin-table td:nth-child(3) {
+  width: 260px;
+}
+
+.payment-admin-table th:nth-child(4),
+.payment-admin-table td:nth-child(4) {
+  width: 150px;
+}
+
+.payment-admin-table th:nth-child(5),
+.payment-admin-table td:nth-child(5) {
+  width: 150px;
+}
+
+.payment-admin-table th:nth-child(6),
+.payment-admin-table td:nth-child(6) {
+  width: 100px;
+}
+
+.payment-admin-table th:nth-child(7),
+.payment-admin-table td:nth-child(7) {
+  width: 90px;
+}
+
+.payment-admin-table th:nth-child(8),
+.payment-admin-table td:nth-child(8) {
+  width: 95px;
+}
+
+.payment-admin-table th:nth-child(9),
+.payment-admin-table td:nth-child(9) {
+  width: 95px;
+}
+
+.payment-admin-table th:nth-child(10),
+.payment-admin-table td:nth-child(10) {
+  width: 80px;
+}
+
+.payment-admin-table th:nth-child(11),
+.payment-admin-table td:nth-child(11) {
+  width: 105px;
+}
+
+.payment-admin-table th:nth-child(12),
+.payment-admin-table td:nth-child(12) {
+  width: 75px;
+}
