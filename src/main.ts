@@ -6003,7 +6003,7 @@ const date = target.dataset.date
         <div id="admin-receipt-modal" class="receipt-modal">
           <div class="receipt-box receipt-approve">
       
-            <div class="receipt-header">
+            <div class="receipt-header ${isCanceled ? 'receipt-cancel-mode' : 'receipt-approve-mode'}">
               <h2>NXG PICK</h2>
               <h3 class="${isCanceled ? 'receipt-cancel-title' : 'receipt-approve-title'}">
   신용카드 매출전표

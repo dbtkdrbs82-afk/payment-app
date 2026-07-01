@@ -4991,3 +4991,41 @@ display: grid !important;
   font-size:28px;
   font-weight:700;
 }
+/* 취소 영수증 빨간 테마 */
+.receipt-cancel-mode {
+  border-bottom-color: #d00000;
+}
+
+.receipt-cancel-mode h2,
+.receipt-cancel-mode h3 {
+  color: #d00000;
+}
+
+.receipt-cancel-mode + section h4,
+.receipt-cancel-mode ~ section h4 {
+  color: #d00000;
+}
+
+#admin-receipt-modal .receipt-cancel-mode ~ section table,
+#admin-receipt-modal .receipt-cancel-mode ~ div table {
+  border-color: #ff9b9b;
+}
+
+#admin-receipt-modal .receipt-cancel-mode ~ section th,
+#admin-receipt-modal .receipt-cancel-mode ~ div th {
+  color: #c40000;
+  background: #fff1f1;
+  border-color: #ff9b9b;
+}
+
+#admin-receipt-modal .receipt-cancel-mode ~ section td,
+#admin-receipt-modal .receipt-cancel-mode ~ div td {
+  border-color: #ff9b9b;
+}
+
+#admin-receipt-modal .receipt-total-cancel th,
+#admin-receipt-modal .receipt-total-cancel td {
+  background: #d00000 !important;
+  color: #fff !important;
+  font-weight: 800;
+}
