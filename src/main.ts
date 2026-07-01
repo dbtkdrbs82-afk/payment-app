@@ -4334,27 +4334,27 @@ merchantButtons.forEach((button) => {
               '<h3>등록정보</h3>' +
               '<div class="merchant-detail-grid">' +
 '<label>등록구분</label>' +
-'<select>' +
+'<select id="register_type">' +
   '<option ' + (merchant.register_type === '가맹점' ? 'selected' : '') + '>가맹점</option>' +
   '<option ' + (merchant.register_type === '담당자' ? 'selected' : '') + '>담당자</option>' +
   '<option ' + (merchant.register_type === '대리점' ? 'selected' : '') + '>대리점</option>' +
 '</select>' +
 
 '<label>소속 대리점</label>' +
-'<select>' +
+'<select id="agency_name">' +
   '<option ' + (merchant.agency_name === '본사' ? 'selected' : '') + '>본사</option>' +
   '<option ' + (merchant.agency_name === '에이드컴퍼니' ? 'selected' : '') + '>에이드컴퍼니</option>' +
 '</select>' +
 
 '<label>사용 PG사</label>' +
-'<select>' +
+'<select id="pg_company">' +
   '<option ' + (merchant.pg_company === '다우데이타' ? 'selected' : '') + '>다우데이타</option>' +
   '<option ' + (merchant.pg_company === '코페이' ? 'selected' : '') + '>코페이</option>' +
   '<option ' + (merchant.pg_company === '토스페이먼츠' ? 'selected' : '') + '>토스페이먼츠</option>' +
 '</select>' +
 
 '<label>회사구분</label>' +
-'<select>' +
+'<select id="company_type">' +
   '<option ' + (merchant.company_type === '개인(일반)' ? 'selected' : '') + '>개인(일반)</option>' +
   '<option ' + (merchant.company_type === '개인사업자' ? 'selected' : '') + '>개인사업자</option>' +
   '<option ' + (merchant.company_type === '법인사업자' ? 'selected' : '') + '>법인사업자</option>' +
@@ -4369,7 +4369,7 @@ merchantButtons.forEach((button) => {
   '<option ' + (merchant.status === '중지' ? 'selected' : '') + '>중지</option>' +
 '</select>' +
 '<label>개통일자</label>' +
-'<input type="date" value="' + (merchant.opened_at || '') + '" />' +
+'<input id="opened_at" type="date" value="' + (merchant.opened_at || '') + '" />' +
 '<label>비밀번호</label>' +
 '<input id="merchant-password-input" type="text" value="' + (merchant.merchant_password || '') + '" placeholder="비밀번호 입력" />' +
 
@@ -4596,6 +4596,11 @@ merchantButtons.forEach((button) => {
   phone: phone,
   fee_rate: feeRate,
   merchant_password: getValue('merchant-password-input'),
+  register_type: getValue('register_type'),
+agency_name: getValue('agency_name'),
+pg_company: getValue('pg_company'),
+company_type: getValue('company_type'),
+status: getValue('merchant_status'),
 
   resident_number: getValue('resident-number'),
         business_number: getValue('business_number'),
@@ -9884,96 +9889,108 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
 
     const { data: payMerchant, error: payMerchantError } = await supabase
   .from('merchants')
-  .select('korpay_pg_mid, korpay_pg_mkey, merchant_name')
+  .select('pg_company, korpay_pg_mid, korpay_pg_mkey, merchant_name')
   .eq('id', Number(merchantId))
   .single()
-   
-if (payMerchantError) {
-  alert(JSON.stringify(payMerchantError))
-}
-
 
 if (payMerchantError || !payMerchant) {
   alert('가맹점 결제 정보를 불러오지 못했습니다.')
   return
 }
 
-if (!payMerchant.korpay_pg_mid || !payMerchant.korpay_pg_mkey) {
-  alert('코페이 PG MID 또는 MKEY가 등록되지 않았습니다.')
+const selectedPg = payMerchant.pg_company || '코페이'
+
+if (selectedPg === '토스페이먼츠') {
+  const tossPayments = await loadTossPayments(clientKey)
+
+  sessionStorage.setItem('merchantId', String(merchantId))
+  sessionStorage.setItem('merchantName', payMerchant.merchant_name || '')
+  sessionStorage.setItem('message', 'NXG 미니상점 주문')
+
+  await tossPayments.requestPayment('카드', {
+    amount: totalPrice,
+    orderId: orderNo.replace(/[^a-zA-Z0-9]/g, ''),
+    orderName: 'NXG 미니상점 주문',
+    customerName: payMerchant.merchant_name || '미니상점 고객',
+    successUrl:
+      window.location.origin +
+      '/success?source=kiosk&merchantId=' +
+      merchantId +
+      '&merchantName=' +
+      encodeURIComponent(payMerchant.merchant_name || ''),
+    failUrl: window.location.origin + '/fail',
+  })
+
   return
 }
 
-const ediDate = getKorpayEdiDate()
-const hashKey = await createKorpayHash(
-  payMerchant.korpay_pg_mid,
-  ediDate,
-  totalPrice,
-  payMerchant.korpay_pg_mkey
-)
+if (selectedPg === '코페이') {
+  if (!payMerchant.korpay_pg_mid || !payMerchant.korpay_pg_mkey) {
+    alert('코페이 PG MID 또는 MKEY가 등록되지 않았습니다.')
+    return
+  }
 
-const paymentData = {
-  merchantId: payMerchant.korpay_pg_mid,
-  productName: 'NXG 미니상점 주문',
-  orderNumber: orderNo.replace(/[^a-zA-Z0-9]/g, ''),
-  amount: totalPrice,
-  payMethod: 'card',
-  returnUrl: window.location.origin + '/api/korpay-return',
-  ediDate: ediDate,
-  hashKey: hashKey,
-  customerName: '미니상점 고객',
-  reserved: String(merchantId),
-  language: 'ko',
+  const ediDate = getKorpayEdiDate()
+  const hashKey = await createKorpayHash(
+    payMerchant.korpay_pg_mid,
+    ediDate,
+    totalPrice,
+    payMerchant.korpay_pg_mkey
+  )
+
+  const paymentData = {
+    merchantId: payMerchant.korpay_pg_mid,
+    productName: 'NXG 미니상점 주문',
+    orderNumber: orderNo.replace(/[^a-zA-Z0-9]/g, ''),
+    amount: totalPrice,
+    payMethod: 'card',
+    returnUrl: window.location.origin + '/api/korpay-return',
+    ediDate: ediDate,
+    hashKey: hashKey,
+    customerName: '미니상점 고객',
+    reserved: String(merchantId),
+    language: 'ko',
+  }
+
+  const korpay = (window as any).KorpaySdk
+  korpay.paymentTimeout = 30000
+
+  korpay.payment(
+    'https://staging-payments.korpay.com/v1',
+    paymentData,
+    {
+      onStart: () => {
+        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+        if (payButton) {
+          payButton.disabled = true
+          payButton.innerText = '결제창 호출 중...'
+        }
+      },
+      onError: (err: any) => {
+        alert(String(err))
+        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+        if (payButton) {
+          payButton.disabled = false
+          payButton.innerText = '결제하기'
+        }
+      },
+      onClose: () => {
+        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+        if (payButton) {
+          payButton.disabled = false
+          payButton.innerText = '결제하기'
+        }
+      },
+    }
+  )
+
+  return
 }
 
-
-
-console.log('paymentData', paymentData)
-console.log('KorpaySdk', (window as any).KorpaySdk)
-
-const korpay = (window as any).KorpaySdk
-
-
-korpay.paymentTimeout = 30000
-
-
-console.log('mobile userAgent:', navigator.userAgent)
-console.log('korpay orderNo:', orderNo)
-
-alert(
-  'User-Agent:\n' + navigator.userAgent +
-  '\n\n주문번호:\n' + orderNo
-)
-korpay.payment(
-  'https://staging-payments.korpay.com/v1',
-  paymentData,
-  {
-    onStart: () => {
-      const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
-      if (payButton) {
-        payButton.disabled = true
-        payButton.innerText = '결제창 호출 중...'
-      }
-    },
-    onError: (err: any) => {
-      alert(String(err))
-      const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
-      if (payButton) {
-        payButton.disabled = false
-        payButton.innerText = '결제하기'
-      }
-    },
-    onClose: () => {
-      const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
-      if (payButton) {
-        payButton.disabled = false
-        payButton.innerText = '결제하기'
-      }
-    },
-  }
-)
-  })
-          
-      }
+alert('사용 PG사가 설정되지 않았습니다.')
+return
+})        
+}
     } else if (path === '/kiosk-success') {
       const orderNo = sessionStorage.getItem('kiosk_order_no')
       const merchantId = sessionStorage.getItem('kiosk_merchant_id')
