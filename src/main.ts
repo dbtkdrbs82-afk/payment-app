@@ -5921,12 +5921,17 @@ payments.forEach((payment, index) => {
     (payment.order_id || '-') +
   '</button>' +
 '</td>' +
-    '<td>-<br/>' +
-'<span title="' + (payment.payment_key || '-') + '">' +
-((payment.payment_key || '-').length > 18
-  ? (payment.payment_key || '-').substring(0, 18) + '...'
-  : (payment.payment_key || '-')) +
-'</span></td>' +
+    '<td>' +
+  '<button class="payment-cancel-link" data-id="' + payment.id + '">' +
+    (payment.status === 'cancel' ? '취소완료' : '-') +
+    '<br/>' +
+    '<span title="' + (payment.payment_key || '-') + '">' +
+      ((payment.payment_key || '-').length > 18
+        ? (payment.payment_key || '-').substring(0, 18) + '...'
+        : (payment.payment_key || '-')) +
+    '</span>' +
+  '</button>' +
+'</td>' +
     '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
     '<td>-<br/>' + (payment.sender_name || '-') + '</td>' +
     '<td>' + (payment.message || '-') + '</td>' +
@@ -6066,8 +6071,8 @@ const date = target.dataset.date
         ?.addEventListener('click', () => {
           document.querySelector('#admin-receipt-modal')?.remove()
         })
-    })
-    document.querySelectorAll('.payment-cancel-btn')
+      })
+      document.querySelectorAll('.payment-cancel-link')
   .forEach((button) => {
     button.addEventListener('click', async () => {
       const paymentId = Number((button as HTMLElement).dataset.id)
