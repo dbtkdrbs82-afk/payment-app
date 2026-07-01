@@ -5967,7 +5967,10 @@ document.querySelectorAll('.payment-cancel-link')
       }
 
       alert('취소 처리되었습니다.')
-      location.reload()
+
+const cancelButton = button as HTMLElement
+const paymentKeyText = cancelButton.querySelector('span')?.outerHTML || ''
+cancelButton.innerHTML = '취소완료<br/>' + paymentKeyText
     })
   })
 document.querySelectorAll('.admin-receipt-btn')
