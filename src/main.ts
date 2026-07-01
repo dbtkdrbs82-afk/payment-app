@@ -4247,12 +4247,8 @@ const rejectedCount =
             '<th>대표자</th>' +
             '<th>연락처</th>' +
             '<th>수수료율</th>' +
-            '<th>정산은행</th>' +
-            '<th>계좌번호</th>' +
-            '<th>예금주</th>' +
             '<th>정산주기</th>' +
-            '<th>상태</th>' +
-            '<th>관리</th>'
+            '<th>상태</th>' 
           '</tr>'
       }
       
@@ -4284,12 +4280,9 @@ merchants
   '<td>' + (merchant.owner_name || '-') + '</td>' +
   '<td>' + (merchant.phone || '-') + '</td>' +
   '<td>' + (merchant.fee_rate || 0) + '%</td>' +
-  '<td>' + (merchant.bank_name || '-') + '</td>' +
-  '<td>' + (merchant.account_number || '-') + '</td>' +
-  '<td>' + (merchant.account_holder || '-') + '</td>' +
   '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
-  '<td>' + (merchant.status || '운영') + '</td>' +
-'<td><button class="merchant-link-btn merchant-view-btn" data-id="' + merchant.id + '">보기</button></td>'
+  '<td>' + (merchant.status || '운영') + '</td>' 
+
       
   paymentTableBody.appendChild(tr)
 
@@ -5927,7 +5920,12 @@ payments.forEach((payment, index) => {
     (payment.order_id || '-') +
   '</button>' +
 '</td>' +
-    '<td>-<br/>' + (payment.payment_key || '-') + '</td>' +
+    '<td>-<br/>' +
+'<span title="' + (payment.payment_key || '-') + '">' +
+((payment.payment_key || '-').length > 18
+  ? (payment.payment_key || '-').substring(0, 18) + '...'
+  : (payment.payment_key || '-')) +
+'</span></td>' +
     '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
     '<td>-<br/>' + (payment.sender_name || '-') + '</td>' +
     '<td>' + (payment.message || '-') + '</td>' +
