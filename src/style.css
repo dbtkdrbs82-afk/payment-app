@@ -5029,3 +5029,7 @@ display: grid !important;
   color: #fff !important;
   font-weight: 800;
 }
+/* 취소 영수증: 구매정보 / 결제금액정보 제목 빨간색 */
+#admin-receipt-modal .receipt-cancel-mode ~ div h4 {
+  color: #d00000 !important;
+}
