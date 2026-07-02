@@ -6395,12 +6395,14 @@ const password =
             return
           }
 
-          const { data: merchant, error } = await supabase
+          const { data: merchants, error } = await supabase
   .from('merchants')
   .select('*')
   .eq('merchant_login_id', loginId)
-  .eq('merchant_password', password)
-  .single()
+
+const merchant = (merchants || []).find((item) => {
+  return String(item.merchant_password || '').trim() === password
+})
 
   console.log('로그인 시도:', loginId, password)
 console.log('로그인 조회 결과:', merchant)
