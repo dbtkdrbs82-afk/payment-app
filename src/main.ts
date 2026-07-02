@@ -6382,53 +6382,46 @@ const orderIdValue =
       `
     
 
-      document.querySelector<HTMLButtonElement>('#merchant-login-button')!
-        .addEventListener('click', async () => {
-          const loginId =
-  document.querySelector<HTMLInputElement>('#merchant-login-id')!.value.trim()
+      document.querySelector<HTMLButtonElement>('#merchant-login-button')
+  ?.addEventListener('click', async () => {
+    const loginId =
+      document.querySelector<HTMLInputElement>('#merchant-login-id')?.value.trim() || ''
 
-const password =
-  document.querySelector<HTMLInputElement>('#merchant-login-password')!.value.trim()
+    const password =
+      document.querySelector<HTMLInputElement>('#merchant-login-password')?.value.trim() || ''
 
-          if (!loginId || !password) {
-            alert('아이디와 비밀번호를 입력해주세요.')
-            return
-          }
+    if (!loginId || !password) {
+      alert('아이디와 비밀번호를 입력해주세요.')
+      return
+    }
 
-          const { data: merchants, error } = await supabase
-  .from('merchants')
-  .select('*')
-  .eq('merchant_login_id', loginId)
+    const { data: merchants, error } = await supabase
+      .from('merchants')
+      .select('*')
+      .eq('merchant_login_id', loginId)
 
-const merchant = (merchants || []).find((item) => {
-  return String(item.merchant_password || '').trim() === password
-})
+    if (error) {
+      alert('로그인 조회 실패: ' + error.message)
+      return
+    }
 
-  console.log('로그인 시도:', loginId, password)
-console.log('로그인 조회 결과:', merchant)
-console.log('로그인 조회 오류:', error)
+    const merchant = (merchants || []).find((item) => {
+      return String(item.merchant_password || '').trim() === password
+    })
 
-          if (error || !merchant) {
-            alert('로그인 정보가 올바르지 않습니다.')
-            return
-          }
+    if (!merchant) {
+      alert('로그인 정보가 올바르지 않습니다.')
+      return
+    }
 
-          sessionStorage.setItem('login_merchant_id', String(merchant.id))
-          sessionStorage.setItem(
-            'login_merchant_code',
-            merchant.merchant_login_id || ''
-          )
-          sessionStorage.setItem('login_merchant_name', merchant.merchant_name)
+    sessionStorage.setItem('login_merchant_id', String(merchant.id))
+    sessionStorage.setItem('login_merchant_code', merchant.merchant_login_id || '')
+    sessionStorage.setItem('login_merchant_name', merchant.merchant_name || '')
+    sessionStorage.setItem('login_merchant_type', merchant.merchant_type || '일반매장')
 
-          sessionStorage.setItem(
-            'login_merchant_type',
-            merchant.merchant_type || '일반매장'
-          )
-
-          alert(merchant.merchant_name + '님 로그인되었습니다.')
-
-          window.location.href = '/merchant-admin'
-        })
+    alert((merchant.merchant_name || '가맹점') + '님 로그인되었습니다.')
+    window.location.href = '/merchant-admin'
+  })
 
         document.querySelector('#merchant-signup-button')
   ?.addEventListener('click', () => {
