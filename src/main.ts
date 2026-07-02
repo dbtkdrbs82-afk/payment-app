@@ -649,6 +649,7 @@ setTimeout(() => {
         }
 
         const usePg = merchantData.pg_company || ''
+        sessionStorage.setItem('selected_pg_company', usePg)
 
 if (usePg === '코페이') {
   if (!merchantData.korpay_pg_mid || !merchantData.korpay_pg_mkey) {
@@ -2321,7 +2322,7 @@ if (existingPayment) {
       message: message,
       merchant_id: merchantId ? Number(merchantId) : null,
       merchant_name: merchantName,
-      pg_company: source === 'kiosk' ? '코페이' : '토스페이먼츠'
+      pg_company: sessionStorage.getItem('selected_pg_company') || '토스페이먼츠'
     }
   ])
 
