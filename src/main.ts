@@ -2536,7 +2536,7 @@ window.history.replaceState({}, '', '/success')
 
   document.querySelector<HTMLButtonElement>('#home-button')!
 .addEventListener('click', () => {
-  window.history.back()
+  window.location.href = '/'
 })
   document.querySelector('#receipt-view-btn')
   ?.addEventListener('click', () => {
