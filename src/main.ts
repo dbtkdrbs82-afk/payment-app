@@ -4594,13 +4594,12 @@ merchantButtons.forEach((button) => {
       const getValue = (id: string) =>
   (document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null)?.value || ''
       
-      const updateData = {
+      const updateData: any = {
   merchant_name: merchantName,
   merchant_type: getValue('merchant-type'),
   owner_name: ownerName,
   phone: phone,
   fee_rate: feeRate,
-  merchant_password: getValue('merchant-password-input'),
   register_type: getValue('register_type'),
 agency_name: getValue('agency_name'),
 pg_company: getValue('pg_company'),
@@ -4639,6 +4638,12 @@ daou_manual_mkey: getValue('daou_manual_mkey'),
         settlement_cycle: getValue('settlement_cycle'),
         memo: getValue('merchant-memo')
       }
+
+      const newPassword = getValue('merchant-password-input')
+
+if (newPassword) {
+  updateData.merchant_password = newPassword
+}
     
       console.log('실제 저장 데이터:', updateData)
       
@@ -4665,7 +4670,7 @@ console.log('저장 error:', error)
   
     if (!confirm('이 가맹점을 승인하시겠습니까?')) return
   
-    const loginId = 'MER' + String(merchant.id).padStart(4, '0')
+    const loginId = 'MER' + String(merchant.id).padStart(5, '0')
   
     const { error } = await supabase
       .from('merchants')
