@@ -6410,7 +6410,13 @@ const orderIdValue =
     })
 
     if (!merchant) {
-      alert('로그인 정보가 올바르지 않습니다.')
+      alert(
+        '로그인 실패 확인\n\n' +
+        '입력 아이디: ' + loginId + '\n' +
+        '입력 비밀번호: ' + password + '\n' +
+        '조회된 가맹점 수: ' + (merchants || []).length + '\n' +
+        'DB 비밀번호: ' + ((merchants || [])[0]?.merchant_password || '없음')
+      )
       return
     }
 
