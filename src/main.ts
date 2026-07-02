@@ -648,38 +648,48 @@ setTimeout(() => {
           return
         }
 
-        if (!merchantData.korpay_pg_mid || !merchantData.korpay_pg_mkey) {
-          alert('코페이 인증결제 MID 또는 MKEY가 등록되지 않았습니다.')
-          return
-        }
-        
-        alert(
-          '코페이 인증결제 준비 완료\n\n' +
-          'MID 등록 확인됨\n' +
-          'MKEY 등록 확인됨'
-        )
-        
-        return
-        
-        const tossPayments = await loadTossPayments(clientKey)
-    
-        sessionStorage.setItem('merchantId', String(merchantData.id))
-        sessionStorage.setItem('merchantName', merchantData.merchant_name)
-        sessionStorage.setItem('message', orderName)
-    
-        await tossPayments.requestPayment('카드', {
-          amount: totalAmount,
-          orderId: 'order-' + Date.now(),
-          orderName: orderName,
-          customerName: merchantData.merchant_name,
-          successUrl:
-  window.location.origin +
-  '/success?source=kiosk&merchantId=' +
-  merchantData.id +
-  '&merchantName=' +
-  encodeURIComponent(merchantData.merchant_name),
-          failUrl: window.location.origin + '/fail',
-        })
+        const usePg = merchantData.pg_company || ''
+
+if (usePg === '코페이') {
+  if (!merchantData.korpay_pg_mid || !merchantData.korpay_pg_mkey) {
+    alert('코페이 인증결제 MID 또는 MKEY가 등록되지 않았습니다.')
+    return
+  }
+
+  alert(
+    '코페이 인증결제 준비 완료\n\n' +
+    'MID 등록 확인됨\n' +
+    'MKEY 등록 확인됨'
+  )
+
+  return
+}
+
+if (usePg === '토스페이먼츠') {
+  const tossPayments = await loadTossPayments(clientKey)
+
+  sessionStorage.setItem('merchantId', String(merchantData.id))
+  sessionStorage.setItem('merchantName', merchantData.merchant_name)
+  sessionStorage.setItem('message', orderName)
+
+  await tossPayments.requestPayment('카드', {
+    amount: totalAmount,
+    orderId: 'order-' + Date.now(),
+    orderName: orderName,
+    customerName: merchantData.merchant_name,
+    successUrl:
+      window.location.origin +
+      '/success?source=kiosk&merchantId=' +
+      merchantData.id +
+      '&merchantName=' +
+      encodeURIComponent(merchantData.merchant_name),
+    failUrl: window.location.origin + '/fail',
+  })
+
+  return
+}
+
+alert('사용 PG사가 등록되지 않았습니다. 가맹점 정보에서 사용 PG사를 확인해주세요.')
       })
   }
 
