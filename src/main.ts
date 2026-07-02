@@ -6385,10 +6385,10 @@ const orderIdValue =
       document.querySelector<HTMLButtonElement>('#merchant-login-button')!
         .addEventListener('click', async () => {
           const loginId =
-            document.querySelector<HTMLInputElement>('#merchant-login-id')!.value
+  document.querySelector<HTMLInputElement>('#merchant-login-id')!.value.trim()
 
-          const password =
-            document.querySelector<HTMLInputElement>('#merchant-login-password')!.value
+const password =
+  document.querySelector<HTMLInputElement>('#merchant-login-password')!.value.trim()
 
           if (!loginId || !password) {
             alert('아이디와 비밀번호를 입력해주세요.')
