@@ -2535,9 +2535,17 @@ window.history.replaceState({}, '', '/success')
   `
 
   document.querySelector<HTMLButtonElement>('#home-button')!
-.addEventListener('click', () => {
-  window.location.href = '/'
-})
+  .addEventListener('click', () => {
+    const merchantId =
+      sessionStorage.getItem('merchantId') ||
+      sessionStorage.getItem('kiosk_merchant_id')
+
+    if (merchantId) {
+      window.location.href = '/kiosk?merchant_id=' + merchantId
+    } else {
+      window.location.href = '/merchant-login'
+    }
+  })
   document.querySelector('#receipt-view-btn')
   ?.addEventListener('click', () => {
     document.querySelector<HTMLElement>('#receipt-modal')!.style.display = 'flex'
