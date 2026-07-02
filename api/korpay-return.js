@@ -7,7 +7,7 @@ export default function handler(req, res) {
   const merchantId = encodeURIComponent(body.reserved || '')
 
   const redirectUrl =
-    '/success?source=kiosk' +
+    '/success?source=kiosk&pg=코페이' +
     '&orderId=' + orderId +
     '&amount=' + amount +
     '&paymentKey=' + paymentKey +

@@ -2322,7 +2322,15 @@ if (existingPayment) {
       message: message,
       merchant_id: merchantId ? Number(merchantId) : null,
       merchant_name: merchantName,
-      pg_company: sessionStorage.getItem('selected_pg_company') || '토스페이먼츠'
+      pg_company:
+      params.get('pg') ||
+      sessionStorage.getItem('selected_pg_company') ||
+      '토스페이먼츠',
+payment_method: '카드',
+card_company: '결제사 제공값',
+card_number: '결제사 제공값',
+installment_months: '일시불',
+approved_at: new Date().toISOString()
     }
   ])
 
