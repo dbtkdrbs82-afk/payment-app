@@ -6402,6 +6402,10 @@ const password =
   .eq('merchant_password', password)
   .single()
 
+  console.log('로그인 시도:', loginId, password)
+console.log('로그인 조회 결과:', merchant)
+console.log('로그인 조회 오류:', error)
+
           if (error || !merchant) {
             alert('로그인 정보가 올바르지 않습니다.')
             return
