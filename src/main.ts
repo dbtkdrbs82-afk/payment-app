@@ -4670,7 +4670,7 @@ console.log('저장 error:', error)
   
     if (!confirm('이 가맹점을 승인하시겠습니까?')) return
   
-    const loginId = 'MER' + String(merchant.id).padStart(5, '0')
+    const loginId = 'MER' + String(merchant.id).padStart(4, '0')
   
     const { error } = await supabase
       .from('merchants')
@@ -5809,7 +5809,7 @@ document.querySelectorAll('.product-delete-button')
       }
 
       const loginId =
-        'MER' + String(merchantId).padStart(5, '0')
+        'MER' + String(merchantId).padStart(4, '0')
 
       const tempPassword =
         '1234'
