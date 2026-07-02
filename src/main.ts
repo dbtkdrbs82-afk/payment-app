@@ -2535,9 +2535,9 @@ window.history.replaceState({}, '', '/success')
   `
 
   document.querySelector<HTMLButtonElement>('#home-button')!
-  .addEventListener('click', () => {
-    window.close()
-  })
+.addEventListener('click', () => {
+  window.history.back()
+})
   document.querySelector('#receipt-view-btn')
   ?.addEventListener('click', () => {
     document.querySelector<HTMLElement>('#receipt-modal')!.style.display = 'flex'
