@@ -9689,7 +9689,7 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
         app.innerHTML = `
           <div class="kiosk-page">
             <div class="kiosk-header">
-              <h1>NXG 미니상점</h1>
+              <h1>키오스 PICK</h1>
               <div class="cart-badge">
                 장바구니 <span id="cart-count">0</span>
               </div>
@@ -9984,12 +9984,12 @@ if (selectedPg === '토스페이먼츠') {
 
   sessionStorage.setItem('merchantId', String(merchantId))
   sessionStorage.setItem('merchantName', payMerchant.merchant_name || '')
-  sessionStorage.setItem('message', 'NXG 미니상점 주문')
+  sessionStorage.setItem('message', '키오스 PICK 주문')
 
   await tossPayments.requestPayment('카드', {
     amount: totalPrice,
     orderId: orderNo.replace(/[^a-zA-Z0-9]/g, ''),
-    orderName: 'NXG 미니상점 주문',
+    orderName: '키오스 PICK 주문',
     customerName: payMerchant.merchant_name || '미니상점 고객',
     successUrl:
       window.location.origin +
