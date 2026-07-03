@@ -4127,14 +4127,36 @@ document.querySelector('#safe-save-admin-user')
   })
 })
 
-document.querySelector('#admin-page-size')
-?.addEventListener('change', (event) => {
-  const select = event.target as HTMLSelectElement
+document.addEventListener('change', (event) => {
+  const target = event.target as HTMLElement
 
-  sessionStorage.setItem('admin_page_size', select.value)
+  if (target.id === 'admin-page-size') {
+    const select = target as HTMLSelectElement
 
-  document.querySelector<HTMLElement>('[data-page="merchant"]')
-    ?.click()
+    sessionStorage.setItem('admin_page_size', select.value)
+
+    const activeTab =
+      document.querySelector<HTMLElement>('.admin-tab.active')
+
+    if (activeTab) {
+      activeTab.click()
+    }
+
+    return
+  }
+
+  if (target.id === 'withdraw-page-size') {
+    const select = target as HTMLSelectElement
+
+    sessionStorage.setItem('withdraw_page_size', select.value)
+
+    const activeTab =
+      document.querySelector<HTMLElement>('.admin-tab.active')
+
+    if (activeTab) {
+      activeTab.click()
+    }
+  }
 })
 
 if (titleBox) {
