@@ -1677,7 +1677,7 @@ button {
   .admin-search-box {
     width: 100% !important;
     box-sizing: border-box !important;
-    padding: 16px !important;
+    padding: 12px !important;
     overflow: hidden !important;
   }
 
@@ -5082,7 +5082,7 @@ display: grid !important;
 }
 /* 출금관리 검색영역 가로형 */
 .payout-search-panel {
-  padding: 18px 24px;
+  padding: 8px 18px;
   background: #fff;
   border: 1px solid #d9e1ec;
   border-radius: 8px;
@@ -5175,4 +5175,31 @@ display: grid !important;
   width: 16px;
   height: 16px;
   margin: 0;
+}
+/* 출금관리 화면 압축 */
+.payout-search-panel {
+  padding: 10px 18px !important;
+}
+
+.payout-search-row {
+  min-height: 38px !important;
+  margin-bottom: 0 !important;
+  gap: 8px !important;
+}
+
+.payout-search-row input,
+.payout-search-row select,
+.payout-search-row button {
+  height: 32px !important;
+  font-size: 13px !important;
+}
+
+.payout-small-btn,
+.payout-search-btn {
+  padding: 0 14px !important;
+  min-width: 64px !important;
+}
+
+.admin-search-box {
+  padding: 12px !important;
 }
