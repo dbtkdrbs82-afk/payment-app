@@ -5004,19 +5004,25 @@ console.log('저장 error:', error)
           })
       }
     
-      const payoutPageSizeSelect =
-        document.querySelector<HTMLSelectElement>('#withdraw-page-size')
-    
-      if (payoutPageSizeSelect) {
-        payoutPageSizeSelect.value = String(payoutPageSize)
-    
-        payoutPageSizeSelect.addEventListener('change', () => {
-          payoutPageSize = Number(payoutPageSizeSelect.value)
-          payoutPage = 1
-          sessionStorage.setItem('withdraw_page_size', String(payoutPageSize))
-          renderPayoutTable()
-        })
-      }
+      const payoutPageSizeSelects =
+  document.querySelectorAll<HTMLSelectElement>('.withdraw-page-size')
+
+payoutPageSizeSelects.forEach((select) => {
+  select.value = String(payoutPageSize)
+
+  select.addEventListener('change', () => {
+    payoutPageSize = Number(select.value)
+    payoutPage = 1
+
+    sessionStorage.setItem('withdraw_page_size', String(payoutPageSize))
+
+    payoutPageSizeSelects.forEach((otherSelect) => {
+      otherSelect.value = String(payoutPageSize)
+    })
+
+    renderPayoutTable()
+  })
+})
     
       document.querySelector('#payout-search-btn')
         ?.addEventListener('click', () => {
