@@ -4844,7 +4844,10 @@ display: grid !important;
 }
 
 .admin-table {
-  min-width: 1800px;
+  width: 100%;
+  max-width: 1800px;
+  min-width: 1200px;
+  margin: 0 auto;
 }
 /* 결제관리 테이블 압축 */
 .payment-table-scroll {
@@ -5032,4 +5035,29 @@ display: grid !important;
 /* 취소 영수증: 구매정보 / 결제금액정보 제목 빨간색 */
 #admin-receipt-modal .receipt-cancel-mode ~ div h4 {
   color: #d00000 !important;
+}
+/* 회원관리 화면 중앙 정렬 */
+.member-page,
+.member-admin-page,
+.member-management-page {
+  max-width: 1480px;
+  margin: 0 auto;
+}
+
+.member-page h1,
+.member-admin-page h1,
+.member-management-page h1 {
+  text-align: center;
+}
+
+.member-page .admin-tab-menu,
+.member-admin-page .admin-tab-menu,
+.member-management-page .admin-tab-menu {
+  justify-content: center;
+}
+
+.member-page .admin-table-wrap,
+.member-admin-page .admin-table-wrap,
+.member-management-page .admin-table-wrap {
+  margin: 0 auto;
 }
