@@ -4737,215 +4737,308 @@ console.log('저장 error:', error)
    
 
 
-if (page === 'payout') {
-  const subMenu = document.querySelector('.admin-sub-menu')
-  const titleBox = document.querySelector('.admin-title')
-  const searchBox = document.querySelector('.admin-search-box')
-  const summaryBox = document.querySelector('.admin-summary')
-  const tableHead = document.querySelector('.admin-table thead')
-  const paymentTableBody =
-    document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
-
-  if (subMenu) {
-    subMenu.innerHTML = '출금예정내역 | 출금완료내역'
-  }
-
-  if (titleBox) {
-    titleBox.innerHTML = '▶ 출금관리 > 출금예정내역'
-  }
-
-  if (searchBox) {
-    searchBox.innerHTML = `
-      <div class="payout-search-panel">
-        <div class="payout-search-row">
-          <span class="payout-search-label">조회기준</span>
-  
-          <label><input type="radio" name="payout-date-type" value="거래일" checked> 거래일</label>
-          <label><input type="radio" name="payout-date-type" value="가맹점출금예정일"> 가맹점출금예정일</label>
-          <label><input type="radio" name="payout-date-type" value="회사입금예정일"> 회사입금예정일</label>
-  
-          <span class="payout-search-label">기간</span>
-          <input id="payout-start-date" type="date">
-          <span>~</span>
-          <input id="payout-end-date" type="date">
-  
-          <button id="payout-today-btn" class="payout-small-btn">오늘</button>
-          <button id="payout-yesterday-btn" class="payout-small-btn">어제</button>
-          <button id="payout-month-btn" class="payout-small-btn">당월</button>
-        </div>
-  
-        <div class="payout-search-row">
-          <span class="payout-search-label">PG</span>
-          <select id="payout-pg-filter">
-            <option value="전체">전체</option>
-            <option value="토스페이먼츠">토스페이먼츠</option>
-            <option value="코페이">코페이</option>
-          </select>
-  
-          <span class="payout-search-label">출금상태</span>
-          <select id="payout-status-filter">
-            <option value="전체">전체</option>
-            <option value="출금대기">출금대기</option>
-            <option value="출금보류">출금보류</option>
-            <option value="계좌오류">계좌오류</option>
-            <option value="계좌인증">계좌인증</option>
-            <option value="출금완료">출금완료</option>
-            <option value="출금오류">출금오류</option>
-          </select>
-  
-          <span class="payout-search-label">조회대상</span>
-          <select id="payout-target-filter">
-            <option value="전체">전체</option>
-            <option value="가맹점">가맹점</option>
-            <option value="담당자">담당자</option>
-            <option value="대리점">대리점</option>
-            <option value="지사">지사</option>
-          </select>
-  
-          <input id="payout-keyword" type="text" placeholder="검색어">
-          <button id="payout-search-btn" class="payout-search-btn">조회</button>
-          <select id="withdraw-page-size">
-  <option value="10">10개씩 보기</option>
-  <option value="20">20개씩 보기</option>
-  <option value="50">50개씩 보기</option>
-</select>
-        </div>
-      </div>
-    `
-  }
-
-  const { data: payments, error } = await supabase
-    .from('payments')
-    .select('*')
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    alert('출금내역 조회 실패: ' + error.message)
-    return
-  }
-
-  let currentPayoutRows = payments || []
-
-  const pgFilter =
-  (document.querySelector('#payout-pg-filter') as HTMLSelectElement)?.value || '전체'
-
-let filteredRows = currentPayoutRows
-
-if (pgFilter !== '전체') {
-  filteredRows = filteredRows.filter((row) => {
-    return row.pg_company === pgFilter
-  })
-}
-
-const totalPayoutAmount = filteredRows.reduce((sum, payment) => {
-    return sum + Number(payment.settlement_amount || payment.amount || 0)
-  }, 0)
-
-  if (summaryBox) {
-    summaryBox.innerHTML =
-      '출금대상 : ' + filteredRows.length + '건 &nbsp;&nbsp;&nbsp;' +
-      '출금예정금액 : ' + totalPayoutAmount.toLocaleString() + '원 &nbsp;&nbsp;&nbsp;' +
-      '출금시간 : 오후 3시'
-  }
-
-  if (tableHead) {
-    tableHead.innerHTML =
-      '<tr>' +
-  '<th>No</th>' +
-  '<th>가맹점ID</th>' +
-  '<th>가맹점명</th>' +
-  '<th>PG사</th>' +
-  '<th>결제금액</th>' +
-  '<th>수수료</th>' +
-  '<th>출금예정금액</th>' +
-  '<th>출금예정일</th>' +
-  '<th>출금상태</th>' +
-  '<th>처리</th>' +
-'</tr>'
-  }
-
-
-  const payoutPageSize =
-  Number(sessionStorage.getItem('withdraw_page_size') || 10)
-
-const visibleRows = filteredRows.slice(0, payoutPageSize)
-  paymentTableBody.innerHTML = ''
-
-  visibleRows.forEach((row, index) => {
-    const tr = document.createElement('tr')
-
-      const amount = Number(row.amount || 0)
-      const feeAmount = Number(row.fee_amount || 0)
-      const payoutAmount = Number(row.settlement_amount || (amount - feeAmount))
-      
-      const paymentDate = new Date(row.created_at)
-      const payoutDate = new Date(paymentDate)
-      payoutDate.setDate(payoutDate.getDate() + 1)
-      
-      tr.innerHTML =
-        '<td>' + (index + 1) + '</td>' +
-        '<td>' +
-          (row.merchant_id
-            ? 'MER' + String(row.merchant_id).padStart(4, '0')
-            : '-') +
-        '</td>' +
-        '<td>' + (row.merchant_name || '-') + '</td>' +
-        '<td>' + (row.pg_company || '-') + '</td>' +
-        '<td>' + amount.toLocaleString() + '원</td>' +
-        '<td>' + feeAmount.toLocaleString() + '원</td>' +
-        '<td>' + payoutAmount.toLocaleString() + '원</td>' +
-        '<td>' + payoutDate.toISOString().slice(0, 10) + '</td>' +
-        '<td>' + (row.payout_status || '출금대기') + '</td>' +
-        '<td>' +
-          (row.payout_status === '출금완료'
-            ? '출금완료'
-            : '<button class="payout-complete-button" data-id="' + row.id + '">출금완료</button>') +
-        '</td>'
-
-    paymentTableBody.appendChild(tr)
-  })
-
-  document.querySelector('#payout-pg-filter')
-  ?.addEventListener('change', () => {
-    location.reload()
-  })
-  const payoutPageSizeSelect =
-  document.querySelector<HTMLSelectElement>('#withdraw-page-size')
-
-if (payoutPageSizeSelect) {
-  payoutPageSizeSelect.value = String(payoutPageSize)
-
-  payoutPageSizeSelect.addEventListener('change', () => {
-    sessionStorage.setItem(
-      'withdraw_page_size',
-      payoutPageSizeSelect.value
-    )
-
-    window.location.href = window.location.href
-  })
-}
-  document.querySelectorAll('.payout-complete-button')
-    .forEach((button) => {
-      button.addEventListener('click', async () => {
-        const paymentId =
-          (button as HTMLElement).getAttribute('data-id')
-
-        const { error } = await supabase
-          .from('payments')
-          .update({
-            payout_status: '출금완료'
-          })
-          .eq('id', Number(paymentId))
-
-        if (error) {
-          alert('출금완료 처리 실패: ' + error.message)
-          return
+    if (page === 'payout') {
+      const subMenu = document.querySelector('.admin-sub-menu')
+      const titleBox = document.querySelector('.admin-title')
+      const searchBox = document.querySelector('.admin-search-box')
+      const summaryBox = document.querySelector('.admin-summary')
+      const tableHead = document.querySelector('.admin-table thead')
+      const paymentTableBody =
+        document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+    
+      let payoutPage = 1
+      let payoutPageSize = Number(sessionStorage.getItem('withdraw_page_size') || 10)
+    
+      if (subMenu) {
+        subMenu.innerHTML = '출금예정내역 | 출금완료내역'
+      }
+    
+      if (titleBox) {
+        titleBox.innerHTML = '▶ 출금관리 > 출금예정내역'
+      }
+    
+      if (searchBox) {
+        searchBox.innerHTML = `
+          <div class="payout-search-panel">
+            <div class="payout-search-row">
+              <span class="payout-search-label">조회기준</span>
+    
+              <label><input type="radio" name="payout-date-type" value="거래일" checked> 거래일</label>
+              <label><input type="radio" name="payout-date-type" value="가맹점출금예정일"> 가맹점출금예정일</label>
+              <label><input type="radio" name="payout-date-type" value="회사입금예정일"> 회사입금예정일</label>
+    
+              <span class="payout-search-label">기간</span>
+              <input id="payout-start-date" type="date">
+              <span>~</span>
+              <input id="payout-end-date" type="date">
+    
+              <button id="payout-today-btn" class="payout-small-btn">오늘</button>
+              <button id="payout-yesterday-btn" class="payout-small-btn">어제</button>
+              <button id="payout-month-btn" class="payout-small-btn">당월</button>
+            </div>
+    
+            <div class="payout-search-row">
+              <span class="payout-search-label">PG</span>
+              <select id="payout-pg-filter">
+                <option value="전체">전체</option>
+                <option value="토스페이먼츠">토스페이먼츠</option>
+                <option value="코페이">코페이</option>
+              </select>
+    
+              <span class="payout-search-label">출금상태</span>
+              <select id="payout-status-filter">
+                <option value="전체">전체</option>
+                <option value="출금대기">출금대기</option>
+                <option value="출금보류">출금보류</option>
+                <option value="계좌오류">계좌오류</option>
+                <option value="계좌인증">계좌인증</option>
+                <option value="출금완료">출금완료</option>
+                <option value="출금오류">출금오류</option>
+              </select>
+    
+              <span class="payout-search-label">조회대상</span>
+              <select id="payout-target-filter">
+                <option value="전체">전체</option>
+                <option value="가맹점">가맹점</option>
+                <option value="담당자">담당자</option>
+                <option value="대리점">대리점</option>
+                <option value="지사">지사</option>
+              </select>
+    
+              <input id="payout-keyword" type="text" placeholder="검색어">
+              <button id="payout-search-btn" class="payout-search-btn">조회</button>
+    
+              <select id="withdraw-page-size">
+                <option value="10">10개씩 보기</option>
+                <option value="20">20개씩 보기</option>
+                <option value="50">50개씩 보기</option>
+              </select>
+            </div>
+          </div>
+        `
+      }
+    
+      if (tableHead) {
+        tableHead.innerHTML =
+          '<tr>' +
+            '<th>No</th>' +
+            '<th>가맹점ID</th>' +
+            '<th>가맹점명</th>' +
+            '<th>PG사</th>' +
+            '<th>결제금액</th>' +
+            '<th>수수료</th>' +
+            '<th>출금예정금액</th>' +
+            '<th>출금예정일</th>' +
+            '<th>출금상태</th>' +
+            '<th>처리</th>' +
+          '</tr>'
+      }
+    
+      const { data: payments, error } = await supabase
+        .from('payments')
+        .select('*')
+        .order('created_at', { ascending: false })
+    
+      if (error) {
+        alert('출금내역 조회 실패: ' + error.message)
+        return
+      }
+    
+      const payoutRows = payments || []
+    
+      const getPayoutDate = (createdAt: string) => {
+        const paymentDate = new Date(createdAt)
+        const payoutDate = new Date(paymentDate)
+        payoutDate.setDate(payoutDate.getDate() + 1)
+        return payoutDate.toISOString().slice(0, 10)
+      }
+    
+      const getFilteredPayoutRows = () => {
+        const pgFilter =
+          (document.querySelector('#payout-pg-filter') as HTMLSelectElement)?.value || '전체'
+    
+        const statusFilter =
+          (document.querySelector('#payout-status-filter') as HTMLSelectElement)?.value || '전체'
+    
+        const keyword =
+          ((document.querySelector('#payout-keyword') as HTMLInputElement)?.value || '').trim()
+    
+        return payoutRows.filter((row) => {
+          const payoutStatus = row.payout_status || '출금대기'
+    
+          if (pgFilter !== '전체' && row.pg_company !== pgFilter) {
+            return false
+          }
+    
+          if (statusFilter !== '전체' && payoutStatus !== statusFilter) {
+            return false
+          }
+    
+          if (keyword) {
+            const searchText =
+              String(row.merchant_id || '') + ' ' +
+              String(row.merchant_name || '') + ' ' +
+              String(row.pg_company || '') + ' ' +
+              String(row.order_id || '') + ' ' +
+              String(row.payment_key || '')
+    
+            if (!searchText.includes(keyword)) {
+              return false
+            }
+          }
+    
+          return true
+        })
+      }
+    
+      const renderPayoutTable = () => {
+        const filteredRows = getFilteredPayoutRows()
+    
+        const totalPayoutAmount = filteredRows.reduce((sum, row) => {
+          const amount = Number(row.amount || 0)
+          const feeAmount = Number(row.fee_amount || 0)
+          const payoutAmount = Number(row.settlement_amount || amount - feeAmount)
+          return sum + payoutAmount
+        }, 0)
+    
+        if (summaryBox) {
+          summaryBox.innerHTML =
+            '출금대상 : ' + filteredRows.length + '건 &nbsp;&nbsp;&nbsp;' +
+            '출금예정금액 : ' + totalPayoutAmount.toLocaleString() + '원 &nbsp;&nbsp;&nbsp;' +
+            '출금시간 : 오후 3시'
         }
-
-        alert('출금완료 처리되었습니다')
-        location.reload()
-      })
-    })
+    
+        const totalPages = Math.max(1, Math.ceil(filteredRows.length / payoutPageSize))
+    
+        if (payoutPage > totalPages) {
+          payoutPage = totalPages
+        }
+    
+        const startIndex = (payoutPage - 1) * payoutPageSize
+        const visibleRows = filteredRows.slice(startIndex, startIndex + payoutPageSize)
+    
+        paymentTableBody.innerHTML = ''
+    
+        visibleRows.forEach((row, index) => {
+          const tr = document.createElement('tr')
+    
+          const amount = Number(row.amount || 0)
+          const feeAmount = Number(row.fee_amount || 0)
+          const payoutAmount = Number(row.settlement_amount || amount - feeAmount)
+    
+          tr.innerHTML =
+            '<td>' + (startIndex + index + 1) + '</td>' +
+            '<td>' +
+              (row.merchant_id
+                ? 'MER' + String(row.merchant_id).padStart(4, '0')
+                : '-') +
+            '</td>' +
+            '<td>' + (row.merchant_name || '-') + '</td>' +
+            '<td>' + (row.pg_company || '-') + '</td>' +
+            '<td>' + amount.toLocaleString() + '원</td>' +
+            '<td>' + feeAmount.toLocaleString() + '원</td>' +
+            '<td>' + payoutAmount.toLocaleString() + '원</td>' +
+            '<td>' + getPayoutDate(row.created_at) + '</td>' +
+            '<td>' + (row.payout_status || '출금대기') + '</td>' +
+            '<td>' +
+              (row.payout_status === '출금완료'
+                ? '출금완료'
+                : '<button class="payout-complete-button" data-id="' + row.id + '">출금완료</button>') +
+            '</td>'
+    
+          paymentTableBody.appendChild(tr)
+        })
+    
+        const oldPagination = document.querySelector('#payout-pagination')
+        if (oldPagination) {
+          oldPagination.remove()
+        }
+    
+        const paginationBox = document.createElement('div')
+        paginationBox.id = 'payout-pagination'
+        paginationBox.className = 'payout-pagination'
+    
+        let paginationHtml = ''
+    
+        for (let i = 1; i <= totalPages; i++) {
+          paginationHtml +=
+            '<button class="payout-page-button ' +
+            (i === payoutPage ? 'active' : '') +
+            '" data-page="' + i + '">' + i + '</button>'
+        }
+    
+        paginationBox.innerHTML = paginationHtml
+    
+        paymentTableBody
+          .closest('table')
+          ?.insertAdjacentElement('afterend', paginationBox)
+    
+        document.querySelectorAll('.payout-page-button')
+          .forEach((button) => {
+            button.addEventListener('click', () => {
+              payoutPage = Number((button as HTMLElement).getAttribute('data-page') || 1)
+              renderPayoutTable()
+            })
+          })
+    
+        document.querySelectorAll('.payout-complete-button')
+          .forEach((button) => {
+            button.addEventListener('click', async () => {
+              const paymentId = (button as HTMLElement).getAttribute('data-id')
+    
+              const { error } = await supabase
+                .from('payments')
+                .update({
+                  payout_status: '출금완료'
+                })
+                .eq('id', Number(paymentId))
+    
+              if (error) {
+                alert('출금완료 처리 실패: ' + error.message)
+                return
+              }
+    
+              alert('출금완료 처리되었습니다')
+              location.reload()
+            })
+          })
+      }
+    
+      const payoutPageSizeSelect =
+        document.querySelector<HTMLSelectElement>('#withdraw-page-size')
+    
+      if (payoutPageSizeSelect) {
+        payoutPageSizeSelect.value = String(payoutPageSize)
+    
+        payoutPageSizeSelect.addEventListener('change', () => {
+          payoutPageSize = Number(payoutPageSizeSelect.value)
+          payoutPage = 1
+          sessionStorage.setItem('withdraw_page_size', String(payoutPageSize))
+          renderPayoutTable()
+        })
+      }
+    
+      document.querySelector('#payout-search-btn')
+        ?.addEventListener('click', () => {
+          payoutPage = 1
+          renderPayoutTable()
+        })
+    
+      document.querySelector('#payout-pg-filter')
+        ?.addEventListener('change', () => {
+          payoutPage = 1
+          renderPayoutTable()
+        })
+    
+      document.querySelector('#payout-status-filter')
+        ?.addEventListener('change', () => {
+          payoutPage = 1
+          renderPayoutTable()
+        })
+    
+      renderPayoutTable()
+    
+    } else if (page === 'order') {
 
 
 } else if (page === 'order') {
