@@ -4229,6 +4229,8 @@ const searchKeyword = keywordInput?.value?.trim() || ''
       
       const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+  
+
       
   const { data: allMerchants } = await supabase
   .from('merchants')
@@ -4762,7 +4764,17 @@ console.log('저장 error:', error)
       const tableHead = document.querySelector('.admin-table thead')
       const paymentTableBody =
         document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
-    
+        const tableTop = document.querySelector('.admin-table-top')
+
+        if (tableTop) {
+          tableTop.innerHTML =
+            '<button>엑셀 다운로드</button>' +
+            '<select id="withdraw-page-size">' +
+              '<option value="10">10개씩 보기</option>' +
+              '<option value="20">20개씩 보기</option>' +
+              '<option value="50">50개씩 보기</option>' +
+            '</select>'
+        }
       let payoutPage = 1
       let payoutPageSize = Number(sessionStorage.getItem('withdraw_page_size') || 10)
     
@@ -5845,6 +5857,17 @@ const summaryBox = document.querySelector('.admin-summary')
 const tableHead = document.querySelector('.admin-table thead')
 const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
+  const tableTop = document.querySelector('.admin-table-top')
+
+if (tableTop) {
+  tableTop.innerHTML =
+    '<button>엑셀 다운로드</button>' +
+    '<select id="admin-page-size">' +
+      '<option value="10">10개씩 보기</option>' +
+      '<option value="20">20개씩 보기</option>' +
+      '<option value="50">50개씩 보기</option>' +
+    '</select>'
+}
 
 if (subMenu) {
   subMenu.innerHTML =
@@ -5913,7 +5936,20 @@ if (tableHead) {
 
 paymentTableBody.innerHTML = ''
 
-payments.forEach((payment, index) => {
+const savedAdminPageSize =
+  sessionStorage.getItem('admin_page_size') || '10'
+
+const pageSizeSelect =
+  document.querySelector('#admin-page-size') as HTMLSelectElement | null
+
+if (pageSizeSelect) {
+  pageSizeSelect.value = savedAdminPageSize
+}
+
+const adminPageSize = Number(savedAdminPageSize) || 10
+const visiblePayments = payments.slice(0, adminPageSize)
+
+visiblePayments.forEach((payment, index) => {
   const tr = document.createElement('tr')
 
   tr.innerHTML =
