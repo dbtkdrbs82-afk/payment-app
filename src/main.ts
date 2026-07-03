@@ -4945,13 +4945,105 @@ if (page === 'payout') {
   }
 
   if (searchBox) {
-    searchBox.innerHTML =
-      '<div class="payment-search-line">' +
-        '<button class="payout-filter-btn" data-status="전체">전체</button>' +
-        '<button class="payout-filter-btn" data-status="출금대기">출금대기</button>' +
-        '<button class="payout-filter-btn" data-status="출금완료">출금완료</button>' +
-      '</div>'
-  }
+    searchBox.innerHTML = `
+<div class="payout-search-box">
+
+  <div class="payout-search-row">
+
+    <label>조회기준</label>
+
+    <label>
+      <input type="radio"
+             name="dateType"
+             value="trade"
+             checked>
+      거래일
+    </label>
+
+    <label>
+      <input type="radio"
+             name="dateType"
+             value="merchant">
+      가맹점 출금예정일
+    </label>
+
+    <label>
+      <input type="radio"
+             name="dateType"
+             value="company">
+      회사 입금예정일
+    </label>
+
+  </div>
+
+  <div class="payout-search-row">
+
+    <label>기간</label>
+
+    <input type="date" id="start-date">
+
+    ~
+
+    <input type="date" id="end-date">
+
+    <button>오늘</button>
+    <button>어제</button>
+    <button>당월</button>
+
+  </div>
+
+  <div class="payout-search-row">
+
+    <label>PG</label>
+
+    <select id="pg-filter">
+
+      <option>전체</option>
+      <option>토스페이먼츠</option>
+      <option>코페이</option>
+
+    </select>
+
+    <label>출금상태</label>
+
+    <select id="status-filter">
+
+      <option>전체</option>
+      <option>출금대기</option>
+      <option>출금보류</option>
+      <option>계좌오류</option>
+      <option>계좌인증</option>
+      <option>출금완료</option>
+      <option>출금오류</option>
+
+    </select>
+
+    <label>조회대상</label>
+
+    <select id="target-filter">
+
+      <option>전체</option>
+      <option>가맹점</option>
+      <option>담당자</option>
+      <option>대리점</option>
+      <option>지사</option>
+
+    </select>
+
+    <input
+      type="text"
+      placeholder="검색어">
+
+    <button id="search-button">
+
+      조회
+
+    </button>
+
+  </div>
+
+</div>
+`
 
   const { data: payments, error } = await supabase
     .from('payments')
@@ -4963,15 +5055,15 @@ if (page === 'payout') {
     return
   }
 
-  const payoutRows = payments || []
+  let currentPayoutRows = payments || []
 
-  const totalPayoutAmount = payoutRows.reduce((sum, payment) => {
+  const totalPayoutAmount = currentPayoutRows.reduce((sum, payment) => {
     return sum + Number(payment.settlement_amount || payment.amount || 0)
   }, 0)
 
   if (summaryBox) {
     summaryBox.innerHTML =
-      '출금대상 : ' + payoutRows.length + '건 &nbsp;&nbsp;&nbsp;' +
+      '출금대상 : ' + currentPayoutRows.length + '건 &nbsp;&nbsp;&nbsp;' +
       '출금예정금액 : ' + totalPayoutAmount.toLocaleString() + '원 &nbsp;&nbsp;&nbsp;' +
       '출금시간 : 오후 3시'
   }
@@ -4994,7 +5086,7 @@ if (page === 'payout') {
 
   paymentTableBody.innerHTML = ''
 
-  payoutRows.forEach((row, index) => {
+  currentPayoutRows.forEach((row, index) => {
     const tr = document.createElement('tr')
 
       const amount = Number(row.amount || 0)
@@ -5052,7 +5144,7 @@ if (page === 'payout') {
     })
 }
 
-if (page === 'order') {
+} else if (page === 'order') {
   const subMenu = document.querySelector('.admin-sub-menu')
   const titleBox = document.querySelector('.admin-title')
   const searchBox = document.querySelector('.admin-search-box')
