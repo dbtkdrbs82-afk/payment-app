@@ -4169,13 +4169,13 @@ const tableTop = document.querySelector('.admin-table-top')
 if (tableTop) {
   tableTop.innerHTML =
     '<button>엑셀 다운로드</button>' +
-    '<select id="admin-page-size">' +
+    '<select id="withdraw-page-size">' +
       '<option value="10">10개씩 보기</option>' +
-      '<option value="20" selected>20개씩 보기</option>' +
+      '<option value="20">20개씩 보기</option>' +
       '<option value="50">50개씩 보기</option>' +
-      '<option value="100">100개씩 보기</option>' +
     '</select>'
 }
+
       const result = await supabase
         .from('merchants')
         .select('*')
@@ -4808,11 +4808,7 @@ console.log('저장 error:', error)
               <input id="payout-keyword" type="text" placeholder="검색어">
               <button id="payout-search-btn" class="payout-search-btn">조회</button>
     
-              <select id="withdraw-page-size">
-                <option value="10">10개씩 보기</option>
-                <option value="20">20개씩 보기</option>
-                <option value="50">50개씩 보기</option>
-              </select>
+              
             </div>
           </div>
         `
@@ -5006,20 +5002,18 @@ console.log('저장 error:', error)
     
       
       const payoutPageSizeSelect =
-      document.querySelector<HTMLSelectElement>('#withdraw-page-size')
-    
-    if (payoutPageSizeSelect) {
-      payoutPageSizeSelect.value = String(payoutPageSize)
-    
-      payoutPageSizeSelect.addEventListener('change', () => {
-        payoutPageSize = Number(payoutPageSizeSelect.value)
-        payoutPage = 1
-    
-        sessionStorage.setItem('withdraw_page_size', String(payoutPageSize))
-    
-        renderPayoutTable()
-      })
-    }
+  document.querySelector<HTMLSelectElement>('#withdraw-page-size')
+
+if (payoutPageSizeSelect) {
+  payoutPageSizeSelect.value = String(payoutPageSize)
+
+  payoutPageSizeSelect.addEventListener('change', () => {
+    payoutPageSize = Number(payoutPageSizeSelect.value)
+    payoutPage = 1
+    sessionStorage.setItem('withdraw_page_size', String(payoutPageSize))
+    renderPayoutTable()
+  })
+}
     
       document.querySelector('#payout-search-btn')
         ?.addEventListener('click', () => {
