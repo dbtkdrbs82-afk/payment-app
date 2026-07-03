@@ -5056,7 +5056,7 @@ const totalPayoutAmount = filteredRows.reduce((sum, payment) => {
 
 
   const payoutPageSize =
-  Number(sessionStorage.getItem('payout_page_size') || 10)
+  Number(sessionStorage.getItem('nxg_payout_page_size') || 10)
 
 const visibleRows = filteredRows.slice(0, payoutPageSize)
   paymentTableBody.innerHTML = ''
@@ -5107,7 +5107,7 @@ if (payoutPageSizeSelect) {
 
   payoutPageSizeSelect.addEventListener('change', () => {
     sessionStorage.setItem(
-      'payout_page_size',
+      'nxg_payout_page_size',
       payoutPageSizeSelect.value
     )
 
