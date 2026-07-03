@@ -4945,37 +4945,7 @@ console.log('저장 error:', error)
           paymentTableBody.appendChild(tr)
         })
     
-        const oldPagination = document.querySelector('#payout-pagination')
-        if (oldPagination) {
-          oldPagination.remove()
-        }
-    
-        const paginationBox = document.createElement('div')
-        paginationBox.id = 'payout-pagination'
-        paginationBox.className = 'payout-pagination'
-    
-        let paginationHtml = ''
-    
-        for (let i = 1; i <= totalPages; i++) {
-          paginationHtml +=
-            '<button class="payout-page-button ' +
-            (i === payoutPage ? 'active' : '') +
-            '" data-page="' + i + '">' + i + '</button>'
-        }
-    
-        paginationBox.innerHTML = paginationHtml
-    
-        paymentTableBody
-          .closest('table')
-          ?.insertAdjacentElement('afterend', paginationBox)
-    
-        document.querySelectorAll('.payout-page-button')
-          .forEach((button) => {
-            button.addEventListener('click', () => {
-              payoutPage = Number((button as HTMLElement).getAttribute('data-page') || 1)
-              renderPayoutTable()
-            })
-          })
+        
     
         document.querySelectorAll('.payout-complete-button')
           .forEach((button) => {
