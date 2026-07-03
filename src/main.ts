@@ -6687,7 +6687,7 @@ const merchantMenu =
     : `
       <button id="merchant-member-tab">회원관리</button>
       <button id="merchant-billing-tab">청구관리</button>
-      <button id="merchant-batch-tab">일괄승인</button>
+      <button id="merchant-batch-tab">수기결제</button>
       <button id="merchant-payment-list-tab">결제내역</button>
     `
     
