@@ -5984,7 +5984,58 @@ document.querySelectorAll('.payment-cancel-link')
 
       const paymentId = Number((button as HTMLElement).dataset.id)
 
-      if (!window.confirm('이 결제를 취소 처리할까요?')) {
+      if (!window.confirm('이 결제를 실제 취소 처리할까요?')) {
+        return
+      }
+
+      const { data: payment, error: paymentError } = await supabase
+        .from('payments')
+        .select('*')
+        .eq('id', paymentId)
+        .single()
+
+      if (paymentError || !payment) {
+        alert('결제정보를 불러오지 못했습니다.')
+        return
+      }
+
+      if (payment.status === 'cancel') {
+        alert('이미 취소된 결제입니다.')
+        return
+      }
+
+      if (payment.pg_company === '토스페이먼츠') {
+        const { data: merchant, error: merchantError } = await supabase
+          .from('merchants')
+          .select('toss_secret_key')
+          .eq('id', Number(payment.merchant_id))
+          .single()
+
+        if (merchantError || !merchant?.toss_secret_key) {
+          alert('토스 Secret Key를 찾을 수 없습니다.')
+          return
+        }
+
+        const cancelResponse = await fetch('/api/toss-cancel', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            paymentKey: payment.payment_key,
+            secretKey: merchant.toss_secret_key,
+            cancelReason: '관리자 취소'
+          })
+        })
+
+        const cancelResult = await cancelResponse.json()
+
+        if (!cancelResponse.ok) {
+          alert('토스 취소 실패: ' + (cancelResult.message || '알 수 없는 오류'))
+          return
+        }
+      } else if (payment.pg_company === '코페이') {
+        alert('코페이 실제 취소 API는 다음 단계에서 연결합니다.')
         return
       }
 
@@ -5994,15 +6045,15 @@ document.querySelectorAll('.payment-cancel-link')
         .eq('id', paymentId)
 
       if (error) {
-        alert('취소 처리 실패: ' + error.message)
+        alert('DB 취소 저장 실패: ' + error.message)
         return
       }
 
       alert('취소 처리되었습니다.')
 
-const cancelButton = button as HTMLElement
-const paymentKeyText = cancelButton.querySelector('span')?.outerHTML || ''
-cancelButton.innerHTML = '취소완료<br/>' + paymentKeyText
+      const cancelButton = button as HTMLElement
+      const paymentKeyText = cancelButton.querySelector('span')?.outerHTML || ''
+      cancelButton.innerHTML = '취소완료<br/>' + paymentKeyText
     })
   })
 document.querySelectorAll('.admin-receipt-btn')
