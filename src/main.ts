@@ -4127,20 +4127,15 @@ document.querySelector('#safe-save-admin-user')
   })
 })
 
-  document.addEventListener('change', (event) => {
-    const target = event.target as HTMLElement
-  
-    if (target.id !== 'admin-page-size') {
-      return
-    }
-  
-    const select = target as HTMLSelectElement
-  
-    sessionStorage.setItem(
-      'admin_page_size',
-      select.value
-    )
-  })
+document.querySelector('#admin-page-size')
+?.addEventListener('change', (event) => {
+  const select = event.target as HTMLSelectElement
+
+  sessionStorage.setItem('admin_page_size', select.value)
+
+  document.querySelector<HTMLElement>('[data-page="merchant"]')
+    ?.click()
+})
 
 if (titleBox) {
   titleBox.innerHTML = '▶ 가맹점관리 > 가맹점 관리'
@@ -4169,7 +4164,7 @@ const tableTop = document.querySelector('.admin-table-top')
 if (tableTop) {
   tableTop.innerHTML =
     '<button>엑셀 다운로드</button>' +
-    '<select id="withdraw-page-size">' +
+    '<select id="admin-page-size">' +
       '<option value="10">10개씩 보기</option>' +
       '<option value="20">20개씩 보기</option>' +
       '<option value="50">50개씩 보기</option>' +
