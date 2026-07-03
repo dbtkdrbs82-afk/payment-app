@@ -4963,9 +4963,7 @@ if (page === 'payout') {
     return
   }
 
-  const payoutRows = (payments || []).filter((payment) => {
-    return payment.settlement_status === '정산완료'
-  })
+  const payoutRows = payments || []
 
   const totalPayoutAmount = payoutRows.reduce((sum, payment) => {
     return sum + Number(payment.settlement_amount || payment.amount || 0)
@@ -4981,14 +4979,17 @@ if (page === 'payout') {
   if (tableHead) {
     tableHead.innerHTML =
       '<tr>' +
-        '<th>No</th>' +
-        '<th>가맹점ID</th>' +
-        '<th>가맹점명</th>' +
-        '<th>출금예정금액</th>' +
-        '<th>출금시간</th>' +
-        '<th>출금상태</th>' +
-        '<th>처리</th>' +
-      '</tr>'
+  '<th>No</th>' +
+  '<th>가맹점ID</th>' +
+  '<th>가맹점명</th>' +
+  '<th>PG사</th>' +
+  '<th>결제금액</th>' +
+  '<th>수수료</th>' +
+  '<th>출금예정금액</th>' +
+  '<th>출금예정일</th>' +
+  '<th>출금상태</th>' +
+  '<th>처리</th>' +
+'</tr>'
   }
 
   paymentTableBody.innerHTML = ''
@@ -4996,25 +4997,33 @@ if (page === 'payout') {
   payoutRows.forEach((row, index) => {
     const tr = document.createElement('tr')
 
-    const payoutAmount =
-      Number(row.settlement_amount || row.amount || 0)
-
-    tr.innerHTML =
-      '<td>' + (index + 1) + '</td>' +
-      '<td>' +
-        (row.merchant_id
-          ? 'MER' + String(row.merchant_id).padStart(4, '0')
-          : '-') +
-      '</td>' +
-      '<td>' + (row.merchant_name || '-') + '</td>' +
-      '<td>' + payoutAmount.toLocaleString() + '원</td>' +
-      '<td>15:00</td>' +
-      '<td>' + (row.payout_status || '출금대기') + '</td>' +
-      '<td>' +
-        (row.payout_status === '출금완료'
-          ? '출금완료'
-          : '<button class="payout-complete-button" data-id="' + row.id + '">출금완료</button>') +
-      '</td>'
+      const amount = Number(row.amount || 0)
+      const feeAmount = Number(row.fee_amount || 0)
+      const payoutAmount = Number(row.settlement_amount || (amount - feeAmount))
+      
+      const paymentDate = new Date(row.created_at)
+      const payoutDate = new Date(paymentDate)
+      payoutDate.setDate(payoutDate.getDate() + 1)
+      
+      tr.innerHTML =
+        '<td>' + (index + 1) + '</td>' +
+        '<td>' +
+          (row.merchant_id
+            ? 'MER' + String(row.merchant_id).padStart(4, '0')
+            : '-') +
+        '</td>' +
+        '<td>' + (row.merchant_name || '-') + '</td>' +
+        '<td>' + (row.pg_company || '-') + '</td>' +
+        '<td>' + amount.toLocaleString() + '원</td>' +
+        '<td>' + feeAmount.toLocaleString() + '원</td>' +
+        '<td>' + payoutAmount.toLocaleString() + '원</td>' +
+        '<td>' + payoutDate.toISOString().slice(0, 10) + '</td>' +
+        '<td>' + (row.payout_status || '출금대기') + '</td>' +
+        '<td>' +
+          (row.payout_status === '출금완료'
+            ? '출금완료'
+            : '<button class="payout-complete-button" data-id="' + row.id + '">출금완료</button>') +
+        '</td>'
 
     paymentTableBody.appendChild(tr)
   })
