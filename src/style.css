@@ -5153,3 +5153,26 @@ display: grid !important;
 .payout-search-btn {
   width: 90px;
 }
+/* 출금관리 조회기준 라디오 간격 압축 */
+.payout-search-panel {
+  overflow-x: auto;
+}
+
+.payout-search-row {
+  justify-content: flex-start;
+}
+
+.payout-search-row label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: auto !important;
+  min-width: auto !important;
+  margin-right: 18px;
+}
+
+.payout-search-row input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
