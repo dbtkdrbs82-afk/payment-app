@@ -4844,10 +4844,7 @@ display: grid !important;
 }
 
 .admin-table {
-  width: 100%;
-  max-width: 1800px;
-  min-width: 1200px;
-  margin: 0 auto;
+  min-width: 1800px;
 }
 /* 결제관리 테이블 압축 */
 .payment-table-scroll {
@@ -5060,4 +5057,26 @@ display: grid !important;
 .member-admin-page .admin-table-wrap,
 .member-management-page .admin-table-wrap {
   margin: 0 auto;
+}
+/* 회원/청구/수기결제 화면만 중앙 정렬 */
+.merchant-members-page {
+  max-width: 1500px;
+  margin: 40px auto;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.merchant-members-page .admin-table {
+  width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+}
+
+.merchant-members-page > div {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.merchant-members-page button {
+  box-sizing: border-box;
 }
