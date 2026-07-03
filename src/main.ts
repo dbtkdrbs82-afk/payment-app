@@ -4773,11 +4773,11 @@ if (page === 'settlement') {
     return
   }
 
-  const settlementRows = (payments || []).map((payment) => {
+    const settlementRows = (payments || []).map((payment) => {
     const amount = Number(payment.amount || 0)
-    const feeRate = 2
-    const feeAmount = Math.floor(amount * feeRate / 100)
-    const settlementAmount = amount - feeAmount
+    const feeRate = Number(payment.fee_rate || 0)
+    const feeAmount = Number(payment.fee_amount || 0)
+    const settlementAmount = Number(payment.settlement_amount || (amount - feeAmount))
 
     const paymentDate = new Date(payment.created_at)
     const dueDate = new Date(paymentDate)
