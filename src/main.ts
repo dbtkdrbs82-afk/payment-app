@@ -4994,7 +4994,7 @@ if (page === 'payout') {
   
           <input id="payout-keyword" type="text" placeholder="검색어">
           <button id="payout-search-btn" class="payout-search-btn">조회</button>
-          <select id="payout-page-size">
+          <select id="withdraw-page-size">
   <option value="10">10개씩 보기</option>
   <option value="20">20개씩 보기</option>
   <option value="50">50개씩 보기</option>
@@ -5056,7 +5056,7 @@ const totalPayoutAmount = filteredRows.reduce((sum, payment) => {
 
 
   const payoutPageSize =
-  Number(sessionStorage.getItem('nxg_payout_page_size') || 10)
+  Number(sessionStorage.getItem('withdraw_page_size') || 10)
 
 const visibleRows = filteredRows.slice(0, payoutPageSize)
   paymentTableBody.innerHTML = ''
@@ -5100,14 +5100,14 @@ const visibleRows = filteredRows.slice(0, payoutPageSize)
     location.reload()
   })
   const payoutPageSizeSelect =
-  document.querySelector<HTMLSelectElement>('#payout-page-size')
+  document.querySelector<HTMLSelectElement>('#withdraw-page-size')
 
 if (payoutPageSizeSelect) {
   payoutPageSizeSelect.value = String(payoutPageSize)
 
   payoutPageSizeSelect.addEventListener('change', () => {
     sessionStorage.setItem(
-      'nxg_payout_page_size',
+      'withdraw_page_size',
       payoutPageSizeSelect.value
     )
 
