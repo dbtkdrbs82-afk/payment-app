@@ -4946,104 +4946,58 @@ if (page === 'payout') {
 
   if (searchBox) {
     searchBox.innerHTML = `
-<div class="payout-search-box">
-
-  <div class="payout-search-row">
-
-    <label>조회기준</label>
-
-    <label>
-      <input type="radio"
-             name="dateType"
-             value="trade"
-             checked>
-      거래일
-    </label>
-
-    <label>
-      <input type="radio"
-             name="dateType"
-             value="merchant">
-      가맹점 출금예정일
-    </label>
-
-    <label>
-      <input type="radio"
-             name="dateType"
-             value="company">
-      회사 입금예정일
-    </label>
-
-  </div>
-
-  <div class="payout-search-row">
-
-    <label>기간</label>
-
-    <input type="date" id="start-date">
-
-    ~
-
-    <input type="date" id="end-date">
-
-    <button>오늘</button>
-    <button>어제</button>
-    <button>당월</button>
-
-  </div>
-
-  <div class="payout-search-row">
-
-    <label>PG</label>
-
-    <select id="pg-filter">
-
-      <option>전체</option>
-      <option>토스페이먼츠</option>
-      <option>코페이</option>
-
-    </select>
-
-    <label>출금상태</label>
-
-    <select id="status-filter">
-
-      <option>전체</option>
-      <option>출금대기</option>
-      <option>출금보류</option>
-      <option>계좌오류</option>
-      <option>계좌인증</option>
-      <option>출금완료</option>
-      <option>출금오류</option>
-
-    </select>
-
-    <label>조회대상</label>
-
-    <select id="target-filter">
-
-      <option>전체</option>
-      <option>가맹점</option>
-      <option>담당자</option>
-      <option>대리점</option>
-      <option>지사</option>
-
-    </select>
-
-    <input
-      type="text"
-      placeholder="검색어">
-
-    <button id="search-button">
-
-      조회
-
-    </button>
-
-  </div>
-
-</div>
-`
+      <div class="payout-search-panel">
+        <div class="payout-search-row">
+          <span class="payout-search-label">조회기준</span>
+  
+          <label><input type="radio" name="payout-date-type" value="거래일" checked> 거래일</label>
+          <label><input type="radio" name="payout-date-type" value="가맹점출금예정일"> 가맹점출금예정일</label>
+          <label><input type="radio" name="payout-date-type" value="회사입금예정일"> 회사입금예정일</label>
+  
+          <span class="payout-search-label">기간</span>
+          <input id="payout-start-date" type="date">
+          <span>~</span>
+          <input id="payout-end-date" type="date">
+  
+          <button id="payout-today-btn" class="payout-small-btn">오늘</button>
+          <button id="payout-yesterday-btn" class="payout-small-btn">어제</button>
+          <button id="payout-month-btn" class="payout-small-btn">당월</button>
+        </div>
+  
+        <div class="payout-search-row">
+          <span class="payout-search-label">PG</span>
+          <select id="payout-pg-filter">
+            <option value="전체">전체</option>
+            <option value="토스페이먼츠">토스페이먼츠</option>
+            <option value="코페이">코페이</option>
+          </select>
+  
+          <span class="payout-search-label">출금상태</span>
+          <select id="payout-status-filter">
+            <option value="전체">전체</option>
+            <option value="출금대기">출금대기</option>
+            <option value="출금보류">출금보류</option>
+            <option value="계좌오류">계좌오류</option>
+            <option value="계좌인증">계좌인증</option>
+            <option value="출금완료">출금완료</option>
+            <option value="출금오류">출금오류</option>
+          </select>
+  
+          <span class="payout-search-label">조회대상</span>
+          <select id="payout-target-filter">
+            <option value="전체">전체</option>
+            <option value="가맹점">가맹점</option>
+            <option value="담당자">담당자</option>
+            <option value="대리점">대리점</option>
+            <option value="지사">지사</option>
+          </select>
+  
+          <input id="payout-keyword" type="text" placeholder="검색어">
+          <button id="payout-search-btn" class="payout-search-btn">조회</button>
+        </div>
+      </div>
+    `
+  }
 
   const { data: payments, error } = await supabase
     .from('payments')
@@ -5142,7 +5096,7 @@ if (page === 'payout') {
         location.reload()
       })
     })
-}
+
 
 } else if (page === 'order') {
   const subMenu = document.querySelector('.admin-sub-menu')

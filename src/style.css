@@ -5080,3 +5080,76 @@ display: grid !important;
 .merchant-members-page button {
   box-sizing: border-box;
 }
+/* 출금관리 검색영역 가로형 */
+.payout-search-panel {
+  padding: 18px 24px;
+  background: #fff;
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+}
+
+.payout-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  margin-bottom: 10px;
+}
+
+.payout-search-row:last-child {
+  margin-bottom: 0;
+}
+
+.payout-search-label {
+  font-weight: 700;
+  font-size: 13px;
+  color: #111827;
+  margin-right: 4px;
+  white-space: nowrap;
+}
+
+.payout-search-row label {
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.payout-search-row input[type="date"],
+.payout-search-row select,
+.payout-search-row input[type="text"] {
+  height: 34px;
+  padding: 0 10px;
+  font-size: 13px;
+  border: 1px solid #cfd8e3;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.payout-search-row input[type="date"] {
+  width: 150px;
+}
+
+.payout-search-row select {
+  width: 130px;
+}
+
+#payout-keyword {
+  width: 180px;
+}
+
+.payout-small-btn,
+.payout-search-btn {
+  height: 34px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 0;
+  border-radius: 6px;
+  background: #123f78;
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.payout-search-btn {
+  width: 90px;
+}
