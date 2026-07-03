@@ -5111,7 +5111,7 @@ if (payoutPageSizeSelect) {
       payoutPageSizeSelect.value
     )
 
-    location.reload()
+    window.location.href = window.location.href
   })
 }
   document.querySelectorAll('.payout-complete-button')
