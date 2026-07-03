@@ -4994,6 +4994,11 @@ if (page === 'payout') {
   
           <input id="payout-keyword" type="text" placeholder="검색어">
           <button id="payout-search-btn" class="payout-search-btn">조회</button>
+          <select id="payout-page-size">
+  <option value="10">10개씩 보기</option>
+  <option value="20">20개씩 보기</option>
+  <option value="50">50개씩 보기</option>
+</select>
         </div>
       </div>
     `
@@ -5011,13 +5016,24 @@ if (page === 'payout') {
 
   let currentPayoutRows = payments || []
 
-  const totalPayoutAmount = currentPayoutRows.reduce((sum, payment) => {
+  const pgFilter =
+  (document.querySelector('#payout-pg-filter') as HTMLSelectElement)?.value || '전체'
+
+let filteredRows = currentPayoutRows
+
+if (pgFilter !== '전체') {
+  filteredRows = filteredRows.filter((row) => {
+    return row.pg_company === pgFilter
+  })
+}
+
+const totalPayoutAmount = filteredRows.reduce((sum, payment) => {
     return sum + Number(payment.settlement_amount || payment.amount || 0)
   }, 0)
 
   if (summaryBox) {
     summaryBox.innerHTML =
-      '출금대상 : ' + currentPayoutRows.length + '건 &nbsp;&nbsp;&nbsp;' +
+      '출금대상 : ' + filteredRows.length + '건 &nbsp;&nbsp;&nbsp;' +
       '출금예정금액 : ' + totalPayoutAmount.toLocaleString() + '원 &nbsp;&nbsp;&nbsp;' +
       '출금시간 : 오후 3시'
   }
@@ -5038,9 +5054,14 @@ if (page === 'payout') {
 '</tr>'
   }
 
+
+  const payoutPageSize =
+  Number(sessionStorage.getItem('payout_page_size') || 10)
+
+const visibleRows = filteredRows.slice(0, payoutPageSize)
   paymentTableBody.innerHTML = ''
 
-  currentPayoutRows.forEach((row, index) => {
+  visibleRows.forEach((row, index) => {
     const tr = document.createElement('tr')
 
       const amount = Number(row.amount || 0)
@@ -5074,6 +5095,25 @@ if (page === 'payout') {
     paymentTableBody.appendChild(tr)
   })
 
+  document.querySelector('#payout-pg-filter')
+  ?.addEventListener('change', () => {
+    location.reload()
+  })
+  const payoutPageSizeSelect =
+  document.querySelector<HTMLSelectElement>('#payout-page-size')
+
+if (payoutPageSizeSelect) {
+  payoutPageSizeSelect.value = String(payoutPageSize)
+
+  payoutPageSizeSelect.addEventListener('change', () => {
+    sessionStorage.setItem(
+      'payout_page_size',
+      payoutPageSizeSelect.value
+    )
+
+    location.reload()
+  })
+}
   document.querySelectorAll('.payout-complete-button')
     .forEach((button) => {
       button.addEventListener('click', async () => {
