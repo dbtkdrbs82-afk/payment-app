@@ -7512,7 +7512,11 @@ document.querySelector('#merchant-qr-tab')
   })
 
   let currentOrderFilter = '전체'
-let currentPageSize = 20
+
+let currentPageSize = Number(
+  sessionStorage.getItem('merchant_page_size') || '20'
+)
+
 let currentPage = 1
 
 function applyOrderFilter() {
@@ -7590,18 +7594,28 @@ document.querySelectorAll('.order-filter-btn')
     })
   })
 
-document.querySelector('#merchant-page-size')
-  ?.addEventListener('change', (e) => {
+  const merchantPageSizeSelect =
+  document.querySelector<HTMLSelectElement>('#merchant-page-size')
 
-    currentPageSize =
-      Number(
-        (e.target as HTMLSelectElement).value
-      )
+if (merchantPageSizeSelect) {
+  merchantPageSizeSelect.value = String(currentPageSize)
 
-      currentPage = 1
+  merchantPageSizeSelect.addEventListener('change', (e) => {
+
+    currentPageSize = Number(
+      (e.target as HTMLSelectElement).value
+    )
+
+    sessionStorage.setItem(
+      'merchant_page_size',
+      String(currentPageSize)
+    )
+
+    currentPage = 1
 
     applyOrderFilter()
   })
+}
 
   document.querySelector('#order-prev-page')
   ?.addEventListener('click', () => {
