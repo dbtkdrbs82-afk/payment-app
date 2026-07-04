@@ -5085,7 +5085,7 @@ if (payoutPageSizeSelect) {
   let currentOrderPage = 1
   let orderPageSize = 10
   const orderList = orders || []
-  const totalOrderPage = Math.max(1, Math.ceil(orderList.length / orderPageSize))
+  
   
   if (tableHead) {
     tableHead.innerHTML =
@@ -5187,8 +5187,13 @@ if (payoutPageSizeSelect) {
     renderMerchantOrderPage()
   })
 
-document.querySelector('#order-next-page')
+  document.querySelector('#order-next-page')
   ?.addEventListener('click', () => {
+    const totalOrderPage = Math.max(
+      1,
+      Math.ceil(orderList.length / orderPageSize)
+    )
+
     if (currentOrderPage >= totalOrderPage) return
 
     currentOrderPage++
