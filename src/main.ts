@@ -2818,7 +2818,18 @@ if (summaryBox) {
        })
        const adminTabs = document.querySelectorAll('.admin-tab')
 
-       adminTabs.forEach((tab) => {
+       setTimeout(() => {
+        const savedAdminPage = sessionStorage.getItem('adminPage') || 'merchant'
+      
+        const savedAdminTab =
+          document.querySelector<HTMLElement>('.admin-tab[data-page="' + savedAdminPage + '"]')
+      
+        if (savedAdminTab) {
+          savedAdminTab.click()
+        }
+      }, 300)
+      
+      adminTabs.forEach((tab) => {
         tab.addEventListener('click', async () => {
           adminTabs.forEach((item) => {
             item.classList.remove('active')
@@ -2827,6 +2838,9 @@ if (summaryBox) {
           tab.classList.add('active')
       
           const page = tab.getAttribute('data-page')
+
+          if (page) sessionStorage.setItem('adminPage', page)
+
           if (page === 'organization') {
             const subMenu = document.querySelector('.admin-sub-menu')
             const titleBox = document.querySelector('.admin-title')
