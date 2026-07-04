@@ -5194,29 +5194,23 @@ if (payoutPageSizeSelect) {
   
   renderMerchantOrderPage()
   
-  const orderPrevButton =
-    document.querySelector<HTMLButtonElement>('#order-prev-page')
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement
   
-  if (orderPrevButton) {
-    orderPrevButton.onclick = () => {
-
+    console.log('클릭됨:', target.id)
+  
+    if (target.id === 'order-prev-page') {
       console.log('이전 클릭')
-      
+  
       if (currentOrderPage <= 1) return
   
       currentOrderPage = currentOrderPage - 1
       renderMerchantOrderPage()
     }
-  }
   
-  const orderNextButton =
-    document.querySelector<HTMLButtonElement>('#order-next-page')
-  
-  if (orderNextButton) {
-    orderNextButton.onclick = () => {
-
+    if (target.id === 'order-next-page') {
       console.log('다음 클릭')
-
+  
       const totalOrderPage = Math.max(
         1,
         Math.ceil(orderList.length / orderPageSize)
@@ -5227,19 +5221,20 @@ if (payoutPageSizeSelect) {
       currentOrderPage = currentOrderPage + 1
       renderMerchantOrderPage()
     }
-  }
+  })
   
-  const merchantPageSizeSelect =
-    document.querySelector<HTMLSelectElement>('#merchant-page-size')
+  document.addEventListener('change', (event) => {
+    const target = event.target as HTMLSelectElement
   
-  if (merchantPageSizeSelect) {
-    merchantPageSizeSelect.onchange = () => {
-      orderPageSize = Number(merchantPageSizeSelect.value)
+    console.log('변경됨:', target.id)
+  
+    if (target.id === 'merchant-page-size') {
+      orderPageSize = Number(target.value)
       currentOrderPage = 1
   
       renderMerchantOrderPage()
     }
-  }
+  })
 
   const speak = (text: string) => {
     const message = new SpeechSynthesisUtterance(text)
