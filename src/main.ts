@@ -7710,7 +7710,65 @@ document.querySelector('#order-prev-page')
     }
   })
 
- 
+  const orderPrevPageButton =
+  document.querySelector<HTMLButtonElement>('#order-prev-page')
+
+if (orderPrevPageButton) {
+  orderPrevPageButton.onclick = () => {
+    console.log('이전 클릭됨')
+
+    if (currentPage <= 1) return
+
+    currentPage = currentPage - 1
+    applyOrderFilter()
+  }
+}
+
+const orderNextPageButton =
+  document.querySelector<HTMLButtonElement>('#order-next-page')
+
+if (orderNextPageButton) {
+  orderNextPageButton.onclick = () => {
+    console.log('다음 클릭됨')
+
+    const rows = Array.from(
+      document.querySelectorAll<HTMLTableRowElement>('#merchantOrderBody tr')
+    )
+
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>('.merchant-order-card')
+    )
+
+    const totalItems =
+      window.matchMedia('(max-width: 768px)').matches
+        ? cards.length
+        : rows.length
+
+    const totalPages = Math.max(
+      1,
+      Math.ceil(totalItems / currentPageSize)
+    )
+
+    if (currentPage >= totalPages) return
+
+    currentPage = currentPage + 1
+    applyOrderFilter()
+  }
+}
+
+const merchantPageSizeButton =
+  document.querySelector<HTMLSelectElement>('#merchant-page-size')
+
+if (merchantPageSizeButton) {
+  merchantPageSizeButton.onchange = () => {
+    console.log('보기 개수 변경됨')
+
+    currentPageSize = Number(merchantPageSizeButton.value)
+    currentPage = 1
+
+    applyOrderFilter()
+  }
+}
 
 applyOrderFilter()
 
