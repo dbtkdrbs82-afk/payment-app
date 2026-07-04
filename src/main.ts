@@ -2704,7 +2704,7 @@ if (adminUser && !adminLoginError) {
 
   <select id="admin-page-size">
     <option value="10">10개씩 보기</option>
-    <option value="20" selected>20개씩 보기</option>
+    <option value="20">20개씩 보기</option>
     <option value="50">50개씩 보기</option>
     <option value="100">100개씩 보기</option>
   </select>
