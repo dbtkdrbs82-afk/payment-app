@@ -5107,6 +5107,10 @@ if (payoutPageSizeSelect) {
       Math.ceil(orderList.length / orderPageSize)
     )
   
+    if (currentOrderPage > totalOrderPage) {
+      currentOrderPage = totalOrderPage
+    }
+  
     const start = (currentOrderPage - 1) * orderPageSize
     const end = start + orderPageSize
     const pageOrders = orderList.slice(start, end)
@@ -5168,50 +5172,69 @@ if (payoutPageSizeSelect) {
       paymentTableBody.appendChild(tr)
     })
   
-    const pageInfo =
-  document.querySelector('#order-page-info')
-  
+    const pageInfo = document.querySelector('#order-page-info')
     if (pageInfo) {
       pageInfo.textContent = currentOrderPage + ' / ' + totalOrderPage
     }
-    console.log('현재페이지', currentOrderPage)
-console.log('시작번호', start)
-console.log('페이지주문', pageOrders)
+  
+    const prevButton =
+      document.querySelector<HTMLButtonElement>('#order-prev-page')
+  
+    const nextButton =
+      document.querySelector<HTMLButtonElement>('#order-next-page')
+  
+    if (prevButton) {
+      prevButton.disabled = currentOrderPage <= 1
+    }
+  
+    if (nextButton) {
+      nextButton.disabled = currentOrderPage >= totalOrderPage
+    }
   }
   
   renderMerchantOrderPage()
-  document.querySelector('#order-prev-page')
-  ?.addEventListener('click', () => {
-    if (currentOrderPage <= 1) return
+  
+  const orderPrevButton =
+    document.querySelector<HTMLButtonElement>('#order-prev-page')
+  
+  if (orderPrevButton) {
+    orderPrevButton.onclick = () => {
+      if (currentOrderPage <= 1) return
+  
+      currentOrderPage = currentOrderPage - 1
+      renderMerchantOrderPage()
+    }
+  }
+  
+  const orderNextButton =
+    document.querySelector<HTMLButtonElement>('#order-next-page')
+  
+  if (orderNextButton) {
+    orderNextButton.onclick = () => {
+      const totalOrderPage = Math.max(
+        1,
+        Math.ceil(orderList.length / orderPageSize)
+      )
+  
+      if (currentOrderPage >= totalOrderPage) return
+  
+      currentOrderPage = currentOrderPage + 1
+      renderMerchantOrderPage()
+    }
+  }
+  
+  const merchantPageSizeSelect =
+    document.querySelector<HTMLSelectElement>('#merchant-page-size')
+  
+  if (merchantPageSizeSelect) {
+    merchantPageSizeSelect.onchange = () => {
+      orderPageSize = Number(merchantPageSizeSelect.value)
+      currentOrderPage = 1
+  
+      renderMerchantOrderPage()
+    }
+  }
 
-    currentOrderPage--
-    renderMerchantOrderPage()
-  })
-
-  document.querySelector('#order-next-page')
-  ?.addEventListener('click', () => {
-    const totalOrderPage = Math.max(
-      1,
-      Math.ceil(orderList.length / orderPageSize)
-    )
-
-    if (currentOrderPage >= totalOrderPage) return
-
-    currentOrderPage++
-    renderMerchantOrderPage()
-  })
-  document
-  .querySelector<HTMLSelectElement>('#merchant-page-size')
-  ?.addEventListener('change', (e) => {
-
-    orderPageSize = Number(
-      (e.target as HTMLSelectElement).value
-    )
-
-    currentOrderPage = 1
-
-    renderMerchantOrderPage()
-  })
   const speak = (text: string) => {
     const message = new SpeechSynthesisUtterance(text)
     message.lang = 'ko-KR'
