@@ -7710,44 +7710,7 @@ document.querySelector('#order-prev-page')
     }
   })
 
-  document.querySelector('#order-next-page')
-  ?.addEventListener('click', () => {
-    const rows = Array.from(
-      document.querySelectorAll<HTMLTableRowElement>('#merchantOrderBody tr')
-    )
-
-    const cards = Array.from(
-      document.querySelectorAll<HTMLElement>('.merchant-order-card')
-    )
-
-    const totalItems =
-      window.matchMedia('(max-width: 768px)').matches
-        ? cards.filter((card) => {
-            const status = card.getAttribute('data-status') || '접수'
-
-            if (currentOrderFilter === '전체') return true
-            if (currentOrderFilter === '준비중') return status !== '완료'
-            return status === '완료'
-          }).length
-        : rows.filter((row) => {
-            const status = row.getAttribute('data-status') || '접수'
-
-            if (currentOrderFilter === '전체') return true
-            if (currentOrderFilter === '준비중') return status !== '완료'
-            return status === '완료'
-          }).length
-
-    const totalPages = Math.max(
-      1,
-      Math.ceil(totalItems / currentPageSize)
-    )
-
-    if (currentPage >= totalPages) return
-
-    currentPage++
-
-    applyOrderFilter()
-  })
+ 
 
 applyOrderFilter()
 
