@@ -7569,9 +7569,9 @@ document.querySelector('#merchant-qr-tab')
 
   let currentOrderFilter = '전체'
 
-let currentPageSize = Number(
-  sessionStorage.getItem('merchant_page_size') || '20'
-)
+  let currentPageSize = Number(
+    sessionStorage.getItem('merchant_page_size') || '10'
+  )
 
 let currentPage = 1
 
@@ -7686,8 +7686,27 @@ document.querySelector('#order-prev-page')
     }
   })
 
-document.querySelector('#order-next-page')
+  document.querySelector('#order-next-page')
   ?.addEventListener('click', () => {
+    const rows = Array.from(
+      document.querySelectorAll<HTMLTableRowElement>('#merchantOrderBody tr')
+    )
+
+    const filteredRows = rows.filter((row) => {
+      const status = row.getAttribute('data-status') || '접수'
+
+      if (currentOrderFilter === '전체') return true
+      if (currentOrderFilter === '준비중') return status !== '완료'
+      return status === '완료'
+    })
+
+    const totalPages = Math.max(
+      1,
+      Math.ceil(filteredRows.length / currentPageSize)
+    )
+
+    if (currentPage >= totalPages) return
+
     currentPage++
 
     applyOrderFilter()
