@@ -5176,6 +5176,9 @@ if (payoutPageSizeSelect) {
     if (pageInfo) {
       pageInfo.textContent = currentOrderPage + ' / ' + totalOrderPage
     }
+    console.log('현재페이지', currentOrderPage)
+console.log('시작번호', start)
+console.log('페이지주문', pageOrders)
   }
   
   renderMerchantOrderPage()
