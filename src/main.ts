@@ -5034,9 +5034,7 @@ if (payoutPageSizeSelect) {
     
       renderPayoutTable()
     
-    } else if (page === 'order') {
-
-
+    
 } else if (page === 'order') {
   const subMenu = document.querySelector('.admin-sub-menu')
   const titleBox = document.querySelector('.admin-title')
