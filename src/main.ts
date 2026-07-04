@@ -5199,6 +5199,9 @@ if (payoutPageSizeSelect) {
   
   if (orderPrevButton) {
     orderPrevButton.onclick = () => {
+
+      console.log('이전 클릭')
+      
       if (currentOrderPage <= 1) return
   
       currentOrderPage = currentOrderPage - 1
@@ -5211,6 +5214,9 @@ if (payoutPageSizeSelect) {
   
   if (orderNextButton) {
     orderNextButton.onclick = () => {
+
+      console.log('다음 클릭')
+
       const totalOrderPage = Math.max(
         1,
         Math.ceil(orderList.length / orderPageSize)
