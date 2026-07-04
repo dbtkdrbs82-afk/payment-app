@@ -7692,17 +7692,30 @@ document.querySelector('#order-prev-page')
       document.querySelectorAll<HTMLTableRowElement>('#merchantOrderBody tr')
     )
 
-    const filteredRows = rows.filter((row) => {
-      const status = row.getAttribute('data-status') || '접수'
+    const cards = Array.from(
+      document.querySelectorAll<HTMLElement>('.merchant-order-card')
+    )
 
-      if (currentOrderFilter === '전체') return true
-      if (currentOrderFilter === '준비중') return status !== '완료'
-      return status === '완료'
-    })
+    const totalItems =
+      window.matchMedia('(max-width: 768px)').matches
+        ? cards.filter((card) => {
+            const status = card.getAttribute('data-status') || '접수'
+
+            if (currentOrderFilter === '전체') return true
+            if (currentOrderFilter === '준비중') return status !== '완료'
+            return status === '완료'
+          }).length
+        : rows.filter((row) => {
+            const status = row.getAttribute('data-status') || '접수'
+
+            if (currentOrderFilter === '전체') return true
+            if (currentOrderFilter === '준비중') return status !== '완료'
+            return status === '완료'
+          }).length
 
     const totalPages = Math.max(
       1,
-      Math.ceil(filteredRows.length / currentPageSize)
+      Math.ceil(totalItems / currentPageSize)
     )
 
     if (currentPage >= totalPages) return
