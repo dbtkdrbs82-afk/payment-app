@@ -5082,7 +5082,11 @@ if (payoutPageSizeSelect) {
     summaryBox.innerHTML =
       '주문수 : ' + (orders || []).length + '건'
   }
-
+  let currentOrderPage = 1
+  let orderPageSize = 10
+  const orderList = orders || []
+  const totalOrderPage = Math.max(1, Math.ceil(orderList.length / orderPageSize))
+  
   if (tableHead) {
     tableHead.innerHTML =
       '<tr>' +
@@ -5097,65 +5101,111 @@ if (payoutPageSizeSelect) {
       '</tr>'
   }
 
-  paymentTableBody.innerHTML = ''
+  function renderMerchantOrderPage() {
+    paymentTableBody.innerHTML = ''
+  
+    const totalOrderPage = Math.max(
+      1,
+      Math.ceil(orderList.length / orderPageSize)
+    )
+  
+    const start = (currentOrderPage - 1) * orderPageSize
+    const end = start + orderPageSize
+    const pageOrders = orderList.slice(start, end)
+  
+    pageOrders.forEach((order, index) => {
+      const tr = document.createElement('tr')
+  
+      const orderNumber =
+        order.order_no?.split('-')[1] ||
+        order.order_no ||
+        start + index + 1
+  
+      const orderItems = Array.isArray(order.items)
+        ? order.items
+            .map((item: any) => item.name + ' x ' + item.quantity)
+            .join(', ')
+        : '-'
+  
+      tr.innerHTML =
+        '<td>' + (start + index + 1) + '</td>' +
+        '<td>' +
+        '<button ' +
+          'class="merchant-receipt-link" ' +
+          'data-order="' + orderNumber + '" ' +
+          'data-amount="' + (order.total_amount || 0) + '" ' +
+          'data-date="' + (order.created_at || '') + '" ' +
+          'data-items="' + orderItems + '" ' +
+          'data-payment-key="' + (order.payment_key || '-') + '" ' +
+          'data-customer="' + (order.customer_name || '현장고객') + '"' +
+        '>' +
+          orderNumber + '번' +
+        '</button>' +
+        '</td>' +
+        '<td>MER' + String(order.merchant_id || 1).padStart(4, '0') + '</td>' +
+        '<td>' + orderItems + '</td>' +
+        '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
+        '<td>' + (order.order_status || '접수') + '</td>' +
+        '<td>' +
+          (order.order_status === '완료'
+            ? '완료'
+            : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
+        '</td>' +
+        '<td>' +
+          '<select class="call-message-select">' +
+            '<option value="주문 나왔습니다.">주문 나왔습니다.</option>' +
+            '<option value="주문이 준비되었습니다.">주문이 준비되었습니다.</option>' +
+            '<option value="음식을 찾아가 주세요.">음식을 찾아가 주세요.</option>' +
+            '<option value="카운터로 와주세요.">카운터로 와주세요.</option>' +
+            '<option value="픽업 부탁드립니다.">픽업 부탁드립니다.</option>' +
+            '<option value="아따 싸게싸게 챙겨가쇼.">아따 싸게싸게 챙겨가쇼.</option>' +
+            '<option value="챙겨 갈껀가 말껀가.">챙겨 갈껀가 말껀가.</option>' +
+            '<option value="행님 주문 나왔습니다.">행님 주문 나왔습니다.</option>' +
+          '</select>' +
+          '<button class="customer-call-button" data-number="' + orderNumber + '">' +
+            '고객호출' +
+          '</button>' +
+        '</td>'
+  
+      paymentTableBody.appendChild(tr)
+    })
+  
+    const pageInfo =
+  document.querySelector('#order-page-info')
+  
+    if (pageInfo) {
+      pageInfo.textContent = currentOrderPage + ' / ' + totalOrderPage
+    }
+  }
+  
+  renderMerchantOrderPage()
+  document.querySelector('#order-prev-page')
+  ?.addEventListener('click', () => {
+    if (currentOrderPage <= 1) return
 
-  ;(orders || []).forEach((order, index) => {
-    const tr = document.createElement('tr')
-
-    const orderNumber =
-  order.order_no?.split('-')[1] ||
-  order.order_no ||
-  index + 1
-
-const orderItems = Array.isArray(order.items)
-  ? order.items
-      .map((item: any) => item.name + ' x ' + item.quantity)
-      .join(', ')
-  : '-'
-
-tr.innerHTML =
-  '<td>' + (index + 1) + '</td>' +
-  '<td>' +
-  '<button ' +
-    'class="merchant-receipt-link" ' +
-    'data-order="' + orderNumber + '" ' +
-    'data-amount="' + (order.total_amount || 0) + '" ' +
-    'data-date="' + (order.created_at || '') + '" ' +
-    'data-items="' + orderItems + '"' +
-    'data-payment-key="' + (order.payment_key || '-') + '" ' +
-    'data-customer="' + (order.customer_name || '현장고객') + '"' +
-  '>' +
-    orderNumber + '번' +
-  '</button>' +
-'</td>' +
-  '<td>MER' + String(order.merchant_id || 1).padStart(4, '0') + '</td>' +
-  '<td>' + orderItems + '</td>' +
-  '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
-  '<td>' + (order.order_status || '접수') + '</td>' +
-      '<td>' +
-        (order.order_status === '완료'
-          ? '완료'
-          : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
-      '</td>' +
-      '<td>' +
-        '<select class="call-message-select">' +
-  '<option value="주문 나왔습니다.">주문 나왔습니다.</option>' +
-  '<option value="주문이 준비되었습니다.">주문이 준비되었습니다.</option>' +
-  '<option value="음식을 찾아가 주세요.">음식을 찾아가 주세요.</option>' +
-  '<option value="카운터로 와주세요.">카운터로 와주세요.</option>' +
-  '<option value="픽업 부탁드립니다.">픽업 부탁드립니다.</option>' +
-  '<option value="아따 싸게싸게 챙겨가쇼.">아따 싸게싸게 챙겨가쇼.</option>' +
-  '<option value="챙겨 갈껀가 말껀가.">챙겨 갈껀가 말껀가.</option>' +
-  '<option value="행님 주문 나왔습니다.">행님 주문 나왔습니다.</option>' +
-'</select>' +
-'<button class="customer-call-button" data-number="' + orderNumber + '">' +
-  '고객호출' +
-'</button>'
-      '</td>'
-
-    paymentTableBody.appendChild(tr)
+    currentOrderPage--
+    renderMerchantOrderPage()
   })
 
+document.querySelector('#order-next-page')
+  ?.addEventListener('click', () => {
+    if (currentOrderPage >= totalOrderPage) return
+
+    currentOrderPage++
+    renderMerchantOrderPage()
+  })
+  document
+  .querySelector<HTMLSelectElement>('#merchant-page-size')
+  ?.addEventListener('change', (e) => {
+
+    orderPageSize = Number(
+      (e.target as HTMLSelectElement).value
+    )
+
+    currentOrderPage = 1
+
+    renderMerchantOrderPage()
+  })
   const speak = (text: string) => {
     const message = new SpeechSynthesisUtterance(text)
     message.lang = 'ko-KR'
@@ -7599,35 +7649,30 @@ document.querySelectorAll('.order-filter-btn')
     })
   })
 
-  document.addEventListener('change', (e) => {
-    const target = e.target as HTMLSelectElement
-  
-    if (target.id !== 'merchant-page-size') {
-      return
-    }
-  
-    currentPageSize = Number(target.value)
-  
+  const merchantPageSizeSelect =
+  document.querySelector<HTMLSelectElement>('#merchant-page-size')
+
+if (merchantPageSizeSelect) {
+  merchantPageSizeSelect.value = String(currentPageSize)
+
+  merchantPageSizeSelect.addEventListener('change', (e) => {
+    currentPageSize = Number(
+      (e.target as HTMLSelectElement).value
+    )
+
     sessionStorage.setItem(
       'merchant_page_size',
       String(currentPageSize)
     )
-  
+
     currentPage = 1
-  
+
     applyOrderFilter()
   })
-  
-  const merchantPageSizeSelect =
-    document.querySelector<HTMLSelectElement>('#merchant-page-size')
-  
-  if (merchantPageSizeSelect) {
-    merchantPageSizeSelect.value = String(currentPageSize)
-  }
+}
 
-  document.querySelector('#order-prev-page')
+document.querySelector('#order-prev-page')
   ?.addEventListener('click', () => {
-
     if (currentPage > 1) {
       currentPage--
 
@@ -7637,7 +7682,6 @@ document.querySelectorAll('.order-filter-btn')
 
 document.querySelector('#order-next-page')
   ?.addEventListener('click', () => {
-
     currentPage++
 
     applyOrderFilter()
