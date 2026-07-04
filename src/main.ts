@@ -2816,18 +2816,20 @@ if (summaryBox) {
      
          location.href = '/admin-login'
        })
-       const adminTabs = document.querySelectorAll('.admin-tab')
+       const adminTabs = document.querySelectorAll<HTMLElement>('.admin-tab')
 
-       setTimeout(() => {
-        const savedAdminPage = sessionStorage.getItem('adminPage') || 'merchant'
-      
-        const savedAdminTab =
-          document.querySelector<HTMLElement>('.admin-tab[data-page="' + savedAdminPage + '"]')
-      
-        if (savedAdminTab) {
-          savedAdminTab.click()
-        }
-      }, 300)
+const savedAdminPage = sessionStorage.getItem('adminPage') || 'merchant'
+
+requestAnimationFrame(() => {
+  const savedAdminTab =
+    document.querySelector<HTMLElement>('.admin-tab[data-page="' + savedAdminPage + '"]')
+
+  if (savedAdminTab) {
+    savedAdminTab.click()
+  } else {
+    document.querySelector<HTMLElement>('.admin-tab[data-page="merchant"]')?.click()
+  }
+})
       
       adminTabs.forEach((tab) => {
         tab.addEventListener('click', async () => {
