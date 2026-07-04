@@ -7544,7 +7544,12 @@ function applyOrderFilter() {
     return checkVisible(status)
   })
 
-  const totalItems = filteredRows.length || filteredCards.length
+  const isMobileOrderView =
+  window.matchMedia('(max-width: 768px)').matches
+
+const totalItems = isMobileOrderView
+  ? filteredCards.length
+  : filteredRows.length
   const totalPages = Math.max(1, Math.ceil(totalItems / currentPageSize))
 
   if (currentPage > totalPages) {
@@ -7594,28 +7599,31 @@ document.querySelectorAll('.order-filter-btn')
     })
   })
 
-  const merchantPageSizeSelect =
-  document.querySelector<HTMLSelectElement>('#merchant-page-size')
-
-if (merchantPageSizeSelect) {
-  merchantPageSizeSelect.value = String(currentPageSize)
-
-  merchantPageSizeSelect.addEventListener('change', (e) => {
-
-    currentPageSize = Number(
-      (e.target as HTMLSelectElement).value
-    )
-
+  document.addEventListener('change', (e) => {
+    const target = e.target as HTMLSelectElement
+  
+    if (target.id !== 'merchant-page-size') {
+      return
+    }
+  
+    currentPageSize = Number(target.value)
+  
     sessionStorage.setItem(
       'merchant_page_size',
       String(currentPageSize)
     )
-
+  
     currentPage = 1
-
+  
     applyOrderFilter()
   })
-}
+  
+  const merchantPageSizeSelect =
+    document.querySelector<HTMLSelectElement>('#merchant-page-size')
+  
+  if (merchantPageSizeSelect) {
+    merchantPageSizeSelect.value = String(currentPageSize)
+  }
 
   document.querySelector('#order-prev-page')
   ?.addEventListener('click', () => {
