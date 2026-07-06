@@ -2662,6 +2662,12 @@ if (adminUser && !adminLoginError) {
 
   } else if (path === '/pg-admin') {
 
+    history.pushState(null, '', '/pg-admin')
+
+window.onpopstate = () => {
+  history.pushState(null, '', '/pg-admin')
+}
+
   if (!sessionStorage.getItem('admin_id')) {
     location.replace('/admin-login')
 }
