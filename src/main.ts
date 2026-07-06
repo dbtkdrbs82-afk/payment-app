@@ -4894,15 +4894,15 @@ console.log('저장 error:', error)
     location.reload()
   })
     
-    })
-    })
-    })
-  })
+})
+})
+})
+})
+
+merchantSearchButton?.click()
 }
-   
 
-
-    if (page === 'payout') {
+if (page === 'payout') {
       const subMenu = document.querySelector('.admin-sub-menu')
       const titleBox = document.querySelector('.admin-title')
       const searchBox = document.querySelector('.admin-search-box')
