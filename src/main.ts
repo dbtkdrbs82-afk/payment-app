@@ -4351,8 +4351,16 @@ if (keyword) {
       business_number: String(merchant.business_number || '').replace(/-/g, ''),
       resident_number: String(merchant.resident_number || '').replace(/-/g, ''),
       cpid: String(merchant.cpid || ''),
-      pg_mid: String(merchant.pg_mid || ''),
-      terminal_mid: String(merchant.terminal_mid || '')
+
+pg_mid:
+  String(merchant.pg_mid || '') + ' ' +
+  String(merchant.korpay_pg_mid || '') + ' ' +
+  String(merchant.daou_pg_mid || ''),
+
+terminal_mid:
+  String(merchant.terminal_mid || '') + ' ' +
+  String(merchant.korpay_terminal_mid || '') + ' ' +
+  String(merchant.daou_terminal_mid || '')
     }
 
     if (searchType !== 'all') {
