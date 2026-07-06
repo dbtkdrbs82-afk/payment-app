@@ -6167,6 +6167,14 @@ if (searchBox) {
 
   '</div>'
 }
+
+document.querySelector('#payment-search-btn')
+  ?.addEventListener('click', () => {
+    document
+      .querySelector<HTMLElement>('.admin-tab[data-page="payment"]')
+      ?.click()
+  })
+  
 const result = await supabase
   .from('payments')
   .select('*')
