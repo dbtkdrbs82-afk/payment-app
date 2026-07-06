@@ -4756,7 +4756,7 @@ merchantButtons.forEach((button) => {
 '</div>' +
             '<div class="merchant-detail-actions">' +
             '<button class="merchant-save-btn" id="save-merchant-info">저장</button>' +
-              '<button class="merchant-save-btn" id="approve-merchant">승인</button>' +
+              '<button class="merchant-save-btn" id="approve-merchant">개통완료</button>' +
 '<button class="merchant-reject-btn" id="delete-merchant">삭제</button>' +
 '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
             '</div>' +
@@ -4862,31 +4862,44 @@ console.log('저장 error:', error)
   })
   document.querySelector('#approve-merchant')
   ?.addEventListener('click', async () => {
-  
-    if (!confirm('이 가맹점을 승인하시겠습니까?')) return
-  
-    const loginId = 'MER' + String(merchant.id).padStart(4, '0')
-  
+    if (!confirm('개통완료 처리하시겠습니까?')) return
+
+    const loginId =
+      merchant.merchant_login_id || 'MER' + String(merchant.id).padStart(4, '0')
+
+    const password =
+      merchant.merchant_password || '1234'
+
     const { error } = await supabase
       .from('merchants')
       .update({
         status: '운영',
         merchant_login_id: loginId,
-        merchant_password: '1234'
+        merchant_password: password
       })
       .eq('id', merchant.id)
-  
+
     if (error) {
-      alert('승인 실패: ' + error.message)
+      alert('개통완료 실패: ' + error.message)
       return
     }
-  
+
+    const message =
+      '[NXG 개통완료]\n\n' +
+      '가맹점명 : ' + (merchant.merchant_name || '-') + '\n' +
+      '로그인 주소 : https://payment-app-ybtf.vercel.app/merchant-login\n' +
+      '아이디 : ' + loginId + '\n' +
+      '비밀번호 : ' + password
+
+    await navigator.clipboard.writeText(message)
+
     alert(
-      '승인완료\n\n' +
-      '아이디 : ' + loginId +
-      '\n비밀번호 : 1234'
+      '개통완료 처리되었습니다.\n\n' +
+      '로그인 안내문이 복사되었습니다.\n' +
+      '문자 또는 카카오톡에 붙여넣어 보내면 됩니다.\n\n' +
+      message
     )
-  
+
     location.reload()
   })
 
