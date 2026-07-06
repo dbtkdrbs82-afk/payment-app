@@ -6139,9 +6139,9 @@ if (searchBox) {
     '</select>' +
 
     '<select id="payment-date-type">' +
-      '<option value="created_at">거래일자</option>' +
-      '<option value="approved_at">승인일자</option>' +
-    '</select>' +
+  '<option value="created_at">거래일자</option>' +
+  '<option value="canceled_at">취소일자</option>' +
+'</select>' +
 
     '<input id="payment-start-date" type="date" />' +
     '<span>~</span>' +
@@ -6213,7 +6213,7 @@ document.querySelector('#payment-month-btn')
 
     document.querySelector<HTMLButtonElement>('#payment-search-btn')?.click()
   })
-  
+
 const savedPaymentFiltersText = sessionStorage.getItem('paymentFilters')
 
 if (savedPaymentFiltersText) {
@@ -6440,9 +6440,12 @@ document.querySelectorAll('.payment-cancel-link')
 
 
       const { error } = await supabase
-        .from('payments')
-        .update({ status: 'cancel' })
-        .eq('id', paymentId)
+  .from('payments')
+  .update({
+    status: 'cancel',
+    canceled_at: new Date().toISOString()
+  })
+  .eq('id', paymentId)
 
       if (error) {
         alert('DB 취소 저장 실패: ' + error.message)
