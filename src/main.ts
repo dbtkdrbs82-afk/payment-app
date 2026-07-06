@@ -2643,7 +2643,7 @@ if (adminUser && !adminLoginError) {
   sessionStorage.setItem('admin_name', adminUser.admin_name || '')
   sessionStorage.setItem('admin_role', adminUser.role || '')
 
-  location.href = '/pg-admin'
+  location.replace('/pg-admin')
   return
 }
 
@@ -2663,7 +2663,7 @@ if (adminUser && !adminLoginError) {
   } else if (path === '/pg-admin') {
 
   if (!sessionStorage.getItem('admin_id')) {
-  location.href = '/admin-login'
+    location.replace('/admin-login')
 }
 
     const adminId =
