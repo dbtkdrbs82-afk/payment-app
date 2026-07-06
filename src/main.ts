@@ -6237,24 +6237,7 @@ document.querySelector('#payment-month-btn')
       ?.click()
   })
   
-const savedPaymentFiltersText = sessionStorage.getItem('paymentFilters')
 
-if (savedPaymentFiltersText) {
-  const savedPaymentFilters = JSON.parse(savedPaymentFiltersText)
-
-  const pgSelect = document.querySelector<HTMLSelectElement>('#payment-pg-filter')
-  const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
-  const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
-  const typeSelect = document.querySelector<HTMLSelectElement>('#payment-search-type')
-  const dateTypeSelect = document.querySelector<HTMLSelectElement>('#payment-date-type')
-  const keywordInput = document.querySelector<HTMLInputElement>('#payment-search-keyword')
-
-  if (pgSelect) pgSelect.value = savedPaymentFilters.pg || 'all'
-  if (startInput) startInput.value = savedPaymentFilters.startDate || ''
-  if (endInput) endInput.value = savedPaymentFilters.endDate || ''
-  if (typeSelect) typeSelect.value = savedPaymentFilters.searchType || 'all'
-  if (keywordInput) keywordInput.value = savedPaymentFilters.keyword || ''
-}
 
 document.querySelector('#payment-search-btn')
   ?.addEventListener('click', () => {
