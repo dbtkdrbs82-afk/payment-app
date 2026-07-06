@@ -4238,7 +4238,8 @@ if (tableTop) {
       '<option value="10">10개씩 보기</option>' +
       '<option value="20">20개씩 보기</option>' +
       '<option value="50">50개씩 보기</option>' +
-    '</select>'
+    '</select>' +
+    '<div id="merchant-pagination" class="merchant-pagination"></div>'
 }
 
 document.querySelectorAll<HTMLButtonElement>('.quick-btn')
@@ -6188,11 +6189,11 @@ paymentTableBody.innerHTML = ''
 const savedAdminPageSize =
   sessionStorage.getItem('admin_page_size') || '10'
 
-const pageSizeSelect =
+  const merchantPageSizeSelect =
   document.querySelector('#admin-page-size') as HTMLSelectElement | null
 
-if (pageSizeSelect) {
-  pageSizeSelect.value = savedAdminPageSize
+if (merchantPageSizeSelect) {
+  merchantPageSizeSelect.value = savedAdminPageSize
 }
 
 const adminPageSize = Number(savedAdminPageSize) || 10
