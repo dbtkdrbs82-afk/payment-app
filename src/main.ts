@@ -4182,20 +4182,47 @@ const searchBox = document.querySelector('.admin-search-box')
 
 if (searchBox) {
   searchBox.innerHTML =
-  '<div class="merchant-filter-line">' +
-    '<span class="filter-label">• 검색</span>' +
-    '<select><option>전체</option><option>다우데이타</option><option>코페이</option></select>' +
-    '<input placeholder="시작일" />' +
-    '<span>~</span>' +
-    '<input placeholder="종료일" />' +
-    '<button class="quick-btn">오늘</button>' +
-    '<button class="quick-btn">어제</button>' +
-    '<button class="quick-btn">당월</button>' +
-    '<select><option>전체</option><option>운영</option><option>중지</option><option>가입대기</option></select>' +
-    '<select><option>가맹점명</option><option>담당자명</option><option>대리점명</option><option>지사명</option><option>주민번호</option><option>사업자번호</option><option>단말기CPID</option></select>' +
-    '<input placeholder="검색어 입력" />' +
-    '<button class="merchant-search-btn">검색</button>' +
-  '</div>'
+    '<div class="merchant-filter-line">' +
+      '<span class="filter-label">• 검색</span>' +
+
+      '<select id="merchant-pg-filter">' +
+        '<option value="">전체 PG</option>' +
+        '<option value="다우데이타">다우데이타</option>' +
+        '<option value="코페이">코페이</option>' +
+        '<option value="토스페이먼츠">토스페이먼츠</option>' +
+      '</select>' +
+
+      '<input id="merchant-start-date" type="date" />' +
+      '<span>~</span>' +
+      '<input id="merchant-end-date" type="date" />' +
+
+      '<button class="quick-btn" data-range="today">오늘</button>' +
+      '<button class="quick-btn" data-range="yesterday">어제</button>' +
+      '<button class="quick-btn" data-range="month">당월</button>' +
+
+      '<select id="merchant-status-filter">' +
+        '<option value="">전체 상태</option>' +
+        '<option value="운영">운영</option>' +
+        '<option value="중지">중지</option>' +
+        '<option value="신청">가입대기</option>' +
+      '</select>' +
+
+      '<select id="merchant-search-type">' +
+        '<option value="all">전체검색</option>' +
+        '<option value="merchant_name">가맹점명</option>' +
+        '<option value="owner_name">담당자명/대표자명</option>' +
+        '<option value="agency_name">대리점명</option>' +
+        '<option value="branch_name">지사명</option>' +
+        '<option value="business_number">사업자번호</option>' +
+        '<option value="resident_number">주민번호</option>' +
+        '<option value="cpid">단말기 CPID</option>' +
+        '<option value="pg_mid">PG사 MID</option>' +
+        '<option value="terminal_mid">단말기 MID</option>' +
+      '</select>' +
+
+      '<input id="merchant-search-keyword" placeholder="검색어 입력" />' +
+      '<button class="merchant-search-btn">검색</button>' +
+    '</div>'
 }
 const tableTop = document.querySelector('.admin-table-top')
 
@@ -4208,7 +4235,14 @@ if (tableTop) {
       '<option value="50">50개씩 보기</option>' +
     '</select>'
 }
+const merchantSearchButton =
+  document.querySelector<HTMLButtonElement>('.merchant-search-btn')
 
+merchantSearchButton?.addEventListener('click', () => {
+  document
+    .querySelector<HTMLElement>('.admin-tab[data-page="merchant"]')
+    ?.click()
+})
       const result = await supabase
         .from('merchants')
         .select('*')
@@ -4219,25 +4253,73 @@ if (tableTop) {
         return
       }
     
-      const keywordInput =
-  document.querySelector<HTMLInputElement>(
-    '.merchant-filter-line input:last-of-type'
-  )
+      const pgFilter =
+  document.querySelector<HTMLSelectElement>('#merchant-pg-filter')?.value || ''
 
-const searchKeyword = keywordInput?.value?.trim() || ''
-      
-      let merchants = result.data || []
-      
-      if (searchKeyword) {
-        merchants = merchants.filter((merchant) => {
-          return (
-            String(merchant.merchant_name || '').includes(searchKeyword) ||
-            String(merchant.owner_name || '').includes(searchKeyword) ||
-            String(merchant.phone || '').includes(searchKeyword) ||
-            String(merchant.account_holder || '').includes(searchKeyword)
-          )
-        })
-      }
+const statusFilter =
+  document.querySelector<HTMLSelectElement>('#merchant-status-filter')?.value || ''
+
+const searchType =
+  document.querySelector<HTMLSelectElement>('#merchant-search-type')?.value || 'all'
+
+const keyword =
+  document.querySelector<HTMLInputElement>('#merchant-search-keyword')?.value.trim() || ''
+
+const startDate =
+  document.querySelector<HTMLInputElement>('#merchant-start-date')?.value || ''
+
+const endDate =
+  document.querySelector<HTMLInputElement>('#merchant-end-date')?.value || ''
+
+let merchants = result.data || []
+
+if (pgFilter) {
+  merchants = merchants.filter((merchant) =>
+    String(merchant.pg_company || '').includes(pgFilter)
+  )
+}
+
+if (statusFilter) {
+  merchants = merchants.filter((merchant) =>
+    String(merchant.status || '') === statusFilter
+  )
+}
+
+if (startDate) {
+  merchants = merchants.filter((merchant) =>
+    String(merchant.created_at || '').slice(0, 10) >= startDate
+  )
+}
+
+if (endDate) {
+  merchants = merchants.filter((merchant) =>
+    String(merchant.created_at || '').slice(0, 10) <= endDate
+  )
+}
+
+if (keyword) {
+  merchants = merchants.filter((merchant) => {
+    const targetMap: Record<string, string> = {
+      merchant_name: String(merchant.merchant_name || ''),
+      owner_name: String(merchant.owner_name || ''),
+      agency_name: String(merchant.agency_name || ''),
+      branch_name: String(merchant.branch_name || ''),
+      business_number: String(merchant.corporate_number || ''),
+      resident_number: String(merchant.resident_number || ''),
+      cpid: String(merchant.cpid || ''),
+      pg_mid: String(merchant.pg_mid || ''),
+      terminal_mid: String(merchant.terminal_mid || '')
+    }
+
+    if (searchType !== 'all') {
+      return targetMap[searchType]?.includes(keyword)
+    }
+
+    return Object.values(targetMap).some((value) =>
+      value.includes(keyword)
+    )
+  })
+}
 
       const summaryBox = document.querySelector('.admin-summary')
       
