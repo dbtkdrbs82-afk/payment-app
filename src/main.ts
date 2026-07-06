@@ -2843,10 +2843,7 @@ requestAnimationFrame(() => {
 
           if (page) sessionStorage.setItem('adminPage', page)
 
-            if (page === 'merchant') {
-              location.reload()
-              return
-            }
+            
 
           if (page === 'organization') {
             const subMenu = document.querySelector('.admin-sub-menu')
