@@ -6220,42 +6220,63 @@ const paymentFiltersText = sessionStorage.getItem('paymentFilters')
 if (paymentFiltersText) {
   const filters = JSON.parse(paymentFiltersText)
 
-  const keyword = (filters.keyword || '').trim().toLowerCase()
+  const pg = filters.pg || 'all'
+  const startDate = filters.startDate || ''
+  const endDate = filters.endDate || ''
+  const searchType = filters.searchType || 'all'
+  const keyword = String(filters.keyword || '').trim().toLowerCase()
+
+  if (pg !== 'all') {
+    payments = payments.filter((payment) => {
+      const pgText = String(payment.pg_company || '').toLowerCase()
+
+      if (pg === 'toss') {
+        return pgText.includes('토스') || pgText.includes('toss')
+      }
+
+      if (pg === 'korpay') {
+        return pgText.includes('코페이') || pgText.includes('korpay')
+      }
+
+      return true
+    })
+  }
+
+  if (startDate) {
+    payments = payments.filter((payment) => {
+      const paymentDate = String(payment.created_at || '').slice(0, 10)
+      return paymentDate >= startDate
+    })
+  }
+
+  if (endDate) {
+    payments = payments.filter((payment) => {
+      const paymentDate = String(payment.created_at || '').slice(0, 10)
+      return paymentDate <= endDate
+    })
+  }
 
   if (keyword) {
     payments = payments.filter((payment) => {
-
       const targetMap: Record<string, string> = {
-        name:
-          String(payment.merchant_name || '').toLowerCase(),
-
-        manager:
-          String(payment.merchant_name || '').toLowerCase(),
-
-        agency:
-          String(payment.merchant_name || '').toLowerCase(),
-
-        branch:
-          String(payment.merchant_name || '').toLowerCase(),
-
-        order_id:
-          String(payment.order_id || '').toLowerCase(),
-
-        payment_key:
-          String(payment.payment_key || '').toLowerCase()
+        name: String(payment.merchant_name || '').toLowerCase(),
+        manager: String(payment.merchant_name || '').toLowerCase(),
+        agency: String(payment.merchant_name || '').toLowerCase(),
+        branch: String(payment.merchant_name || '').toLowerCase(),
+        order_id: String(payment.order_id || '').toLowerCase(),
+        payment_key: String(payment.payment_key || '').toLowerCase()
       }
 
-      if (filters.searchType === 'all') {
-        return Object.values(targetMap)
-          .some(value => value.includes(keyword))
+      if (searchType === 'all') {
+        return Object.values(targetMap).some((value) =>
+          value.includes(keyword)
+        )
       }
 
-      return targetMap[filters.searchType]
-        ?.includes(keyword)
+      return targetMap[searchType]?.includes(keyword) || false
     })
   }
 }
-
 if (summaryBox) {
   const totalAmount = payments.reduce((sum, payment) => {
     return sum + Number(payment.amount || 0)
