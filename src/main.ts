@@ -4306,8 +4306,10 @@ const statusFilter =
 const searchType =
   document.querySelector<HTMLSelectElement>('#merchant-search-type')?.value || 'all'
 
-const keyword =
+  const keyword =
   document.querySelector<HTMLInputElement>('#merchant-search-keyword')?.value.trim() || ''
+
+const cleanKeyword = keyword.replace(/-/g, '')
 
 const startDate =
   document.querySelector<HTMLInputElement>('#merchant-start-date')?.value || ''
@@ -4348,19 +4350,19 @@ if (keyword) {
       owner_name: String(merchant.owner_name || ''),
       agency_name: String(merchant.agency_name || ''),
       branch_name: String(merchant.branch_name || ''),
-      business_number: String(merchant.corporate_number || ''),
-      resident_number: String(merchant.resident_number || ''),
+      business_number: String(merchant.business_number || '').replace(/-/g, ''),
+resident_number: String(merchant.resident_number || '').replace(/-/g, ''),
       cpid: String(merchant.cpid || ''),
       pg_mid: String(merchant.pg_mid || ''),
       terminal_mid: String(merchant.terminal_mid || '')
     }
 
     if (searchType !== 'all') {
-      return targetMap[searchType]?.includes(keyword)
+      return targetMap[searchType]?.includes(cleanKeyword)
     }
 
     return Object.values(targetMap).some((value) =>
-      value.includes(keyword)
+      value.replace(/-/g, '').includes(cleanKeyword)
     )
   })
 }
