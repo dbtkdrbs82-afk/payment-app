@@ -4891,14 +4891,23 @@ console.log('저장 error:', error)
       '아이디 : ' + loginId + '\n' +
       '비밀번호 : ' + password
 
-    await navigator.clipboard.writeText(message)
-
-    alert(
-      '개통완료 처리되었습니다.\n\n' +
-      '로그인 안내문이 복사되었습니다.\n' +
-      '문자 또는 카카오톡에 붙여넣어 보내면 됩니다.\n\n' +
-      message
-    )
+      try {
+        await navigator.clipboard.writeText(message)
+      
+        alert(
+          '개통완료 처리되었습니다.\n\n' +
+          '로그인 안내문이 복사되었습니다.\n' +
+          '문자 또는 카카오톡에 붙여넣어 보내면 됩니다.\n\n' +
+          message
+        )
+      } catch (copyError) {
+        prompt(
+          '개통완료 처리되었습니다.\n\n' +
+          '자동 복사가 차단되었습니다.\n' +
+          '아래 안내문을 Ctrl + C로 복사해서 보내주세요.',
+          message
+        )
+      }
 
     location.reload()
   })
