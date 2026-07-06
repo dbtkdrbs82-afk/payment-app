@@ -4224,6 +4224,26 @@ if (searchBox) {
       '<button class="merchant-search-btn">검색</button>' +
     '</div>'
 }
+
+const savedMerchantFiltersText = sessionStorage.getItem('merchantFilters')
+
+if (savedMerchantFiltersText) {
+  const savedMerchantFilters = JSON.parse(savedMerchantFiltersText)
+
+  const pgSelect = document.querySelector<HTMLSelectElement>('#merchant-pg-filter')
+  const startInput = document.querySelector<HTMLInputElement>('#merchant-start-date')
+  const endInput = document.querySelector<HTMLInputElement>('#merchant-end-date')
+  const statusSelect = document.querySelector<HTMLSelectElement>('#merchant-status-filter')
+  const typeSelect = document.querySelector<HTMLSelectElement>('#merchant-search-type')
+  const keywordInput = document.querySelector<HTMLInputElement>('#merchant-search-keyword')
+
+  if (pgSelect) pgSelect.value = savedMerchantFilters.pg || ''
+  if (startInput) startInput.value = savedMerchantFilters.startDate || ''
+  if (endInput) endInput.value = savedMerchantFilters.endDate || ''
+  if (statusSelect) statusSelect.value = savedMerchantFilters.status || ''
+  if (typeSelect) typeSelect.value = savedMerchantFilters.searchType || 'all'
+  if (keywordInput) keywordInput.value = savedMerchantFilters.keyword || ''
+}
 const tableTop = document.querySelector('.admin-table-top')
 
 if (tableTop) {
@@ -4239,6 +4259,17 @@ const merchantSearchButton =
   document.querySelector<HTMLButtonElement>('.merchant-search-btn')
 
 merchantSearchButton?.addEventListener('click', () => {
+  const filters = {
+    pg: document.querySelector<HTMLSelectElement>('#merchant-pg-filter')?.value || '',
+    startDate: document.querySelector<HTMLInputElement>('#merchant-start-date')?.value || '',
+    endDate: document.querySelector<HTMLInputElement>('#merchant-end-date')?.value || '',
+    status: document.querySelector<HTMLSelectElement>('#merchant-status-filter')?.value || '',
+    searchType: document.querySelector<HTMLSelectElement>('#merchant-search-type')?.value || 'all',
+    keyword: document.querySelector<HTMLInputElement>('#merchant-search-keyword')?.value || ''
+  }
+
+  sessionStorage.setItem('merchantFilters', JSON.stringify(filters))
+
   document
     .querySelector<HTMLElement>('.admin-tab[data-page="merchant"]')
     ?.click()
