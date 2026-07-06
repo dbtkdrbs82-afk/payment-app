@@ -4231,7 +4231,6 @@ const tableTop = document.querySelector('.admin-table-top')
 
 if (tableTop) {
   tableTop.innerHTML =
-    '<button>엑셀 다운로드</button>' +
     '<select id="admin-page-size">' +
       '<option value="10">10개씩 보기</option>' +
       '<option value="20">20개씩 보기</option>' +
