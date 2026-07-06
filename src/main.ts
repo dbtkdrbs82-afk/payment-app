@@ -6164,6 +6164,7 @@ if (searchBox) {
     '<input id="payment-search-keyword" placeholder="검색어 입력" />' +
 
     '<button id="payment-search-btn" class="search-btn" type="button">🔍 검색</button>' +
+'<button id="payment-reset-btn" class="search-btn" type="button">초기화</button>' +
 
   '</div>'
 }
@@ -6213,7 +6214,29 @@ document.querySelector('#payment-month-btn')
 
     document.querySelector<HTMLButtonElement>('#payment-search-btn')?.click()
   })
+  document.querySelector('#payment-reset-btn')
+  ?.addEventListener('click', () => {
+    sessionStorage.removeItem('paymentFilters')
 
+    const pgSelect = document.querySelector<HTMLSelectElement>('#payment-pg-filter')
+    const dateTypeSelect = document.querySelector<HTMLSelectElement>('#payment-date-type')
+    const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
+    const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
+    const typeSelect = document.querySelector<HTMLSelectElement>('#payment-search-type')
+    const keywordInput = document.querySelector<HTMLInputElement>('#payment-search-keyword')
+
+    if (pgSelect) pgSelect.value = 'all'
+    if (dateTypeSelect) dateTypeSelect.value = 'created_at'
+    if (startInput) startInput.value = ''
+    if (endInput) endInput.value = ''
+    if (typeSelect) typeSelect.value = 'all'
+    if (keywordInput) keywordInput.value = ''
+
+    document
+      .querySelector<HTMLElement>('.admin-tab[data-page="payment"]')
+      ?.click()
+  })
+  
 const savedPaymentFiltersText = sessionStorage.getItem('paymentFilters')
 
 if (savedPaymentFiltersText) {
@@ -6223,6 +6246,7 @@ if (savedPaymentFiltersText) {
   const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
   const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
   const typeSelect = document.querySelector<HTMLSelectElement>('#payment-search-type')
+  const dateTypeSelect = document.querySelector<HTMLSelectElement>('#payment-date-type')
   const keywordInput = document.querySelector<HTMLInputElement>('#payment-search-keyword')
 
   if (pgSelect) pgSelect.value = savedPaymentFilters.pg || 'all'
@@ -6236,6 +6260,7 @@ document.querySelector('#payment-search-btn')
   ?.addEventListener('click', () => {
     const filters = {
       pg: document.querySelector<HTMLSelectElement>('#payment-pg-filter')?.value || 'all',
+      dateType: document.querySelector<HTMLSelectElement>('#payment-date-type')?.value || 'created_at',
       startDate: document.querySelector<HTMLInputElement>('#payment-start-date')?.value || '',
       endDate: document.querySelector<HTMLInputElement>('#payment-end-date')?.value || '',
       searchType: document.querySelector<HTMLSelectElement>('#payment-search-type')?.value || 'all',
