@@ -6168,6 +6168,52 @@ if (searchBox) {
   '</div>'
 }
 
+document.querySelector('#payment-today-btn')
+  ?.addEventListener('click', () => {
+    const today = new Date()
+    const todayText = today.toISOString().slice(0, 10)
+
+    const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
+    const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
+
+    if (startInput) startInput.value = todayText
+    if (endInput) endInput.value = todayText
+
+    document.querySelector<HTMLButtonElement>('#payment-search-btn')?.click()
+  })
+
+document.querySelector('#payment-yesterday-btn')
+  ?.addEventListener('click', () => {
+    const yesterday = new Date()
+    yesterday.setDate(yesterday.getDate() - 1)
+
+    const yesterdayText = yesterday.toISOString().slice(0, 10)
+
+    const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
+    const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
+
+    if (startInput) startInput.value = yesterdayText
+    if (endInput) endInput.value = yesterdayText
+
+    document.querySelector<HTMLButtonElement>('#payment-search-btn')?.click()
+  })
+
+document.querySelector('#payment-month-btn')
+  ?.addEventListener('click', () => {
+    const today = new Date()
+    const yyyy = today.getFullYear()
+    const mm = String(today.getMonth() + 1).padStart(2, '0')
+    const todayText = today.toISOString().slice(0, 10)
+
+    const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
+    const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
+
+    if (startInput) startInput.value = yyyy + '-' + mm + '-01'
+    if (endInput) endInput.value = todayText
+
+    document.querySelector<HTMLButtonElement>('#payment-search-btn')?.click()
+  })
+  
 const savedPaymentFiltersText = sessionStorage.getItem('paymentFilters')
 
 if (savedPaymentFiltersText) {
