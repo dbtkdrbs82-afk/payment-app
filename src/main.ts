@@ -4757,6 +4757,7 @@ merchantButtons.forEach((button) => {
             '<div class="merchant-detail-actions">' +
             '<button class="merchant-save-btn" id="save-merchant-info">저장</button>' +
               '<button class="merchant-save-btn" id="approve-merchant">개통완료</button>' +
+              '<button class="merchant-save-btn" id="show-merchant-login">로그인정보 확인</button>' +
 '<button class="merchant-reject-btn" id="delete-merchant">삭제</button>' +
 '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
             '</div>' +
@@ -4884,34 +4885,20 @@ console.log('저장 error:', error)
       return
     }
 
-    const message =
-      '[NXG 개통완료]\n\n' +
-      '가맹점명 : ' + (merchant.merchant_name || '-') + '\n' +
-      '로그인 주소 : https://payment-app-ybtf.vercel.app/merchant-login\n' +
-      '아이디 : ' + loginId + '\n' +
-      '비밀번호 : ' + password
+    alert('개통완료 처리되었습니다.')
 
-      try {
-        await navigator.clipboard.writeText(message)
-      
-        alert(
-          '개통완료 처리되었습니다.\n\n' +
-          '로그인 안내문이 복사되었습니다.\n' +
-          '문자 또는 카카오톡에 붙여넣어 보내면 됩니다.\n\n' +
-          message
-        )
-      } catch (copyError) {
-        prompt(
-          '개통완료 처리되었습니다.\n\n' +
-          '자동 복사가 차단되었습니다.\n' +
-          '아래 안내문을 Ctrl + C로 복사해서 보내주세요.',
-          message
-        )
-      }
-
-    location.reload()
+location.reload()
   })
 
+  document.querySelector('#show-merchant-login')
+  ?.addEventListener('click', () => {
+    alert(
+      '가맹점 로그인정보\n\n' +
+      '로그인 주소 : https://payment-app-ybtf.vercel.app/merchant-login\n' +
+      '아이디 : ' + (merchant.merchant_login_id || '-') + '\n' +
+      '비밀번호 : ' + (merchant.merchant_password || '-')
+    )
+  })
   document.querySelector('#delete-merchant')
   ?.addEventListener('click', async () => {
     if (!confirm('이 신청내역을 삭제하시겠습니까?')) return
