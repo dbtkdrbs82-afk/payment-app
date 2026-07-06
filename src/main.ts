@@ -4210,17 +4210,14 @@ if (searchBox) {
       '</select>' +
 
       '<select id="merchant-search-type">' +
-        '<option value="all">전체검색</option>' +
-        '<option value="merchant_name">가맹점명</option>' +
-        '<option value="owner_name">담당자명/대표자명</option>' +
-        '<option value="agency_name">대리점명</option>' +
-        '<option value="branch_name">지사명</option>' +
-        '<option value="business_number">사업자번호</option>' +
-        '<option value="resident_number">주민번호</option>' +
-        '<option value="cpid">단말기 CPID</option>' +
-        '<option value="pg_mid">PG사 MID</option>' +
-        '<option value="terminal_mid">단말기 MID</option>' +
-      '</select>' +
+  '<option value="all">전체검색</option>' +
+  '<option value="name">가맹점명 / 대표자명</option>' +
+  '<option value="business_number">사업자번호</option>' +
+  '<option value="resident_number">주민번호</option>' +
+  '<option value="cpid">단말기 CPID</option>' +
+  '<option value="pg_mid">PG사 MID</option>' +
+  '<option value="terminal_mid">단말기 MID</option>' +
+'</select>' +
 
       '<input id="merchant-search-keyword" placeholder="검색어 입력" />' +
 '<button class="merchant-search-btn" type="button">검색</button>' +
@@ -4347,12 +4344,12 @@ if (endDate) {
 if (keyword) {
   merchants = merchants.filter((merchant) => {
     const targetMap: Record<string, string> = {
-      merchant_name: String(merchant.merchant_name || ''),
-      owner_name: String(merchant.owner_name || ''),
-      agency_name: String(merchant.agency_name || ''),
-      branch_name: String(merchant.branch_name || ''),
+      name:
+        String(merchant.merchant_name || '') + ' ' +
+        String(merchant.owner_name || ''),
+    
       business_number: String(merchant.business_number || '').replace(/-/g, ''),
-resident_number: String(merchant.resident_number || '').replace(/-/g, ''),
+      resident_number: String(merchant.resident_number || '').replace(/-/g, ''),
       cpid: String(merchant.cpid || ''),
       pg_mid: String(merchant.pg_mid || ''),
       terminal_mid: String(merchant.terminal_mid || '')
