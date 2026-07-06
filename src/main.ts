@@ -6168,13 +6168,41 @@ if (searchBox) {
   '</div>'
 }
 
+const savedPaymentFiltersText = sessionStorage.getItem('paymentFilters')
+
+if (savedPaymentFiltersText) {
+  const savedPaymentFilters = JSON.parse(savedPaymentFiltersText)
+
+  const pgSelect = document.querySelector<HTMLSelectElement>('#payment-pg-filter')
+  const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
+  const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
+  const typeSelect = document.querySelector<HTMLSelectElement>('#payment-search-type')
+  const keywordInput = document.querySelector<HTMLInputElement>('#payment-search-keyword')
+
+  if (pgSelect) pgSelect.value = savedPaymentFilters.pg || 'all'
+  if (startInput) startInput.value = savedPaymentFilters.startDate || ''
+  if (endInput) endInput.value = savedPaymentFilters.endDate || ''
+  if (typeSelect) typeSelect.value = savedPaymentFilters.searchType || 'all'
+  if (keywordInput) keywordInput.value = savedPaymentFilters.keyword || ''
+}
+
 document.querySelector('#payment-search-btn')
   ?.addEventListener('click', () => {
+    const filters = {
+      pg: document.querySelector<HTMLSelectElement>('#payment-pg-filter')?.value || 'all',
+      startDate: document.querySelector<HTMLInputElement>('#payment-start-date')?.value || '',
+      endDate: document.querySelector<HTMLInputElement>('#payment-end-date')?.value || '',
+      searchType: document.querySelector<HTMLSelectElement>('#payment-search-type')?.value || 'all',
+      keyword: document.querySelector<HTMLInputElement>('#payment-search-keyword')?.value || ''
+    }
+
+    sessionStorage.setItem('paymentFilters', JSON.stringify(filters))
+
     document
       .querySelector<HTMLElement>('.admin-tab[data-page="payment"]')
       ?.click()
   })
-  
+
 const result = await supabase
   .from('payments')
   .select('*')
@@ -6185,7 +6213,48 @@ if (result.error) {
   return
 }
 
-const payments = result.data || []
+let payments = result.data || []
+
+const paymentFiltersText = sessionStorage.getItem('paymentFilters')
+
+if (paymentFiltersText) {
+  const filters = JSON.parse(paymentFiltersText)
+
+  const keyword = (filters.keyword || '').trim().toLowerCase()
+
+  if (keyword) {
+    payments = payments.filter((payment) => {
+
+      const targetMap: Record<string, string> = {
+        name:
+          String(payment.merchant_name || '').toLowerCase(),
+
+        manager:
+          String(payment.merchant_name || '').toLowerCase(),
+
+        agency:
+          String(payment.merchant_name || '').toLowerCase(),
+
+        branch:
+          String(payment.merchant_name || '').toLowerCase(),
+
+        order_id:
+          String(payment.order_id || '').toLowerCase(),
+
+        payment_key:
+          String(payment.payment_key || '').toLowerCase()
+      }
+
+      if (filters.searchType === 'all') {
+        return Object.values(targetMap)
+          .some(value => value.includes(keyword))
+      }
+
+      return targetMap[filters.searchType]
+        ?.includes(keyword)
+    })
+  }
+}
 
 if (summaryBox) {
   const totalAmount = payments.reduce((sum, payment) => {
