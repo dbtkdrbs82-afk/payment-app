@@ -6130,21 +6130,43 @@ if (titleBox) {
 
 if (searchBox) {
   searchBox.innerHTML =
-    '<div class="payment-search-line">' +
-      '<select><option>전체 PG</option><option>토스</option><option>코페이</option></select>' +
-      '<select><option>거래일자</option><option>승인일자</option></select>' +
-      '<input placeholder="시작일" />' +
-      '<span>~</span>' +
-      '<input placeholder="종료일" />' +
-      '<button class="quick-btn">오늘</button>' +
-      '<button class="quick-btn">어제</button>' +
-      '<button class="quick-btn">당월</button>' +
-      '<select><option>가맹점ID</option><option>가맹점명</option><option>주문번호</option></select>' +
-      '<input placeholder="검색어 입력" />' +
-      '<button class="search-btn">🔍 검색</button>' +
-    '</div>'
-}
+  '<div class="payment-search-line">' +
 
+    '<select id="payment-pg-filter">' +
+      '<option value="all">전체 PG</option>' +
+      '<option value="toss">토스</option>' +
+      '<option value="korpay">코페이</option>' +
+    '</select>' +
+
+    '<select id="payment-date-type">' +
+      '<option value="created_at">거래일자</option>' +
+      '<option value="approved_at">승인일자</option>' +
+    '</select>' +
+
+    '<input id="payment-start-date" type="date" />' +
+    '<span>~</span>' +
+    '<input id="payment-end-date" type="date" />' +
+
+    '<button class="quick-btn" id="payment-today-btn">오늘</button>' +
+    '<button class="quick-btn" id="payment-yesterday-btn">어제</button>' +
+    '<button class="quick-btn" id="payment-month-btn">당월</button>' +
+
+    '<select id="payment-search-type">' +
+  '<option value="all">전체검색</option>' +
+  '<option value="name">가맹점명 / 대표자명</option>' +
+  '<option value="manager">담당자</option>' +
+  '<option value="agency">대리점</option>' +
+  '<option value="branch">지사</option>' +
+  '<option value="order_id">주문번호</option>' +
+  '<option value="payment_key">결제키</option>' +
+'</select>' +
+
+    '<input id="payment-search-keyword" placeholder="검색어 입력" />' +
+
+    '<button id="payment-search-btn" class="search-btn" type="button">🔍 검색</button>' +
+
+  '</div>'
+}
 const result = await supabase
   .from('payments')
   .select('*')
@@ -6419,17 +6441,18 @@ const date = target.dataset.date
       document.querySelector<HTMLElement>('#admin-receipt-modal')!.style.display = 'flex'
       
       document.querySelector('#admin-receipt-close-btn')
-        ?.addEventListener('click', () => {
-          document.querySelector('#admin-receipt-modal')?.remove()
-        })
-      })
-      
+  ?.addEventListener('click', () => {
+    document.querySelector('#admin-receipt-modal')?.remove()
   })
+})
+
+})
 }
+
 })
 })
 
-  } else if (path === '/store') {
+} else if (path === '/store') {
     const params = new URLSearchParams(window.location.search)
     const eventId = params.get('id')
   
