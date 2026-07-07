@@ -2884,7 +2884,7 @@ if (summaryBox) {
           location.reload()
         })
       }
-      
+
        const adminTabs = document.querySelectorAll<HTMLElement>('.admin-tab')
 
 const savedAdminPage = sessionStorage.getItem('adminPage') || 'merchant'
@@ -6473,6 +6473,9 @@ visiblePayments.forEach((payment, index) => {
     '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
     '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' 
 
+if (payment.status === 'cancel') {
+  tr.classList.add('payment-cancel-row')
+}
 
 paymentTableBody.appendChild(tr)
 })
