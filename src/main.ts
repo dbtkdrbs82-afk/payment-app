@@ -6292,7 +6292,7 @@ if (paymentFilters) {
       return targetDate >= startDate
     })
   }
-
+  
   if (endDate) {
     payments = payments.filter((payment) => {
       const targetDate = String(payment[dateType] || '').slice(0, 10)
