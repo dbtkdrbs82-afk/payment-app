@@ -2822,6 +2822,69 @@ if (summaryBox) {
      
          location.href = '/admin-login'
        })
+
+       const adminWindow = window as Window & {
+        cancelApproveClickReady?: boolean
+      }
+      
+      if (!adminWindow.cancelApproveClickReady) {
+        adminWindow.cancelApproveClickReady = true
+      
+        document.addEventListener('click', async (event) => {
+          const target = event.target as HTMLElement
+      
+          if (!target.classList.contains('cancel-approve-btn')) return
+      
+          const requestId = Number(target.dataset.id)
+      
+          if (!requestId) {
+            alert('취소요청 ID를 찾을 수 없습니다.')
+            return
+          }
+      
+          if (!confirm('취소 승인 처리하시겠습니까?')) return
+      
+          const { data: cancelRequest, error: requestFindError } = await supabase
+            .from('cancel_requests')
+            .select('*')
+            .eq('id', requestId)
+            .single()
+      
+          if (requestFindError || !cancelRequest) {
+            alert('취소요청 정보를 찾지 못했습니다.')
+            return
+          }
+      
+          const { error: paymentUpdateError } = await supabase
+            .from('payments')
+            .update({
+              status: 'cancel',
+              canceled_at: new Date().toISOString()
+            })
+            .eq('id', Number(cancelRequest.payment_id))
+      
+          if (paymentUpdateError) {
+            alert('결제 취소 처리 실패: ' + paymentUpdateError.message)
+            return
+          }
+      
+          const { error: requestUpdateError } = await supabase
+            .from('cancel_requests')
+            .update({
+              status: '승인'
+            })
+            .eq('id', requestId)
+      
+          if (requestUpdateError) {
+            alert('취소요청 상태 변경 실패: ' + requestUpdateError.message)
+            return
+          }
+      
+          alert('취소 승인 처리되었습니다.')
+          location.reload()
+        })
+      }
+      
        const adminTabs = document.querySelectorAll<HTMLElement>('.admin-tab')
 
 const savedAdminPage = sessionStorage.getItem('adminPage') || 'merchant'
