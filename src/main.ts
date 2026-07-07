@@ -6239,9 +6239,9 @@ document.querySelector('#payment-month-btn')
   
 
 
-document.querySelector('#payment-search-btn')
+  document.querySelector('#payment-search-btn')
   ?.addEventListener('click', () => {
-    const filters = {
+    ;(window as any).paymentFilters = {
       pg: document.querySelector<HTMLSelectElement>('#payment-pg-filter')?.value || 'all',
       dateType: document.querySelector<HTMLSelectElement>('#payment-date-type')?.value || 'created_at',
       startDate: document.querySelector<HTMLInputElement>('#payment-start-date')?.value || '',
@@ -6249,8 +6249,6 @@ document.querySelector('#payment-search-btn')
       searchType: document.querySelector<HTMLSelectElement>('#payment-search-type')?.value || 'all',
       keyword: document.querySelector<HTMLInputElement>('#payment-search-keyword')?.value || ''
     }
-
-    sessionStorage.setItem('paymentFilters', JSON.stringify(filters))
 
     document
       .querySelector<HTMLElement>('.admin-tab[data-page="payment"]')
@@ -6269,12 +6267,13 @@ if (result.error) {
 
 let payments = result.data || []
 
-const paymentFiltersText = sessionStorage.getItem('paymentFilters')
+const paymentFilters = (window as any).paymentFilters
 
-if (paymentFiltersText) {
-  const filters = JSON.parse(paymentFiltersText)
+if (paymentFilters) {
+  const filters = paymentFilters
 
   const pg = filters.pg || 'all'
+  const dateType = filters.dateType || 'created_at'
   const startDate = filters.startDate || ''
   const endDate = filters.endDate || ''
   const searchType = filters.searchType || 'all'
@@ -6284,13 +6283,8 @@ if (paymentFiltersText) {
     payments = payments.filter((payment) => {
       const pgText = String(payment.pg_company || '').toLowerCase()
 
-      if (pg === 'toss') {
-        return pgText.includes('토스') || pgText.includes('toss')
-      }
-
-      if (pg === 'korpay') {
-        return pgText.includes('코페이') || pgText.includes('korpay')
-      }
+      if (pg === 'toss') return pgText.includes('토스') || pgText.includes('toss')
+      if (pg === 'korpay') return pgText.includes('코페이') || pgText.includes('korpay')
 
       return true
     })
@@ -6298,15 +6292,15 @@ if (paymentFiltersText) {
 
   if (startDate) {
     payments = payments.filter((payment) => {
-      const paymentDate = String(payment.created_at || '').slice(0, 10)
-      return paymentDate >= startDate
+      const targetDate = String(payment[dateType] || '').slice(0, 10)
+      return targetDate >= startDate
     })
   }
 
   if (endDate) {
     payments = payments.filter((payment) => {
-      const paymentDate = String(payment.created_at || '').slice(0, 10)
-      return paymentDate <= endDate
+      const targetDate = String(payment[dateType] || '').slice(0, 10)
+      return targetDate <= endDate
     })
   }
 
@@ -6322,9 +6316,7 @@ if (paymentFiltersText) {
       }
 
       if (searchType === 'all') {
-        return Object.values(targetMap).some((value) =>
-          value.includes(keyword)
-        )
+        return Object.values(targetMap).some((value) => value.includes(keyword))
       }
 
       return targetMap[searchType]?.includes(keyword) || false
