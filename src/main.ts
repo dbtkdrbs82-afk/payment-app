@@ -6348,17 +6348,25 @@ if (tableHead) {
 
 paymentTableBody.innerHTML = ''
 
-const savedAdminPageSize =
-  sessionStorage.getItem('admin_page_size') || '10'
-
-  const merchantPageSizeSelect =
+const paymentPageSizeSelect =
   document.querySelector('#admin-page-size') as HTMLSelectElement | null
 
-if (merchantPageSizeSelect) {
-  merchantPageSizeSelect.value = savedAdminPageSize
+const savedPaymentPageSize =
+  sessionStorage.getItem('payment_page_size') || '10'
+
+if (paymentPageSizeSelect) {
+  paymentPageSizeSelect.value = savedPaymentPageSize
+
+  paymentPageSizeSelect.onchange = () => {
+    sessionStorage.setItem('payment_page_size', paymentPageSizeSelect.value)
+
+    document
+      .querySelector<HTMLElement>('.admin-tab[data-page="payment"]')
+      ?.click()
+  }
 }
 
-const adminPageSize = Number(savedAdminPageSize) || 10
+const adminPageSize = Number(savedPaymentPageSize) || 10
 const visiblePayments = payments.slice(0, adminPageSize)
 
 visiblePayments.forEach((payment, index) => {
