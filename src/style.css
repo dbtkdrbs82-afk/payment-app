@@ -5271,14 +5271,6 @@ font-weight: 700;
 font-size: 15px;
 }
 
-.org-v2-wrap {
-  background: #1f4b87;
-  color: #fff;
-  border: 1px solid #dbe3ef;
-  border-radius: 16px;
-  padding: 24px;
-}
-
 .org-v2-list {
   display: grid;
   gap: 10px;
