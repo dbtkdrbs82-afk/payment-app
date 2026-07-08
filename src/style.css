@@ -5230,3 +5230,76 @@ display: grid !important;
   padding: 16px;
   background: #fafafa;
 }
+.org-v2-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+  margin: 18px 0 30px;
+}
+
+.org-v2-card {
+  width: 100%;
+  min-height: 130px;
+  background: #ffffff;
+  border: 1px solid #d7dee8;
+  border-radius: 16px;
+  padding: 18px;
+  text-align: left;
+  cursor: pointer;
+  color: #12325c;
+}
+
+.org-v2-card:hover {
+  border-color: #174a86;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.org-v2-card strong {
+  display: block;
+  font-size: 18px;
+  margin-bottom: 14px;
+  color: #0b2f5f;
+}
+
+.org-v2-card span {
+  display: block;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+.org-v2-wrap {
+  background: #fff;
+  border: 1px solid #dbe3ef;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.org-v2-list {
+  display: grid;
+  gap: 10px;
+  max-width: 480px;
+}
+
+.org-v2-manager-row {
+  background: #fff;
+  border: 1px solid #d7dee8;
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: left;
+  cursor: pointer;
+  color: #12325c;
+}
+
+.org-v2-manager-row strong {
+  float: right;
+  color: #174a86;
+}
+
+.org-v2-merchant-box {
+  margin-top: 12px;
+  background: #f8fafc;
+  border: 1px solid #d7dee8;
+  border-radius: 14px;
+  padding: 16px;
+}
