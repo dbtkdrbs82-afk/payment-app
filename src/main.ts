@@ -3187,6 +3187,35 @@ const renderAgencyList = (agencies: any[]) => {
     ?.addEventListener('input', () => renderAgencyList(agencies))
 
   bindAgencyClick()
+
+  document.querySelectorAll<HTMLButtonElement>('.org-agency-v2')
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      const agencyId = Number(button.dataset.id)
+
+      const managers = managerUsers.filter((manager) =>
+        Number(manager.parent_admin_id) === agencyId
+      )
+
+      const detailArea =
+        document.querySelector<HTMLElement>('#org-v2-detail-area')
+
+      if (!detailArea) return
+
+      detailArea.innerHTML +=
+        '<h3>대리점 소속 담당자</h3>' +
+        '<div class="org-v2-list">' +
+          managers.map((manager) =>
+            '<button class="org-v2-manager-row" data-id="' + manager.id + '">' +
+              '👤 ' + (manager.admin_name || '-') +
+              '<strong>' + getManagerMerchantCount(Number(manager.id)) + '</strong>' +
+            '</button>'
+          ).join('') +
+        '</div>'
+
+      bindManagerClick()
+    })
+  })
 }
 
 const bindAgencyClick = () => {
