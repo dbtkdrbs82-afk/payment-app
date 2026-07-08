@@ -3122,6 +3122,30 @@ const bindBranchClick = () => {
           '<div id="org-agency-list"></div>'
 
         renderAgencyList(agencies)
+
+        const directManagers = managerUsers.filter((manager) =>
+          Number(manager.parent_admin_id) === branchId
+        )
+        
+        if (directManagers.length > 0) {
+          const managerArea =
+            document.querySelector<HTMLElement>('#org-v2-detail-area')
+        
+          if (managerArea) {
+            managerArea.innerHTML +=
+              '<h3>지사 직속 담당자</h3>' +
+              '<div class="org-v2-list">' +
+                directManagers.map((manager) =>
+                  '<button class="org-v2-manager-row" data-id="' + manager.id + '">' +
+                    '👤 ' + (manager.admin_name || '-') +
+                    '<strong>' + getManagerMerchantCount(Number(manager.id)) + '</strong>' +
+                  '</button>'
+                ).join('') +
+              '</div>'
+          }
+        
+          bindManagerClick()
+        }
       })
     })
 }
