@@ -1281,9 +1281,61 @@ if (extraFile) {
   }
 }
 
+const applyParams = new URLSearchParams(window.location.search)
+const refCode = (applyParams.get('ref') || '').replace(/-/g, '').trim()
+
+let matchedManager: any = null
+let matchedAgency: any = null
+let matchedBranch: any = null
+
+if (refCode) {
+  const { data: managerData, error: managerError } = await supabase
+    .from('admin_users')
+    .select('*')
+    .eq('role', 'MANAGER')
+    .eq('status', '사용중')
+
+  if (managerError) {
+    alert('담당자 정보를 확인하지 못했습니다: ' + managerError.message)
+    return
+  }
+
+  matchedManager = (managerData || []).find((user) =>
+    String(user.phone || '').replace(/-/g, '').endsWith(refCode)
+  )
+
+  if (matchedManager?.parent_admin_id) {
+    const { data: agencyData } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('id', matchedManager.parent_admin_id)
+      .single()
+
+    matchedAgency = agencyData || null
+  }
+
+  if (matchedAgency?.parent_admin_id) {
+    const { data: branchData } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('id', matchedAgency.parent_admin_id)
+      .single()
+
+    matchedBranch = branchData || null
+  }
+}
+
   const insertData = {
     merchant_name: (document.getElementById('apply-merchant-name') as HTMLInputElement)?.value || '',
-    agency_name: (document.getElementById('apply-agency-name') as HTMLSelectElement)?.value || '본사',
+    manager_admin_id: matchedManager?.id || null,
+manager_admin_name: matchedManager?.admin_name || '',
+
+agency_admin_id: matchedAgency?.id || null,
+agency_name: matchedAgency?.admin_name || '본사',
+agency_admin_name: matchedAgency?.admin_name || '',
+
+branch_admin_id: matchedBranch?.id || null,
+branch_admin_name: matchedBranch?.admin_name || '',
     owner_name: (document.getElementById('apply-owner-name') as HTMLInputElement)?.value || '',
     phone: (document.getElementById('apply-phone') as HTMLInputElement)?.value || '',
 
@@ -3700,6 +3752,9 @@ if (subMenu) {
           '<label>비밀번호</label>' +
           '<input id="edit-admin-password" value="' + (adminUser.password || '') + '" />' +
 
+          '<label>휴대폰번호</label>' +
+          '<input id="edit-admin-phone" value="' + (adminUser.phone || '') + '" placeholder="010-0000-0000" />' +
+          
           '<label>상태</label>' +
           '<select id="edit-admin-status">' +
             '<option value="사용중" ' + (adminUser.status === '사용중' ? 'selected' : '') + '>사용중</option>' +
@@ -4382,6 +4437,9 @@ document.querySelector('#safe-update-admin-user')
     const newPassword =
       (document.querySelector<HTMLInputElement>('#edit-admin-password')?.value || '').trim()
 
+      const newPhone =
+  (document.querySelector<HTMLInputElement>('#edit-admin-phone')?.value || '').trim()
+
     const newStatus =
       (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || adminUser.status).trim()
 
@@ -4445,6 +4503,7 @@ document.querySelector('#safe-update-admin-user')
   : {
       admin_name: newName,
       password: newPassword,
+      phone: newPhone,
       role: newRole,
       status: newStatus,
       login_id: newLoginId,
