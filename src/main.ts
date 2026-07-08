@@ -4606,8 +4606,7 @@ merchantButtons.forEach((button) => {
 
 '<label>소속 대리점</label>' +
 '<select id="agency_name">' +
-  '<option ' + (merchant.agency_name === '본사' ? 'selected' : '') + '>본사</option>' +
-  '<option ' + (merchant.agency_name === '에이드컴퍼니' ? 'selected' : '') + '>에이드컴퍼니</option>' +
+  '<option value="' + (merchant.agency_name || '본사') + '">' + (merchant.agency_name || '본사') + '</option>' +
 '</select>' +
 
 '<label>사용 PG사</label>' +
@@ -4634,6 +4633,7 @@ merchantButtons.forEach((button) => {
 '</select>' +
 '<label>개통일자</label>' +
 '<input id="opened_at" type="date" value="' + (merchant.opened_at || '') + '" />' +
+
 '<label>비밀번호</label>' +
 '<input id="merchant-password-input" type="text" value="' + (merchant.merchant_password || '') + '" placeholder="비밀번호 입력" />' +
 
@@ -4834,6 +4834,8 @@ merchantButtons.forEach((button) => {
       ?.addEventListener('click', () => {
         location.reload()
       })
+
+      
     
       document.querySelector('#save-merchant-info')
   ?.addEventListener('click', async () => {
