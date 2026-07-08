@@ -4121,13 +4121,46 @@ document.querySelector('#safe-update-admin-user')
         '<input id="safe-admin-name" />' +
 
         '<label>비밀번호</label>' +
-        '<input id="safe-admin-password" value="1234" />' +
-      '</div>' +
+'<input id="safe-admin-password" value="1234" />' +
+
+'<label>상위조직</label>' +
+'<select id="safe-parent-admin-id">' +
+  '<option value="">선택</option>' +
+'</select>' +
+
+'</div>' +
 
       '<div class="merchant-detail-actions">' +
         '<button id="safe-save-admin-user" class="merchant-save-btn">저장</button>' +
         '<button id="safe-back-admin-user-list" class="merchant-close-btn">목록</button>' +
       '</div>'
+
+      const parentSelect =
+  document.querySelector<HTMLSelectElement>('#safe-parent-admin-id')
+
+if (parentSelect) {
+  parentSelect.innerHTML = '<option value="">선택</option>'
+
+  ;(adminUsers || [])
+    .filter((user) =>
+      user.role === 'MASTER' ||
+      user.role === 'BRANCH' ||
+      user.role === 'AGENCY'
+    )
+    .forEach((user) => {
+      const option = document.createElement('option')
+      option.value = String(user.id)
+
+      option.textContent =
+        user.role === 'MASTER'
+          ? '대표관리자 - ' + user.admin_name
+          : user.role === 'BRANCH'
+            ? '지사 - ' + user.admin_name
+            : '대리점 - ' + user.admin_name
+
+      parentSelect.appendChild(option)
+    })
+}
 
       document.querySelector('#safe-back-admin-user-list')
   ?.addEventListener('click', () => {
@@ -4148,9 +4181,17 @@ document.querySelector('#safe-save-admin-user')
 
     const password =
       (document.querySelector<HTMLInputElement>('#safe-admin-password')?.value || '1234').trim()
-
+    const parentAdminId =
+      Number(
+        document.querySelector<HTMLSelectElement>('#safe-parent-admin-id')
+          ?.value || 0
+      )
     if (!adminName) {
       alert('이름을 입력해주세요.')
+      return
+    }
+    if (!parentAdminId) {
+      alert('상위조직을 선택해주세요.')
       return
     }
 
@@ -4194,7 +4235,7 @@ document.querySelector('#safe-save-admin-user')
         password: password,
         role: role,
         status: '사용중',
-        parent_admin_id: 2
+        parent_admin_id: parentAdminId
       })
 
     if (error) {
