@@ -2981,12 +2981,18 @@ const getManagerCancelBadge = (managerId: number) => {
             const managerUsers = (adminUsers || []).filter((user) =>
               user.role === 'MANAGER'
             )
-          
+            const branchCardHtml = branchUsers.map((branch) =>
+              '<button class="org-branch-card" data-branch-id="' + branch.id + '">' +
+                '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
+              '</button>'
+            ).join('')
+
             if (summaryBox) {
               summaryBox.innerHTML =
                 '<div class="merchant-detail-header">' +
                   '<h2>조직관리</h2>' +
-                  '<p>지사, 대리점, 담당자 조직 구조를 확인합니다.</p>' +
+                  '<p>지사를 선택하면 하위 대리점과 담당자를 확인할 수 있습니다.</p>' +
+'<div class="org-branch-card-row">' + branchCardHtml + '</div>' +
                 '</div>' +
           
                 '<div class="merchant-detail-page" style="border:1px solid #ddd; border-radius:12px; background:#fff; overflow:hidden;">' +
@@ -3037,6 +3043,170 @@ const getManagerCancelBadge = (managerId: number) => {
 '</div>' +
 '</div>'
             }
+
+            const { data: orgMerchants, error: orgMerchantError } = await supabase
+  .from('merchants')
+  .select('id, merchant_name, manager_admin_id')
+
+if (orgMerchantError) {
+  alert('조직 가맹점 정보를 불러오지 못했습니다: ' + orgMerchantError.message)
+  return
+}
+
+const getManagerMerchantCount = (managerId: number) => {
+  return (orgMerchants || []).filter((merchant) =>
+    Number(merchant.manager_admin_id) === Number(managerId)
+  ).length
+}
+
+const branchCards = branchUsers.map((branch) => {
+  const agencies = agencyUsers.filter((agency) =>
+    Number(agency.parent_admin_id) === Number(branch.id)
+  )
+
+  const agencyIds = agencies.map((agency) => Number(agency.id))
+
+  const managers = managerUsers.filter((manager) =>
+    agencyIds.includes(Number(manager.parent_admin_id))
+  )
+
+  const merchantCount = managers.reduce((sum, manager) => {
+    return sum + getManagerMerchantCount(Number(manager.id))
+  }, 0)
+
+  return (
+    '<button class="org-v2-card org-branch-v2" data-id="' + branch.id + '">' +
+      '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
+      '<span>대리점 ' + agencies.length + '개</span>' +
+      '<span>담당자 ' + managers.length + '명</span>' +
+      '<span>가맹점 ' + merchantCount + '개</span>' +
+    '</button>'
+  )
+}).join('')
+
+if (summaryBox) {
+  summaryBox.innerHTML =
+    '<div class="merchant-detail-header">' +
+      '<h2>조직관리</h2>' +
+      '<p>지사 → 대리점 → 담당자 순서로 조직을 확인합니다.</p>' +
+    '</div>' +
+
+    '<div class="org-v2-wrap">' +
+      '<h3>지사 목록</h3>' +
+      '<div class="org-v2-grid">' + branchCards + '</div>' +
+
+      '<div id="org-v2-agency-area"></div>' +
+      '<div id="org-v2-manager-area"></div>' +
+      '<div id="org-v2-merchant-area"></div>' +
+    '</div>'
+}
+
+document.querySelectorAll<HTMLButtonElement>('.org-branch-v2')
+  .forEach((button) => {
+    button.addEventListener('click', () => {
+      const branchId = Number(button.dataset.id)
+
+      const agencies = agencyUsers.filter((agency) =>
+        Number(agency.parent_admin_id) === branchId
+      )
+
+      const agencyArea =
+        document.querySelector<HTMLElement>('#org-v2-agency-area')
+
+      const managerArea =
+        document.querySelector<HTMLElement>('#org-v2-manager-area')
+
+      const merchantArea =
+        document.querySelector<HTMLElement>('#org-v2-merchant-area')
+
+      if (managerArea) managerArea.innerHTML = ''
+      if (merchantArea) merchantArea.innerHTML = ''
+
+      if (!agencyArea) return
+
+      agencyArea.innerHTML =
+        '<h3>대리점 목록</h3>' +
+        '<div class="org-v2-grid">' +
+          agencies.map((agency) => {
+            const managers = managerUsers.filter((manager) =>
+              Number(manager.parent_admin_id) === Number(agency.id)
+            )
+
+            const merchantCount = managers.reduce((sum, manager) => {
+              return sum + getManagerMerchantCount(Number(manager.id))
+            }, 0)
+
+            return (
+              '<button class="org-v2-card org-agency-v2" data-id="' + agency.id + '">' +
+                '<strong>🤝 ' + (agency.admin_name || '-') + '</strong>' +
+                '<span>담당자 ' + managers.length + '명</span>' +
+                '<span>가맹점 ' + merchantCount + '개</span>' +
+              '</button>'
+            )
+          }).join('') +
+        '</div>'
+
+      document.querySelectorAll<HTMLButtonElement>('.org-agency-v2')
+        .forEach((agencyButton) => {
+          agencyButton.addEventListener('click', () => {
+            const agencyId = Number(agencyButton.dataset.id)
+
+            const managers = managerUsers.filter((manager) =>
+              Number(manager.parent_admin_id) === Number(agencyId)
+            )
+
+            const managerArea =
+              document.querySelector<HTMLElement>('#org-v2-manager-area')
+
+            const merchantArea =
+              document.querySelector<HTMLElement>('#org-v2-merchant-area')
+
+            if (merchantArea) merchantArea.innerHTML = ''
+
+            if (!managerArea) return
+
+            managerArea.innerHTML =
+              '<h3>담당자 목록</h3>' +
+              '<div class="org-v2-list">' +
+                managers.map((manager) =>
+                  '<button class="org-v2-manager-row" data-id="' + manager.id + '">' +
+                    '👤 ' + (manager.admin_name || '-') +
+                    ' <strong>' + getManagerMerchantCount(Number(manager.id)) + '</strong>' +
+                  '</button>'
+                ).join('') +
+              '</div>'
+
+            document.querySelectorAll<HTMLButtonElement>('.org-v2-manager-row')
+              .forEach((managerButton) => {
+                managerButton.addEventListener('click', () => {
+                  const managerId = Number(managerButton.dataset.id)
+
+                  const merchantList = (orgMerchants || []).filter((merchant) =>
+                    Number(merchant.manager_admin_id) === managerId
+                  )
+
+                  const merchantArea =
+                    document.querySelector<HTMLElement>('#org-v2-merchant-area')
+
+                  if (!merchantArea) return
+
+                  merchantArea.innerHTML =
+                    '<h3>담당 가맹점</h3>' +
+                    '<div class="org-v2-merchant-box">' +
+                      (
+                        merchantList.length === 0
+                          ? '<p>연결된 가맹점이 없습니다.</p>'
+                          : merchantList.map((merchant, index) =>
+                              '<p>' + (index + 1) + '. ' + (merchant.merchant_name || '-') + '</p>'
+                            ).join('')
+                      ) +
+                    '</div>'
+                })
+              })
+          })
+        })
+    })
+  })
 
             document.querySelectorAll('.manager-cancel-btn')
   .forEach((button) => {
