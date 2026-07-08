@@ -3667,15 +3667,23 @@ if (subMenu) {
             ?.dispatchEvent(new Event('click'))
         })
 
-      document.querySelector('#update-admin-user')
+        document.querySelector('#update-admin-user')
         ?.addEventListener('click', async () => {
+      
+          const newParentAdminId =
+            Number(
+              document.querySelector<HTMLSelectElement>('#edit-parent-admin-id')
+                ?.value || 0
+            )
+      
           const { error: updateError } = await supabase
             .from('admin_users')
             .update({
               admin_name: (document.querySelector<HTMLInputElement>('#edit-admin-name')?.value || '').trim(),
               password: (document.querySelector<HTMLInputElement>('#edit-admin-password')?.value || '').trim(),
               role: (document.querySelector<HTMLSelectElement>('#edit-admin-role')?.value || '').trim(),
-              status: (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || '').trim()
+              status: (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || '').trim(),
+              parent_admin_id: newParentAdminId
             })
             .eq('id', adminUser.id)
 
@@ -4257,17 +4265,54 @@ summaryBox.innerHTML =
     '<input id="edit-admin-password" value="' + (adminUser.password || '') + '" />' +
 
     '<label>상태</label>' +
-    '<select id="edit-admin-status" ' + (adminUser.login_id === 'NXGMASTER16' ? 'disabled' : '') + '>' +
-      '<option value="사용중" ' + (adminUser.status === '사용중' ? 'selected' : '') + '>사용중</option>' +
-      '<option value="사용정지" ' + (adminUser.status === '사용정지' ? 'selected' : '') + '>사용정지</option>' +
-      '<option value="퇴사" ' + (adminUser.status === '퇴사' ? 'selected' : '') + '>퇴사</option>' +
-    '</select>' +
-  '</div>' +
+'<select id="edit-admin-status" ' + (adminUser.login_id === 'NXGMASTER16' ? 'disabled' : '') + '>' +
+  '<option value="사용중" ' + (adminUser.status === '사용중' ? 'selected' : '') + '>사용중</option>' +
+  '<option value="사용정지" ' + (adminUser.status === '사용정지' ? 'selected' : '') + '>사용정지</option>' +
+  '<option value="퇴사" ' + (adminUser.status === '퇴사' ? 'selected' : '') + '>퇴사</option>' +
+'</select>' +
+
+'<label>상위조직</label>' +
+'<select id="edit-parent-admin-id">' +
+  '<option value="">선택</option>' +
+'</select>' +
+
+'</div>' +
 
   '<div class="merchant-detail-actions">' +
     '<button id="safe-update-admin-user" class="merchant-save-btn" data-id="' + adminUser.id + '">저장</button>' +
     '<button id="safe-cancel-admin-user-edit" class="merchant-close-btn">취소</button>' +
   '</div>'
+
+  const editParentSelect =
+  document.querySelector<HTMLSelectElement>('#edit-parent-admin-id')
+
+if (editParentSelect) {
+  editParentSelect.innerHTML = '<option value="">선택</option>'
+
+  ;(adminUsers || [])
+    .filter((user) =>
+      user.role === 'MASTER' ||
+      user.role === 'BRANCH' ||
+      user.role === 'AGENCY'
+    )
+    .forEach((user) => {
+      const option = document.createElement('option')
+      option.value = String(user.id)
+
+      option.textContent =
+        user.role === 'MASTER'
+          ? '대표관리자 - ' + user.admin_name
+          : user.role === 'BRANCH'
+            ? '지사 - ' + user.admin_name
+            : '대리점 - ' + user.admin_name
+
+      if (Number(adminUser.parent_admin_id) === Number(user.id)) {
+        option.selected = true
+      }
+
+      editParentSelect.appendChild(option)
+    })
+}
 
   document.querySelector('#safe-cancel-admin-user-edit')
   ?.addEventListener('click', () => {
@@ -4288,6 +4333,11 @@ document.querySelector('#safe-update-admin-user')
     const newStatus =
       (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || adminUser.status).trim()
 
+      const newParentAdminId =
+  Number(
+    document.querySelector<HTMLSelectElement>('#edit-parent-admin-id')
+      ?.value || 0
+  )
     if (!newName) {
       alert('이름을 입력해주세요.')
       return
