@@ -4386,17 +4386,18 @@ document.querySelector('#safe-update-admin-user')
     }
 
     const updateData = isRootMaster
-      ? {
-          admin_name: newName,
-          password: newPassword
-        }
-      : {
-          admin_name: newName,
-          password: newPassword,
-          role: newRole,
-          status: newStatus,
-          login_id: newLoginId
-        }
+  ? {
+      admin_name: newName,
+      password: newPassword
+    }
+  : {
+      admin_name: newName,
+      password: newPassword,
+      role: newRole,
+      status: newStatus,
+      login_id: newLoginId,
+      parent_admin_id: newParentAdminId
+    }
 
     const { error } = await supabase
       .from('admin_users')
