@@ -3745,6 +3745,33 @@ if (subMenu) {
           '<label>비밀번호</label>' +
           '<input id="edit-admin-password" value="' + (adminUser.password || '') + '" />' +
 
+'<label>이메일</label>' +
+'<input id="edit-admin-email" value="' + (adminUser.email || '') + '" />' +
+
+'<label>주민번호</label>' +
+'<input id="edit-admin-resident-number" value="' + (adminUser.resident_number || '') + '" />' +
+
+'<label>회사명</label>' +
+'<input id="edit-admin-company-name" value="' + (adminUser.company_name || '') + '" />' +
+
+'<label>사업자번호</label>' +
+'<input id="edit-admin-business-number" value="' + (adminUser.business_number || '') + '" />' +
+
+'<label>수수료율(%)</label>' +
+'<input id="edit-admin-commission-rate" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate || '') + '" />'
+
+'<label>은행명</label>' +
+'<input id="edit-admin-bank-name" value="' + (adminUser.bank_name || '') + '" />' +
+
+'<label>계좌번호</label>' +
+'<input id="edit-admin-account-number" value="' + (adminUser.account_number || '') + '" />' +
+
+'<label>예금주</label>' +
+'<input id="edit-admin-account-holder" value="' + (adminUser.account_holder || '') + '" />' +
+
+'<label>메모</label>' +
+'<textarea id="edit-admin-memo">' + (adminUser.memo || '') + '</textarea>' +
+
           '<label>휴대폰번호</label>' +
           '<input id="edit-admin-phone" value="' + (adminUser.phone || '') + '" placeholder="010-0000-0000" />' +
           
@@ -3776,12 +3803,30 @@ if (subMenu) {
                 ?.value || 0
             )
       
-          const { error: updateError } = await supabase
+            const { error: updateError } = await supabase
             .from('admin_users')
             .update({
               admin_name: (document.querySelector<HTMLInputElement>('#edit-admin-name')?.value || '').trim(),
               password: (document.querySelector<HTMLInputElement>('#edit-admin-password')?.value || '').trim(),
               role: (document.querySelector<HTMLSelectElement>('#edit-admin-role')?.value || '').trim(),
+          
+              phone: (document.querySelector<HTMLInputElement>('#edit-admin-phone')?.value || '').trim(),
+              email: (document.querySelector<HTMLInputElement>('#edit-admin-email')?.value || '').trim(),
+              resident_number: (document.querySelector<HTMLInputElement>('#edit-admin-resident-number')?.value || '').trim(),
+          
+              company_name: (document.querySelector<HTMLInputElement>('#edit-admin-company-name')?.value || '').trim(),
+              business_number: (document.querySelector<HTMLInputElement>('#edit-admin-business-number')?.value || '').trim(),
+          
+              commission_rate: Number(
+                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate')?.value || 0
+              ),
+          
+              bank_name: (document.querySelector<HTMLInputElement>('#edit-admin-bank-name')?.value || '').trim(),
+              account_number: (document.querySelector<HTMLInputElement>('#edit-admin-account-number')?.value || '').trim(),
+              account_holder: (document.querySelector<HTMLInputElement>('#edit-admin-account-holder')?.value || '').trim(),
+          
+              memo: (document.querySelector<HTMLTextAreaElement>('#edit-admin-memo')?.value || '').trim(),
+          
               status: (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || '').trim(),
               parent_admin_id: newParentAdminId
             })
@@ -3817,6 +3862,8 @@ if (subMenu) {
           '<option value="AGENCY">대리점</option>' +
           '<option value="MANAGER" selected>담당자</option>' +
         '</select>' +
+
+        
 
         '<label>이름</label>' +
         '<input id="admin-name" />' +
@@ -3885,15 +3932,35 @@ const password =
     const loginId = prefix + String(nextNumber).padStart(4, '0')
 
     const { error } = await supabase
-      .from('admin_users')
-      .insert({
-        admin_name: adminName,
-        login_id: loginId,
-        password: password,
-        role: role,
-status: '사용중',
-parent_admin_id: 2
-      })
+  .from('admin_users')
+  .insert({
+    admin_name: adminName,
+    login_id: loginId,
+    password: password,
+    role: role,
+
+    phone: (document.querySelector<HTMLInputElement>('#admin-phone')?.value || '').trim(),
+    email: (document.querySelector<HTMLInputElement>('#admin-email')?.value || '').trim(),
+    resident_number: (document.querySelector<HTMLInputElement>('#admin-resident-number')?.value || '').trim(),
+
+    company_name: (document.querySelector<HTMLInputElement>('#admin-company-name')?.value || '').trim(),
+    business_number: (document.querySelector<HTMLInputElement>('#admin-business-number')?.value || '').trim(),
+
+    commission_rate: Number(
+      document.querySelector<HTMLInputElement>('#admin-commission-rate')?.value || 0
+    ),
+
+    bank_name: (document.querySelector<HTMLInputElement>('#admin-bank-name')?.value || '').trim(),
+    account_number: (document.querySelector<HTMLInputElement>('#admin-account-number')?.value || '').trim(),
+    account_holder: (document.querySelector<HTMLInputElement>('#admin-account-holder')?.value || '').trim(),
+
+    memo: (document.querySelector<HTMLTextAreaElement>('#admin-memo')?.value || '').trim(),
+
+    status: '사용중',
+    parent_admin_id: Number(
+      document.querySelector<HTMLSelectElement>('#admin-parent-admin-id')?.value || 0
+    ),
+  })
 
     if (error) {
       alert('담당자 저장 실패: ' + error.message)
@@ -4524,6 +4591,7 @@ document.querySelector('#safe-update-admin-user')
       ?.addEventListener('click', () => {
     if (!summaryBox) return
 
+   
     summaryBox.innerHTML =
       '<div class="merchant-detail-header">' +
         '<h2>담당자 등록</h2>' +
@@ -4561,6 +4629,8 @@ document.querySelector('#safe-update-admin-user')
 
 if (parentSelect) {
   parentSelect.innerHTML = '<option value="">선택</option>'
+
+  
 
   ;(adminUsers || [])
     .filter((user) =>
