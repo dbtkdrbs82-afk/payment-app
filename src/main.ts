@@ -5168,20 +5168,12 @@ merchantButtons.forEach((button) => {
   '<option ' + (merchant.register_type === '대리점' ? 'selected' : '') + '>대리점</option>' +
 '</select>' +
 
-'<label>지사</label>' +
-'<input value="' + (merchant.branch_admin_name || '-') + '" readonly />' +
-
-'<label>대리점</label>' +
-'<input value="' + (merchant.agency_name || '-') + '" readonly />' +
-
 '<label>담당자</label>' +
-'<input value="' + (merchant.manager_admin_name || '-') + '" readonly />' +
-
-'<label>담당자 수수료율</label>' +
-'<input value="' + (merchant.commission_rate || '0') + '%" readonly />' +
-
-'<label>담당자 연락처</label>' +
-'<input value="' + (merchant.manager_phone || '-') + '" readonly />' +
+'<select id="manager_admin_id">' +
+  '<option value="' + (merchant.manager_admin_id || '') + '">' +
+    (merchant.manager_admin_name || '선택') +
+  '</option>' +
+'</select>' +
 
 '<label>사용 PG사</label>' +
 '<select id="pg_company">' +
@@ -5437,7 +5429,7 @@ merchantButtons.forEach((button) => {
   phone: phone,
   fee_rate: feeRate,
   register_type: getValue('register_type'),
-agency_name: getValue('agency_name'),
+  manager_admin_id: Number(getValue('manager_admin_id')) || null,
 pg_company: getValue('pg_company'),
 company_type: getValue('company_type'),
 status: getValue('merchant_status'),
