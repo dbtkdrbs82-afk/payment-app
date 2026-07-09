@@ -1305,7 +1305,7 @@ if (refCode) {
     merchant_name: (document.getElementById('apply-merchant-name') as HTMLInputElement)?.value || '',
     manager_admin_id: matchedManager?.id || null,
 manager_admin_name: matchedManager?.admin_name || '',
-
+manager_phone: matchedManager?.phone || '',
 agency_admin_id: matchedAgency?.id || null,
 agency_name: matchedAgency?.admin_name || '본사',
 agency_admin_name: matchedAgency?.admin_name || '',
@@ -5168,10 +5168,20 @@ merchantButtons.forEach((button) => {
   '<option ' + (merchant.register_type === '대리점' ? 'selected' : '') + '>대리점</option>' +
 '</select>' +
 
-'<label>소속 대리점</label>' +
-'<select id="agency_name">' +
-  '<option value="' + (merchant.agency_name || '본사') + '">' + (merchant.agency_name || '본사') + '</option>' +
-'</select>' +
+'<label>지사</label>' +
+'<input value="' + (merchant.branch_admin_name || '-') + '" readonly />' +
+
+'<label>대리점</label>' +
+'<input value="' + (merchant.agency_name || '-') + '" readonly />' +
+
+'<label>담당자</label>' +
+'<input value="' + (merchant.manager_admin_name || '-') + '" readonly />' +
+
+'<label>담당자 수수료율</label>' +
+'<input value="' + (merchant.commission_rate || '0') + '%" readonly />' +
+
+'<label>담당자 연락처</label>' +
+'<input value="' + (merchant.manager_phone || '-') + '" readonly />' +
 
 '<label>사용 PG사</label>' +
 '<select id="pg_company">' +
@@ -5506,7 +5516,8 @@ console.log('저장 error:', error)
       .update({
         status: '운영',
         merchant_login_id: loginId,
-        merchant_password: password
+        merchant_password: password,
+        opened_at: new Date().toISOString().slice(0, 10),
       })
       .eq('id', merchant.id)
 
@@ -6672,7 +6683,15 @@ document.querySelectorAll('.product-delete-button')
               '<td>' +
               new Date(merchant.created_at).toLocaleDateString('ko-KR') +
               '</td>' +
-              '<td>' + (merchant.merchant_name || '-') + '</td>' +
+              '<td>' +
+  (merchant.merchant_name || '-') +
+  '<br/><span style="font-size:12px;color:#555;">담당자: ' +
+  (merchant.manager_admin_name || '-') +
+  '</span>' +
+  '<br/><span style="font-size:12px;color:#555;">' +
+  (merchant.manager_phone || '-') +
+  '</span>' +
+'</td>' +
               '<td>' + (merchant.ceo_name || '-') + '</td>' +
               '<td>' + (merchant.business_number || '-') + '</td>' +
               '<td>' + merchant.status + '</td>' +
