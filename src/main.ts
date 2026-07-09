@@ -4647,6 +4647,38 @@ document.querySelector('#safe-update-admin-user')
   '<option value="">선택</option>' +
 '</select>' +
 
+'<label>휴대폰번호</label>' +
+'<input id="admin-phone" placeholder="010-0000-0000" />' +
+
+'<label>이메일</label>' +
+'<input id="admin-email" />' +
+
+'<label>주민등록번호</label>' +
+'<input id="admin-resident-number" />' +
+
+'<label>회사명</label>' +
+'<input id="admin-company-name" />' +
+
+'<label>사업자번호</label>' +
+'<input id="admin-business-number" />' +
+
+'<label>수수료율(%)</label>' +
+'<input id="admin-commission-rate" type="number" step="0.01" min="0" max="100" />' +
+
+'<label>은행명</label>' +
+'<input id="admin-bank-name" />' +
+
+'<label>계좌번호</label>' +
+'<input id="admin-account-number" />' +
+
+'<label>예금주</label>' +
+'<input id="admin-account-holder" />' +
+
+'<label>메모</label>' +
+'<textarea id="admin-memo"></textarea>' +
+
+'</div>' +
+
 '</div>' +
 
       '<div class="merchant-detail-actions">' +
