@@ -3847,36 +3847,6 @@ if (subMenu) {
 
     if (!summaryBox) return
 
-    summaryBox.innerHTML =
-
-      '<div class="merchant-detail-header">' +
-        '<h2>담당자 등록</h2>' +
-        '<p>지사 / 대리점 / 담당자를 등록합니다.</p>' +
-      '</div>' +
-
-      '<div class="merchant-detail-grid">' +
-
-        '<label>권한</label>' +
-        '<select id="admin-role">' +
-          '<option value="BRANCH">지사</option>' +
-          '<option value="AGENCY">대리점</option>' +
-          '<option value="MANAGER" selected>담당자</option>' +
-        '</select>' +
-
-        
-
-        '<label>이름</label>' +
-        '<input id="admin-name" />' +
-
-        '<label>비밀번호</label>' +
-        '<input id="admin-password" value="1234" />' +
-
-      '</div>' +
-
-      '<div class="merchant-detail-actions">' +
-        '<button id="save-admin-user" class="merchant-save-btn">저장</button>' +
-        '<button id="back-admin-user-list" class="merchant-close-btn">목록</button>' +
-      '</div>'
       document.querySelector('#back-admin-user-list')
   ?.addEventListener('click', () => {
     document.querySelector('[data-sub="admin-users"]')
