@@ -1313,7 +1313,9 @@ branch_admin_name: matchedBranch?.admin_name || '',
 
     business_number: (document.getElementById('apply-business-number') as HTMLInputElement)?.value || '',
     resident_number: (document.getElementById('apply-resident-number') as HTMLInputElement)?.value || '',
-
+    business_category: (document.getElementById('apply-business-category') as HTMLInputElement)?.value || '',
+business_type: (document.getElementById('apply-business-item') as HTMLInputElement)?.value || '',
+product_item: (document.getElementById('apply-product-item') as HTMLInputElement)?.value || '',
     email: (document.getElementById('apply-email') as HTMLInputElement)?.value || '',
 
     zipcode: (document.getElementById('apply-zipcode') as HTMLInputElement)?.value || '',
@@ -1326,11 +1328,26 @@ branch_admin_name: matchedBranch?.admin_name || '',
 
     settlement_cycle: (document.getElementById('apply-settlement-cycle') as HTMLSelectElement)?.value || '',
 
-    business_license_url: businessFileName,
-bankbook_url: bankbookFileName,
-id_card_url: idCardFileName,
-product_photo_url: productPhotoFileName,
-extra_file_url: extraFileName,
+
+    business_license_url: businessFileName
+  ? supabase.storage.from('merchant-files').getPublicUrl(businessFileName).data.publicUrl
+  : '',
+
+bankbook_url: bankbookFileName
+  ? supabase.storage.from('merchant-files').getPublicUrl(bankbookFileName).data.publicUrl
+  : '',
+
+id_card_url: idCardFileName
+  ? supabase.storage.from('merchant-files').getPublicUrl(idCardFileName).data.publicUrl
+  : '',
+
+product_photo_url: productPhotoFileName
+  ? supabase.storage.from('merchant-files').getPublicUrl(productPhotoFileName).data.publicUrl
+  : '',
+
+extra_file_url: extraFileName
+  ? supabase.storage.from('merchant-files').getPublicUrl(extraFileName).data.publicUrl
+  : '',
 memo: (document.getElementById('apply-memo') as HTMLTextAreaElement)?.value || '',
     status: '신청'
   }
