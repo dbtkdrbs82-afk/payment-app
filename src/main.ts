@@ -3758,7 +3758,7 @@ if (subMenu) {
 '<input id="edit-admin-business-number" value="' + (adminUser.business_number || '') + '" />' +
 
 '<label>수수료율(%)</label>' +
-'<input id="edit-admin-commission-rate" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate || '') + '" />'
+'<input id="edit-admin-commission-rate" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate || '') + '" />' +
 
 '<label>은행명</label>' +
 '<input id="edit-admin-bank-name" value="' + (adminUser.bank_name || '') + '" />' +
@@ -4430,6 +4430,36 @@ summaryBox.innerHTML =
 
     '<label>비밀번호</label>' +
     '<input id="edit-admin-password" value="' + (adminUser.password || '') + '" />' +
+
+    '<label>휴대폰번호</label>' +
+'<input id="edit-admin-phone" value="' + (adminUser.phone || '') + '" placeholder="010-0000-0000" />' +
+
+'<label>이메일</label>' +
+'<input id="edit-admin-email" value="' + (adminUser.email || '') + '" />' +
+
+'<label>주민등록번호</label>' +
+'<input id="edit-admin-resident-number" value="' + (adminUser.resident_number || '') + '" />' +
+
+'<label>회사명</label>' +
+'<input id="edit-admin-company-name" value="' + (adminUser.company_name || '') + '" />' +
+
+'<label>사업자번호</label>' +
+'<input id="edit-admin-business-number" value="' + (adminUser.business_number || '') + '" />' +
+
+'<label>수수료율(%)</label>' +
+'<input id="edit-admin-commission-rate" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate || '') + '" />' +
+
+'<label>은행명</label>' +
+'<input id="edit-admin-bank-name" value="' + (adminUser.bank_name || '') + '" />' +
+
+'<label>계좌번호</label>' +
+'<input id="edit-admin-account-number" value="' + (adminUser.account_number || '') + '" />' +
+
+'<label>예금주</label>' +
+'<input id="edit-admin-account-holder" value="' + (adminUser.account_holder || '') + '" />' +
+
+'<label>메모</label>' +
+'<textarea id="edit-admin-memo">' + (adminUser.memo || '') + '</textarea>' +
 
     '<label>상태</label>' +
 '<select id="edit-admin-status" ' + (adminUser.login_id === 'NXGMASTER16' ? 'disabled' : '') + '>' +
