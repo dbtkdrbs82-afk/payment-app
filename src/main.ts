@@ -1188,8 +1188,9 @@ const extraFile =
 
 const safeTime = Date.now()
 
-const businessFileName =
-  `${safeTime}_business.${businessFile.name.split('.').pop() || 'file'}`
+const businessFileName = businessFile
+  ? `${safeTime}_business.${businessFile.name.split('.').pop() || 'file'}`
+  : ''
 
 const bankbookFileName =
   `${safeTime}_bankbook.${bankbookFile.name.split('.').pop() || 'file'}`
