@@ -1367,7 +1367,7 @@ memo: (document.getElementById('apply-memo') as HTMLTextAreaElement)?.value || '
 
   alert('가입신청이 완료되었습니다.')
 
-  location.href = '/'
+location.href = '/merchant-login'
 })
 
 } else if (path === '/merchant-create') {
