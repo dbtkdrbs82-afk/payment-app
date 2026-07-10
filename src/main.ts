@@ -2917,7 +2917,7 @@ if (summaryBox) {
      
          sessionStorage.removeItem('admin_id')
      
-         location.href = '/admin-login'
+         location.href = '/merchant-login'
        })
 
        const adminWindow = window as Window & {
