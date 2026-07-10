@@ -5610,56 +5610,194 @@ if (page === 'payout') {
               titleBox.innerHTML = '▶ 출금관리 > 담당자 정산'
             }
     
-            const { data: rows, error } = await supabase
-            .from('organization_commission_summary')
-              .select('*')
-              .order('settlement_month', { ascending: false })
-    
-            if (error) {
-              alert(error.message)
-              return
-            }
-    
-            if (tableHead) {
-              tableHead.innerHTML =
-                '<tr>' +
-                  '<th>정산월</th>' +
-                  '<th>구분</th>' +
-                  '<th>조직명</th>' +
-                  '<th>수수료율</th>' +
-                  '<th>결제건수</th>' +
-                  '<th>결제금액</th>' +
-                  '<th>지급예정액</th>' +
-                '</tr>'
-            }
-    
-            paymentTableBody.innerHTML = ''
-    
-            ;(rows || []).forEach((row) => {
-    
-              const tr = document.createElement('tr')
-    
-              tr.innerHTML =
-  '<td>' + (row.settlement_month || '-') + '</td>' +
+            const { data: paymentRows, error } = await supabase
+  .from('payments')
+  .select(`
+    id,
+    created_at,
+    amount,
+    status,
+    branch_admin_id,
+    branch_admin_name,
+    branch_fee_rate,
+    agency_admin_id,
+    agency_admin_name,
+    agency_fee_rate,
+    manager_admin_id,
+    manager_admin_name,
+    manager_fee_rate
+  `)
+  .eq('status', 'paid')
+  .order('created_at', { ascending: false })
 
-  '<td>' +
-    (
-      row.role === 'BRANCH'
-        ? '지사'
-        : row.role === 'AGENCY'
-          ? '대리점'
-          : '담당자'
-    ) +
-  '</td>' +
+if (error) {
+  alert('담당자 정산 조회 실패: ' + error.message)
+  return
+}
 
-  '<td>' + (row.admin_name || '-') + '</td>' +
-  '<td>' + Number(row.commission_rate || 0) + '%</td>' +
-  '<td>' + Number(row.payment_count || 0).toLocaleString() + '</td>' +
-  '<td>' + Number(row.total_payment_amount || 0).toLocaleString() + '원</td>' +
-  '<td>' + Number(row.commission_amount || 0).toLocaleString() + '원</td>'
-    
-              paymentTableBody.appendChild(tr)
-            })
+type CommissionSummaryRow = {
+  settlement_month: string
+  role: 'BRANCH' | 'AGENCY' | 'MANAGER'
+  admin_id: number
+  admin_name: string
+  commission_rate: number
+  payment_count: number
+  total_payment_amount: number
+  commission_amount: number
+}
+
+const summaryMap = new Map<string, CommissionSummaryRow>()
+
+const addCommissionSummary = (
+  settlementMonth: string,
+  role: 'BRANCH' | 'AGENCY' | 'MANAGER',
+  adminId: number | null,
+  adminName: string,
+  commissionRate: number,
+  paymentAmount: number
+) => {
+  if (!adminId || commissionRate <= 0) return
+
+  const key = settlementMonth + '-' + role + '-' + adminId
+
+  const commissionAmount = Math.floor(
+    paymentAmount * commissionRate / 100
+  )
+
+  const existing = summaryMap.get(key)
+
+  if (existing) {
+    existing.payment_count += 1
+    existing.total_payment_amount += paymentAmount
+    existing.commission_amount += commissionAmount
+  } else {
+    summaryMap.set(key, {
+      settlement_month: settlementMonth,
+      role,
+      admin_id: adminId,
+      admin_name: adminName || '-',
+      commission_rate: commissionRate,
+      payment_count: 1,
+      total_payment_amount: paymentAmount,
+      commission_amount: commissionAmount
+    })
+  }
+}
+
+;(paymentRows || []).forEach((payment) => {
+  const paymentAmount = Number(payment.amount || 0)
+
+  const settlementMonth = payment.created_at
+    ? String(payment.created_at).slice(0, 7)
+    : '-'
+
+  const branchFeeRate = Number(payment.branch_fee_rate || 0)
+  const agencyFeeRate = Number(payment.agency_fee_rate || 0)
+  const managerFeeRate = Number(payment.manager_fee_rate || 0)
+
+  const branchActualRate = Math.max(
+    branchFeeRate - agencyFeeRate,
+    0
+  )
+
+  const agencyActualRate = Math.max(
+    agencyFeeRate - managerFeeRate,
+    0
+  )
+
+  const managerActualRate = Math.max(
+    managerFeeRate,
+    0
+  )
+
+  addCommissionSummary(
+    settlementMonth,
+    'BRANCH',
+    payment.branch_admin_id
+      ? Number(payment.branch_admin_id)
+      : null,
+    payment.branch_admin_name || '',
+    branchActualRate,
+    paymentAmount
+  )
+
+  addCommissionSummary(
+    settlementMonth,
+    'AGENCY',
+    payment.agency_admin_id
+      ? Number(payment.agency_admin_id)
+      : null,
+    payment.agency_admin_name || '',
+    agencyActualRate,
+    paymentAmount
+  )
+
+  addCommissionSummary(
+    settlementMonth,
+    'MANAGER',
+    payment.manager_admin_id
+      ? Number(payment.manager_admin_id)
+      : null,
+    payment.manager_admin_name || '',
+    managerActualRate,
+    paymentAmount
+  )
+})
+
+const rows = Array.from(summaryMap.values())
+  .sort((a, b) => {
+    if (a.settlement_month !== b.settlement_month) {
+      return b.settlement_month.localeCompare(a.settlement_month)
+    }
+
+    const roleOrder = {
+      BRANCH: 1,
+      AGENCY: 2,
+      MANAGER: 3
+    }
+
+    return roleOrder[a.role] - roleOrder[b.role]
+  })
+
+if (tableHead) {
+  tableHead.innerHTML =
+    '<tr>' +
+      '<th>정산월</th>' +
+      '<th>구분</th>' +
+      '<th>조직명</th>' +
+      '<th>실제 지급률</th>' +
+      '<th>결제건수</th>' +
+      '<th>결제금액</th>' +
+      '<th>지급예정액</th>' +
+    '</tr>'
+}
+
+paymentTableBody.innerHTML = ''
+
+rows.forEach((row) => {
+  const tr = document.createElement('tr')
+
+  tr.innerHTML =
+    '<td>' + row.settlement_month + '</td>' +
+
+    '<td>' +
+      (
+        row.role === 'BRANCH'
+          ? '지사'
+          : row.role === 'AGENCY'
+            ? '대리점'
+            : '담당자'
+      ) +
+    '</td>' +
+
+    '<td>' + row.admin_name + '</td>' +
+    '<td>' + row.commission_rate.toFixed(2) + '%</td>' +
+    '<td>' + row.payment_count.toLocaleString() + '</td>' +
+    '<td>' + row.total_payment_amount.toLocaleString() + '원</td>' +
+    '<td>' + row.commission_amount.toLocaleString() + '원</td>'
+
+  paymentTableBody.appendChild(tr)
+})
           }
         })
       })
@@ -11363,68 +11501,16 @@ return
   const kioskSettlementAmount = kioskAmount - kioskFeeAmount
   
   const managerAdminId = merchantData?.manager_admin_id
-    ? Number(merchantData.manager_admin_id)
-    : null
-  
   let managerAdminName = ''
-  let agencyAdminId: number | null = null
-  let agencyAdminName = ''
-  let branchAdminId: number | null = null
-  let branchAdminName = ''
-  
-  if (managerAdminId) {
-    const { data: managerData, error: managerError } = await supabase
-      .from('admin_users')
-      .select('id, admin_name, role, parent_admin_id')
-      .eq('id', managerAdminId)
-      .maybeSingle()
-  
-    if (managerError) {
-      alert('담당자 정보 조회 실패: ' + managerError.message)
-    }
-  
-    if (managerData) {
-      managerAdminName = managerData.admin_name || ''
-  
-      if (managerData.role === 'MANAGER' && managerData.parent_admin_id) {
-        agencyAdminId = Number(managerData.parent_admin_id)
-  
-        const { data: agencyData, error: agencyError } = await supabase
-          .from('admin_users')
-          .select('id, admin_name, parent_admin_id')
-          .eq('id', agencyAdminId)
-          .maybeSingle()
-  
-        if (agencyError) {
-          alert('대리점 정보 조회 실패: ' + agencyError.message)
-        
-        }
-  
-        if (agencyData) {
-          agencyAdminName = agencyData.admin_name || ''
-  
-          if (agencyData.parent_admin_id) {
-            branchAdminId = Number(agencyData.parent_admin_id)
-  
-            const { data: branchData, error: branchError } = await supabase
-              .from('admin_users')
-              .select('id, admin_name')
-              .eq('id', branchAdminId)
-              .maybeSingle()
-  
-            if (branchError) {
-              alert('지사 정보 조회 실패: ' + branchError.message)
-            
-            }
-  
-            if (branchData) {
-              branchAdminName = branchData.admin_name || ''
-            }
-          }
-        }
-      }
-    }
-  }
+let managerFeeRate = 0
+
+let agencyAdminId: number | null = null
+let agencyAdminName = ''
+let agencyFeeRate = 0
+
+let branchAdminId: number | null = null
+let branchAdminName = ''
+let branchFeeRate = 0
   
   const { error: paymentSaveError } = await supabase
     .from('payments')
@@ -11441,11 +11527,16 @@ return
       merchant_name: merchantData?.merchant_name || '',
   
       manager_admin_id: managerAdminId,
-      manager_admin_name: managerAdminName,
-      agency_admin_id: agencyAdminId,
-      agency_admin_name: agencyAdminName,
-      branch_admin_id: branchAdminId,
-      branch_admin_name: branchAdminName,
+manager_admin_name: managerAdminName,
+manager_fee_rate: managerFeeRate,
+
+agency_admin_id: agencyAdminId,
+agency_admin_name: agencyAdminName,
+agency_fee_rate: agencyFeeRate,
+
+branch_admin_id: branchAdminId,
+branch_admin_name: branchAdminName,
+branch_fee_rate: branchFeeRate,
   
       order_status: '준비중',
       pg_company: '코페이'
