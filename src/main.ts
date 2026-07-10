@@ -6035,12 +6035,20 @@ if (payoutPageSizeSelect) {
 }
     
 document.querySelector('#payout-search-btn')
-?.addEventListener('click', () => {
-  if (currentPayoutView === 'manager') return
+  ?.addEventListener('click', () => {
+    if (currentPayoutView === 'manager') {
+      const managerTab =
+        document.querySelector<HTMLElement>(
+          '.payout-sub-tab[data-payout-view="manager"]'
+        )
 
-  payoutPage = 1
-  renderPayoutTable()
-})
+      managerTab?.click()
+      return
+    }
+
+    payoutPage = 1
+    renderPayoutTable()
+  })
 
 document.querySelector('#payout-pg-filter')
 ?.addEventListener('change', () => {
