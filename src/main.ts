@@ -3021,16 +3021,7 @@ requestAnimationFrame(() => {
             const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
 
-const { data: managerCommissionRows, error: managerCommissionError } =
-  await supabase
-    .from('manager_commission_summary')
-    .select('*')
-    .order('settlement_month', { ascending: false })
 
-if (managerCommissionError) {
-  alert('담당자 수수료 조회 실패: ' + managerCommissionError.message)
-  return
-}
               if (subMenu) {
                 subMenu.innerHTML = ''
               }
