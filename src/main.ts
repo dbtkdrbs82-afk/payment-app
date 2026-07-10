@@ -3019,8 +3019,18 @@ requestAnimationFrame(() => {
             const tableTop = document.querySelector('.admin-table-top')
             const tableHead = document.querySelector('.admin-table thead')
             const paymentTableBody =
-              document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
-          
+  document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
+
+const { data: managerCommissionRows, error: managerCommissionError } =
+  await supabase
+    .from('manager_commission_summary')
+    .select('*')
+    .order('settlement_month', { ascending: false })
+
+if (managerCommissionError) {
+  alert('담당자 수수료 조회 실패: ' + managerCommissionError.message)
+  return
+}
               if (subMenu) {
                 subMenu.innerHTML = ''
               }
@@ -5585,9 +5595,72 @@ if (page === 'payout') {
       let payoutPageSize = Number(sessionStorage.getItem('withdraw_page_size') || 10)
     
       if (subMenu) {
-        subMenu.innerHTML = '출금예정내역 | 출금완료내역'
+        subMenu.innerHTML =
+          '<button class="admin-sub-tab payout-sub-tab active" data-payout-view="scheduled">출금예정내역</button>' +
+          '<button class="admin-sub-tab payout-sub-tab" data-payout-view="completed">출금완료내역</button>' +
+          '<button class="admin-sub-tab payout-sub-tab" data-payout-view="manager">담당자 정산</button>'
       }
     
+      document.querySelectorAll('.payout-sub-tab')
+      .forEach((tab) => {
+        tab.addEventListener('click', async () => {
+    
+          const view =
+            (tab as HTMLElement).dataset.payoutView || 'scheduled'
+    
+          document.querySelectorAll('.payout-sub-tab')
+            .forEach((t) => t.classList.remove('active'))
+    
+          tab.classList.add('active')
+    
+          if (view === 'manager') {
+    
+            if (titleBox) {
+              titleBox.innerHTML = '▶ 출금관리 > 담당자 정산'
+            }
+    
+            const { data: rows, error } = await supabase
+              .from('manager_commission_summary')
+              .select('*')
+              .order('settlement_month', { ascending: false })
+    
+            if (error) {
+              alert(error.message)
+              return
+            }
+    
+            if (tableHead) {
+              tableHead.innerHTML =
+                '<tr>' +
+                  '<th>정산월</th>' +
+                  '<th>담당자</th>' +
+                  '<th>수수료율</th>' +
+                  '<th>결제건수</th>' +
+                  '<th>결제금액</th>' +
+                  '<th>지급예정액</th>' +
+                '</tr>'
+            }
+    
+            paymentTableBody.innerHTML = ''
+    
+            ;(rows || []).forEach((row) => {
+    
+              const tr = document.createElement('tr')
+    
+              tr.innerHTML =
+                '<td>' + (row.settlement_month || '-') + '</td>' +
+                '<td>' + (row.manager_name || '-') + '</td>' +
+                '<td>' + Number(row.commission_rate || 0) + '%</td>' +
+                '<td>' + Number(row.payment_count || 0).toLocaleString() + '</td>' +
+                '<td>' + Number(row.total_payment_amount || 0).toLocaleString() + '원</td>' +
+                '<td>' + Number(row.commission_amount || 0).toLocaleString() + '원</td>'
+    
+              paymentTableBody.appendChild(tr)
+            })
+          }
+        })
+      })
+
       if (titleBox) {
         titleBox.innerHTML = '▶ 출금관리 > 출금예정내역'
       }
