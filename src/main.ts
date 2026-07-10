@@ -10882,12 +10882,12 @@ document.querySelector('#pay-link-btn')
     
         document.querySelector('#ocr-card-payment')
         ?.addEventListener('click', () => {
-          location.href = '/merchant-card-ocr'
+          location.href = '/merchant-card-ocr?mode=ocr'
         })
-    
+      
       document.querySelector('#manual-card-payment')
         ?.addEventListener('click', () => {
-          alert('일반 수기결제 화면은 다음 단계에서 연결합니다.')
+          location.href = '/merchant-card-ocr?mode=manual'
         })
     
       document.querySelector('#menu-card-payment')
@@ -10899,44 +10899,179 @@ document.querySelector('#pay-link-btn')
           location.href = '/merchant-batch-payment'
         })
 
+      } else if (path === '/merchant-card-manual') {
+
+        const merchantId =
+          Number(sessionStorage.getItem('login_merchant_id') || 0)
+      
+        if (!merchantId) {
+          location.href = '/merchant-login'        
+        }
+      
+        app.innerHTML = `
+          <div class="merchant-card-ocr-page">
+      
+            <h1>일반 수기결제</h1>
+            <p>카드정보를 직접 입력해주세요.</p>
+      
+            <div class="payment-card">
+      
+              <label>결제금액</label>
+              <input
+                id="manual-payment-amount"
+                type="number"
+                min="100"
+                placeholder="결제금액"
+              />
+      
+              <label>상품명</label>
+              <input
+                id="manual-product-name"
+                type="text"
+                placeholder="상품명"
+              />
+      
+              <label>카드번호</label>
+              <input
+                id="manual-card-number"
+                type="text"
+                inputmode="numeric"
+                maxlength="19"
+                placeholder="0000-0000-0000-0000"
+              />
+      
+              <label>유효기간</label>
+              <input
+                id="manual-expiry"
+                type="text"
+                inputmode="numeric"
+                maxlength="5"
+                placeholder="MM/YY"
+              />
+      
+              <label>할부개월</label>
+              <select id="manual-installment">
+                <option value="0">일시불</option>
+                <option value="2">2개월</option>
+                <option value="3">3개월</option>
+                <option value="4">4개월</option>
+                <option value="5">5개월</option>
+                <option value="6">6개월</option>
+                <option value="12">12개월</option>
+              </select>
+      
+              <label>비밀번호 앞 2자리</label>
+              <input
+                id="manual-card-password"
+                type="password"
+                inputmode="numeric"
+                maxlength="2"
+                placeholder="**"
+              />
+      
+              <label>생년월일 또는 사업자번호</label>
+              <input
+                id="manual-buyer-number"
+                type="text"
+                inputmode="numeric"
+                maxlength="10"
+                placeholder="YYMMDD 또는 사업자번호"
+              />
+      
+              <button id="manual-payment-submit" class="merchant-save-btn">
+                결제 요청
+              </button>
+      
+              <button id="manual-payment-back" class="merchant-close-btn">
+                이전
+              </button>
+      
+            </div>
+          </div>
+        `
+      
+        document.querySelector('#manual-payment-back')
+          ?.addEventListener('click', () => {
+            location.href = '/merchant-card-payment'
+          })
+      
+        document.querySelector('#manual-card-number')
+          ?.addEventListener('input', (event) => {
+            const input = event.target as HTMLInputElement
+            const numbers = input.value.replace(/\D/g, '').slice(0, 16)
+      
+            input.value =
+              numbers.match(/.{1,4}/g)?.join('-') || numbers
+          })
+      
+        document.querySelector('#manual-expiry')
+          ?.addEventListener('input', (event) => {
+            const input = event.target as HTMLInputElement
+            const numbers = input.value.replace(/\D/g, '').slice(0, 4)
+      
+            input.value =
+              numbers.length > 2
+                ? numbers.slice(0, 2) + '/' + numbers.slice(2)
+                : numbers
+          })
+      
+        document.querySelector('#manual-payment-submit')
+          ?.addEventListener('click', () => {
+            alert('입력 화면 연결 완료. 다음 단계에서 코페이 승인 API를 연결합니다.')
+          })
+      
+
       } else if (path === '/merchant-card-ocr') {
+        const mode =
+  new URLSearchParams(location.search).get('mode') || 'ocr'
 
         app.innerHTML = `
           <div class="merchant-card-ocr-page">
       
-            <h1>카드 스캔 결제</h1>
-<p>실물카드를 직접 촬영해주세요.</p>
-      
-            <div class="ocr-upload-box">
-         <label class="card-scan-button" for="ocr-card-image">
-  카드 촬영하기
-</label>
-
-<input
-  type="file"
-  id="ocr-card-image"
-  accept="image/*"
-  capture="environment"
-  style="display:none"
-/>
-            </div>
-      
-            <div class="ocr-preview-box">
-              <img
-                id="ocr-preview-image"
-                style="max-width:400px; display:none;"
-              />
-            </div>
-      
-            <div class="ocr-action-box">
-              <button id="ocr-start-btn">
-                카드정보 인식하기
-              </button>
-      
-              <button id="ocr-back-btn">
-                이전으로
-              </button>
-            </div>
+          ${
+            mode === 'ocr'
+              ? `
+                <h1>OCR 카드결제</h1>
+                <p>실물카드를 촬영하거나 카드정보를 직접 입력해주세요.</p>
+          
+                <div class="ocr-upload-box">
+                  <label class="card-scan-button" for="ocr-card-image">
+                    카드 촬영하기
+                  </label>
+          
+                  <input
+                    type="file"
+                    id="ocr-card-image"
+                    accept="image/*"
+                    capture="environment"
+                    style="display:none"
+                  />
+                </div>
+          
+                <div class="ocr-preview-box">
+                  <img
+                    id="ocr-preview-image"
+                    style="max-width:400px; display:none;"
+                  />
+                </div>
+          
+                <div class="ocr-action-box">
+                  <button id="ocr-start-btn">
+                    카드정보 인식하기
+                  </button>
+                </div>
+              `
+              : `
+                <h1>일반 수기결제</h1>
+                <p>카드정보를 직접 입력해주세요.</p>
+              `
+          }
+          
+          <div class="ocr-action-box">
+            <button id="ocr-back-btn">
+              이전으로
+            </button>
+          </div>
       
           
 
@@ -10951,7 +11086,14 @@ document.querySelector('#pay-link-btn')
   <input id="ocr-amount" placeholder="결제금액" />
 
   <label>카드번호</label>
-  <input id="ocr-card-number" placeholder="카드 스캔 후 자동 입력됩니다" />
+  <input
+  id="ocr-card-number"
+  placeholder="${
+    mode === 'ocr'
+      ? '카드 스캔 후 자동 입력됩니다'
+      : '카드번호를 직접 입력하세요'
+  }"
+/>
 
   <label>유효기간</label>
   <div>
