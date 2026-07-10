@@ -5122,7 +5122,7 @@ merchants
   const merchantButtons = tr.querySelectorAll('.merchant-link-btn')
 
 merchantButtons.forEach((button) => {
-  button.addEventListener('click', () => {
+  button.addEventListener('click', async () => {
     sessionStorage.setItem('selected_merchant_id', String(merchant.id))
 
     if (titleBox) {
@@ -5395,6 +5395,7 @@ merchantButtons.forEach((button) => {
           '</div>' +
         '</td>' +
       '</tr>'
+
     
       document.querySelector('#back-merchant-list')
       ?.addEventListener('click', () => {
@@ -5430,6 +5431,9 @@ merchantButtons.forEach((button) => {
   fee_rate: feeRate,
   register_type: getValue('register_type'),
   manager_admin_id: Number(getValue('manager_admin_id')) || null,
+  manager_admin_name:
+  document.querySelector<HTMLSelectElement>('#manager_admin_id')
+    ?.selectedOptions[0]?.textContent || '',
 pg_company: getValue('pg_company'),
 company_type: getValue('company_type'),
 status: getValue('merchant_status'),
