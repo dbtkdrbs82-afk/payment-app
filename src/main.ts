@@ -4500,6 +4500,36 @@ document.querySelector('#safe-update-admin-user')
 
       const newPhone =
   (document.querySelector<HTMLInputElement>('#edit-admin-phone')?.value || '').trim()
+      
+  const newEmail =
+  (document.querySelector<HTMLInputElement>('#edit-admin-email')?.value || '').trim()
+
+const newResidentNumber =
+  (document.querySelector<HTMLInputElement>('#edit-admin-resident-number')?.value || '').trim()
+
+const newCompanyName =
+  (document.querySelector<HTMLInputElement>('#edit-admin-company-name')?.value || '').trim()
+
+const newBusinessNumber =
+  (document.querySelector<HTMLInputElement>('#edit-admin-business-number')?.value || '').trim()
+
+const newCommissionRate =
+  Number(
+    document.querySelector<HTMLInputElement>('#edit-admin-commission-rate')
+      ?.value || 0
+  )
+
+const newBankName =
+  (document.querySelector<HTMLInputElement>('#edit-admin-bank-name')?.value || '').trim()
+
+const newAccountNumber =
+  (document.querySelector<HTMLInputElement>('#edit-admin-account-number')?.value || '').trim()
+
+const newAccountHolder =
+  (document.querySelector<HTMLInputElement>('#edit-admin-account-holder')?.value || '').trim()
+
+const newMemo =
+  (document.querySelector<HTMLTextAreaElement>('#edit-admin-memo')?.value || '').trim()
 
     const newStatus =
       (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || adminUser.status).trim()
@@ -4559,12 +4589,31 @@ document.querySelector('#safe-update-admin-user')
     const updateData = isRootMaster
   ? {
       admin_name: newName,
-      password: newPassword
+      password: newPassword,
+      phone: newPhone,
+      email: newEmail,
+      resident_number: newResidentNumber,
+      company_name: newCompanyName,
+      business_number: newBusinessNumber,
+      commission_rate: newCommissionRate,
+      bank_name: newBankName,
+      account_number: newAccountNumber,
+      account_holder: newAccountHolder,
+      memo: newMemo
     }
   : {
       admin_name: newName,
       password: newPassword,
       phone: newPhone,
+      email: newEmail,
+      resident_number: newResidentNumber,
+      company_name: newCompanyName,
+      business_number: newBusinessNumber,
+      commission_rate: newCommissionRate,
+      bank_name: newBankName,
+      account_number: newAccountNumber,
+      account_holder: newAccountHolder,
+      memo: newMemo,
       role: newRole,
       status: newStatus,
       login_id: newLoginId,
