@@ -5584,7 +5584,7 @@ if (page === 'payout') {
         }
       let payoutPage = 1
       let payoutPageSize = Number(sessionStorage.getItem('withdraw_page_size') || 10)
-    
+      let currentPayoutView = 'scheduled'
       if (subMenu) {
         subMenu.innerHTML =
           '<button class="admin-sub-tab payout-sub-tab active" data-payout-view="scheduled">출금예정내역</button>' +
@@ -5598,7 +5598,7 @@ if (page === 'payout') {
     
           const view =
             (tab as HTMLElement).dataset.payoutView || 'scheduled'
-    
+            currentPayoutView = view
           document.querySelectorAll('.payout-sub-tab')
             .forEach((t) => t.classList.remove('active'))
     
@@ -6034,23 +6034,29 @@ if (payoutPageSizeSelect) {
   })
 }
     
-      document.querySelector('#payout-search-btn')
-        ?.addEventListener('click', () => {
-          payoutPage = 1
-          renderPayoutTable()
-        })
-    
-      document.querySelector('#payout-pg-filter')
-        ?.addEventListener('change', () => {
-          payoutPage = 1
-          renderPayoutTable()
-        })
-    
-      document.querySelector('#payout-status-filter')
-        ?.addEventListener('change', () => {
-          payoutPage = 1
-          renderPayoutTable()
-        })
+document.querySelector('#payout-search-btn')
+?.addEventListener('click', () => {
+  if (currentPayoutView === 'manager') return
+
+  payoutPage = 1
+  renderPayoutTable()
+})
+
+document.querySelector('#payout-pg-filter')
+?.addEventListener('change', () => {
+  if (currentPayoutView === 'manager') return
+
+  payoutPage = 1
+  renderPayoutTable()
+})
+
+document.querySelector('#payout-status-filter')
+?.addEventListener('change', () => {
+  if (currentPayoutView === 'manager') return
+
+  payoutPage = 1
+  renderPayoutTable()
+})
     
       renderPayoutTable()
     
