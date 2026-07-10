@@ -11353,34 +11353,108 @@ return
   
           const { data: merchantData } = await supabase
   .from('merchants')
-  .select('merchant_name, fee_rate')
+  .select('merchant_name, fee_rate, manager_admin_id')
   .eq('id', Number(merchantId))
   .maybeSingle()
 
-const kioskAmount = Number(totalAmount)
-const kioskFeeRate = Number(merchantData?.fee_rate || 0)
-const kioskFeeAmount = Math.floor(kioskAmount * kioskFeeRate / 100)
-const kioskSettlementAmount = kioskAmount - kioskFeeAmount
-
-const { error: paymentSaveError } = await supabase
-  .from('payments')
-  .insert({
-    order_id: orderNo,
-    payment_key: 'kiosk-' + orderNo,
-    amount: kioskAmount,
-    fee_rate: kioskFeeRate,
-    fee_amount: kioskFeeAmount,
-    settlement_amount: kioskSettlementAmount,
-    status: 'paid',
-    merchant_id: Number(merchantId),
-    merchant_name: merchantData?.merchant_name || '',
-    order_status: '준비중',
-    pg_company: '코페이'
-  })
-
-if (paymentSaveError) {
-  alert('결제내역 저장 실패: ' + paymentSaveError.message)
-}
+  const kioskAmount = Number(totalAmount)
+  const kioskFeeRate = Number(merchantData?.fee_rate || 0)
+  const kioskFeeAmount = Math.floor(kioskAmount * kioskFeeRate / 100)
+  const kioskSettlementAmount = kioskAmount - kioskFeeAmount
+  
+  const managerAdminId = merchantData?.manager_admin_id
+    ? Number(merchantData.manager_admin_id)
+    : null
+  
+  let managerAdminName = ''
+  let agencyAdminId: number | null = null
+  let agencyAdminName = ''
+  let branchAdminId: number | null = null
+  let branchAdminName = ''
+  
+  if (managerAdminId) {
+    const { data: managerData, error: managerError } = await supabase
+      .from('admin_users')
+      .select('id, admin_name, role, parent_admin_id')
+      .eq('id', managerAdminId)
+      .maybeSingle()
+  
+    if (managerError) {
+      alert('담당자 정보 조회 실패: ' + managerError.message)
+    }
+  
+    if (managerData) {
+      managerAdminName = managerData.admin_name || ''
+  
+      if (managerData.role === 'MANAGER' && managerData.parent_admin_id) {
+        agencyAdminId = Number(managerData.parent_admin_id)
+  
+        const { data: agencyData, error: agencyError } = await supabase
+          .from('admin_users')
+          .select('id, admin_name, parent_admin_id')
+          .eq('id', agencyAdminId)
+          .maybeSingle()
+  
+        if (agencyError) {
+          alert('대리점 정보 조회 실패: ' + agencyError.message)
+        
+        }
+  
+        if (agencyData) {
+          agencyAdminName = agencyData.admin_name || ''
+  
+          if (agencyData.parent_admin_id) {
+            branchAdminId = Number(agencyData.parent_admin_id)
+  
+            const { data: branchData, error: branchError } = await supabase
+              .from('admin_users')
+              .select('id, admin_name')
+              .eq('id', branchAdminId)
+              .maybeSingle()
+  
+            if (branchError) {
+              alert('지사 정보 조회 실패: ' + branchError.message)
+            
+            }
+  
+            if (branchData) {
+              branchAdminName = branchData.admin_name || ''
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  const { error: paymentSaveError } = await supabase
+    .from('payments')
+    .insert({
+      order_id: orderNo,
+      payment_key: 'kiosk-' + orderNo,
+      amount: kioskAmount,
+      fee_rate: kioskFeeRate,
+      fee_amount: kioskFeeAmount,
+      settlement_amount: kioskSettlementAmount,
+      status: 'paid',
+  
+      merchant_id: Number(merchantId),
+      merchant_name: merchantData?.merchant_name || '',
+  
+      manager_admin_id: managerAdminId,
+      manager_admin_name: managerAdminName,
+      agency_admin_id: agencyAdminId,
+      agency_admin_name: agencyAdminName,
+      branch_admin_id: branchAdminId,
+      branch_admin_name: branchAdminName,
+  
+      order_status: '준비중',
+      pg_company: '코페이'
+    })
+  
+  if (paymentSaveError) {
+    alert('결제내역 저장 실패: ' + paymentSaveError.message)
+  
+  }
 
         if (error) {
           app.innerHTML = `
