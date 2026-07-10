@@ -10934,7 +10934,7 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
 
               <div class="kiosk-company-info">
 
-  <div><strong>NXG 소프트</strong></div>
+  <div><strong>주식회사 엔엑스지소프트</strong></div>
 
   <div>
     대표 : 유상균
@@ -10946,11 +10946,11 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
   </div>
 
   <div>
-    서울특별시 금천구 가산디지털2로 34, 211-4호
+    서울특별시 금천구 가산디지털2로 34, 211-4N호
   </div>
 
   <div>
-  고객센터 : 02-431-1252 |
+  대표 번호 : 02-431-1252 |
   이메일 : nxgsoft@naver.com
 </div>
 
