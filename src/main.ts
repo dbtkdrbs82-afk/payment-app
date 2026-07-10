@@ -5611,7 +5611,7 @@ if (page === 'payout') {
             }
     
             const { data: rows, error } = await supabase
-              .from('manager_commission_summary')
+            .from('organization_commission_summary')
               .select('*')
               .order('settlement_month', { ascending: false })
     
@@ -5624,7 +5624,8 @@ if (page === 'payout') {
               tableHead.innerHTML =
                 '<tr>' +
                   '<th>정산월</th>' +
-                  '<th>담당자</th>' +
+                  '<th>구분</th>' +
+                  '<th>조직명</th>' +
                   '<th>수수료율</th>' +
                   '<th>결제건수</th>' +
                   '<th>결제금액</th>' +
@@ -5639,12 +5640,23 @@ if (page === 'payout') {
               const tr = document.createElement('tr')
     
               tr.innerHTML =
-                '<td>' + (row.settlement_month || '-') + '</td>' +
-                '<td>' + (row.manager_name || '-') + '</td>' +
-                '<td>' + Number(row.commission_rate || 0) + '%</td>' +
-                '<td>' + Number(row.payment_count || 0).toLocaleString() + '</td>' +
-                '<td>' + Number(row.total_payment_amount || 0).toLocaleString() + '원</td>' +
-                '<td>' + Number(row.commission_amount || 0).toLocaleString() + '원</td>'
+  '<td>' + (row.settlement_month || '-') + '</td>' +
+
+  '<td>' +
+    (
+      row.role === 'BRANCH'
+        ? '지사'
+        : row.role === 'AGENCY'
+          ? '대리점'
+          : '담당자'
+    ) +
+  '</td>' +
+
+  '<td>' + (row.admin_name || '-') + '</td>' +
+  '<td>' + Number(row.commission_rate || 0) + '%</td>' +
+  '<td>' + Number(row.payment_count || 0).toLocaleString() + '</td>' +
+  '<td>' + Number(row.total_payment_amount || 0).toLocaleString() + '원</td>' +
+  '<td>' + Number(row.commission_amount || 0).toLocaleString() + '원</td>'
     
               paymentTableBody.appendChild(tr)
             })
