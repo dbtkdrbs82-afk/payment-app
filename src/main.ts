@@ -4705,6 +4705,34 @@ document.querySelector('#safe-save-admin-user')
 
     const password =
       (document.querySelector<HTMLInputElement>('#safe-admin-password')?.value || '1234').trim()
+
+      const residentNumber =
+      (document.querySelector<HTMLInputElement>('#admin-resident-number')?.value || '').trim()
+    
+    const companyName =
+      (document.querySelector<HTMLInputElement>('#admin-company-name')?.value || '').trim()
+    
+    const businessNumber =
+      (document.querySelector<HTMLInputElement>('#admin-business-number')?.value || '').trim()
+    
+    const commissionRate =
+      Number(
+        document.querySelector<HTMLInputElement>('#admin-commission-rate')
+          ?.value || 0
+      )
+    
+    const bankName =
+      (document.querySelector<HTMLInputElement>('#admin-bank-name')?.value || '').trim()
+    
+    const accountNumber =
+      (document.querySelector<HTMLInputElement>('#admin-account-number')?.value || '').trim()
+    
+    const accountHolder =
+      (document.querySelector<HTMLInputElement>('#admin-account-holder')?.value || '').trim()
+    
+    const memo =
+      (document.querySelector<HTMLTextAreaElement>('#admin-memo')?.value || '').trim()
+
     const parentAdminId =
       Number(
         document.querySelector<HTMLSelectElement>('#safe-parent-admin-id')
@@ -4759,7 +4787,16 @@ document.querySelector('#safe-save-admin-user')
         password: password,
         role: role,
         status: '사용중',
-        parent_admin_id: parentAdminId
+        parent_admin_id: parentAdminId,
+      
+        resident_number: residentNumber,
+        company_name: companyName,
+        business_number: businessNumber,
+        commission_rate: commissionRate,
+        bank_name: bankName,
+        account_number: accountNumber,
+        account_holder: accountHolder,
+        memo: memo
       })
 
     if (error) {
