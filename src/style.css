@@ -5303,7 +5303,7 @@ font-weight: 700;
 /* 출금관리 요약 카드 영역 */
 .payout-summary-cards {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(8, minmax(0, 1fr));
   gap: 8px;
   padding: 8px;
   margin: 0;
@@ -5388,4 +5388,11 @@ font-weight: 700;
   .payout-summary-cards {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+.payout-summary-card.incoming {
+  background: #f2f8ff;
+}
+
+.payout-summary-card.completed {
+  background: #f2fbf6;
 }

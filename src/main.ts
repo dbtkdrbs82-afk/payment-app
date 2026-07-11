@@ -5977,15 +5977,15 @@ rows.forEach((row) => {
         const payoutErrorCount = 0
         const accountErrorCount = 0       
     
-      const payoutRows = payments || []
+        const payoutRows = payments || []
     
-      const getPayoutDate = (createdAt: string) => {
-        const paymentDate = new Date(createdAt)
-        const payoutDate = new Date(paymentDate)
-        payoutDate.setDate(payoutDate.getDate() + 1)
-        return payoutDate.toISOString().slice(0, 10)
-      }
-    
+        const getPayoutDate = (createdAt: string) => {
+          const paymentDate = new Date(createdAt)
+          const payoutDate = new Date(paymentDate)
+          payoutDate.setDate(payoutDate.getDate() + 1)
+          return payoutDate.toISOString().slice(0, 10)
+        }
+        
       const getFilteredPayoutRows = () => {
         const pgFilter =
           (document.querySelector('#payout-pg-filter') as HTMLSelectElement)?.value || '전체'
@@ -6035,7 +6035,25 @@ rows.forEach((row) => {
         }, 0)
 
         const payoutCount = filteredRows.length
+
+        const incomingExpectedAmount = filteredRows.reduce((sum, row) => {
+          return sum + Number(row.amount || 0)
+        }, 0)
         
+        const completedPayoutAmount = filteredRows.reduce((sum, row) => {
+          if (row.payout_status !== '출금완료') {
+            return sum
+          }
+        
+          const amount = Number(row.amount || 0)
+          const feeAmount = Number(row.fee_amount || 0)
+          const settlementAmount = Number(
+            row.settlement_amount || amount - feeAmount
+          )
+        
+          return sum + settlementAmount
+        }, 0)
+
         if (summaryBox) {         
           summaryBox.innerHTML = `
           <div class="payout-summary-cards">
@@ -6047,6 +6065,16 @@ rows.forEach((row) => {
                 <div class="payout-summary-value">${payoutCount.toLocaleString()}건</div>
               </div>
             </div>
+
+            <div class="payout-summary-card incoming">
+  <div class="payout-summary-icon">🏦</div>
+  <div class="payout-summary-info">
+    <div class="payout-summary-title">입금예정금액</div>
+    <div class="payout-summary-value">
+      ${incomingExpectedAmount.toLocaleString()}원
+    </div>
+  </div>
+</div>
         
             <div class="payout-summary-card balance">
               <div class="payout-summary-icon">🏦</div>
@@ -6063,6 +6091,16 @@ rows.forEach((row) => {
                 <div class="payout-summary-value">${totalPayoutAmount.toLocaleString()}원</div>
               </div>
             </div>
+
+            <div class="payout-summary-card completed">
+  <div class="payout-summary-icon">✅</div>
+  <div class="payout-summary-info">
+    <div class="payout-summary-title">출금완료</div>
+    <div class="payout-summary-value">
+      ${completedPayoutAmount.toLocaleString()}원
+    </div>
+  </div>
+</div>
         
             <div class="payout-summary-card duplicate">
               <div class="payout-summary-icon">⚠️</div>
