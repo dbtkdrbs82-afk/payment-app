@@ -5970,7 +5970,82 @@ rows.forEach((row) => {
         const payoutErrorCount = 0
         const accountErrorCount = 0       
     
-        const payoutRows = payments || []
+        type PayoutGroup = {
+          id: number
+          merchant_id: number | string | null
+          merchant_name: string
+          pg_company: string
+          created_at: string
+          payout_date: string
+          order_id: string
+          payment_key: string
+          amount: number
+          fee_amount: number
+          settlement_amount: number
+          payout_status: string
+          payment_count: number
+          payment_ids: number[]
+        }
+        
+        const payoutGroupMap: Record<string, PayoutGroup> = {}
+        
+        ;(payments || []).forEach((row: any) => {
+          const payoutDate = getPayoutDate(row.created_at)
+        
+          const groupKey =
+            String(row.merchant_id || '') + '_' + payoutDate
+        
+          const amount = Number(row.amount || 0)
+          const feeAmount = Number(row.fee_amount || 0)
+        
+          const settlementAmount = Number(
+            row.settlement_amount ?? amount - feeAmount
+          )
+        
+          if (!payoutGroupMap[groupKey]) {
+            payoutGroupMap[groupKey] = {
+              id: Number(row.id),
+              merchant_id: row.merchant_id,
+              merchant_name: row.merchant_name || '-',
+              pg_company: row.pg_company || '-',
+              created_at: row.created_at,
+              payout_date: payoutDate,
+        
+              order_id: row.order_id || '',
+              payment_key: row.payment_key || '',
+              
+              amount: 0,
+              fee_amount: 0,
+              settlement_amount: 0,
+        
+              payout_status:
+                row.payout_status || '출금대기',
+        
+              payment_count: 0,
+              payment_ids: []
+            }
+          }
+        
+          const group = payoutGroupMap[groupKey]
+        
+          group.amount += amount
+          group.fee_amount += feeAmount
+          group.settlement_amount += settlementAmount
+          group.payment_count += 1
+          group.payment_ids.push(Number(row.id))
+        
+          if (row.payout_status === '출금오류') {
+            group.payout_status = '출금오류'
+          } else if (
+            group.payout_status !== '출금오류' &&
+            row.payout_status !== '출금완료'
+          ) {
+            group.payout_status = '출금대기'
+          }
+        })
+        
+        const payoutRows: PayoutGroup[] =
+          Object.values(payoutGroupMap)
     
         const getPayoutDate = (createdAt: string) => {
           const paymentDate = new Date(createdAt)
@@ -6153,12 +6228,14 @@ rows.forEach((row) => {
             '<td>' + amount.toLocaleString() + '원</td>' +
             '<td>' + feeAmount.toLocaleString() + '원</td>' +
             '<td>' + payoutAmount.toLocaleString() + '원</td>' +
-            '<td>' + getPayoutDate(row.created_at) + '</td>' +
+            '<td>' + row.payout_date + '</td>' +
             '<td>' + (row.payout_status || '출금대기') + '</td>' +
             '<td>' +
-              (row.payout_status === '출금완료'
-                ? '출금완료'
-                : '<button class="payout-complete-button" data-id="' + row.id + '">출금완료</button>') +
+            (row.payout_status === '출금완료'
+              ? '출금완료'
+              : '<button class="payout-complete-button" data-ids="' +
+                  row.payment_ids.join(',') +
+                '">출금완료</button>') +
             '</td>'
     
           paymentTableBody.appendChild(tr)
@@ -6169,14 +6246,25 @@ rows.forEach((row) => {
         document.querySelectorAll('.payout-complete-button')
           .forEach((button) => {
             button.addEventListener('click', async () => {
-              const paymentId = (button as HTMLElement).getAttribute('data-id')
-    
-              const { error } = await supabase
-                .from('payments')
-                .update({
-                  payout_status: '출금완료'
-                })
-                .eq('id', Number(paymentId))
+              const paymentIdsText =
+              (button as HTMLElement).getAttribute('data-ids') || ''
+            
+            const paymentIds = paymentIdsText
+              .split(',')
+              .map((id) => Number(id))
+              .filter((id) => !Number.isNaN(id))
+            
+            if (paymentIds.length === 0) {
+              alert('출금대상 결제정보가 없습니다.')
+              return
+            }
+            
+            const { error } = await supabase
+              .from('payments')
+              .update({
+                payout_status: '출금완료'
+              })
+              .in('id', paymentIds)
     
               if (error) {
                 alert('출금완료 처리 실패: ' + error.message)
