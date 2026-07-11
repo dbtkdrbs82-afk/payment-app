@@ -5945,7 +5945,7 @@ rows.forEach((row) => {
           '<tr>' +
             '<th>No</th>' +
             '<th>가맹점ID</th>' +
-            '<th style="width:160px;">가맹점명</th>' +
+            '<th>가맹점명</th>' +
             '<th>PG사</th>' +
             '<th>결제금액</th>' +
             '<th>수수료</th>' +
@@ -6266,7 +6266,7 @@ if (holidayError) {
                 ? 'MER' + String(row.merchant_id).padStart(4, '0')
                 : '-') +
             '</td>' +
-            '<td style="width:160px;">' + (row.merchant_name || '-') + '</td>' +
+            '<td>' + (row.merchant_name || '-') + '</td>' +
             '<td>' + (row.pg_company || '-') + '</td>' +
             '<td>' + amount.toLocaleString() + '원</td>' +
             '<td>' + feeAmount.toLocaleString() + '원</td>' +

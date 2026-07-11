@@ -5396,3 +5396,30 @@ font-weight: 700;
 .payout-summary-card.completed {
   background: #f2fbf6;
 }
+/* 출금관리 테이블 컬럼 폭 정리 */
+.admin-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.admin-table th,
+.admin-table td {
+  width: 10%;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+
+/* No 컬럼만 작게 */
+.admin-table th:first-child,
+.admin-table td:first-child {
+  width: 4%;
+}
+
+/* 처리 버튼 컬럼 */
+.admin-table th:last-child,
+.admin-table td:last-child {
+  width: 8%;
+}
