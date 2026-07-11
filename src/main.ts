@@ -5891,11 +5891,7 @@ rows.forEach((row) => {
         searchBox.innerHTML = `
           <div class="payout-search-panel">
             <div class="payout-search-row">
-              <span class="payout-search-label">조회기준</span>
-    
-              <label><input type="radio" name="payout-date-type" value="거래일" checked> 거래일</label>
-              <label><input type="radio" name="payout-date-type" value="가맹점출금예정일"> 가맹점출금예정일</label>
-              <label><input type="radio" name="payout-date-type" value="회사입금예정일"> 회사입금예정일</label>
+              <input type="hidden" name="payout-date-type" value="거래일">
     
               <span class="payout-search-label">기간</span>
               <input id="payout-start-date" type="date">
