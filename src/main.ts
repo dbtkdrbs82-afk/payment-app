@@ -5967,11 +5967,15 @@ rows.forEach((row) => {
         .from('payments')
         .select('*')
         .order('created_at', { ascending: false })
-    
-      if (error) {
-        alert('출금내역 조회 실패: ' + error.message)
-        return
-      }
+        
+        if (error) {
+          alert('출금내역 조회 실패: ' + error.message)
+          return
+        }
+        const accountBalance = 99  
+        const duplicateErrorCount = 1
+        const payoutErrorCount = 0
+        const accountErrorCount = 0       
     
       const payoutRows = payments || []
     
@@ -6029,12 +6033,63 @@ rows.forEach((row) => {
           const payoutAmount = Number(row.settlement_amount || amount - feeAmount)
           return sum + payoutAmount
         }, 0)
-    
-        if (summaryBox) {
-          summaryBox.innerHTML =
-            '출금대상 : ' + filteredRows.length + '건 &nbsp;&nbsp;&nbsp;' +
-            '출금예정금액 : ' + totalPayoutAmount.toLocaleString() + '원 &nbsp;&nbsp;&nbsp;' +
-            '출금시간 : 오후 3시'
+
+        const payoutCount = filteredRows.length
+        
+        if (summaryBox) {         
+          summaryBox.innerHTML = `
+          <div class="payout-summary-cards">
+        
+            <div class="payout-summary-card target">
+              <div class="payout-summary-icon">👥</div>
+              <div class="payout-summary-info">
+                <div class="payout-summary-title">출금대상</div>
+                <div class="payout-summary-value">${payoutCount.toLocaleString()}건</div>
+              </div>
+            </div>
+        
+            <div class="payout-summary-card balance">
+              <div class="payout-summary-icon">🏦</div>
+              <div class="payout-summary-info">
+                <div class="payout-summary-title">출금계좌잔액</div>
+                <div class="payout-summary-value">${accountBalance.toLocaleString()}원</div>
+              </div>
+            </div>
+        
+            <div class="payout-summary-card amount">
+              <div class="payout-summary-icon">💳</div>
+              <div class="payout-summary-info">
+                <div class="payout-summary-title">출금예정금액</div>
+                <div class="payout-summary-value">${totalPayoutAmount.toLocaleString()}원</div>
+              </div>
+            </div>
+        
+            <div class="payout-summary-card duplicate">
+              <div class="payout-summary-icon">⚠️</div>
+              <div class="payout-summary-info">
+                <div class="payout-summary-title">중복결제오류</div>
+                <div class="payout-summary-value">${duplicateErrorCount.toLocaleString()}건</div>
+              </div>
+            </div>
+        
+            <div class="payout-summary-card payout-error">
+              <div class="payout-summary-icon">❗</div>
+              <div class="payout-summary-info">
+                <div class="payout-summary-title">출금오류</div>
+                <div class="payout-summary-value">${payoutErrorCount.toLocaleString()}건</div>
+              </div>
+            </div>
+        
+            <div class="payout-summary-card account-error">
+              <div class="payout-summary-icon">💳</div>
+              <div class="payout-summary-info">
+                <div class="payout-summary-title">계좌오류</div>
+                <div class="payout-summary-value">${accountErrorCount.toLocaleString()}건</div>
+              </div>
+            </div>
+        
+          </div>
+        `
         }
     
         const totalPages = Math.max(1, Math.ceil(filteredRows.length / payoutPageSize))

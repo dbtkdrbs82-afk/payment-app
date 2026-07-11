@@ -5300,3 +5300,92 @@ font-weight: 700;
   border-radius: 14px;
   padding: 16px;
 }
+/* 출금관리 요약 카드 영역 */
+.payout-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  padding: 8px;
+  margin: 0;
+  border: 1px solid #dfe5ec;
+  border-radius: 8px;
+  background: #fff;
+}
+
+/* 개별 카드 */
+.payout-summary-card {
+  min-height: 52px;
+  padding: 6px 10px;
+  border: 1px solid #e1e7ee;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+}
+
+/* 아이콘 */
+.payout-summary-icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+/* 글자 영역 */
+.payout-summary-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.15;
+}
+
+.payout-summary-title {
+  font-size: 11px;
+  font-weight: 700;
+  color: #25364d;
+  white-space: nowrap;
+}
+
+.payout-summary-value {
+  font-size: 17px;
+  font-weight: 800;
+  color: #111;
+  white-space: nowrap;
+}
+
+/* 카드별 배경 */
+.payout-summary-card.target {
+  background: #f4f8ff;
+}
+
+.payout-summary-card.balance {
+  background: #f4fbf5;
+}
+
+.payout-summary-card.amount {
+  background: #fff9ef;
+}
+
+.payout-summary-card.duplicate {
+  background: #fff4f4;
+}
+
+.payout-summary-card.payout-error {
+  background: #f7f5ff;
+}
+
+.payout-summary-card.account-error {
+  background: #f1fbfd;
+}
+
+/* 작은 화면 */
+@media (max-width: 1200px) {
+  .payout-summary-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
