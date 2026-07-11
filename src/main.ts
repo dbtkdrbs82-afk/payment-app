@@ -5965,19 +5965,58 @@ rows.forEach((row) => {
           alert('출금내역 조회 실패: ' + error.message)
           return
         }
-        const accountBalance = 99  
-const duplicateErrorCount = 1
-const payoutErrorCount = 0
-const accountErrorCount = 0
 
-const getPayoutDate = (createdAt: string) => {
-  const paymentDate = new Date(createdAt)
-  const payoutDate = new Date(paymentDate)
+        const { data: holidayData, error: holidayError } = await supabase
+  .from('holidays')
+  .select('holiday_date')
 
-  payoutDate.setDate(payoutDate.getDate() + 1)
-
-  return payoutDate.toISOString().slice(0, 10)
-}    
+if (holidayError) {
+  alert('공휴일 조회 실패: ' + holidayError.message)
+  return
+}
+        
+        const holidaySet = new Set(
+          (holidayData || []).map((holiday) => holiday.holiday_date)
+        )
+        
+        const accountBalance = 99
+        const duplicateErrorCount = 1
+        const payoutErrorCount = 0
+        const accountErrorCount = 0
+        
+        const formatPayoutDate = (date: Date) => {
+          const year = date.getFullYear()
+          const month = String(date.getMonth() + 1).padStart(2, '0')
+          const day = String(date.getDate()).padStart(2, '0')
+        
+          return `${year}-${month}-${day}`
+        }
+        
+        const getPayoutDate = (createdAt: string) => {
+          const payoutDate = new Date(createdAt)
+        
+          payoutDate.setDate(payoutDate.getDate() + 1)
+        
+          while (true) {
+            const dayOfWeek = payoutDate.getDay()
+            const dateText = formatPayoutDate(payoutDate)
+        
+            const isWeekend =
+              dayOfWeek === 0 ||
+              dayOfWeek === 6
+        
+            const isHoliday =
+              holidaySet.has(dateText)
+        
+            if (!isWeekend && !isHoliday) {
+              return dateText
+            }
+        
+            payoutDate.setDate(payoutDate.getDate() + 1)
+          }
+        }
+        
+        
    
         type PayoutGroup = {
           id: number
