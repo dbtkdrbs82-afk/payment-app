@@ -5966,10 +5966,19 @@ rows.forEach((row) => {
           return
         }
         const accountBalance = 99  
-        const duplicateErrorCount = 1
-        const payoutErrorCount = 0
-        const accountErrorCount = 0       
-    
+const duplicateErrorCount = 1
+const payoutErrorCount = 0
+const accountErrorCount = 0
+
+const getPayoutDate = (createdAt: string) => {
+  const paymentDate = new Date(createdAt)
+  const payoutDate = new Date(paymentDate)
+
+  payoutDate.setDate(payoutDate.getDate() + 1)
+
+  return payoutDate.toISOString().slice(0, 10)
+}    
+   
         type PayoutGroup = {
           id: number
           merchant_id: number | string | null
@@ -6013,7 +6022,7 @@ rows.forEach((row) => {
         
               order_id: row.order_id || '',
               payment_key: row.payment_key || '',
-              
+
               amount: 0,
               fee_amount: 0,
               settlement_amount: 0,
@@ -6047,12 +6056,7 @@ rows.forEach((row) => {
         const payoutRows: PayoutGroup[] =
           Object.values(payoutGroupMap)
     
-        const getPayoutDate = (createdAt: string) => {
-          const paymentDate = new Date(createdAt)
-          const payoutDate = new Date(paymentDate)
-          payoutDate.setDate(payoutDate.getDate() + 1)
-          return payoutDate.toISOString().slice(0, 10)
-        }
+        
         
       const getFilteredPayoutRows = () => {
         const pgFilter =
