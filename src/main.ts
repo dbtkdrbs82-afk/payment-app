@@ -5670,10 +5670,7 @@ if (page === 'payout') {
       let payoutPageSize = Number(sessionStorage.getItem('withdraw_page_size') || 10)
       let currentPayoutView = 'scheduled'
       if (subMenu) {
-        subMenu.innerHTML =
-          '<button class="admin-sub-tab payout-sub-tab active" data-payout-view="scheduled">출금예정내역</button>' +
-          '<button class="admin-sub-tab payout-sub-tab" data-payout-view="completed">출금완료내역</button>' +
-          '<button class="admin-sub-tab payout-sub-tab" data-payout-view="manager">담당자 정산</button>'
+        subMenu.innerHTML = ''
       }
     
       document.querySelectorAll('.payout-sub-tab')
