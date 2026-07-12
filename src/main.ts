@@ -6257,6 +6257,109 @@ ${canViewPayoutBalance ? `
           </div>
         `
         }
+
+        document.querySelector('#payout-balance-button')
+  ?.addEventListener('click', () => {
+    const existingModal =
+      document.querySelector('#payout-balance-modal')
+
+    if (existingModal) {
+      existingModal.remove()
+    }
+
+    const modal = document.createElement('div')
+    modal.id = 'payout-balance-modal'
+    modal.className = 'payout-balance-modal'
+
+    modal.innerHTML = `
+      <div class="payout-balance-modal-card">
+
+        <div class="payout-balance-modal-header">
+          <h3>출금계좌 관리</h3>
+
+          <button
+            type="button"
+            id="payout-balance-modal-close"
+            class="payout-balance-modal-close"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="payout-balance-modal-body">
+
+          <div class="payout-balance-row">
+            <span>현재 가상계좌잔액</span>
+            <strong>${accountBalance.toLocaleString()}원</strong>
+          </div>
+
+          <div class="payout-balance-row">
+            <span>가맹점 출금예정금액</span>
+            <strong>${totalPayoutAmount.toLocaleString()}원</strong>
+          </div>
+
+          <div class="payout-balance-row payout-balance-available">
+            <span>회사통장 회수 가능금액</span>
+            <strong>
+              ${Math.max(
+                accountBalance - totalPayoutAmount,
+                0
+              ).toLocaleString()}원
+            </strong>
+          </div>
+
+          <div class="payout-company-account">
+            <span>회사 회수계좌</span>
+            <strong>회사계좌 연동 전</strong>
+            <small>토스 지급 API 연결 후 고정 계좌가 표시됩니다.</small>
+          </div>
+
+        </div>
+
+        <div class="payout-balance-modal-footer">
+          <button
+            type="button"
+            id="payout-balance-history-button"
+            class="payout-balance-secondary-button"
+          >
+            회수내역
+          </button>
+
+          <button
+            type="button"
+            id="payout-balance-withdraw-button"
+            class="payout-balance-primary-button"
+          >
+            회사통장으로 회수
+          </button>
+        </div>
+
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    document.querySelector('#payout-balance-modal-close')
+      ?.addEventListener('click', () => {
+        modal.remove()
+      })
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.remove()
+      }
+    })
+
+    document.querySelector('#payout-balance-history-button')
+      ?.addEventListener('click', () => {
+        alert('회수내역 기능은 다음 단계에서 연결합니다.')
+      })
+
+    document.querySelector('#payout-balance-withdraw-button')
+      ?.addEventListener('click', () => {
+        alert('토스 지급 API 연결 후 실행됩니다.')
+      })
+  })
     
         const totalPages = Math.max(1, Math.ceil(filteredRows.length / payoutPageSize))
     

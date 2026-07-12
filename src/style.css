@@ -5509,3 +5509,114 @@ button.payout-summary-card.payout-summary-button .payout-summary-title,
 button.payout-summary-card.payout-summary-button .payout-summary-value {
   color: inherit !important;
 }
+/* 출금계좌 관리 모달 */
+.payout-balance-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 32, 55, 0.42);
+  box-sizing: border-box;
+}
+
+.payout-balance-modal-card {
+  width: 420px;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.2);
+}
+
+.payout-balance-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.payout-balance-modal-header h3 {
+  margin: 0;
+  color: #163d70;
+  font-size: 17px;
+}
+
+.payout-balance-modal-close {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #526174;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.payout-balance-modal-body {
+  padding: 16px 18px;
+}
+
+.payout-balance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 42px;
+  border-bottom: 1px solid #edf0f4;
+  font-size: 13px;
+}
+
+.payout-balance-row strong {
+  font-size: 15px;
+}
+
+.payout-balance-available strong {
+  color: #14539a;
+}
+
+.payout-company-account {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 7px;
+  background: #f5f8fc;
+  font-size: 12px;
+}
+
+.payout-company-account strong {
+  font-size: 14px;
+}
+
+.payout-company-account small {
+  color: #718096;
+}
+
+.payout-balance-modal-footer {
+  display: flex;
+  gap: 8px;
+  padding: 14px 18px 18px;
+}
+
+.payout-balance-modal-footer button {
+  flex: 1;
+  height: 38px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.payout-balance-secondary-button {
+  border: 1px solid #17477f;
+  background: #fff;
+  color: #17477f;
+}
+
+.payout-balance-primary-button {
+  border: 1px solid #17477f;
+  background: #17477f;
+  color: #fff;
+}
