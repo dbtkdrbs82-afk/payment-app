@@ -5423,3 +5423,20 @@ font-weight: 700;
 .admin-table td:last-child {
   width: 8%;
 }
+.payout-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  margin-left: 5px;
+  padding: 0 4px;
+  border-radius: 8px;
+  background: #e8f1ff;
+  color: #14539a;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+  box-sizing: border-box;
+}

@@ -5306,6 +5306,7 @@ merchantButtons.forEach((button) => {
 '<option value="렌탈" ' + (merchant.merchant_type === '렌탈' ? 'selected' : '') + '>렌탈</option>' +
 '<option value="결혼" ' + (merchant.merchant_type === '결혼' ? 'selected' : '') + '>결혼</option>' +
 '<option value="장례" ' + (merchant.merchant_type === '장례' ? 'selected' : '') + '>장례</option>' +
+'<option value="무선단말기" ' + (merchant.merchant_type === '무선단말기' ? 'selected' : '') + '>무선단말기</option>' +
 '</select>' +
 
     '<label>대표자</label>' +
@@ -6266,7 +6267,12 @@ if (holidayError) {
                 ? 'MER' + String(row.merchant_id).padStart(4, '0')
                 : '-') +
             '</td>' +
-            '<td>' + (row.merchant_name || '-') + '</td>' +
+            '<td>' +
+  (row.merchant_name || '-') +
+  '<span class="payout-count-badge">' +
+    row.payment_count +
+  '</span>' +
+'</td>' +
             '<td>' + (row.pg_company || '-') + '</td>' +
             '<td>' + amount.toLocaleString() + '원</td>' +
             '<td>' + feeAmount.toLocaleString() + '원</td>' +
