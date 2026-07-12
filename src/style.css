@@ -5638,3 +5638,32 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   background: #eef4fb !important;
   border-radius: 50%;
 }
+.payout-company-account-title {
+  margin-bottom: 6px;
+  color: #183b68;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.payout-company-account-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 30px;
+  border-bottom: 1px solid #e8edf3;
+}
+
+.payout-company-account-row span {
+  color: #66758a;
+  font-size: 12px;
+}
+
+.payout-company-account-row strong {
+  color: #17263b;
+  font-size: 13px;
+  text-align: right;
+}
+
+.payout-company-account-row:last-of-type {
+  border-bottom: 0;
+}

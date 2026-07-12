@@ -6309,10 +6309,29 @@ ${canViewPayoutBalance ? `
           </div>
 
           <div class="payout-company-account">
-            <span>회사 회수계좌</span>
-            <strong>회사계좌 연동 전</strong>
-            <small>토스 지급 API 연결 후 고정 계좌가 표시됩니다.</small>
-          </div>
+  <div class="payout-company-account-title">
+    회사 회수계좌
+  </div>
+
+  <div class="payout-company-account-row">
+    <span>은행</span>
+    <strong>은행명 입력 예정</strong>
+  </div>
+
+  <div class="payout-company-account-row">
+    <span>예금주</span>
+    <strong>주식회사 엔엑스지소프트</strong>
+  </div>
+
+  <div class="payout-company-account-row">
+    <span>계좌번호</span>
+    <strong>계좌번호 입력 예정</strong>
+  </div>
+
+  <small>
+    회수계좌는 운영관리자 화면에서 변경할 수 없습니다.
+  </small>
+</div>
 
         </div>
 
@@ -6355,9 +6374,34 @@ ${canViewPayoutBalance ? `
         alert('회수내역 기능은 다음 단계에서 연결합니다.')
       })
 
-    document.querySelector('#payout-balance-withdraw-button')
+      document.querySelector('#payout-balance-withdraw-button')
       ?.addEventListener('click', () => {
-        alert('토스 지급 API 연결 후 실행됩니다.')
+        const availableAmount = Math.max(
+          accountBalance - totalPayoutAmount,
+          0
+        )
+    
+        if (availableAmount <= 0) {
+          alert('현재 회사계좌로 회수 가능한 금액이 없습니다.')
+          return
+        }
+    
+        const confirmMessage =
+          '회사계좌로 회수하시겠습니까?\n\n' +
+          '회수금액: ' +
+          availableAmount.toLocaleString() +
+          '원\n\n' +
+          '은행: 은행명 입력 예정\n' +
+          '예금주: 주식회사 엔엑스지소프트\n' +
+          '계좌번호: 계좌번호 입력 예정\n\n' +
+          '처리자: ' +
+          adminId
+    
+        if (!confirm(confirmMessage)) {
+          return
+        }
+    
+        alert('토스 지급 API 연결 후 실제 회수가 실행됩니다.')
       })
   })
     
