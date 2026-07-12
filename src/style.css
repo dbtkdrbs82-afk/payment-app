@@ -5440,3 +5440,27 @@ font-weight: 700;
   vertical-align: middle;
   box-sizing: border-box;
 }
+.payout-summary-button {
+  background: transparent;
+  border: 1px solid #d9e3ef;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.payout-summary-button:hover {
+  border-color: #1d4f91;
+  transform: translateY(-2px);
+}
+.payout-summary-button {
+  background: inherit;
+  border: inherit;
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payout-summary-button:hover {
+  transform: translateY(-2px);
+  border-color: #1d4f91;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
