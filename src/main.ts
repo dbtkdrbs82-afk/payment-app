@@ -5989,6 +5989,12 @@ if (holidayError) {
         const duplicateErrorCount = 1
         const payoutErrorCount = 0
         const accountErrorCount = 0
+
+        const { data: companyAccount } = await supabase
+  .from('company_accounts')
+  .select('*')
+  .eq('is_active', true)
+  .maybeSingle()
         
         const formatPayoutDate = (date: Date) => {
           const year = date.getFullYear()
@@ -6140,7 +6146,7 @@ if (holidayError) {
           return true
         })
       }
-    
+
       const renderPayoutTable = () => {
         const filteredRows = getFilteredPayoutRows()
 
@@ -6314,19 +6320,19 @@ ${canViewPayoutBalance ? `
   </div>
 
   <div class="payout-company-account-row">
-    <span>은행</span>
-    <strong>은행명 입력 예정</strong>
-  </div>
+  <span>은행</span>
+  <strong>${companyAccount?.bank_name || '-'}</strong>
+</div>
 
-  <div class="payout-company-account-row">
-    <span>예금주</span>
-    <strong>주식회사 엔엑스지소프트</strong>
-  </div>
+<div class="payout-company-account-row">
+  <span>예금주</span>
+  <strong>${companyAccount?.account_holder || '-'}</strong>
+</div>
 
-  <div class="payout-company-account-row">
-    <span>계좌번호</span>
-    <strong>계좌번호 입력 예정</strong>
-  </div>
+<div class="payout-company-account-row">
+  <span>계좌번호</span>
+  <strong>${companyAccount?.account_number || '-'}</strong>
+</div>
 
   <small>
     회수계좌는 운영관리자 화면에서 변경할 수 없습니다.
@@ -6413,9 +6419,9 @@ ${canViewPayoutBalance ? `
       '회수금액: ' +
       availableAmount.toLocaleString() +
       '원\n\n' +
-      '은행: 은행명 입력 예정\n' +
-      '예금주: 주식회사 엔엑스지소프트\n' +
-      '계좌번호: 계좌번호 입력 예정\n\n' +
+      '은행: ' + (companyAccount?.bank_name || '-') + '\n' +
+'예금주: ' + (companyAccount?.account_holder || '-') + '\n' +
+'계좌번호: ' + (companyAccount?.account_number || '-') + '\n\n'
       '처리자: ' +
       verifiedAdmin.login_id
 
