@@ -6375,34 +6375,56 @@ ${canViewPayoutBalance ? `
       })
 
       document.querySelector('#payout-balance-withdraw-button')
-      ?.addEventListener('click', () => {
-        const availableAmount = Math.max(
-          accountBalance - totalPayoutAmount,
-          0
-        )
-    
-        if (availableAmount <= 0) {
-          alert('현재 회사계좌로 회수 가능한 금액이 없습니다.')
-          return
-        }
-    
-        const confirmMessage =
-          '회사계좌로 회수하시겠습니까?\n\n' +
-          '회수금액: ' +
-          availableAmount.toLocaleString() +
-          '원\n\n' +
-          '은행: 은행명 입력 예정\n' +
-          '예금주: 주식회사 엔엑스지소프트\n' +
-          '계좌번호: 계좌번호 입력 예정\n\n' +
-          '처리자: ' +
-          adminId
-    
-        if (!confirm(confirmMessage)) {
-          return
-        }
-    
-        alert('토스 지급 API 연결 후 실제 회수가 실행됩니다.')
-      })
+  ?.addEventListener('click', async () => {
+    const availableAmount = Math.max(
+      accountBalance - totalPayoutAmount,
+      0
+    )
+
+    if (availableAmount <= 0) {
+      alert('현재 회사계좌로 회수 가능한 금액이 없습니다.')
+      return
+    }
+
+    const adminPassword = prompt(
+      '회사계좌 회수를 위해 관리자 비밀번호를 입력해주세요.'
+    )
+
+    if (!adminPassword) {
+      return
+    }
+
+    const { data: verifiedAdmin, error: verifyError } = await supabase
+      .from('admin_users')
+      .select('id, login_id, role, status')
+      .eq('login_id', adminId)
+      .eq('password', adminPassword)
+      .eq('role', 'MASTER')
+      .eq('status', '사용중')
+      .maybeSingle()
+
+    if (verifyError || !verifiedAdmin) {
+      alert('관리자 비밀번호가 올바르지 않습니다.')
+      return
+    }
+
+    const confirmMessage =
+      '회사계좌로 회수하시겠습니까?\n\n' +
+      '회수금액: ' +
+      availableAmount.toLocaleString() +
+      '원\n\n' +
+      '은행: 은행명 입력 예정\n' +
+      '예금주: 주식회사 엔엑스지소프트\n' +
+      '계좌번호: 계좌번호 입력 예정\n\n' +
+      '처리자: ' +
+      verifiedAdmin.login_id
+
+    if (!confirm(confirmMessage)) {
+      return
+    }
+
+    alert('비밀번호 확인 완료\n토스 지급 API 연결 후 실제 회수가 실행됩니다.')
+  })
   })
     
         const totalPages = Math.max(1, Math.ceil(filteredRows.length / payoutPageSize))
