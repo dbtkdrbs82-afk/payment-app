@@ -2722,7 +2722,9 @@ document.querySelector('#receipt-close-btn')
   document.querySelector<HTMLButtonElement>('#admin-login-button')
     ?.addEventListener('click', async () => {
       const loginId =
-        (document.querySelector<HTMLInputElement>('#admin-login-id')?.value || '').trim()
+  (document.querySelector<HTMLInputElement>('#admin-login-id')?.value || '')
+    .trim()
+    .toUpperCase()
 
       const password =
         (document.querySelector<HTMLInputElement>('#admin-login-password')?.value || '').trim()
@@ -2765,12 +2767,13 @@ window.onpopstate = () => {
   history.pushState(null, '', '/pg-admin')
 }
 
-  if (!sessionStorage.getItem('admin_id')) {
-    location.replace('/admin-login')
+if (!sessionStorage.getItem('admin_id')) {
+  location.replace('/admin-login')
+  
 }
 
-    const adminId =
-      sessionStorage.getItem('admin_id') || 'nxg001'
+      const adminId =
+  sessionStorage.getItem('admin_id') || ''
   
     app.innerHTML = `
       <div class="admin-wrap">
