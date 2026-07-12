@@ -5990,11 +5990,7 @@ if (holidayError) {
         const payoutErrorCount = 0
         const accountErrorCount = 0
 
-        const { data: companyAccount } = await supabase
-  .from('company_accounts')
-  .select('*')
-  .eq('is_active', true)
-  .maybeSingle()
+        
         
         const formatPayoutDate = (date: Date) => {
           const year = date.getFullYear()
@@ -6265,7 +6261,45 @@ ${canViewPayoutBalance ? `
         }
 
         document.querySelector('#payout-balance-button')
-  ?.addEventListener('click', () => {
+  ?.addEventListener('click', async () => {
+
+    const adminId =
+  sessionStorage.getItem('admin_id') || ''
+
+const adminPassword = prompt(
+  '회사 회수계좌 확인을 위해 관리자 비밀번호를 입력해주세요.'
+)
+
+if (!adminPassword) {
+  return
+}
+
+const { data: accountResult, error: accountFunctionError } =
+  await supabase.functions.invoke('get-company-account', {
+    body: {
+      loginId: adminId,
+      password: adminPassword
+    }
+  })
+
+if (accountFunctionError) {
+  alert(
+    '회사 회수계좌 조회 실패: ' +
+    accountFunctionError.message
+  )
+  return
+}
+
+if (!accountResult?.account) {
+  alert(
+    accountResult?.error ||
+    '등록된 회사 회수계좌가 없습니다.'
+  )
+  return
+}
+
+const companyAccount = accountResult.account
+
     const existingModal =
       document.querySelector('#payout-balance-modal')
 
@@ -6321,17 +6355,17 @@ ${canViewPayoutBalance ? `
 
   <div class="payout-company-account-row">
   <span>은행</span>
-  <strong>${companyAccount?.bank_name || '-'}</strong>
+  <strong>${companyAccount.bank_name}</strong>
 </div>
 
 <div class="payout-company-account-row">
   <span>예금주</span>
-  <strong>${companyAccount?.account_holder || '-'}</strong>
+  <strong>${companyAccount.account_holder}</strong>
 </div>
 
 <div class="payout-company-account-row">
   <span>계좌번호</span>
-  <strong>${companyAccount?.account_number || '-'}</strong>
+  <strong>${companyAccount.account_number}</strong>
 </div>
 
   <small>
@@ -6419,9 +6453,9 @@ ${canViewPayoutBalance ? `
       '회수금액: ' +
       availableAmount.toLocaleString() +
       '원\n\n' +
-      '은행: ' + (companyAccount?.bank_name || '-') + '\n' +
-'예금주: ' + (companyAccount?.account_holder || '-') + '\n' +
-'계좌번호: ' + (companyAccount?.account_number || '-') + '\n\n'
+'은행: ' + companyAccount.bank_name + '\n' +
+'예금주: ' + companyAccount.account_holder + '\n' +
+'계좌번호: ' + companyAccount.account_number + '\n\n' +
       '처리자: ' +
       verifiedAdmin.login_id
 
