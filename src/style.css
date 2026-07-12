@@ -5464,3 +5464,48 @@ font-weight: 700;
   border-color: #1d4f91;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
+/* 출금계좌잔액 카드 버튼을 일반 카드처럼 표시 */
+button.payout-summary-card.payout-summary-button {
+  width: 100%;
+  min-height: 52px;
+  padding: 6px 10px;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+
+  background: #f4fbf5 !important;
+  border: 1px solid #dfe8e2 !important;
+  border-radius: 7px;
+
+  color: #111 !important;
+  font-family: inherit;
+  text-align: left;
+
+  cursor: pointer;
+  box-shadow: none !important;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+button.payout-summary-card.payout-summary-button:hover {
+  background: #eef8f0 !important;
+  border-color: #9bc7a5 !important;
+  transform: none;
+  box-shadow: 0 0 0 2px rgba(76, 145, 90, 0.08) !important;
+}
+
+button.payout-summary-card.payout-summary-button:active {
+  transform: scale(0.99);
+}
+
+button.payout-summary-card.payout-summary-button:focus {
+  outline: none;
+}
+
+button.payout-summary-card.payout-summary-button .payout-summary-title,
+button.payout-summary-card.payout-summary-button .payout-summary-value {
+  color: inherit !important;
+}
