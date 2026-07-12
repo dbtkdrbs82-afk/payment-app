@@ -2909,16 +2909,18 @@ if (summaryBox) {
          })
        })
        document.querySelector('#admin-logout')
-       ?.addEventListener('click', () => {
-     
-         if (!confirm('로그아웃 하시겠습니까?')) {
-           return
-         }
-     
-         sessionStorage.removeItem('admin_id')
-     
-         location.href = '/merchant-login'
-       })
+?.addEventListener('click', () => {
+
+  if (!confirm('로그아웃 하시겠습니까?')) {
+    return
+  }
+
+  sessionStorage.removeItem('admin_id')
+  sessionStorage.removeItem('admin_name')
+  sessionStorage.removeItem('admin_role')
+
+  location.href = '/admin-login'
+})
 
        const adminWindow = window as Window & {
         cancelApproveClickReady?: boolean
@@ -6138,6 +6140,9 @@ if (holidayError) {
     
       const renderPayoutTable = () => {
         const filteredRows = getFilteredPayoutRows()
+
+        const adminId = sessionStorage.getItem('admin_id') || ''
+        const canViewPayoutBalance = adminId === 'NXGMASTER16'
     
         const totalPayoutAmount = filteredRows.reduce((sum, row) => {
           const amount = Number(row.amount || 0)
@@ -6188,13 +6193,21 @@ if (holidayError) {
   </div>
 </div>
         
-            <div class="payout-summary-card balance">
-              <div class="payout-summary-icon">🏦</div>
-              <div class="payout-summary-info">
-                <div class="payout-summary-title">출금계좌잔액</div>
-                <div class="payout-summary-value">${accountBalance.toLocaleString()}원</div>
-              </div>
-            </div>
+${canViewPayoutBalance ? `
+  <button
+    type="button"
+    id="payout-balance-button"
+    class="payout-summary-card balance payout-summary-button"
+  >
+    <div class="payout-summary-icon">🏦</div>
+    <div class="payout-summary-info">
+      <div class="payout-summary-title">출금계좌잔액</div>
+      <div class="payout-summary-value">
+        ${accountBalance.toLocaleString()}원
+      </div>
+    </div>
+  </button>
+` : ''}
         
             <div class="payout-summary-card amount">
               <div class="payout-summary-icon">💳</div>
