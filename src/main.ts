@@ -6496,25 +6496,190 @@ const companyAccount = accountResult.account
 
 document.querySelector('#duplicate-payment-card')
   ?.addEventListener('click', () => {
-    const duplicatePayments =
-      (payments || []).filter((payment: any) => {
-        const approvalNumber =
-          String(payment.approval_number || '').trim()
+    const duplicateGroups: Record<string, any[]> = {}
 
-        return (
-          approvalNumber &&
-          duplicateApprovalNumbers.has(approvalNumber)
-        )
+    ;(payments || []).forEach((payment: any) => {
+      const approvalNumber =
+        String(payment.approval_number || '').trim()
+
+      if (
+        !approvalNumber ||
+        !duplicateApprovalNumbers.has(approvalNumber)
+      ) {
+        return
+      }
+
+      if (!duplicateGroups[approvalNumber]) {
+        duplicateGroups[approvalNumber] = []
+      }
+
+      duplicateGroups[approvalNumber].push(payment)
+    })
+
+    const groupEntries = Object.entries(duplicateGroups)
+
+    if (groupEntries.length === 0) {
+      alert('중복결제 내역이 없습니다.')
+      return
+    }
+
+    document.querySelector('#duplicate-payment-modal')?.remove()
+
+    const modal = document.createElement('div')
+    modal.id = 'duplicate-payment-modal'
+    modal.className = 'duplicate-payment-modal'
+
+    modal.innerHTML = `
+      <div class="duplicate-payment-modal-card">
+        <div class="duplicate-payment-modal-header">
+          <h3>중복결제 관리</h3>
+
+          <button
+            type="button"
+            id="duplicate-payment-modal-close"
+            class="duplicate-payment-modal-close"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="duplicate-payment-modal-body">
+          ${groupEntries.map(([approvalNumber, rows]) => `
+            <div class="duplicate-payment-group">
+              <div class="duplicate-payment-group-title">
+                승인번호 ${approvalNumber}
+              </div>
+
+              ${rows.map((row: any, index: number) => `
+                <label class="duplicate-payment-row">
+                  <input
+                    type="radio"
+                    name="keep-payment-${approvalNumber}"
+                    value="${row.id}"
+                    ${index === 0 ? 'checked' : ''}
+                  >
+
+                  <span>${row.merchant_name || '-'}</span>
+                  <span>${Number(row.amount || 0).toLocaleString()}원</span>
+                  <span>${row.created_at ? new Date(row.created_at).toLocaleString() : '-'}</span>
+                </label>
+              `).join('')}
+
+              <button
+                type="button"
+                class="duplicate-payment-delete-button"
+                data-approval-number="${approvalNumber}"
+              >
+                정상 1건 제외하고 중복 삭제
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    document.querySelector('#duplicate-payment-modal-close')
+      ?.addEventListener('click', () => {
+        modal.remove()
       })
 
-    console.log(duplicatePayments)
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.remove()
+      }
+    })
 
-    alert(
-      '중복결제 ' +
-      duplicatePayments.length +
-      '건이 발견되었습니다.\n\n' +
-      '다음 단계에서 목록 화면을 연결합니다.'
-    )
+    document.querySelectorAll('.duplicate-payment-delete-button')
+      .forEach((button) => {
+        button.addEventListener('click', async () => {
+          const approvalNumber =
+            (button as HTMLElement).getAttribute('data-approval-number') || ''
+
+          const selected =
+            document.querySelector<HTMLInputElement>(
+              'input[name="keep-payment-' +
+              approvalNumber +
+              '"]:checked'
+            )
+
+          if (!selected) {
+            alert('정상으로 남길 결제를 선택해주세요.')
+            return
+          }
+
+          const keepPaymentId = Number(selected.value)
+
+          const deletePaymentIds =
+            (duplicateGroups[approvalNumber] || [])
+              .map((row: any) => Number(row.id))
+              .filter((id: number) => id !== keepPaymentId)
+
+          if (deletePaymentIds.length === 0) {
+            alert('삭제할 중복결제가 없습니다.')
+            return
+          }
+
+          const adminPassword = prompt(
+            '중복결제 삭제를 위해 관리자 비밀번호를 입력해주세요.'
+          )
+
+          if (!adminPassword) {
+            return
+          }
+
+          if (
+            !confirm(
+              '정상 1건을 제외하고 중복결제 ' +
+              deletePaymentIds.length +
+              '건을 삭제하시겠습니까?'
+            )
+          ) {
+            return
+          }
+
+          const adminId =
+            sessionStorage.getItem('admin_id') || ''
+
+          const { data, error } =
+            await supabase.functions.invoke(
+              'delete-duplicate-payments',
+              {
+                body: {
+                  loginId: adminId,
+                  password: adminPassword,
+                  keepPaymentId,
+                  deletePaymentIds
+                }
+              }
+            )
+
+          if (error) {
+            alert(
+              '중복결제 삭제 실패: ' +
+              error.message
+            )
+            return
+          }
+
+          if (!data?.success) {
+            alert(
+              data?.error ||
+              '중복결제 삭제에 실패했습니다.'
+            )
+            return
+          }
+
+          alert(
+            '중복결제 ' +
+            data.deletedCount +
+            '건이 삭제되었습니다.'
+          )
+
+          location.reload()
+        })
+      })
   })
 
 const totalPages = Math.max(
