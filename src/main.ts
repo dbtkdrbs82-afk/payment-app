@@ -5986,7 +5986,31 @@ if (holidayError) {
         )
         
         const accountBalance = 99
-        const duplicateErrorCount = 1
+        const duplicateApprovalNumbers = new Set<string>()
+
+const approvalNumberCount: Record<string, number> = {}
+
+;(payments || []).forEach((payment: any) => {
+  const approvalNumber =
+    String(payment.approval_number || '').trim()
+
+  if (!approvalNumber) {
+    return
+  }
+
+  approvalNumberCount[approvalNumber] =
+    (approvalNumberCount[approvalNumber] || 0) + 1
+})
+
+Object.entries(approvalNumberCount)
+  .forEach(([approvalNumber, count]) => {
+    if (count > 1) {
+      duplicateApprovalNumbers.add(approvalNumber)
+    }
+  })
+
+const duplicateErrorCount =
+  duplicateApprovalNumbers.size
         const payoutErrorCount = 0
         const accountErrorCount = 0
 
@@ -6232,7 +6256,10 @@ ${canViewPayoutBalance ? `
   </div>
 </div>
         
-            <div class="payout-summary-card duplicate">
+            <div
+  id="duplicate-payment-card"
+  class="payout-summary-card duplicate"
+>
               <div class="payout-summary-icon">⚠️</div>
               <div class="payout-summary-info">
                 <div class="payout-summary-title">중복결제오류</div>
@@ -6465,10 +6492,36 @@ const companyAccount = accountResult.account
 
     alert('비밀번호 확인 완료\n토스 지급 API 연결 후 실제 회수가 실행됩니다.')
   })
+})
+
+document.querySelector('#duplicate-payment-card')
+  ?.addEventListener('click', () => {
+    const duplicatePayments =
+      (payments || []).filter((payment: any) => {
+        const approvalNumber =
+          String(payment.approval_number || '').trim()
+
+        return (
+          approvalNumber &&
+          duplicateApprovalNumbers.has(approvalNumber)
+        )
+      })
+
+    console.log(duplicatePayments)
+
+    alert(
+      '중복결제 ' +
+      duplicatePayments.length +
+      '건이 발견되었습니다.\n\n' +
+      '다음 단계에서 목록 화면을 연결합니다.'
+    )
   })
-    
-        const totalPages = Math.max(1, Math.ceil(filteredRows.length / payoutPageSize))
-    
+
+const totalPages = Math.max(
+  1,
+  Math.ceil(filteredRows.length / payoutPageSize)
+)
+
         if (payoutPage > totalPages) {
           payoutPage = totalPages
         }
