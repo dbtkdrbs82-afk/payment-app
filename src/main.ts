@@ -6570,7 +6570,7 @@ document.querySelector('#duplicate-payment-card')
                 class="duplicate-payment-delete-button"
                 data-approval-number="${approvalNumber}"
               >
-                정상 1건 제외하고 중복 삭제
+                중복결제 삭제
               </button>
             </div>
           `).join('')}
@@ -6629,15 +6629,33 @@ document.querySelector('#duplicate-payment-card')
             return
           }
 
-          if (
-            !confirm(
-              '정상 1건을 제외하고 중복결제 ' +
-              deletePaymentIds.length +
-              '건을 삭제하시겠습니까?'
-            )
-          ) {
-            return
-          }
+          const selectedPayment =
+  (duplicateGroups[approvalNumber] || [])
+    .find(
+      (row: any) =>
+        Number(row.id) === keepPaymentId
+    )
+
+const confirmMessage =
+  '중복결제를 삭제하시겠습니까?\n\n' +
+  '승인번호: ' +
+  approvalNumber +
+  '\n\n' +
+  '정상으로 남길 결제\n' +
+  '- 가맹점: ' +
+  (selectedPayment?.merchant_name || '-') +
+  '\n' +
+  '- 결제금액: ' +
+  Number(selectedPayment?.amount || 0).toLocaleString() +
+  '원\n\n' +
+  '삭제 대상: ' +
+  deletePaymentIds.length +
+  '건\n\n' +
+  '삭제되는 결제는 중복결제 이력에 백업됩니다.'
+
+if (!confirm(confirmMessage)) {
+  return
+}
 
           const adminId =
             sessionStorage.getItem('admin_id') || ''
