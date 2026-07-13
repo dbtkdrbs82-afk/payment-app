@@ -5986,31 +5986,39 @@ if (holidayError) {
         )
         
         const accountBalance = 99
-        const duplicateApprovalNumbers = new Set<string>()
+        
 
-const approvalNumberCount: Record<string, number> = {}
+        const duplicatePaymentKeys = new Set<string>()
 
-;(payments || []).forEach((payment: any) => {
-  const approvalNumber =
-    String(payment.approval_number || '').trim()
-
-  if (!approvalNumber) {
-    return
-  }
-
-  approvalNumberCount[approvalNumber] =
-    (approvalNumberCount[approvalNumber] || 0) + 1
-})
-
-Object.entries(approvalNumberCount)
-  .forEach(([approvalNumber, count]) => {
-    if (count > 1) {
-      duplicateApprovalNumbers.add(approvalNumber)
-    }
-  })
-
-const duplicateErrorCount =
-  duplicateApprovalNumbers.size
+        const duplicateKeyCount: Record<string, number> = {}
+        
+        ;(payments || []).forEach((payment: any) => {
+          const approvalNumber =
+            String(payment.approval_number || '').trim()
+        
+          const amount =
+            Number(payment.amount || 0)
+        
+          if (!approvalNumber) {
+            return
+          }
+        
+          const duplicateKey =
+            approvalNumber + '_' + amount
+        
+          duplicateKeyCount[duplicateKey] =
+            (duplicateKeyCount[duplicateKey] || 0) + 1
+        })
+        
+        Object.entries(duplicateKeyCount)
+          .forEach(([duplicateKey, count]) => {
+            if (count > 1) {
+              duplicatePaymentKeys.add(duplicateKey)
+            }
+          })
+        
+        const duplicateErrorCount =
+          duplicatePaymentKeys.size
         const payoutErrorCount = 0
         const accountErrorCount = 0
 
@@ -6502,18 +6510,24 @@ document.querySelector('#duplicate-payment-card')
       const approvalNumber =
         String(payment.approval_number || '').trim()
 
+        const amount =
+        Number(payment.amount || 0)
+      
+      const duplicateKey =
+        approvalNumber + '_' + amount
+      
       if (
         !approvalNumber ||
-        !duplicateApprovalNumbers.has(approvalNumber)
+        !duplicatePaymentKeys.has(duplicateKey)
       ) {
         return
       }
 
-      if (!duplicateGroups[approvalNumber]) {
-        duplicateGroups[approvalNumber] = []
+      if (!duplicateGroups[duplicateKey]) {
+        duplicateGroups[duplicateKey] = []
       }
-
-      duplicateGroups[approvalNumber].push(payment)
+      
+      duplicateGroups[duplicateKey].push(payment)
     })
 
     const groupEntries = Object.entries(duplicateGroups)
@@ -6551,18 +6565,30 @@ document.querySelector('#duplicate-payment-card')
               </div>
 
               ${rows.map((row: any, index: number) => `
-                <label class="duplicate-payment-row">
-                  <input
-                    type="radio"
-                    name="keep-payment-${approvalNumber}"
-                    value="${row.id}"
-                    ${index === 0 ? 'checked' : ''}
-                  >
+                <label class="duplicate-payment-row ${index === 0 ? 'keep-row' : 'delete-row'}">
+  <input
+    type="radio"
+    name="keep-payment-${approvalNumber}"
+    value="${row.id}"
+    ${index === 0 ? 'checked' : ''}
+  >
 
-                  <span>${row.merchant_name || '-'}</span>
-                  <span>${Number(row.amount || 0).toLocaleString()}원</span>
-                  <span>${row.created_at ? new Date(row.created_at).toLocaleString() : '-'}</span>
-                </label>
+  <span class="duplicate-payment-status">
+    ${index === 0 ? '정상 유지' : '삭제 예정'}
+  </span>
+
+  <span>${row.merchant_name || '-'}</span>
+
+  <span>
+    ${Number(row.amount || 0).toLocaleString()}원
+  </span>
+
+  <span>
+    ${row.created_at
+      ? new Date(row.created_at).toLocaleString()
+      : '-'}
+  </span>
+</label>
               `).join('')}
 
               <button
@@ -6579,6 +6605,39 @@ document.querySelector('#duplicate-payment-card')
     `
 
     document.body.appendChild(modal)
+
+    document.querySelectorAll(
+      '.duplicate-payment-row input[type="radio"]'
+    ).forEach((radio) => {
+      radio.addEventListener('change', () => {
+        const input = radio as HTMLInputElement
+        const groupName = input.name
+    
+        document.querySelectorAll<HTMLInputElement>(
+          'input[name="' + groupName + '"]'
+        ).forEach((groupRadio) => {
+          const row = groupRadio.closest(
+            '.duplicate-payment-row'
+          )
+    
+          const status = row?.querySelector(
+            '.duplicate-payment-status'
+          )
+    
+          if (!row || !status) return
+    
+          if (groupRadio.checked) {
+            row.classList.add('keep-row')
+            row.classList.remove('delete-row')
+            status.textContent = '정상 유지'
+          } else {
+            row.classList.add('delete-row')
+            row.classList.remove('keep-row')
+            status.textContent = '삭제 예정'
+          }
+        })
+      })
+    })
 
     document.querySelector('#duplicate-payment-modal-close')
       ?.addEventListener('click', () => {
@@ -6692,7 +6751,9 @@ if (!confirm(confirmMessage)) {
           alert(
             '중복결제 ' +
             data.deletedCount +
-            '건이 삭제되었습니다.'
+            '건 삭제 완료\n\n' +
+            '✓ 원본 백업 완료\n' +
+            '✓ 출금·정산 재계산 완료'
           )
 
           location.reload()
