@@ -5787,3 +5787,95 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
 .duplicate-payment-row.delete-row .duplicate-payment-status {
   color: #d33a3a;
 }
+.payout-error-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10003;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 32, 55, 0.48);
+  box-sizing: border-box;
+}
+
+.payout-error-modal-card {
+  width: 760px;
+  max-width: 100%;
+  max-height: 85vh;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.22);
+}
+
+.payout-error-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 18px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.payout-error-modal-header h3 {
+  margin: 0;
+  color: #173f72;
+  font-size: 17px;
+}
+
+.payout-error-modal-close {
+  width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  color: #66758a !important;
+  font-size: 23px !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.payout-error-modal-body {
+  max-height: calc(85vh - 62px);
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.payout-error-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1.5fr 90px;
+  gap: 12px;
+  align-items: center;
+  min-height: 64px;
+  padding: 10px 12px;
+  border: 1px solid #e0e6ee;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.payout-error-row div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payout-error-row span {
+  color: #718096;
+  font-size: 11px;
+}
+
+.payout-error-row strong {
+  color: #17263b;
+  font-size: 13px;
+}
+
+.payout-error-retry-button {
+  height: 34px;
+  border: 1px solid #17477f;
+  border-radius: 6px;
+  background: #17477f;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}

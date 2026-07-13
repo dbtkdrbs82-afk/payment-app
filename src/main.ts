@@ -6019,8 +6019,26 @@ if (holidayError) {
         
         const duplicateErrorCount =
           duplicatePaymentKeys.size
-        const payoutErrorCount = 0
-        const accountErrorCount = 0
+          const payoutErrorPayments =
+          (payments || []).filter((payment: any) => {
+        
+            return (
+              payment.payout_status === '출금오류'
+            )
+          })
+        
+        const payoutErrorCount =
+          payoutErrorPayments.length
+          const accountErrorPayments =
+          (payments || []).filter((payment: any) => {
+        
+            return (
+              payment.payout_status === '계좌오류'
+            )
+          })
+        
+        const accountErrorCount =
+          accountErrorPayments.length
 
         
         
@@ -6054,10 +6072,8 @@ if (holidayError) {
         
             payoutDate.setDate(payoutDate.getDate() + 1)
           }
-        }
-        
-        
-   
+        }       
+           
         type PayoutGroup = {
           id: number
           merchant_id: number | string | null
@@ -6073,6 +6089,11 @@ if (holidayError) {
           payout_status: string
           payment_count: number
           payment_ids: number[]
+        
+          payout_hold: boolean
+          payout_hold_reason: string | null
+          payout_hold_at: string | null
+          payout_hold_by: string | null
         }
         
         const payoutGroupMap: Record<string, PayoutGroup> = {}
@@ -6109,8 +6130,13 @@ if (holidayError) {
               payout_status:
                 row.payout_status || '출금대기',
         
-              payment_count: 0,
-              payment_ids: []
+                payment_count: 0,
+                payment_ids: [],
+                
+                payout_hold: row.payout_hold === true,
+                payout_hold_reason: row.payout_hold_reason || null,
+                payout_hold_at: row.payout_hold_at || null,
+                payout_hold_by: row.payout_hold_by || null
             }
           }
         
@@ -6148,6 +6174,10 @@ if (holidayError) {
           ((document.querySelector('#payout-keyword') as HTMLInputElement)?.value || '').trim()
     
         return payoutRows.filter((row) => {
+          if (row.payout_hold === true) {
+            return false
+          }
+
           const payoutStatus = row.payout_status || '출금대기'
     
           if (pgFilter !== '전체' && row.pg_company !== pgFilter) {
@@ -6180,6 +6210,7 @@ if (holidayError) {
 
         const adminId = sessionStorage.getItem('admin_id') || ''
         const canViewPayoutBalance = adminId === 'NXGMASTER16'
+        const canManagePayoutHold = adminId === 'NXGMASTER16'
     
         const totalPayoutAmount = filteredRows.reduce((sum, row) => {
           const amount = Number(row.amount || 0)
@@ -6275,7 +6306,10 @@ ${canViewPayoutBalance ? `
               </div>
             </div>
         
-            <div class="payout-summary-card payout-error">
+            <div
+  id="payout-error-card"
+  class="payout-summary-card payout-error"
+>
               <div class="payout-summary-icon">❗</div>
               <div class="payout-summary-info">
                 <div class="payout-summary-title">출금오류</div>
@@ -6283,7 +6317,10 @@ ${canViewPayoutBalance ? `
               </div>
             </div>
         
-            <div class="payout-summary-card account-error">
+            <div
+  id="account-error-card"
+  class="payout-summary-card account-error"
+>
               <div class="payout-summary-icon">💳</div>
               <div class="payout-summary-info">
                 <div class="payout-summary-title">계좌오류</div>
@@ -6761,6 +6798,227 @@ if (!confirm(confirmMessage)) {
       })
   })
 
+  document.querySelector('#payout-error-card')
+  ?.addEventListener('click', () => {
+    if (payoutErrorPayments.length === 0) {
+      alert('출금오류 내역이 없습니다.')
+      return
+    }
+
+    document.querySelector('#payout-error-modal')?.remove()
+
+    const modal = document.createElement('div')
+    modal.id = 'payout-error-modal'
+    modal.className = 'payout-error-modal'
+
+    modal.innerHTML = `
+      <div class="payout-error-modal-card">
+        <div class="payout-error-modal-header">
+          <h3>출금오류 관리</h3>
+
+          <button
+            type="button"
+            id="payout-error-modal-close"
+            class="payout-error-modal-close"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="payout-error-modal-body">
+          ${payoutErrorPayments.map((payment: any) => `
+            <div class="payout-error-row">
+              <div>
+                <strong>${payment.merchant_name || '-'}</strong>
+                <span>
+                  ${payment.merchant_id
+                    ? 'MER' + String(payment.merchant_id).padStart(4, '0')
+                    : '-'}
+                </span>
+              </div>
+
+              <div>
+                <span>출금예정금액</span>
+                <strong>
+                  ${Number(
+                    payment.settlement_amount ||
+                    Number(payment.amount || 0) -
+                    Number(payment.fee_amount || 0)
+                  ).toLocaleString()}원
+                </strong>
+              </div>
+
+              <div>
+                <span>오류사유</span>
+                <strong>
+                  ${payment.payout_error_message || '출금 처리 실패'}
+                </strong>
+              </div>
+
+              <button
+                type="button"
+                class="payout-error-retry-button"
+                data-id="${payment.id}"
+              >
+                재처리
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    document.querySelector('#payout-error-modal-close')
+      ?.addEventListener('click', () => {
+        modal.remove()
+      })
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.remove()
+      }
+    })
+
+    document.querySelectorAll('.payout-error-retry-button')
+      .forEach((button) => {
+        button.addEventListener('click', async () => {
+          const paymentId =
+            Number((button as HTMLElement).getAttribute('data-id'))
+
+          if (!paymentId) {
+            alert('출금오류 결제정보를 찾을 수 없습니다.')
+            return
+          }
+
+          if (!confirm('이 출금건을 다시 출금대기로 변경하시겠습니까?')) {
+            return
+          }
+
+          const { error } = await supabase
+            .from('payments')
+            .update({
+              payout_status: '출금대기',
+              payout_error_code: null,
+              payout_error_message: null,
+              payout_last_attempt_at: new Date().toISOString()
+            })
+            .eq('id', paymentId)
+
+          if (error) {
+            alert('출금 재처리 실패: ' + error.message)
+            return
+          }
+
+          alert('출금대기로 변경되었습니다.')
+          location.reload()
+        })
+      })
+  })
+
+  document.querySelector('#account-error-card')
+  ?.addEventListener('click', () => {
+    if (accountErrorPayments.length === 0) {
+      alert('계좌오류 내역이 없습니다.')
+      return
+    }
+
+    document.querySelector('#account-error-modal')?.remove()
+
+    const modal = document.createElement('div')
+    modal.id = 'account-error-modal'
+    modal.className = 'payout-error-modal'
+
+    modal.innerHTML = `
+      <div class="payout-error-modal-card">
+        <div class="payout-error-modal-header">
+          <h3>계좌오류 관리</h3>
+
+          <button
+            type="button"
+            id="account-error-modal-close"
+            class="payout-error-modal-close"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="payout-error-modal-body">
+          ${accountErrorPayments.map((payment: any) => `
+            <div class="payout-error-row">
+              <div>
+                <strong>${payment.merchant_name || '-'}</strong>
+                <span>
+                  ${payment.merchant_id
+                    ? 'MER' + String(payment.merchant_id).padStart(4, '0')
+                    : '-'}
+                </span>
+              </div>
+
+              <div>
+                <span>출금예정금액</span>
+                <strong>
+                  ${Number(
+                    payment.settlement_amount ||
+                    Number(payment.amount || 0) -
+                    Number(payment.fee_amount || 0)
+                  ).toLocaleString()}원
+                </strong>
+              </div>
+
+              <div>
+                <span>계좌오류 사유</span>
+                <strong>
+                  ${payment.account_error_message || '계좌정보 확인 필요'}
+                </strong>
+              </div>
+
+              <button
+                type="button"
+                class="account-error-check-button"
+                data-merchant-id="${payment.merchant_id || ''}"
+              >
+                가맹점 확인
+              </button>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    document.querySelector('#account-error-modal-close')
+      ?.addEventListener('click', () => {
+        modal.remove()
+      })
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.remove()
+      }
+    })
+
+    document.querySelectorAll('.account-error-check-button')
+      .forEach((button) => {
+        button.addEventListener('click', () => {
+          const merchantId =
+            (button as HTMLElement).getAttribute('data-merchant-id') || ''
+
+          if (!merchantId) {
+            alert('가맹점 정보를 찾을 수 없습니다.')
+            return
+          }
+
+          sessionStorage.setItem('selected_merchant_id', merchantId)
+          sessionStorage.setItem('adminPage', 'merchant')
+
+          location.reload()
+        })
+      })
+  })
+
 const totalPages = Math.max(
   1,
   Math.ceil(filteredRows.length / payoutPageSize)
@@ -6802,12 +7060,33 @@ const totalPages = Math.max(
             '<td>' + row.payout_date + '</td>' +
             '<td>' + (row.payout_status || '출금대기') + '</td>' +
             '<td>' +
-            (row.payout_status === '출금완료'
-              ? '출금완료'
-              : '<button class="payout-complete-button" data-ids="' +
-                  row.payment_ids.join(',') +
-                '">출금완료</button>') +
-            '</td>'
+
+(row.payout_hold
+  ? '<span class="payout-hold-badge">출금보류</span>' +
+    '<br>' +
+    (canManagePayoutHold
+      ? '<button class="payout-hold-release-button" data-ids="' +
+          row.payment_ids.join(',') +
+        '">보류해제</button>'
+      : '')
+
+  : row.payout_status === '출금완료'
+
+    ? '출금완료'
+
+    : '<button class="payout-complete-button" data-ids="' +
+        row.payment_ids.join(',') +
+      '">출금완료</button>' +
+
+      (canManagePayoutHold
+        ? ' <button class="payout-hold-button" data-ids="' +
+            row.payment_ids.join(',') +
+          '">출금보류</button>'
+        : '')
+
+) +
+
+'</td>';
     
           paymentTableBody.appendChild(tr)
         })
@@ -6847,7 +7126,171 @@ const totalPages = Math.max(
             })
           })
       }
+
+      document.querySelectorAll('.payout-hold-button')
+      .forEach((button) => {
+        button.addEventListener('click', async () => {
+          const currentAdminId =
+            sessionStorage.getItem('admin_id') || ''
     
+          if (currentAdminId !== 'NXGMASTER16') {
+            alert('출금보류는 대표관리자만 처리할 수 있습니다.')
+            return
+          }
+    
+          const paymentIdsText =
+            (button as HTMLElement).getAttribute('data-ids') || ''
+    
+          const paymentIds = paymentIdsText
+            .split(',')
+            .map((id) => Number(id))
+            .filter((id) => !Number.isNaN(id))
+    
+          if (paymentIds.length === 0) {
+            alert('출금보류 대상 결제정보가 없습니다.')
+            return
+          }
+    
+          const holdReason = prompt(
+            '출금보류 사유를 입력해주세요.\n\n예: 불법거래 의심, 민원접수, 수사기관 요청'
+          )
+    
+          if (!holdReason?.trim()) {
+            return
+          }
+    
+          const adminPassword = prompt(
+            '출금보류 처리를 위해 관리자 비밀번호를 입력해주세요.'
+          )
+    
+          if (!adminPassword) {
+            return
+          }
+    
+          const { data: verifiedAdmin, error: verifyError } =
+            await supabase
+              .from('admin_users')
+              .select('login_id, role, status')
+              .eq('login_id', currentAdminId)
+              .eq('password', adminPassword)
+              .eq('role', 'MASTER')
+              .eq('status', '사용중')
+              .maybeSingle()
+    
+          if (verifyError || !verifiedAdmin) {
+            alert('관리자 비밀번호가 올바르지 않습니다.')
+            return
+          }
+    
+          if (
+            !confirm(
+              '이 가맹점의 현재 출금대상을 보류하시겠습니까?\n\n' +
+              '보류사유: ' + holdReason.trim() + '\n' +
+              '대상 결제: ' + paymentIds.length + '건'
+            )
+          ) {
+            return
+          }
+    
+          const { error } = await supabase
+            .from('payments')
+            .update({
+              payout_hold: true,
+              payout_hold_reason: holdReason.trim(),
+              payout_hold_at: new Date().toISOString(),
+              payout_hold_by: currentAdminId,
+              payout_status: '출금보류'
+            })
+            .in('id', paymentIds)
+    
+          if (error) {
+            alert('출금보류 처리 실패: ' + error.message)
+            return
+          }
+    
+          alert('출금보류 처리되었습니다.')
+          location.reload()
+        })
+      })
+    
+    document.querySelectorAll('.payout-hold-release-button')
+      .forEach((button) => {
+        button.addEventListener('click', async () => {
+          const currentAdminId =
+            sessionStorage.getItem('admin_id') || ''
+    
+          if (currentAdminId !== 'NXGMASTER16') {
+            alert('보류해제는 대표관리자만 처리할 수 있습니다.')
+            return
+          }
+    
+          const paymentIdsText =
+            (button as HTMLElement).getAttribute('data-ids') || ''
+    
+          const paymentIds = paymentIdsText
+            .split(',')
+            .map((id) => Number(id))
+            .filter((id) => !Number.isNaN(id))
+    
+          if (paymentIds.length === 0) {
+            alert('보류해제 대상 결제정보가 없습니다.')
+            return
+          }
+    
+          const adminPassword = prompt(
+            '보류해제를 위해 관리자 비밀번호를 입력해주세요.'
+          )
+    
+          if (!adminPassword) {
+            return
+          }
+    
+          const { data: verifiedAdmin, error: verifyError } =
+            await supabase
+              .from('admin_users')
+              .select('login_id, role, status')
+              .eq('login_id', currentAdminId)
+              .eq('password', adminPassword)
+              .eq('role', 'MASTER')
+              .eq('status', '사용중')
+              .maybeSingle()
+    
+          if (verifyError || !verifiedAdmin) {
+            alert('관리자 비밀번호가 올바르지 않습니다.')
+            return
+          }
+    
+          if (
+            !confirm(
+              '출금보류를 해제하시겠습니까?\n\n' +
+              '해제 후에는 즉시 출금되지 않고 출금대기로 돌아갑니다.'
+            )
+          ) {
+            return
+          }
+    
+          const { error } = await supabase
+            .from('payments')
+            .update({
+              payout_hold: false,
+              payout_hold_reason: null,
+              payout_hold_at: null,
+              payout_hold_by: null,
+              payout_status: '출금대기'
+            })
+            .in('id', paymentIds)
+    
+          if (error) {
+            alert('보류해제 실패: ' + error.message)
+            return
+          }
+    
+          alert('보류가 해제되어 출금대기로 변경되었습니다.')
+          location.reload()
+        })
+      })
+
+      document.querySelector('#payout-error-card')
       
       const payoutPageSizeSelect =
   document.querySelector<HTMLSelectElement>('#withdraw-page-size')
