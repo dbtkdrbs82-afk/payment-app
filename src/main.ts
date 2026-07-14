@@ -12690,7 +12690,13 @@ const cardNumberMatch =
               if (!response.ok || !data.success) {
                 alert(
                   '결제 실패: ' +
-                  (data.message || '알 수 없는 오류')
+                  (data.message || '알 수 없는 오류') +
+                  '\n응답코드: ' +
+                  (data.resultCode || '-') +
+                  '\n사용 MID: ' +
+                  (data.usedMid || '-') +
+                  '\nMKEY 끝 4자리: ' +
+                  (data.usedMkeyLast4 || '-')
                 )
                 return
               }

@@ -189,14 +189,19 @@ export default async function handler(
     )
 
     if (resultCode !== '0000') {
-      return res.status(400).json({
-        success: false,
-        message:
-          String(korpayData.res_msg || '') ||
-          '카드결제가 승인되지 않았습니다.',
-        detail: korpayData
-      })
-    }
+        return res.status(400).json({
+          success: false,
+          message:
+            String(korpayData.res_msg || '') ||
+            '카드결제가 승인되지 않았습니다.',
+      
+          resultCode,
+          usedMid: mid,
+          usedMkeyLast4: mkey.slice(-4),
+      
+          detail: korpayData
+        })
+      }
 
     return res.status(200).json({
       success: true,
