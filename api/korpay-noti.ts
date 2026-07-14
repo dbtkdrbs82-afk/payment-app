@@ -93,6 +93,149 @@ export default async function handler(
       'Content-Type': 'application/json'
     }
 
+   // 코페이 취소 Noti 처리
+if (cancelYN === 'Y') {
+  const originalTid =
+    String(noti.otid || '').trim()
+
+  if (!originalTid) {
+    return res.status(400).json({
+      result: 'ERROR',
+      message: '취소 원거래 otid가 없습니다.'
+    })
+  }
+
+  const originalResponse = await fetch(
+    `${supabaseUrl}/rest/v1/payments` +
+      `?select=id,amount,fee_rate` +
+      `&payment_key=eq.${encodeURIComponent(originalTid)}` +
+      `&limit=1`,
+    {
+      method: 'GET',
+      headers
+    }
+  )
+
+  const originalRows = await originalResponse.json()
+
+  if (!originalResponse.ok) {
+    return res.status(500).json({
+      result: 'ERROR',
+      message: '취소 원거래 조회 실패',
+      detail: originalRows
+    })
+  }
+
+  const originalPayment =
+    Array.isArray(originalRows) && originalRows.length > 0
+      ? originalRows[0]
+      : null
+
+  if (!originalPayment) {
+    return res.status(404).json({
+      result: 'ERROR',
+      message: '취소할 원거래를 찾을 수 없습니다.',
+      otid: originalTid
+    })
+  }
+
+  const originalAmount =
+    Number(originalPayment.amount || 0)
+
+  const cancelAmount =
+    Math.abs(amount)
+
+  const remainingAmount =
+    Math.max(originalAmount - cancelAmount, 0)
+
+  const originalFeeRate =
+    Number(originalPayment.fee_rate || 0)
+
+  const remainingFeeAmount =
+    Math.round(
+      (remainingAmount * originalFeeRate) / 100
+    )
+
+  const remainingSettlementAmount =
+    remainingAmount - remainingFeeAmount
+
+  const isFullCancel =
+    cancelAmount >= originalAmount
+
+  const cancelData = {
+    status: isFullCancel
+      ? 'cancel'
+      : 'partial_cancel',
+
+    canceled_at:
+      korpayDateToIso(noti.canDtm) ||
+      new Date().toISOString(),
+
+    original_payment_key: originalTid,
+    cancel_payment_key: tid,
+    cancel_amount: cancelAmount,
+    cancel_reason:
+      noti.canMsg ||
+      noti.cancelReason ||
+      '코페이 취소',
+
+    fee_amount: isFullCancel
+      ? 0
+      : remainingFeeAmount,
+
+    settlement_amount: isFullCancel
+      ? 0
+      : remainingSettlementAmount,
+
+    settlement_status: isFullCancel
+      ? '취소'
+      : '정산대기',
+
+    payout_status: isFullCancel
+      ? '출금제외'
+      : '출금대기',
+
+    payout_excluded: isFullCancel,
+    payout_excluded_reason: isFullCancel
+      ? '코페이 결제취소'
+      : null
+  }
+
+  const cancelResponse = await fetch(
+    `${supabaseUrl}/rest/v1/payments` +
+      `?id=eq.${originalPayment.id}`,
+    {
+      method: 'PATCH',
+      headers: {
+        ...headers,
+        Prefer: 'return=representation'
+      },
+      body: JSON.stringify(cancelData)
+    }
+  )
+
+  const canceledPayment =
+    await cancelResponse.json()
+
+  if (!cancelResponse.ok) {
+    return res.status(500).json({
+      result: 'ERROR',
+      message: '코페이 취소 저장 실패',
+      detail: canceledPayment
+    })
+  }
+
+  return res.status(200).json({
+    result: 'OK',
+    canceled: true,
+    fullCancel: isFullCancel,
+    originalTid,
+    cancelTid: tid,
+    cancelAmount,
+    payment: canceledPayment
+  })
+}
+
     const findResponse = await fetch(
       `${supabaseUrl}/rest/v1/payments` +
         `?select=id` +
