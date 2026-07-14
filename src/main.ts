@@ -10381,14 +10381,6 @@ if (merchantPageSizeSelect) {
   })
 }
 
-document.querySelector('#order-prev-page')
-  ?.addEventListener('click', () => {
-    if (currentPage > 1) {
-      currentPage--
-
-      applyOrderFilter()
-    }
-  })
 
   const orderPrevPageButton =
   document.querySelector<HTMLButtonElement>('#order-prev-page')
