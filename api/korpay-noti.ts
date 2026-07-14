@@ -259,6 +259,11 @@ const paymentData = {
       saved: true,
       duplicate:
         Array.isArray(existingRows) && existingRows.length > 0,
+    
+      feeRate,
+      feeAmount,
+      settlementAmount,
+    
       payment: savedData
     })
   } catch (error) {
