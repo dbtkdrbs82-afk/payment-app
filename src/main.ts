@@ -7381,6 +7381,58 @@ document.querySelector('#payout-search-btn')
     renderPayoutTable()
   })
 
+  const payoutStartDate =
+  document.querySelector<HTMLInputElement>('#payout-start-date')!
+
+const payoutEndDate =
+  document.querySelector<HTMLInputElement>('#payout-end-date')!
+
+const formatDate = (date: Date) => {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+document.querySelector('#payout-today-btn')
+?.addEventListener('click', () => {
+  const today = formatDate(new Date())
+
+  payoutStartDate.value = today
+  payoutEndDate.value = today
+
+  payoutPage = 1
+  renderPayoutTable()
+})
+
+document.querySelector('#payout-yesterday-btn')
+?.addEventListener('click', () => {
+  const date = new Date()
+  date.setDate(date.getDate() - 1)
+
+  const yesterday = formatDate(date)
+
+  payoutStartDate.value = yesterday
+  payoutEndDate.value = yesterday
+
+  payoutPage = 1
+  renderPayoutTable()
+})
+
+document.querySelector('#payout-month-btn')
+?.addEventListener('click', () => {
+  const today = new Date()
+
+  const firstDay =
+    new Date(today.getFullYear(), today.getMonth(), 1)
+
+  payoutStartDate.value = formatDate(firstDay)
+  payoutEndDate.value = formatDate(today)
+
+  payoutPage = 1
+  renderPayoutTable()
+})
+
 document.querySelector('#payout-pg-filter')
 ?.addEventListener('change', () => {
   if (currentPayoutView === 'manager') return
