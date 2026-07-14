@@ -155,9 +155,13 @@ export default async function handler(
     }
 
     const approvedAt = korpayDateToIso(noti.appDtm)
-    const canceledAt = korpayDateToIso(noti.canDtm)
+const canceledAt = korpayDateToIso(noti.canDtm)
 
-    const paymentData = {
+const feeRate = Number(merchant.fee_rate || 0)
+const feeAmount = Math.round((amount * feeRate) / 100)
+const settlementAmount = amount - feeAmount
+
+const paymentData = {
       order_id: noti.ordNo || tid,
       payment_key: tid,
       amount,
@@ -185,7 +189,9 @@ export default async function handler(
           ? canceledAt || new Date().toISOString()
           : null,
 
-      fee_rate: Number(merchant.fee_rate || 0),
+          fee_rate: feeRate,
+          fee_amount: feeAmount,
+          settlement_amount: settlementAmount,
 
       manager_admin_id: merchant.manager_admin_id || null,
       manager_admin_name: merchant.manager_admin_name || null,
