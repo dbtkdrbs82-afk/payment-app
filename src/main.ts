@@ -6114,8 +6114,11 @@ if (holidayError) {
         type PayoutGroup = {
           id: number
           merchant_id: number | string | null
-          merchant_name: string
+          merchant_name: string         
           pg_company: string
+          manager_admin_name: string
+agency_admin_name: string
+branch_admin_name: string
           created_at: string
           payout_date: string
           order_id: string
@@ -6163,6 +6166,9 @@ const payoutDate =
               merchant_id: row.merchant_id,
               merchant_name: row.merchant_name || '-',
               pg_company: row.pg_company || '-',
+              manager_admin_name: row.manager_admin_name || '',
+agency_admin_name: row.agency_admin_name || '',
+branch_admin_name: row.branch_admin_name || '',
               created_at: row.created_at,
               payout_date: payoutDate,
         
@@ -6213,6 +6219,9 @@ const payoutDate =
           
             const statusFilter =
               (document.querySelector('#payout-status-filter') as HTMLSelectElement)?.value || '전체'
+
+              const targetFilter =
+  (document.querySelector('#payout-target-filter') as HTMLSelectElement)?.value || '전체'
           
             const keyword =
               ((document.querySelector('#payout-keyword') as HTMLInputElement)?.value || '').trim()
@@ -6244,6 +6253,24 @@ const payoutDate =
           
               if (endDate && row.payout_date > endDate) {
                 return false
+              }
+
+              if (targetFilter !== '전체' && keyword) {
+                let targetText = ''
+              
+                if (targetFilter === '가맹점') {
+                  targetText = String(row.merchant_name || '')
+                } else if (targetFilter === '담당자') {
+                  targetText = String(row.manager_admin_name || '')
+                } else if (targetFilter === '대리점') {
+                  targetText = String(row.agency_admin_name || '')
+                } else if (targetFilter === '지사') {
+                  targetText = String(row.branch_admin_name || '')
+                }
+              
+                if (!targetText.includes(keyword)) {
+                  return false
+                }
               }
           
               if (keyword) {
@@ -7448,7 +7475,13 @@ document.querySelector('#payout-status-filter')
   payoutPage = 1
   renderPayoutTable()
 })
-    
+document.querySelector('#payout-target-filter')
+?.addEventListener('change', () => {
+  if (currentPayoutView === 'manager') return
+
+  payoutPage = 1
+  renderPayoutTable()
+})    
       renderPayoutTable()
     
     
