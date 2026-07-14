@@ -5957,6 +5957,7 @@ rows.forEach((row) => {
             '<th>수수료</th>' +
             '<th>출금예정금액</th>' +
             '<th>출금예정일</th>' +
+            '<th>결제일</th>' +
             '<th>출금상태</th>' +
             '<th>처리</th>' +
           '</tr>'
@@ -7114,6 +7115,7 @@ const totalPages = Math.max(
             '<td>' + amount.toLocaleString() + '원</td>' +
             '<td>' + feeAmount.toLocaleString() + '원</td>' +
             '<td>' + payoutAmount.toLocaleString() + '원</td>' +
+            '<td>' + row.created_at.substring(0, 10) + '</td>' +
             '<td>' + row.payout_date + '</td>' +
             '<td>' + (row.payout_status || '출금대기') + '</td>' +
             '<td>' +
