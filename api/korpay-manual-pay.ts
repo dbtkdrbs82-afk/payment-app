@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
-import { createHash } from 'node:crypto'
+import { createHash, randomBytes } from 'node:crypto'
 
 function onlyDigits(value: unknown): string {
   return String(value ?? '').replace(/\D/g, '')
@@ -123,11 +123,11 @@ export default async function handler(
     }
 
     const ordNo =
-  'NXG' +
-  Date.now().toString().slice(-12) +
-  Math.floor(Math.random() * 1000)
-    .toString()
-    .padStart(3, '0')
+  Date.now().toString().padStart(13, '0').slice(-13) +
+  Array.from(
+    randomBytes(17),
+    (byte) => String(byte % 10)
+  ).join('')
 
     const hashKey = createHash('sha256')
       .update(mid + String(goodsAmt))
