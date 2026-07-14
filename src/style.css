@@ -4514,11 +4514,11 @@ display: grid !important;
 }
 
 .admin-table tbody {
-  display: table-row-group !important;
+  display: table-row-group;
 }
 
 .admin-table tr {
-  display: table-row !important;
+  display: table-row;
 }
 
 .admin-table th,
