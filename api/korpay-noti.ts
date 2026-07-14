@@ -62,6 +62,7 @@ export default async function handler(
     console.log(noti)
 
     const tid = noti.tid?.trim()
+    const korpayMid = noti.mid?.trim()
     const cancelYN = noti.cancelYN?.toUpperCase() || 'N'
     const amount = Number(noti.amt || 0)
 
@@ -69,6 +70,13 @@ export default async function handler(
       return res.status(400).json({
         result: 'ERROR',
         message: 'tid가 없습니다.'
+      })
+    }
+
+    if (!korpayMid) {
+      return res.status(400).json({
+        result: 'ERROR',
+        message: 'mid가 없습니다.'
       })
     }
 
@@ -85,9 +93,11 @@ export default async function handler(
       'Content-Type': 'application/json'
     }
 
-    // 같은 TID가 이미 저장됐는지 확인
     const findResponse = await fetch(
-      `${supabaseUrl}/rest/v1/payments?select=id&payment_key=eq.${encodeURIComponent(tid)}&limit=1`,
+      `${supabaseUrl}/rest/v1/payments` +
+        `?select=id` +
+        `&payment_key=eq.${encodeURIComponent(tid)}` +
+        `&limit=1`,
       {
         method: 'GET',
         headers
@@ -106,6 +116,44 @@ export default async function handler(
       })
     }
 
+    const merchantResponse = await fetch(
+      `${supabaseUrl}/rest/v1/merchants` +
+        `?select=id,merchant_name,fee_rate,manager_admin_id,manager_admin_name,agency_admin_id,agency_admin_name,branch_admin_id,branch_admin_name` +
+        `&korpay_terminal_mid=eq.${encodeURIComponent(korpayMid)}` +
+        `&limit=1`,
+      {
+        method: 'GET',
+        headers
+      }
+    )
+
+    const merchantRows = await merchantResponse.json()
+
+    if (!merchantResponse.ok) {
+      console.error('가맹점 조회 실패:', merchantRows)
+
+      return res.status(500).json({
+        result: 'ERROR',
+        message: '가맹점 조회 실패',
+        detail: merchantRows
+      })
+    }
+
+    const merchant =
+      Array.isArray(merchantRows) && merchantRows.length > 0
+        ? merchantRows[0]
+        : null
+
+    if (!merchant) {
+      console.error('등록되지 않은 코페이 단말기 MID:', korpayMid)
+
+      return res.status(400).json({
+        result: 'ERROR',
+        message: '등록된 가맹점을 찾을 수 없습니다.',
+        mid: korpayMid
+      })
+    }
+
     const approvedAt = korpayDateToIso(noti.appDtm)
     const canceledAt = korpayDateToIso(noti.canDtm)
 
@@ -114,10 +162,14 @@ export default async function handler(
       payment_key: tid,
       amount,
       status: cancelYN === 'Y' ? 'cancel' : 'paid',
+
       created_at:
         approvedAt ||
         canceledAt ||
         new Date().toISOString(),
+
+      merchant_id: merchant.id,
+      merchant_name: merchant.merchant_name || null,
 
       pg_company: '코페이',
       payment_method: noti.payMethod || 'CARD',
@@ -128,9 +180,21 @@ export default async function handler(
       installment_months: noti.quota || '00',
 
       approved_at: approvedAt,
-      canceled_at: cancelYN === 'Y'
-        ? canceledAt || new Date().toISOString()
-        : null,
+      canceled_at:
+        cancelYN === 'Y'
+          ? canceledAt || new Date().toISOString()
+          : null,
+
+      fee_rate: Number(merchant.fee_rate || 0),
+
+      manager_admin_id: merchant.manager_admin_id || null,
+      manager_admin_name: merchant.manager_admin_name || null,
+
+      agency_admin_id: merchant.agency_admin_id || null,
+      agency_admin_name: merchant.agency_admin_name || null,
+
+      branch_admin_id: merchant.branch_admin_id || null,
+      branch_admin_name: merchant.branch_admin_name || null,
 
       settlement_status: '정산대기',
       payout_status: '출금대기',
@@ -142,9 +206,9 @@ export default async function handler(
     let saveResponse: Response
 
     if (Array.isArray(existingRows) && existingRows.length > 0) {
-      // 재전송된 거래면 새 행을 만들지 않고 기존 행 갱신
       saveResponse = await fetch(
-        `${supabaseUrl}/rest/v1/payments?payment_key=eq.${encodeURIComponent(tid)}`,
+        `${supabaseUrl}/rest/v1/payments` +
+          `?payment_key=eq.${encodeURIComponent(tid)}`,
         {
           method: 'PATCH',
           headers: {
@@ -183,7 +247,8 @@ export default async function handler(
     return res.status(200).json({
       result: 'OK',
       saved: true,
-      duplicate: existingRows.length > 0,
+      duplicate:
+        Array.isArray(existingRows) && existingRows.length > 0,
       payment: savedData
     })
   } catch (error) {
@@ -191,9 +256,10 @@ export default async function handler(
 
     return res.status(500).json({
       result: 'ERROR',
-      message: error instanceof Error
-        ? error.message
-        : 'Unknown error'
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Unknown error'
     })
   }
 }
