@@ -8451,7 +8451,7 @@ if (tableTop) {
 
 if (subMenu) {
   subMenu.innerHTML =
-    '승인내역조회 | POS주문내역조회 | 승인거절 내역조회 | 카드결제 | 현금영수증 발급'
+    '승인내역조회 | 현금영수증 발급 | 고액 동일카드 조회'
 }
 
 if (titleBox) {
@@ -12429,11 +12429,7 @@ document.querySelector('#pay-link-btn')
                   />
                 </div>
           
-                <div class="ocr-action-box">
-                  <button id="ocr-start-btn">
-                    카드정보 인식하기
-                  </button>
-                </div>
+                
               `
               : `
                 <h1>일반 수기결제</h1>
@@ -12450,39 +12446,63 @@ document.querySelector('#pay-link-btn')
           
 
           <div class="ocr-payment-form">
-  <label>상품명</label>
-  <input id="ocr-product-name" placeholder="상품명을 입력하세요" />
-
-  <label>구매자 연락처</label>
-  <input id="ocr-customer-phone" placeholder="010-0000-0000" />
-
   <label>결제금액</label>
-  <input id="ocr-amount" placeholder="결제금액" />
+  <input
+    id="ocr-amount"
+    type="number"
+    inputmode="numeric"
+    placeholder="결제금액"
+  />
 
   <label>카드번호</label>
   <input
-  id="ocr-card-number"
-  placeholder="${
-    mode === 'ocr'
-      ? '카드 스캔 후 자동 입력됩니다'
-      : '카드번호를 직접 입력하세요'
-  }"
-/>
+    id="ocr-card-number"
+    inputmode="numeric"
+    maxlength="16"
+    placeholder="${
+      mode === 'ocr'
+        ? '카드 스캔 후 자동 입력됩니다'
+        : '카드번호를 직접 입력하세요'
+    }"
+  />
 
   <label>유효기간</label>
   <div>
-    <input id="ocr-exp-month" placeholder="월" />
-    <input id="ocr-exp-year" placeholder="년" />
+    <input
+      id="ocr-exp-month"
+      inputmode="numeric"
+      maxlength="2"
+      placeholder="월"
+    />
+    <input
+      id="ocr-exp-year"
+      inputmode="numeric"
+      maxlength="2"
+      placeholder="년"
+    />
   </div>
 
   <label>할부방법</label>
   <select id="ocr-installment">
-    <option>일시불</option>
-    <option>2개월</option>
-    <option>3개월</option>
-    <option>6개월</option>
-    <option>12개월</option>
+    <option value="00">일시불</option>
+    <option value="02">2개월</option>
+    <option value="03">3개월</option>
+    <option value="06">6개월</option>
+    <option value="12">12개월</option>
   </select>
+
+  <label>상품명</label>
+  <input
+    id="ocr-product-name"
+    value="일반 카드결제"
+  />
+
+  <label>구매자 연락처</label>
+  <input
+    id="ocr-customer-phone"
+    inputmode="tel"
+    placeholder="선택 입력"
+  />
 
   <button id="ocr-payment-submit">결제하기</button>
 </div>
@@ -12552,6 +12572,148 @@ const cardNumberMatch =
     alert('카드번호를 찾지 못했습니다. 직접 입력해주세요.')
   }
           })
+
+          document.querySelector('#ocr-payment-submit')
+          ?.addEventListener('click', async () => {
+            const merchantId =
+              Number(sessionStorage.getItem('login_merchant_id') || 0)
+        
+            const amount =
+              Number(
+                (
+                  document.querySelector(
+                    '#ocr-amount'
+                  ) as HTMLInputElement
+                )?.value || 0
+              )
+        
+            const cardNumber =
+              (
+                document.querySelector(
+                  '#ocr-card-number'
+                ) as HTMLInputElement
+              )?.value || ''
+        
+            const expMonth =
+              (
+                document.querySelector(
+                  '#ocr-exp-month'
+                ) as HTMLInputElement
+              )?.value || ''
+        
+            const expYear =
+              (
+                document.querySelector(
+                  '#ocr-exp-year'
+                ) as HTMLInputElement
+              )?.value || ''
+        
+            const installment =
+              (
+                document.querySelector(
+                  '#ocr-installment'
+                ) as HTMLSelectElement
+              )?.value || '00'
+        
+            const goodsName =
+              (
+                document.querySelector(
+                  '#ocr-product-name'
+                ) as HTMLInputElement
+              )?.value || '일반 카드결제'
+        
+            const customerPhone =
+              (
+                document.querySelector(
+                  '#ocr-customer-phone'
+                ) as HTMLInputElement
+              )?.value || ''
+        
+            const expiryYymm =
+              expYear.trim() + expMonth.trim()
+        
+            if (!merchantId) {
+              alert('가맹점 정보를 찾을 수 없습니다.')
+              return
+            }
+        
+            if (!amount || amount <= 0) {
+              alert('결제금액을 입력해주세요.')
+              return
+            }
+        
+            if (!cardNumber.trim()) {
+              alert('카드번호를 입력해주세요.')
+              return
+            }
+        
+            if (
+              expMonth.trim().length !== 2 ||
+              expYear.trim().length !== 2
+            ) {
+              alert('유효기간 월/년을 각각 2자리로 입력해주세요.')
+              return
+            }
+        
+            const submitButton =
+              document.querySelector<HTMLButtonElement>(
+                '#ocr-payment-submit'
+              )
+        
+            if (submitButton) {
+              submitButton.disabled = true
+              submitButton.textContent = '결제 처리 중...'
+            }
+        
+            try {
+              const response = await fetch(
+                '/api/korpay-manual-pay',
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    merchantId,
+                    amount,
+                    cardNumber,
+                    expiryYymm,
+                    installment,
+                    goodsName,
+                    customerPhone
+                  })
+                }
+              )
+        
+              const data = await response.json()
+        
+              if (!response.ok || !data.success) {
+                alert(
+                  '결제 실패: ' +
+                  (data.message || '알 수 없는 오류')
+                )
+                return
+              }
+        
+              alert(
+                '결제가 승인되었습니다.\n' +
+                '승인번호: ' +
+                (data.approvalNumber || '-')
+              )
+        
+              location.href = '/merchant-admin'
+            } catch (error) {
+              alert(
+                '결제 요청 중 오류가 발생했습니다.'
+              )
+              console.error(error)
+            } finally {
+              if (submitButton) {
+                submitButton.disabled = false
+                submitButton.textContent = '결제하기'
+              }
+            }
+          }) 
       
         } else if (path === '/merchant-batch-payment') {
 
