@@ -5679,7 +5679,7 @@ if (page === 'payout') {
               '<option value="50">50개씩 보기</option>' +
             '</select>'
         }
-        
+
       let payoutPage = 1
       let payoutPageSize = Number(sessionStorage.getItem('withdraw_page_size') || 10)
       let currentPayoutView = 'scheduled'
@@ -7116,7 +7116,41 @@ const totalPages = Math.max(
   1,
   Math.ceil(filteredRows.length / payoutPageSize)
 )
+const pageInfoTop =
+  document.querySelector<HTMLElement>('#payout-page-info-top')
 
+const prevTop =
+  document.querySelector<HTMLButtonElement>('#payout-prev-top')
+
+const nextTop =
+  document.querySelector<HTMLButtonElement>('#payout-next-top')
+
+if (pageInfoTop) {
+  pageInfoTop.textContent =
+    payoutPage + ' / ' + totalPages
+}
+
+if (prevTop) {
+  prevTop.disabled = payoutPage <= 1
+
+  prevTop.onclick = () => {
+    if (payoutPage <= 1) return
+
+    payoutPage -= 1
+    renderPayoutTable()
+  }
+}
+
+if (nextTop) {
+  nextTop.disabled = payoutPage >= totalPages
+
+  nextTop.onclick = () => {
+    if (payoutPage >= totalPages) return
+
+    payoutPage += 1
+    renderPayoutTable()
+  }
+}
         if (payoutPage > totalPages) {
           payoutPage = totalPages
         }
