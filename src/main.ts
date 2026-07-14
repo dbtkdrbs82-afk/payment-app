@@ -10436,19 +10436,6 @@ if (orderNextPageButton) {
   }
 }
 
-const merchantPageSizeButton =
-  document.querySelector<HTMLSelectElement>('#merchant-page-size')
-
-if (merchantPageSizeButton) {
-  merchantPageSizeButton.onchange = () => {
-    console.log('보기 개수 변경됨')
-
-    currentPageSize = Number(merchantPageSizeButton.value)
-    currentPage = 1
-
-    applyOrderFilter()
-  }
-}
 
 applyOrderFilter()
 
