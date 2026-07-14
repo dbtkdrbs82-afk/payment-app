@@ -123,11 +123,11 @@ export default async function handler(
     }
 
     const ordNo =
-      'NXG' +
-      Date.now().toString() +
-      Math.floor(Math.random() * 1000)
-        .toString()
-        .padStart(3, '0')
+  'NXG' +
+  Date.now().toString().slice(-12) +
+  Math.floor(Math.random() * 1000)
+    .toString()
+    .padStart(3, '0')
 
     const hashKey = createHash('sha256')
       .update(mid + String(goodsAmt))
