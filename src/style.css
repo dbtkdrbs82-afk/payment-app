@@ -5879,3 +5879,22 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   font-weight: 700;
   cursor: pointer;
 }
+.payout-top-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+#payout-page-info-top {
+  display: inline-block;
+  min-width: 50px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+#payout-prev-top,
+#payout-next-top {
+  min-width: 90px;
+}
