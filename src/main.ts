@@ -5666,12 +5666,20 @@ if (page === 'payout') {
         if (tableTop) {
           tableTop.innerHTML =
             '<button>엑셀 다운로드</button>' +
+        
+            '<div class="payout-top-pagination">' +
+              '<button id="payout-prev-top">이전</button>' +
+              '<span id="payout-page-info-top">1 / 1</span>' +
+              '<button id="payout-next-top">다음</button>' +
+            '</div>' +
+        
             '<select id="withdraw-page-size">' +
               '<option value="10">10개씩 보기</option>' +
               '<option value="20">20개씩 보기</option>' +
               '<option value="50">50개씩 보기</option>' +
             '</select>'
         }
+        
       let payoutPage = 1
       let payoutPageSize = Number(sessionStorage.getItem('withdraw_page_size') || 10)
       let currentPayoutView = 'scheduled'
