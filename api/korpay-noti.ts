@@ -208,7 +208,11 @@ const paymentData = {
 
       message: noti.goodsName || '코페이 무선단말기 결제'
     }
-
+    console.log({
+      feeRate,
+      feeAmount,
+      settlementAmount
+    })
     let saveResponse: Response
 
     if (Array.isArray(existingRows) && existingRows.length > 0) {
