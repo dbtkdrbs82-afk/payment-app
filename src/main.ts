@@ -5967,6 +5967,24 @@ rows.forEach((row) => {
         .select('*')
         .order('created_at', { ascending: false })
         
+        const { data: merchantCycles, error: merchantCyclesError } =
+  await supabase
+    .from('merchants')
+    .select('id, settlement_cycle')
+
+if (merchantCyclesError) {
+  alert('가맹점 정산주기 조회 실패: ' + merchantCyclesError.message)
+  return
+}
+
+const settlementCycleMap = new Map<number, string>()
+
+;(merchantCycles || []).forEach((merchant: any) => {
+  settlementCycleMap.set(
+    Number(merchant.id),
+    String(merchant.settlement_cycle || '1일')
+  )
+})
         if (error) {
           alert('출금내역 조회 실패: ' + error.message)
           return
@@ -6050,10 +6068,26 @@ if (holidayError) {
           return `${year}-${month}-${day}`
         }
         
-        const getPayoutDate = (createdAt: string) => {
+        const getPayoutDate = (
+          createdAt: string,
+          settlementCycle: string
+        ) => {
           const payoutDate = new Date(createdAt)
         
-          payoutDate.setDate(payoutDate.getDate() + 1)
+          const cycleText =
+            String(settlementCycle || '1일').trim()
+        
+          const cycleNumberMatch =
+            cycleText.match(/\d+/)
+        
+          const cycleDays =
+            cycleNumberMatch
+              ? Number(cycleNumberMatch[0])
+              : 1
+        
+          payoutDate.setDate(
+            payoutDate.getDate() + cycleDays
+          )
         
           while (true) {
             const dayOfWeek = payoutDate.getDay()
@@ -6070,9 +6104,11 @@ if (holidayError) {
               return dateText
             }
         
-            payoutDate.setDate(payoutDate.getDate() + 1)
+            payoutDate.setDate(
+              payoutDate.getDate() + 1
+            )
           }
-        }       
+        }     
            
         type PayoutGroup = {
           id: number
@@ -6099,7 +6135,16 @@ if (holidayError) {
         const payoutGroupMap: Record<string, PayoutGroup> = {}
         
         ;(payments || []).forEach((row: any) => {
-          const payoutDate = getPayoutDate(row.created_at)
+          const settlementCycle =
+  settlementCycleMap.get(
+    Number(row.merchant_id)
+  ) || '1일'
+
+const payoutDate =
+  getPayoutDate(
+    row.created_at,
+    settlementCycle
+  )
         
           const groupKey =
             String(row.merchant_id || '') + '_' + payoutDate
@@ -6160,50 +6205,62 @@ if (holidayError) {
         
         const payoutRows: PayoutGroup[] =
           Object.values(payoutGroupMap)
-    
-        
-        
-      const getFilteredPayoutRows = () => {
-        const pgFilter =
-          (document.querySelector('#payout-pg-filter') as HTMLSelectElement)?.value || '전체'
-    
-        const statusFilter =
-          (document.querySelector('#payout-status-filter') as HTMLSelectElement)?.value || '전체'
-    
-        const keyword =
-          ((document.querySelector('#payout-keyword') as HTMLInputElement)?.value || '').trim()
-    
-        return payoutRows.filter((row) => {
-          if (row.payout_hold === true) {
-            return false
+          
+          const getFilteredPayoutRows = () => {
+            const pgFilter =
+              (document.querySelector('#payout-pg-filter') as HTMLSelectElement)?.value || '전체'
+          
+            const statusFilter =
+              (document.querySelector('#payout-status-filter') as HTMLSelectElement)?.value || '전체'
+          
+            const keyword =
+              ((document.querySelector('#payout-keyword') as HTMLInputElement)?.value || '').trim()
+          
+            const startDate =
+              (document.querySelector('#payout-start-date') as HTMLInputElement)?.value || ''
+          
+            const endDate =
+              (document.querySelector('#payout-end-date') as HTMLInputElement)?.value || ''
+          
+            return payoutRows.filter((row) => {
+              if (row.payout_hold === true) {
+                return false
+              }
+          
+              const payoutStatus = row.payout_status || '출금대기'
+          
+              if (pgFilter !== '전체' && row.pg_company !== pgFilter) {
+                return false
+              }
+          
+              if (statusFilter !== '전체' && payoutStatus !== statusFilter) {
+                return false
+              }
+          
+              if (startDate && row.payout_date < startDate) {
+                return false
+              }
+          
+              if (endDate && row.payout_date > endDate) {
+                return false
+              }
+          
+              if (keyword) {
+                const searchText =
+                  String(row.merchant_id || '') + ' ' +
+                  String(row.merchant_name || '') + ' ' +
+                  String(row.pg_company || '') + ' ' +
+                  String(row.order_id || '') + ' ' +
+                  String(row.payment_key || '')
+          
+                if (!searchText.includes(keyword)) {
+                  return false
+                }
+              }
+          
+              return true
+            })
           }
-
-          const payoutStatus = row.payout_status || '출금대기'
-    
-          if (pgFilter !== '전체' && row.pg_company !== pgFilter) {
-            return false
-          }
-    
-          if (statusFilter !== '전체' && payoutStatus !== statusFilter) {
-            return false
-          }
-    
-          if (keyword) {
-            const searchText =
-              String(row.merchant_id || '') + ' ' +
-              String(row.merchant_name || '') + ' ' +
-              String(row.pg_company || '') + ' ' +
-              String(row.order_id || '') + ' ' +
-              String(row.payment_key || '')
-    
-            if (!searchText.includes(keyword)) {
-              return false
-            }
-          }
-    
-          return true
-        })
-      }
 
       const renderPayoutTable = () => {
         const filteredRows = getFilteredPayoutRows()
