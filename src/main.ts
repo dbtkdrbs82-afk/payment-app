@@ -12466,7 +12466,14 @@ document.querySelector('#pay-link-btn')
     <option value="00">일시불</option>
     <option value="02">2개월</option>
     <option value="03">3개월</option>
+    <option value="04">4개월</option>
+    <option value="05">5개월</option>
     <option value="06">6개월</option>
+    <option value="07">7개월</option>
+    <option value="08">8개월</option>
+    <option value="09">9개월</option>
+    <option value="10">10개월</option>
+    <option value="11">11개월</option>
     <option value="12">12개월</option>
   </select>
 
@@ -12503,6 +12510,34 @@ if (amountInput && savedCardPaymentAmount) {
   amountInput.value = savedCardPaymentAmount
   amountInput.readOnly = true
 }
+
+const savedCardPaymentItems =
+  sessionStorage.getItem('card_payment_items') || '[]'
+
+const savedItems = JSON.parse(savedCardPaymentItems)
+
+const productNameInput =
+  document.querySelector<HTMLInputElement>(
+    '#ocr-product-name'
+  )
+
+if (
+  productNameInput &&
+  Array.isArray(savedItems) &&
+  savedItems.length > 0
+) {
+  productNameInput.value =
+    savedItems
+      .map((item: any) =>
+        String(item.name || item.product_name || '상품') +
+        ' x ' +
+        Number(item.quantity || 1)
+      )
+      .join(', ')
+
+  productNameInput.readOnly = true
+}
+
       
           document.querySelector('#ocr-card-image')
           ?.addEventListener('change', async (e: any) => {
