@@ -5898,3 +5898,50 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
 #payout-next-top {
   min-width: 90px;
 }
+.kiosk-payment-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.kiosk-app-pay-button,
+.kiosk-card-pay-button {
+  flex: 1;
+  height: 54px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.kiosk-app-pay-button {
+  background: #eef7ff;
+  border: 1px solid #bddcff;
+  color: #205ca8;
+}
+
+.kiosk-card-pay-button {
+  background: #effaf5;
+  border: 1px solid #bfe4d1;
+  color: #247050;
+}
+
+.kiosk-app-pay-button:hover {
+  background: #e1f0ff;
+}
+
+.kiosk-card-pay-button:hover {
+  background: #e2f5eb;
+}
+
+@media (max-width: 600px) {
+  .kiosk-payment-buttons {
+    gap: 8px;
+  }
+
+  .kiosk-app-pay-button,
+  .kiosk-card-pay-button {
+    height: 50px;
+    font-size: 14px;
+  }
+}

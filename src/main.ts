@@ -13020,7 +13020,7 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
     <button
       class="kiosk-app-pay-button"
       id="kiosk-app-pay-button">
-      📱 앱 · 삼성페이 결제
+      📱 QR · 앱 결제
     </button>
 
     <button
@@ -13161,8 +13161,8 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
           })
         })
 
-        document.querySelector<HTMLButtonElement>('#kiosk-pay-button')!
-  .addEventListener('click', async () => {
+        document.querySelector<HTMLButtonElement>('#kiosk-app-pay-button')!
+        .addEventListener('click', async () => {
     console.log('결제 버튼 클릭됨')
       
     const totalPrice = cart.reduce(
@@ -13257,7 +13257,7 @@ if (selectedPg === '코페이') {
     paymentData,
     {
       onStart: () => {
-        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-app-pay-button')
         if (payButton) {
           payButton.disabled = true
           payButton.innerText = '결제창 호출 중...'
@@ -13265,17 +13265,17 @@ if (selectedPg === '코페이') {
       },
       onError: (err: any) => {
         alert(String(err))
-        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-app-pay-button')
         if (payButton) {
           payButton.disabled = false
           payButton.innerText = '결제하기'
         }
       },
       onClose: () => {
-        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-pay-button')
+        const payButton = document.querySelector<HTMLButtonElement>('#kiosk-app-pay-button')
         if (payButton) {
           payButton.disabled = false
-          payButton.innerText = '결제하기'
+          payButton.innerText = '📱 QR · 앱 결제'
         }
       },
     }
@@ -13287,6 +13287,30 @@ if (selectedPg === '코페이') {
 alert('사용 PG사가 설정되지 않았습니다.')
 return
 })        
+
+document.querySelector('#kiosk-card-pay-button')
+  ?.addEventListener('click', () => {
+    const params =
+      new URLSearchParams(window.location.search)
+
+    const merchantId =
+      params.get('merchant_id') || ''
+
+    if (!merchantId) {
+      alert('가맹점 정보를 찾을 수 없습니다.')
+      return
+    }
+
+    sessionStorage.setItem(
+      'card_payment_merchant_id',
+      merchantId
+    )
+
+    location.href =
+      '/merchant-card?merchant_id=' +
+      encodeURIComponent(merchantId)
+  })
+  
 }
     } else if (path === '/kiosk-success') {
       const orderNo = sessionStorage.getItem('kiosk_order_no')
