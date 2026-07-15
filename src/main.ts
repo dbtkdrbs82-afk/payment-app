@@ -13307,10 +13307,10 @@ document.querySelector('#kiosk-card-pay-button')
     )
 
     location.href =
-      '/merchant-card?merchant_id=' +
-      encodeURIComponent(merchantId)
+  '/merchant-card-ocr?mode=ocr&merchant_id=' +
+  encodeURIComponent(merchantId)
   })
-  
+
 }
     } else if (path === '/kiosk-success') {
       const orderNo = sessionStorage.getItem('kiosk_order_no')
