@@ -12533,23 +12533,63 @@ document.querySelector('#pay-link-btn')
             )
         
             const text = result.data.text
-            alert(text)
 
-const cardNumberMatch =
-  text.match(/\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}/)
+const normalizedText = text
+  .replace(/[Oo]/g, '0')
+  .replace(/[Il|]/g, '1')
 
-  if (cardNumberMatch) {
-    const cardNumberInput =
-      document.querySelector<HTMLInputElement>('#ocr-card-number')
-  
-    if (cardNumberInput) {
-      cardNumberInput.value = cardNumberMatch[0].replace(/\D/g, '')
-    }
-  
-    alert('카드번호를 인식했습니다.')
-  } else {
-    alert('카드번호를 찾지 못했습니다. 직접 입력해주세요.')
-  }
+const cardNumberCandidates =
+  normalizedText.match(/(?:\d[\s-]?){13,19}/g) || []
+
+const cardNumber =
+  cardNumberCandidates
+    .map((value) => value.replace(/\D/g, ''))
+    .find((value) => value.length >= 13 && value.length <= 19)
+
+const expiryMatch =
+  normalizedText.match(
+    /\b(0[1-9]|1[0-2])[\s\/.-]?(\d{2})\b/
+  )
+
+const cardNumberInput =
+  document.querySelector<HTMLInputElement>(
+    '#ocr-card-number'
+  )
+
+const expMonthInput =
+  document.querySelector<HTMLInputElement>(
+    '#ocr-exp-month'
+  )
+
+const expYearInput =
+  document.querySelector<HTMLInputElement>(
+    '#ocr-exp-year'
+  )
+
+let recognizedCount = 0
+
+if (cardNumber && cardNumberInput) {
+  cardNumberInput.value = cardNumber
+  recognizedCount += 1
+}
+
+if (expiryMatch && expMonthInput && expYearInput) {
+  expMonthInput.value = expiryMatch[1]
+  expYearInput.value = expiryMatch[2]
+  recognizedCount += 1
+}
+
+if (recognizedCount === 2) {
+  alert('카드번호와 유효기간을 인식했습니다.')
+} else if (recognizedCount === 1) {
+  alert(
+    '일부 정보만 인식했습니다. 나머지는 직접 입력해주세요.'
+  )
+} else {
+  alert(
+    '카드정보를 인식하지 못했습니다. 직접 입력해주세요.'
+  )
+}
           })
 
           document.querySelector('#ocr-payment-submit')
