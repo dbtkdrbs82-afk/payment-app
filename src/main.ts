@@ -12537,7 +12537,6 @@ if (
 
   productNameInput.readOnly = true
 }
-
       
           document.querySelector('#ocr-card-image')
           ?.addEventListener('change', async (e: any) => {
