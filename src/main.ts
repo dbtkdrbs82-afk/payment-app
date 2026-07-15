@@ -12493,105 +12493,118 @@ document.querySelector('#pay-link-btn')
             location.href = '/merchant-card'
           })
       
-        document.querySelector('#ocr-card-image')
-          ?.addEventListener('change', (e: any) => {
-      
+          document.querySelector('#ocr-card-image')
+          ?.addEventListener('change', async (e: any) => {
             const file = e.target.files?.[0]
+        
             if (!file) return
-      
+        
             const reader = new FileReader()
-      
-            reader.onload = (event) => {
-              const img =
-                document.querySelector<HTMLImageElement>('#ocr-preview-image')
-      
-              if (!img) return
-      
-              img.src = String(event.target?.result)
-              img.style.display = 'block'
+        
+            reader.onload = async (event) => {
+              const image =
+                document.querySelector<HTMLImageElement>(
+                  '#ocr-preview-image'
+                )
+        
+              if (!image) return
+        
+              image.src = String(event.target?.result)
+              image.style.display = 'block'
+        
+              alert('카드 인식 중입니다. 잠시만 기다려주세요.')
+        
+              try {
+                const result = await Tesseract.recognize(
+                  image.src,
+                  'eng'
+                )
+        
+                const text = result.data.text
+        
+                const normalizedText = text
+                  .replace(/[Oo]/g, '0')
+                  .replace(/[Il|]/g, '1')
+        
+                const cardNumberCandidates =
+                  normalizedText.match(
+                    /(?:\d[\s-]?){13,19}/g
+                  ) || []
+        
+                const cardNumber =
+                  cardNumberCandidates
+                    .map((value) =>
+                      value.replace(/\D/g, '')
+                    )
+                    .find(
+                      (value) =>
+                        value.length >= 13 &&
+                        value.length <= 19
+                    )
+        
+                const expiryMatch =
+                  normalizedText.match(
+                    /\b(0[1-9]|1[0-2])[\s\/.-]?(\d{2})\b/
+                  )
+        
+                const cardNumberInput =
+                  document.querySelector<HTMLInputElement>(
+                    '#ocr-card-number'
+                  )
+        
+                const expMonthInput =
+                  document.querySelector<HTMLInputElement>(
+                    '#ocr-exp-month'
+                  )
+        
+                const expYearInput =
+                  document.querySelector<HTMLInputElement>(
+                    '#ocr-exp-year'
+                  )
+        
+                let recognizedCount = 0
+        
+                if (cardNumber && cardNumberInput) {
+                  cardNumberInput.value = cardNumber
+                  recognizedCount += 1
+                }
+        
+                if (
+                  expiryMatch &&
+                  expMonthInput &&
+                  expYearInput
+                ) {
+                  expMonthInput.value = expiryMatch[1]
+                  expYearInput.value = expiryMatch[2]
+                  recognizedCount += 1
+                }
+        
+                if (recognizedCount === 2) {
+                  alert(
+                    '카드번호와 유효기간을 인식했습니다.'
+                  )
+                } else if (recognizedCount === 1) {
+                  alert(
+                    '일부 정보만 인식했습니다. 나머지는 직접 입력해주세요.'
+                  )
+                } else {
+                  alert(
+                    '카드정보를 인식하지 못했습니다. 직접 입력해주세요.'
+                  )
+                }
+              } catch (error) {
+                console.error('OCR 인식 오류:', error)
+        
+                alert(
+                  '카드 인식 중 오류가 발생했습니다. 직접 입력해주세요.'
+                )
+              }
             }
-      
+        
             reader.readAsDataURL(file)
           })
-      
-          document.querySelector('#ocr-start-btn')
-          ?.addEventListener('click', async () => {
         
-            const image =
-              document.querySelector<HTMLImageElement>('#ocr-preview-image')
-        
-            if (!image?.src) {
-              alert('카드를 먼저 촬영해주세요.')
-              return
-            }
-        
-            alert('카드 인식 중입니다. 잠시만 기다려주세요.')
-        
-            const result = await Tesseract.recognize(
-              image.src,
-              'eng'
-            )
-        
-            const text = result.data.text
-
-const normalizedText = text
-  .replace(/[Oo]/g, '0')
-  .replace(/[Il|]/g, '1')
-
-const cardNumberCandidates =
-  normalizedText.match(/(?:\d[\s-]?){13,19}/g) || []
-
-const cardNumber =
-  cardNumberCandidates
-    .map((value) => value.replace(/\D/g, ''))
-    .find((value) => value.length >= 13 && value.length <= 19)
-
-const expiryMatch =
-  normalizedText.match(
-    /\b(0[1-9]|1[0-2])[\s\/.-]?(\d{2})\b/
-  )
-
-const cardNumberInput =
-  document.querySelector<HTMLInputElement>(
-    '#ocr-card-number'
-  )
-
-const expMonthInput =
-  document.querySelector<HTMLInputElement>(
-    '#ocr-exp-month'
-  )
-
-const expYearInput =
-  document.querySelector<HTMLInputElement>(
-    '#ocr-exp-year'
-  )
-
-let recognizedCount = 0
-
-if (cardNumber && cardNumberInput) {
-  cardNumberInput.value = cardNumber
-  recognizedCount += 1
-}
-
-if (expiryMatch && expMonthInput && expYearInput) {
-  expMonthInput.value = expiryMatch[1]
-  expYearInput.value = expiryMatch[2]
-  recognizedCount += 1
-}
-
-if (recognizedCount === 2) {
-  alert('카드번호와 유효기간을 인식했습니다.')
-} else if (recognizedCount === 1) {
-  alert(
-    '일부 정보만 인식했습니다. 나머지는 직접 입력해주세요.'
-  )
-} else {
-  alert(
-    '카드정보를 인식하지 못했습니다. 직접 입력해주세요.'
-  )
-}
-          })
-
+           
           document.querySelector('#ocr-payment-submit')
           ?.addEventListener('click', async () => {
             const merchantId =
