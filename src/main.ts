@@ -12492,6 +12492,17 @@ document.querySelector('#pay-link-btn')
           ?.addEventListener('click', () => {
             location.href = '/merchant-card'
           })
+
+          const savedCardPaymentAmount =
+  sessionStorage.getItem('card_payment_amount') || ''
+
+const amountInput =
+  document.querySelector<HTMLInputElement>('#ocr-amount')
+
+if (amountInput && savedCardPaymentAmount) {
+  amountInput.value = savedCardPaymentAmount
+  amountInput.readOnly = true
+}
       
           document.querySelector('#ocr-card-image')
           ?.addEventListener('change', async (e: any) => {
@@ -13304,6 +13315,22 @@ document.querySelector('#kiosk-card-pay-button')
     sessionStorage.setItem(
       'card_payment_merchant_id',
       merchantId
+    )
+
+    sessionStorage.setItem(
+      'card_payment_items',
+      JSON.stringify(cart)
+    )
+    
+    sessionStorage.setItem(
+      'card_payment_amount',
+      String(
+        cart.reduce(
+          (sum, item) =>
+            sum + item.price * item.quantity,
+          0
+        )
+      )
     )
 
     location.href =
