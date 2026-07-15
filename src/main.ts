@@ -13015,9 +13015,21 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
     <strong id="cart-total-price-bottom">0원</strong>
   </div>
 
-  <button class="gold-button" id="kiosk-pay-button">
-    결제하기
-  </button>
+  <div class="kiosk-payment-buttons">
+
+    <button
+      class="kiosk-app-pay-button"
+      id="kiosk-app-pay-button">
+      📱 앱 · 삼성페이 결제
+    </button>
+
+    <button
+      class="kiosk-card-pay-button"
+      id="kiosk-card-pay-button">
+      💳 카드 결제
+    </button>
+
+  </div>
 </div>
             </div>
           </div>
