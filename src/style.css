@@ -5951,12 +5951,13 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   justify-content: center;
   gap: 12px;
   margin-left: auto;
+  margin-right: 12px;
 }
 
 #merchant-pagination button {
   width: auto;
   min-width: 80px;
-  height: 40px;
+  height: 42px;
   padding: 0 20px;
   border: none;
   border-radius: 6px;
