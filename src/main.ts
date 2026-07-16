@@ -5199,68 +5199,7 @@ const rejectedCount =
       alert('가입신청 링크가 복사되었습니다.')
     })
       
-    document.querySelector('#merchant-pagination')?.remove()
-
-
-
-    const merchantPagination =
-      document.createElement('div')
     
-    merchantPagination.id = 'merchant-pagination'
-    merchantPagination.className = 'admin-pagination'
-    
-    merchantPagination.innerHTML =
-      '<button id="merchant-prev-page"' +
-        (merchantCurrentPage <= 1 ? ' disabled' : '') +
-        '>이전</button>' +
-    
-      '<span>' +
-        merchantCurrentPage +
-        ' / ' +
-        totalMerchantPages +
-      '</span>' +
-    
-      '<button id="merchant-next-page"' +
-        (
-          merchantCurrentPage >= totalMerchantPages
-            ? ' disabled'
-            : ''
-         ) +
-    '>다음</button>'
-      
-      const merchantTableBox =
-      document.querySelector('.admin-table')
-    
-    merchantTableBox?.insertAdjacentElement(
-      'afterend',
-      merchantPagination
-    )
-    
-    document.querySelector('#merchant-prev-page')
-      ?.addEventListener('click', () => {
-        if (merchantCurrentPage <= 1) return
-    
-        sessionStorage.setItem(
-          'merchant_admin_page',
-          String(merchantCurrentPage - 1)
-        )
-    
-        location.reload()
-      })
-    
-    document.querySelector('#merchant-next-page')
-      ?.addEventListener('click', () => {
-        if (
-          merchantCurrentPage >= totalMerchantPages
-        ) return
-    
-        sessionStorage.setItem(
-          'merchant_admin_page',
-          String(merchantCurrentPage + 1)
-        )
-    
-        location.reload()
-      })
 
       if (tableHead) {
         tableHead.innerHTML =
