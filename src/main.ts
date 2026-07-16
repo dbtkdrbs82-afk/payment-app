@@ -12556,6 +12556,8 @@ if (
         
               image.src = String(event.target?.result)
               image.style.display = 'block'
+
+              await image.decode()
         
               alert('카드 인식 중입니다. 잠시만 기다려주세요.')
         
