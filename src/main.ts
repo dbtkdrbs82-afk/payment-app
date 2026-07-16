@@ -5103,6 +5103,42 @@ if (keyword) {
   })
 }
 
+const savedAdminPageSize =
+  sessionStorage.getItem('admin_page_size') || '20'
+
+const adminPageSize =
+  Number(savedAdminPageSize) || 20
+
+const sortedMerchants = [...merchants].sort(
+  (a, b) => Number(b.id || 0) - Number(a.id || 0)
+)
+
+const totalMerchantPages =
+  Math.max(
+    1,
+    Math.ceil(sortedMerchants.length / adminPageSize)
+  )
+
+let merchantCurrentPage =
+  Number(
+    sessionStorage.getItem('merchant_admin_page') || '1'
+  )
+
+if (
+  merchantCurrentPage < 1 ||
+  merchantCurrentPage > totalMerchantPages
+) {
+  merchantCurrentPage = 1
+}
+
+const merchantStartIndex =
+  (merchantCurrentPage - 1) * adminPageSize
+
+merchants = sortedMerchants.slice(
+  merchantStartIndex,
+  merchantStartIndex + adminPageSize
+)
+
       const summaryBox = document.querySelector('.admin-summary')
       
       const tableHead = document.querySelector('.admin-table thead')
@@ -5163,6 +5199,71 @@ const rejectedCount =
       alert('가입신청 링크가 복사되었습니다.')
     })
       
+    document.querySelector('#merchant-pagination')?.remove()
+
+    const merchantPagination =
+      document.createElement('div')
+    
+    merchantPagination.id = 'merchant-pagination'
+    merchantPagination.className = 'admin-pagination'
+    
+    merchantPagination.innerHTML =
+      '<button id="merchant-prev-page"' +
+        (merchantCurrentPage <= 1 ? ' disabled' : '') +
+      '>' +
+        '이전' +
+      '</button>' +
+    
+      '<span>' +
+        merchantCurrentPage +
+        ' / ' +
+        totalMerchantPages +
+      '</span>' +
+    
+      '<button id="merchant-next-page"' +
+        (
+          merchantCurrentPage >= totalMerchantPages
+            ? ' disabled'
+            : ''
+        ) +
+      '>' +
+        '다음' +
+      '</button>'
+    
+    const merchantTable =
+      paymentTableBody.closest('table')
+    
+    merchantTable?.insertAdjacentElement(
+      'afterend',
+      merchantPagination
+    )
+    
+    document.querySelector('#merchant-prev-page')
+      ?.addEventListener('click', () => {
+        if (merchantCurrentPage <= 1) return
+    
+        sessionStorage.setItem(
+          'merchant_admin_page',
+          String(merchantCurrentPage - 1)
+        )
+    
+        location.reload()
+      })
+    
+    document.querySelector('#merchant-next-page')
+      ?.addEventListener('click', () => {
+        if (
+          merchantCurrentPage >= totalMerchantPages
+        ) return
+    
+        sessionStorage.setItem(
+          'merchant_admin_page',
+          String(merchantCurrentPage + 1)
+        )
+    
+        location.reload()
+      })
+
       if (tableHead) {
         tableHead.innerHTML =
           '<tr>' +
@@ -5179,27 +5280,15 @@ const rejectedCount =
       
       paymentTableBody.innerHTML = ''
       
-      const savedAdminPageSize =
-  sessionStorage.getItem('admin_page_size') || '20'
-
-const pageSizeSelect =
-  document.querySelector('#admin-page-size') as HTMLSelectElement | null
-
-if (pageSizeSelect) {
-  pageSizeSelect.value = savedAdminPageSize
-}
-
-const adminPageSize =
-  Number(savedAdminPageSize) || 20
-
-merchants
-  .slice(0, adminPageSize)
-  .forEach((merchant, index) => {
+     
+  
+      merchants
+      .forEach((merchant, index) => {
        
     const tr = document.createElement('tr')
       
         tr.innerHTML =
-  '<td>' + (index + 1) + '</td>' +
+  '<td>' + (merchantStartIndex + index + 1) + '</td>'
   '<td><button class="merchant-link-btn" data-id="' + merchant.id + '">MER' + String(merchant.id).padStart(4, '0') + '</button></td>' +
 '<td><button class="merchant-link-btn" data-id="' + merchant.id + '">' + (merchant.merchant_name || '-') + '</button></td>' +
   '<td>' + (merchant.owner_name || '-') + '</td>' +
