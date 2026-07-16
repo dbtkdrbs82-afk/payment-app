@@ -12607,8 +12607,8 @@ const result = await Tesseract.recognize(
         
                 const text = result.data.text
                 
-                alert('OCR 원문:\n' + text)
-        
+                console.log('OCR 원문:', text)
+                                      
                 const normalizedText = text
                   .replace(/[Oo]/g, '0')
                   .replace(/[Il|]/g, '1')
