@@ -5945,3 +5945,35 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     font-size: 14px;
   }
 }
+#merchant-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+#merchant-pagination button {
+  width: auto;
+  min-width: 80px;
+  height: 40px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 6px;
+  background: #18477f;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#merchant-pagination button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#merchant-pagination span {
+  min-width: 55px;
+  text-align: center;
+  font-weight: 700;
+  color: #173f73;
+}
