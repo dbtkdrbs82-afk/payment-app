@@ -12826,7 +12826,7 @@ const result = await Tesseract.recognize(
                 (data.approvalNumber || '-')
               )
         
-              location.href = '/merchant-admin'
+              location.href = '/kiosk-card-success'
             } catch (error) {
               alert(
                 '결제 요청 중 오류가 발생했습니다.'
@@ -13673,6 +13673,79 @@ document.querySelector('#receipt-view-btn')
   })
         }
       }
+
+    } else if (path === '/kiosk-card-success') {
+      const merchantId =
+        sessionStorage.getItem('card_payment_merchant_id')
+    
+      const itemsText =
+        sessionStorage.getItem('card_payment_items')
+    
+      const totalAmount =
+        sessionStorage.getItem('card_payment_amount')
+    
+      const items = itemsText
+        ? JSON.parse(itemsText)
+        : []
+    
+      const callNumber =
+        Math.floor(1 + Math.random() * 99)
+    
+      const orderNo =
+        'CARD-' + callNumber + '-' + Date.now()
+    
+      if (!merchantId || !totalAmount) {
+        app.innerHTML = `
+          <div class="page">
+            <div class="payment-card">
+              <h1>주문 정보가 없습니다.</h1>
+            </div>
+          </div>
+        `
+      } else {
+        const { error } = await supabase
+          .from('orders')
+          .insert({
+            merchant_id: Number(merchantId),
+            order_no: orderNo,
+            items: items,
+            total_amount: Number(totalAmount),
+            order_status: '접수',
+            payment_status: '결제완료'
+          })
+    
+        if (error) {
+          app.innerHTML = `
+            <div class="page">
+              <div class="payment-card">
+                <h1>주문 저장 실패</h1>
+                <p>${error.message}</p>
+              </div>
+            </div>
+          `
+        } else {
+          app.innerHTML = `
+            <div class="page">
+              <div class="payment-card">
+                <h1>결제가 완료되었습니다.</h1>
+                <p>주문번호</p>
+                <div style="
+                  font-size:100px;
+                  font-weight:900;
+                  color:#d4af37;
+                ">
+                  ${callNumber}
+                </div>
+                <p>
+                  결제금액 :
+                  ${Number(totalAmount).toLocaleString()}원
+                </p>
+              </div>
+            </div>
+          `
+        }
+      }
+
     } else if (path === '/member-pay') {
 
       const params = new URLSearchParams(window.location.search)
