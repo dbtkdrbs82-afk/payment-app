@@ -5217,7 +5217,69 @@ const rejectedCount =
       
       paymentTableBody.innerHTML = ''
       
-     
+      document.querySelector('#merchant-pagination')?.remove()
+
+      const merchantPagination =
+        document.createElement('div')
+      
+      merchantPagination.id = 'merchant-pagination'
+      merchantPagination.className = 'admin-pagination'
+      
+      merchantPagination.innerHTML =
+        '<button id="merchant-prev-page"' +
+          (merchantCurrentPage <= 1 ? ' disabled' : '') +
+        '>' +
+          '이전' +
+        '</button>' +
+      
+        '<span>' +
+          merchantCurrentPage +
+          ' / ' +
+          totalMerchantPages +
+        '</span>' +
+      
+        '<button id="merchant-next-page"' +
+          (
+            merchantCurrentPage >= totalMerchantPages
+              ? ' disabled'
+              : ''
+          ) +
+        '>' +
+          '다음' +
+        '</button>'
+      
+      const merchantTableTop =
+        document.querySelector('.admin-table-top')
+      
+      merchantTableTop?.appendChild(
+        merchantPagination
+      )
+      
+      document.querySelector('#merchant-prev-page')
+        ?.addEventListener('click', () => {
+          if (merchantCurrentPage <= 1) return
+      
+          sessionStorage.setItem(
+            'merchant_admin_page',
+            String(merchantCurrentPage - 1)
+          )
+      
+          location.reload()
+        })
+      
+      document.querySelector('#merchant-next-page')
+        ?.addEventListener('click', () => {
+          if (
+            merchantCurrentPage >= totalMerchantPages
+          ) return
+      
+          sessionStorage.setItem(
+            'merchant_admin_page',
+            String(merchantCurrentPage + 1)
+          )
+      
+          location.reload()
+        })
   
       merchants
       .forEach((merchant, index) => {
