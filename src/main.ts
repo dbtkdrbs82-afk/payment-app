@@ -12560,10 +12560,48 @@ if (
               alert('카드 인식 중입니다. 잠시만 기다려주세요.')
         
               try {
-                const result = await Tesseract.recognize(
-                  image.src,
-                  'eng'
-                )
+
+                const canvas = document.createElement('canvas')
+const ctx = canvas.getContext('2d')
+
+if (!ctx) {
+  alert('이미지 처리에 실패했습니다.')
+  return
+}
+
+canvas.width = image.naturalWidth
+canvas.height = image.naturalHeight
+
+ctx.drawImage(image, 0, 0)
+
+const imageData = ctx.getImageData(
+  0,
+  0,
+  canvas.width,
+  canvas.height
+)
+
+const data = imageData.data
+
+for (let i = 0; i < data.length; i += 4) {
+  const gray =
+    data[i] * 0.3 +
+    data[i + 1] * 0.59 +
+    data[i + 2] * 0.11
+
+  const value = gray > 150 ? 255 : 0
+
+  data[i] = value
+  data[i + 1] = value
+  data[i + 2] = value
+}
+
+ctx.putImageData(imageData, 0, 0)
+
+const result = await Tesseract.recognize(
+  canvas,
+  'eng'
+)
         
                 const text = result.data.text
         
