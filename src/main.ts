@@ -5201,6 +5201,8 @@ const rejectedCount =
       
     document.querySelector('#merchant-pagination')?.remove()
 
+
+
     const merchantPagination =
       document.createElement('div')
     
@@ -5210,9 +5212,7 @@ const rejectedCount =
     merchantPagination.innerHTML =
       '<button id="merchant-prev-page"' +
         (merchantCurrentPage <= 1 ? ' disabled' : '') +
-      '>' +
-        '이전' +
-      '</button>' +
+        '>이전</button>' +
     
       '<span>' +
         merchantCurrentPage +
@@ -5225,15 +5225,13 @@ const rejectedCount =
           merchantCurrentPage >= totalMerchantPages
             ? ' disabled'
             : ''
-        ) +
-      '>' +
-        '다음' +
-      '</button>'
+         ) +
+    '>다음</button>'
+      
+      const merchantTableBox =
+      document.querySelector('.admin-table')
     
-    const merchantTable =
-      paymentTableBody.closest('table')
-    
-    merchantTable?.insertAdjacentElement(
+    merchantTableBox?.insertAdjacentElement(
       'afterend',
       merchantPagination
     )
@@ -5736,9 +5734,8 @@ location.reload()
     
 })
 })
-})
-})
-
+      })
+    }) 
 merchantSearchButton?.click()
 }
 
