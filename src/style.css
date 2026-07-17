@@ -939,7 +939,18 @@ button {
 .admin-table-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+}
+
+.admin-table-top > :first-child {
+  margin-right: auto;
+}
+
+#merchant-pagination {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin: 0 auto;
 }
 
 .admin-table-top button {
@@ -5950,8 +5961,6 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   align-items: center;
   gap: 14px;
 
-  margin-left: auto;
-  margin-right: 180px;
 }
 
 #merchant-pagination button {

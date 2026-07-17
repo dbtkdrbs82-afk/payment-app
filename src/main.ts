@@ -5231,6 +5231,7 @@ const rejectedCount =
       
       merchantPagination.id = 'merchant-pagination'
       merchantPagination.className = 'admin-pagination'
+      merchantPagination.style.margin = '0 auto'
       
       merchantPagination.innerHTML =
         '<button id="merchant-prev-page"' +
