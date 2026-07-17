@@ -32,6 +32,8 @@ export default async function handler(
       amount,
       cardNumber,
       expiryYymm,
+      birth,
+      cardPassword,
       installment,
       buyerName,
       goodsName,
@@ -39,11 +41,13 @@ export default async function handler(
     } = req.body || {}
 
     const merchantDbId = Number(merchantId)
-    const goodsAmt = Number(amount)
-    const cardNo = onlyDigits(cardNumber)
-    const expiry = onlyDigits(expiryYymm)
-    const quotaMon = onlyDigits(installment || '00').padStart(2, '0')
-    const ordHp = onlyDigits(customerPhone)
+const goodsAmt = Number(amount)
+const cardNo = onlyDigits(cardNumber)
+const expiry = onlyDigits(expiryYymm)
+const birthNo = onlyDigits(birth)
+const cardPwd = onlyDigits(cardPassword)
+const quotaMon = onlyDigits(installment || '00').padStart(2, '0')
+const ordHp = onlyDigits(customerPhone)
 
     if (!Number.isInteger(merchantDbId) || merchantDbId <= 0) {
       return res.status(400).json({
@@ -70,6 +74,20 @@ export default async function handler(
       return res.status(400).json({
         success: false,
         message: '유효기간은 YYMM 4자리로 입력해주세요.'
+      })
+    }
+
+    if (!/^\d{6}$/.test(birthNo)) {
+      return res.status(400).json({
+        success: false,
+        message: '생년월일은 6자리로 입력해주세요.'
+      })
+    }
+    
+    if (!/^\d{2}$/.test(cardPwd)) {
+      return res.status(400).json({
+        success: false,
+        message: '카드 비밀번호 앞 2자리를 입력해주세요.'
       })
     }
 
@@ -134,19 +152,21 @@ export default async function handler(
       .digest('hex')
       .toLowerCase()
 
-    const korpayRequest = {
-      ordNo,
-      mkey,
-      mid,
-      goodsAmt: String(goodsAmt),
-      cardNo,
-      expireYymm: expiry,
-      quotaMon,
-      buyer_nm: String(buyerName || '구매자').trim(),
-      goodsNm: String(goodsName || '일반 카드결제').trim(),
-      ordHp,
-      hashKey
-    }
+      const korpayRequest = {
+        ordNo,
+        mkey,
+        mid,
+        goodsAmt: String(goodsAmt),
+        cardNo,
+        expireYymm: expiry,
+        birth: birthNo,
+        passwd: cardPwd,
+        quotaMon,
+        buyer_nm: String(buyerName || '구매자').trim(),
+        goodsNm: String(goodsName || '일반 카드결제').trim(),
+        ordHp,
+        hashKey
+      }
 
     const korpayUrl =
       process.env.KORPAY_MANUAL_PAY_URL ||

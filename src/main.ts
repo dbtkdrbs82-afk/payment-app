@@ -5287,7 +5287,7 @@ merchantTableTop?.appendChild(
       
           location.reload()
         })
-        
+
         pageSizeSelect?.addEventListener('change', () => {
           sessionStorage.setItem(
             'admin_page_size',
@@ -12569,6 +12569,25 @@ document.querySelector('#pay-link-btn')
     />
   </div>
 
+  <label>생년월일</label>
+<input
+  id="manual-card-birth"
+  inputmode="numeric"
+  maxlength="6"
+  autocomplete="off"
+  placeholder="생년월일 6자리"
+/>
+
+<label>카드 비밀번호</label>
+<input
+  id="manual-card-password"
+  type="password"
+  inputmode="numeric"
+  maxlength="2"
+  autocomplete="new-password"
+  placeholder="앞 2자리"
+/>
+
   <label>할부방법</label>
   <select id="ocr-installment">
     <option value="00">일시불</option>
@@ -12834,6 +12853,20 @@ const result = await Tesseract.recognize(
                   '#ocr-exp-year'
                 ) as HTMLInputElement
               )?.value || ''
+
+              const birth =
+  (
+    document.querySelector(
+      '#manual-card-birth'
+    ) as HTMLInputElement
+  )?.value.replace(/\D/g, '') || ''
+
+const cardPassword =
+  (
+    document.querySelector(
+      '#manual-card-password'
+    ) as HTMLInputElement
+  )?.value.replace(/\D/g, '') || ''
         
             const installment =
               (
@@ -12866,6 +12899,16 @@ const result = await Tesseract.recognize(
         
             if (!amount || amount <= 0) {
               alert('결제금액을 입력해주세요.')
+              return
+            }
+
+            if (birth.length !== 6) {
+              alert('생년월일 6자리를 입력해주세요.')
+              return
+            }
+            
+            if (cardPassword.length !== 2) {
+              alert('카드 비밀번호 앞 2자리를 입력해주세요.')
               return
             }
         
@@ -12905,6 +12948,8 @@ const result = await Tesseract.recognize(
                     amount,
                     cardNumber,
                     expiryYymm,
+                    birth,
+                    cardPassword,
                     installment,
                     goodsName,
                     customerPhone
