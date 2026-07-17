@@ -5255,12 +5255,12 @@ const rejectedCount =
           '다음' +
         '</button>'
       
-        const merchantTable =
-        document.querySelector('.admin-table')
-      
-      merchantTable?.appendChild(
-        merchantPagination
-      )
+        const merchantTableTop =
+  document.querySelector('.admin-table-top')
+
+merchantTableTop?.appendChild(
+  merchantPagination
+)
       
       document.querySelector('#merchant-prev-page')
         ?.addEventListener('click', () => {
