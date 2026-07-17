@@ -5947,11 +5947,11 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
 }
 #merchant-pagination {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-left: auto;
-  margin-right: 12px;
+  align-items: center;
+  gap: 14px;
+
+  margin: 18px auto;
 }
 
 #merchant-pagination button {
