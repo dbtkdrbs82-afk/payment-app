@@ -5103,11 +5103,18 @@ if (keyword) {
   })
 }
 
+const pageSizeSelect =
+  document.querySelector<HTMLSelectElement>('#admin-page-size')
+
 const savedAdminPageSize =
-  sessionStorage.getItem('admin_page_size') || '20'
+  sessionStorage.getItem('admin_page_size') || '10'
+
+if (pageSizeSelect) {
+  pageSizeSelect.value = savedAdminPageSize
+}
 
 const adminPageSize =
-  Number(savedAdminPageSize) || 20
+  Number(savedAdminPageSize) || 10
 
 const sortedMerchants = [...merchants].sort(
   (a, b) => Number(b.id || 0) - Number(a.id || 0)
@@ -5267,17 +5274,17 @@ const rejectedCount =
           location.reload()
         })
       
-      document.querySelector('#merchant-next-page')
-        ?.addEventListener('click', () => {
-          if (
-            merchantCurrentPage >= totalMerchantPages
-          ) return
-      
+        pageSizeSelect?.addEventListener('change', () => {
+          sessionStorage.setItem(
+            'admin_page_size',
+            pageSizeSelect.value
+          )
+        
           sessionStorage.setItem(
             'merchant_admin_page',
-            String(merchantCurrentPage + 1)
+            '1'
           )
-      
+        
           location.reload()
         })
   
