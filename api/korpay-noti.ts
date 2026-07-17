@@ -262,7 +262,11 @@ if (cancelYN === 'Y') {
     const merchantResponse = await fetch(
       `${supabaseUrl}/rest/v1/merchants` +
         `?select=id,merchant_name,fee_rate,manager_admin_id,manager_admin_name,agency_admin_id,agency_admin_name,branch_admin_id,branch_admin_name` +
-        `&korpay_terminal_mid=eq.${encodeURIComponent(korpayMid)}` +
+        `&or=(` +
+          `korpay_terminal_mid.eq.${encodeURIComponent(korpayMid)},` +
+          `korpay_manual_mid.eq.${encodeURIComponent(korpayMid)},` +
+          `korpay_pg_mid.eq.${encodeURIComponent(korpayMid)}` +
+        `)` +
         `&limit=1`,
       {
         method: 'GET',
@@ -319,7 +323,12 @@ const paymentData = {
       merchant_name: merchant.merchant_name || null,
 
       pg_company: '코페이',
-      payment_method: noti.payMethod || 'CARD',
+      payment_method:
+  merchant.korpay_terminal_mid === korpayMid
+    ? '무선단말기'
+    : merchant.korpay_manual_mid === korpayMid
+    ? '수기결제'
+    : '온라인인증',
 
       approval_number: noti.appNo || null,
       card_company: noti.fnNm || null,

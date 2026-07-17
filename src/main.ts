@@ -12979,7 +12979,7 @@ const cardPassword =
                 (data.approvalNumber || '-')
               )
         
-              location.href = '/kiosk-card-success'
+              location.href = '/merchant-admin'
             } catch (error) {
               alert(
                 '결제 요청 중 오류가 발생했습니다.'

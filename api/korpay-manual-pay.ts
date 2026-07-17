@@ -26,8 +26,8 @@ export default async function handler(
     })
   }
 
-  try {
-    const {
+  try {   
+   const {
       merchantId,
       amount,
       cardNumber,
