@@ -5274,7 +5274,20 @@ merchantTableTop?.appendChild(
       
           location.reload()
         })
+        document.querySelector('#merchant-next-page')
+        ?.addEventListener('click', () => {
+          if (
+            merchantCurrentPage >= totalMerchantPages
+          ) return
       
+          sessionStorage.setItem(
+            'merchant_admin_page',
+            String(merchantCurrentPage + 1)
+          )
+      
+          location.reload()
+        })
+        
         pageSizeSelect?.addEventListener('change', () => {
           sessionStorage.setItem(
             'admin_page_size',
