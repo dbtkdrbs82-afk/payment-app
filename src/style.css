@@ -937,20 +937,22 @@ button {
 }
 
 .admin-table-top {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
 }
 
 .admin-table-top > :first-child {
-  margin-right: auto;
+  justify-self: start;
+  margin-right: 0;
 }
 
 #merchant-pagination {
   display: flex;
   align-items: center;
   gap: 14px;
-
-  margin: 0 auto;
+  margin: 0;
+  justify-self: center;
 }
 
 .admin-table-top button {
