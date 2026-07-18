@@ -9558,6 +9558,47 @@ const averageAmount =
     ? Math.floor(totalSales / (orders || []).length)
     : 0
 
+    let settlementQuery = supabase
+  .from('payments')
+  .select('settlement_amount,payout_status,created_at')
+  .eq('merchant_id', merchantId)
+
+if (startDate && endDate) {
+  settlementQuery = settlementQuery
+    .gte('created_at', startDate + 'T00:00:00')
+    .lte('created_at', endDate + 'T23:59:59')
+}
+
+const {
+  data: settlementPayments,
+  error: settlementError
+} = await settlementQuery
+
+if (settlementError) {
+  console.error(
+    '정산예정금액 조회 실패:',
+    settlementError
+  )
+}
+
+const settlementAmount =
+  (settlementPayments || []).reduce(
+    (sum, payment) => {
+      return (
+        sum +
+        Number(payment.settlement_amount || 0)
+      )
+    },
+    0
+  )
+
+const settlementComplete =
+  (settlementPayments || []).length > 0 &&
+  (settlementPayments || []).every(
+    (payment) =>
+      payment.payout_status === '출금완료'
+  )
+
     const merchantType =
   sessionStorage.getItem('login_merchant_type') || '일반매장'
 
@@ -9787,11 +9828,32 @@ ${merchantContent}
     <span>${totalSales.toLocaleString()}원</span>
   </div>
 
-  <div>
+    <div>
     <strong>평균객단가</strong>
     <span>${averageAmount.toLocaleString()}원</span>
   </div>
+
+  <div>
+    <strong>정산예정금액</strong>
+
+    <span>
+      ${settlementAmount.toLocaleString()}원
+
+      <em class="merchant-settlement-badge ${
+        settlementComplete
+          ? 'is-complete'
+          : 'is-waiting'
+      }">
+        ${
+          settlementComplete
+            ? '완료'
+            : '대기'
+        }
+      </em>
+    </span>
+  </div>
 </div>
+
 
   <div class="order-bottom-toolbar ${isNormalStore ? '' : 'hide-for-type'}">
 
