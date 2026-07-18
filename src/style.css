@@ -5993,3 +5993,9 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   font-weight: 700;
   color: #173f73;
 }
+.merchant-settlement-value {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}

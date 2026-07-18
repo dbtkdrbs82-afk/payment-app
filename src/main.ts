@@ -9836,21 +9836,23 @@ ${merchantContent}
   <div>
     <strong>정산예정금액</strong>
 
-    <span>
-      ${settlementAmount.toLocaleString()}원
+    <span class="merchant-settlement-value">
+  ${settlementAmount.toLocaleString()}원
 
-      <em class="merchant-settlement-badge ${
-        settlementComplete
-          ? 'is-complete'
-          : 'is-waiting'
-      }">
-        ${
-          settlementComplete
-            ? '완료'
-            : '대기'
-        }
-      </em>
-    </span>
+  <span
+    class="${
+      settlementComplete
+        ? 'order-status-complete'
+        : 'order-status-received'
+    }"
+  >
+    ${
+      settlementComplete
+        ? '완료'
+        : '대기'
+    }
+  </span>
+</span>
   </div>
 </div>
 
