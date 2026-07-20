@@ -5916,9 +5916,21 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   min-width: 90px;
 }
 .kiosk-payment-buttons {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
   width: 100%;
+}
+
+.kiosk-payment-buttons button {
+  width: 100%;
+  min-width: 0;
+  height: 56px;
+  padding: 0 12px;
+  box-sizing: border-box;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 800;
 }
 
 .kiosk-app-pay-button,
@@ -5953,6 +5965,7 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
 
 @media (max-width: 600px) {
   .kiosk-payment-buttons {
+    grid-template-columns: 1fr;
     gap: 8px;
   }
 
