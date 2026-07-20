@@ -1526,24 +1526,35 @@ button {
   right: 0;
 
   background: white;
-
-  padding: 12px;
+  padding: 12px 20px;
   border-top: 1px solid #ddd;
 
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
   align-items: center;
+  gap: 16px;
 
+  box-sizing: border-box;
   z-index: 999;
 }
 
 .bottom-total {
   display: flex;
   flex-direction: column;
+  flex: 0 0 180px;
+  white-space: nowrap;
+}
+
+.bottom-total span {
+  font-size: 13px;
+  font-weight: 700;
 }
 
 .bottom-total strong {
+  margin-top: 4px;
   font-size: 22px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 .kiosk-page {
   padding-bottom: 100px;
@@ -5919,7 +5930,7 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  width: 100%;
+  min-width: 0;
 }
 
 .kiosk-payment-buttons button {
@@ -5933,16 +5944,29 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   font-weight: 800;
 }
 
+.kiosk-toss-pay-button,
 .kiosk-app-pay-button,
 .kiosk-card-pay-button {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
   height: 54px;
+  padding: 0 10px;
+  box-sizing: border-box;
   border-radius: 12px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
+  white-space: nowrap;
   cursor: pointer;
 }
+.kiosk-toss-pay-button {
+  background: #1b64da;
+  border: 1px solid #1b64da;
+  color: #fff;
+}
 
+.kiosk-toss-pay-button:hover {
+  background: #1658bf;
+}
 .kiosk-app-pay-button {
   background: #eef7ff;
   border: 1px solid #bddcff;
@@ -5969,8 +5993,9 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     gap: 8px;
   }
 
-  .kiosk-app-pay-button,
-  .kiosk-card-pay-button {
+  .kiosk-toss-pay-button,
+.kiosk-app-pay-button,
+.kiosk-card-pay-button {
     height: 50px;
     font-size: 14px;
   }
