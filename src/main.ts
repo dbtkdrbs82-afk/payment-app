@@ -13155,13 +13155,46 @@ const cardPassword =
                 return
               }
         
-              alert(
-                '결제가 승인되었습니다.\n' +
-                '승인번호: ' +
-                (data.approvalNumber || '-')
-              )
-        
-              location.href = '/merchant-admin'
+              const manualOrderNo =
+  'MANUAL-' +
+  String(data.approvalNumber || Date.now())
+    .replace(/[^a-zA-Z0-9]/g, '')
+
+const { error: orderSaveError } = await supabase
+  .from('orders')
+  .insert({
+    merchant_id: Number(merchantId),
+
+    order_no: manualOrderNo,
+
+    items: [
+      {
+        name: goodsName || '수기결제',
+        price: Number(amount),
+        quantity: 1
+      }
+    ],
+
+    total_amount: Number(amount),
+    order_status: '접수',
+    payment_status: '결제완료'
+  })
+
+if (orderSaveError) {
+  alert(
+    '결제는 승인됐지만 주문 저장에 실패했습니다.\n' +
+    orderSaveError.message
+  )
+  return
+}
+
+alert(
+  '결제가 승인되었습니다.\n' +
+  '승인번호: ' +
+  (data.approvalNumber || '-')
+)
+
+location.href = '/merchant-admin'
             } catch (error) {
               alert(
                 '결제 요청 중 오류가 발생했습니다.'
