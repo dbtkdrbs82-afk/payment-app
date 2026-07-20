@@ -13819,17 +13819,20 @@ if (selectedPg === '코페이') {
       },
       onError: (err: any) => {
         alert(String(err))
+
         const payButton = document.querySelector<HTMLButtonElement>('#kiosk-app-pay-button')
+        
         if (payButton) {
           payButton.disabled = false
-          payButton.innerText = '결제하기'
+          payButton.innerText = '은행앱카드결제'
         }
       },
       onClose: () => {
         const payButton = document.querySelector<HTMLButtonElement>('#kiosk-app-pay-button')
+        
         if (payButton) {
           payButton.disabled = false
-          payButton.innerText = '📱 QR · 앱 결제'
+          payButton.innerText = '은행앱카드결제'
         }
       },
     }
