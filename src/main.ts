@@ -3986,7 +3986,39 @@ paymentTableBody.innerHTML =
           '<div class="merchant-detail-grid">' +
             '<label>등록구분</label><select id="register-type"><option>가맹점</option><option>담당자</option><option>대리점</option></select>' +
             '<label>소속 대리점</label><select id="agency-name"><option>불러오는 중...</option></select>' +
-            '<label>사용 PG사</label><select id="pg-company"><option>다우데이타</option><option>코페이</option><option>토스페이먼츠</option></select>' +
+            '<label>사용 PG사</label>' +
+'<div class="merchant-pg-select-grid">' +
+
+  '<div class="merchant-pg-select-item">' +
+    '<span>온라인결제 1</span>' +
+    '<select id="online-pg-company-1">' +
+      '<option value="">사용안함</option>' +
+      '<option value="토스페이먼츠">토스페이먼츠</option>' +
+      '<option value="코페이">코페이</option>' +
+      '<option value="다우데이타">다우데이타</option>' +
+    '</select>' +
+  '</div>' +
+
+  '<div class="merchant-pg-select-item">' +
+    '<span>온라인결제 2</span>' +
+    '<select id="online-pg-company-2">' +
+      '<option value="">사용안함</option>' +
+      '<option value="토스페이먼츠">토스페이먼츠</option>' +
+      '<option value="코페이">코페이</option>' +
+      '<option value="다우데이타">다우데이타</option>' +
+    '</select>' +
+  '</div>' +
+
+  '<div class="merchant-pg-select-item">' +
+    '<span>수기결제</span>' +
+    '<select id="manual-pg-company">' +
+      '<option value="">사용안함</option>' +
+      '<option value="코페이">코페이</option>' +
+      '<option value="다우데이타">다우데이타</option>' +
+    '</select>' +
+  '</div>' +
+
+'</div>' +
             '<label>회사구분</label><select id="company-type"><option>개인(일반)</option><option>개인사업자</option><option>법인사업자</option></select>' +
             '<label>CPID</label><input id="cpid" placeholder="자동생성 또는 직접입력" />' +
             '<label>사업자번호</label><input id="business_number" />' +
@@ -4131,7 +4163,32 @@ const address = (document.querySelector<HTMLInputElement>('#address')?.value || 
 const addressDetail = (document.querySelector<HTMLInputElement>('#address_detail')?.value || '').trim()
 const registerType = (document.querySelector<HTMLSelectElement>('#register-type')?.value || '').trim()
 const agencyName = (document.querySelector<HTMLSelectElement>('#agency-name')?.value || '').trim()
-const pgCompany = (document.querySelector<HTMLSelectElement>('#pg-company')?.value || '').trim()
+const onlinePgCompany1 =
+  (
+    document.querySelector<HTMLSelectElement>(
+      '#online-pg-company-1'
+    )?.value || ''
+  ).trim()
+
+const onlinePgCompany2 =
+  (
+    document.querySelector<HTMLSelectElement>(
+      '#online-pg-company-2'
+    )?.value || ''
+  ).trim()
+
+const manualPgCompany =
+  (
+    document.querySelector<HTMLSelectElement>(
+      '#manual-pg-company'
+    )?.value || ''
+  ).trim()
+
+const pgCompany =
+  onlinePgCompany1 ||
+  onlinePgCompany2 ||
+  manualPgCompany ||
+  ''
 const companyType = (document.querySelector<HTMLSelectElement>('#company-type')?.value || '').trim()
 const merchantStatus = (document.querySelector<HTMLSelectElement>('#status')?.value || '').trim()
 const merchantType =(document.querySelector('#merchant-type') as HTMLSelectElement)?.value || '일반매장'
@@ -4226,7 +4283,12 @@ if (!merchantName) {
 
   register_type: registerType,
   agency_name: agencyName,
+  
   pg_company: pgCompany,
+  online_pg_company_1: onlinePgCompany1,
+  online_pg_company_2: onlinePgCompany2,
+  manual_pg_company: manualPgCompany,
+  
   company_type: companyType,
   opened_at: openedAt,
   resident_number: residentNumber,
@@ -5375,11 +5437,54 @@ merchantButtons.forEach((button) => {
 '</select>' +
 
 '<label>사용 PG사</label>' +
-'<select id="pg_company">' +
-  '<option ' + (merchant.pg_company === '다우데이타' ? 'selected' : '') + '>다우데이타</option>' +
-  '<option ' + (merchant.pg_company === '코페이' ? 'selected' : '') + '>코페이</option>' +
-  '<option ' + (merchant.pg_company === '토스페이먼츠' ? 'selected' : '') + '>토스페이먼츠</option>' +
-'</select>' +
+'<div class="merchant-pg-select-grid">' +
+
+  '<div class="merchant-pg-select-item">' +
+    '<span>온라인결제 1</span>' +
+    '<select id="online-pg-company-1">' +
+      '<option value="">사용안함</option>' +
+      '<option value="토스페이먼츠" ' +
+        (merchant.online_pg_company_1 === '토스페이먼츠' ? 'selected' : '') +
+      '>토스페이먼츠</option>' +
+      '<option value="코페이" ' +
+        (merchant.online_pg_company_1 === '코페이' ? 'selected' : '') +
+      '>코페이</option>' +
+      '<option value="다우데이타" ' +
+        (merchant.online_pg_company_1 === '다우데이타' ? 'selected' : '') +
+      '>다우데이타</option>' +
+    '</select>' +
+  '</div>' +
+
+  '<div class="merchant-pg-select-item">' +
+    '<span>온라인결제 2</span>' +
+    '<select id="online-pg-company-2">' +
+      '<option value="">사용안함</option>' +
+      '<option value="토스페이먼츠" ' +
+        (merchant.online_pg_company_2 === '토스페이먼츠' ? 'selected' : '') +
+      '>토스페이먼츠</option>' +
+      '<option value="코페이" ' +
+        (merchant.online_pg_company_2 === '코페이' ? 'selected' : '') +
+      '>코페이</option>' +
+      '<option value="다우데이타" ' +
+        (merchant.online_pg_company_2 === '다우데이타' ? 'selected' : '') +
+      '>다우데이타</option>' +
+    '</select>' +
+  '</div>' +
+
+  '<div class="merchant-pg-select-item">' +
+    '<span>수기결제</span>' +
+    '<select id="manual-pg-company">' +
+      '<option value="">사용안함</option>' +
+      '<option value="코페이" ' +
+        (merchant.manual_pg_company === '코페이' ? 'selected' : '') +
+      '>코페이</option>' +
+      '<option value="다우데이타" ' +
+        (merchant.manual_pg_company === '다우데이타' ? 'selected' : '') +
+      '>다우데이타</option>' +
+    '</select>' +
+  '</div>' +
+
+'</div>' +
 
 '<label>회사구분</label>' +
 '<select id="company_type">' +
@@ -5634,9 +5739,22 @@ merchantButtons.forEach((button) => {
   manager_admin_name:
   document.querySelector<HTMLSelectElement>('#manager_admin_id')
     ?.selectedOptions[0]?.textContent || '',
-pg_company: getValue('pg_company'),
-company_type: getValue('company_type'),
-status: getValue('merchant_status'),
+    pg_company:
+    getValue('online-pg-company-1') ||
+    getValue('online-pg-company-2') ||
+    getValue('manual-pg-company'),
+  
+  online_pg_company_1:
+    getValue('online-pg-company-1'),
+  
+  online_pg_company_2:
+    getValue('online-pg-company-2'),
+  
+  manual_pg_company:
+    getValue('manual-pg-company'),
+  
+  company_type: getValue('company_type'),
+  status: getValue('merchant_status'),
 
   resident_number: getValue('resident-number'),
         business_number: getValue('business_number'),
@@ -13321,19 +13439,25 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
 
   <div class="kiosk-payment-buttons">
 
-    <button
-      class="kiosk-app-pay-button"
-      id="kiosk-app-pay-button">
-      📱 QR · 앱 결제
-    </button>
+  <button
+    class="kiosk-toss-pay-button"
+    id="kiosk-toss-pay-button">
+    삼성PAY결제
+  </button>
 
-    <button
-      class="kiosk-card-pay-button"
-      id="kiosk-card-pay-button">
-      💳 카드 결제
-    </button>
+  <button
+    class="kiosk-app-pay-button"
+    id="kiosk-app-pay-button">
+    은행앱카드결제
+  </button>
 
-  </div>
+  <button
+    class="kiosk-card-pay-button"
+    id="kiosk-card-pay-button">
+    수기결제
+  </button>
+
+</div>
 </div>
             </div>
           </div>
