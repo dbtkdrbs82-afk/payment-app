@@ -13589,6 +13589,126 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
           })
         })
 
+        document.querySelector<HTMLButtonElement>('#kiosk-toss-pay-button')
+  ?.addEventListener('click', async () => {
+    const totalPrice = cart.reduce(
+      (sum, item) => sum + item.price * item.quantity,
+      0
+    )
+
+    if (cart.length === 0 || totalPrice <= 0) {
+      alert('상품을 먼저 선택해주세요.')
+      return
+    }
+
+    const { data: tossMerchant, error: tossMerchantError } =
+      await supabase
+        .from('merchants')
+        .select(
+          'merchant_name, online_pg_company_1, toss_client_key'
+        )
+        .eq('id', Number(merchantId))
+        .single()
+
+    if (tossMerchantError || !tossMerchant) {
+      alert('가맹점 토스 결제정보를 불러오지 못했습니다.')
+      return
+    }
+
+    if (tossMerchant.online_pg_company_1 !== '토스페이먼츠') {
+      alert('온라인결제 1이 토스페이먼츠로 설정되지 않았습니다.')
+      return
+    }
+
+    const tossClientKey =
+      String(tossMerchant.toss_client_key || clientKey).trim()
+
+    if (!tossClientKey) {
+      alert('토스 Client Key가 등록되지 않았습니다.')
+      return
+    }
+
+    const callNumber =
+      Math.floor(1 + Math.random() * 99)
+
+    const orderNo =
+      'TOSS-' + callNumber + '-' + Date.now()
+
+    sessionStorage.setItem(
+      'kiosk_call_number',
+      String(callNumber)
+    )
+
+    sessionStorage.setItem(
+      'kiosk_order_no',
+      orderNo
+    )
+
+    sessionStorage.setItem(
+      'kiosk_merchant_id',
+      String(merchantId)
+    )
+
+    sessionStorage.setItem(
+      'kiosk_items',
+      JSON.stringify(cart)
+    )
+
+    sessionStorage.setItem(
+      'kiosk_total_amount',
+      String(totalPrice)
+    )
+
+    sessionStorage.setItem(
+      'merchantId',
+      String(merchantId)
+    )
+
+    sessionStorage.setItem(
+      'merchantName',
+      tossMerchant.merchant_name || ''
+    )
+
+    sessionStorage.setItem(
+      'message',
+      '키오스 PICK 주문'
+    )
+
+    sessionStorage.setItem(
+      'selected_pg_company',
+      '토스페이먼츠'
+    )
+
+    const tossPayments =
+      await loadTossPayments(tossClientKey)
+
+    await tossPayments.requestPayment('카드', {
+      amount: totalPrice,
+
+      orderId:
+        orderNo.replace(/[^a-zA-Z0-9]/g, ''),
+
+      orderName: '키오스 PICK 주문',
+
+      customerName:
+        tossMerchant.merchant_name || '키오스 고객',
+
+      successUrl:
+        window.location.origin +
+        '/success?source=kiosk' +
+        '&pg=토스페이먼츠' +
+        '&merchantId=' +
+        merchantId +
+        '&merchantName=' +
+        encodeURIComponent(
+          tossMerchant.merchant_name || ''
+        ),
+
+      failUrl:
+        window.location.origin + '/fail'
+    })
+  })
+
         document.querySelector<HTMLButtonElement>('#kiosk-app-pay-button')!
         .addEventListener('click', async () => {
     console.log('결제 버튼 클릭됨')
@@ -13614,7 +13734,9 @@ sessionStorage.setItem('kiosk_call_number', String(callNumber))
 
     const { data: payMerchant, error: payMerchantError } = await supabase
   .from('merchants')
-  .select('pg_company, korpay_pg_mid, korpay_pg_mkey, merchant_name')
+  .select(
+    'online_pg_company_2, korpay_pg_mid, korpay_pg_mkey, merchant_name'
+  )
   .eq('id', Number(merchantId))
   .single()
 
@@ -13623,7 +13745,8 @@ if (payMerchantError || !payMerchant) {
   return
 }
 
-const selectedPg = payMerchant.pg_company || '코페이'
+const selectedPg =
+  payMerchant.online_pg_company_2 || '코페이'
 
 if (selectedPg === '토스페이먼츠') {
   const tossPayments = await loadTossPayments(clientKey)
