@@ -6108,23 +6108,24 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   white-space: nowrap;
 }
 
+.payment-mini-summary-card strong {
+  color: #222;
+}
+
 .payment-mini-summary-card span {
   margin-left: 8px;
   font-size: 15px;
   font-weight: 800;
   white-space: nowrap;
+  color: #111;
 }
 
 .payment-mini-summary-card.cancel-request {
-  background: #fff5e6;
-  border-color: #f3c36b;
-  color: #d97706;
+  background: #fff1f1;
+  border: 1px solid #ef4444;
 }
 
-.payment-mini-summary-card.cancel-request strong {
-  color: #b86200;
-}
-
+.payment-mini-summary-card.cancel-request strong,
 .payment-mini-summary-card.cancel-request span {
-  color: #d97706;
+  color: #c62828;
 }
