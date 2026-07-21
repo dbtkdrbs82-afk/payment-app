@@ -2447,7 +2447,8 @@ approved_at: new Date().toISOString()
   
       await supabase.from('orders').insert({
         merchant_id: Number(merchantId),
-        order_no: orderNo,
+        order_no:
+  orderNo.replace(/[^a-zA-Z0-9]/g, ''),
         items,
         total_amount: Number(totalAmount),
         order_status: '접수',

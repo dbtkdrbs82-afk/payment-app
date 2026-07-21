@@ -489,6 +489,48 @@ const paymentData = {
       })
     }
 
+    const savedPayment =
+  Array.isArray(savedData) && savedData.length > 0
+    ? savedData[0]
+    : null
+
+if (savedPayment && noti.ordNo) {
+  const orderUpdateResponse = await fetch(
+    `${supabaseUrl}/rest/v1/orders` +
+      `?order_no=eq.${encodeURIComponent(noti.ordNo)}`,
+    {
+      method: 'PATCH',
+      headers: {
+        ...headers,
+        Prefer: 'return=representation'
+      },
+      body: JSON.stringify({
+        payment_id: savedPayment.id,
+        payment_key: savedPayment.payment_key || tid,
+        approval_number:
+          savedPayment.approval_number ||
+          noti.appNo ||
+          null
+      })
+    }
+  )
+
+  const updatedOrders =
+    await orderUpdateResponse.json()
+
+  if (!orderUpdateResponse.ok) {
+    console.error(
+      'orders 결제정보 연결 실패:',
+      updatedOrders
+    )
+  } else {
+    console.log(
+      'orders 결제정보 연결 완료:',
+      updatedOrders
+    )
+  }
+}
+
     return res.status(200).json({
       result: 'OK',
       saved: true,
