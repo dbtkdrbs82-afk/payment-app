@@ -11010,39 +11010,69 @@ if (orderDate !== today) {
         .single()
       
       if (orderFindError || !canceledOrder) {
-        alert('주문은 취소됐지만 결제정보를 찾지 못했습니다.')
+        alert('주문은 취소됐지만 주문정보를 다시 불러오지 못했습니다.')
         return
       }
       
-      const { error: paymentCancelError } = await supabase
+      const { data: paymentRows, error: paymentFindError } = await supabase
         .from('payments')
-        .update({
-          status: 'cancel',
-          canceled_at: new Date().toISOString(),
-      
-          fee_amount: 0,
-          settlement_amount: 0,
-          settlement_status: '취소',
-      
-          payout_status: '출금제외',
-          payout_excluded: true,
-          payout_excluded_reason: reason || '가맹점 직접취소'
-        })
+        .select('id, status, amount, merchant_id')
         .eq('merchant_id', Number(canceledOrder.merchant_id))
         .eq('amount', Number(canceledOrder.total_amount))
         .eq('status', 'paid')
         .order('created_at', { ascending: false })
         .limit(1)
       
-      if (paymentCancelError) {
+      if (paymentFindError) {
         alert(
-          '주문은 취소됐지만 관리자 결제내역 반영에 실패했습니다.\n' +
-          paymentCancelError.message
+          '주문은 취소됐지만 관리자 결제정보 조회에 실패했습니다.\n' +
+          paymentFindError.message
         )
         return
       }
       
-      alert('결제취소 처리되었습니다.')
+      const targetPayment =
+        Array.isArray(paymentRows) && paymentRows.length > 0
+          ? paymentRows[0]
+          : null
+      
+      if (!targetPayment) {
+        alert(
+          '주문은 취소됐지만 연결할 승인 결제를 찾지 못했습니다.\n' +
+          '가맹점ID: ' + canceledOrder.merchant_id + '\n' +
+          '금액: ' + Number(canceledOrder.total_amount).toLocaleString() + '원'
+        )
+        return
+      }
+      
+      const { data: updatedPayment, error: paymentCancelError } =
+        await supabase
+          .from('payments')
+          .update({
+            status: 'cancel',
+            canceled_at: new Date().toISOString(),
+            fee_amount: 0,
+            settlement_amount: 0,
+            settlement_status: '취소',
+            payout_status: '출금제외'
+          })
+          .eq('id', Number(targetPayment.id))
+          .select('id, status, payout_status')
+          .single()
+      
+      if (paymentCancelError || !updatedPayment) {
+        alert(
+          '주문은 취소됐지만 관리자 결제내역 반영에 실패했습니다.\n' +
+          (paymentCancelError?.message || '수정된 결제정보가 없습니다.')
+        )
+        return
+      }
+      
+      alert(
+        '결제취소 처리되었습니다.\n\n' +
+        '관리자 결제내역: 취소\n' +
+        '출금처리: 출금제외'
+      )
       
       location.reload()
   })
