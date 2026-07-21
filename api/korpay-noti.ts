@@ -218,24 +218,73 @@ if (cancelYN === 'Y') {
   const canceledPayment =
     await cancelResponse.json()
 
-  if (!cancelResponse.ok) {
-    return res.status(500).json({
-      result: 'ERROR',
-      message: '코페이 취소 저장 실패',
-      detail: canceledPayment
+    if (!cancelResponse.ok) {
+      return res.status(500).json({
+        result: 'ERROR',
+        message: '코페이 취소 저장 실패',
+        detail: canceledPayment
+      })
+    }
+  
+    const canceledOrderNo =
+      String(noti.ordNo || '').trim()
+  
+    if (canceledOrderNo) {
+      const orderUpdateResponse = await fetch(
+        `${supabaseUrl}/rest/v1/orders` +
+          `?order_no=eq.${encodeURIComponent(canceledOrderNo)}`,
+        {
+          method: 'PATCH',
+          headers: {
+            ...headers,
+            Prefer: 'return=representation'
+          },
+          body: JSON.stringify({
+            order_status: isFullCancel
+              ? '취소완료'
+              : '부분취소',
+  
+            payment_status: isFullCancel
+              ? '취소완료'
+              : '부분취소',
+  
+            cancel_status: isFullCancel
+              ? '취소완료'
+              : '부분취소',
+  
+            cancel_reason:
+              noti.canMsg ||
+              noti.cancelReason ||
+              '코페이 직접취소',
+  
+            cancel_requested_at:
+              korpayDateToIso(noti.canDtm) ||
+              new Date().toISOString()
+          })
+        }
+      )
+  
+      const updatedOrders =
+        await orderUpdateResponse.json()
+  
+      if (!orderUpdateResponse.ok) {
+        console.error(
+          '코페이 취소 주문 반영 실패:',
+          updatedOrders
+        )
+      }
+    }
+  
+    return res.status(200).json({
+      result: 'OK',
+      canceled: true,
+      fullCancel: isFullCancel,
+      originalTid,
+      cancelTid: tid,
+      cancelAmount,
+      payment: canceledPayment
     })
   }
-
-  return res.status(200).json({
-    result: 'OK',
-    canceled: true,
-    fullCancel: isFullCancel,
-    originalTid,
-    cancelTid: tid,
-    cancelAmount,
-    payment: canceledPayment
-  })
-}
 
 const findResponse = await fetch(
   `${supabaseUrl}/rest/v1/payments` +
