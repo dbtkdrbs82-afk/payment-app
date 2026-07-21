@@ -310,10 +310,11 @@ const feeAmount = Math.round((amount * feeRate) / 100)
 const settlementAmount = amount - feeAmount
 
 const paymentData = {
-      order_id: noti.ordNo || tid,
-      payment_key: tid,
-      pg_order_no: pgOrderNo || null,
-      amount,
+  order_id: noti.ordNo || tid,
+  payment_key: tid,
+  pg_order_no: pgOrderNo || null,
+  pg_mid: korpayMid || null,
+  amount,
       status: cancelYN === 'Y' ? 'cancel' : 'paid',
 
       created_at:
