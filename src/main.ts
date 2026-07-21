@@ -6373,6 +6373,15 @@ branch_admin_name: string
         const payoutGroupMap: Record<string, PayoutGroup> = {}
         
         ;(payments || []).forEach((row: any) => {
+
+          if (
+            row.status === 'cancel' ||
+            row.payout_status === '출금제외' ||
+            row.settlement_status === '취소'
+          ) {
+            return
+          }
+          
           const settlementCycle =
   settlementCycleMap.get(
     Number(row.merchant_id)
