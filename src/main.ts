@@ -2895,6 +2895,7 @@ if (summaryBox) {
        
          payments.forEach((payment, index) => {
            const tr = document.createElement('tr')
+
        
            tr.innerHTML =
              '<td>' + (index + 1) + '</td>' +
@@ -6202,6 +6203,30 @@ rows.forEach((row) => {
         .from('payments')
         .select('*')
         .order('created_at', { ascending: false })
+
+        const { data: cancelRequests, error: cancelRequestError } =
+  await supabase
+    .from('cancel_requests')
+    .select('id, payment_id, status, reason')
+    .eq('status', '요청중')
+
+if (cancelRequestError) {
+  alert(
+    '취소요청 조회 실패: ' +
+    cancelRequestError.message
+  )
+  return
+}
+
+const cancelRequestMap =
+  new Map<number, any>()
+
+;(cancelRequests || []).forEach((request: any) => {
+  cancelRequestMap.set(
+    Number(request.payment_id),
+    request
+  )
+})
         
         const { data: merchantCycles, error: merchantCyclesError } =
   await supabase
@@ -8935,8 +8960,41 @@ if (paymentPageSizeSelect) {
 const adminPageSize = Number(savedPaymentPageSize) || 10
 const visiblePayments = payments.slice(0, adminPageSize)
 
+const { data: paymentCancelRequests, error: paymentCancelRequestError } =
+  await supabase
+    .from('cancel_requests')
+    .select('id, payment_id, status, reason')
+    .eq('status', '요청중')
+
+if (paymentCancelRequestError) {
+  alert(
+    '취소요청 조회 실패: ' +
+    paymentCancelRequestError.message
+  )
+  return
+}
+
+const paymentCancelRequestMap = new Map<number, any>()
+
+;(paymentCancelRequests || []).forEach((request: any) => {
+  paymentCancelRequestMap.set(
+    Number(request.payment_id),
+    request
+  )
+})
+
 visiblePayments.forEach((payment, index) => {
   const tr = document.createElement('tr')
+
+  const cancelRequest =
+    paymentCancelRequestMap.get(Number(payment.id))
+
+  const cancelStatusText =
+    payment.status === 'cancel'
+      ? '취소완료'
+      : cancelRequest
+        ? '취소요청'
+        : '-'
 
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
@@ -8959,7 +9017,7 @@ visiblePayments.forEach((payment, index) => {
 '</td>' +
     '<td>' +
   '<button type="button" class="payment-cancel-link" data-id="' + payment.id + '">' +
-    (payment.status === 'cancel' ? '취소완료' : '-') +
+  cancelStatusText +
     '<br/>' +
     '<span title="' + (payment.payment_key || '-') + '">' +
       ((payment.payment_key || '-').length > 18
