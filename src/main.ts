@@ -6381,7 +6381,7 @@ branch_admin_name: string
           ) {
             return
           }
-          
+
           const settlementCycle =
   settlementCycleMap.get(
     Number(row.merchant_id)
@@ -10955,136 +10955,223 @@ document.querySelector('#close-cancel-modal')
     }
   })
 
-  document.querySelector('#direct-cancel-button')
+ document.querySelector('#direct-cancel-button')
   ?.addEventListener('click', async () => {
     const passwordInput =
-      document.querySelector('#cancel-password') as HTMLInputElement | null
+      document.querySelector<HTMLInputElement>('#cancel-password')
 
     const reasonInput =
-      document.querySelector('#cancel-reason') as HTMLTextAreaElement | null
+      document.querySelector<HTMLTextAreaElement>('#cancel-reason')
 
-    const password = passwordInput?.value || ''
-    const reason = reasonInput?.value || ''
+    const password =
+      (passwordInput?.value || '').trim()
+
+    const reason =
+      (reasonInput?.value || '').trim()
 
     const modal =
-    document.querySelector<HTMLElement>('#cancel-modal')
+      document.querySelector<HTMLElement>('#cancel-modal')
 
-const orderCreatedAt =
-  modal?.getAttribute('data-created-at') || ''
+    const orderCreatedAt =
+      modal?.getAttribute('data-created-at') || ''
 
-const today =
-  new Date().toISOString().slice(0, 10)
+    const today =
+      new Date().toISOString().slice(0, 10)
 
-const orderDate =
-  orderCreatedAt.slice(0, 10)
+    const orderDate =
+      orderCreatedAt.slice(0, 10)
 
-if (orderDate !== today) {
-  alert('당일 결제건만 직접 취소할 수 있습니다.\n본사 승인요청을 이용해주세요.')
-  return
-}
+    if (orderDate !== today) {
+      alert(
+        '당일 결제건만 직접 취소할 수 있습니다.\n' +
+        '본사 승인요청을 이용해주세요.'
+      )
+      return
+    }
 
     if (password !== '1234') {
       alert('취소 비밀번호가 일치하지 않습니다.')
       return
     }
 
+    if (!reason) {
+      alert('취소 사유를 입력해주세요.')
+      return
+    }
+
     const orderId =
-      modal?.getAttribute('data-order-id') || ''
+      Number(
+        modal?.getAttribute('data-order-id') || 0
+      )
 
     if (!orderId) {
       alert('취소할 주문을 찾을 수 없습니다.')
       return
     }
 
-    const { error } = await supabase
-      .from('orders')
-      .update({
-        order_status: '취소완료',
-        payment_status: '취소완료',
-        cancel_status: '취소완료',
-        cancel_reason: reason,
-        cancel_requested_at: new Date().toISOString()
-      })
-      .eq('id', Number(orderId))
+    const directCancelButton =
+      document.querySelector<HTMLButtonElement>(
+        '#direct-cancel-button'
+      )
 
-      if (error) {
-        alert('결제취소 처리 실패: ' + error.message)
+    if (directCancelButton) {
+      directCancelButton.disabled = true
+      directCancelButton.textContent = '취소 처리 중...'
+    }
+
+    try {
+      /* 주문정보 확인 */
+      const { data: order, error: orderFindError } =
+        await supabase
+          .from('orders')
+          .select(
+            'id, merchant_id, total_amount, order_no'
+          )
+          .eq('id', orderId)
+          .single()
+
+      if (orderFindError || !order) {
+        alert('주문정보를 불러오지 못했습니다.')
         return
       }
-      
-      const { data: canceledOrder, error: orderFindError } = await supabase
-        .from('orders')
-        .select('order_no, merchant_id, total_amount')
-        .eq('id', Number(orderId))
-        .single()
-      
-      if (orderFindError || !canceledOrder) {
-        alert('주문은 취소됐지만 주문정보를 다시 불러오지 못했습니다.')
-        return
-      }
-      
-      const { data: paymentRows, error: paymentFindError } = await supabase
-        .from('payments')
-        .select('id, status, amount, merchant_id')
-        .eq('merchant_id', Number(canceledOrder.merchant_id))
-        .eq('amount', Number(canceledOrder.total_amount))
-        .eq('status', 'paid')
-        .order('created_at', { ascending: false })
-        .limit(1)
-      
+
+      /*
+        현재 orders에 payment_id가 없으므로
+        같은 가맹점 + 같은 금액의 가장 최근 승인 건을 찾음.
+      */
+      const { data: paymentRows, error: paymentFindError } =
+        await supabase
+          .from('payments')
+          .select(
+            'id, pg_company, status, amount, created_at'
+          )
+          .eq('merchant_id', Number(order.merchant_id))
+          .eq('amount', Number(order.total_amount))
+          .eq('status', 'paid')
+          .order('created_at', { ascending: false })
+          .limit(1)
+
       if (paymentFindError) {
         alert(
-          '주문은 취소됐지만 관리자 결제정보 조회에 실패했습니다.\n' +
+          '결제정보 조회에 실패했습니다.\n' +
           paymentFindError.message
         )
         return
       }
-      
+
       const targetPayment =
-        Array.isArray(paymentRows) && paymentRows.length > 0
+        Array.isArray(paymentRows) &&
+        paymentRows.length > 0
           ? paymentRows[0]
           : null
-      
+
       if (!targetPayment) {
         alert(
-          '주문은 취소됐지만 연결할 승인 결제를 찾지 못했습니다.\n' +
-          '가맹점ID: ' + canceledOrder.merchant_id + '\n' +
-          '금액: ' + Number(canceledOrder.total_amount).toLocaleString() + '원'
+          '연결된 승인 결제를 찾지 못했습니다.\n' +
+          '가맹점ID: ' + order.merchant_id + '\n' +
+          '금액: ' +
+          Number(order.total_amount).toLocaleString() +
+          '원'
         )
         return
       }
-      
-      const { data: updatedPayment, error: paymentCancelError } =
-        await supabase
-          .from('payments')
-          .update({
-            status: 'cancel',
-            canceled_at: new Date().toISOString(),
-            fee_amount: 0,
-            settlement_amount: 0,
-            settlement_status: '취소',
-            payout_status: '출금제외'
-          })
-          .eq('id', Number(targetPayment.id))
-          .select('id, status, payout_status')
-          .single()
-      
-      if (paymentCancelError || !updatedPayment) {
+
+      if (targetPayment.pg_company !== '코페이') {
         alert(
-          '주문은 취소됐지만 관리자 결제내역 반영에 실패했습니다.\n' +
-          (paymentCancelError?.message || '수정된 결제정보가 없습니다.')
+          '현재 직접취소 API는 코페이 결제만 지원합니다.\n' +
+          '결제 PG사: ' +
+          (targetPayment.pg_company || '-')
         )
         return
       }
-      
-      alert(
-        '결제취소 처리되었습니다.\n\n' +
-        '관리자 결제내역: 취소\n' +
-        '출금처리: 출금제외'
+
+      /* 코페이 실제 취소 API 호출 */
+      const cancelResponse = await fetch(
+        '/api/korpay-cancel',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            paymentId: Number(targetPayment.id),
+            cancelName:
+              sessionStorage.getItem(
+                'login_merchant_name'
+              ) || '가맹점',
+            cancelMessage: reason
+          })
+        }
       )
-      
+
+      const cancelData = await cancelResponse.json()
+
+      if (!cancelResponse.ok || !cancelData.success) {
+        alert(
+          '코페이 실제 취소에 실패했습니다.\n\n' +
+          (cancelData.message || '알 수 없는 오류') +
+          (
+            cancelData.resultCode
+              ? '\n응답코드: ' +
+                cancelData.resultCode
+              : ''
+          )
+        )
+        return
+      }
+
+      /*
+        코페이 취소 성공 후에만
+        가맹점 주문 상태를 취소완료로 변경
+      */
+      const { error: orderCancelError } =
+        await supabase
+          .from('orders')
+          .update({
+            order_status: '취소완료',
+            payment_status: '취소완료',
+            cancel_status: '취소완료',
+            cancel_reason: reason,
+            cancel_requested_at:
+              new Date().toISOString()
+          })
+          .eq('id', orderId)
+
+      if (orderCancelError) {
+        alert(
+          '코페이 결제는 취소됐지만 ' +
+          '주문 상태 수정에 실패했습니다.\n' +
+          orderCancelError.message
+        )
+        return
+      }
+
+      alert(
+        '코페이 결제가 실제 취소되었습니다.\n\n' +
+        '결제관리: 취소\n' +
+        '출금관리: 출금제외'
+      )
+
       location.reload()
+    } catch (error) {
+      console.error(error)
+
+      alert(
+        '취소 처리 중 오류가 발생했습니다.\n' +
+        (
+          error instanceof Error
+            ? error.message
+            : '알 수 없는 오류'
+        )
+      )
+    } finally {
+      if (directCancelButton) {
+        directCancelButton.disabled = false
+        directCancelButton.textContent = '직접 취소'
+      }
+    }
   })
+  
 
       document.querySelector('#merchant-logout')
         ?.addEventListener('click', () => {
