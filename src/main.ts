@@ -10998,14 +10998,53 @@ if (orderDate !== today) {
       })
       .eq('id', Number(orderId))
 
-    if (error) {
-      alert('결제취소 처리 실패: ' + error.message)
-      return
-    }
-
-    alert('결제취소 처리되었습니다.')
-
-    location.reload()
+      if (error) {
+        alert('결제취소 처리 실패: ' + error.message)
+        return
+      }
+      
+      const { data: canceledOrder, error: orderFindError } = await supabase
+        .from('orders')
+        .select('order_no, merchant_id, total_amount')
+        .eq('id', Number(orderId))
+        .single()
+      
+      if (orderFindError || !canceledOrder) {
+        alert('주문은 취소됐지만 결제정보를 찾지 못했습니다.')
+        return
+      }
+      
+      const { error: paymentCancelError } = await supabase
+        .from('payments')
+        .update({
+          status: 'cancel',
+          canceled_at: new Date().toISOString(),
+      
+          fee_amount: 0,
+          settlement_amount: 0,
+          settlement_status: '취소',
+      
+          payout_status: '출금제외',
+          payout_excluded: true,
+          payout_excluded_reason: reason || '가맹점 직접취소'
+        })
+        .eq('merchant_id', Number(canceledOrder.merchant_id))
+        .eq('amount', Number(canceledOrder.total_amount))
+        .eq('status', 'paid')
+        .order('created_at', { ascending: false })
+        .limit(1)
+      
+      if (paymentCancelError) {
+        alert(
+          '주문은 취소됐지만 관리자 결제내역 반영에 실패했습니다.\n' +
+          paymentCancelError.message
+        )
+        return
+      }
+      
+      alert('결제취소 처리되었습니다.')
+      
+      location.reload()
   })
 
       document.querySelector('#merchant-logout')
