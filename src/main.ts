@@ -9052,10 +9052,116 @@ const filteredVisiblePayments =
       )
     : payments
 
-const visiblePayments =
-  filteredVisiblePayments.slice(0, adminPageSize)
+    const savedPaymentPage =
+    Number(
+      sessionStorage.getItem('payment_current_page') || '1'
+    )
+  
+  const totalPaymentPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredVisiblePayments.length / adminPageSize
+      )
+    )
+  
+  const currentPaymentPage =
+    Math.min(
+      Math.max(savedPaymentPage, 1),
+      totalPaymentPages
+    )
+  
+  const paymentStartIndex =
+    (currentPaymentPage - 1) * adminPageSize
+  
+  const visiblePayments =
+    filteredVisiblePayments.slice(
+      paymentStartIndex,
+      paymentStartIndex + adminPageSize
+    )
 
-
+    const paymentPageSizeSelectElement =
+    document.querySelector<HTMLSelectElement>('#admin-page-size')
+  
+  const paymentToolbar =
+    paymentPageSizeSelectElement?.parentElement
+  
+  paymentToolbar
+    ?.querySelector('#payment-pagination')
+    ?.remove()
+  
+  if (paymentToolbar) {
+    paymentToolbar.style.position = 'relative'
+  
+    const paymentPagination =
+      document.createElement('div')
+  
+    paymentPagination.id = 'payment-pagination'
+  
+    paymentPagination.innerHTML =
+      '<button type="button" id="payment-prev-page">이전</button>' +
+      '<span>' +
+        currentPaymentPage +
+        ' / ' +
+        totalPaymentPages +
+      '</span>' +
+      '<button type="button" id="payment-next-page">다음</button>'
+  
+    paymentToolbar.appendChild(paymentPagination)
+  
+    document
+      .querySelector<HTMLButtonElement>('#payment-prev-page')
+      ?.addEventListener('click', () => {
+        if (currentPaymentPage <= 1) return
+  
+        sessionStorage.setItem(
+          'payment_current_page',
+          String(currentPaymentPage - 1)
+        )
+  
+        document
+          .querySelector<HTMLElement>(
+            '.admin-tab[data-page="payment"]'
+          )
+          ?.click()
+      })
+  
+    document
+      .querySelector<HTMLButtonElement>('#payment-next-page')
+      ?.addEventListener('click', () => {
+        if (currentPaymentPage >= totalPaymentPages) return
+  
+        sessionStorage.setItem(
+          'payment_current_page',
+          String(currentPaymentPage + 1)
+        )
+  
+        document
+          .querySelector<HTMLElement>(
+            '.admin-tab[data-page="payment"]'
+          )
+          ?.click()
+      })
+  
+    const prevButton =
+      document.querySelector<HTMLButtonElement>(
+        '#payment-prev-page'
+      )
+  
+    const nextButton =
+      document.querySelector<HTMLButtonElement>(
+        '#payment-next-page'
+      )
+  
+    if (prevButton) {
+      prevButton.disabled = currentPaymentPage <= 1
+    }
+  
+    if (nextButton) {
+      nextButton.disabled =
+        currentPaymentPage >= totalPaymentPages
+    }
+  }
 
 visiblePayments.forEach((payment, index) => {
   const tr = document.createElement('tr')

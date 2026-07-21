@@ -6137,3 +6137,37 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   transform:translateY(-1px);
   transition:.15s;
 }
+#payment-pagination {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+#payment-pagination button {
+  min-width: 70px;
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #18477f;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+#payment-pagination button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#payment-pagination span {
+  min-width: 55px;
+  text-align: center;
+  font-weight: 800;
+  white-space: nowrap;
+}
