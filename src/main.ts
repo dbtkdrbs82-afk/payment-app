@@ -8952,10 +8952,10 @@ if (summaryBox) {
   summaryBox.innerHTML =
     '<div class="payment-mini-summary">' +
 
-      '<div class="payment-mini-summary-card">' +
-        '<strong>검색 데이터</strong>' +
-        '<span>' + payments.length.toLocaleString() + '건</span>' +
-      '</div>' +
+      '<div class="payment-mini-summary-card all-payments">' +
+  '<strong>검색 데이터</strong>' +
+  '<span>' + payments.length.toLocaleString() + '건</span>' +
+'</div>' +
 
       '<div class="payment-mini-summary-card">' +
         '<strong>가맹점</strong>' +
@@ -8981,6 +8981,20 @@ document
     sessionStorage.setItem(
       'payment_cancel_request_filter',
       '요청중'
+    )
+
+    document
+      .querySelector<HTMLElement>(
+        '.admin-tab[data-page="payment"]'
+      )
+      ?.click()
+  })
+
+  document
+  .querySelector('.payment-mini-summary-card.all-payments')
+  ?.addEventListener('click', () => {
+    sessionStorage.removeItem(
+      'payment_cancel_request_filter'
     )
 
     document
