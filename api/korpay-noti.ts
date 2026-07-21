@@ -237,11 +237,11 @@ if (cancelYN === 'Y') {
   })
 }
 
-    const findResponse = await fetch(
-      `${supabaseUrl}/rest/v1/payments` +
-        `?select=id` +
-        `&payment_key=eq.${encodeURIComponent(tid)}` +
-        `&limit=1`,
+const findResponse = await fetch(
+  `${supabaseUrl}/rest/v1/payments` +
+    `?select=id,status,payout_status,settlement_status` +
+    `&payment_key=eq.${encodeURIComponent(tid)}` +
+    `&limit=1`,
       {
         method: 'GET',
         headers
@@ -259,6 +259,37 @@ if (cancelYN === 'Y') {
         detail: existingRows
       })
     }
+
+    const existingPayment =
+  Array.isArray(existingRows) && existingRows.length > 0
+    ? existingRows[0]
+    : null
+
+if (
+  cancelYN !== 'Y' &&
+  existingPayment &&
+  (
+    existingPayment.status === 'cancel' ||
+    existingPayment.status === 'partial_cancel' ||
+    existingPayment.payout_status === '출금제외' ||
+    existingPayment.settlement_status === '취소'
+  )
+) {
+  console.log(
+    '이미 취소된 거래라 승인 Noti 재수신을 무시합니다.',
+    {
+      tid,
+      status: existingPayment.status
+    }
+  )
+
+  return res.status(200).json({
+    result: 'OK',
+    ignored: true,
+    reason: 'ALREADY_CANCELED',
+    tid
+  })
+}
 
     const merchantResponse = await fetch(
       `${supabaseUrl}/rest/v1/merchants` +
