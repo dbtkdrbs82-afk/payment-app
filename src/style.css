@@ -6072,3 +6072,11 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     grid-template-columns: 1fr;
   }
 }
+.order-status-cancel-request {
+  display: inline-block;
+  background: #fff0d6;
+  color: #d97706;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+}

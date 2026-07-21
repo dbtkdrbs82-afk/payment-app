@@ -10214,11 +10214,13 @@ if (merchantOrderCardList) {
     '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
     '<td>' +
   (
-    order.order_status === '취소완료'
-  ? '<span class="order-status-cancel">취소완료</span>'
-  : order.order_status === '완료'
-    ? '<span class="order-status-complete">완료</span>'
-    : '<span class="order-status-received">접수</span>'
+    order.cancel_status === '취소요청'
+  ? '<span class="order-status-cancel-request">취소요청</span>'
+  : order.order_status === '취소완료'
+    ? '<span class="order-status-cancel">취소완료</span>'
+    : order.order_status === '완료'
+      ? '<span class="order-status-complete">완료</span>'
+      : '<span class="order-status-received">접수</span>'
   ) +
 '</td>' +
     
@@ -10274,11 +10276,13 @@ if (merchantOrderCardList) {
 
     '<div class="merchant-order-card-status">' +
   (
-    order.order_status === '취소완료'
-  ? '<span class="order-status-cancel">취소완료</span>'
-  : order.order_status === '완료'
-    ? '<span class="order-status-complete">완료</span>'
-    : '<span class="order-status-received">접수</span>'
+    order.cancel_status === '취소요청'
+  ? '<span class="order-status-cancel-request">취소요청</span>'
+  : order.order_status === '취소완료'
+    ? '<span class="order-status-cancel">취소완료</span>'
+    : order.order_status === '완료'
+      ? '<span class="order-status-complete">완료</span>'
+      : '<span class="order-status-received">접수</span>'
   ) +
 '</div>' +
 
@@ -11213,7 +11217,7 @@ document.querySelector('#close-cancel-modal')
         await supabase
           .from('orders')
           .select(
-            'id, order_no, merchant_id, total_amount, created_at'
+            'id, order_no, merchant_id, total_amount, created_at, payment_key'
           )
           .eq('id', orderId)
           .single()
@@ -11223,17 +11227,22 @@ document.querySelector('#close-cancel-modal')
         return
       }
 
-      const { data: paymentRows, error: paymentError } =
+      if (!order.payment_key) {
+        alert(
+          '이 주문에 결제 거래번호가 연결되어 있지 않습니다.\n' +
+          '승인번호 연결 작업이 필요합니다.'
+        )
+        return
+      }
+      
+      const { data: payment, error: paymentError } =
         await supabase
           .from('payments')
           .select(
-            'id, amount, settlement_amount, manager_admin_id, manager_admin_name, status, created_at'
+            'id, amount, settlement_amount, manager_admin_id, manager_admin_name, status, created_at, payment_key'
           )
-          .eq('merchant_id', Number(order.merchant_id))
-          .eq('amount', Number(order.total_amount))
-          .eq('status', 'paid')
-          .order('created_at', { ascending: false })
-          .limit(1)
+          .eq('payment_key', order.payment_key)
+          .maybeSingle()
 
       if (paymentError) {
         alert(
@@ -11243,11 +11252,7 @@ document.querySelector('#close-cancel-modal')
         return
       }
 
-      const payment =
-        Array.isArray(paymentRows) &&
-        paymentRows.length > 0
-          ? paymentRows[0]
-          : null
+    
 
       if (!payment) {
         alert('연결된 승인 결제를 찾지 못했습니다.')
@@ -11309,6 +11314,24 @@ document.querySelector('#close-cancel-modal')
         )
         return
       }
+
+      const { error: orderRequestError } =
+  await supabase
+    .from('orders')
+    .update({
+      cancel_status: '취소요청',
+      cancel_reason: reason,
+      cancel_requested_at: new Date().toISOString()
+    })
+    .eq('id', orderId)
+
+if (orderRequestError) {
+  alert(
+    '본사 승인요청은 접수됐지만 주문상태 표시 변경에 실패했습니다.\n' +
+    orderRequestError.message
+  )
+  return
+}
 
       const settlementAmount =
         Number(payment.settlement_amount || 0)
