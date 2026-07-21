@@ -8910,15 +8910,69 @@ if (paymentFilters) {
     })
   }
 }
+
+const { data: paymentCancelRequests, error: paymentCancelRequestError } =
+  await supabase
+    .from('cancel_requests')
+    .select('id, payment_id, status, reason')
+    .eq('status', '요청중')
+
+if (paymentCancelRequestError) {
+  alert(
+    '취소요청 조회 실패: ' +
+    paymentCancelRequestError.message
+  )
+  return
+}
+
+const paymentCancelRequestMap = new Map<number, any>()
+
+;(paymentCancelRequests || []).forEach((request: any) => {
+  paymentCancelRequestMap.set(
+    Number(request.payment_id),
+    request
+  )
+})
+
 if (summaryBox) {
   const totalAmount = payments.reduce((sum, payment) => {
     return sum + Number(payment.amount || 0)
   }, 0)
 
+  const merchantCount =
+    new Set(
+      payments
+        .map((payment) => Number(payment.merchant_id))
+        .filter((merchantId) => merchantId > 0)
+    ).size
+
+  const cancelRequestCount =
+    paymentCancelRequestMap.size
+
   summaryBox.innerHTML =
-    '검색된 데이터 : ' + payments.length + '건 &nbsp;&nbsp;&nbsp;' +
-    '사용자 : ' + payments.length + '명 &nbsp;&nbsp;&nbsp;' +
-    '전체금액 : ' + totalAmount.toLocaleString() + '원'
+    '<div class="payment-mini-summary">' +
+
+      '<div class="payment-mini-summary-card">' +
+        '<strong>검색 데이터</strong>' +
+        '<span>' + payments.length.toLocaleString() + '건</span>' +
+      '</div>' +
+
+      '<div class="payment-mini-summary-card">' +
+        '<strong>가맹점</strong>' +
+        '<span>' + merchantCount.toLocaleString() + '곳</span>' +
+      '</div>' +
+
+      '<div class="payment-mini-summary-card">' +
+        '<strong>전체금액</strong>' +
+        '<span>' + totalAmount.toLocaleString() + '원</span>' +
+      '</div>' +
+
+      '<div class="payment-mini-summary-card cancel-request">' +
+        '<strong>취소요청</strong>' +
+        '<span>' + cancelRequestCount.toLocaleString() + '건</span>' +
+      '</div>' +
+
+    '</div>'
 }
 
 if (tableHead) {
@@ -8960,28 +9014,7 @@ if (paymentPageSizeSelect) {
 const adminPageSize = Number(savedPaymentPageSize) || 10
 const visiblePayments = payments.slice(0, adminPageSize)
 
-const { data: paymentCancelRequests, error: paymentCancelRequestError } =
-  await supabase
-    .from('cancel_requests')
-    .select('id, payment_id, status, reason')
-    .eq('status', '요청중')
 
-if (paymentCancelRequestError) {
-  alert(
-    '취소요청 조회 실패: ' +
-    paymentCancelRequestError.message
-  )
-  return
-}
-
-const paymentCancelRequestMap = new Map<number, any>()
-
-;(paymentCancelRequests || []).forEach((request: any) => {
-  paymentCancelRequestMap.set(
-    Number(request.payment_id),
-    request
-  )
-})
 
 visiblePayments.forEach((payment, index) => {
   const tr = document.createElement('tr')
