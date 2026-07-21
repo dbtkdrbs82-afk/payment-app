@@ -62,9 +62,10 @@ export default async function handler(
     console.log(noti)
 
     const tid = noti.tid?.trim()
-    const korpayMid = noti.mid?.trim()
-    const cancelYN = noti.cancelYN?.toUpperCase() || 'N'
-    const amount = Number(noti.amt || 0)
+const korpayMid = noti.mid?.trim()
+const pgOrderNo = String(noti.ordNo || '').trim()
+const cancelYN = noti.cancelYN?.toUpperCase() || 'N'
+const amount = Number(noti.amt || 0)
 
     if (!tid) {
       return res.status(400).json({
@@ -311,6 +312,7 @@ const settlementAmount = amount - feeAmount
 const paymentData = {
       order_id: noti.ordNo || tid,
       payment_key: tid,
+      pg_order_no: pgOrderNo || null,
       amount,
       status: cancelYN === 'Y' ? 'cancel' : 'paid',
 
