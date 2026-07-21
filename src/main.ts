@@ -11172,6 +11172,179 @@ document.querySelector('#close-cancel-modal')
     }
   })
   
+  document.querySelector('#request-cancel-button')
+  ?.addEventListener('click', async () => {
+    const modal =
+      document.querySelector<HTMLElement>('#cancel-modal')
+
+    const reasonInput =
+      document.querySelector<HTMLTextAreaElement>('#cancel-reason')
+
+    const reason =
+      (reasonInput?.value || '').trim()
+
+    const orderId =
+      Number(
+        modal?.getAttribute('data-order-id') || 0
+      )
+
+    if (!orderId) {
+      alert('취소 요청할 주문을 찾을 수 없습니다.')
+      return
+    }
+
+    if (!reason) {
+      alert('취소 사유를 입력해주세요.')
+      return
+    }
+
+    const requestButton =
+      document.querySelector<HTMLButtonElement>(
+        '#request-cancel-button'
+      )
+
+    if (requestButton) {
+      requestButton.disabled = true
+      requestButton.textContent = '요청 처리 중...'
+    }
+
+    try {
+      const { data: order, error: orderError } =
+        await supabase
+          .from('orders')
+          .select(
+            'id, order_no, merchant_id, total_amount, created_at'
+          )
+          .eq('id', orderId)
+          .single()
+
+      if (orderError || !order) {
+        alert('주문정보를 불러오지 못했습니다.')
+        return
+      }
+
+      const { data: paymentRows, error: paymentError } =
+        await supabase
+          .from('payments')
+          .select(
+            'id, amount, settlement_amount, manager_admin_id, manager_admin_name, status, created_at'
+          )
+          .eq('merchant_id', Number(order.merchant_id))
+          .eq('amount', Number(order.total_amount))
+          .eq('status', 'paid')
+          .order('created_at', { ascending: false })
+          .limit(1)
+
+      if (paymentError) {
+        alert(
+          '결제정보 조회에 실패했습니다.\n' +
+          paymentError.message
+        )
+        return
+      }
+
+      const payment =
+        Array.isArray(paymentRows) &&
+        paymentRows.length > 0
+          ? paymentRows[0]
+          : null
+
+      if (!payment) {
+        alert('연결된 승인 결제를 찾지 못했습니다.')
+        return
+      }
+
+      const { data: existingRequest } =
+        await supabase
+          .from('cancel_requests')
+          .select('id')
+          .eq('payment_id', Number(payment.id))
+          .eq('status', '요청중')
+          .maybeSingle()
+
+      if (existingRequest) {
+        alert('이미 본사 승인요청이 접수된 거래입니다.')
+        return
+      }
+
+      const { error: requestError } =
+        await supabase
+          .from('cancel_requests')
+          .insert({
+            payment_id: Number(payment.id),
+            merchant_id: Number(order.merchant_id),
+            manager_admin_id:
+              payment.manager_admin_id || null,
+            manager_admin_name:
+              payment.manager_admin_name || null,
+            reason,
+            status: '요청중'
+          })
+
+      if (requestError) {
+        alert(
+          '본사 승인요청 저장에 실패했습니다.\n' +
+          requestError.message
+        )
+        return
+      }
+
+      const { error: holdError } =
+        await supabase
+          .from('payments')
+          .update({
+            payout_hold: true,
+            payout_hold_reason:
+              '익일 취소 본사 승인요청: ' + reason,
+            payout_hold_at:
+              new Date().toISOString(),
+            payout_status: '지급정지'
+          })
+          .eq('id', Number(payment.id))
+
+      if (holdError) {
+        alert(
+          '취소요청은 접수됐지만 지급정지 처리에 실패했습니다.\n' +
+          holdError.message
+        )
+        return
+      }
+
+      const settlementAmount =
+        Number(payment.settlement_amount || 0)
+
+      const transferFee = 500
+
+      alert(
+        '본사 승인요청이 접수되었습니다.\n\n' +
+        '지급상태: 지급정지\n' +
+        '반환 예정금액: ' +
+        (
+          settlementAmount + transferFee
+        ).toLocaleString() +
+        '원\n\n' +
+        '본사 안내 후 지정 계좌로 입금해주세요.'
+      )
+
+      location.reload()
+    } catch (error) {
+      console.error(error)
+
+      alert(
+        '본사 승인요청 중 오류가 발생했습니다.\n' +
+        (
+          error instanceof Error
+            ? error.message
+            : '알 수 없는 오류'
+        )
+      )
+    } finally {
+      if (requestButton) {
+        requestButton.disabled = false
+        requestButton.textContent = '본사 승인요청'
+      }
+    }
+  })
 
       document.querySelector('#merchant-logout')
         ?.addEventListener('click', () => {
