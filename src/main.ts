@@ -13518,9 +13518,16 @@ const cardPassword =
               }
         
               const manualOrderNo =
-  'MANUAL-' +
-  String(data.approvalNumber || Date.now())
-    .replace(/[^a-zA-Z0-9]/g, '')
+              String(data.orderId || '').trim()
+            
+            if (!manualOrderNo) {
+              alert(
+                '결제는 승인됐지만 주문번호를 받지 못했습니다.\n' +
+                '승인번호: ' +
+                (data.approvalNumber || '-')
+              )
+              return
+            }
 
 const { error: orderSaveError } = await supabase
   .from('orders')
@@ -13528,6 +13535,9 @@ const { error: orderSaveError } = await supabase
     merchant_id: Number(merchantId),
 
     order_no: manualOrderNo,
+
+    payment_key: data.tid || null,
+    approval_number: data.approvalNumber || null,
 
     items: [
       {
