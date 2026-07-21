@@ -8967,28 +8967,28 @@ if (summaryBox) {
         '<span>' + totalAmount.toLocaleString() + '원</span>' +
       '</div>' +
 
-      '<button type="button" id="payment-cancel-request-filter" class="payment-mini-summary-card cancel-request">' +
+      '<div class="payment-mini-summary-card cancel-request">' +
   '<strong>취소요청</strong>' +
   '<span>' + cancelRequestCount.toLocaleString() + '건</span>' +
-'</button>' +
+'</div>' +
 
     '</div>'
 }
 
-document.querySelector<HTMLButtonElement>(
-  '#payment-cancel-request-filter'
-)?.addEventListener('click', () => {
-  sessionStorage.setItem(
-    'payment_cancel_request_filter',
-    '요청중'
-  )
-
-  document
-    .querySelector<HTMLElement>(
-      '.admin-tab[data-page="payment"]'
+document
+  .querySelector('.payment-mini-summary-card.cancel-request')
+  ?.addEventListener('click', () => {
+    sessionStorage.setItem(
+      'payment_cancel_request_filter',
+      '요청중'
     )
-    ?.click()
-})
+
+    document
+      .querySelector<HTMLElement>(
+        '.admin-tab[data-page="payment"]'
+      )
+      ?.click()
+  })
 
 if (tableHead) {
   tableHead.innerHTML =

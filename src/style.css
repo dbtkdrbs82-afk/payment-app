@@ -6129,22 +6129,11 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
 .payment-mini-summary-card.cancel-request span {
   color: #c62828;
 }
-#payment-cancel-request-filter {
-  background: #fff1f1 !important;
-  border: 1px solid #ef4444 !important;
-  color: #c62828 !important;
-
-  width: 100%;
-  height: 48px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  cursor: pointer;
+.payment-mini-summary-card.cancel-request{
+  cursor:pointer;
 }
 
-#payment-cancel-request-filter strong,
-#payment-cancel-request-filter span {
-  color: #c62828 !important;
+.payment-mini-summary-card.cancel-request:hover{
+  transform:translateY(-1px);
+  transition:.15s;
 }
