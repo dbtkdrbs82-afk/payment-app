@@ -8967,13 +8967,28 @@ if (summaryBox) {
         '<span>' + totalAmount.toLocaleString() + '원</span>' +
       '</div>' +
 
-      '<div class="payment-mini-summary-card cancel-request">' +
-        '<strong>취소요청</strong>' +
-        '<span>' + cancelRequestCount.toLocaleString() + '건</span>' +
-      '</div>' +
+      '<button type="button" id="payment-cancel-request-filter" class="payment-mini-summary-card cancel-request">' +
+  '<strong>취소요청</strong>' +
+  '<span>' + cancelRequestCount.toLocaleString() + '건</span>' +
+'</button>' +
 
     '</div>'
 }
+
+document.querySelector<HTMLButtonElement>(
+  '#payment-cancel-request-filter'
+)?.addEventListener('click', () => {
+  sessionStorage.setItem(
+    'payment_cancel_request_filter',
+    '요청중'
+  )
+
+  document
+    .querySelector<HTMLElement>(
+      '.admin-tab[data-page="payment"]'
+    )
+    ?.click()
+})
 
 if (tableHead) {
   tableHead.innerHTML =
@@ -9012,7 +9027,19 @@ if (paymentPageSizeSelect) {
 }
 
 const adminPageSize = Number(savedPaymentPageSize) || 10
-const visiblePayments = payments.slice(0, adminPageSize)
+
+const cancelRequestFilter =
+  sessionStorage.getItem('payment_cancel_request_filter')
+
+const filteredVisiblePayments =
+  cancelRequestFilter === '요청중'
+    ? payments.filter((payment) =>
+        paymentCancelRequestMap.has(Number(payment.id))
+      )
+    : payments
+
+const visiblePayments =
+  filteredVisiblePayments.slice(0, adminPageSize)
 
 
 
