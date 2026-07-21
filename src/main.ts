@@ -9147,24 +9147,78 @@ document.querySelectorAll('.payment-cancel-link')
       }
 
 
-      const { error } = await supabase
-  .from('payments')
-  .update({
-    status: 'cancel',
-    canceled_at: new Date().toISOString()
-  })
-  .eq('id', paymentId)
-
-      if (error) {
-        alert('DB 취소 저장 실패: ' + error.message)
+      if (payment.pg_company !== '코페이') {
+        alert(
+          '현재 관리자 취소 API는 코페이 결제만 지원합니다.\n' +
+          '결제 PG사: ' +
+          (payment.pg_company || '-')
+        )
         return
       }
-
-      alert('취소 처리되었습니다.')
-
-      const cancelButton = button as HTMLElement
-      const paymentKeyText = cancelButton.querySelector('span')?.outerHTML || ''
-      cancelButton.innerHTML = '취소완료<br/>' + paymentKeyText
+      
+      const cancelRequest =
+        paymentCancelRequestMap.get(Number(payment.id))
+      
+      const cancelReason =
+        String(cancelRequest?.reason || '관리자 취소 승인').trim()
+      
+      const cancelResponse = await fetch(
+        '/api/korpay-cancel',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            paymentId: Number(payment.id),
+            cancelName:
+              sessionStorage.getItem('admin_name') ||
+              '관리자',
+            cancelMessage: cancelReason
+          })
+        }
+      )
+      
+      const cancelData = await cancelResponse.json()
+      
+      if (!cancelResponse.ok || !cancelData.success) {
+        alert(
+          '코페이 실제 취소에 실패했습니다.\n\n' +
+          (cancelData.message || '알 수 없는 오류') +
+          (
+            cancelData.resultCode
+              ? '\n응답코드: ' +
+                cancelData.resultCode
+              : ''
+          )
+        )
+        return
+      }
+      
+      const { error: cancelRequestUpdateError } =
+        await supabase
+          .from('cancel_requests')
+          .update({
+            status: '승인완료',
+            processed_at: new Date().toISOString()
+          })
+          .eq('payment_id', Number(payment.id))
+          .eq('status', '요청중')
+      
+      if (cancelRequestUpdateError) {
+        alert(
+          '코페이 취소는 성공했지만 취소요청 상태 변경에 실패했습니다.\n' +
+          cancelRequestUpdateError.message
+        )
+        return
+      }
+      
+      alert(
+        '코페이 결제가 실제 취소되었습니다.\n' +
+        '취소 Noti 수신 후 결제관리와 가맹점 화면에 자동 반영됩니다.'
+      )
+      
+      location.reload()
     })
   })
 document.querySelectorAll('.admin-receipt-btn')
