@@ -8113,7 +8113,8 @@ if (page === 'mini') {
     }
 
     const kioskUrl =
-      window.location.origin + '/kiosk?merchant_id=' + loginMerchantId
+  'https://nxgsoft.co.kr/pay/?merchant_id=' +
+  loginMerchantId
 
     if (titleBox) {
       titleBox.innerHTML = '▶ 미니상점 > 쇼핑몰관리'
@@ -8195,9 +8196,8 @@ document.querySelector('#mini-qr-tab')
     }
 
     const kioskUrl =
-      window.location.origin +
-      '/kiosk?merchant_id=' +
-      loginMerchantId
+  'https://nxgsoft.co.kr/pay/?merchant_id=' +
+  loginMerchantId
 
       qrBox.innerHTML =
       '<div style="text-align:center;">' +
@@ -12142,7 +12142,8 @@ document.querySelector('#merchant-product-image-file')
     }
   
     const kioskUrl =
-      window.location.origin + '/kiosk?merchant_id=' + merchantId
+  'https://nxgsoft.co.kr/pay/?merchant_id=' +
+  merchantId
   
     app.innerHTML = `
       <div class="pg-admin-page">
@@ -12161,42 +12162,124 @@ document.querySelector('#merchant-product-image-file')
           <button id="qr-go-qr">PICK QR</button>
         </div>
   
-        <div class="payment-card" style="max-width:720px;">
-          <h2>가맹점 주문 QR</h2>
-  
-          <p style="font-weight:700;margin-top:16px;">
-            ${merchantName}
-          </p>
-  
-          <div id="merchant-qr-box" style="
-            width:260px;
-            height:260px;
-            margin:24px auto;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            border:1px solid #d9dee7;
-            border-radius:16px;
-            background:white;
-          "></div>
-  
-          <div style="
-            padding:14px;
-            border:1px solid #d9dee7;
-            border-radius:8px;
-            background:#f8fafc;
-            word-break:break-all;
-            margin-bottom:18px;
-          ">
-            ${kioskUrl}
-          </div>
-  
-      <div class="qr-button-row">
-  <button id="copy-kiosk-url" class="qr-button">주소 복사</button>
-  <button id="print-qr" class="qr-button">인쇄</button>
-</div>
-</div>
-</div>
+       <div class="payment-card" style="
+  max-width:720px;
+  margin:0 auto;
+  border-radius:18px;
+  overflow:hidden;
+">
+
+  <div style="
+    background:#18477f;
+    color:#fff;
+    padding:22px;
+    text-align:center;
+  ">
+    <div style="font-size:34px;">📱</div>
+
+    <h2 style="
+      margin:10px 0 0;
+      color:#fff;
+      font-size:26px;
+    ">
+      NXG PICK
+    </h2>
+
+    <div style="
+      margin-top:8px;
+      font-size:16px;
+      font-weight:700;
+    ">
+      ${merchantName}
+    </div>
+
+  </div>
+
+  <div style="
+    padding:28px;
+    background:#fff;
+  ">
+
+    <div id="merchant-qr-box"
+      style="
+      width:270px;
+      height:270px;
+      margin:0 auto 24px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid #d9dee7;
+      border-radius:16px;
+      background:#fff;
+    ">
+    </div>
+
+    <div style="
+      background:#f8fafc;
+      border:1px solid #d9dee7;
+      border-radius:12px;
+      padding:18px;
+      margin-bottom:22px;
+    ">
+
+      <div style="
+        color:#6b7280;
+        font-size:13px;
+        font-weight:700;
+        margin-bottom:8px;
+      ">
+        주문주소
+      </div>
+
+      <div style="
+        font-size:15px;
+        word-break:break-all;
+      ">
+        ${kioskUrl}
+      </div>
+
+    </div>
+
+    <div style="
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+    ">
+
+      <button
+        id="copy-kiosk-url"
+        style="
+        height:54px;
+        border:none;
+        border-radius:10px;
+        background:#18477f;
+        color:#fff;
+        font-size:15px;
+        font-weight:700;
+        cursor:pointer;
+      ">
+        📋 주소 복사
+      </button>
+
+      <button
+        id="print-qr"
+        style="
+        height:54px;
+        border:none;
+        border-radius:10px;
+        background:#10b981;
+        color:#fff;
+        font-size:15px;
+        font-weight:700;
+        cursor:pointer;
+      ">
+        🖨️ 인쇄
+      </button>
+
+    </div>
+
+  </div>
+
 </div>
 `
 
