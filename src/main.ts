@@ -14567,7 +14567,7 @@ const orderNo =
 
 document.querySelector('#kiosk-card-pay-button')
   ?.addEventListener('click', () => {
-    alert('수기결제 버튼 클릭')
+    
 
     const params =
       new URLSearchParams(window.location.search)
