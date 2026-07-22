@@ -15104,3 +15104,6 @@ document.querySelector('#receipt-view-btn')
       .map((byte) => byte.toString(16).padStart(2, '0'))
       .join('')
   }
+
+void getKorpayEdiDate
+void createKorpayHash
