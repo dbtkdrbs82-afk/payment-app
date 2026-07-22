@@ -12241,52 +12241,63 @@ document.querySelector('#merchant-product-image-file')
     </div>
 
     <div style="
-  display:flex;
-  flex-direction:column;
+  display:grid;
+  grid-template-columns:1fr;
   gap:10px;
   width:100%;
   margin-top:20px;
+  box-sizing:border-box;
 ">
 
-  <button
+  <div
     id="copy-kiosk-url"
-    type="button"
+    role="button"
+    tabindex="0"
     style="
       width:100%;
       height:56px;
+      margin:0;
+      padding:0 16px;
+      box-sizing:border-box;
       display:flex;
       align-items:center;
       justify-content:center;
-      border:none;
+      border:1px solid #18477f;
       border-radius:10px;
       background:#18477f;
-      color:#fff;
+      color:#ffffff;
       font-size:16px;
       font-weight:700;
       cursor:pointer;
+      user-select:none;
     ">
     📋 링크 복사
-  </button>
+  </div>
 
-  <button
+  <div
     id="print-qr"
-    type="button"
+    role="button"
+    tabindex="0"
     style="
       width:100%;
       height:56px;
+      margin:0;
+      padding:0 16px;
+      box-sizing:border-box;
       display:flex;
       align-items:center;
       justify-content:center;
-      border:none;
+      border:1px solid #18477f;
       border-radius:10px;
       background:#18477f;
-      color:#fff;
+      color:#ffffff;
       font-size:16px;
       font-weight:700;
       cursor:pointer;
+      user-select:none;
     ">
     🖨️ 인쇄
-  </button>
+  </div>
 
 </div>
 
