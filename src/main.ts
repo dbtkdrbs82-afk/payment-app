@@ -14187,7 +14187,7 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
   <button
     class="kiosk-card-pay-button"
     id="kiosk-card-pay-button">
-    수기결제
+    수기 결제
   </button>
 
 </div>
