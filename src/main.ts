@@ -12242,49 +12242,53 @@ document.querySelector('#merchant-product-image-file')
 
     <div style="
   display:flex;
-  gap:12px;
+  flex-direction:column;
+  gap:10px;
+  width:100%;
   margin-top:20px;
 ">
 
-      <button
-  id="copy-kiosk-url"
-  style="
-    flex:1;
-    height:56px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border:none;
-    border-radius:10px;
-    background:#18477f;
-    color:#fff;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-  ">
-        📋 링크 복사
-      </button>
+  <button
+    id="copy-kiosk-url"
+    type="button"
+    style="
+      width:100%;
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      border-radius:10px;
+      background:#18477f;
+      color:#fff;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+    ">
+    📋 링크 복사
+  </button>
 
-      <button
-  id="print-qr"
-  style="
-    flex:1;
-    height:56px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    border:none;
-    border-radius:10px;
-    background:#10b981;
-    color:#fff;
-    font-size:15px;
-    font-weight:700;
-    cursor:pointer;
-  ">
-        🖨️ 인쇄
-      </button>
+  <button
+    id="print-qr"
+    type="button"
+    style="
+      width:100%;
+      height:56px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border:none;
+      border-radius:10px;
+      background:#18477f;
+      color:#fff;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+    ">
+    🖨️ 인쇄
+  </button>
 
-    </div>
+</div>
 
   </div>
 
