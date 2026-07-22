@@ -2441,14 +2441,22 @@ approved_at: new Date().toISOString()
     const merchantId = sessionStorage.getItem('kiosk_merchant_id')
     const itemsText = sessionStorage.getItem('kiosk_items')
     const totalAmount = sessionStorage.getItem('kiosk_total_amount')
+    const callNumber = sessionStorage.getItem('kiosk_call_number')
   
     if (orderNo && merchantId && totalAmount) {
       const items = itemsText ? JSON.parse(itemsText) : []
   
       await supabase.from('orders').insert({
         merchant_id: Number(merchantId),
-        order_no:
-  orderNo.replace(/[^a-zA-Z0-9]/g, ''),
+      
+        // 고객 화면에 표시할 주문 대기번호
+        order_no: callNumber || '-',
+        call_number: callNumber ? Number(callNumber) : null,
+      
+        // PG 결제 연결용 주문번호
+        pg_order_id:
+          orderNo.replace(/[^a-zA-Z0-9]/g, ''),
+      
         items,
         total_amount: Number(totalAmount),
         order_status: '접수',
@@ -9192,7 +9200,7 @@ visiblePayments.forEach((payment, index) => {
     'data-date="' + (payment.created_at || '') + '" ' +
     'data-status="' + (payment.status || '') + '"' +
   '>' +
-    (payment.order_id || '-') +
+  (payment.approval_number || '-') +
   '</button>' +
 '</td>' +
     '<td>' +
@@ -13821,12 +13829,35 @@ const cardPassword =
               return
             }
 
-const { error: orderSaveError } = await supabase
+            const {
+              data: nextManualCallNumber,
+              error: manualCallNumberError
+            } = await supabase.rpc('get_next_call_number', {
+              target_merchant_id: Number(merchantId)
+            })
+            
+            if (manualCallNumberError || !nextManualCallNumber) {
+              alert(
+                '주문 대기번호 생성에 실패했습니다.\n' +
+                (
+                  manualCallNumberError?.message ||
+                  '번호를 받지 못했습니다.'
+                )
+              )
+              return
+            }
+            
+            const manualCallNumber =
+              Number(nextManualCallNumber)
+
+  const { error: orderSaveError } = await supabase
   .from('orders')
   .insert({
     merchant_id: Number(merchantId),
 
-    order_no: manualOrderNo,
+    order_no: String(manualCallNumber),
+    call_number: manualCallNumber,
+    pg_order_id: manualOrderNo,
 
     payment_key: data.tid || null,
     approval_number: data.approvalNumber || null,
@@ -14328,11 +14359,23 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
       return
     }
 
-    const callNumber =
-      Math.floor(1 + Math.random() * 99)
+    const { data: nextCallNumber, error: callNumberError } =
+  await supabase.rpc('get_next_call_number', {
+    target_merchant_id: Number(merchantId)
+  })
 
-    const orderNo =
-      'TOSS-' + callNumber + '-' + Date.now()
+if (callNumberError || !nextCallNumber) {
+  alert(
+    '주문 대기번호 생성에 실패했습니다.\n' +
+    (callNumberError?.message || '번호를 받지 못했습니다.')
+  )
+  return
+}
+
+const callNumber = Number(nextCallNumber)
+
+const orderNo =
+  'TOSS-' + callNumber + '-' + Date.now()
 
     sessionStorage.setItem(
       'kiosk_call_number',
@@ -14855,11 +14898,67 @@ document.querySelector('#receipt-view-btn')
         ? JSON.parse(itemsText)
         : []
     
-      const callNumber =
-        Math.floor(1 + Math.random() * 99)
-    
-      const orderNo =
-        'CARD-' + callNumber + '-' + Date.now()
+        const {
+          data: nextCallNumber,
+          error: callNumberError
+        } = await supabase.rpc('get_next_call_number', {
+          target_merchant_id: Number(merchantId)
+        })
+        
+        if (callNumberError || !nextCallNumber) {
+          app.innerHTML = `
+            <div class="page">
+              <div class="payment-card">
+                <h1>주문번호 생성에 실패했습니다.</h1>
+              </div>
+            </div>
+          `
+        } else {
+          const callNumber = Number(nextCallNumber)
+        
+          const orderNo =
+            'CARD-' + callNumber + '-' + Date.now()
+        
+          if (!merchantId || !totalAmount) {
+            app.innerHTML = `
+              <div class="page">
+                <div class="payment-card">
+                  <h1>주문 정보가 없습니다.</h1>
+                </div>
+              </div>
+            `
+          } else {
+            const { error } = await supabase
+              .from('orders')
+              .insert({
+                merchant_id: Number(merchantId),
+        
+                order_no: String(callNumber),
+                call_number: callNumber,
+                pg_order_id: orderNo,
+        
+                items,
+                total_amount: Number(totalAmount),
+                order_status: '접수',
+                payment_status: '결제완료'
+              })
+        
+            if (error) {
+              app.innerHTML = `
+                <div class="page">
+                  <div class="payment-card">
+                    <h1>주문 저장에 실패했습니다.</h1>
+                  </div>
+                </div>
+              `
+            }
+          }
+        }
+        
+        const callNumber = Number(nextCallNumber)
+        
+        const orderNo =
+          'CARD-' + callNumber + '-' + Date.now()
     
       if (!merchantId || !totalAmount) {
         app.innerHTML = `
