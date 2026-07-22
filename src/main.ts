@@ -14182,11 +14182,7 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
     삼성PAY결제
   </button>
 
-  <button
-    class="kiosk-app-pay-button"
-    id="kiosk-app-pay-button">
-    은행앱카드결제
-  </button>
+  
 
   <button
     class="kiosk-card-pay-button"
