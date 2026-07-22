@@ -12228,7 +12228,7 @@ document.querySelector('#merchant-product-image-file')
         font-weight:700;
         margin-bottom:8px;
       ">
-        주문주소
+        링크주소
       </div>
 
       <div style="
@@ -12241,38 +12241,46 @@ document.querySelector('#merchant-product-image-file')
     </div>
 
     <div style="
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:12px;
-    ">
+  display:flex;
+  gap:12px;
+  margin-top:20px;
+">
 
       <button
-        id="copy-kiosk-url"
-        style="
-        height:54px;
-        border:none;
-        border-radius:10px;
-        background:#18477f;
-        color:#fff;
-        font-size:15px;
-        font-weight:700;
-        cursor:pointer;
-      ">
-        📋 주소 복사
+  id="copy-kiosk-url"
+  style="
+    flex:1;
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    border-radius:10px;
+    background:#18477f;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+  ">
+        📋 링크 복사
       </button>
 
       <button
-        id="print-qr"
-        style="
-        height:54px;
-        border:none;
-        border-radius:10px;
-        background:#10b981;
-        color:#fff;
-        font-size:15px;
-        font-weight:700;
-        cursor:pointer;
-      ">
+  id="print-qr"
+  style="
+    flex:1;
+    height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:none;
+    border-radius:10px;
+    background:#10b981;
+    color:#fff;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+  ">
         🖨️ 인쇄
       </button>
 
