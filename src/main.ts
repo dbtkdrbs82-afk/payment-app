@@ -10496,7 +10496,7 @@ if (merchantOrderCardList) {
   'data-id="' + order.id + '" ' +
   'data-created-at="' + order.created_at + '" ' +
   'data-amount="' + order.total_amount + '">' +
-  '승인번호 ' + (order.payment_key || '-') +
+  '승인번호 ' + (order.approval_number || '-') +
 '</div>' + 
 (
   order.cancel_status === '취소완료'
@@ -10567,7 +10567,7 @@ if (merchantOrderCardList) {
   'data-id="' + order.id + '" ' +
   'data-created-at="' + order.created_at + '" ' +
   'data-amount="' + order.total_amount + '">' +
-  '승인번호 : ' + (order.payment_key || '-') +
+  '승인번호 : ' + (order.approval_number || '-') +
 '</div>' +
       
 
@@ -13850,17 +13850,26 @@ const cardPassword =
             const manualCallNumber =
               Number(nextManualCallNumber)
 
+              const rawApprovalNumber =
+  String(data.approvalNumber || '').trim()
+
+const approvalNumber =
+  /^\d{8}$/.test(rawApprovalNumber)
+    ? rawApprovalNumber
+    : null
+
   const { error: orderSaveError } = await supabase
   .from('orders')
   .insert({
     merchant_id: Number(merchantId),
 
     order_no: String(manualCallNumber),
+
     call_number: manualCallNumber,
     pg_order_id: manualOrderNo,
 
     payment_key: data.tid || null,
-    approval_number: data.approvalNumber || null,
+    approval_number: approvalNumber,
 
     items: [
       {
