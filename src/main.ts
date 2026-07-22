@@ -14179,7 +14179,7 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
   <button
     class="kiosk-toss-pay-button"
     id="kiosk-toss-pay-button">
-    삼성PAY결제
+    모바일 결제
   </button>
 
   
