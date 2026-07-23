@@ -10089,148 +10089,92 @@ if (isNormalStore) {
   merchantContent = ''
 
 } else if (isWirelessTerminal) {
-  const todayText =
-    new Date().toLocaleDateString('ko-KR')
-
-  const todayPayments =
+  const getLocalDateValue = (date: Date) => {
+    const year = date.getFullYear()
+  
+    const month =
+      String(date.getMonth() + 1)
+        .padStart(2, '0')
+  
+    const day =
+      String(date.getDate())
+        .padStart(2, '0')
+  
+    return `${year}-${month}-${day}`
+  }
+  
+  const todayDateValue =
+    getLocalDateValue(new Date())
+  
+  const selectedDate =
+    new URLSearchParams(
+      window.location.search
+    ).get('terminal_date') || todayDateValue
+  
+  const selectedDatePayments =
     terminalPayments.filter((payment) => {
-      if (!payment.created_at) return false
-
+      const dateText =
+        payment.status === 'cancel'
+          ? payment.canceled_at ||
+            payment.approved_at ||
+            payment.created_at
+          : payment.approved_at ||
+            payment.created_at
+  
+      if (!dateText) return false
+  
       return (
-        new Date(payment.created_at)
-          .toLocaleDateString('ko-KR') === todayText
+        getLocalDateValue(new Date(dateText)) ===
+        selectedDate
       )
     })
-
-  const terminalPaidPayments =
-    todayPayments.filter((payment) =>
+  
+  const selectedPaidPayments =
+    selectedDatePayments.filter((payment) =>
       payment.status === 'paid'
     )
-
-  const terminalCancelPayments =
-    todayPayments.filter((payment) =>
+  
+  const selectedCancelPayments =
+    selectedDatePayments.filter((payment) =>
       payment.status === 'cancel'
     )
-
-    const now = new Date()
-
-const thisMonthPayments =
-  terminalPayments.filter((payment) => {
-    if (!payment.created_at) return false
-
-    const paymentDate =
-      new Date(payment.created_at)
-
-    return (
-      paymentDate.getFullYear() ===
-        now.getFullYear() &&
-      paymentDate.getMonth() ===
-        now.getMonth()
-    )
-  })
-
-const thisYearPayments =
-  terminalPayments.filter((payment) => {
-    if (!payment.created_at) return false
-
-    const paymentDate =
-      new Date(payment.created_at)
-
-    return (
-      paymentDate.getFullYear() ===
-      now.getFullYear()
-    )
-  })
-
-const todayApprovedCount =
-  terminalPaidPayments.length
-
-const todayCanceledCount =
-  terminalCancelPayments.length
-
-const monthPaidPayments =
-  thisMonthPayments.filter((payment) =>
-    payment.status === 'paid'
-  )
-
-const monthCancelPayments =
-  thisMonthPayments.filter((payment) =>
-    payment.status === 'cancel'
-  )
-
-const yearPaidPayments =
-  thisYearPayments.filter((payment) =>
-    payment.status === 'paid'
-  )
-
-const yearCancelPayments =
-  thisYearPayments.filter((payment) =>
-    payment.status === 'cancel'
-  )
-
-const monthApprovedAmount =
-  monthPaidPayments.reduce(
-    (sum, payment) =>
-      sum + Number(payment.amount || 0),
-    0
-  )
-
-const monthCanceledAmount =
-  monthCancelPayments.reduce(
-    (sum, payment) =>
-      sum + Number(payment.amount || 0),
-    0
-  )
-
-const monthNetAmount =
-  monthApprovedAmount -
-  monthCanceledAmount
-
-const yearApprovedAmount =
-  yearPaidPayments.reduce(
-    (sum, payment) =>
-      sum + Number(payment.amount || 0),
-    0
-  )
-
-const yearCanceledAmount =
-  yearCancelPayments.reduce(
-    (sum, payment) =>
-      sum + Number(payment.amount || 0),
-    0
-  )
-
-const yearNetAmount =
-  yearApprovedAmount -
-  yearCanceledAmount
-
-const monthSettlementAmount =
-  monthPaidPayments.reduce(
-    (sum, payment) =>
-      sum +
-      Number(
-        payment.settlement_amount || 0
-      ),
-    0
-  )
-
-  const terminalApprovedAmount =
-    terminalPaidPayments.reduce(
+  
+  const selectedApprovedAmount =
+    selectedPaidPayments.reduce(
       (sum, payment) =>
         sum + Number(payment.amount || 0),
       0
     )
-
-  const terminalCanceledAmount =
-    terminalCancelPayments.reduce(
+  
+  const selectedCanceledAmount =
+    selectedCancelPayments.reduce(
       (sum, payment) =>
         sum + Number(payment.amount || 0),
       0
     )
-
-  const terminalNetAmount =
-    terminalApprovedAmount -
-    terminalCanceledAmount
+  
+  const selectedNetAmount =
+    selectedApprovedAmount -
+    selectedCanceledAmount
+  
+  const selectedSettlementAmount =
+    selectedPaidPayments.reduce(
+      (sum, payment) =>
+        sum +
+        Number(
+          payment.settlement_amount || 0
+        ),
+      0
+    )
+  
+  const selectedTotalCount =
+    selectedDatePayments.length
+  
+  const selectedApprovedCount =
+    selectedPaidPayments.length
+  
+  const selectedCanceledCount =
+    selectedCancelPayments.length
 
   
 
@@ -10275,60 +10219,89 @@ const monthSettlementAmount =
   merchantContent = `
     <div class="merchant-type-ready-box">
 
-     <div class="academy-dashboard">
+    <div class="terminal-date-search-box">
 
-  <div class="academy-card">
-    <span>오늘 매출</span>
+  <div class="terminal-date-search-row">
 
-    <strong>
-      ${terminalNetAmount.toLocaleString()}원
-    </strong>
+    <label for="terminal-date-input">
+      조회일자
+    </label>
 
-    <small>
-      승인 ${todayApprovedCount.toLocaleString()}건
-      · 취소 ${todayCanceledCount.toLocaleString()}건
-    </small>
-  </div>
+    <input
+      type="date"
+      id="terminal-date-input"
+      value="${selectedDate}"
+    />
 
-  <div class="academy-card">
-    <span>이번 달 매출</span>
+    <button
+      type="button"
+      id="terminal-date-search-button"
+    >
+      조회
+    </button>
 
-    <strong>
-      ${monthNetAmount.toLocaleString()}원
-    </strong>
+    <button
+      type="button"
+      id="terminal-date-today-button"
+    >
+      오늘
+    </button>
 
-    <small>
-      승인 ${monthPaidPayments.length.toLocaleString()}건
-      · 취소 ${monthCancelPayments.length.toLocaleString()}건
-    </small>
-  </div>
-
-  <div class="academy-card">
-    <span>올해 매출</span>
-
-    <strong>
-      ${yearNetAmount.toLocaleString()}원
-    </strong>
-
-    <small>
-      승인 ${yearPaidPayments.length.toLocaleString()}건
-      · 취소 ${yearCancelPayments.length.toLocaleString()}건
-    </small>
-  </div>
-
-  <div class="academy-card">
-    <span>이번 달 정산금액</span>
-
-    <strong>
-      ${monthSettlementAmount.toLocaleString()}원
-    </strong>
-
-    <small>
-      승인 ${monthPaidPayments.length.toLocaleString()}건 기준
-    </small>
   </div>
 
 </div>
+
+<div class="academy-dashboard">
+
+  <div class="academy-card">
+    <span>총매출</span>
+
+    <strong>
+      ${selectedApprovedAmount.toLocaleString()}원
+    </strong>
+
+    <small>
+      승인 ${selectedApprovedCount.toLocaleString()}건
+    </small>
+  </div>
+
+  <div class="academy-card">
+    <span>취소금액</span>
+
+    <strong>
+      ${selectedCanceledAmount.toLocaleString()}원
+    </strong>
+
+    <small>
+      취소 ${selectedCanceledCount.toLocaleString()}건
+    </small>
+  </div>
+
+  <div class="academy-card">
+    <span>순매출</span>
+
+    <strong>
+      ${selectedNetAmount.toLocaleString()}원
+    </strong>
+
+    <small>
+      총 거래 ${selectedTotalCount.toLocaleString()}건
+    </small>
+  </div>
+
+  <div class="academy-card">
+    <span>정산금액</span>
+
+    <strong>
+      ${selectedSettlementAmount.toLocaleString()}원
+    </strong>
+
+    <small>
+      정산대상 ${selectedApprovedCount.toLocaleString()}건
+    </small>
+  </div>
+
+</div> 
 
       <div class="admin-table-wrap">
         <table class="admin-table">
@@ -10346,7 +10319,7 @@ const monthSettlementAmount =
 
           <tbody>
             ${
-              terminalPayments.length === 0
+              selectedDatePayments.length === 0
                 ? `
                   <tr>
                     <td colspan="6">
@@ -10354,8 +10327,8 @@ const monthSettlementAmount =
                     </td>
                   </tr>
                 `
-                : terminalPayments
-                    .map((payment) => `
+                : selectedDatePayments
+                  .map((payment) => `
                       <tr>
                         <td>
                           ${getTerminalDateText(payment)}
@@ -10756,6 +10729,60 @@ ${merchantContent}
         </div>
       
       `
+
+      document
+  .querySelector('#terminal-date-search-button')
+  ?.addEventListener('click', () => {
+    const dateInput =
+      document.querySelector<HTMLInputElement>(
+        '#terminal-date-input'
+      )
+
+    if (!dateInput?.value) {
+      alert('조회 날짜를 선택해주세요.')
+      return
+    }
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
+
+    params.set(
+      'terminal_date',
+      dateInput.value
+    )
+
+    window.location.search =
+      params.toString()
+  })
+
+document
+  .querySelector('#terminal-date-today-button')
+  ?.addEventListener('click', () => {
+    const now = new Date()
+
+    const year = now.getFullYear()
+    const month =
+      String(now.getMonth() + 1)
+        .padStart(2, '0')
+    const day =
+      String(now.getDate())
+        .padStart(2, '0')
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
+
+    params.set(
+      'terminal_date',
+      `${year}-${month}-${day}`
+    )
+
+    window.location.search =
+      params.toString()
+  })
 
       const { data: merchantSetting } = await supabase
   .from('merchants')
