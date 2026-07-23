@@ -10027,58 +10027,135 @@ const settlementComplete =
       payment.payout_status === '출금완료'
   )
 
+  
+
     const merchantType =
   sessionStorage.getItem('login_merchant_type') || '일반매장'
 
-const merchantMenu =
-  merchantType === '일반매장'
-    ? `
-
-      <button id="merchant-order-tab">주문관리</button>
-      <button id="merchant-product-tab">상품관리</button>
-      <button id="merchant-qr-tab">PICK QR</button>
-      <button id="merchant-card-tab">카드결제</button>
-    `
-    : `
-      <button id="merchant-member-tab">회원관리</button>
-      <button id="merchant-billing-tab">청구관리</button>
-      <button id="merchant-batch-tab">수기결제</button>
-      <button id="merchant-payment-list-tab">결제내역</button>
-    `
-    
-    const isNormalStore =
+  const isNormalStore =
   merchantType === '일반매장'
 
-const merchantContent =
-  isNormalStore
-    ? ''
-    : `
-      <div class="merchant-type-ready-box">
-       <div class="academy-dashboard">
+const isAcademy =
+  merchantType === '학원'
 
-  <div class="academy-card">
-    <span>회원 수</span>
-    <strong>3명</strong>
-  </div>
+const isWirelessTerminal =
+  merchantType === '무선단말기'
 
-  <div class="academy-card">
-    <span>미납 건수</span>
-    <strong>3건</strong>
-  </div>
+let merchantMenu = ''
+let merchantContent = ''
 
-  <div class="academy-card">
-    <span>완료 건수</span>
-    <strong>1건</strong>
-  </div>
+if (isNormalStore) {
+  merchantMenu = `
+    <button id="merchant-order-tab">주문관리</button>
+    <button id="merchant-product-tab">상품관리</button>
+    <button id="merchant-qr-tab">PICK QR</button>
+    <button id="merchant-card-tab">카드결제</button>
+  `
 
-  <div class="academy-card">
-    <span>이번달 청구금액</span>
-    <strong>350,000원</strong>
-  </div>
+  merchantContent = ''
 
-</div> 
+} else if (isWirelessTerminal) {
+  merchantMenu = `
+    <button id="terminal-payment-tab">거래내역</button>
+    <button id="terminal-settlement-tab">정산내역</button>
+    <button id="terminal-info-tab">가맹점정보</button>
+  `
+
+  merchantContent = `
+    <div class="merchant-type-ready-box">
+      <div class="academy-dashboard">
+
+        <div class="academy-card">
+          <span>오늘 승인금액</span>
+          <strong>0원</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>오늘 취소금액</span>
+          <strong>0원</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>오늘 순매출</span>
+          <strong>0원</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>정산예정금액</span>
+          <strong>0원</strong>
+        </div>
+
       </div>
-    `
+
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>거래일시</th>
+              <th>승인번호</th>
+              <th>거래번호</th>
+              <th>금액</th>
+              <th>상태</th>
+              <th>정산상태</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td colspan="6">
+                무선단말기 거래내역을 연결할 예정입니다.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `
+
+} else if (isAcademy) {
+  merchantMenu = `
+    <button id="merchant-member-tab">회원관리</button>
+    <button id="merchant-billing-tab">청구관리</button>
+    <button id="merchant-batch-tab">수기결제</button>
+    <button id="merchant-payment-list-tab">결제내역</button>
+  `
+
+  merchantContent = `
+    <div class="merchant-type-ready-box">
+      <div class="academy-dashboard">
+
+        <div class="academy-card">
+          <span>회원 수</span>
+          <strong>3명</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>미납 건수</span>
+          <strong>3건</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>완료 건수</span>
+          <strong>1건</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>이번달 청구금액</span>
+          <strong>350,000원</strong>
+        </div>
+
+      </div>
+    </div>
+  `
+
+} else {
+  merchantMenu = ''
+  merchantContent = `
+    <div class="merchant-type-ready-box">
+      가맹점 유형을 확인해주세요.
+    </div>
+  `
+}
 
   let lastCheckedOrderId =
   Number(sessionStorage.getItem('last_checked_order_id_' + merchantId) || 0)
