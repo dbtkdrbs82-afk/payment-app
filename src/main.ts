@@ -10141,6 +10141,51 @@ if (isNormalStore) {
         paymentDateValue <= selectedEndDate
       )
     })
+
+    const terminalPageParams =
+  new URLSearchParams(window.location.search)
+
+const terminalCurrentPage =
+  Math.max(
+    1,
+    Number(
+      terminalPageParams.get('terminal_page') || 1
+    )
+  )
+
+const terminalPageSize =
+  Math.max(
+    1,
+    Number(
+      terminalPageParams.get('terminal_page_size') || 10
+    )
+  )
+
+const terminalTotalPages =
+  Math.max(
+    1,
+    Math.ceil(
+      selectedDatePayments.length /
+      terminalPageSize
+    )
+  )
+
+const terminalSafePage =
+  Math.min(
+    terminalCurrentPage,
+    terminalTotalPages
+  )
+
+const terminalStartIndex =
+  (terminalSafePage - 1) *
+  terminalPageSize
+
+const terminalPagedPayments =
+  selectedDatePayments.slice(
+    terminalStartIndex,
+    terminalStartIndex +
+      terminalPageSize
+  )
   
   const selectedPaidPayments =
     selectedDatePayments.filter((payment) =>
@@ -10323,6 +10368,47 @@ if (isNormalStore) {
 </div> 
 
       <div class="admin-table-wrap">
+
+      <div class="admin-table-top">
+  <button id="terminal-excel-download">
+    엑셀 다운로드
+  </button>
+
+  <div class="admin-pagination">
+    <button
+      id="terminal-prev-page"
+      ${terminalSafePage <= 1 ? 'disabled' : ''}
+    >
+      이전
+    </button>
+
+    <span>
+      ${terminalSafePage} / ${terminalTotalPages}
+    </span>
+
+    <button
+      id="terminal-next-page"
+      ${terminalSafePage >= terminalTotalPages ? 'disabled' : ''}
+    >
+      다음
+    </button>
+  </div>
+
+  <select id="terminal-page-size">
+    <option value="10" ${terminalPageSize === 10 ? 'selected' : ''}>
+      10개씩 보기
+    </option>
+
+    <option value="20" ${terminalPageSize === 20 ? 'selected' : ''}>
+      20개씩 보기
+    </option>
+
+    <option value="50" ${terminalPageSize === 50 ? 'selected' : ''}>
+      50개씩 보기
+    </option>
+  </select>
+</div>
+
         <table class="admin-table">
 
           <thead>
@@ -10346,7 +10432,7 @@ if (isNormalStore) {
                     </td>
                   </tr>
                 `
-                : selectedDatePayments
+                : terminalPagedPayments
                   .map((payment) => `
                       <tr>
                         <td>
@@ -10841,18 +10927,35 @@ document
       params.toString()
   })
 
-document
-  .querySelector('#terminal-date-today-button')
+  document
+  .querySelector('#terminal-next-page')
   ?.addEventListener('click', () => {
-    const now = new Date()
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
 
-    const year = now.getFullYear()
-    const month =
-      String(now.getMonth() + 1)
-        .padStart(2, '0')
-    const day =
-      String(now.getDate())
-        .padStart(2, '0')
+    const currentPage =
+      Math.max(
+        1,
+        Number(
+          params.get('terminal_page') || 1
+        )
+      )
+
+    params.set(
+      'terminal_page',
+      String(currentPage + 1)
+    )
+
+    window.location.search =
+      params.toString()
+  })
+  document
+  .querySelector('#terminal-page-size')
+  ?.addEventListener('change', (event) => {
+    const select =
+      event.currentTarget as HTMLSelectElement
 
     const params =
       new URLSearchParams(
@@ -10860,14 +10963,18 @@ document
       )
 
     params.set(
-      'terminal_date',
-      `${year}-${month}-${day}`
+      'terminal_page_size',
+      select.value
+    )
+
+    params.set(
+      'terminal_page',
+      '1'
     )
 
     window.location.search =
       params.toString()
   })
-
       const { data: merchantSetting } = await supabase
   .from('merchants')
   .select(`
