@@ -10112,6 +10112,108 @@ if (isNormalStore) {
       payment.status === 'cancel'
     )
 
+    const now = new Date()
+
+const thisMonthPayments =
+  terminalPayments.filter((payment) => {
+    if (!payment.created_at) return false
+
+    const paymentDate =
+      new Date(payment.created_at)
+
+    return (
+      paymentDate.getFullYear() ===
+        now.getFullYear() &&
+      paymentDate.getMonth() ===
+        now.getMonth()
+    )
+  })
+
+const thisYearPayments =
+  terminalPayments.filter((payment) => {
+    if (!payment.created_at) return false
+
+    const paymentDate =
+      new Date(payment.created_at)
+
+    return (
+      paymentDate.getFullYear() ===
+      now.getFullYear()
+    )
+  })
+
+const todayApprovedCount =
+  terminalPaidPayments.length
+
+const todayCanceledCount =
+  terminalCancelPayments.length
+
+const monthPaidPayments =
+  thisMonthPayments.filter((payment) =>
+    payment.status === 'paid'
+  )
+
+const monthCancelPayments =
+  thisMonthPayments.filter((payment) =>
+    payment.status === 'cancel'
+  )
+
+const yearPaidPayments =
+  thisYearPayments.filter((payment) =>
+    payment.status === 'paid'
+  )
+
+const yearCancelPayments =
+  thisYearPayments.filter((payment) =>
+    payment.status === 'cancel'
+  )
+
+const monthApprovedAmount =
+  monthPaidPayments.reduce(
+    (sum, payment) =>
+      sum + Number(payment.amount || 0),
+    0
+  )
+
+const monthCanceledAmount =
+  monthCancelPayments.reduce(
+    (sum, payment) =>
+      sum + Number(payment.amount || 0),
+    0
+  )
+
+const monthNetAmount =
+  monthApprovedAmount -
+  monthCanceledAmount
+
+const yearApprovedAmount =
+  yearPaidPayments.reduce(
+    (sum, payment) =>
+      sum + Number(payment.amount || 0),
+    0
+  )
+
+const yearCanceledAmount =
+  yearCancelPayments.reduce(
+    (sum, payment) =>
+      sum + Number(payment.amount || 0),
+    0
+  )
+
+const yearNetAmount =
+  yearApprovedAmount -
+  yearCanceledAmount
+
+const monthSettlementAmount =
+  monthPaidPayments.reduce(
+    (sum, payment) =>
+      sum +
+      Number(
+        payment.settlement_amount || 0
+      ),
+    0
+  )
+
   const terminalApprovedAmount =
     terminalPaidPayments.reduce(
       (sum, payment) =>
@@ -10130,20 +10232,7 @@ if (isNormalStore) {
     terminalApprovedAmount -
     terminalCanceledAmount
 
-  const terminalSettlementAmount =
-    terminalPayments
-      .filter((payment) =>
-        payment.status === 'paid' &&
-        payment.payout_status !== '출금완료'
-      )
-      .reduce(
-        (sum, payment) =>
-          sum +
-          Number(
-            payment.settlement_amount || 0
-          ),
-        0
-      )
+  
 
   const getTerminalStatusText =
     (status: string) => {
@@ -10186,37 +10275,60 @@ if (isNormalStore) {
   merchantContent = `
     <div class="merchant-type-ready-box">
 
-      <div class="academy-dashboard">
+     <div class="academy-dashboard">
 
-        <div class="academy-card">
-          <span>오늘 승인금액</span>
-          <strong>
-            ${terminalApprovedAmount.toLocaleString()}원
-          </strong>
-        </div>
+  <div class="academy-card">
+    <span>오늘 매출</span>
 
-        <div class="academy-card">
-          <span>오늘 취소금액</span>
-          <strong>
-            ${terminalCanceledAmount.toLocaleString()}원
-          </strong>
-        </div>
+    <strong>
+      ${terminalNetAmount.toLocaleString()}원
+    </strong>
 
-        <div class="academy-card">
-          <span>오늘 순매출</span>
-          <strong>
-            ${terminalNetAmount.toLocaleString()}원
-          </strong>
-        </div>
+    <small>
+      승인 ${todayApprovedCount.toLocaleString()}건
+      · 취소 ${todayCanceledCount.toLocaleString()}건
+    </small>
+  </div>
 
-        <div class="academy-card">
-          <span>정산예정금액</span>
-          <strong>
-            ${terminalSettlementAmount.toLocaleString()}원
-          </strong>
-        </div>
+  <div class="academy-card">
+    <span>이번 달 매출</span>
 
-      </div>
+    <strong>
+      ${monthNetAmount.toLocaleString()}원
+    </strong>
+
+    <small>
+      승인 ${monthPaidPayments.length.toLocaleString()}건
+      · 취소 ${monthCancelPayments.length.toLocaleString()}건
+    </small>
+  </div>
+
+  <div class="academy-card">
+    <span>올해 매출</span>
+
+    <strong>
+      ${yearNetAmount.toLocaleString()}원
+    </strong>
+
+    <small>
+      승인 ${yearPaidPayments.length.toLocaleString()}건
+      · 취소 ${yearCancelPayments.length.toLocaleString()}건
+    </small>
+  </div>
+
+  <div class="academy-card">
+    <span>이번 달 정산금액</span>
+
+    <strong>
+      ${monthSettlementAmount.toLocaleString()}원
+    </strong>
+
+    <small>
+      승인 ${monthPaidPayments.length.toLocaleString()}건 기준
+    </small>
+  </div>
+
+</div>
 
       <div class="admin-table-wrap">
         <table class="admin-table">
