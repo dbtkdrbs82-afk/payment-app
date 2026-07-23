@@ -10041,6 +10041,40 @@ const isAcademy =
 const isWirelessTerminal =
   merchantType === '무선단말기'
 
+  let terminalPayments: any[] = []
+
+if (isWirelessTerminal) {
+  const { data, error } = await supabase
+    .from('payments')
+    .select(`
+      id,
+      created_at,
+      approved_at,
+      canceled_at,
+      approval_number,
+      order_id,
+      payment_key,
+      amount,
+      settlement_amount,
+      status,
+      payout_status,
+      settlement_status,
+      pg_company
+    `)
+    .eq('merchant_id', merchantId)
+    .order('created_at', { ascending: false })
+    .limit(100)
+
+  if (error) {
+    console.error(
+      '무선단말기 거래내역 조회 실패:',
+      error
+    )
+  }
+
+  terminalPayments = data || []
+}
+
 let merchantMenu = ''
 let merchantContent = ''
 
@@ -10055,40 +10089,138 @@ if (isNormalStore) {
   merchantContent = ''
 
 } else if (isWirelessTerminal) {
+  const todayText =
+    new Date().toLocaleDateString('ko-KR')
+
+  const todayPayments =
+    terminalPayments.filter((payment) => {
+      if (!payment.created_at) return false
+
+      return (
+        new Date(payment.created_at)
+          .toLocaleDateString('ko-KR') === todayText
+      )
+    })
+
+  const terminalPaidPayments =
+    todayPayments.filter((payment) =>
+      payment.status === 'paid'
+    )
+
+  const terminalCancelPayments =
+    todayPayments.filter((payment) =>
+      payment.status === 'cancel'
+    )
+
+  const terminalApprovedAmount =
+    terminalPaidPayments.reduce(
+      (sum, payment) =>
+        sum + Number(payment.amount || 0),
+      0
+    )
+
+  const terminalCanceledAmount =
+    terminalCancelPayments.reduce(
+      (sum, payment) =>
+        sum + Number(payment.amount || 0),
+      0
+    )
+
+  const terminalNetAmount =
+    terminalApprovedAmount -
+    terminalCanceledAmount
+
+  const terminalSettlementAmount =
+    terminalPayments
+      .filter((payment) =>
+        payment.status === 'paid' &&
+        payment.payout_status !== '출금완료'
+      )
+      .reduce(
+        (sum, payment) =>
+          sum +
+          Number(
+            payment.settlement_amount || 0
+          ),
+        0
+      )
+
+  const getTerminalStatusText =
+    (status: string) => {
+      if (status === 'paid') return '승인'
+      if (status === 'cancel') return '취소'
+      if (status === 'ready') return '대기'
+
+      return status || '-'
+    }
+
+  const getTerminalDateText =
+    (payment: any) => {
+      const dateText =
+        payment.status === 'cancel'
+          ? payment.canceled_at ||
+            payment.created_at
+          : payment.approved_at ||
+            payment.created_at
+
+      if (!dateText) return '-'
+
+      return new Date(dateText)
+        .toLocaleString('ko-KR')
+    }
+
   merchantMenu = `
-    <button id="terminal-payment-tab">거래내역</button>
-    <button id="terminal-settlement-tab">정산내역</button>
-    <button id="terminal-info-tab">가맹점정보</button>
+    <button id="terminal-payment-tab">
+      거래내역
+    </button>
+
+    <button id="terminal-settlement-tab">
+      정산내역
+    </button>
+
+    <button id="terminal-info-tab">
+      가맹점정보
+    </button>
   `
 
   merchantContent = `
     <div class="merchant-type-ready-box">
+
       <div class="academy-dashboard">
 
         <div class="academy-card">
           <span>오늘 승인금액</span>
-          <strong>0원</strong>
+          <strong>
+            ${terminalApprovedAmount.toLocaleString()}원
+          </strong>
         </div>
 
         <div class="academy-card">
           <span>오늘 취소금액</span>
-          <strong>0원</strong>
+          <strong>
+            ${terminalCanceledAmount.toLocaleString()}원
+          </strong>
         </div>
 
         <div class="academy-card">
           <span>오늘 순매출</span>
-          <strong>0원</strong>
+          <strong>
+            ${terminalNetAmount.toLocaleString()}원
+          </strong>
         </div>
 
         <div class="academy-card">
           <span>정산예정금액</span>
-          <strong>0원</strong>
+          <strong>
+            ${terminalSettlementAmount.toLocaleString()}원
+          </strong>
         </div>
 
       </div>
 
       <div class="admin-table-wrap">
         <table class="admin-table">
+
           <thead>
             <tr>
               <th>거래일시</th>
@@ -10101,14 +10233,62 @@ if (isNormalStore) {
           </thead>
 
           <tbody>
-            <tr>
-              <td colspan="6">
-                무선단말기 거래내역을 연결할 예정입니다.
-              </td>
-            </tr>
+            ${
+              terminalPayments.length === 0
+                ? `
+                  <tr>
+                    <td colspan="6">
+                      등록된 무선단말기 거래내역이 없습니다.
+                    </td>
+                  </tr>
+                `
+                : terminalPayments
+                    .map((payment) => `
+                      <tr>
+                        <td>
+                          ${getTerminalDateText(payment)}
+                        </td>
+
+                        <td>
+                          ${payment.approval_number || '-'}
+                        </td>
+
+                        <td>
+                          ${
+                            payment.order_id ||
+                            payment.payment_key ||
+                            '-'
+                          }
+                        </td>
+
+                        <td>
+                          ${Number(
+                            payment.amount || 0
+                          ).toLocaleString()}원
+                        </td>
+
+                        <td>
+                          ${getTerminalStatusText(
+                            payment.status
+                          )}
+                        </td>
+
+                        <td>
+                          ${
+                            payment.payout_status ||
+                            payment.settlement_status ||
+                            '정산대기'
+                          }
+                        </td>
+                      </tr>
+                    `)
+                    .join('')
+            }
           </tbody>
+
         </table>
       </div>
+
     </div>
   `
 
