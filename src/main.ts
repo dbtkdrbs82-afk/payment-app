@@ -10106,10 +10106,18 @@ if (isNormalStore) {
   const todayDateValue =
     getLocalDateValue(new Date())
   
-  const selectedDate =
+    const terminalDateParams =
     new URLSearchParams(
       window.location.search
-    ).get('terminal_date') || todayDateValue
+    )
+  
+  const selectedStartDate =
+    terminalDateParams.get('terminal_start_date') ||
+    todayDateValue
+  
+  const selectedEndDate =
+    terminalDateParams.get('terminal_end_date') ||
+    todayDateValue
   
   const selectedDatePayments =
     terminalPayments.filter((payment) => {
@@ -10123,9 +10131,14 @@ if (isNormalStore) {
   
       if (!dateText) return false
   
+      const paymentDateValue =
+        getLocalDateValue(
+          new Date(dateText)
+        )
+  
       return (
-        getLocalDateValue(new Date(dateText)) ===
-        selectedDate
+        paymentDateValue >= selectedStartDate &&
+        paymentDateValue <= selectedEndDate
       )
     })
   
@@ -10223,14 +10236,20 @@ if (isNormalStore) {
 
   <div class="terminal-date-search-row">
 
-    <label for="terminal-date-input">
-      조회일자
-    </label>
+    <input
+      type="date"
+      id="terminal-start-date-input"
+      value="${selectedStartDate}"
+    />
+
+    <span class="terminal-date-wave">
+      ~
+    </span>
 
     <input
       type="date"
-      id="terminal-date-input"
-      value="${selectedDate}"
+      id="terminal-end-date-input"
+      value="${selectedEndDate}"
     />
 
     <button
@@ -10733,13 +10752,31 @@ ${merchantContent}
       document
   .querySelector('#terminal-date-search-button')
   ?.addEventListener('click', () => {
-    const dateInput =
+    const startDateInput =
       document.querySelector<HTMLInputElement>(
-        '#terminal-date-input'
+        '#terminal-start-date-input'
       )
 
-    if (!dateInput?.value) {
+    const endDateInput =
+      document.querySelector<HTMLInputElement>(
+        '#terminal-end-date-input'
+      )
+
+    if (
+      !startDateInput?.value ||
+      !endDateInput?.value
+    ) {
       alert('조회 날짜를 선택해주세요.')
+      return
+    }
+
+    if (
+      startDateInput.value >
+      endDateInput.value
+    ) {
+      alert(
+        '시작일은 종료일보다 늦을 수 없습니다.'
+      )
       return
     }
 
@@ -10748,9 +10785,56 @@ ${merchantContent}
         window.location.search
       )
 
+    params.delete('terminal_date')
+
     params.set(
-      'terminal_date',
-      dateInput.value
+      'terminal_start_date',
+      startDateInput.value
+    )
+
+    params.set(
+      'terminal_end_date',
+      endDateInput.value
+    )
+
+    window.location.search =
+      params.toString()
+  })
+
+document
+  .querySelector('#terminal-date-today-button')
+  ?.addEventListener('click', () => {
+    const now = new Date()
+
+    const year =
+      now.getFullYear()
+
+    const month =
+      String(now.getMonth() + 1)
+        .padStart(2, '0')
+
+    const day =
+      String(now.getDate())
+        .padStart(2, '0')
+
+    const todayValue =
+      `${year}-${month}-${day}`
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
+
+    params.delete('terminal_date')
+
+    params.set(
+      'terminal_start_date',
+      todayValue
+    )
+
+    params.set(
+      'terminal_end_date',
+      todayValue
     )
 
     window.location.search =
