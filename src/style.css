@@ -6171,3 +6171,39 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   font-weight: 800;
   white-space: nowrap;
 }
+/* 무선단말기 날짜 조회 영역 */
+.terminal-date-search-box {
+  margin: 18px 0 20px;
+}
+
+.terminal-date-search-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.terminal-date-search-row input[type='date'] {
+  width: 145px;
+  height: 34px;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
+
+.terminal-date-wave {
+  flex: 0 0 auto;
+}
+
+#terminal-date-search-button,
+#terminal-date-today-button {
+  width: auto !important;
+  min-width: 58px;
+  height: 34px;
+  margin: 0 !important;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 5px;
+}
