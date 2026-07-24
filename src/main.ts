@@ -7794,8 +7794,267 @@ document.querySelector('#payout-target-filter')
   renderPayoutTable()
 })    
       renderPayoutTable()
+
+    } else if (page === 'tax') {
+      const subMenu = document.querySelector('.admin-sub-menu')
+      const titleBox = document.querySelector('.admin-title')
+      const searchBox = document.querySelector('.admin-search-box')
+      const summaryBox = document.querySelector('.admin-summary')
+      const tableTop = document.querySelector('.admin-table-top')
+      const tableHead = document.querySelector('.admin-table thead')
+      const paymentTableBody =
+        document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
     
+      if (subMenu) {
+        subMenu.innerHTML =
+          '<span class="sub-tab active" data-tax-sub="generate">신고자료 생성</span>' +
+          '<span class="sub-tab" data-tax-sub="header">헤더레코드 설정</span>'
+      }
     
+      if (titleBox) {
+        titleBox.innerHTML = '▶ 세무관리 > 신고자료 생성'
+      }
+    
+      if (searchBox) {
+        searchBox.innerHTML = ''
+      }
+    
+      if (tableTop) {
+        tableTop.innerHTML = ''
+      }
+    
+      if (tableHead) {
+        tableHead.innerHTML = ''
+      }
+    
+      if (paymentTableBody) {
+        paymentTableBody.innerHTML = ''
+      }
+    
+      if (summaryBox) {
+        summaryBox.innerHTML =
+          '<div class="merchant-detail-header">' +
+            '<h2>신고자료 생성</h2>' +
+            '<p>거래기간을 선택하여 세금계산서 및 판매대행 신고자료를 생성합니다.</p>' +
+          '</div>' +
+    
+          '<div class="merchant-detail-page">' +
+            '<div class="merchant-detail-section">' +
+              '<h3>거래기간</h3>' +
+    
+              '<div class="merchant-detail-grid">' +
+                '<label>년도</label>' +
+                '<select id="tax-year">' +
+                  '<option value="2026" selected>2026년</option>' +
+                  '<option value="2027">2027년</option>' +
+                '</select>' +
+    
+                '<label>시작월</label>' +
+                '<select id="tax-start-month">' +
+                  '<option value="1">1월</option>' +
+                  '<option value="2">2월</option>' +
+                  '<option value="3">3월</option>' +
+                  '<option value="4" selected>4월</option>' +
+                  '<option value="5">5월</option>' +
+                  '<option value="6">6월</option>' +
+                  '<option value="7">7월</option>' +
+                  '<option value="8">8월</option>' +
+                  '<option value="9">9월</option>' +
+                  '<option value="10">10월</option>' +
+                  '<option value="11">11월</option>' +
+                  '<option value="12">12월</option>' +
+                '</select>' +
+    
+                '<label>종료월</label>' +
+                '<select id="tax-end-month">' +
+                  '<option value="1">1월</option>' +
+                  '<option value="2">2월</option>' +
+                  '<option value="3">3월</option>' +
+                  '<option value="4">4월</option>' +
+                  '<option value="5">5월</option>' +
+                  '<option value="6" selected>6월</option>' +
+                  '<option value="7">7월</option>' +
+                  '<option value="8">8월</option>' +
+                  '<option value="9">9월</option>' +
+                  '<option value="10">10월</option>' +
+                  '<option value="11">11월</option>' +
+                  '<option value="12">12월</option>' +
+                '</select>' +
+              '</div>' +
+    
+              '<div style="margin-top:16px;">' +
+                '<button class="tax-quarter-btn" data-quarter="1">1분기</button> ' +
+                '<button class="tax-quarter-btn" data-quarter="2">2분기</button> ' +
+                '<button class="tax-quarter-btn" data-quarter="3">3분기</button> ' +
+                '<button class="tax-quarter-btn" data-quarter="4">4분기</button>' +
+              '</div>' +
+    
+              '<div class="merchant-detail-actions">' +
+                '<button id="tax-search-btn" class="merchant-save-btn">조회</button>' +
+              '</div>' +
+            '</div>' +
+    
+            '<div id="tax-result-area"></div>' +
+          '</div>'
+      }
+    
+      document.querySelectorAll<HTMLButtonElement>('.tax-quarter-btn')
+        .forEach((button) => {
+          button.addEventListener('click', () => {
+            const quarter = Number(button.dataset.quarter)
+    
+            const startMonth = (quarter - 1) * 3 + 1
+            const endMonth = startMonth + 2
+    
+            const startSelect =
+              document.querySelector<HTMLSelectElement>('#tax-start-month')
+    
+            const endSelect =
+              document.querySelector<HTMLSelectElement>('#tax-end-month')
+    
+            if (startSelect) {
+              startSelect.value = String(startMonth)
+            }
+    
+            if (endSelect) {
+              endSelect.value = String(endMonth)
+            }
+          })
+        })
+    
+      document.querySelector('#tax-search-btn')
+        ?.addEventListener('click', async () => {
+          const year =
+            Number(
+              document.querySelector<HTMLSelectElement>('#tax-year')?.value || 0
+            )
+    
+          const startMonth =
+            Number(
+              document.querySelector<HTMLSelectElement>('#tax-start-month')?.value || 0
+            )
+    
+          const endMonth =
+            Number(
+              document.querySelector<HTMLSelectElement>('#tax-end-month')?.value || 0
+            )
+    
+          if (!year || !startMonth || !endMonth) {
+            alert('조회기간을 선택해주세요.')
+            return
+          }
+    
+          if (startMonth > endMonth) {
+            alert('시작월은 종료월보다 클 수 없습니다.')
+            return
+          }
+    
+          const periodStart =
+            year + '-' + String(startMonth).padStart(2, '0') + '-01'
+    
+          const nextMonthDate =
+            new Date(year, endMonth, 1)
+    
+          const periodEndDate =
+            new Date(nextMonthDate.getTime() - 1)
+    
+          const periodEnd =
+            periodEndDate.getFullYear() +
+            '-' +
+            String(periodEndDate.getMonth() + 1).padStart(2, '0') +
+            '-' +
+            String(periodEndDate.getDate()).padStart(2, '0')
+    
+          const { data: payments, error } = await supabase
+            .from('payments')
+            .select('*')
+            .gte('created_at', periodStart + 'T00:00:00')
+            .lte('created_at', periodEnd + 'T23:59:59')
+            .eq('status', 'paid')
+            .order('created_at', { ascending: true })
+    
+          if (error) {
+            alert('신고자료 조회 실패: ' + error.message)
+            return
+          }
+    
+          const totalAmount = (payments || []).reduce((sum, payment) => {
+            return sum + Number(payment.amount || 0)
+          }, 0)
+    
+          const totalFeeAmount = (payments || []).reduce((sum, payment) => {
+            return sum + Number(payment.fee_amount || 0)
+          }, 0)
+    
+          const merchantIds = Array.from(
+            new Set(
+              (payments || [])
+                .map((payment) => Number(payment.merchant_id))
+                .filter((merchantId) => merchantId > 0)
+            )
+          )
+    
+          const resultArea =
+            document.querySelector<HTMLElement>('#tax-result-area')
+    
+          if (!resultArea) return
+    
+          resultArea.innerHTML =
+            '<div class="merchant-detail-section">' +
+              '<h3>조회 결과</h3>' +
+              '<div class="merchant-status-cards">' +
+    
+                '<div class="merchant-status-card">' +
+                  '<p>거래기간</p>' +
+                  '<strong>' + periodStart + ' ~ ' + periodEnd + '</strong>' +
+                '</div>' +
+    
+                '<div class="merchant-status-card">' +
+                  '<p>가맹점</p>' +
+                  '<strong>' + merchantIds.length + '곳</strong>' +
+                '</div>' +
+    
+                '<div class="merchant-status-card">' +
+                  '<p>승인건수</p>' +
+                  '<strong>' + (payments || []).length + '건</strong>' +
+                '</div>' +
+    
+                '<div class="merchant-status-card">' +
+                  '<p>결제금액</p>' +
+                  '<strong>' + totalAmount.toLocaleString() + '원</strong>' +
+                '</div>' +
+    
+                '<div class="merchant-status-card">' +
+                  '<p>수수료합계</p>' +
+                  '<strong>' + totalFeeAmount.toLocaleString() + '원</strong>' +
+                '</div>' +
+    
+              '</div>' +
+    
+              '<div class="merchant-detail-actions">' +
+                '<button id="tax-xlsx-download-btn" class="merchant-save-btn">' +
+                  '세금계산서 파일(XLSX) 다운로드' +
+                '</button>' +
+    
+                '<button id="tax-txt-download-btn" class="merchant-save-btn">' +
+                  '전산매체 파일(TXT) 다운로드' +
+                '</button>' +
+              '</div>' +
+            '</div>'
+    
+          document.querySelector('#tax-xlsx-download-btn')
+            ?.addEventListener('click', () => {
+              alert('세금계산서 XLSX 생성 기능을 다음 단계에서 연결합니다.')
+            })
+    
+          document.querySelector('#tax-txt-download-btn')
+            ?.addEventListener('click', () => {
+              alert('판매대행 TXT 생성 기능을 다음 단계에서 연결합니다.')
+            })
+        })
+    
+      return
+          
 } else if (page === 'order') {
   const subMenu = document.querySelector('.admin-sub-menu')
   const titleBox = document.querySelector('.admin-title')
