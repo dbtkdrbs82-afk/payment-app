@@ -7897,6 +7897,384 @@ document.querySelector('#payout-target-filter')
             '<div id="tax-result-area"></div>' +
           '</div>'
       }
+
+      const renderTaxHeaderSettings = async () => {
+        if (titleBox) {
+          titleBox.innerHTML = '▶ 세무관리 > 헤더레코드 설정'
+        }
+    
+        if (searchBox) {
+          searchBox.innerHTML = ''
+        }
+    
+        if (tableTop) {
+          tableTop.innerHTML = ''
+        }
+    
+        if (tableHead) {
+          tableHead.innerHTML = ''
+        }
+    
+        if (paymentTableBody) {
+          paymentTableBody.innerHTML = ''
+        }
+    
+        if (!summaryBox) return
+    
+        summaryBox.innerHTML =
+          '<div class="merchant-detail-header">' +
+            '<h2>헤더레코드 설정</h2>' +
+            '<p>국세청 신고파일에 들어갈 회사 기본정보를 설정합니다.</p>' +
+          '</div>' +
+    
+          '<div class="merchant-detail-page">' +
+    
+            '<div class="merchant-detail-section">' +
+              '<h3>신고 기본정보</h3>' +
+    
+              '<div class="merchant-detail-grid">' +
+    
+                '<label>회사코드</label>' +
+                '<input id="tax-header-company-code" value="NXGSOFT" />' +
+    
+                '<label>결제연도</label>' +
+                '<input id="tax-header-year" type="number" value="2026" />' +
+    
+                '<label>분기</label>' +
+                '<select id="tax-header-quarter">' +
+                  '<option value="1">1분기</option>' +
+                  '<option value="2">2분기</option>' +
+                  '<option value="3">3분기</option>' +
+                  '<option value="4">4분기</option>' +
+                '</select>' +
+    
+                '<label>관할세무서 코드</label>' +
+                '<input id="tax-header-office-code" />' +
+    
+                '<label>제출일</label>' +
+                '<input id="tax-header-submission-date" type="date" />' +
+    
+                '<label>신고기간 시작일</label>' +
+                '<input id="tax-header-period-start" type="date" />' +
+    
+                '<label>신고기간 종료일</label>' +
+                '<input id="tax-header-period-end" type="date" />' +
+    
+              '</div>' +
+            '</div>' +
+    
+            '<div class="merchant-detail-section">' +
+              '<h3>회사정보</h3>' +
+    
+              '<div class="merchant-detail-grid">' +
+    
+                '<label>사업자번호</label>' +
+                '<input id="tax-header-business-number" placeholder="000-00-00000" />' +
+    
+                '<label>회사명</label>' +
+                '<input id="tax-header-company-name" value="주식회사 엔엑스지소프트" />' +
+    
+                '<label>영문명</label>' +
+                '<input id="tax-header-company-name-english" value="NXGSOFT" />' +
+    
+                '<label>대표자</label>' +
+                '<input id="tax-header-representative-name" />' +
+    
+                '<label>주소</label>' +
+                '<input id="tax-header-business-address" />' +
+    
+                '<label>업태</label>' +
+                '<input id="tax-header-business-type" />' +
+    
+                '<label>종목</label>' +
+                '<input id="tax-header-business-item" />' +
+    
+              '</div>' +
+            '</div>' +
+    
+            '<div class="merchant-detail-section">' +
+              '<h3>담당자 연락처</h3>' +
+    
+              '<div class="merchant-detail-grid">' +
+    
+                '<label>회사 전화번호</label>' +
+                '<input id="tax-header-company-phone" />' +
+    
+                '<label>담당자 휴대폰</label>' +
+                '<input id="tax-header-manager-phone" />' +
+    
+                '<label>담당자 이메일</label>' +
+                '<input id="tax-header-manager-email" type="email" />' +
+    
+              '</div>' +
+            '</div>' +
+    
+            '<div class="merchant-detail-actions">' +
+              '<button id="tax-header-save-btn" class="merchant-save-btn">' +
+                '헤더레코드 저장' +
+              '</button>' +
+            '</div>' +
+    
+          '</div>'
+    
+        const setInputValue = (
+          selector: string,
+          value: string | number | null | undefined
+        ) => {
+          const input =
+            document.querySelector<HTMLInputElement | HTMLSelectElement>(selector)
+    
+          if (input) {
+            input.value = value === null || value === undefined
+              ? ''
+              : String(value)
+          }
+        }
+    
+        const { data: headerSetting, error: headerLoadError } = await supabase
+          .from('tax_header_settings')
+          .select('*')
+          .order('id', { ascending: true })
+          .limit(1)
+          .maybeSingle()
+    
+        if (headerLoadError) {
+          alert('헤더레코드 불러오기 실패: ' + headerLoadError.message)
+          return
+        }
+    
+        if (headerSetting) {
+          setInputValue(
+            '#tax-header-company-code',
+            headerSetting.company_code
+          )
+    
+          setInputValue(
+            '#tax-header-year',
+            headerSetting.tax_year
+          )
+    
+          setInputValue(
+            '#tax-header-quarter',
+            headerSetting.quarter
+          )
+    
+          setInputValue(
+            '#tax-header-office-code',
+            headerSetting.tax_office_code
+          )
+    
+          setInputValue(
+            '#tax-header-submission-date',
+            headerSetting.submission_date
+          )
+    
+          setInputValue(
+            '#tax-header-period-start',
+            headerSetting.period_start
+          )
+    
+          setInputValue(
+            '#tax-header-period-end',
+            headerSetting.period_end
+          )
+    
+          setInputValue(
+            '#tax-header-business-number',
+            headerSetting.business_number
+          )
+    
+          setInputValue(
+            '#tax-header-company-name',
+            headerSetting.company_name
+          )
+    
+          setInputValue(
+            '#tax-header-company-name-english',
+            headerSetting.company_name_english
+          )
+    
+          setInputValue(
+            '#tax-header-representative-name',
+            headerSetting.representative_name
+          )
+    
+          setInputValue(
+            '#tax-header-business-address',
+            headerSetting.business_address
+          )
+    
+          setInputValue(
+            '#tax-header-business-type',
+            headerSetting.business_type
+          )
+    
+          setInputValue(
+            '#tax-header-business-item',
+            headerSetting.business_item
+          )
+    
+          setInputValue(
+            '#tax-header-company-phone',
+            headerSetting.company_phone
+          )
+    
+          setInputValue(
+            '#tax-header-manager-phone',
+            headerSetting.manager_phone
+          )
+    
+          setInputValue(
+            '#tax-header-manager-email',
+            headerSetting.manager_email
+          )
+        }
+    
+        document.querySelector<HTMLButtonElement>('#tax-header-save-btn')
+          ?.addEventListener('click', async () => {
+            const getInputValue = (selector: string) => {
+              return (
+                document.querySelector<
+                  HTMLInputElement | HTMLSelectElement
+                >(selector)?.value || ''
+              ).trim()
+            }
+    
+            const companyCode =
+              getInputValue('#tax-header-company-code')
+    
+            const taxYear =
+              Number(getInputValue('#tax-header-year'))
+    
+            const quarter =
+              Number(getInputValue('#tax-header-quarter'))
+    
+            const businessNumber =
+              getInputValue('#tax-header-business-number')
+    
+            const companyName =
+              getInputValue('#tax-header-company-name')
+    
+            if (!companyCode) {
+              alert('회사코드를 입력해주세요.')
+              return
+            }
+    
+            if (!taxYear) {
+              alert('결제연도를 입력해주세요.')
+              return
+            }
+    
+            if (!quarter) {
+              alert('분기를 선택해주세요.')
+              return
+            }
+    
+            if (!businessNumber) {
+              alert('사업자번호를 입력해주세요.')
+              return
+            }
+    
+            if (!companyName) {
+              alert('회사명을 입력해주세요.')
+              return
+            }
+    
+            const saveData = {
+              company_code: companyCode,
+              tax_year: taxYear,
+              quarter: quarter,
+    
+              tax_office_code:
+                getInputValue('#tax-header-office-code') || null,
+    
+              submission_date:
+                getInputValue('#tax-header-submission-date') || null,
+    
+              business_number: businessNumber,
+              company_name: companyName,
+    
+              company_name_english:
+                getInputValue('#tax-header-company-name-english') || null,
+    
+              period_start:
+                getInputValue('#tax-header-period-start') || null,
+    
+              period_end:
+                getInputValue('#tax-header-period-end') || null,
+    
+              company_phone:
+                getInputValue('#tax-header-company-phone') || null,
+    
+              manager_phone:
+                getInputValue('#tax-header-manager-phone') || null,
+    
+              manager_email:
+                getInputValue('#tax-header-manager-email') || null,
+    
+              representative_name:
+                getInputValue('#tax-header-representative-name') || null,
+    
+              business_address:
+                getInputValue('#tax-header-business-address') || null,
+    
+              business_type:
+                getInputValue('#tax-header-business-type') || null,
+    
+              business_item:
+                getInputValue('#tax-header-business-item') || null,
+    
+              updated_at: new Date().toISOString()
+            }
+    
+            let saveError = null
+    
+            if (headerSetting?.id) {
+              const { error } = await supabase
+                .from('tax_header_settings')
+                .update(saveData)
+                .eq('id', headerSetting.id)
+    
+              saveError = error
+            } else {
+              const { error } = await supabase
+                .from('tax_header_settings')
+                .insert([saveData])
+    
+              saveError = error
+            }
+    
+            if (saveError) {
+              alert('헤더레코드 저장 실패: ' + saveError.message)
+              return
+            }
+    
+            alert('헤더레코드가 저장되었습니다.')
+          })
+      }
+    
+      document.querySelector<HTMLElement>(
+        '[data-tax-sub="header"]'
+      )?.addEventListener('click', async () => {
+        document.querySelectorAll<HTMLElement>('[data-tax-sub]')
+          .forEach((tab) => {
+            tab.classList.remove('active')
+          })
+    
+        document.querySelector<HTMLElement>(
+          '[data-tax-sub="header"]'
+        )?.classList.add('active')
+    
+        await renderTaxHeaderSettings()
+      })
+    
+      document.querySelector<HTMLElement>(
+        '[data-tax-sub="generate"]'
+      )?.addEventListener('click', () => {
+        document.querySelector<HTMLElement>(
+          '.admin-tab[data-page="tax"]'
+        )?.click()
+      })
     
       document.querySelectorAll<HTMLButtonElement>('.tax-quarter-btn')
         .forEach((button) => {
