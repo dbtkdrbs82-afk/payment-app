@@ -10928,6 +10928,33 @@ document
   })
 
   document
+  .querySelector('#terminal-prev-page')
+  ?.addEventListener('click', () => {
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
+
+    const currentPage =
+      Math.max(
+        1,
+        Number(
+          params.get('terminal_page') || 1
+        )
+      )
+
+    if (currentPage <= 1) return
+
+    params.set(
+      'terminal_page',
+      String(currentPage - 1)
+    )
+
+    window.location.search =
+      params.toString()
+  })
+
+  document
   .querySelector('#terminal-next-page')
   ?.addEventListener('click', () => {
     const params =
