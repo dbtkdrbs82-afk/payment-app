@@ -8422,9 +8422,119 @@ document.querySelector('#payout-target-filter')
               '</div>' +
             '</div>'
     
-          document.querySelector('#tax-xlsx-download-btn')
-            ?.addEventListener('click', () => {
-              alert('세금계산서 XLSX 생성 기능을 다음 단계에서 연결합니다.')
+            document.querySelector('#tax-xlsx-download-btn')
+            ?.addEventListener('click', async () => {
+              if (!payments || payments.length === 0) {
+                alert('다운로드할 승인거래가 없습니다.')
+                return
+              }
+          
+              const XLSX = await import('xlsx')
+          
+              const merchantMap = new Map<
+                string,
+                {
+                  merchantId: string
+                  merchantName: string
+                  paymentCount: number
+                  totalAmount: number
+                  totalFeeAmount: number
+                }
+              >()
+          
+              payments.forEach((payment: any) => {
+                const merchantId =
+                  payment.merchant_id
+                    ? String(payment.merchant_id)
+                    : ''
+          
+                const merchantName =
+                  payment.merchant_name || '미등록 가맹점'
+          
+                const merchantKey =
+                  merchantId || merchantName
+          
+                const existing =
+                  merchantMap.get(merchantKey)
+          
+                if (existing) {
+                  existing.paymentCount += 1
+                  existing.totalAmount +=
+                    Number(payment.amount || 0)
+          
+                  existing.totalFeeAmount +=
+                    Number(payment.fee_amount || 0)
+                } else {
+                  merchantMap.set(merchantKey, {
+                    merchantId,
+                    merchantName,
+                    paymentCount: 1,
+                    totalAmount:
+                      Number(payment.amount || 0),
+                    totalFeeAmount:
+                      Number(payment.fee_amount || 0)
+                  })
+                }
+              })
+          
+              const excelRows =
+                Array.from(merchantMap.values())
+                  .map((merchant, index) => {
+                    const supplyAmount =
+                      Math.round(
+                        merchant.totalFeeAmount / 1.1
+                      )
+          
+                    const vatAmount =
+                      merchant.totalFeeAmount -
+                      supplyAmount
+          
+                    return {
+                      순번: index + 1,
+                      가맹점번호: merchant.merchantId,
+                      가맹점명: merchant.merchantName,
+                      승인건수: merchant.paymentCount,
+                      결제금액: merchant.totalAmount,
+                      수수료공급가액: supplyAmount,
+                      부가세: vatAmount,
+                      수수료합계: merchant.totalFeeAmount
+                    }
+                  })
+          
+              const worksheet =
+                XLSX.utils.json_to_sheet(excelRows)
+          
+              worksheet['!cols'] = [
+                { wch: 8 },
+                { wch: 14 },
+                { wch: 24 },
+                { wch: 12 },
+                { wch: 16 },
+                { wch: 18 },
+                { wch: 14 },
+                { wch: 16 }
+              ]
+          
+              const workbook =
+                XLSX.utils.book_new()
+          
+              XLSX.utils.book_append_sheet(
+                workbook,
+                worksheet,
+                '세금계산서'
+              )
+          
+              const fileName =
+                '세금계산서_' +
+                periodStart +
+                '_' +
+                periodEnd +
+                '.xlsx'
+          
+              XLSX.writeFile(
+                workbook,
+                fileName
+              )
             })
     
           document.querySelector('#tax-txt-download-btn')
