@@ -10409,7 +10409,7 @@ const terminalPagedPayments =
   </select>
 </div>
 
-        <table class="admin-table">
+        <table class="admin-table terminal-payment-table">
 
           <thead>
             <tr>

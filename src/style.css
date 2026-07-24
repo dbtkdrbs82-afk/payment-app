@@ -6207,3 +6207,14 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   flex: 0 0 auto;
   border-radius: 5px;
 }
+.terminal-payment-table th:first-child,
+.terminal-payment-table td:first-child {
+  width: 190px;
+  min-width: 190px;
+  white-space: nowrap;
+}
+
+.terminal-payment-table td:first-child {
+  overflow: visible;
+  text-overflow: initial;
+}
