@@ -8129,6 +8129,8 @@ document.querySelector('#payout-target-filter')
             headerSetting.manager_email
           )
         }
+
+        
     
         document.querySelector<HTMLButtonElement>('#tax-header-save-btn')
           ?.addEventListener('click', async () => {
@@ -8274,6 +8276,233 @@ document.querySelector('#payout-target-filter')
         document.querySelector<HTMLElement>(
           '.admin-tab[data-page="tax"]'
         )?.click()
+      })
+
+      document.querySelector<HTMLButtonElement>('#tax-search-btn')
+      ?.addEventListener('click', async () => {
+        const year = Number(
+          document.querySelector<HTMLSelectElement>(
+            '#tax-year'
+          )?.value || 0
+        )
+  
+        const startMonth = Number(
+          document.querySelector<HTMLSelectElement>(
+            '#tax-start-month'
+          )?.value || 0
+        )
+  
+        const endMonth = Number(
+          document.querySelector<HTMLSelectElement>(
+            '#tax-end-month'
+          )?.value || 0
+        )
+  
+        if (!year) {
+          alert('년도를 선택해주세요.')
+          return
+        }
+  
+        if (!startMonth || !endMonth) {
+          alert('시작월과 종료월을 선택해주세요.')
+          return
+        }
+  
+        if (startMonth > endMonth) {
+          alert('시작월은 종료월보다 늦을 수 없습니다.')
+          return
+        }
+  
+        const startDate =
+          year +
+          '-' +
+          String(startMonth).padStart(2, '0') +
+          '-01'
+  
+        const nextMonthDate =
+          new Date(year, endMonth, 1)
+  
+        const endDateExclusive =
+          nextMonthDate.getFullYear() +
+          '-' +
+          String(
+            nextMonthDate.getMonth() + 1
+          ).padStart(2, '0') +
+          '-01'
+  
+        const displayEndDate =
+          year +
+          '-' +
+          String(endMonth).padStart(2, '0') +
+          '-' +
+          String(
+            new Date(year, endMonth, 0).getDate()
+          ).padStart(2, '0')
+  
+        const searchButton =
+          document.querySelector<HTMLButtonElement>(
+            '#tax-search-btn'
+          )
+  
+        if (searchButton) {
+          searchButton.disabled = true
+          searchButton.textContent = '조회 중...'
+        }
+  
+        const { data: taxPayments, error: taxPaymentError } =
+          await supabase
+            .from('payments')
+            .select(
+              'id, merchant_id, merchant_name, amount, fee_amount, settlement_amount, status, created_at'
+            )
+            .eq('status', 'paid')
+            .gte(
+              'created_at',
+              startDate + 'T00:00:00+09:00'
+            )
+            .lt(
+              'created_at',
+              endDateExclusive + 'T00:00:00+09:00'
+            )
+            .order('created_at', {
+              ascending: true
+            })
+  
+        if (searchButton) {
+          searchButton.disabled = false
+          searchButton.textContent = '조회'
+        }
+  
+        if (taxPaymentError) {
+          alert(
+            '신고자료 조회 실패: ' +
+            taxPaymentError.message
+          )
+          return
+        }
+  
+        const paymentRows = taxPayments || []
+  
+        const merchantKeySet = new Set(
+          paymentRows
+            .map((payment) => {
+              if (payment.merchant_id) {
+                return 'ID-' + payment.merchant_id
+              }
+  
+              if (payment.merchant_name) {
+                return 'NAME-' + payment.merchant_name
+              }
+  
+              return ''
+            })
+            .filter((value) => value)
+        )
+  
+        const merchantCount =
+          merchantKeySet.size
+  
+        const paymentCount =
+          paymentRows.length
+  
+        const totalAmount =
+          paymentRows.reduce(
+            (sum, payment) => {
+              return sum + Number(payment.amount || 0)
+            },
+            0
+          )
+  
+        const totalFeeAmount =
+          paymentRows.reduce(
+            (sum, payment) => {
+              return sum + Number(payment.fee_amount || 0)
+            },
+            0
+          )
+  
+        const totalSettlementAmount =
+          paymentRows.reduce(
+            (sum, payment) => {
+              return (
+                sum +
+                Number(
+                  payment.settlement_amount || 0
+                )
+              )
+            },
+            0
+          )
+  
+        const resultArea =
+          document.querySelector<HTMLElement>(
+            '#tax-result-area'
+          )
+  
+        if (!resultArea) {
+          alert('조회 결과 영역을 찾지 못했습니다.')
+          return
+        }
+  
+        resultArea.innerHTML =
+          '<div class="merchant-detail-section">' +
+            '<h3>조회 결과</h3>' +
+  
+            '<div class="merchant-detail-grid">' +
+  
+              '<label>거래기간</label>' +
+              '<div>' +
+                startDate +
+                ' ~ ' +
+                displayEndDate +
+              '</div>' +
+  
+              '<label>가맹점 수</label>' +
+              '<div>' +
+                merchantCount.toLocaleString() +
+                '곳' +
+              '</div>' +
+  
+              '<label>승인 건수</label>' +
+              '<div>' +
+                paymentCount.toLocaleString() +
+                '건' +
+              '</div>' +
+  
+              '<label>결제금액</label>' +
+              '<div>' +
+                totalAmount.toLocaleString() +
+                '원' +
+              '</div>' +
+  
+              '<label>수수료 합계</label>' +
+              '<div>' +
+                totalFeeAmount.toLocaleString() +
+                '원' +
+              '</div>' +
+  
+              '<label>정산금액 합계</label>' +
+              '<div>' +
+                totalSettlementAmount.toLocaleString() +
+                '원' +
+              '</div>' +
+  
+            '</div>' +
+          '</div>'
+  
+        ;(window as any).taxSearchResult = {
+          year,
+          startMonth,
+          endMonth,
+          startDate,
+          endDate: displayEndDate,
+          payments: paymentRows,
+          merchantCount,
+          paymentCount,
+          totalAmount,
+          totalFeeAmount,
+          totalSettlementAmount
+        }
       })
     
       document.querySelectorAll<HTMLButtonElement>('.tax-quarter-btn')
