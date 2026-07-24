@@ -1973,8 +1973,9 @@ button {
 
 .merchant-status-card strong {
   color: #0d3b75;
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 800;
+  line-height: 1.4;
 }
 
 .merchant-status-card.danger strong {
