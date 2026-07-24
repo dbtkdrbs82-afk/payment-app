@@ -6208,16 +6208,44 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   border-radius: 5px;
 }
 .terminal-payment-table {
-  table-layout: fixed;
+  width: 100%;
+  table-layout: fixed !important;
 }
 
-.terminal-payment-table th:first-child,
-.terminal-payment-table td:first-child {
-  width: 170px;
+.terminal-payment-table th:nth-child(1),
+.terminal-payment-table td:nth-child(1) {
+  width: 220px !important;
+  max-width: 220px !important;
   white-space: nowrap;
+}
+
+.terminal-payment-table th:nth-child(2),
+.terminal-payment-table td:nth-child(2) {
+  width: 120px !important;
+}
+
+.terminal-payment-table th:nth-child(3),
+.terminal-payment-table td:nth-child(3) {
+  width: 190px !important;
+}
+
+.terminal-payment-table th:nth-child(4),
+.terminal-payment-table td:nth-child(4) {
+  width: 110px !important;
+}
+
+.terminal-payment-table th:nth-child(5),
+.terminal-payment-table td:nth-child(5) {
+  width: 100px !important;
+}
+
+.terminal-payment-table th:nth-child(6),
+.terminal-payment-table td:nth-child(6) {
+  width: 120px !important;
 }
 
 .terminal-payment-table td {
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
