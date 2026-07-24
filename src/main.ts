@@ -7844,10 +7844,9 @@ document.querySelector('#payout-target-filter')
     
               '<div class="merchant-detail-grid">' +
                 '<label>년도</label>' +
-                '<select id="tax-year">' +
-                  '<option value="2026" selected>2026년</option>' +
-                  '<option value="2027">2027년</option>' +
-                '</select>' +
+                '<input id="tax-year" type="number" value="' +
+                 new Date().getFullYear() +
+                 '" min="2020" max="2100" />' +
     
                 '<label>시작월</label>' +
                 '<select id="tax-start-month">' +
@@ -7882,12 +7881,12 @@ document.querySelector('#payout-target-filter')
                 '</select>' +
               '</div>' +
     
-              '<div style="margin-top:16px;">' +
-                '<button class="tax-quarter-btn" data-quarter="1">1분기</button> ' +
-                '<button class="tax-quarter-btn" data-quarter="2">2분기</button> ' +
-                '<button class="tax-quarter-btn" data-quarter="3">3분기</button> ' +
-                '<button class="tax-quarter-btn" data-quarter="4">4분기</button>' +
-              '</div>' +
+              '<div class="tax-quarter-buttons">' +
+  '<button class="tax-quarter-btn" data-quarter="1">1분기</button>' +
+  '<button class="tax-quarter-btn" data-quarter="2">2분기</button>' +
+  '<button class="tax-quarter-btn" data-quarter="3">3분기</button>' +
+  '<button class="tax-quarter-btn" data-quarter="4">4분기</button>' +
+'</div>' +
     
               '<div class="merchant-detail-actions">' +
                 '<button id="tax-search-btn" class="merchant-save-btn">조회</button>' +
@@ -8445,50 +8444,62 @@ document.querySelector('#payout-target-filter')
         }
   
         resultArea.innerHTML =
-          '<div class="merchant-detail-section">' +
-            '<h3>조회 결과</h3>' +
-  
-            '<div class="merchant-detail-grid">' +
-  
-              '<label>거래기간</label>' +
-              '<div>' +
-                startDate +
-                ' ~ ' +
-                displayEndDate +
-              '</div>' +
-  
-              '<label>가맹점 수</label>' +
-              '<div>' +
-                merchantCount.toLocaleString() +
-                '곳' +
-              '</div>' +
-  
-              '<label>승인 건수</label>' +
-              '<div>' +
-                paymentCount.toLocaleString() +
-                '건' +
-              '</div>' +
-  
-              '<label>결제금액</label>' +
-              '<div>' +
-                totalAmount.toLocaleString() +
-                '원' +
-              '</div>' +
-  
-              '<label>수수료 합계</label>' +
-              '<div>' +
-                totalFeeAmount.toLocaleString() +
-                '원' +
-              '</div>' +
-  
-              '<label>정산금액 합계</label>' +
-              '<div>' +
-                totalSettlementAmount.toLocaleString() +
-                '원' +
-              '</div>' +
-  
-            '</div>' +
-          '</div>'
+  '<div class="merchant-detail-section tax-result-section">' +
+    '<h3>조회 결과</h3>' +
+
+    '<div class="tax-summary-grid">' +
+
+      '<div class="tax-summary-card">' +
+        '<span>거래기간</span>' +
+        '<strong>' +
+          startDate +
+          ' ~ ' +
+          displayEndDate +
+        '</strong>' +
+      '</div>' +
+
+      '<div class="tax-summary-card">' +
+        '<span>가맹점</span>' +
+        '<strong>' +
+          merchantCount.toLocaleString() +
+          '곳' +
+        '</strong>' +
+      '</div>' +
+
+      '<div class="tax-summary-card">' +
+        '<span>승인건수</span>' +
+        '<strong>' +
+          paymentCount.toLocaleString() +
+          '건' +
+        '</strong>' +
+      '</div>' +
+
+      '<div class="tax-summary-card">' +
+        '<span>결제금액</span>' +
+        '<strong>' +
+          totalAmount.toLocaleString() +
+          '원' +
+        '</strong>' +
+      '</div>' +
+
+      '<div class="tax-summary-card">' +
+        '<span>수수료합계</span>' +
+        '<strong>' +
+          totalFeeAmount.toLocaleString() +
+          '원' +
+        '</strong>' +
+      '</div>' +
+
+      '<div class="tax-summary-card">' +
+        '<span>정산금액</span>' +
+        '<strong>' +
+          totalSettlementAmount.toLocaleString() +
+          '원' +
+        '</strong>' +
+      '</div>' +
+
+    '</div>' +
+  '</div>'
   
         ;(window as any).taxSearchResult = {
           year,
@@ -8531,10 +8542,9 @@ document.querySelector('#payout-target-filter')
     
       document.querySelector('#tax-search-btn')
         ?.addEventListener('click', async () => {
-          const year =
-            Number(
-              document.querySelector<HTMLSelectElement>('#tax-year')?.value || 0
-            )
+          const year = Number(
+            document.querySelector<HTMLInputElement>('#tax-year')?.value || 0
+          )
     
           const startMonth =
             Number(
