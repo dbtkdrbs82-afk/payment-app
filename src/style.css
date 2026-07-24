@@ -6310,7 +6310,7 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
 
 .tax-summary-grid {
   display: grid;
-  grid-template-columns: minmax(230px, 1.4fr) repeat(5, minmax(130px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 12px;
 }
 
@@ -6336,9 +6336,9 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   color: #063f7d;
   font-size: 21px;
   line-height: 1.3;
-  white-space: nowrap;
+  white-space: normal;
+word-break: keep-all;
 }
-
 /* 다운로드 버튼 */
 #tax-result-area .merchant-detail-actions {
   display: flex;
