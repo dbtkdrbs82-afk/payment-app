@@ -10265,13 +10265,7 @@ const terminalPagedPayments =
       거래내역
     </button>
 
-    <button id="terminal-settlement-tab">
-      정산내역
-    </button>
-
-    <button id="terminal-info-tab">
-      가맹점정보
-    </button>
+    
   `
 
   merchantContent = `
