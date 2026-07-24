@@ -8423,119 +8423,462 @@ document.querySelector('#payout-target-filter')
             '</div>'
     
             document.querySelector('#tax-xlsx-download-btn')
-            ?.addEventListener('click', async () => {
-              if (!payments || payments.length === 0) {
-                alert('다운로드할 승인거래가 없습니다.')
-                return
-              }
-          
-              const XLSX = await import('xlsx')
-          
-              const merchantMap = new Map<
-                string,
-                {
-                  merchantId: string
-                  merchantName: string
-                  paymentCount: number
-                  totalAmount: number
-                  totalFeeAmount: number
-                }
-              >()
-          
-              payments.forEach((payment: any) => {
-                const merchantId =
-                  payment.merchant_id
-                    ? String(payment.merchant_id)
-                    : ''
-          
-                const merchantName =
-                  payment.merchant_name || '미등록 가맹점'
-          
-                const merchantKey =
-                  merchantId || merchantName
-          
-                const existing =
-                  merchantMap.get(merchantKey)
-          
-                if (existing) {
-                  existing.paymentCount += 1
-                  existing.totalAmount +=
-                    Number(payment.amount || 0)
-          
-                  existing.totalFeeAmount +=
-                    Number(payment.fee_amount || 0)
-                } else {
-                  merchantMap.set(merchantKey, {
-                    merchantId,
-                    merchantName,
-                    paymentCount: 1,
-                    totalAmount:
-                      Number(payment.amount || 0),
-                    totalFeeAmount:
-                      Number(payment.fee_amount || 0)
-                  })
-                }
-              })
-          
-              const excelRows =
-                Array.from(merchantMap.values())
-                  .map((merchant, index) => {
-                    const supplyAmount =
-                      Math.round(
-                        merchant.totalFeeAmount / 1.1
-                      )
-          
-                    const vatAmount =
-                      merchant.totalFeeAmount -
-                      supplyAmount
-          
-                    return {
-                      순번: index + 1,
-                      가맹점번호: merchant.merchantId,
-                      가맹점명: merchant.merchantName,
-                      승인건수: merchant.paymentCount,
-                      결제금액: merchant.totalAmount,
-                      수수료공급가액: supplyAmount,
-                      부가세: vatAmount,
-                      수수료합계: merchant.totalFeeAmount
-                    }
-                  })
-          
-              const worksheet =
-                XLSX.utils.json_to_sheet(excelRows)
-          
-              worksheet['!cols'] = [
-                { wch: 8 },
-                { wch: 14 },
-                { wch: 24 },
-                { wch: 12 },
-                { wch: 16 },
-                { wch: 18 },
-                { wch: 14 },
-                { wch: 16 }
-              ]
-          
-              const workbook =
-                XLSX.utils.book_new()
-          
-              XLSX.utils.book_append_sheet(
-                workbook,
-                worksheet,
-                '세금계산서'
-              )
-          
-              const fileName =
-                '세금계산서_' +
-                periodStart +
-                '_' +
-                periodEnd +
-                '.xlsx'
-          
-              XLSX.writeFile(
-                workbook,
-                fileName
-              )
-            })
+  ?.addEventListener('click', async () => {
+    if (!payments || payments.length === 0) {
+      alert('다운로드할 승인거래가 없습니다.')
+      return
+    }
+
+    const XLSX = await import('xlsx')
+
+    const paymentMerchantIds = Array.from(
+      new Set(
+        payments
+          .map((payment: any) =>
+            Number(payment.merchant_id)
+          )
+          .filter((merchantId: number) =>
+            merchantId > 0
+          )
+      )
+    )
+
+    if (paymentMerchantIds.length === 0) {
+      alert('가맹점이 연결된 승인거래가 없습니다.')
+      return
+    }
+
+    const { data: merchants, error: merchantError } =
+      await supabase
+        .from('merchants')
+        .select(
+          'id, merchant_name, owner_name, business_number, resident_number, email, address, address_detail, business_type, business_category, company_type, fee_rate'
+        )
+        .in('id', paymentMerchantIds)
+
+    if (merchantError) {
+      alert(
+        '가맹점 정보 조회 실패: ' +
+        merchantError.message
+      )
+      return
+    }
+
+    const merchantById = new Map<number, any>()
+
+    ;(merchants || []).forEach((merchant: any) => {
+      merchantById.set(
+        Number(merchant.id),
+        merchant
+      )
+    })
+
+    const cleanValue = (value: any) => {
+      const text = String(value ?? '').trim()
+
+      if (
+        text === '' ||
+        text.toUpperCase() === 'NULL' ||
+        text.toUpperCase() === 'EMPTY'
+      ) {
+        return ''
+      }
+
+      return text
+    }
+
+    const cleanNumber = (value: any) => {
+      return cleanValue(value).replace(/[^0-9]/g, '')
+    }
+
+    const merchantSummaryMap = new Map<
+      number,
+      {
+        merchant: any
+        paymentCount: number
+        paymentAmount: number
+        feeAmount: number
+      }
+    >()
+
+    let excludedPaymentCount = 0
+
+    payments.forEach((payment: any) => {
+      const merchantId =
+        Number(payment.merchant_id)
+
+      const merchant =
+        merchantById.get(merchantId)
+
+      if (!merchant) {
+        excludedPaymentCount += 1
+        return
+      }
+
+      const paymentAmount =
+        Number(payment.amount || 0)
+
+      const savedFeeAmount =
+        Number(payment.fee_amount || 0)
+
+      const merchantFeeRate =
+        Number(merchant.fee_rate || 0)
+
+      const calculatedFeeAmount =
+        Math.round(
+          paymentAmount *
+          merchantFeeRate /
+          100
+        )
+
+      const feeAmount =
+        savedFeeAmount > 0
+          ? savedFeeAmount
+          : calculatedFeeAmount
+
+      const existing =
+        merchantSummaryMap.get(merchantId)
+
+      if (existing) {
+        existing.paymentCount += 1
+        existing.paymentAmount +=
+          paymentAmount
+        existing.feeAmount +=
+          feeAmount
+      } else {
+        merchantSummaryMap.set(
+          merchantId,
+          {
+            merchant,
+            paymentCount: 1,
+            paymentAmount,
+            feeAmount
+          }
+        )
+      }
+    })
+
+    if (merchantSummaryMap.size === 0) {
+      alert(
+        '신고파일을 생성할 가맹점 정보가 없습니다.'
+      )
+      return
+    }
+
+    const headers = [
+      '전자(세금)계산서종류\n(01:일반, 02:영세율)',
+      '작성일자',
+      "공급자 등록번호\n('-'없이 입력)",
+      '공급자\n종사업장번호',
+      '공급자 상호',
+      '공급자 성명',
+      '공급자 사업장주소',
+      '공급자 업태',
+      '공급자 종목',
+      '공급자 이메일',
+      "공급받는자 등록번호\n('-'없이 입력)",
+      '공급받는자\n종사업장번호',
+      '공급받는자 상호',
+      '공급받는자 성명',
+      '공급받는자 사업장주소',
+      '공급받는자 업태',
+      '공급받는자 종목',
+      '공급받는자 이메일1',
+      '공급받는자 이메일2',
+      '공급가액',
+      '세액',
+      '비고',
+      '일자1\n(2자리,작성년월 제외)',
+      '품목1',
+      '규격1',
+      '수량1',
+      '단가1',
+      '공급가액1',
+      '세액1',
+      '물품비고1',
+      '일자2\n(2자리,작성년월 제외)',
+      '품목2',
+      '규격2',
+      '수량2',
+      '단가2',
+      '공급가액2',
+      '세액2',
+      '물품비고2',
+      '일자3\n(2자리,작성년월 제외)',
+      '품목3',
+      '규격3',
+      '수량3',
+      '단가3',
+      '공급가액3',
+      '세액3',
+      '물품비고3',
+      '일자4\n(2자리,작성년월 제외)',
+      '품목4',
+      '규격4',
+      '수량4',
+      '단가4',
+      '공급가액4',
+      '세액4',
+      '물품비고4',
+      '현금',
+      '수표',
+      '어음',
+      '외상미수금',
+      '영수(01)\n청구(02)'
+    ]
+
+    const invoiceDate =
+      periodEnd.replace(/-/g, '')
+
+    const invoiceDay =
+      periodEnd.slice(-2)
+
+    const supplierBusinessNumber =
+      '2458101732'
+
+    const supplierCompanyName =
+      'NXGSOFT'
+
+    const supplierOwnerName =
+      '유상균'
+
+    const supplierAddress =
+      '서울시 금천구 가산디지털2로34, 2층 211-4N호'
+
+    const supplierBusinessType =
+      '정보통신업'
+
+    const supplierBusinessCategory =
+      '소프트웨어개발 및 개발용역업'
+
+    const supplierEmail =
+      'nxgsoft@naver.com'
+
+    const rows: any[][] = [
+      headers
+    ]
+
+    Array.from(
+      merchantSummaryMap.values()
+    ).forEach((summary) => {
+      const merchant =
+        summary.merchant
+
+      const totalFeeAmount =
+        Math.round(summary.feeAmount)
+
+      const supplyAmount =
+        Math.round(
+          totalFeeAmount / 1.1
+        )
+
+      const vatAmount =
+        totalFeeAmount -
+        supplyAmount
+
+      const businessNumber =
+        cleanNumber(
+          merchant.business_number
+        )
+
+      const residentNumber =
+        cleanNumber(
+          merchant.resident_number
+        )
+
+      const recipientNumber =
+        businessNumber ||
+        residentNumber
+
+      const fullAddress = [
+        cleanValue(merchant.address),
+        cleanValue(
+          merchant.address_detail
+        )
+      ]
+        .filter(Boolean)
+        .join(' ')
+
+      const row = new Array(59).fill('')
+
+      row[0] = '01'
+      row[1] = invoiceDate
+
+      row[2] =
+        supplierBusinessNumber
+
+      row[3] = ''
+      row[4] =
+        supplierCompanyName
+
+      row[5] =
+        supplierOwnerName
+
+      row[6] =
+        supplierAddress
+
+      row[7] =
+        supplierBusinessType
+
+      row[8] =
+        supplierBusinessCategory
+
+      row[9] =
+        supplierEmail
+
+      row[10] =
+        recipientNumber
+
+      row[11] = ''
+
+      row[12] =
+        cleanValue(
+          merchant.merchant_name
+        )
+
+      row[13] =
+        cleanValue(
+          merchant.owner_name
+        )
+
+      row[14] =
+        fullAddress
+
+      row[15] =
+        cleanValue(
+          merchant.business_type
+        )
+
+      row[16] =
+        cleanValue(
+          merchant.business_category
+        )
+
+      row[17] =
+        cleanValue(merchant.email)
+
+      row[18] = ''
+
+      row[19] =
+        supplyAmount
+
+      row[20] =
+        vatAmount
+
+      row[21] =
+        summary.paymentCount +
+        '건 승인수수료'
+
+      row[22] =
+        invoiceDay
+
+      row[23] =
+        '결제승인수수료'
+
+      row[24] = ''
+      row[25] = ''
+      row[26] = ''
+
+      row[27] =
+        supplyAmount
+
+      row[28] =
+        vatAmount
+
+      row[29] = ''
+
+      row[54] = ''
+      row[55] = ''
+      row[56] = ''
+      row[57] =
+        totalFeeAmount
+
+      row[58] = '01'
+
+      rows.push(row)
+    })
+
+    const worksheet =
+      XLSX.utils.aoa_to_sheet(rows)
+
+      worksheet['!cols'] =
+      headers.map((_, index) => {
+        if (index === 0) return { wch: 22 }
+        if (index === 1) return { wch: 12 }
+
+        if (
+          index === 4 ||
+          index === 5 ||
+          index === 12 ||
+          index === 13
+        ) {
+          return { wch: 18 }
+        }
+
+        if (
+          index === 6 ||
+          index === 14
+        ) {
+          return { wch: 34 }
+        }
+
+        if (
+          index === 9 ||
+          index === 17 ||
+          index === 18
+        ) {
+          return { wch: 24 }
+        }
+
+        return { wch: 14 }
+      })
+
+    worksheet['!rows'] = [
+      { hpt: 42 }
+    ]
+
+    const workbook =
+      XLSX.utils.book_new()
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      'Sheet1'
+    )
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet([[]]),
+      'Sheet2'
+    )
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      XLSX.utils.aoa_to_sheet([[]]),
+      'Sheet3'
+    )
+
+    const fileName =
+      '홈택스_세금계산서_' +
+      periodStart +
+      '_' +
+      periodEnd +
+      '.xlsx'
+
+    XLSX.writeFile(
+      workbook,
+      fileName
+    )
+
+    if (excludedPaymentCount > 0) {
+      alert(
+        '엑셀 다운로드가 완료되었습니다.\n\n' +
+        '단, 가맹점 정보가 연결되지 않은 거래 ' +
+        excludedPaymentCount +
+        '건은 제외되었습니다.'
+      )
+    }
+  })
     
           document.querySelector('#tax-txt-download-btn')
             ?.addEventListener('click', () => {
