@@ -3280,6 +3280,9 @@ requestAnimationFrame(() => {
 
                 document.querySelector('#tax-excel-download-button')
   ?.addEventListener('click', async () => {
+
+    alert('엑셀 버튼 연결 확인')
+    
     const startDate =
       getTaxInputValue('#tax-period-start').replace(/-/g, '')
 
