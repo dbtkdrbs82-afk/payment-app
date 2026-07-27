@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import Tesseract from 'tesseract.js'
 import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
+import iconv from 'iconv-lite'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
 const adminPassword = '1234'
@@ -3803,6 +3804,568 @@ taxExcelDownloadButton.onclick = async () => {
 
     alert(completeMessage)
 }
+
+const taxTextDownloadButton =
+  document.querySelector<HTMLButtonElement>(
+    '#tax-text-download-button'
+  )
+
+if (!taxTextDownloadButton) {
+  alert('전산매체신고양식 내려받기 버튼을 찾지 못했습니다.')
+  return
+}
+
+taxTextDownloadButton.onclick = async () => {
+  const cleanNumber = (value: unknown) => {
+    return String(value || '')
+      .replace(/[^0-9]/g, '')
+      .trim()
+  }
+
+  const padZero = (
+    value: string | number,
+    length: number
+  ) => {
+    return String(value || '')
+      .replace(/[^0-9]/g, '')
+      .padStart(length, '0')
+      .slice(-length)
+  }
+
+  const padTextBytes = (
+    value: unknown,
+    byteLength: number
+  ) => {
+    let result = ''
+    const text = String(value || '')
+
+    for (const character of text) {
+      const nextText = result + character
+
+      if (
+        iconv.encode(nextText, 'cp949').length >
+        byteLength
+      ) {
+        break
+      }
+
+      result = nextText
+    }
+
+    const currentByteLength =
+      iconv.encode(result, 'cp949').length
+
+    return (
+      result +
+      ' '.repeat(
+        Math.max(0, byteLength - currentByteLength)
+      )
+    )
+  }
+
+  const makeMerchantReportId = (
+    merchant: any
+  ) => {
+    const originalId = String(
+      merchant.merchant_login_id ||
+      merchant.cpid ||
+      (
+        merchant.id
+          ? 'MER' +
+            String(merchant.id).padStart(4, '0')
+          : ''
+      )
+    )
+      .trim()
+      .toUpperCase()
+
+    if (originalId.startsWith('MER')) {
+      return originalId
+        .padEnd(12, '0')
+        .slice(0, 12)
+    }
+
+    return originalId
+      .padEnd(12, ' ')
+      .slice(0, 12)
+  }
+
+  const year =
+    cleanNumber(
+      getTaxInputValue('#tax-year')
+    ).slice(0, 4)
+
+  const quarter =
+    cleanNumber(
+      getTaxInputValue('#tax-quarter')
+    ).slice(0, 1)
+
+  const officeCode =
+    padZero(
+      getTaxInputValue('#tax-office-code'),
+      3
+    )
+
+  const submitDate =
+    cleanNumber(
+      getTaxInputValue('#tax-submit-date')
+    ).slice(0, 8)
+
+  const supplierBusinessNumber =
+    cleanNumber(
+      getTaxInputValue('#tax-business-number')
+    ).slice(0, 10)
+
+  const supplierBusinessName =
+    getTaxInputValue('#tax-business-name')
+
+  const periodStart =
+    cleanNumber(
+      getTaxInputValue('#tax-period-start')
+    ).slice(0, 8)
+
+  const periodEnd =
+    cleanNumber(
+      getTaxInputValue('#tax-period-end')
+    ).slice(0, 8)
+
+  const companyPhone =
+    cleanNumber(
+      getTaxInputValue('#tax-company-phone')
+    )
+
+  const companyMobile =
+    cleanNumber(
+      getTaxInputValue('#tax-company-mobile')
+    )
+
+  const companyEmail =
+    getTaxInputValue('#tax-company-email')
+
+  if (year.length !== 4) {
+    alert('결제년도를 정확히 입력해주세요.')
+    return
+  }
+
+  if (!['1', '2', '3', '4'].includes(quarter)) {
+    alert('분기를 정확히 선택해주세요.')
+    return
+  }
+
+  if (submitDate.length !== 8) {
+    alert('제출년월일을 정확히 입력해주세요.')
+    return
+  }
+
+  if (supplierBusinessNumber.length !== 10) {
+    alert('사업자등록번호를 정확히 입력해주세요.')
+    return
+  }
+
+  if (
+    periodStart.length !== 8 ||
+    periodEnd.length !== 8
+  ) {
+    alert('결제기간 시작일과 종료일을 확인해주세요.')
+    return
+  }
+
+  const startIso =
+    periodStart.slice(0, 4) +
+    '-' +
+    periodStart.slice(4, 6) +
+    '-' +
+    periodStart.slice(6, 8) +
+    'T00:00:00'
+
+  const endIso =
+    periodEnd.slice(0, 4) +
+    '-' +
+    periodEnd.slice(4, 6) +
+    '-' +
+    periodEnd.slice(6, 8) +
+    'T23:59:59.999'
+
+  const { data: payments, error: paymentError } =
+    await supabase
+      .from('payments')
+      .select(
+        'merchant_id, amount, status, created_at'
+      )
+      .eq('status', 'paid')
+      .gte('created_at', startIso)
+      .lte('created_at', endIso)
+      .order('created_at', {
+        ascending: true
+      })
+
+  if (paymentError) {
+    alert(
+      '결제내역 조회 실패: ' +
+      paymentError.message
+    )
+    return
+  }
+
+  if (!payments || payments.length === 0) {
+    alert(
+      '선택한 기간에 승인된 결제내역이 없습니다.'
+    )
+    return
+  }
+
+  const merchantIds = [
+    ...new Set(
+      payments
+        .map((payment) =>
+          Number(payment.merchant_id)
+        )
+        .filter((merchantId) =>
+          merchantId > 0
+        )
+    )
+  ]
+
+  if (merchantIds.length === 0) {
+    alert(
+      '가맹점과 연결된 결제내역이 없습니다.'
+    )
+    return
+  }
+
+  const { data: merchants, error: merchantError } =
+    await supabase
+      .from('merchants')
+      .select('*')
+      .in('id', merchantIds)
+
+  if (merchantError) {
+    alert(
+      '가맹점 정보 조회 실패: ' +
+      merchantError.message
+    )
+    return
+  }
+
+  const merchantMap =
+    new Map<number, any>()
+
+  ;((merchants || []) as any[])
+    .forEach((merchant) => {
+      merchantMap.set(
+        Number(merchant.id),
+        merchant
+      )
+    })
+
+  const monthlySummary =
+    new Map<
+      string,
+      {
+        merchant: any
+        paymentMonth: string
+        paymentCount: number
+        paymentAmount: number
+      }
+    >()
+
+  let excludedPaymentCount = 0
+  let totalPaymentCount = 0
+  let totalPaymentAmount = 0
+
+  payments.forEach((payment) => {
+    const merchantId =
+      Number(payment.merchant_id)
+
+    const merchant =
+      merchantMap.get(merchantId)
+
+    if (!merchant) {
+      excludedPaymentCount += 1
+      return
+    }
+
+    const paymentDate =
+      new Date(payment.created_at)
+
+    const paymentMonth =
+      String(paymentDate.getFullYear()) +
+      String(
+        paymentDate.getMonth() + 1
+      ).padStart(2, '0')
+
+    const summaryKey =
+      String(merchantId) +
+      '-' +
+      paymentMonth
+
+    const amount =
+      Math.round(
+        Number(payment.amount || 0)
+      )
+
+    const current =
+      monthlySummary.get(summaryKey)
+
+    if (current) {
+      current.paymentCount += 1
+      current.paymentAmount += amount
+    } else {
+      monthlySummary.set(summaryKey, {
+        merchant,
+        paymentMonth,
+        paymentCount: 1,
+        paymentAmount: amount
+      })
+    }
+
+    totalPaymentCount += 1
+    totalPaymentAmount += amount
+  })
+
+  if (monthlySummary.size === 0) {
+    alert(
+      '신고서에 넣을 결제내역이 없습니다.'
+    )
+    return
+  }
+
+  const headerRecord =
+    'HD' +
+    year +
+    quarter +
+    officeCode +
+    submitDate +
+    supplierBusinessNumber +
+    padTextBytes(
+      supplierBusinessName,
+      40
+    ) +
+    periodStart +
+    periodEnd +
+    ' '.repeat(146)
+
+  const sortedSummary =
+    Array.from(
+      monthlySummary.values()
+    ).sort((first, second) => {
+      const firstId =
+        makeMerchantReportId(
+          first.merchant
+        )
+
+      const secondId =
+        makeMerchantReportId(
+          second.merchant
+        )
+
+      if (firstId !== secondId) {
+        return firstId.localeCompare(secondId)
+      }
+
+      return first.paymentMonth.localeCompare(
+        second.paymentMonth
+      )
+    })
+
+  const detailRecords =
+    sortedSummary.map(
+      (summary, index) => {
+        const merchant =
+          summary.merchant
+
+        const businessNumber =
+          cleanNumber(
+            merchant.business_number
+          )
+
+        const residentNumber =
+          cleanNumber(
+            merchant.resident_number
+          )
+
+        const isBusiness =
+          businessNumber.length === 10
+
+        const reportBusinessNumber =
+          isBusiness
+            ? businessNumber
+            : '**********'
+
+        const reportResidentNumber =
+          isBusiness
+            ? ' '.repeat(13)
+            : residentNumber
+                .padEnd(13, ' ')
+                .slice(0, 13)
+
+        const ownerName =
+          merchant.owner_name ||
+          merchant.merchant_name ||
+          ''
+
+        const reportMerchantId =
+          makeMerchantReportId(merchant)
+
+        return (
+          'RD' +
+          year +
+          quarter +
+          supplierBusinessNumber +
+          padZero(index + 1, 7) +
+          reportBusinessNumber +
+          reportResidentNumber +
+          padTextBytes(ownerName, 20) +
+          reportMerchantId +
+          summary.paymentMonth +
+          ' ' +
+          padZero(
+            summary.paymentCount,
+            6
+          ) +
+          padZero(0, 16) +
+          padZero(
+            summary.paymentAmount,
+            16
+          ) +
+          padZero(
+            summary.paymentAmount,
+            16
+          ) +
+          padTextBytes(
+            supplierBusinessName,
+            20
+          ) +
+          padTextBytes(
+            companyPhone,
+            13
+          ) +
+          padTextBytes(
+            companyMobile,
+            11
+          ) +
+          padTextBytes(
+            companyEmail,
+            40
+          ) +
+          'C' +
+          ' '.repeat(5)
+        )
+      }
+    )
+
+  const trailerBody =
+    padZero(
+      detailRecords.length,
+      9
+    ) +
+    padZero(
+      totalPaymentCount,
+      9
+    ) +
+    '0'.repeat(23) +
+    padZero(
+      totalPaymentAmount,
+      9
+    ) +
+    '0'.repeat(7) +
+    padZero(
+      totalPaymentAmount,
+      9
+    ) +
+    padZero(
+      totalPaymentCount,
+      9
+    ) +
+    padZero(
+      totalPaymentAmount,
+      15
+    )
+
+  const trailerRecord =
+    (
+      'TD' +
+      year +
+      quarter +
+      supplierBusinessNumber +
+      trailerBody
+    ).padEnd(230, ' ')
+
+  const textContent = [
+    headerRecord,
+    ...detailRecords,
+    trailerRecord
+  ].join('\r\n')
+
+  const encodedText =
+    iconv.encode(
+      textContent,
+      'cp949'
+    )
+
+  const blob =
+    new Blob(
+      [
+        new Uint8Array(
+          encodedText
+        )
+      ],
+      {
+        type: 'text/plain;charset=cp949'
+      }
+    )
+
+  const downloadUrl =
+    URL.createObjectURL(blob)
+
+  const downloadLink =
+    document.createElement('a')
+
+  downloadLink.href =
+    downloadUrl
+
+  downloadLink.download =
+    'A_' +
+    supplierBusinessNumber +
+    '_' +
+    year +
+    quarter +
+    '_1.txt'
+
+  document.body.appendChild(
+    downloadLink
+  )
+
+  downloadLink.click()
+  downloadLink.remove()
+
+  URL.revokeObjectURL(
+    downloadUrl
+  )
+
+  let completeMessage =
+    '전산매체신고양식이 생성되었습니다.\n\n' +
+    '상세 레코드: ' +
+    detailRecords.length +
+    '건\n' +
+    '승인 거래: ' +
+    totalPaymentCount +
+    '건\n' +
+    '승인 금액: ' +
+    totalPaymentAmount.toLocaleString() +
+    '원'
+
+  if (excludedPaymentCount > 0) {
+    completeMessage +=
+      '\n가맹점 정보 미연결: ' +
+      excludedPaymentCount +
+      '건 제외'
+  }
+
+  alert(completeMessage)
+}
+
+
 
               return
             }  
