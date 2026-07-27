@@ -3,6 +3,7 @@ import { loadTossPayments } from '@tosspayments/payment-sdk'
 import { createClient } from '@supabase/supabase-js'
 import Tesseract from 'tesseract.js'
 import QRCode from 'qrcode'
+import * as XLSX from 'xlsx'
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
 const adminPassword = '1234'
@@ -3276,6 +3277,171 @@ requestAnimationFrame(() => {
             
                   alert('헤더레코드가 저장되었습니다.')
                 })
+
+                document.querySelector('#tax-excel-download-button')
+  ?.addEventListener('click', async () => {
+    const startDate =
+      getTaxInputValue('#tax-period-start').replace(/-/g, '')
+
+    const endDate =
+      getTaxInputValue('#tax-period-end').replace(/-/g, '')
+
+    if (!startDate || !endDate) {
+      alert('결제기간 시작일과 종료일을 선택해주세요.')
+      return
+    }
+
+    const startIso =
+      startDate.slice(0, 4) +
+      '-' +
+      startDate.slice(4, 6) +
+      '-' +
+      startDate.slice(6, 8) +
+      'T00:00:00'
+
+    const endIso =
+      endDate.slice(0, 4) +
+      '-' +
+      endDate.slice(4, 6) +
+      '-' +
+      endDate.slice(6, 8) +
+      'T23:59:59'
+
+    const { data: payments, error: paymentError } = await supabase
+      .from('payments')
+      .select(
+        'merchant_id, merchant_name, fee_amount, status, created_at'
+      )
+      .eq('status', 'paid')
+      .gte('created_at', startIso)
+      .lte('created_at', endIso)
+
+    if (paymentError) {
+      alert('결제내역 조회 실패: ' + paymentError.message)
+      return
+    }
+
+    if (!payments || payments.length === 0) {
+      alert('선택한 기간에 승인된 결제내역이 없습니다.')
+      return
+    }
+
+    const merchantIds = [
+      ...new Set(
+        payments
+          .map((payment) => Number(payment.merchant_id))
+          .filter((merchantId) => merchantId > 0)
+      )
+    ]
+
+    const { data: merchants, error: merchantError } = await supabase
+      .from('merchants')
+      .select('id, merchant_name, business_number')
+      .in('id', merchantIds)
+
+    if (merchantError) {
+      alert('가맹점 정보 조회 실패: ' + merchantError.message)
+      return
+    }
+
+    const merchantMap = new Map<
+      number,
+      {
+        merchant_name: string
+        business_number: string
+      }
+    >()
+
+    ;(merchants || []).forEach((merchant) => {
+      merchantMap.set(Number(merchant.id), {
+        merchant_name: merchant.merchant_name || '',
+        business_number: merchant.business_number || ''
+      })
+    })
+
+    const summaryMap = new Map<
+      number,
+      {
+        merchant_name: string
+        business_number: string
+        fee_total: number
+      }
+    >()
+
+    payments.forEach((payment) => {
+      const merchantId = Number(payment.merchant_id)
+
+      if (!merchantId) return
+
+      const merchant = merchantMap.get(merchantId)
+
+      if (!merchant) return
+
+      const current = summaryMap.get(merchantId)
+
+      if (current) {
+        current.fee_total += Number(payment.fee_amount || 0)
+      } else {
+        summaryMap.set(merchantId, {
+          merchant_name:
+            merchant.merchant_name ||
+            payment.merchant_name ||
+            '',
+          business_number: merchant.business_number || '',
+          fee_total: Number(payment.fee_amount || 0)
+        })
+      }
+    })
+
+    const excelRows = Array.from(summaryMap.values()).map(
+      (row, index) => {
+        const supplyAmount = Math.round(row.fee_total / 1.1)
+        const taxAmount = row.fee_total - supplyAmount
+
+        return {
+          순번: index + 1,
+          사업자번호: row.business_number,
+          가맹점명: row.merchant_name,
+          공급가액: supplyAmount,
+          부가세: taxAmount,
+          수수료합계: row.fee_total
+        }
+      }
+    )
+
+    if (excelRows.length === 0) {
+      alert('가맹점 정보와 연결된 결제내역이 없습니다.')
+      return
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(excelRows)
+
+    worksheet['!cols'] = [
+      { wch: 8 },
+      { wch: 18 },
+      { wch: 24 },
+      { wch: 16 },
+      { wch: 14 },
+      { wch: 16 }
+    ]
+
+    const workbook = XLSX.utils.book_new()
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      '수수료세금계산서'
+    )
+
+    XLSX.writeFile(
+      workbook,
+      '수수료세금계산서_' +
+        startDate +
+        '_' +
+        endDate +
+        '.xlsx'
+    )
+  })
 
               return
             }  
