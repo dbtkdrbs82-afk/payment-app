@@ -3024,7 +3024,256 @@ requestAnimationFrame(() => {
 
           if (page) sessionStorage.setItem('adminPage', page)
 
+            if (page === 'tax') {
+              const subMenu = document.querySelector('.admin-sub-menu')
+              const titleBox = document.querySelector('.admin-title')
+              const searchBox = document.querySelector('.admin-search-box')
+              const summaryBox = document.querySelector('.admin-summary')
+              const tableTop = document.querySelector('.admin-table-top')
+              const tableHead = document.querySelector('.admin-table thead')
+              const paymentTableBody =
+                document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
             
+              if (subMenu) {
+                subMenu.innerHTML = ''
+              }
+            
+              if (titleBox) {
+                titleBox.innerHTML = '▶ 세무관리'
+              }
+            
+              if (searchBox) {
+                searchBox.innerHTML = ''
+              }
+            
+              if (tableTop) {
+                tableTop.innerHTML = ''
+              }
+            
+              if (tableHead) {
+                tableHead.innerHTML = ''
+              }
+            
+              if (paymentTableBody) {
+                paymentTableBody.innerHTML = ''
+              }
+            
+              if (summaryBox) {
+                summaryBox.innerHTML =
+                  '<div class="merchant-detail-header">' +
+                    '<h2>세무관리</h2>' +
+                  '</div>' +
+            
+                  '<div class="merchant-detail-section">' +
+                    '<h3>헤더레코드 설정</h3>' +
+            
+                    '<div class="merchant-detail-grid">' +
+            
+                      '<label>회사코드</label>' +
+                      '<select id="tax-company-code">' +
+                        '<option value="NXGSOFT">NXGSOFT(nxgsoft)</option>' +
+                      '</select>' +
+            
+                      '<label>결제년도</label>' +
+                      '<input id="tax-year" value="2026" maxlength="4" />' +
+            
+                      '<label>분기구분</label>' +
+                      '<select id="tax-quarter">' +
+                        '<option value="1">1분기</option>' +
+                        '<option value="2" selected>2분기</option>' +
+                        '<option value="3">3분기</option>' +
+                        '<option value="4">4분기</option>' +
+                      '</select>' +
+            
+                      '<label>관할서코드</label>' +
+                      '<input id="tax-office-code" value="119" />' +
+            
+                      '<label>제출년월일</label>' +
+                      '<input id="tax-submit-date" value="20260708" />' +
+            
+                      '<label>사업자등록번호</label>' +
+                      '<input id="tax-business-number" value="2458101732" />' +
+            
+                      '<label>사업자상호</label>' +
+                      '<input id="tax-business-name" value="NXGSOFT" />' +
+            
+                      '<label>사업자상호 영문명</label>' +
+                      '<input id="tax-business-name-en" value="NXGSOFT" />' +
+            
+                      '<label>결제기간시작년월일</label>' +
+                      '<input id="tax-period-start" value="20260401" />' +
+            
+                      '<label>결제기간종료년월일</label>' +
+                      '<input id="tax-period-end" value="20260630" />' +
+            
+                      '<label>의뢰업체 전화번호</label>' +
+                      '<input id="tax-company-phone" value="024311252" />' +
+            
+                      '<label>의뢰업체 휴대폰번호</label>' +
+                      '<input id="tax-company-mobile" value="01099382962" />' +
+            
+                      '<label>의뢰업체 E-mail주소</label>' +
+                      '<input id="tax-company-email" value="nxgsoft@naver.com" />' +
+            
+                      '<label>공급자 성명</label>' +
+                      '<input id="tax-supplier-name" value="유상균" />' +
+            
+                      '<label>공급자 사업장주소</label>' +
+                      '<input id="tax-supplier-address" value="서울시 금천구 가산디지털2로34, 2층 211-4" />' +
+            
+                      '<label>공급자 업태</label>' +
+                      '<input id="tax-supplier-business-type" value="정보통신업" />' +
+            
+                      '<label>공급자 종목</label>' +
+                      '<input id="tax-supplier-business-item" value="소프트웨어개발 및 개발용역업" />' +
+            
+                    '</div>' +
+            
+                    '<div class="merchant-detail-actions">' +
+                      '<button id="tax-header-save-button" class="merchant-save-btn">' +
+                        '수정하기' +
+                      '</button>' +
+                    '</div>' +
+                  '</div>' +
+            
+                  '<div class="merchant-detail-section">' +
+                    '<h3>수수료 세금계산서</h3>' +
+                    '<button id="tax-excel-download-button" class="merchant-save-btn">' +
+                      '엑셀파일 내려받기' +
+                    '</button>' +
+                  '</div>' +
+            
+                  '<div class="merchant-detail-section">' +
+                    '<h3>전산매체신고양식</h3>' +
+                    '<button id="tax-text-download-button" class="merchant-save-btn">' +
+                      '메모장파일 내려받기' +
+                    '</button>' +
+                  '</div>'
+              }
+            
+              const getTaxInputValue = (selector: string) => {
+                return (
+                  document.querySelector<HTMLInputElement | HTMLSelectElement>(selector)
+                    ?.value || ''
+                ).trim()
+              }
+            
+              const setTaxInputValue = (
+                selector: string,
+                value: string | number | null | undefined
+              ) => {
+                const input =
+                  document.querySelector<HTMLInputElement | HTMLSelectElement>(selector)
+            
+                if (input && value !== null && value !== undefined) {
+                  input.value = String(value)
+                }
+              }
+            
+              const loadTaxHeaderSettings = async () => {
+                const { data, error } = await supabase
+                  .from('tax_header_settings')
+                  .select('*')
+                  .order('id', { ascending: false })
+                  .limit(1)
+                  .maybeSingle()
+            
+                if (error) {
+                  alert('헤더레코드 불러오기 실패: ' + error.message)
+                  return
+                }
+            
+                if (!data) return
+            
+                setTaxInputValue('#tax-company-code', data.company_code)
+                setTaxInputValue('#tax-year', data.payment_year)
+                setTaxInputValue('#tax-quarter', data.quarter)
+                setTaxInputValue('#tax-office-code', data.office_code)
+                setTaxInputValue('#tax-submit-date', data.submit_date)
+                setTaxInputValue('#tax-business-number', data.business_number)
+                setTaxInputValue('#tax-business-name', data.business_name)
+                setTaxInputValue('#tax-business-name-en', data.business_name_en)
+                setTaxInputValue('#tax-period-start', data.period_start)
+                setTaxInputValue('#tax-period-end', data.period_end)
+                setTaxInputValue('#tax-company-phone', data.company_phone)
+                setTaxInputValue('#tax-company-mobile', data.company_mobile)
+                setTaxInputValue('#tax-company-email', data.company_email)
+                setTaxInputValue('#tax-supplier-name', data.supplier_name)
+                setTaxInputValue('#tax-supplier-address', data.supplier_address)
+                setTaxInputValue(
+                  '#tax-supplier-business-type',
+                  data.supplier_business_type
+                )
+                setTaxInputValue(
+                  '#tax-supplier-business-item',
+                  data.supplier_business_item
+                )
+              }
+            
+              await loadTaxHeaderSettings()
+            
+              document.querySelector('#tax-header-save-button')
+                ?.addEventListener('click', async () => {
+                  const saveData = {
+                    company_code: getTaxInputValue('#tax-company-code'),
+                    payment_year: getTaxInputValue('#tax-year'),
+                    quarter: getTaxInputValue('#tax-quarter'),
+                    office_code: getTaxInputValue('#tax-office-code'),
+                    submit_date: getTaxInputValue('#tax-submit-date'),
+                    business_number: getTaxInputValue('#tax-business-number'),
+                    business_name: getTaxInputValue('#tax-business-name'),
+                    business_name_en: getTaxInputValue('#tax-business-name-en'),
+                    period_start: getTaxInputValue('#tax-period-start'),
+                    period_end: getTaxInputValue('#tax-period-end'),
+                    company_phone: getTaxInputValue('#tax-company-phone'),
+                    company_mobile: getTaxInputValue('#tax-company-mobile'),
+                    company_email: getTaxInputValue('#tax-company-email'),
+                    supplier_name: getTaxInputValue('#tax-supplier-name'),
+                    supplier_address: getTaxInputValue('#tax-supplier-address'),
+                    supplier_business_type:
+                      getTaxInputValue('#tax-supplier-business-type'),
+                    supplier_business_item:
+                      getTaxInputValue('#tax-supplier-business-item')
+                  }
+            
+                  const { data: existingSetting, error: findError } = await supabase
+                    .from('tax_header_settings')
+                    .select('id')
+                    .order('id', { ascending: false })
+                    .limit(1)
+                    .maybeSingle()
+            
+                  if (findError) {
+                    alert('헤더레코드 확인 실패: ' + findError.message)
+                    return
+                  }
+            
+                  if (existingSetting?.id) {
+                    const { error: updateError } = await supabase
+                      .from('tax_header_settings')
+                      .update(saveData)
+                      .eq('id', existingSetting.id)
+            
+                    if (updateError) {
+                      alert('헤더레코드 수정 실패: ' + updateError.message)
+                      return
+                    }
+                  } else {
+                    const { error: insertError } = await supabase
+                      .from('tax_header_settings')
+                      .insert(saveData)
+            
+                    if (insertError) {
+                      alert('헤더레코드 저장 실패: ' + insertError.message)
+                      return
+                    }
+                  }
+            
+                  alert('헤더레코드가 저장되었습니다.')
+                })
+                
+              return
+            }  
 
           if (page === 'organization') {
             const subMenu = document.querySelector('.admin-sub-menu')
