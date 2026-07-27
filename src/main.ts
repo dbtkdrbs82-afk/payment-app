@@ -3803,6 +3803,301 @@ taxExcelDownloadButton.onclick = async () => {
 
     alert(completeMessage)
 }
+const taxTextDownloadButton =
+  document.querySelector<HTMLButtonElement>('#tax-text-download-button')
+
+if (!taxTextDownloadButton) {
+  alert('전산매체신고 내려받기 버튼을 찾지 못했습니다.')
+  return
+}
+taxTextDownloadButton.onclick = async () => {
+  const cleanNumber = (value: unknown) => {
+    return String(value || '')
+      .replace(/[^0-9]/g, '')
+      .trim()
+  }
+
+  const paymentYear =
+    cleanNumber(getTaxInputValue('#tax-year'))
+
+  const quarter =
+    cleanNumber(getTaxInputValue('#tax-quarter'))
+
+  const submitDate =
+    cleanNumber(getTaxInputValue('#tax-submit-date'))
+
+  const businessNumber =
+    cleanNumber(getTaxInputValue('#tax-business-number'))
+
+  const periodStart =
+    cleanNumber(getTaxInputValue('#tax-period-start'))
+
+  const periodEnd =
+    cleanNumber(getTaxInputValue('#tax-period-end'))
+
+  if (paymentYear.length !== 4) {
+    alert('귀속연도를 4자리로 입력해주세요.')
+    return
+  }
+
+  if (!['1', '2', '3', '4'].includes(quarter)) {
+    alert('분기를 1~4 중에서 선택해주세요.')
+    return
+  }
+
+  if (submitDate.length !== 8) {
+    alert('제출년월일을 정확히 입력해주세요.')
+    return
+  }
+
+  if (businessNumber.length !== 10) {
+    alert('사업자등록번호를 정확히 입력해주세요.')
+    return
+  }
+
+  if (
+    periodStart.length !== 8 ||
+    periodEnd.length !== 8
+  ) {
+    alert('결제기간 시작일과 종료일을 선택해주세요.')
+    return
+  }
+
+  const startIso =
+  periodStart.slice(0, 4) +
+  '-' +
+  periodStart.slice(4, 6) +
+  '-' +
+  periodStart.slice(6, 8) +
+  'T00:00:00'
+
+const endIso =
+  periodEnd.slice(0, 4) +
+  '-' +
+  periodEnd.slice(4, 6) +
+  '-' +
+  periodEnd.slice(6, 8) +
+  'T23:59:59.999'
+
+const { data: payments, error: paymentError } =
+  await supabase
+    .from('payments')
+    .select(
+      'merchant_id, amount, status, approved_at, created_at'
+    )
+    .eq('status', 'paid')
+    .gte('created_at', startIso)
+    .lte('created_at', endIso)
+
+if (paymentError) {
+  alert(
+    'TXT 결제내역 조회 실패: ' +
+    paymentError.message
+  )
+  return
+}
+
+if (!payments || payments.length === 0) {
+  alert(
+    '선택한 신고기간에 승인된 결제내역이 없습니다.'
+  )
+  return
+}
+
+const merchantIds = [
+  ...new Set(
+    payments
+      .map((payment) =>
+        Number(payment.merchant_id || 0)
+      )
+      .filter((merchantId) => merchantId > 0)
+  )
+]
+
+if (merchantIds.length === 0) {
+  alert(
+    '가맹점과 연결된 결제내역이 없습니다.'
+  )
+  return
+}
+
+const { data: merchants, error: merchantError } =
+  await supabase
+    .from('merchants')
+    .select(
+      'id, merchant_name, owner_name, business_number, resident_number, cpid, phone, email'
+    )
+    .in('id', merchantIds)
+
+if (merchantError) {
+  alert(
+    'TXT 가맹점 정보 조회 실패: ' +
+    merchantError.message
+  )
+  return
+}
+
+const merchantMap = new Map<number, any>()
+
+;(merchants || []).forEach((merchant) => {
+  merchantMap.set(
+    Number(merchant.id),
+    merchant
+  )
+})
+
+const merchantMonthlyMap = new Map<
+  string,
+  {
+    merchant: any
+    paymentMonth: string
+    paymentCount: number
+    paymentAmount: number
+  }
+>()
+
+let excludedPaymentCount = 0
+
+payments.forEach((payment) => {
+  const merchantId =
+    Number(payment.merchant_id || 0)
+
+  const merchant =
+    merchantMap.get(merchantId)
+
+  if (!merchantId || !merchant) {
+    excludedPaymentCount += 1
+    return
+  }
+
+  const paymentDate =
+    String(
+      payment.approved_at ||
+      payment.created_at ||
+      ''
+    )
+
+  const paymentMonth =
+    paymentDate.slice(0, 7).replace(/-/g, '')
+
+  if (paymentMonth.length !== 6) {
+    excludedPaymentCount += 1
+    return
+  }
+
+  const summaryKey =
+    String(merchantId) +
+    '-' +
+    paymentMonth
+
+  const currentSummary =
+    merchantMonthlyMap.get(summaryKey)
+
+  if (currentSummary) {
+    currentSummary.paymentCount += 1
+    currentSummary.paymentAmount +=
+      Number(payment.amount || 0)
+  } else {
+    merchantMonthlyMap.set(summaryKey, {
+      merchant,
+      paymentMonth,
+      paymentCount: 1,
+      paymentAmount:
+        Number(payment.amount || 0)
+    })
+  }
+})
+
+if (merchantMonthlyMap.size === 0) {
+  alert(
+    'TXT에 작성할 가맹점 매출자료가 없습니다.'
+  )
+  return
+}
+
+const companyCode =
+  getTaxInputValue('#tax-company-code').trim()
+
+const officeCode =
+  getTaxInputValue('#tax-office-code').trim()
+
+const businessName =
+  getTaxInputValue('#tax-business-name').trim()
+
+const fitText = (
+  value: unknown,
+  length: number
+) => {
+  const text = String(value || '')
+
+  if (text.length >= length) {
+    return text.slice(0, length)
+  }
+
+  return text + ' '.repeat(length - text.length)
+}
+
+const fitNumber = (
+  value: unknown,
+  length: number
+) => {
+  const numberText =
+    cleanNumber(value)
+
+  if (numberText.length >= length) {
+    return numberText.slice(-length)
+  }
+
+  return numberText.padStart(length, '0')
+}
+
+if (companyCode.length !== 3) {
+  alert('자료구분코드는 3자리로 입력해주세요.')
+  return
+}
+
+if (!officeCode) {
+  alert('관할세무서 코드를 입력해주세요.')
+  return
+}
+
+if (!businessName) {
+  alert('상호명을 입력해주세요.')
+  return
+}
+
+const headerLine =
+  'HD' +
+  fitNumber(paymentYear, 4) +
+  fitNumber(quarter, 1) +
+  fitText(companyCode, 3) +
+  fitNumber(submitDate, 8) +
+  fitNumber(businessNumber, 10) +
+  fitText(businessName, 40) +
+  fitNumber(periodStart, 8) +
+  fitNumber(periodEnd, 8) +
+  fitText('', 140)
+
+if (headerLine.length !== 230) {
+  alert(
+    'HD 헤더 길이 오류\n\n' +
+    '현재 길이: ' +
+    headerLine.length +
+    '자리'
+  )
+  return
+}
+
+alert(
+  'HD 헤더 생성 완료\n\n' +
+  '길이: ' +
+  headerLine.length +
+  '자리\n' +
+  '상세자료: ' +
+  merchantMonthlyMap.size +
+  '건'
+)
+}
 
               return
             }  
