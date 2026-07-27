@@ -3141,7 +3141,7 @@ requestAnimationFrame(() => {
                   '<div class="tax-download-title">' +
                     '수수료 세금계산서' +
                   '</div>' +
-                  '<button type="button" id="tax-excel-download-button" class="merchant-save-btn tax-download-button" onclick="alert(\'엑셀 버튼 클릭 확인\')">' +
+                  '<button type="button" id="tax-excel-download-button" class="merchant-save-btn tax-download-button">' +
                     '내려받기' +
                   '</button>' +
                 '</div>' +
@@ -3280,8 +3280,12 @@ requestAnimationFrame(() => {
 
                 document.querySelector('#tax-excel-download-button')
   ?.addEventListener('click', async () => {
-
-    alert('엑셀 버튼 연결 확인')
+    const cleanNumber = (value: unknown) => {
+      return String(value || '')
+        .replace(/-/g, '')
+        .replace(/\s/g, '')
+        .trim()
+    }
 
     const startDate =
       getTaxInputValue('#tax-period-start').replace(/-/g, '')
@@ -3289,8 +3293,42 @@ requestAnimationFrame(() => {
     const endDate =
       getTaxInputValue('#tax-period-end').replace(/-/g, '')
 
+    const writeDate =
+      getTaxInputValue('#tax-submit-date').replace(/-/g, '')
+
+    const supplierBusinessNumber =
+      cleanNumber(getTaxInputValue('#tax-business-number'))
+
+    const supplierBusinessName =
+      getTaxInputValue('#tax-business-name')
+
+    const supplierName =
+      getTaxInputValue('#tax-supplier-name')
+
+    const supplierAddress =
+      getTaxInputValue('#tax-supplier-address')
+
+    const supplierBusinessType =
+      getTaxInputValue('#tax-supplier-business-type')
+
+    const supplierBusinessItem =
+      getTaxInputValue('#tax-supplier-business-item')
+
+    const supplierEmail =
+      getTaxInputValue('#tax-company-email')
+
     if (!startDate || !endDate) {
       alert('결제기간 시작일과 종료일을 선택해주세요.')
+      return
+    }
+
+    if (writeDate.length !== 8) {
+      alert('제출년월일을 정확히 입력해주세요.')
+      return
+    }
+
+    if (!supplierBusinessNumber) {
+      alert('공급자 사업자등록번호를 입력해주세요.')
       return
     }
 
@@ -3308,7 +3346,7 @@ requestAnimationFrame(() => {
       endDate.slice(4, 6) +
       '-' +
       endDate.slice(6, 8) +
-      'T23:59:59'
+      'T23:59:59.999'
 
     const { data: payments, error: paymentError } = await supabase
       .from('payments')
@@ -3337,104 +3375,398 @@ requestAnimationFrame(() => {
       )
     ]
 
+    if (merchantIds.length === 0) {
+      alert('가맹점과 연결된 결제내역이 없습니다.')
+      return
+    }
+
+  
     const { data: merchants, error: merchantError } = await supabase
-      .from('merchants')
-      .select('id, merchant_name, business_number')
-      .in('id', merchantIds)
+  .from('merchants')
+  .select('*')
+  .in('id', merchantIds)
 
     if (merchantError) {
       alert('가맹점 정보 조회 실패: ' + merchantError.message)
       return
     }
 
-    const merchantMap = new Map<
-      number,
-      {
-        merchant_name: string
-        business_number: string
-      }
-    >()
+    const merchantMap = new Map<number, any>()
 
-    ;(merchants || []).forEach((merchant) => {
-      merchantMap.set(Number(merchant.id), {
-        merchant_name: merchant.merchant_name || '',
-        business_number: merchant.business_number || ''
-      })
+    ;((merchants || []) as any[]).forEach((merchant) => {
+      merchantMap.set(Number(merchant.id), merchant)
     })
 
     const summaryMap = new Map<
       number,
       {
-        merchant_name: string
-        business_number: string
-        fee_total: number
+        merchant: any
+        feeTotal: number
       }
     >()
+
+    let excludedPaymentCount = 0
 
     payments.forEach((payment) => {
       const merchantId = Number(payment.merchant_id)
 
-      if (!merchantId) return
+      if (!merchantId) {
+        excludedPaymentCount += 1
+        return
+      }
 
       const merchant = merchantMap.get(merchantId)
 
-      if (!merchant) return
+      if (!merchant) {
+        excludedPaymentCount += 1
+        return
+      }
 
       const current = summaryMap.get(merchantId)
 
       if (current) {
-        current.fee_total += Number(payment.fee_amount || 0)
+        current.feeTotal += Number(payment.fee_amount || 0)
       } else {
         summaryMap.set(merchantId, {
-          merchant_name:
-            merchant.merchant_name ||
-            payment.merchant_name ||
-            '',
-          business_number: merchant.business_number || '',
-          fee_total: Number(payment.fee_amount || 0)
+          merchant,
+          feeTotal: Number(payment.fee_amount || 0)
         })
       }
     })
 
-    const excelRows = Array.from(summaryMap.values()).map(
-      (row, index) => {
-        const supplyAmount = Math.round(row.fee_total / 1.1)
-        const taxAmount = row.fee_total - supplyAmount
-
-        return {
-          순번: index + 1,
-          사업자번호: row.business_number,
-          가맹점명: row.merchant_name,
-          공급가액: supplyAmount,
-          부가세: taxAmount,
-          수수료합계: row.fee_total
-        }
-      }
-    )
-
-    if (excelRows.length === 0) {
+    if (summaryMap.size === 0) {
       alert('가맹점 정보와 연결된 결제내역이 없습니다.')
       return
     }
 
-    const worksheet = XLSX.utils.json_to_sheet(excelRows)
+    let templateResponse: Response
 
-    worksheet['!cols'] = [
-      { wch: 8 },
-      { wch: 18 },
-      { wch: 24 },
-      { wch: 16 },
-      { wch: 14 },
-      { wch: 16 }
+    try {
+      templateResponse = await fetch(
+        '/세금계선서양식 테스트(2).xlsx',
+        {
+          cache: 'no-store'
+        }
+      )
+    } catch {
+      alert('세금계산서 원본 양식 파일을 불러오지 못했습니다.')
+      return
+    }
+
+    if (!templateResponse.ok) {
+      alert(
+        '세금계산서 원본 양식 파일을 찾을 수 없습니다.\n\n' +
+        'public 폴더에 아래 파일이 있는지 확인해주세요.\n' +
+        '세금계선서양식 테스트(2).xlsx'
+      )
+      return
+    }
+
+    const templateBuffer =
+      await templateResponse.arrayBuffer()
+
+    const workbook = XLSX.read(
+      templateBuffer,
+      {
+        type: 'array',
+        cellStyles: true,
+        cellDates: false
+      }
+    )
+
+    const worksheet = workbook.Sheets['Sheet1']
+
+    if (!worksheet) {
+      alert('원본 양식에서 Sheet1을 찾을 수 없습니다.')
+      return
+    }
+
+    const originalRange = XLSX.utils.decode_range(
+      worksheet['!ref'] || 'A1:BG1'
+    )
+
+    if (originalRange.e.c !== 58) {
+      alert(
+        '원본 세금계산서 양식의 항목 수가 다릅니다.\n' +
+        '반드시 보내준 원본 파일을 사용해주세요.'
+      )
+      return
+    }
+
+    const expectedHeaders = [
+      '전자(세금)계산서종류\n(01:일반, 02:영세율)',
+      '작성일자',
+      "공급자 등록번호\n('-'없이 입력)",
+      '공급자\n종사업장번호',
+      '공급자 상호',
+      '공급자 성명',
+      '공급자 사업장주소',
+      '공급자 업태',
+      '공급자 종목',
+      '공급자 이메일',
+      "공급받는자 등록번호\n('-'없이 입력)",
+      '공급받는자\n종사업장번호',
+      '공급받는자 상호',
+      '공급받는자 성명',
+      '공급받는자 사업장주소',
+      '공급받는자 업태',
+      '공급받는자 종목',
+      '공급받는자 이메일1',
+      '공급받는자 이메일2',
+      '공급가액',
+      '세액',
+      '비고',
+      '일자1\n(2자리,작성년월 제외)',
+      '품목1',
+      '규격1',
+      '수량1',
+      '단가1',
+      '공급가액1',
+      '세액1',
+      '물품비고1',
+      '일자2\n(2자리,작성년월 제외)',
+      '품목2',
+      '규격2',
+      '수량2',
+      '단가2',
+      '공급가액2',
+      '세액2',
+      '물품비고2',
+      '일자3\n(2자리,작성년월 제외)',
+      '품목3',
+      '규격3',
+      '수량3',
+      '단가3',
+      '공급가액3',
+      '세액3',
+      '물품비고3',
+      '일자4\n(2자리,작성년월 제외)',
+      '품목4',
+      '규격4',
+      '수량4',
+      '단가4',
+      '공급가액4',
+      '세액4',
+      '물품비고4',
+      '현금',
+      '수표',
+      '어음',
+      '외상미수금',
+      '영수(01)\n청구(02)'
     ]
 
-    const workbook = XLSX.utils.book_new()
+    for (
+      let columnIndex = 0;
+      columnIndex < expectedHeaders.length;
+      columnIndex += 1
+    ) {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: 0,
+        c: columnIndex
+      })
 
-    XLSX.utils.book_append_sheet(
-      workbook,
-      worksheet,
-      '수수료세금계산서'
-    )
+      const actualHeader =
+        String(worksheet[cellAddress]?.v ?? '')
+
+      if (actualHeader !== expectedHeaders[columnIndex]) {
+        alert(
+          '원본 양식의 제목이 변경되어 있습니다.\n\n' +
+          '위치: ' + cellAddress + '\n' +
+          '반드시 보내준 원본 파일을 다시 넣어주세요.'
+        )
+        return
+      }
+    }
+
+    const templateCellStyles: Record<number, any> = {}
+
+    for (let columnIndex = 0; columnIndex < 59; columnIndex += 1) {
+      const templateAddress = XLSX.utils.encode_cell({
+        r: 1,
+        c: columnIndex
+      })
+
+      const templateCell = worksheet[templateAddress]
+
+      if (templateCell?.s) {
+        templateCellStyles[columnIndex] =
+          JSON.parse(JSON.stringify(templateCell.s))
+      }
+    }
+
+    const worksheetKeys = Object.keys(worksheet)
+
+    worksheetKeys.forEach((key) => {
+      if (key.startsWith('!')) return
+
+      const decoded = XLSX.utils.decode_cell(key)
+
+      if (decoded.r >= 1) {
+        delete worksheet[key]
+      }
+    })
+
+    const invoiceDay = writeDate.slice(6, 8)
+
+    const outputRows = Array.from(summaryMap.values())
+      .sort((first, second) => {
+        const firstName =
+          String(first.merchant.merchant_name || '')
+
+        const secondName =
+          String(second.merchant.merchant_name || '')
+
+        return firstName.localeCompare(secondName, 'ko')
+      })
+      .map(({ merchant, feeTotal }) => {
+        const supplyAmount =
+          Math.round(Number(feeTotal || 0) / 1.1)
+
+        const taxAmount =
+          Number(feeTotal || 0) - supplyAmount
+
+        const recipientNumber =
+          cleanNumber(
+            merchant.business_number ||
+            merchant.resident_number
+          )
+
+        const recipientAddress = [
+          merchant.address || '',
+          merchant.address_detail || ''
+        ]
+          .filter(Boolean)
+          .join(' ')
+          .trim()
+
+        return [
+          '01',
+          writeDate,
+          supplierBusinessNumber,
+          '',
+          supplierBusinessName,
+          supplierName,
+          supplierAddress,
+          supplierBusinessType,
+          supplierBusinessItem,
+          supplierEmail,
+          recipientNumber,
+          '',
+          merchant.merchant_name || '',
+          merchant.owner_name || '',
+          recipientAddress,
+          merchant.business_type || '',
+          merchant.business_category || '',
+          merchant.email || '',
+          '',
+          supplyAmount,
+          taxAmount,
+          '',
+          invoiceDay,
+          '결제승인수수료',
+          '',
+          '',
+          '',
+          supplyAmount,
+          taxAmount,
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '',
+          '01'
+        ]
+      })
+
+    const writeCell = (
+      rowIndex: number,
+      columnIndex: number,
+      value: string | number
+    ) => {
+      const address = XLSX.utils.encode_cell({
+        r: rowIndex,
+        c: columnIndex
+      })
+
+      const isNumber =
+        typeof value === 'number'
+
+      worksheet[address] = {
+        t: isNumber ? 'n' : 's',
+        v: value
+      }
+
+      const templateStyle =
+        templateCellStyles[columnIndex]
+
+      if (templateStyle) {
+        worksheet[address].s =
+          JSON.parse(JSON.stringify(templateStyle))
+      }
+
+      if (
+        columnIndex === 2 ||
+        columnIndex === 10
+      ) {
+        worksheet[address].t = 's'
+        worksheet[address].z = '@'
+      }
+    }
+
+    outputRows.forEach((row, outputIndex) => {
+      const sheetRowIndex = outputIndex + 1
+
+      for (
+        let columnIndex = 0;
+        columnIndex < 59;
+        columnIndex += 1
+      ) {
+        writeCell(
+          sheetRowIndex,
+          columnIndex,
+          row[columnIndex] ?? ''
+        )
+      }
+    })
+
+    worksheet['!ref'] =
+      'A1:BG' + String(outputRows.length + 1)
+
+    if (worksheet['!rows']?.[1]) {
+      const templateRowSetting =
+        JSON.parse(JSON.stringify(worksheet['!rows'][1]))
+
+      worksheet['!rows'] = worksheet['!rows'] || []
+
+      outputRows.forEach((_, index) => {
+        worksheet['!rows']![index + 1] =
+          JSON.parse(JSON.stringify(templateRowSetting))
+      })
+    }
 
     XLSX.writeFile(
       workbook,
@@ -3442,8 +3774,27 @@ requestAnimationFrame(() => {
         startDate +
         '_' +
         endDate +
-        '.xlsx'
+        '.xlsx',
+      {
+        cellStyles: true,
+        bookType: 'xlsx'
+      }
     )
+
+    let completeMessage =
+      '수수료 세금계산서가 생성되었습니다.\n\n' +
+      '생성 가맹점: ' +
+      outputRows.length +
+      '곳'
+
+    if (excludedPaymentCount > 0) {
+      completeMessage +=
+        '\n가맹점 정보 미연결: ' +
+        excludedPaymentCount +
+        '건 제외'
+    }
+
+    alert(completeMessage)
   })
 
               return
