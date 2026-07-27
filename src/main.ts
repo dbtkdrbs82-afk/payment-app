@@ -4067,13 +4067,13 @@ const headerLine =
   'HD' +
   fitNumber(paymentYear, 4) +
   fitNumber(quarter, 1) +
-  fitText(companyCode, 3) +
+  fitText(companyCode, 7) +
   fitNumber(submitDate, 8) +
   fitNumber(businessNumber, 10) +
   fitText(businessName, 40) +
   fitNumber(periodStart, 8) +
   fitNumber(periodEnd, 8) +
-  fitText('', 140)
+  fitText('', 136)
 
 if (headerLine.length !== 230) {
   alert(
