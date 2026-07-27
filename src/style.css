@@ -6249,3 +6249,26 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.tax-download-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 12px 16px;
+  margin-top: 10px;
+  border: 1px solid #d8e3f1;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.tax-download-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #173f78;
+}
+
+.tax-download-button {
+  width: 180px;
+  margin: 0;
+  padding: 10px 14px;
+}

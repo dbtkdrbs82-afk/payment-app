@@ -3089,7 +3089,7 @@ requestAnimationFrame(() => {
                       '<input id="tax-office-code" value="119" />' +
             
                       '<label>제출년월일</label>' +
-                      '<input id="tax-submit-date" value="20260708" />' +
+                      '<input id="tax-submit-date" type="date" value="2026-07-08" />' +
             
                       '<label>사업자등록번호</label>' +
                       '<input id="tax-business-number" value="2458101732" />' +
@@ -3101,10 +3101,10 @@ requestAnimationFrame(() => {
                       '<input id="tax-business-name-en" value="NXGSOFT" />' +
             
                       '<label>결제기간시작년월일</label>' +
-                      '<input id="tax-period-start" value="20260401" />' +
+                      '<input id="tax-period-start" type="date" value="2026-04-01" />' +
             
                       '<label>결제기간종료년월일</label>' +
-                      '<input id="tax-period-end" value="20260630" />' +
+                      '<input id="tax-period-end" type="date" value="2026-06-30" />' +
             
                       '<label>의뢰업체 전화번호</label>' +
                       '<input id="tax-company-phone" value="024311252" />' +
@@ -3137,18 +3137,18 @@ requestAnimationFrame(() => {
                   '</div>' +
             
                   '<div class="merchant-detail-section">' +
-                    '<h3>수수료 세금계산서</h3>' +
-                    '<button id="tax-excel-download-button" class="merchant-save-btn">' +
-                      '엑셀파일 내려받기' +
-                    '</button>' +
-                  '</div>' +
-            
-                  '<div class="merchant-detail-section">' +
-                    '<h3>전산매체신고양식</h3>' +
-                    '<button id="tax-text-download-button" class="merchant-save-btn">' +
-                      '메모장파일 내려받기' +
-                    '</button>' +
-                  '</div>'
+                  '<h3>수수료 세금계산서</h3>' +
+                  '<button id="tax-excel-download-button" class="merchant-save-btn">' +
+                    '엑셀파일 내려받기' +
+                  '</button>' +
+                '</div>' +
+
+                '<div class="merchant-detail-section">' +
+                  '<h3>전산매체신고양식</h3>' +
+                  '<button id="tax-text-download-button" class="merchant-save-btn">' +
+                    '메모장파일 내려받기' +
+                  '</button>' +
+                '</div>'
               }
             
               const getTaxInputValue = (selector: string) => {
@@ -3271,7 +3271,7 @@ requestAnimationFrame(() => {
             
                   alert('헤더레코드가 저장되었습니다.')
                 })
-                
+
               return
             }  
 
