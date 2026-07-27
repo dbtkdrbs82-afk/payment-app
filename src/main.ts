@@ -4073,7 +4073,7 @@ const headerLine =
   fitText(businessName, 40) +
   fitNumber(periodStart, 8) +
   fitNumber(periodEnd, 8) +
-  fitText('', 136)
+  fitText('', 142)
 
 if (headerLine.length !== 230) {
   alert(
