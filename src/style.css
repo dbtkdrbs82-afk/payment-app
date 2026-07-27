@@ -6252,8 +6252,8 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
 .tax-download-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  justify-content: flex-start;
+  gap: 24px;
   padding: 10px 16px;
   margin-top: 10px;
   border: 1px solid #d8e3f1;
@@ -6265,10 +6265,11 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   font-size: 16px;
   font-weight: 700;
   color: #173f78;
+  min-width: 180px;
 }
 
 .tax-download-button {
-  width: 140px;
+  width: 120px;
   margin: 0;
   padding: 9px 12px;
 }
