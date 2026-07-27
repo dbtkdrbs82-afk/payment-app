@@ -3136,17 +3136,21 @@ requestAnimationFrame(() => {
                     '</div>' +
                   '</div>' +
             
-                  '<div class="merchant-detail-section">' +
-                  '<h3>수수료 세금계산서</h3>' +
-                  '<button id="tax-excel-download-button" class="merchant-save-btn">' +
-                    '엑셀파일 내려받기' +
+                  '<div class="tax-download-row">' +
+                  '<div class="tax-download-title">' +
+                    '수수료 세금계산서' +
+                  '</div>' +
+                  '<button id="tax-excel-download-button" class="merchant-save-btn tax-download-button">' +
+                    '내려받기' +
                   '</button>' +
                 '</div>' +
 
-                '<div class="merchant-detail-section">' +
-                  '<h3>전산매체신고양식</h3>' +
-                  '<button id="tax-text-download-button" class="merchant-save-btn">' +
-                    '메모장파일 내려받기' +
+                '<div class="tax-download-row">' +
+                  '<div class="tax-download-title">' +
+                    '전산매체신고양식' +
+                  '</div>' +
+                  '<button id="tax-text-download-button" class="merchant-save-btn tax-download-button">' +
+                    '내려받기' +
                   '</button>' +
                 '</div>'
               }
