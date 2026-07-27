@@ -3278,8 +3278,15 @@ requestAnimationFrame(() => {
                   alert('헤더레코드가 저장되었습니다.')
                 })
 
-                document.querySelector('#tax-excel-download-button')
-  ?.addEventListener('click', async () => {
+                const taxExcelDownloadButton =
+  document.querySelector<HTMLButtonElement>('#tax-excel-download-button')
+
+if (!taxExcelDownloadButton) {
+  alert('수수료 세금계산서 내려받기 버튼을 찾지 못했습니다.')
+  return
+}
+
+taxExcelDownloadButton.onclick = async () => {
     const cleanNumber = (value: unknown) => {
       return String(value || '')
         .replace(/-/g, '')
@@ -3795,7 +3802,7 @@ requestAnimationFrame(() => {
     }
 
     alert(completeMessage)
-  })
+}
 
               return
             }  
