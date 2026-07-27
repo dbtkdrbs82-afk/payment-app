@@ -3141,7 +3141,7 @@ requestAnimationFrame(() => {
                   '<div class="tax-download-title">' +
                     '수수료 세금계산서' +
                   '</div>' +
-                  '<button id="tax-excel-download-button" class="merchant-save-btn tax-download-button">' +
+                  '<button type="button" id="tax-excel-download-button" class="merchant-save-btn tax-download-button" onclick="alert(\'엑셀 버튼 클릭 확인\')">' +
                     '내려받기' +
                   '</button>' +
                 '</div>' +
@@ -3282,7 +3282,7 @@ requestAnimationFrame(() => {
   ?.addEventListener('click', async () => {
 
     alert('엑셀 버튼 연결 확인')
-    
+
     const startDate =
       getTaxInputValue('#tax-period-start').replace(/-/g, '')
 
