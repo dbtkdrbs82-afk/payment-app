@@ -4051,10 +4051,7 @@ const fitNumber = (
   return numberText.padStart(length, '0')
 }
 
-if (companyCode.length !== 3) {
-  alert('자료구분코드는 3자리로 입력해주세요.')
-  return
-}
+
 
 if (!officeCode) {
   alert('관할세무서 코드를 입력해주세요.')
