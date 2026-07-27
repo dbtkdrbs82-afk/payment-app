@@ -3450,7 +3450,7 @@ taxExcelDownloadButton.onclick = async () => {
 
     try {
       templateResponse = await fetch(
-        '/세금계선서양식 테스트(2).xlsx',
+        '/tax-template.xlsx',
         {
           cache: 'no-store'
         }
@@ -3464,7 +3464,7 @@ taxExcelDownloadButton.onclick = async () => {
       alert(
         '세금계산서 원본 양식 파일을 찾을 수 없습니다.\n\n' +
         'public 폴더에 아래 파일이 있는지 확인해주세요.\n' +
-        '세금계선서양식 테스트(2).xlsx'
+'tax-template.xlsx'
       )
       return
     }
