@@ -3216,7 +3216,7 @@ requestAnimationFrame(() => {
                 )
               }
             
-              await loadTaxHeaderSettings()
+              void loadTaxHeaderSettings()
             
               document.querySelector('#tax-header-save-button')
                 ?.addEventListener('click', async () => {
