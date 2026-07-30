@@ -6,7 +6,7 @@ import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
 
 
-const clientKey = 'live_gck_ma60RZblrqy4xXDZ2NYMrwzYWBn1'
+const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 const adminPassword = '1234'
 const adminSecondCode = '5678'
 
