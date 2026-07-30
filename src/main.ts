@@ -4366,7 +4366,7 @@ taxTextDownloadButton.onclick = async () => {
       fitNumber(paymentCount, 6) +
       fitNumber(0, 12) +
       fitNumber(0, 12) +
-      fitNumber(paymentAmount, 12) +
+      fitNumber(paymentAmount * 10000, 12) +
       fitNumber(paymentAmount, 12) +
       fitByteText(businessName, 20) +
       fitNumber(companyPhone, 11) +
