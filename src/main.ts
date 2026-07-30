@@ -3996,21 +3996,21 @@ taxTextDownloadButton.onclick = async () => {
 
     if (sourceCode.startsWith('MER')) {
       return (
-        'MER' +
-        codeNumber.padStart(9, '0')
+        'CPID' +
+        codeNumber.padStart(8, '0')
       ).slice(0, 12)
     }
 
     if (sourceCode.startsWith('CPID')) {
       return (
-        'MER' +
-        codeNumber.padStart(9, '0')
+        'CPID' +
+        codeNumber.padStart(8, '0')
       ).slice(0, 12)
     }
 
     return (
-      'MER' +
-      codeNumber.padStart(9, '0')
+      'CPID' +
+      codeNumber.padStart(8, '0')
     ).slice(0, 12)
   }
 
