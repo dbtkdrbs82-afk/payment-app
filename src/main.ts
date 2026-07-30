@@ -4,7 +4,6 @@ import { createClient } from '@supabase/supabase-js'
 import Tesseract from 'tesseract.js'
 import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
-import iconv from 'iconv-lite'
 
 
 const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
@@ -3806,15 +3805,12 @@ taxExcelDownloadButton.onclick = async () => {
     alert(completeMessage)
 }
 const taxTextDownloadButton =
-  document.querySelector<HTMLButtonElement>(
-    '#tax-text-download-button'
-  )
+  document.querySelector<HTMLButtonElement>('#tax-text-download-button')
 
 if (!taxTextDownloadButton) {
   alert('전산매체신고 내려받기 버튼을 찾지 못했습니다.')
   return
 }
-
 taxTextDownloadButton.onclick = async () => {
   const cleanNumber = (value: unknown) => {
     return String(value || '')
@@ -3834,39 +3830,19 @@ taxTextDownloadButton.onclick = async () => {
   const businessNumber =
     cleanNumber(getTaxInputValue('#tax-business-number'))
 
-  const officeCode =
-    cleanNumber(getTaxInputValue('#tax-office-code'))
-
-  const businessName =
-    getTaxInputValue('#tax-business-name').trim()
-
   const periodStart =
     cleanNumber(getTaxInputValue('#tax-period-start'))
 
   const periodEnd =
     cleanNumber(getTaxInputValue('#tax-period-end'))
 
-  const companyPhone =
-    cleanNumber(getTaxInputValue('#tax-company-phone'))
-
-  const companyMobile =
-    cleanNumber(getTaxInputValue('#tax-company-mobile'))
-
-  const companyEmail =
-    getTaxInputValue('#tax-company-email').trim()
-
   if (paymentYear.length !== 4) {
-    alert('결제년도를 4자리로 입력해주세요.')
+    alert('귀속연도를 4자리로 입력해주세요.')
     return
   }
 
   if (!['1', '2', '3', '4'].includes(quarter)) {
     alert('분기를 1~4 중에서 선택해주세요.')
-    return
-  }
-
-  if (officeCode.length !== 3) {
-    alert('관할서코드를 3자리로 입력해주세요.')
     return
   }
 
@@ -3888,555 +3864,327 @@ taxTextDownloadButton.onclick = async () => {
     return
   }
 
-  if (!businessName) {
-    alert('사업자상호를 입력해주세요.')
-    return
-  }
-
-  /*
-   * 실제 파일은 한글 1글자가 2바이트인 CP949 형식입니다.
-   * 문자열 길이가 아니라 바이트 길이로 자르고 공백을 채웁니다.
-   */
-  const fitByteText = (
-    value: unknown,
-    byteLength: number
-  ) => {
-    const text = String(value || '')
-    let result = ''
-
-    for (const character of text) {
-      const nextText = result + character
-      const nextLength =
-        iconv.encode(nextText, 'cp949').length
-
-      if (nextLength > byteLength) {
-        break
-      }
-
-      result = nextText
-    }
-
-    const currentLength =
-      iconv.encode(result, 'cp949').length
-
-    return (
-      result +
-      ' '.repeat(
-        Math.max(0, byteLength - currentLength)
-      )
-    )
-  }
-
-  const fitNumber = (
-    value: unknown,
-    length: number
-  ) => {
-    const numberText = cleanNumber(value)
-
-    if (numberText.length >= length) {
-      return numberText.slice(-length)
-    }
-
-    return numberText.padStart(length, '0')
-  }
-
   const startIso =
-    periodStart.slice(0, 4) +
-    '-' +
-    periodStart.slice(4, 6) +
-    '-' +
-    periodStart.slice(6, 8) +
-    'T00:00:00'
+  periodStart.slice(0, 4) +
+  '-' +
+  periodStart.slice(4, 6) +
+  '-' +
+  periodStart.slice(6, 8) +
+  'T00:00:00'
 
-  const endIso =
-    periodEnd.slice(0, 4) +
-    '-' +
-    periodEnd.slice(4, 6) +
-    '-' +
-    periodEnd.slice(6, 8) +
-    'T23:59:59.999'
+const endIso =
+  periodEnd.slice(0, 4) +
+  '-' +
+  periodEnd.slice(4, 6) +
+  '-' +
+  periodEnd.slice(6, 8) +
+  'T23:59:59.999'
 
-  const { data: payments, error: paymentError } =
-    await supabase
-      .from('payments')
-      .select(
-        'merchant_id, amount, status, approved_at, created_at'
+const { data: payments, error: paymentError } =
+  await supabase
+    .from('payments')
+    .select(
+      'merchant_id, amount, status, approved_at, created_at'
+    )
+    .eq('status', 'paid')
+    .gte('created_at', startIso)
+    .lte('created_at', endIso)
+
+if (paymentError) {
+  alert(
+    'TXT 결제내역 조회 실패: ' +
+    paymentError.message
+  )
+  return
+}
+
+if (!payments || payments.length === 0) {
+  alert(
+    '선택한 신고기간에 승인된 결제내역이 없습니다.'
+  )
+  return
+}
+
+const merchantIds = [
+  ...new Set(
+    payments
+      .map((payment) =>
+        Number(payment.merchant_id || 0)
       )
-      .eq('status', 'paid')
-      .gte('created_at', startIso)
-      .lte('created_at', endIso)
+      .filter((merchantId) => merchantId > 0)
+  )
+]
 
-  if (paymentError) {
-    alert(
-      'TXT 결제내역 조회 실패: ' +
-      paymentError.message
+if (merchantIds.length === 0) {
+  alert(
+    '가맹점과 연결된 결제내역이 없습니다.'
+  )
+  return
+}
+
+const { data: merchants, error: merchantError } =
+  await supabase
+    .from('merchants')
+    .select(
+      'id, merchant_name, owner_name, business_number, resident_number, cpid, phone, email'
     )
+    .in('id', merchantIds)
+
+if (merchantError) {
+  alert(
+    'TXT 가맹점 정보 조회 실패: ' +
+    merchantError.message
+  )
+  return
+}
+
+const merchantMap = new Map<number, any>()
+
+;(merchants || []).forEach((merchant) => {
+  merchantMap.set(
+    Number(merchant.id),
+    merchant
+  )
+})
+
+const merchantMonthlyMap = new Map<
+  string,
+  {
+    merchant: any
+    paymentMonth: string
+    paymentCount: number
+    paymentAmount: number
+  }
+>()
+
+let excludedPaymentCount = 0
+
+payments.forEach((payment) => {
+  const merchantId =
+    Number(payment.merchant_id || 0)
+
+  const merchant =
+    merchantMap.get(merchantId)
+
+  if (!merchantId || !merchant) {
+    excludedPaymentCount += 1
     return
   }
 
-  if (!payments || payments.length === 0) {
-    alert(
-      '선택한 신고기간에 승인된 결제내역이 없습니다.'
+  const paymentDate =
+    String(
+      payment.approved_at ||
+      payment.created_at ||
+      ''
     )
+
+  const paymentMonth =
+    paymentDate.slice(0, 7).replace(/-/g, '')
+
+  if (paymentMonth.length !== 6) {
+    excludedPaymentCount += 1
     return
   }
 
-  const merchantIds = [
-    ...new Set(
-      payments
-        .map((payment) =>
-          Number(payment.merchant_id || 0)
-        )
-        .filter((merchantId) => merchantId > 0)
-    )
-  ]
+  const summaryKey =
+    String(merchantId) +
+    '-' +
+    paymentMonth
 
-  if (merchantIds.length === 0) {
-    alert('가맹점과 연결된 결제내역이 없습니다.')
-    return
-  }
+  const currentSummary =
+    merchantMonthlyMap.get(summaryKey)
 
-  const { data: merchants, error: merchantError } =
-    await supabase
-      .from('merchants')
-      .select(
-        [
-          'id',
-          'merchant_name',
-          'owner_name',
-          'business_number',
-          'resident_number',
-          'cpid',
-          'merchant_login_id'
-        ].join(',')
-      )
-      .in('id', merchantIds)
-
-  if (merchantError) {
-    alert(
-      'TXT 가맹점 정보 조회 실패: ' +
-      merchantError.message
-    )
-    return
-  }
-
-  const merchantMap = new Map<number, any>()
-
-  ;(merchants || []).forEach((merchant: any) => {
-    merchantMap.set(
-      Number(merchant.id),
-      merchant
-    )
-  })
-
-  const merchantMonthlyMap = new Map<
-    string,
-    {
-      merchant: any
-      paymentMonth: string
-      paymentCount: number
-      paymentAmount: number
-    }
-  >()
-
-  let excludedPaymentCount = 0
-
-  payments.forEach((payment) => {
-    const merchantId =
-      Number(payment.merchant_id || 0)
-
-    const merchant =
-      merchantMap.get(merchantId)
-
-    if (!merchantId || !merchant) {
-      excludedPaymentCount += 1
-      return
-    }
-
-    const paymentDate =
-      String(
-        payment.approved_at ||
-        payment.created_at ||
-        ''
-      )
-
-    const paymentMonth =
-      paymentDate
-        .slice(0, 7)
-        .replace(/-/g, '')
-
-    if (paymentMonth.length !== 6) {
-      excludedPaymentCount += 1
-      return
-    }
-
-    const summaryKey =
-      String(merchantId) +
-      '-' +
-      paymentMonth
-
-    const current =
-      merchantMonthlyMap.get(summaryKey)
-
-    if (current) {
-      current.paymentCount += 1
-      current.paymentAmount +=
+  if (currentSummary) {
+    currentSummary.paymentCount += 1
+    currentSummary.paymentAmount +=
+      Number(payment.amount || 0)
+  } else {
+    merchantMonthlyMap.set(summaryKey, {
+      merchant,
+      paymentMonth,
+      paymentCount: 1,
+      paymentAmount:
         Number(payment.amount || 0)
-    } else {
-      merchantMonthlyMap.set(summaryKey, {
-        merchant,
-        paymentMonth,
-        paymentCount: 1,
-        paymentAmount:
-          Number(payment.amount || 0)
-      })
-    }
+    })
+  }
+})
+
+if (merchantMonthlyMap.size === 0) {
+  alert(
+    'TXT에 작성할 가맹점 매출자료가 없습니다.'
+  )
+  return
+}
+
+const companyCode =
+  getTaxInputValue('#tax-company-code').trim()
+
+const officeCode =
+  getTaxInputValue('#tax-office-code').trim()
+
+const businessName =
+  getTaxInputValue('#tax-business-name').trim()
+
+const fitText = (
+  value: unknown,
+  length: number
+) => {
+  const text = String(value || '')
+
+  if (text.length >= length) {
+    return text.slice(0, length)
+  }
+
+  return text + ' '.repeat(length - text.length)
+}
+
+const fitNumber = (
+  value: unknown,
+  length: number
+) => {
+  const numberText =
+    cleanNumber(value)
+
+  if (numberText.length >= length) {
+    return numberText.slice(-length)
+  }
+
+  return numberText.padStart(length, '0')
+}
+
+
+
+if (!officeCode) {
+  alert('관할세무서 코드를 입력해주세요.')
+  return
+}
+
+if (!businessName) {
+  alert('상호명을 입력해주세요.')
+  return
+}
+
+const headerLine =
+  'HD' +
+  fitNumber(paymentYear, 4) +
+  fitNumber(quarter, 1) +
+  fitText(companyCode, 7) +
+  fitNumber(submitDate, 8) +
+  fitNumber(businessNumber, 10) +
+  fitText(businessName, 40) +
+  fitNumber(periodStart, 8) +
+  fitNumber(periodEnd, 8) +
+  fitText('', 142)
+
+if (headerLine.length !== 230) {
+  alert(
+    'HD 헤더 길이 오류\n\n' +
+    '현재 길이: ' +
+    headerLine.length +
+    '자리'
+  )
+  return
+}
+
+const lines: string[] = []
+
+lines.push(headerLine)
+
+let sequence = 1
+
+Array.from(merchantMonthlyMap.values())
+  .sort((a, b) => {
+    const aNo = cleanNumber(
+      a.merchant.business_number ||
+      a.merchant.resident_number
+    )
+
+    const bNo = cleanNumber(
+      b.merchant.business_number ||
+      b.merchant.resident_number
+    )
+
+    return aNo.localeCompare(bNo)
   })
+  .forEach((row) => {
 
-  if (merchantMonthlyMap.size === 0) {
-    alert(
-      'TXT에 작성할 가맹점 매출자료가 없습니다.'
-    )
-    return
-  }
-
-  /*
-   * HD 실제 구조
-   *
-   * HD                 2
-   * 결제년도           4
-   * 분기               1
-   * 관할서코드         3
-   * 제출년월일         8
-   * 제출자 사업자번호 10
-   * 사업자상호        40
-   * 결제기간 시작일    8
-   * 결제기간 종료일    8
-   * 공백             146
-   *
-   * 합계 230바이트
-   */
-  const headerLine =
-    'HD' +
-    fitNumber(paymentYear, 4) +
-    fitNumber(quarter, 1) +
-    fitNumber(officeCode, 3) +
-    fitNumber(submitDate, 8) +
-    fitNumber(businessNumber, 10) +
-    fitByteText(businessName, 40) +
-    fitNumber(periodStart, 8) +
-    fitNumber(periodEnd, 8) +
-    fitByteText('', 146)
-
-  const headerByteLength =
-    iconv.encode(headerLine, 'cp949').length
-
-  if (headerByteLength !== 230) {
-    alert(
-      'HD 길이 오류\n\n' +
-      '현재 길이: ' +
-      headerByteLength +
-      '바이트'
-    )
-    return
-  }
-
-  const rows =
-    Array.from(merchantMonthlyMap.values())
-      .sort((first, second) => {
-        const firstNumber =
-          cleanNumber(
-            first.merchant.business_number ||
-            first.merchant.resident_number
-          )
-
-        const secondNumber =
-          cleanNumber(
-            second.merchant.business_number ||
-            second.merchant.resident_number
-          )
-
-        const numberCompare =
-          firstNumber.localeCompare(secondNumber)
-
-        if (numberCompare !== 0) {
-          return numberCompare
-        }
-
-        return first.paymentMonth.localeCompare(
-          second.paymentMonth
-        )
-      })
-
-  const lines: string[] = [headerLine]
-
-  let sequence = 1
-  let totalPaymentCount = 0
-  let totalPaymentAmount = 0
-
-  rows.forEach((row) => {
-    const merchantBusinessNumber =
-      cleanNumber(row.merchant.business_number)
-
-    const merchantResidentNumber =
-      cleanNumber(row.merchant.resident_number)
-
-    const isBusiness =
-      merchantBusinessNumber.length === 10
-
-    const isResident =
-      !isBusiness &&
-      merchantResidentNumber.length === 13
-
-    if (!isBusiness && !isResident) {
-      excludedPaymentCount += row.paymentCount
-      return
-    }
-
-    /*
-     * 사업자 신고
-     *
-     * 사업자번호 10자리
-     * 주민번호칸 공백 13자리
-     */
-    const recipientBusinessField =
-      isBusiness
-        ? merchantBusinessNumber
-        : '**********'
-
-    /*
-     * 비사업자 신고
-     *
-     * 사업자번호칸 **********
-     * 주민번호 13자리
-     */
-    const recipientResidentField =
-      isResident
-        ? merchantResidentNumber
-        : ' '.repeat(13)
-
-    const ownerName =
-      String(
-        row.merchant.owner_name ||
-        row.merchant.merchant_name ||
-        ''
-      ).trim()
-
-    /*
-     * 신규 시스템의 가맹점 코드를 우선 사용합니다.
-     * 길이는 실제 CPID 자리와 동일한 12바이트입니다.
-     */
-    const merchantCode =
-      String(
-        row.merchant.merchant_login_id ||
-        row.merchant.cpid ||
-        ''
-      ).trim()
-
-    const paymentCount =
-      Number(row.paymentCount || 0)
-
-    const paymentAmount =
-      Math.round(
-        Number(row.paymentAmount || 0)
+    const merchantNumber =
+      cleanNumber(
+        row.merchant.business_number ||
+        row.merchant.resident_number
       )
 
-    /*
-     * 실제 신고파일의 마지막 구분값
-     *
-     * 사업자     : C
-     * 비사업자   : C
-     *
-     * 카드사 또는 자료 종류에 따라 다른 값이 필요한
-     * 기존 자료가 있다면 DB 컬럼을 추가해 연결해야 합니다.
-     */
-    const recordType = 'C'
+    const merchantCode =
+      row.merchant.cpid || ''
 
-    /*
-     * RD 실제 구조, 총 230바이트
-     *
-     * RD                    2
-     * 결제년도              4
-     * 분기                  1
-     * 제출자 사업자번호    10
-     * 일련번호              7
-     * 사업자번호/별표      10
-     * 주민번호             13
-     * 대표자명             20
-     * 가맹점코드           12
-     * 결제년월              6
-     * 공백                  1
-     * 결제건수              6
-     * 금액칸1              12
-     * 금액칸2              12
-     * 결제금액             12
-     * 합계금액             12
-     * 회사명               20
-     * 전화번호             11
-     * 공백                  2
-     * 휴대폰번호           11
-     * 이메일               40
-     * 구분값                1
-     * 공백                  5
-     */
+    const merchantName =
+      row.merchant.merchant_name || ''
+
     const rdLine =
       'RD' +
-      fitNumber(paymentYear, 4) +
-      fitNumber(quarter, 1) +
-      fitNumber(businessNumber, 10) +
-      fitNumber(sequence, 7) +
-      recipientBusinessField +
-      recipientResidentField +
-      fitByteText(ownerName, 20) +
-      fitByteText(merchantCode, 12) +
+      fitNumber(sequence, 6) +
+      fitNumber(merchantNumber, 10) +
+      fitText(merchantName, 60) +
+      fitText(merchantCode, 20) +
       fitNumber(row.paymentMonth, 6) +
-      ' ' +
-      fitNumber(paymentCount, 6) +
-      fitNumber(0, 12) +
-      fitNumber(0, 12) +
-      fitNumber(paymentAmount, 12) +
-      fitNumber(paymentAmount, 12) +
-      fitByteText(businessName, 20) +
-      fitNumber(companyPhone, 11) +
-      '  ' +
-      fitNumber(companyMobile, 11) +
-      fitByteText(companyEmail, 40) +
-      recordType +
-      ' '.repeat(5)
-
-    const rdByteLength =
-      iconv.encode(rdLine, 'cp949').length
-
-    if (rdByteLength !== 230) {
-      alert(
-        'RD 길이 오류\n\n' +
-        '가맹점: ' +
-        ownerName +
-        '\n결제년월: ' +
-        row.paymentMonth +
-        '\n현재 길이: ' +
-        rdByteLength +
-        '바이트'
-      )
-
-      throw new Error('RD_BYTE_LENGTH_ERROR')
-    }
+      fitNumber(row.paymentCount, 8) +
+      fitNumber(row.paymentAmount, 15) +
+      fitNumber(0, 15) +
+      fitText('', 88)
 
     lines.push(rdLine)
 
-    totalPaymentCount += paymentCount
-    totalPaymentAmount += paymentAmount
-    sequence += 1
+    sequence++
   })
 
-  if (lines.length === 1) {
-    alert(
-      '사업자번호 또는 주민번호가 등록된 가맹점이 없습니다.'
-    )
-    return
+alert(
+  'RD 생성 완료\n\n' +
+  'HD : 1건\n' +
+  'RD : ' +
+  (lines.length - 1) +
+  '건'
+)
+const tdLine =
+  'TD' +
+  fitNumber(lines.length - 1, 8) +
+  fitText('', 220)
+
+lines.push(tdLine)
+
+const fileName =
+  'A_' +
+  businessNumber +
+  '_' +
+  paymentYear +
+  quarter +
+  '_1.txt'
+
+const blob = new Blob(
+  [lines.join('\r\n')],
+  {
+    type: 'text/plain;charset=euc-kr'
   }
+)
 
-  /*
-   * TD는 실제 파일과 동일하게 230바이트로 생성합니다.
-   *
-   * TD                    2
-   * 결제년도              4
-   * 분기                  1
-   * 제출자 사업자번호    10
-   * 가맹점 수             7
-   * 전체 결제건수        10
-   * 금액칸1              15
-   * 금액칸2              15
-   * 전체 결제금액        15
-   * 전체 합계금액        15
-   * 반복 결제건수        10
-   * 반복 합계금액        15
-   * 공백                111
-   */
-  const tdLine =
-    'TD' +
-    fitNumber(paymentYear, 4) +
-    fitNumber(quarter, 1) +
-    fitNumber(businessNumber, 10) +
-    fitNumber(lines.length - 1, 7) +
-    fitNumber(totalPaymentCount, 10) +
-    fitNumber(0, 15) +
-    fitNumber(0, 15) +
-    fitNumber(totalPaymentAmount, 15) +
-    fitNumber(totalPaymentAmount, 15) +
-    fitNumber(totalPaymentCount, 10) +
-    fitNumber(totalPaymentAmount, 15) +
-    fitByteText('', 111)
+const url = URL.createObjectURL(blob)
 
-  const tdByteLength =
-    iconv.encode(tdLine, 'cp949').length
+const a = document.createElement('a')
+a.href = url
+a.download = fileName
 
-  if (tdByteLength !== 230) {
-    alert(
-      'TD 길이 오류\n\n' +
-      '현재 길이: ' +
-      tdByteLength +
-      '바이트'
-    )
-    return
-  }
+document.body.appendChild(a)
+a.click()
 
-  lines.push(tdLine)
+document.body.removeChild(a)
+URL.revokeObjectURL(url)
 
-  const textContent =
-    lines.join('\r\n')
-
-  const encodedText =
-    iconv.encode(textContent, 'cp949')
-
-  const blob = new Blob(
-    [new Uint8Array(encodedText)],
-    {
-      type: 'text/plain'
-    }
-  )
-
-  const fileName =
-    'A_' +
-    businessNumber +
-    '_' +
-    paymentYear +
-    quarter +
-    '_1.txt'
-
-  const url =
-    URL.createObjectURL(blob)
-
-  const downloadLink =
-    document.createElement('a')
-
-  downloadLink.href = url
-  downloadLink.download = fileName
-
-  document.body.appendChild(downloadLink)
-  downloadLink.click()
-  document.body.removeChild(downloadLink)
-
-  URL.revokeObjectURL(url)
-
-  let completeMessage =
-    '전산매체신고 파일이 생성되었습니다.\n\n' +
-    '파일명: ' +
-    fileName +
-    '\nHD: 1건' +
-    '\nRD: ' +
-    String(lines.length - 2) +
-    '건' +
-    '\nTD: 1건'
-
-  if (excludedPaymentCount > 0) {
-    completeMessage +=
-      '\n제외된 결제: ' +
-      excludedPaymentCount +
-      '건'
-  }
-
-  alert(completeMessage)
+alert(
+  '전산매체신고 파일이 생성되었습니다.\n\n' +
+  '파일명 : ' + fileName + '\n' +
+  'HD : 1건\n' +
+  'RD : ' + (lines.length - 2) + '건\n' +
+  'TD : 1건'
+)
 }
 
               return
