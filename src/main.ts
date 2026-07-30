@@ -3223,24 +3223,23 @@ requestAnimationFrame(() => {
                 ?.addEventListener('click', async () => {
                   const saveData = {
                     company_code: getTaxInputValue('#tax-company-code'),
-                    payment_year: getTaxInputValue('#tax-year'),
-                    quarter: getTaxInputValue('#tax-quarter'),
-                    office_code: getTaxInputValue('#tax-office-code'),
-                    submit_date: getTaxInputValue('#tax-submit-date'),
+                    tax_year: Number(getTaxInputValue('#tax-year')),
+                    quarter: Number(getTaxInputValue('#tax-quarter')),
+                    tax_office_code: getTaxInputValue('#tax-office-code'),
+                    submission_date: getTaxInputValue('#tax-submit-date'),
                     business_number: getTaxInputValue('#tax-business-number'),
-                    business_name: getTaxInputValue('#tax-business-name'),
-                    business_name_en: getTaxInputValue('#tax-business-name-en'),
+                    company_name: getTaxInputValue('#tax-business-name'),
+                    company_name_english: getTaxInputValue('#tax-business-name-en'),
                     period_start: getTaxInputValue('#tax-period-start'),
                     period_end: getTaxInputValue('#tax-period-end'),
                     company_phone: getTaxInputValue('#tax-company-phone'),
-                    company_mobile: getTaxInputValue('#tax-company-mobile'),
-                    company_email: getTaxInputValue('#tax-company-email'),
-                    supplier_name: getTaxInputValue('#tax-supplier-name'),
-                    supplier_address: getTaxInputValue('#tax-supplier-address'),
-                    supplier_business_type:
-                      getTaxInputValue('#tax-supplier-business-type'),
-                    supplier_business_item:
-                      getTaxInputValue('#tax-supplier-business-item')
+                    manager_phone: getTaxInputValue('#tax-company-mobile'),
+                    manager_email: getTaxInputValue('#tax-company-email'),
+                    representative_name: getTaxInputValue('#tax-supplier-name'),
+                    business_address: getTaxInputValue('#tax-supplier-address'),
+                    business_type: getTaxInputValue('#tax-supplier-business-type'),
+                    business_item: getTaxInputValue('#tax-supplier-business-item'),
+                    updated_at: new Date().toISOString()
                   }
             
                   const { data: existingSetting, error: findError } = await supabase
