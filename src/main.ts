@@ -6,7 +6,7 @@ import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
 
 
-const clientKey = 'test_ck_LlDJaYngroaYkOqwzpPl3ezGdRpX'
+const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 const adminPassword = '1234'
 const adminSecondCode = '5678'
 
@@ -8280,19 +8280,34 @@ const companyAccount = accountResult.account
           </div>
 
           <div class="payout-balance-row">
-            <span>가맹점 출금예정금액</span>
-            <strong>${totalPayoutAmount.toLocaleString()}원</strong>
-          </div>
+  <span>회수금액</span>
 
-          <div class="payout-balance-row payout-balance-available">
-            <span>회사통장 회수 가능금액</span>
-            <strong>
-              ${Math.max(
-                accountBalance - totalPayoutAmount,
-                0
-              ).toLocaleString()}원
-            </strong>
-          </div>
+  <div
+    style="
+      display:flex;
+      gap:8px;
+      align-items:center;
+    "
+  >
+    <input
+      id="withdraw-amount"
+      type="text"
+      value=""
+      placeholder="0"
+      style="
+        width:150px;
+        text-align:right;
+      "
+    />
+
+    <button
+      type="button"
+      id="withdraw-all-button"
+    >
+      전액
+    </button>
+  </div>
+</div>
 
           <div class="payout-company-account">
   <div class="payout-company-account-title">
@@ -8344,6 +8359,35 @@ const companyAccount = accountResult.account
 
     document.body.appendChild(modal)
 
+    const withdrawInput =
+  document.querySelector<HTMLInputElement>(
+    '#withdraw-amount'
+  )
+
+withdrawInput?.addEventListener('input', () => {
+
+  const value =
+    withdrawInput.value.replace(/,/g, '')
+      .replace(/[^\d]/g, '')
+
+  withdrawInput.value =
+    value
+      ? Number(value).toLocaleString()
+      : ''
+
+})
+
+document
+  .querySelector('#withdraw-all-button')
+  ?.addEventListener('click', () => {
+
+    if (!withdrawInput) return
+
+    withdrawInput.value =
+      accountBalance.toLocaleString()
+
+  })
+
     document.querySelector('#payout-balance-modal-close')
       ?.addEventListener('click', () => {
         modal.remove()
@@ -8362,15 +8406,35 @@ const companyAccount = accountResult.account
 
       document.querySelector('#payout-balance-withdraw-button')
   ?.addEventListener('click', async () => {
-    const availableAmount = Math.max(
-      accountBalance - totalPayoutAmount,
-      0
-    )
+    const withdrawInput =
+  document.querySelector<HTMLInputElement>(
+    '#withdraw-amount'
+  )
 
-    if (availableAmount <= 0) {
-      alert('현재 회사계좌로 회수 가능한 금액이 없습니다.')
-      return
-    }
+const withdrawAmount =
+  Number(
+    withdrawInput?.value
+      .replace(/,/g, '') || 0
+  )
+
+if (withdrawAmount <= 0) {
+
+  alert('회수금액을 입력해주세요.')
+
+  return
+
+}
+
+if (withdrawAmount > accountBalance) {
+
+  alert(
+    '현재 가상계좌잔액보다 큰 금액은 회수할 수 없습니다.'
+  )
+
+  return
+
+}
+
 
     const adminPassword = prompt(
       '회사계좌 회수를 위해 관리자 비밀번호를 입력해주세요.'
@@ -8397,7 +8461,7 @@ const companyAccount = accountResult.account
     const confirmMessage =
       '회사계좌로 회수하시겠습니까?\n\n' +
       '회수금액: ' +
-      availableAmount.toLocaleString() +
+      withdrawAmount.toLocaleString() +
       '원\n\n' +
 '은행: ' + companyAccount.bank_name + '\n' +
 '예금주: ' + companyAccount.account_holder + '\n' +
