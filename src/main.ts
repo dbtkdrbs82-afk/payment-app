@@ -2406,6 +2406,28 @@ const { data: existingPayment } = await supabase
 if (existingPayment) {
   console.log('이미 저장된 주문입니다.')
 } else {
+  const confirmResponse = await fetch('/api/toss-confirm', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      paymentKey,
+      orderId,
+      amount
+    })
+  })
+  
+  if (!confirmResponse.ok) {
+    const confirmError = await confirmResponse.json()
+  
+    alert(
+      '결제 승인 실패 : ' +
+      (confirmError.message || '알 수 없는 오류')
+    )
+  
+    throw new Error('토스 결제 승인 실패')
+  }  
   const { error } = await supabase.from('payments').insert([
     {
       order_number: nextOrderNumber,
