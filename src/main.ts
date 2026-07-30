@@ -4085,14 +4085,104 @@ if (headerLine.length !== 230) {
   return
 }
 
+const lines: string[] = []
+
+lines.push(headerLine)
+
+let sequence = 1
+
+Array.from(merchantMonthlyMap.values())
+  .sort((a, b) => {
+    const aNo = cleanNumber(
+      a.merchant.business_number ||
+      a.merchant.resident_number
+    )
+
+    const bNo = cleanNumber(
+      b.merchant.business_number ||
+      b.merchant.resident_number
+    )
+
+    return aNo.localeCompare(bNo)
+  })
+  .forEach((row) => {
+
+    const merchantNumber =
+      cleanNumber(
+        row.merchant.business_number ||
+        row.merchant.resident_number
+      )
+
+    const merchantCode =
+      row.merchant.cpid || ''
+
+    const merchantName =
+      row.merchant.merchant_name || ''
+
+    const rdLine =
+      'RD' +
+      fitNumber(sequence, 6) +
+      fitNumber(merchantNumber, 10) +
+      fitText(merchantName, 60) +
+      fitText(merchantCode, 20) +
+      fitNumber(row.paymentMonth, 6) +
+      fitNumber(row.paymentCount, 8) +
+      fitNumber(row.paymentAmount, 15) +
+      fitNumber(0, 15) +
+      fitText('', 88)
+
+    lines.push(rdLine)
+
+    sequence++
+  })
+
 alert(
-  'HD 헤더 생성 완료\n\n' +
-  '길이: ' +
-  headerLine.length +
-  '자리\n' +
-  '상세자료: ' +
-  merchantMonthlyMap.size +
+  'RD 생성 완료\n\n' +
+  'HD : 1건\n' +
+  'RD : ' +
+  (lines.length - 1) +
   '건'
+)
+const tdLine =
+  'TD' +
+  fitNumber(lines.length - 1, 8) +
+  fitText('', 220)
+
+lines.push(tdLine)
+
+const fileName =
+  'A_' +
+  businessNumber +
+  '_' +
+  paymentYear +
+  quarter +
+  '_1.txt'
+
+const blob = new Blob(
+  [lines.join('\r\n')],
+  {
+    type: 'text/plain;charset=euc-kr'
+  }
+)
+
+const url = URL.createObjectURL(blob)
+
+const a = document.createElement('a')
+a.href = url
+a.download = fileName
+
+document.body.appendChild(a)
+a.click()
+
+document.body.removeChild(a)
+URL.revokeObjectURL(url)
+
+alert(
+  '전산매체신고 파일이 생성되었습니다.\n\n' +
+  '파일명 : ' + fileName + '\n' +
+  'HD : 1건\n' +
+  'RD : ' + (lines.length - 2) + '건\n' +
+  'TD : 1건'
 )
 }
 
