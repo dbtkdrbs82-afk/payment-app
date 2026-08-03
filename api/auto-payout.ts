@@ -268,37 +268,233 @@ if (
     )
 
     const payoutGroups =
-      Object.values(payoutGroupMap)
+  Object.values(payoutGroupMap)
 
-    const totalSettlementAmount =
-      payoutGroups.reduce(
-        (sum, group) =>
-          sum + group.settlementAmount,
-        0
-      )
+const host = String(req.headers.host || '').trim()
 
-    return res.status(200).json({
+if (!host) {
+  return res.status(500).json({
+    success: false,
+    message: '서버 주소를 확인할 수 없습니다.',
+  })
+}
+
+const baseUrl = `https://${host}`
+
+const sellerResponse = await fetch(
+  `${baseUrl}/api/toss-seller-get`
+)
+
+const sellerResult = await sellerResponse.json()
+
+if (
+  !sellerResponse.ok ||
+  !sellerResult.success
+) {
+  return res.status(500).json({
+    success: false,
+    message: '토스 셀러 목록 조회에 실패했습니다.',
+    data: sellerResult,
+  })
+}
+
+const sellers =
+  sellerResult?.data?.entityBody?.items || []
+
+const results: any[] = []
+
+for (const group of payoutGroups) {
+  const rawMerchantId =
+    String(group.merchantId || '').trim()
+
+  const refSellerId =
+    rawMerchantId.startsWith('MER')
+      ? rawMerchantId
+      : 'MER' + rawMerchantId.padStart(4, '0')
+
+  const seller = sellers.find(
+    (item: any) =>
+      String(item.refSellerId || '').trim() ===
+      refSellerId
+  )
+
+  if (!seller?.id) {
+    await supabase
+      .from('payments')
+      .update({
+        payout_status: '출금오류',
+      })
+      .in('id', group.paymentIds)
+
+    results.push({
+      merchantId: refSellerId,
+      merchantName: group.merchantName,
+      success: false,
+      message: '토스 셀러가 등록되어 있지 않습니다.',
+    })
+
+    continue
+  }
+
+  if (seller.status !== 'APPROVED') {
+    await supabase
+      .from('payments')
+      .update({
+        payout_status: '출금오류',
+      })
+      .in('id', group.paymentIds)
+
+    results.push({
+      merchantId: refSellerId,
+      merchantName: group.merchantName,
+      success: false,
+      message:
+        '토스 셀러가 지급가능 상태가 아닙니다.',
+      sellerStatus: seller.status,
+    })
+
+    continue
+  }
+
+  const minPaymentId =
+    Math.min(...group.paymentIds)
+
+  const maxPaymentId =
+    Math.max(...group.paymentIds)
+
+  const refPayoutId =
+    'AUTO-' +
+    today.replace(/-/g, '') +
+    '-' +
+    refSellerId +
+    '-' +
+    minPaymentId +
+    '-' +
+    maxPaymentId
+
+  try {
+    const payoutResponse = await fetch(
+      `${baseUrl}/api/toss-payout`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          destination: seller.id,
+          amount: group.settlementAmount,
+          transactionDescription: '자동정산',
+          refPayoutId,
+        }),
+      }
+    )
+
+    const payoutResult =
+      await payoutResponse.json()
+
+    if (
+      !payoutResponse.ok ||
+      !payoutResult.success
+    ) {
+      await supabase
+        .from('payments')
+        .update({
+          payout_status: '출금오류',
+        })
+        .in('id', group.paymentIds)
+
+      results.push({
+        merchantId: refSellerId,
+        merchantName: group.merchantName,
+        amount: group.settlementAmount,
+        success: false,
+        refPayoutId,
+        message:
+          payoutResult?.data?.error?.message ||
+          payoutResult?.message ||
+          '토스 지급 요청에 실패했습니다.',
+      })
+
+      continue
+    }
+
+    const { error: updateError } =
+      await supabase
+        .from('payments')
+        .update({
+          payout_status: '출금처리중',
+          payout_time: new Date().toISOString(),
+        })
+        .in('id', group.paymentIds)
+
+    if (updateError) {
+      results.push({
+        merchantId: refSellerId,
+        merchantName: group.merchantName,
+        amount: group.settlementAmount,
+        success: false,
+        refPayoutId,
+        message:
+          '지급 요청은 전송됐지만 DB 저장에 실패했습니다.',
+        error: updateError.message,
+      })
+
+      continue
+    }
+
+    results.push({
+      merchantId: refSellerId,
+      merchantName: group.merchantName,
+      amount: group.settlementAmount,
+      paymentCount: group.paymentCount,
       success: true,
-      message: '가맹점별 자동정산 대상 계산 완료',
-      today,
-      groupCount: payoutGroups.length,
-      paymentCount: payoutGroups.reduce(
-        (sum, group) =>
-          sum + group.paymentCount,
-        0
-      ),
-      totalSettlementAmount,
-      payoutGroups,
+      refPayoutId,
+      message: '토스 지급 요청 전송 완료',
     })
   } catch (error) {
-    console.error('자동정산 계산 오류:', error)
+    await supabase
+      .from('payments')
+      .update({
+        payout_status: '출금오류',
+      })
+      .in('id', group.paymentIds)
 
-    return res.status(500).json({
+    results.push({
+      merchantId: refSellerId,
+      merchantName: group.merchantName,
+      amount: group.settlementAmount,
       success: false,
+      refPayoutId,
       message:
         error instanceof Error
           ? error.message
-          : '자동정산 계산 중 오류가 발생했습니다.',
+          : '자동정산 중 오류가 발생했습니다.',
     })
   }
+}
+
+return res.status(200).json({
+    success: true,
+    message: '자동정산 실행 완료',
+    today,
+    groupCount: payoutGroups.length,
+    successCount: results.filter(
+      (result) => result.success
+    ).length,
+    failureCount: results.filter(
+      (result) => !result.success
+    ).length,
+    results,
+  })
+} catch (error) {
+  console.error('자동정산 오류:', error)
+
+  return res.status(500).json({
+    success: false,
+    message:
+      error instanceof Error
+        ? error.message
+        : '자동정산 중 오류가 발생했습니다.',
+  })
+}
 }
