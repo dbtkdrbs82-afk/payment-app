@@ -20,6 +20,7 @@
     "@tosspayments/payment-sdk": "^1.9.2",
     "buffer": "^6.0.3",
     "iconv-lite": "^0.7.3",
+    "jose": "^6.2.7",
     "qrcode": "^1.5.4",
     "tesseract.js": "^7.0.0",
     "xlsx": "^0.18.5"
