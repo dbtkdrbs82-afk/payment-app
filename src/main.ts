@@ -9146,7 +9146,11 @@ if (nextTop) {
           return
         }
 
-        const merchantId = merchantIds[0]
+        const rawMerchantId = merchantIds[0]
+
+const merchantId = rawMerchantId.startsWith('MER')
+  ? rawMerchantId
+  : 'MER' + rawMerchantId.padStart(4, '0')
         const merchantName =
           String(paymentRows[0].merchant_name || merchantId)
 
