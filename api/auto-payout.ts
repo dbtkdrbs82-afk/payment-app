@@ -14,7 +14,8 @@ export default async function handler(
 
   try {
     const supabaseUrl =
-      process.env.VITE_SUPABASE_URL?.trim()
+    process.env.SUPABASE_URL?.trim() ||
+    process.env.VITE_SUPABASE_URL?.trim()
 
     const serviceRoleKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
@@ -22,7 +23,7 @@ export default async function handler(
     if (!supabaseUrl) {
       return res.status(500).json({
         success: false,
-        message: 'VITE_SUPABASE_URL이 없습니다.',
+        message: 'SUPABASE_URL이 없습니다.',
       })
     }
 
