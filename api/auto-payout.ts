@@ -1,6 +1,64 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { createClient } from '@supabase/supabase-js'
 
+function formatDate(date: Date) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
+}
+
+function getKoreaToday() {
+  const koreaTime = new Date(
+    new Date().toLocaleString('en-US', {
+      timeZone: 'Asia/Seoul',
+    })
+  )
+
+  return formatDate(koreaTime)
+}
+
+function getPayoutDate(
+  createdAt: string,
+  settlementCycle: string,
+  holidaySet: Set<string>
+) {
+  const payoutDate = new Date(createdAt)
+
+  const cycleText =
+    String(settlementCycle || '1일').trim()
+
+  const cycleNumberMatch = cycleText.match(/\d+/)
+
+  const cycleDays = cycleNumberMatch
+    ? Number(cycleNumberMatch[0])
+    : 1
+
+  payoutDate.setDate(
+    payoutDate.getDate() + cycleDays
+  )
+
+  while (true) {
+    const dayOfWeek = payoutDate.getDay()
+    const dateText = formatDate(payoutDate)
+
+    const isWeekend =
+      dayOfWeek === 0 || dayOfWeek === 6
+
+    const isHoliday =
+      holidaySet.has(dateText)
+
+    if (!isWeekend && !isHoliday) {
+      return dateText
+    }
+
+    payoutDate.setDate(
+      payoutDate.getDate() + 1
+    )
+  }
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -14,8 +72,8 @@ export default async function handler(
 
   try {
     const supabaseUrl =
-    process.env.SUPABASE_URL?.trim() ||
-    process.env.VITE_SUPABASE_URL?.trim()
+      process.env.SUPABASE_URL?.trim() ||
+      process.env.VITE_SUPABASE_URL?.trim()
 
     const serviceRoleKey =
       process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
@@ -45,64 +103,179 @@ export default async function handler(
       }
     )
 
-    const { data: payments, error } = await supabase
-      .from('payments')
-      .select(`
-        id,
-        merchant_id,
-        merchant_name,
-        pg_company,
-        amount,
-        fee_amount,
-        settlement_amount,
-        payout_status,
-        payout_hold,
-        created_at
-      `)
-      .eq('payout_status', '출금대기')
-      .or('payout_hold.is.null,payout_hold.eq.false')
-      .order('created_at', {
-        ascending: true,
-      })
+    const [
+      paymentsResult,
+      merchantsResult,
+      holidaysResult,
+    ] = await Promise.all([
+      supabase
+        .from('payments')
+        .select(`
+          id,
+          merchant_id,
+          merchant_name,
+          pg_company,
+          settlement_amount,
+          payout_status,
+          payout_hold,
+          created_at,
+          status,
+          settlement_status
+        `)
+        .eq('payout_status', '출금대기')
+        .or('payout_hold.is.null,payout_hold.eq.false'),
 
-    if (error) {
-      return res.status(500).json({
-        success: false,
-        message: '출금대기 조회 실패',
-        error: error.message,
-      })
+      supabase
+        .from('merchants')
+        .select('id, settlement_cycle'),
+
+      supabase
+        .from('holidays')
+        .select('holiday_date'),
+    ])
+
+    if (paymentsResult.error) {
+      throw paymentsResult.error
     }
 
-    const payoutRows = payments || []
+    if (merchantsResult.error) {
+      throw merchantsResult.error
+    }
+
+    if (holidaysResult.error) {
+      throw holidaysResult.error
+    }
+
+    const settlementCycleMap =
+      new Map<number, string>()
+
+    ;(merchantsResult.data || []).forEach(
+      (merchant: any) => {
+        settlementCycleMap.set(
+          Number(merchant.id),
+          String(
+            merchant.settlement_cycle || '1일'
+          )
+        )
+      }
+    )
+
+    const holidaySet = new Set<string>(
+      (holidaysResult.data || []).map(
+        (holiday: any) =>
+          String(holiday.holiday_date)
+      )
+    )
+
+    const today = getKoreaToday()
+
+    const payoutGroupMap: Record<
+      string,
+      {
+        merchantId: string
+        merchantName: string
+        pgCompany: string
+        payoutDate: string
+        paymentCount: number
+        settlementAmount: number
+        paymentIds: number[]
+      }
+    > = {}
+
+    ;(paymentsResult.data || []).forEach(
+      (payment: any) => {
+        if (
+          !payment.merchant_id ||
+          payment.status === 'cancel' ||
+          payment.settlement_status === '취소'
+        ) {
+          return
+        }
+
+        const settlementAmount =
+          Number(payment.settlement_amount || 0)
+
+        if (settlementAmount <= 0) {
+          return
+        }
+
+        const settlementCycle =
+          settlementCycleMap.get(
+            Number(payment.merchant_id)
+          ) || '1일'
+
+        const payoutDate = getPayoutDate(
+          payment.created_at,
+          settlementCycle,
+          holidaySet
+        )
+
+        if (payoutDate > today) {
+          return
+        }
+
+        const merchantId =
+          String(payment.merchant_id)
+
+        const groupKey =
+          merchantId + '_' + payoutDate
+
+        if (!payoutGroupMap[groupKey]) {
+          payoutGroupMap[groupKey] = {
+            merchantId,
+            merchantName:
+              payment.merchant_name || '-',
+            pgCompany:
+              payment.pg_company || '-',
+            payoutDate,
+            paymentCount: 0,
+            settlementAmount: 0,
+            paymentIds: [],
+          }
+        }
+
+        payoutGroupMap[groupKey].paymentCount += 1
+
+        payoutGroupMap[groupKey]
+          .settlementAmount += settlementAmount
+
+        payoutGroupMap[groupKey]
+          .paymentIds.push(Number(payment.id))
+      }
+    )
+
+    const payoutGroups =
+      Object.values(payoutGroupMap)
 
     const totalSettlementAmount =
-      payoutRows.reduce(
-        (sum, payment) =>
-          sum +
-          Number(
-            payment.settlement_amount ||
-            0
-          ),
+      payoutGroups.reduce(
+        (sum, group) =>
+          sum + group.settlementAmount,
         0
       )
 
     return res.status(200).json({
       success: true,
-      message: '자동정산 대상 조회 완료',
-      executedAt: new Date().toISOString(),
-      paymentCount: payoutRows.length,
+      message: '가맹점별 자동정산 대상 계산 완료',
+      today,
+      groupCount: payoutGroups.length,
+      paymentCount: payoutGroups.reduce(
+        (sum, group) =>
+          sum + group.paymentCount,
+        0
+      ),
       totalSettlementAmount,
-      payments: payoutRows,
+      payoutGroups,
     })
   } catch (error) {
-    console.error('자동정산 조회 오류:', error)
+    console.error('자동정산 계산 오류:', error)
 
     return res.status(500).json({
       success: false,
       message:
         error instanceof Error
           ? error.message
-          : '자동정산 조회 중 오류가 발생했습니다.',
+          : '자동정산 계산 중 오류가 발생했습니다.',
     })
   }
 }
