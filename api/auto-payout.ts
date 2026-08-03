@@ -70,6 +70,28 @@ export default async function handler(
     })
   }
 
+  const cronSecret =
+  process.env.CRON_SECRET?.trim()
+
+if (!cronSecret) {
+  return res.status(500).json({
+    success: false,
+    message: 'CRON_SECRET이 없습니다.',
+  })
+}
+
+const authorization =
+  String(req.headers.authorization || '')
+
+if (
+  authorization !== `Bearer ${cronSecret}`
+) {
+  return res.status(401).json({
+    success: false,
+    message: '자동정산 실행 권한이 없습니다.',
+  })
+}
+
   try {
     const supabaseUrl =
       process.env.SUPABASE_URL?.trim() ||
