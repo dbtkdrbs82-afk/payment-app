@@ -3,48 +3,61 @@ import { CompactEncrypt, compactDecrypt } from 'jose'
 import { randomUUID } from 'crypto'
 
 function getIssuedAt() {
-  const now = new Date()
-
-  const year = now.getUTCFullYear()
-  const month = String(now.getUTCMonth() + 1).padStart(2, '0')
-  const day = String(now.getUTCDate()).padStart(2, '0')
-  const hour = String(now.getUTCHours()).padStart(2, '0')
-  const minute = String(now.getUTCMinutes()).padStart(2, '0')
-  const second = String(now.getUTCSeconds()).padStart(2, '0')
-
-  return `${year}-${month}-${day}T${hour}:${minute}:${second}+00:00`
+  return new Date()
+    .toISOString()
+    .replace(/\.\d{3}Z$/, '+00:00')
 }
 
-async function encryptBody(
-  data: Record<string, unknown>,
-  securityKey: Uint8Array
-) {
-  const payload = new TextEncoder().encode(
-    JSON.stringify(data)
-  )
+function getEncryptionKey() {
+  const encryptionKey = process.env.TOSS_ENCRYPTION_KEY?.trim()
 
-  return await new CompactEncrypt(payload)
+  if (!encryptionKey) {
+    throw new Error('TOSS_ENCRYPTION_KEY가 없습니다.')
+  }
+
+  if (!/^[0-9a-fA-F]{64}$/.test(encryptionKey)) {
+    throw new Error(
+      'TOSS_ENCRYPTION_KEY는 64자리 Hex 문자열이어야 합니다.'
+    )
+  }
+
+  return Buffer.from(encryptionKey, 'hex')
+}
+
+async function encryptPayload(
+  payload: Record<string, unknown>,
+  encryptionKey: Buffer
+) {
+  const text = JSON.stringify(payload)
+
+  return await new CompactEncrypt(
+    new TextEncoder().encode(text)
+  )
     .setProtectedHeader({
       alg: 'dir',
       enc: 'A256GCM',
       iat: getIssuedAt(),
-      nonce: randomUUID()
+      nonce: randomUUID(),
     })
-    .encrypt(securityKey)
+    .encrypt(encryptionKey)
 }
 
-async function decryptBody(
+async function decryptPayload(
   encryptedText: string,
-  securityKey: Uint8Array
+  encryptionKey: Buffer
 ) {
   const { plaintext } = await compactDecrypt(
     encryptedText,
-    securityKey
+    encryptionKey
   )
 
-  const decoded = new TextDecoder().decode(plaintext)
+  const decodedText = new TextDecoder().decode(plaintext)
 
-  return JSON.parse(decoded)
+  try {
+    return JSON.parse(decodedText)
+  } catch {
+    return decodedText
+  }
 }
 
 export default async function handler(
@@ -53,113 +66,110 @@ export default async function handler(
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({
-      message: 'POST 요청만 가능합니다.'
+      message: 'POST 요청만 가능합니다.',
     })
-  }
-
-  const secretKey = process.env.TOSS_SECRET_KEY
-  const encryptionKey = process.env.TOSS_ENCRYPTION_KEY
-
-  if (!secretKey || !encryptionKey) {
-    return res.status(500).json({
-      message:
-        'TOSS_SECRET_KEY 또는 TOSS_ENCRYPTION_KEY가 없습니다.'
-    })
-  }
-
-  if (!/^[0-9a-fA-F]{64}$/.test(encryptionKey)) {
-    return res.status(500).json({
-      message: '토스 보안 키 형식이 올바르지 않습니다.'
-    })
-  }
-
-  const {
-    refSellerId,
-    businessType,
-    company,
-    individual,
-    account,
-    metadata
-  } = req.body || {}
-
-  if (!refSellerId || !businessType || !account) {
-    return res.status(400).json({
-      message:
-        'refSellerId, businessType, account 정보가 필요합니다.'
-    })
-  }
-
-  const sellerBody: Record<string, unknown> = {
-    refSellerId,
-    businessType,
-    account
-  }
-
-  if (company) {
-    sellerBody.company = company
-  }
-
-  if (individual) {
-    sellerBody.individual = individual
-  }
-
-  if (metadata) {
-    sellerBody.metadata = metadata
   }
 
   try {
-    const securityKey = new Uint8Array(
-      Buffer.from(encryptionKey, 'hex')
+    const secretKey = process.env.TOSS_SECRET_KEY?.trim()
+
+    if (!secretKey) {
+      return res.status(500).json({
+        message: 'TOSS_SECRET_KEY가 없습니다.',
+      })
+    }
+
+    const {
+      refSellerId,
+      businessType,
+      company,
+      individual,
+      account,
+      metadata,
+    } = req.body || {}
+
+    if (!refSellerId) {
+      return res.status(400).json({
+        message: 'refSellerId가 없습니다.',
+      })
+    }
+
+    if (!businessType) {
+      return res.status(400).json({
+        message: 'businessType이 없습니다.',
+      })
+    }
+
+    if (!account) {
+      return res.status(400).json({
+        message: 'account 정보가 없습니다.',
+      })
+    }
+
+    const sellerData: Record<string, unknown> = {
+      refSellerId,
+      businessType,
+      account,
+    }
+
+    if (company) {
+      sellerData.company = company
+    }
+
+    if (individual) {
+      sellerData.individual = individual
+    }
+
+    if (metadata) {
+      sellerData.metadata = metadata
+    }
+
+    const encryptionKey = getEncryptionKey()
+    const encryptedBody = await encryptPayload(
+      sellerData,
+      encryptionKey
     )
 
-    const encryptedBody = await encryptBody(
-      sellerBody,
-      securityKey
-    )
-
-    const authorization =
-      'Basic ' +
-      Buffer.from(secretKey + ':').toString('base64')
+    const authorization = Buffer.from(
+      `${secretKey}:`
+    ).toString('base64')
 
     const tossResponse = await fetch(
       'https://api.tosspayments.com/v2/sellers',
       {
         method: 'POST',
         headers: {
-          Authorization: authorization,
+          Authorization: `Basic ${authorization}`,
           'Content-Type': 'text/plain',
-          'TossPayments-api-security-mode': 'ENCRYPTION'
+          'TossPayments-api-security-mode': 'ENCRYPTION',
         },
-        body: encryptedBody
+        body: encryptedBody,
       }
     )
 
     const responseText = await tossResponse.text()
 
-    let result: any
+    let result: unknown
 
     try {
-      result = await decryptBody(
+      result = await decryptPayload(
         responseText,
-        securityKey
+        encryptionKey
       )
     } catch {
       try {
         result = JSON.parse(responseText)
       } catch {
         result = {
-          message: responseText || '응답을 확인할 수 없습니다.'
+          message: responseText,
         }
       }
     }
 
-    if (!tossResponse.ok) {
-      return res.status(tossResponse.status).json(result)
-    }
-
-    return res.status(200).json({
-      success: true,
-      seller: result
+    return res.status(tossResponse.status).json({
+      success: tossResponse.ok,
+      status: tossResponse.status,
+      data: result,
     })
   } catch (error) {
     console.error('토스 셀러 등록 오류:', error)
@@ -169,7 +179,7 @@ export default async function handler(
       message:
         error instanceof Error
           ? error.message
-          : '토스 셀러 등록 중 오류가 발생했습니다.'
+          : '셀러 등록 중 오류가 발생했습니다.',
     })
   }
 }
