@@ -25,7 +25,7 @@ export default async function handler(
     ).toString('base64')
 
     const tossResponse = await fetch(
-      'https://api.tosspayments.com/v2/balance',
+        'https://api.tosspayments.com/v2/balances',
       {
         method: 'GET',
         headers: {
