@@ -13554,7 +13554,7 @@ document.querySelector('#close-cancel-modal')
         await supabase
           .from('payments')
           .select(
-            'id, pg_company, status, amount, created_at'
+            'id, pg_company, payment_key, status, amount, created_at'
           )
           .eq('merchant_id', Number(order.merchant_id))
           .eq('amount', Number(order.total_amount))
@@ -13587,49 +13587,95 @@ document.querySelector('#close-cancel-modal')
         return
       }
 
-      if (targetPayment.pg_company !== '코페이') {
-        alert(
-          '현재 직접취소 API는 코페이 결제만 지원합니다.\n' +
-          '결제 PG사: ' +
-          (targetPayment.pg_company || '-')
-        )
-        return
-      }
+      let cancelResponse: Response
+let cancelData: any
 
-      /* 코페이 실제 취소 API 호출 */
-      const cancelResponse = await fetch(
-        '/api/korpay-cancel',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            paymentId: Number(targetPayment.id),
-            cancelName:
-              sessionStorage.getItem(
-                'login_merchant_name'
-              ) || '가맹점',
-            cancelMessage: reason
-          })
-        }
-      )
+if (targetPayment.pg_company === '코페이') {
+  cancelResponse = await fetch(
+    '/api/korpay-cancel',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        paymentId: Number(targetPayment.id),
+        cancelName:
+          sessionStorage.getItem(
+            'login_merchant_name'
+          ) || '가맹점',
+        cancelMessage: reason
+      })
+    }
+  )
 
-      const cancelData = await cancelResponse.json()
+  cancelData = await cancelResponse.json()
 
-      if (!cancelResponse.ok || !cancelData.success) {
-        alert(
-          '코페이 실제 취소에 실패했습니다.\n\n' +
-          (cancelData.message || '알 수 없는 오류') +
-          (
-            cancelData.resultCode
-              ? '\n응답코드: ' +
-                cancelData.resultCode
-              : ''
-          )
-        )
-        return
-      }
+  if (!cancelResponse.ok || !cancelData.success) {
+    alert(
+      '코페이 실제 취소에 실패했습니다.\n\n' +
+      (cancelData.message || '알 수 없는 오류')
+    )
+    return
+  }
+} else if (
+  targetPayment.pg_company === '토스페이먼츠'
+) {
+  if (!targetPayment.payment_key) {
+    alert('토스 paymentKey가 없습니다.')
+    return
+  }
+
+  cancelResponse = await fetch(
+    '/api/toss-cancel',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        paymentKey: targetPayment.payment_key,
+        cancelReason: reason
+      })
+    }
+  )
+
+  cancelData = await cancelResponse.json()
+
+  if (!cancelResponse.ok) {
+    alert(
+      '토스 실제 취소에 실패했습니다.\n\n' +
+      (cancelData.message || '알 수 없는 오류')
+    )
+    return
+  }
+
+  const { error: paymentCancelError } =
+    await supabase
+      .from('payments')
+      .update({
+        status: 'cancel',
+        canceled_at: new Date().toISOString(),
+        payout_status: '출금제외',
+        settlement_status: '취소'
+      })
+      .eq('id', Number(targetPayment.id))
+
+  if (paymentCancelError) {
+    alert(
+      '토스 결제는 취소됐지만 결제내역 수정에 실패했습니다.\n' +
+      paymentCancelError.message
+    )
+    return
+  }
+} else {
+  alert(
+    '직접 취소를 지원하지 않는 PG사입니다.\n' +
+    '결제 PG사: ' +
+    (targetPayment.pg_company || '-')
+  )
+  return
+}
 
       /*
         코페이 취소 성공 후에만

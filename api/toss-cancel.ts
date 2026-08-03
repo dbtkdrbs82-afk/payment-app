@@ -8,11 +8,13 @@ export default async function handler(
     return res.status(405).json({ message: 'POST only' })
   }
 
-  const { paymentKey, secretKey, cancelReason } = req.body || {}
+  const { paymentKey, cancelReason } = req.body || {}
+
+  const secretKey = process.env.TOSS_SECRET_KEY
 
   if (!paymentKey || !secretKey) {
     return res.status(400).json({
-      message: 'paymentKey 또는 secretKey가 없습니다.'
+      message: 'paymentKey 또는 TOSS_SECRET_KEY가 없습니다.'
     })
   }
 
