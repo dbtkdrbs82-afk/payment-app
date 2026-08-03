@@ -7806,7 +7806,22 @@ if (holidayError) {
           (holidayData || []).map((holiday) => holiday.holiday_date)
         )
         
-        const accountBalance = 99
+        let accountBalance = 0
+
+try {
+  const response = await fetch('/api/toss-balance')
+
+  const result = await response.json()
+
+  if (result.success) {
+    accountBalance =
+      Number(
+        result.data?.entityBody?.availableAmount?.value || 0
+      )
+  }
+} catch (error) {
+  console.error('토스 잔액 조회 실패:', error)
+}
         
 
         const duplicatePaymentKeys = new Set<string>()
