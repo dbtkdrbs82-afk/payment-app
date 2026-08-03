@@ -123,6 +123,7 @@ export default async function handler(
           settlement_status
         `)
         .eq('payout_status', '출금대기')
+        .gte('created_at', '2026-08-02T15:00:00.000Z')
         .or('payout_hold.is.null,payout_hold.eq.false'),
 
       supabase
