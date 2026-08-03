@@ -211,8 +211,8 @@ export default async function handler(
           holidaySet
         )
 
-        if (payoutDate > today) {
-          return
+        if (payoutDate !== today) {
+            return
         }
 
         const merchantId =
