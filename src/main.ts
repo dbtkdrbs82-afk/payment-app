@@ -9089,38 +9089,244 @@ if (nextTop) {
         
     
         document.querySelectorAll('.payout-complete-button')
-          .forEach((button) => {
-            button.addEventListener('click', async () => {
-              const paymentIdsText =
-              (button as HTMLElement).getAttribute('data-ids') || ''
-            
-            const paymentIds = paymentIdsText
-              .split(',')
-              .map((id) => Number(id))
-              .filter((id) => !Number.isNaN(id))
-            
-            if (paymentIds.length === 0) {
-              alert('출금대상 결제정보가 없습니다.')
-              return
-            }
-            
-            const { error } = await supabase
-              .from('payments')
-              .update({
-                payout_status: '출금완료'
-              })
-              .in('id', paymentIds)
-    
-              if (error) {
-                alert('출금완료 처리 실패: ' + error.message)
-                return
-              }
-    
-              alert('출금완료 처리되었습니다')
-              location.reload()
-            })
-          })
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const targetButton = button as HTMLButtonElement
+
+      const paymentIdsText =
+        targetButton.getAttribute('data-ids') || ''
+
+      const paymentIds = paymentIdsText
+        .split(',')
+        .map((id) => Number(id))
+        .filter((id) => !Number.isNaN(id))
+
+      if (paymentIds.length === 0) {
+        alert('출금대상 결제정보가 없습니다.')
+        return
       }
+
+      targetButton.disabled = true
+      targetButton.textContent = '처리중'
+
+      try {
+        const { data: paymentRows, error: paymentError } =
+          await supabase
+            .from('payments')
+            .select(`
+              id,
+              merchant_id,
+              merchant_name,
+              settlement_amount,
+              payout_status,
+              payout_hold
+            `)
+            .in('id', paymentIds)
+
+        if (paymentError) {
+          alert('결제정보 조회 실패: ' + paymentError.message)
+          return
+        }
+
+        if (!paymentRows || paymentRows.length === 0) {
+          alert('출금대상 결제정보가 없습니다.')
+          return
+        }
+
+        const merchantIds = [
+          ...new Set(
+            paymentRows
+              .map((row) => String(row.merchant_id || '').trim())
+              .filter(Boolean)
+          )
+        ]
+
+        if (merchantIds.length !== 1) {
+          alert('서로 다른 가맹점의 결제건은 함께 출금할 수 없습니다.')
+          return
+        }
+
+        const merchantId = merchantIds[0]
+        const merchantName =
+          String(paymentRows[0].merchant_name || merchantId)
+
+        const hasHoldPayment = paymentRows.some(
+          (row) =>
+            row.payout_hold === true ||
+            row.payout_status === '출금보류'
+        )
+
+        if (hasHoldPayment) {
+          alert('출금보류된 결제건이 포함되어 있습니다.')
+          return
+        }
+
+        const payoutAmount = paymentRows.reduce(
+          (sum, row) =>
+            sum + Number(row.settlement_amount || 0),
+          0
+        )
+
+        if (payoutAmount <= 0) {
+          alert('출금예정금액이 올바르지 않습니다.')
+          return
+        }
+
+        const sellerResponse = await fetch(
+          '/api/toss-seller-get'
+        )
+
+        const sellerResult = await sellerResponse.json()
+
+        if (!sellerResponse.ok || !sellerResult.success) {
+          alert('토스 셀러 조회에 실패했습니다.')
+          return
+        }
+
+        const sellers =
+          sellerResult?.data?.entityBody?.items || []
+
+        const seller = sellers.find(
+          (item: any) =>
+            String(item.refSellerId || '').trim() === merchantId
+        )
+
+        if (!seller?.id) {
+          alert(
+            merchantId +
+              ' 가맹점이 토스 셀러로 등록되어 있지 않습니다.'
+          )
+          return
+        }
+
+        if (seller.status !== 'APPROVED') {
+          alert(
+            '토스 셀러가 지급가능 상태가 아닙니다.\n현재 상태: ' +
+              seller.status
+          )
+          return
+        }
+
+        const balanceResponse = await fetch(
+          '/api/toss-balance'
+        )
+
+        const balanceResult = await balanceResponse.json()
+
+        if (!balanceResponse.ok || !balanceResult.success) {
+          alert('토스 지급가능 잔액 조회에 실패했습니다.')
+          return
+        }
+
+        const availableAmount = Number(
+          balanceResult?.data?.entityBody
+            ?.availableAmount?.value || 0
+        )
+
+        if (availableAmount < payoutAmount) {
+          alert(
+            '토스 지급대행 잔액이 부족합니다.\n\n' +
+              '지급 가능 잔액: ' +
+              availableAmount.toLocaleString() +
+              '원\n' +
+              '출금 예정 금액: ' +
+              payoutAmount.toLocaleString() +
+              '원'
+          )
+          return
+        }
+
+        if (
+          !confirm(
+            merchantName +
+              ' 가맹점에 ' +
+              payoutAmount.toLocaleString() +
+              '원을 실제 지급하시겠습니까?'
+          )
+        ) {
+          return
+        }
+
+        const minPaymentId = Math.min(...paymentIds)
+        const maxPaymentId = Math.max(...paymentIds)
+
+        const refPayoutId =
+          'NXG-' +
+          merchantId +
+          '-' +
+          minPaymentId +
+          '-' +
+          maxPaymentId
+
+        const payoutResponse = await fetch(
+          '/api/toss-payout',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              destination: seller.id,
+              amount: payoutAmount,
+              transactionDescription: '가맹점정산',
+              refPayoutId
+            })
+          }
+        )
+
+        const payoutResult = await payoutResponse.json()
+
+        if (!payoutResponse.ok || !payoutResult.success) {
+          const errorMessage =
+            payoutResult?.data?.error?.message ||
+            payoutResult?.message ||
+            '토스 지급 요청에 실패했습니다.'
+
+          alert(errorMessage)
+          return
+        }
+
+        const { error: updateError } = await supabase
+          .from('payments')
+          .update({
+            payout_status: '출금처리중',
+            payout_time: new Date().toISOString()
+          })
+          .in('id', paymentIds)
+
+        if (updateError) {
+          alert(
+            '토스 지급 요청은 전송됐지만 DB 저장에 실패했습니다.\n' +
+              updateError.message
+          )
+          return
+        }
+
+        alert(
+          '토스 지급 요청이 전송되었습니다.\n\n' +
+            '가맹점: ' +
+            merchantName +
+            '\n' +
+            '지급금액: ' +
+            payoutAmount.toLocaleString() +
+            '원\n\n' +
+            '실제 입금 완료까지 시간이 걸릴 수 있습니다.'
+        )
+
+        location.reload()
+      } catch (error) {
+        alert(
+          error instanceof Error
+            ? error.message
+            : '출금 처리 중 오류가 발생했습니다.'
+        )
+      } finally {
+        targetButton.disabled = false
+        targetButton.textContent = '출금완료'
+      }
+    })
+  })
+}
 
       document.querySelectorAll('.payout-hold-button')
       .forEach((button) => {
