@@ -7746,11 +7746,23 @@ rows.forEach((row) => {
         .select('*')
         .order('created_at', { ascending: false })
 
+        if (
+          sessionStorage.getItem('adminPage') !== 'payout'
+        ) {
+          return
+        }
+
         const { data: cancelRequests, error: cancelRequestError } =
   await supabase
     .from('cancel_requests')
     .select('id, payment_id, status, reason')
     .eq('status', '요청중')
+
+    if (
+      sessionStorage.getItem('adminPage') !== 'payout'
+    ) {
+      return
+    }
 
 if (cancelRequestError) {
   alert(
