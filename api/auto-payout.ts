@@ -70,9 +70,7 @@ export default async function handler(
     })
   }
 
-  console.log('=== AUTO PAYOUT START ===')
-console.log(new Date().toISOString())
-console.log(req.headers.authorization)
+  
 
   const cronSecret =
   process.env.CRON_SECRET?.trim()
@@ -453,6 +451,38 @@ try {
 
       continue
     }
+
+    const { error: payoutUpdateError } = await supabase
+  .from('payments')
+  .update({
+    payout_status: '출금완료',
+    payout_time: new Date().toISOString(),
+  })
+  .in('id', group.paymentIds)
+
+if (payoutUpdateError) {
+  results.push({
+    merchantId: refSellerId,
+    merchantName: group.merchantName,
+    amount: group.settlementAmount,
+    success: false,
+    refPayoutId,
+    message:
+      '토스 지급은 성공했지만 출금완료 저장에 실패했습니다: ' +
+      payoutUpdateError.message,
+  })
+
+  continue
+}
+
+results.push({
+  merchantId: refSellerId,
+  merchantName: group.merchantName,
+  amount: group.settlementAmount,
+  success: true,
+  refPayoutId,
+  message: '자동정산 완료',
+})
 
     const { error: updateError } =
       await supabase
