@@ -9152,7 +9152,7 @@ if (nextTop) {
             settlementBadge +
             '<span class="payout-count-badge">' +
               row.payment_count +
-            '</span>'
+            '</span>' +
 '</td>' +
             '<td>' + (row.pg_company || '-') + '</td>' +
             '<td>' + amount.toLocaleString() + '원</td>' +
