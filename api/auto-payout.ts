@@ -274,16 +274,7 @@ if (
     const payoutGroups =
   Object.values(payoutGroupMap)
 
-const host = String(req.headers.host || '').trim()
-
-if (!host) {
-  return res.status(500).json({
-    success: false,
-    message: '서버 주소를 확인할 수 없습니다.',
-  })
-}
-
-const baseUrl = `https://${host}`
+const baseUrl = 'https://payment-app-lv6a.vercel.app'
 
 const sellerResponse = await fetch(
   `${baseUrl}/api/toss-seller-get`
