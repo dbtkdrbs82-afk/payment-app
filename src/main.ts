@@ -16035,7 +16035,6 @@ document.querySelector('#pay-link-btn')
   <button id="card-go-product">상품관리</button>
   <button id="card-go-qr">PICK QR</button>
   <button id="card-go-card">카드결제</button>
-  <button id="card-go-cash">현금영수증</button>
 </div>
 
     <div class="merchant-card-payment-page">
