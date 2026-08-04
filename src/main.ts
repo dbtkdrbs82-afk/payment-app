@@ -2428,6 +2428,9 @@ if (existingPayment) {
   
     throw new Error('토스 결제 승인 실패')
   }  
+
+  const confirmResult = await confirmResponse.json()
+
   const { error } = await supabase.from('payments').insert([
     {
       order_number: nextOrderNumber,
@@ -2447,11 +2450,27 @@ if (existingPayment) {
       params.get('pg') ||
       sessionStorage.getItem('selected_pg_company') ||
       '토스페이먼츠',
-payment_method: '카드',
-card_company: '결제사 제공값',
-card_number: '결제사 제공값',
-installment_months: '일시불',
-approved_at: new Date().toISOString()
+payment_method: confirmResult.method || '카드',
+
+approval_number:
+  confirmResult.card?.approveNo || '',
+
+card_company:
+  confirmResult.card?.issuerCode ||
+  confirmResult.card?.acquirerCode ||
+  '',
+
+card_number:
+  confirmResult.card?.number || '',
+
+installment_months:
+  confirmResult.card?.installmentPlanMonths
+    ? String(confirmResult.card.installmentPlanMonths)
+    : '일시불',
+
+approved_at:
+  confirmResult.approvedAt ||
+  new Date().toISOString()
     }
   ])
 
