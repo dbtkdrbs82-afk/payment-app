@@ -8116,8 +8116,51 @@ branch_admin_name: row.branch_admin_name || '',
             })
           }
 
+          const getTossDepositDate = (createdAt: string) => {
+            const koreaDateText = new Date(createdAt).toLocaleDateString('en-CA', {
+              timeZone: 'Asia/Seoul'
+            })
+          
+            const depositDate = new Date(koreaDateText + 'T12:00:00')
+          
+            let addedBusinessDays = 0
+          
+            while (addedBusinessDays < 4) {
+              depositDate.setDate(depositDate.getDate() + 1)
+          
+              const dayOfWeek = depositDate.getDay()
+          
+              const dateText =
+                depositDate.getFullYear() + '-' +
+                String(depositDate.getMonth() + 1).padStart(2, '0') + '-' +
+                String(depositDate.getDate()).padStart(2, '0')
+          
+              const isWeekend =
+                dayOfWeek === 0 || dayOfWeek === 6
+          
+              const isHoliday =
+                holidaySet.has(dateText)
+          
+              if (!isWeekend && !isHoliday) {
+                addedBusinessDays += 1
+              }
+            }
+          
+            return (
+              depositDate.getFullYear() + '-' +
+              String(depositDate.getMonth() + 1).padStart(2, '0') + '-' +
+              String(depositDate.getDate()).padStart(2, '0')
+            )
+          }
+
       const renderPayoutTable = () => {
         const filteredRows = getFilteredPayoutRows()
+
+        const startDate =
+  (document.querySelector('#payout-start-date') as HTMLInputElement)?.value || ''
+
+const endDate =
+  (document.querySelector('#payout-end-date') as HTMLInputElement)?.value || ''
 
         const adminId = sessionStorage.getItem('admin_id') || ''
         const canViewPayoutBalance = adminId === 'NXGMASTER16'
@@ -8132,26 +8175,41 @@ branch_admin_name: row.branch_admin_name || '',
 
         const payoutCount = filteredRows.length
 
-        const incomingExpectedAmount = filteredRows.reduce((sum, row) => {
-          const amount = Number(row.amount || 0)
-          const pgCompany = String(row.pg_company || '').trim()
+        const incomingExpectedAmount = payoutRows.reduce((sum, row) => {
+          const pgCompany =
+            String(row.pg_company || '').trim()
         
-          if (pgCompany === '토스페이먼츠') {
-            const pgFee = Math.floor(
-              amount * 1.375 / 100
-            )
-        
-            const pgVat = Math.floor(
-              pgFee * 0.1
-            )
-        
-            return sum + (amount - pgFee - pgVat)
+          if (pgCompany !== '토스페이먼츠') {
+            return sum
           }
+        
+          const tossDepositDate =
+            getTossDepositDate(row.created_at)
+        
+          if (startDate && tossDepositDate < startDate) {
+            return sum
+          }
+        
+          if (endDate && tossDepositDate > endDate) {
+            return sum
+          }
+        
+          const amount = Number(row.amount || 0)
+        
+          const pgFee = Math.floor(
+            amount * 1.375 / 100
+          )
+        
+          const pgVat = Math.floor(
+            pgFee * 0.1
+          )
+        
+          return sum + amount - pgFee - pgVat
+        }, 0)
         
           
         
-          return sum 
-        }, 0)
+         
         
         const completedPayoutAmount = filteredRows.reduce((sum, row) => {
           if (row.payout_status !== '출금완료') {
