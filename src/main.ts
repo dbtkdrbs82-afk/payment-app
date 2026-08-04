@@ -8000,7 +8000,7 @@ branch_admin_name: row.branch_admin_name || '',
               payout_date: payoutDate,
 
               settlement_cycle:
-  String(row.settlement_cycle || '')
+  String(settlementCycle || '')
     .replace(/[^0-9]/g, ''),
               
                       order_id: row.order_id || '',
@@ -9130,15 +9130,9 @@ if (nextTop) {
           const payoutAmount = Number(row.settlement_amount || amount - feeAmount)
 
           const settlementColorBar =
-  row.settlement_cycle === '1'
-    ? '<span class="settlement-color-bar settlement-color-1"></span>'
-    : row.settlement_cycle === '3'
-    ? '<span class="settlement-color-bar settlement-color-3"></span>'
-    : row.settlement_cycle === '4'
-    ? '<span class="settlement-color-bar settlement-color-4"></span>'
-    : row.settlement_cycle === '7'
-    ? '<span class="settlement-color-bar settlement-color-7"></span>'
-    : ''
+  '<span class="settlement-color-bar settlement-color-' +
+  row.settlement_cycle +
+  '"></span>'
     
           tr.innerHTML =
             '<td>' + (startIndex + index + 1) + '</td>' +
