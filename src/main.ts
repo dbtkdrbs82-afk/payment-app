@@ -8148,19 +8148,9 @@ branch_admin_name: row.branch_admin_name || '',
             return sum + (amount - pgFee - pgVat)
           }
         
-          if (pgCompany === '코페이') {
-            const pgFee = Math.floor(
-              amount * 0.75 / 100
-            )
+          
         
-            const pgVat = Math.floor(
-              pgFee * 0.1
-            )
-        
-            return sum + (amount - pgFee - pgVat)
-          }
-        
-          return sum + amount
+          return sum 
         }, 0)
         
         const completedPayoutAmount = filteredRows.reduce((sum, row) => {
