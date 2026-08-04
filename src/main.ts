@@ -10642,7 +10642,7 @@ const paymentTableBody =
 
 if (tableTop) {
   tableTop.innerHTML =
-    '<button>엑셀 다운로드</button>' +
+    '<button id="payment-excel-download">엑셀 다운로드</button>' +
     '<select id="admin-page-size">' +
       '<option value="10">10개씩 보기</option>' +
       '<option value="20">20개씩 보기</option>' +
@@ -10991,6 +10991,212 @@ const filteredVisiblePayments =
         paymentCancelRequestMap.has(Number(payment.id))
       )
     : payments
+
+    document
+  .querySelector<HTMLButtonElement>('#payment-excel-download')
+  ?.addEventListener('click', () => {
+    if (filteredVisiblePayments.length === 0) {
+      alert('다운로드할 결제내역이 없습니다.')
+      return
+    }
+
+    const excelRows = filteredVisiblePayments.map(
+      (payment: any, index: number) => {
+        const amount = Number(payment.amount || 0)
+        const feeAmount = Number(payment.fee_amount || 0)
+
+        const settlementAmount = Number(
+          payment.settlement_amount ?? amount - feeAmount
+        )
+
+        const installmentMonths =
+          Number(payment.installment_months || 0)
+
+        return {
+          No: index + 1,
+
+          승인일:
+            payment.approved_at ||
+            payment.created_at ||
+            '',
+
+          승인번호:
+            payment.approval_number || '',
+
+          취소일:
+            payment.canceled_at || '',
+
+          거래번호:
+            payment.order_id ||
+            payment.payment_key ||
+            '',
+
+          가맹점ID:
+            payment.merchant_id
+              ? 'MER' +
+                String(payment.merchant_id).padStart(4, '0')
+              : '',
+
+          가맹점명:
+            payment.merchant_name || '',
+
+          매입사:
+            payment.card_company || '',
+
+          구매자연락처:
+            payment.buyer_phone ||
+            payment.phone ||
+            '',
+
+          구매상품:
+            payment.order_name ||
+            payment.product_name ||
+            '',
+
+          구매자성명:
+            payment.sender_name ||
+            payment.buyer_name ||
+            '',
+
+          메모:
+            payment.message || '',
+
+          카드번호:
+            payment.card_number || '',
+
+          할부구분:
+            installmentMonths > 0
+              ? installmentMonths + '개월'
+              : '일시불',
+
+          결제상태:
+            payment.status === 'cancel'
+              ? '취소'
+              : '승인',
+
+          결제수단:
+            payment.payment_method || '카드',
+
+          결제금액:
+            amount,
+
+          거래방식:
+            payment.pg_company || '',
+
+          물품금액:
+            amount,
+
+          거래수수료:
+            feeAmount,
+
+          가맹점금액:
+            settlementAmount
+        }
+      }
+    )
+
+    const totalExcelAmount =
+      filteredVisiblePayments.reduce(
+        (sum: number, payment: any) =>
+          sum + Number(payment.amount || 0),
+        0
+      )
+
+    excelRows.push({} as any)
+
+    excelRows.push({
+      No: '',
+      승인일: '검색 건수',
+      승인번호:
+        filteredVisiblePayments.length + '건',
+      취소일: '',
+      거래번호: '',
+      가맹점ID: '',
+      가맹점명: '',
+      매입사: '',
+      구매자연락처: '',
+      구매상품: '',
+      구매자성명: '',
+      메모: '',
+      카드번호: '',
+      할부구분: '',
+      결제상태: '',
+      결제수단: '',
+      결제금액: '',
+      거래방식: '',
+      물품금액: '',
+      거래수수료: '',
+      가맹점금액: ''
+    } as any)
+
+    excelRows.push({
+      No: '',
+      승인일: '전체금액',
+      승인번호: totalExcelAmount,
+      취소일: '',
+      거래번호: '',
+      가맹점ID: '',
+      가맹점명: '',
+      매입사: '',
+      구매자연락처: '',
+      구매상품: '',
+      구매자성명: '',
+      메모: '',
+      카드번호: '',
+      할부구분: '',
+      결제상태: '',
+      결제수단: '',
+      결제금액: '',
+      거래방식: '',
+      물품금액: '',
+      거래수수료: '',
+      가맹점금액: ''
+    } as any)
+
+    const worksheet =
+      XLSX.utils.json_to_sheet(excelRows)
+
+    worksheet['!cols'] = [
+      { wch: 6 },
+      { wch: 22 },
+      { wch: 16 },
+      { wch: 22 },
+      { wch: 32 },
+      { wch: 14 },
+      { wch: 24 },
+      { wch: 15 },
+      { wch: 18 },
+      { wch: 24 },
+      { wch: 16 },
+      { wch: 28 },
+      { wch: 22 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 14 },
+      { wch: 16 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 }
+    ]
+
+    const workbook =
+      XLSX.utils.book_new()
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      '결제내역'
+    )
+
+    const today =
+      new Date().toISOString().slice(0, 10)
+
+    XLSX.writeFile(
+      workbook,
+      `결제내역_${today}.xlsx`
+    )
+  })
 
     const savedPaymentPage =
     Number(
