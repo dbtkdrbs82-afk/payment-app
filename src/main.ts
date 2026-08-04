@@ -12228,6 +12228,7 @@ if (isNormalStore) {
     <button id="merchant-product-tab">상품관리</button>
     <button id="merchant-qr-tab">PICK QR</button>
     <button id="merchant-card-tab">카드결제</button>
+    
   `
 
   merchantContent = ''
@@ -12626,6 +12627,7 @@ const terminalPagedPayments =
     <button id="merchant-billing-tab">청구관리</button>
     <button id="merchant-batch-tab">수기결제</button>
     <button id="merchant-payment-list-tab">결제내역</button>
+    
   `
 
   merchantContent = `
@@ -13610,6 +13612,7 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-card'
   })
+  
   document.querySelector('#merchant-member-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-members'
@@ -16028,11 +16031,12 @@ document.querySelector('#pay-link-btn')
     </div>
 
     <div class="merchant-toolbar">
-      <button id="card-go-order">주문관리</button>
-      <button id="card-go-product">상품관리</button>
-      <button id="card-go-qr">PICK QR</button>
-      <button id="card-go-card" class="active">카드결제</button>
-    </div>
+  <button id="card-go-order">주문관리</button>
+  <button id="card-go-product">상품관리</button>
+  <button id="card-go-qr">PICK QR</button>
+  <button id="card-go-card">카드결제</button>
+  <button id="card-go-cash">현금영수증</button>
+</div>
 
     <div class="merchant-card-payment-page">
       <div class="merchant-card-payment-grid">
@@ -16051,9 +16055,9 @@ document.querySelector('#pay-link-btn')
           <span>상품을 선택한 뒤 카드결제를 진행합니다.</span>
         </button>
 
-        <button class="merchant-card-payment-box" id="batch-card-payment">
-  <strong>일괄승인</strong>
-  <span>학원비, 관리비, 회비 등을 한 번에 승인합니다.</span>
+        <button class="merchant-card-payment-box" id="cash-receipt-payment">
+  <strong>현금영수증</strong>
+  <span>현금 결제 건의 소득공제 또는 지출증빙 영수증을 발급합니다.</span>
 </button>
 
       </div>
@@ -16103,10 +16107,222 @@ document.querySelector('#pay-link-btn')
         ?.addEventListener('click', () => {
           location.href = '/kiosk?merchant_id=' + merchantId
         })
-        document.querySelector('#batch-card-payment')
-        ?.addEventListener('click', () => {
-          location.href = '/merchant-batch-payment'
-        })
+        document.querySelector('#cash-receipt-payment')
+  ?.addEventListener('click', () => {
+    const existingModal =
+      document.querySelector('#cash-receipt-modal')
+
+    if (existingModal) {
+      existingModal.remove()
+    }
+
+    const modal = document.createElement('div')
+    modal.id = 'cash-receipt-modal'
+    modal.className = 'cash-receipt-modal'
+
+    modal.innerHTML = `
+      <div class="cash-receipt-modal-card">
+
+        <div class="cash-receipt-modal-header">
+          <h3>현금영수증 발급</h3>
+
+          <button
+            type="button"
+            id="cash-receipt-modal-close"
+            class="cash-receipt-modal-close"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="cash-receipt-modal-body">
+
+          <label>구분</label>
+          <select id="cash-receipt-type">
+            <option value="소득공제">소득공제</option>
+            <option value="지출증빙">지출증빙</option>
+          </select>
+
+          <label>결제금액</label>
+          <input
+            id="cash-receipt-amount"
+            type="number"
+            min="1"
+            placeholder="금액 입력"
+          />
+
+          <label>휴대폰번호 / 사업자번호</label>
+          <input
+            id="cash-receipt-number"
+            type="text"
+            placeholder="숫자만 입력"
+          />
+
+          <label>품목명</label>
+          <input
+            id="cash-receipt-order-name"
+            type="text"
+            value="현금결제"
+          />
+
+          <button
+            type="button"
+            id="cash-receipt-submit"
+            class="cash-receipt-submit"
+          >
+            현금영수증 발급
+          </button>
+
+        </div>
+
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    document.querySelector('#cash-receipt-modal-close')
+      ?.addEventListener('click', () => {
+        modal.remove()
+      })
+
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) {
+        modal.remove()
+      }
+    })
+
+    document.querySelector('#cash-receipt-type')
+      ?.addEventListener('change', () => {
+        const typeSelect =
+          document.querySelector<HTMLSelectElement>(
+            '#cash-receipt-type'
+          )
+
+        const numberInput =
+          document.querySelector<HTMLInputElement>(
+            '#cash-receipt-number'
+          )
+
+        if (!typeSelect || !numberInput) return
+
+        numberInput.placeholder =
+          typeSelect.value === '지출증빙'
+            ? '사업자번호 10자리'
+            : '휴대폰번호 또는 현금영수증 카드번호'
+      })
+  })
+
+  document.querySelector('#cash-receipt-submit')
+  ?.addEventListener('click', async () => {
+    const type =
+      (
+        document.querySelector(
+          '#cash-receipt-type'
+        ) as HTMLSelectElement | null
+      )?.value || ''
+
+    const amount =
+      Number(
+        (
+          document.querySelector(
+            '#cash-receipt-amount'
+          ) as HTMLInputElement | null
+        )?.value || 0
+      )
+
+    const customerIdentityNumber =
+      (
+        document.querySelector(
+          '#cash-receipt-number'
+        ) as HTMLInputElement | null
+      )?.value || ''
+
+    const orderName =
+      (
+        document.querySelector(
+          '#cash-receipt-order-name'
+        ) as HTMLInputElement | null
+      )?.value || '현금결제'
+
+    if (amount <= 0) {
+      alert('결제금액을 입력해주세요.')
+      return
+    }
+
+    if (!customerIdentityNumber.trim()) {
+      alert(
+        type === '지출증빙'
+          ? '사업자번호를 입력해주세요.'
+          : '휴대폰번호를 입력해주세요.'
+      )
+      return
+    }
+
+    const orderId =
+      'CASH-' +
+      merchantId +
+      '-' +
+      Date.now()
+
+    const submitButton =
+      document.querySelector<HTMLButtonElement>(
+        '#cash-receipt-submit'
+      )
+
+    if (submitButton) {
+      submitButton.disabled = true
+      submitButton.textContent = '발급 중...'
+    }
+
+    try {
+      const response = await fetch(
+        '/api/toss-cash-receipt',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            amount,
+            orderId,
+            orderName,
+            type,
+            customerIdentityNumber,
+            taxFreeAmount: 0
+          })
+        }
+      )
+
+      const result = await response.json()
+
+      if (!response.ok || !result.success) {
+        alert(
+          '현금영수증 발급 실패: ' +
+          (
+            result.message ||
+            '알 수 없는 오류'
+          )
+        )
+        return
+      }
+
+      alert(
+        '현금영수증 발급 요청이 완료되었습니다.'
+      )
+
+      document.querySelector('#cash-receipt-modal')?.remove()
+    } catch (error) {
+      alert(
+        '현금영수증 발급 중 오류가 발생했습니다.'
+      )
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false
+        submitButton.textContent =
+          '현금영수증 발급'
+      }
+    }
+  })
 
       } else if (path === '/merchant-card-manual') {
 
