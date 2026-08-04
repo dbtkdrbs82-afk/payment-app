@@ -7746,11 +7746,7 @@ rows.forEach((row) => {
         .select('*')
         .order('created_at', { ascending: false })
 
-        if (
-          sessionStorage.getItem('adminPage') !== 'payout'
-        ) {
-          return
-        }
+        
 
         const { data: cancelRequests, error: cancelRequestError } =
   await supabase
@@ -7758,12 +7754,7 @@ rows.forEach((row) => {
     .select('id, payment_id, status, reason')
     .eq('status', '요청중')
 
-    if (
-      sessionStorage.getItem('adminPage') !== 'payout'
-    ) {
-      return
-    }
-
+    
 if (cancelRequestError) {
   alert(
     '취소요청 조회 실패: ' +
