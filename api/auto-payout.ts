@@ -484,39 +484,7 @@ results.push({
   message: '자동정산 완료',
 })
 
-    const { error: updateError } =
-      await supabase
-        .from('payments')
-        .update({
-          payout_status: '출금처리중',
-          payout_time: new Date().toISOString(),
-        })
-        .in('id', group.paymentIds)
-
-    if (updateError) {
-      results.push({
-        merchantId: refSellerId,
-        merchantName: group.merchantName,
-        amount: group.settlementAmount,
-        success: false,
-        refPayoutId,
-        message:
-          '지급 요청은 전송됐지만 DB 저장에 실패했습니다.',
-        error: updateError.message,
-      })
-
-      continue
-    }
-
-    results.push({
-      merchantId: refSellerId,
-      merchantName: group.merchantName,
-      amount: group.settlementAmount,
-      paymentCount: group.paymentCount,
-      success: true,
-      refPayoutId,
-      message: '토스 지급 요청 전송 완료',
-    })
+    
   } catch (error) {
     await supabase
       .from('payments')
