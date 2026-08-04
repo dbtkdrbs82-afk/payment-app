@@ -70,6 +70,10 @@ export default async function handler(
     })
   }
 
+  console.log('=== AUTO PAYOUT START ===')
+console.log(new Date().toISOString())
+console.log(req.headers.authorization)
+
   const cronSecret =
   process.env.CRON_SECRET?.trim()
 
