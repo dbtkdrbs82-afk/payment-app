@@ -289,7 +289,22 @@ const sellerResponse = await fetch(
   `${baseUrl}/api/toss-seller-get`
 )
 
-const sellerResult = await sellerResponse.json()
+const sellerResponseText =
+  await sellerResponse.text()
+
+let sellerResult: any
+
+try {
+  sellerResult = JSON.parse(sellerResponseText)
+} catch {
+  return res.status(500).json({
+    success: false,
+    message: '토스 셀러 조회 API가 JSON이 아닌 응답을 반환했습니다.',
+    requestUrl: `${baseUrl}/api/toss-seller-get`,
+    status: sellerResponse.status,
+    responsePreview: sellerResponseText.slice(0, 300),
+  })
+}
 
 if (
   !sellerResponse.ok ||
@@ -393,8 +408,34 @@ for (const group of payoutGroups) {
       }
     )
 
-    const payoutResult =
-      await payoutResponse.json()
+    const payoutResponseText =
+  await payoutResponse.text()
+
+let payoutResult: any
+
+try {
+  payoutResult = JSON.parse(payoutResponseText)
+} catch {
+  await supabase
+    .from('payments')
+    .update({
+      payout_status: '출금오류',
+    })
+    .in('id', group.paymentIds)
+
+  results.push({
+    merchantId: refSellerId,
+    merchantName: group.merchantName,
+    amount: group.settlementAmount,
+    success: false,
+    refPayoutId,
+    message: '토스 지급 API가 JSON이 아닌 응답을 반환했습니다.',
+    status: payoutResponse.status,
+    responsePreview: payoutResponseText.slice(0, 300),
+  })
+
+  continue
+}
 
     if (
       !payoutResponse.ok ||
