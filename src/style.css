@@ -6302,3 +6302,27 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   background:#E5DBFF;
   color:#5F3DC4;
 }
+.settlement-color-bar {
+  display: inline-block;
+  width: 5px;
+  height: 18px;
+  margin-right: 8px;
+  border-radius: 4px;
+  vertical-align: middle;
+}
+
+.settlement-color-1 {
+  background: #f6c453;
+}
+
+.settlement-color-3 {
+  background: #74c69d;
+}
+
+.settlement-color-4 {
+  background: #74b9ff;
+}
+
+.settlement-color-7 {
+  background: #b197fc;
+}

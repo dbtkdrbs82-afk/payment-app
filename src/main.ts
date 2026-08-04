@@ -9129,15 +9129,15 @@ if (nextTop) {
           const feeAmount = Number(row.fee_amount || 0)
           const payoutAmount = Number(row.settlement_amount || amount - feeAmount)
 
-          const settlementBadge =
+          const settlementColorBar =
   row.settlement_cycle === '1'
-    ? '<span class="settlement-badge settlement-1">1일</span>'
+    ? '<span class="settlement-color-bar settlement-color-1"></span>'
     : row.settlement_cycle === '3'
-    ? '<span class="settlement-badge settlement-3">3일</span>'
+    ? '<span class="settlement-color-bar settlement-color-3"></span>'
     : row.settlement_cycle === '4'
-    ? '<span class="settlement-badge settlement-4">4일</span>'
+    ? '<span class="settlement-color-bar settlement-color-4"></span>'
     : row.settlement_cycle === '7'
-    ? '<span class="settlement-badge settlement-7">7일</span>'
+    ? '<span class="settlement-color-bar settlement-color-7"></span>'
     : ''
     
           tr.innerHTML =
@@ -9148,12 +9148,13 @@ if (nextTop) {
                 : '-') +
             '</td>' +
             '<td>' +
-            (row.merchant_name || '-') +
-            settlementBadge +
-            '<span class="payout-count-badge">' +
-              row.payment_count +
-            '</span>' +
+  settlementColorBar +
+  (row.merchant_name || '-') +
+  '<span class="payout-count-badge">' +
+    row.payment_count +
+  '</span>' +
 '</td>' +
+
             '<td>' + (row.pg_company || '-') + '</td>' +
             '<td>' + amount.toLocaleString() + '원</td>' +
             '<td>' + feeAmount.toLocaleString() + '원</td>' +
