@@ -7951,6 +7951,7 @@ branch_admin_name: string
           payout_hold_reason: string | null
           payout_hold_at: string | null
           payout_hold_by: string | null
+          settlement_cycle: string
         }
         
         const payoutGroupMap: Record<string, PayoutGroup> = {}
@@ -7997,8 +7998,12 @@ agency_admin_name: row.agency_admin_name || '',
 branch_admin_name: row.branch_admin_name || '',
               created_at: row.created_at,
               payout_date: payoutDate,
-        
-              order_id: row.order_id || '',
+
+              settlement_cycle:
+  String(row.settlement_cycle || '')
+    .replace(/[^0-9]/g, ''),
+              
+                      order_id: row.order_id || '',
               payment_key: row.payment_key || '',
 
               amount: 0,
@@ -9123,6 +9128,17 @@ if (nextTop) {
           const amount = Number(row.amount || 0)
           const feeAmount = Number(row.fee_amount || 0)
           const payoutAmount = Number(row.settlement_amount || amount - feeAmount)
+
+          const settlementBadge =
+  row.settlement_cycle === '1'
+    ? '<span class="settlement-badge settlement-1">1일</span>'
+    : row.settlement_cycle === '3'
+    ? '<span class="settlement-badge settlement-3">3일</span>'
+    : row.settlement_cycle === '4'
+    ? '<span class="settlement-badge settlement-4">4일</span>'
+    : row.settlement_cycle === '7'
+    ? '<span class="settlement-badge settlement-7">7일</span>'
+    : ''
     
           tr.innerHTML =
             '<td>' + (startIndex + index + 1) + '</td>' +
@@ -9132,10 +9148,11 @@ if (nextTop) {
                 : '-') +
             '</td>' +
             '<td>' +
-  (row.merchant_name || '-') +
-  '<span class="payout-count-badge">' +
-    row.payment_count +
-  '</span>' +
+            (row.merchant_name || '-') +
+            settlementBadge +
+            '<span class="payout-count-badge">' +
+              row.payment_count +
+            '</span>'
 '</td>' +
             '<td>' + (row.pg_company || '-') + '</td>' +
             '<td>' + amount.toLocaleString() + '원</td>' +

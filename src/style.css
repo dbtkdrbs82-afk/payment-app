@@ -6273,3 +6273,32 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   margin: 0;
   padding: 9px 12px;
 }
+.settlement-badge{
+  display:inline-block;
+  margin-left:6px;
+  padding:2px 8px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:700;
+  line-height:1.4;
+}
+
+.settlement-1{
+  background:#FFF3BF;
+  color:#8A6D00;
+}
+
+.settlement-3{
+  background:#C3F0CA;
+  color:#146C43;
+}
+
+.settlement-4{
+  background:#D0EBFF;
+  color:#0B7285;
+}
+
+.settlement-7{
+  background:#E5DBFF;
+  color:#5F3DC4;
+}
