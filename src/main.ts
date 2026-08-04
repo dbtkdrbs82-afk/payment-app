@@ -8180,8 +8180,14 @@ branch_admin_name: row.branch_admin_name || '',
             )
           }
 
-      const renderPayoutTable = () => {
-        const filteredRows = getFilteredPayoutRows()
+          const renderPayoutTable = () => {
+            if (
+              sessionStorage.getItem('adminPage') !== 'payout'
+            ) {
+              return
+            }
+          
+            const filteredRows = getFilteredPayoutRows()
 
         const startDate =
   (document.querySelector('#payout-start-date') as HTMLInputElement)?.value || ''
