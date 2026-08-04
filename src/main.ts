@@ -8133,7 +8133,34 @@ branch_admin_name: row.branch_admin_name || '',
         const payoutCount = filteredRows.length
 
         const incomingExpectedAmount = filteredRows.reduce((sum, row) => {
-          return sum + Number(row.amount || 0)
+          const amount = Number(row.amount || 0)
+          const pgCompany = String(row.pg_company || '').trim()
+        
+          if (pgCompany === '토스페이먼츠') {
+            const pgFee = Math.floor(
+              amount * 1.375 / 100
+            )
+        
+            const pgVat = Math.floor(
+              pgFee * 0.1
+            )
+        
+            return sum + (amount - pgFee - pgVat)
+          }
+        
+          if (pgCompany === '코페이') {
+            const pgFee = Math.floor(
+              amount * 0.75 / 100
+            )
+        
+            const pgVat = Math.floor(
+              pgFee * 0.1
+            )
+        
+            return sum + (amount - pgFee - pgVat)
+          }
+        
+          return sum + amount
         }, 0)
         
         const completedPayoutAmount = filteredRows.reduce((sum, row) => {
