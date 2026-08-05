@@ -16108,7 +16108,7 @@ document.querySelector('#pay-link-btn')
         })
         document.querySelector('#cash-receipt-payment')
   ?.addEventListener('click', () => {
-    alert('현금영수증 클릭됨')
+    
     const existingModal =
       document.querySelector('#cash-receipt-modal')
 
@@ -16210,7 +16210,7 @@ document.querySelector('#pay-link-btn')
             ? '사업자번호 10자리'
             : '휴대폰번호 또는 현금영수증 카드번호'
       })
-  })
+  
 
   document.querySelector('#cash-receipt-submit')
   ?.addEventListener('click', async () => {
@@ -16323,7 +16323,7 @@ document.querySelector('#pay-link-btn')
       }
     }
   })
-
+  })
       } else if (path === '/merchant-card-manual') {
 
         const merchantId =

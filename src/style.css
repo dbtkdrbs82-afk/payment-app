@@ -6326,3 +6326,84 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
 .settlement-color-7 {
   background: #b197fc;
 }
+.cash-receipt-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+  box-sizing: border-box;
+}
+
+.cash-receipt-modal-card {
+  width: 100%;
+  max-width: 460px;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.25);
+}
+
+.cash-receipt-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 22px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.cash-receipt-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.cash-receipt-modal-close {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: #f3f4f6;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.cash-receipt-modal-body {
+  display: grid;
+  gap: 10px;
+  padding: 22px;
+}
+
+.cash-receipt-modal-body label {
+  margin-top: 4px;
+  font-weight: 700;
+}
+
+.cash-receipt-modal-body input,
+.cash-receipt-modal-body select {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  box-sizing: border-box;
+}
+
+.cash-receipt-submit {
+  height: 46px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #111827;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.cash-receipt-submit:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
