@@ -7083,6 +7083,7 @@ merchantButtons.forEach((button) => {
 '<select id="merchant-type">' +
 '<option value="일반매장" ' + (merchant.merchant_type === '일반매장' ? 'selected' : '') + '>일반매장</option>' +
 '<option value="학원" ' + (merchant.merchant_type === '학원' ? 'selected' : '') + '>학원</option>' +
+'<option value="뷰티" ' + (merchant.merchant_type === '뷰티' ? 'selected' : '') + '>뷰티</option>' +
 '<option value="아파트관리" ' + (merchant.merchant_type === '아파트관리' ? 'selected' : '') + '>아파트관리</option>' +
 '<option value="청소업체" ' + (merchant.merchant_type === '청소업체' ? 'selected' : '') + '>청소업체</option>' +
 '<option value="렌탈" ' + (merchant.merchant_type === '렌탈' ? 'selected' : '') + '>렌탈</option>' +
@@ -12182,6 +12183,9 @@ const settlementComplete =
 const isAcademy =
   merchantType === '학원'
 
+  const isBeauty = 
+  merchantType === '뷰티'
+
 const isWirelessTerminal =
   merchantType === '무선단말기'
 
@@ -12652,6 +12656,43 @@ const terminalPagedPayments =
         <div class="academy-card">
           <span>이번달 청구금액</span>
           <strong>350,000원</strong>
+        </div>
+
+      </div>
+    </div>
+  `
+
+} else if (isBeauty) {
+  merchantMenu = `
+    <button id="merchant-beauty-reservation-tab">예약관리</button>
+    <button id="merchant-beauty-service-tab">서비스관리</button>
+    <button id="merchant-beauty-staff-tab">직원관리</button>
+    <button id="merchant-beauty-customer-tab">고객관리</button>
+    <button id="merchant-payment-list-tab">결제내역</button>
+  `
+
+  merchantContent = `
+    <div class="merchant-type-ready-box">
+      <div class="academy-dashboard">
+
+        <div class="academy-card">
+          <span>오늘 예약</span>
+          <strong>0건</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>예약 대기</span>
+          <strong>0건</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>예약 완료</span>
+          <strong>0건</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>이번달 예약금</span>
+          <strong>0원</strong>
         </div>
 
       </div>
@@ -13629,6 +13670,25 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-admin'
   })
+  document.querySelector('#merchant-beauty-reservation-tab')
+?.addEventListener('click', () => {
+  alert('예약관리 준비중')
+})
+
+document.querySelector('#merchant-beauty-service-tab')
+?.addEventListener('click', () => {
+  location.href = '/merchant-service'
+})
+
+document.querySelector('#merchant-beauty-staff-tab')
+?.addEventListener('click', () => {
+  alert('직원관리 준비중')
+})
+
+document.querySelector('#merchant-beauty-customer-tab')
+?.addEventListener('click', () => {
+  alert('고객관리 준비중')
+})
 
   let currentOrderFilter = '전체'
 
@@ -14481,6 +14541,506 @@ if (orderRequestError) {
           sessionStorage.removeItem('login_merchant_code')
           location.href = '/merchant-login'
         })
+      
+      } else if (path === '/merchant-service') {
+
+        const merchantId =
+          Number(sessionStorage.getItem('login_merchant_id'))
+      
+        const merchantName =
+          sessionStorage.getItem('login_merchant_name') || ''
+      
+        if (!merchantId) {
+          alert('로그인이 필요합니다.')
+          location.href = '/merchant-login'
+        }
+      
+        const { data: services, error } = await supabase
+          .from('beauty_services')
+          .select('*')
+          .eq('merchant_id', merchantId)
+          .order('id', { ascending: false })
+      
+        if (error) {
+          alert('서비스 목록 조회 실패: ' + error.message)
+        }
+      
+        app.innerHTML = `
+          <div class="pg-admin-page">
+      
+            <div class="merchant-pick-header">
+              <h1>서비스관리</h1>
+      
+              <div class="merchant-user-box">
+                <strong>${merchantName}님</strong>
+                <button id="merchant-service-logout">로그아웃</button>
+              </div>
+            </div>
+      
+            <div class="merchant-toolbar">
+              <button id="service-go-admin">예약관리</button>
+              <button id="service-go-service">서비스관리</button>
+              <button id="service-go-staff">직원관리</button>
+              <button id="service-go-customer">고객관리</button>
+            </div>
+      
+            <div class="payment-card">
+              <div class="merchant-product-layout">
+      
+                <div class="product-create-card">
+                  <h2>서비스 등록</h2>
+      
+                  <div class="input-group">
+                    <label>서비스명</label>
+                    <input
+                      id="beauty-service-name"
+                      placeholder="예: 여성 커트"
+                    />
+                  </div>
+      
+                  <div class="input-group">
+                    <label>가격</label>
+                    <input
+                      id="beauty-service-price"
+                      type="number"
+                      placeholder="예: 30000"
+                    />
+                  </div>
+      
+                  <div class="input-group">
+                    <label>소요시간</label>
+                    <select id="beauty-service-duration">
+                      <option value="15">15분</option>
+                      <option value="30" selected>30분</option>
+                      <option value="45">45분</option>
+                      <option value="60">60분</option>
+                      <option value="90">90분</option>
+                      <option value="120">120분</option>
+                      <option value="150">150분</option>
+                      <option value="180">180분</option>
+                    </select>
+                  </div>
+      
+                  <div class="input-group">
+                    <label>예약 결제방식</label>
+                    <select id="beauty-service-reservation-type">
+                      <option value="예약금">예약금 결제</option>
+                      <option value="전액결제">전액결제</option>
+                      <option value="결제없음">결제 없는 예약</option>
+                    </select>
+                  </div>
+      
+                  <div class="input-group">
+                    <label>예약금</label>
+                    <input
+                      id="beauty-service-deposit"
+                      type="number"
+                      value="0"
+                      placeholder="예: 10000"
+                    />
+                  </div>
+      
+                  <button id="beauty-service-create">
+                    서비스 등록
+                  </button>
+                </div>
+      
+                <div class="product-list-card">
+                  <h2>등록된 서비스</h2>
+      
+                  <div class="product-summary-row">
+                    <span>
+                      총 서비스 : ${(services || []).length}개
+                    </span>
+      
+                    <span>
+                      사용 :
+                      ${(services || []).filter(
+                        (service) =>
+                          (service.status || '사용') === '사용'
+                      ).length}개
+                    </span>
+      
+                    <span>
+                      사용중지 :
+                      ${(services || []).filter(
+                        (service) =>
+                          service.status === '사용중지'
+                      ).length}개
+                    </span>
+                  </div>
+      
+                  <div
+                    id="beautyServiceBody"
+                    class="product-card-list"
+                  ></div>
+                </div>
+      
+              </div>
+            </div>
+          </div>
+        `
+      
+        const serviceBody =
+          document.querySelector<HTMLDivElement>(
+            '#beautyServiceBody'
+          )!
+      
+        serviceBody.innerHTML = ''
+      
+        ;(services || []).forEach((service) => {
+          const item = document.createElement('div')
+      
+          item.className = 'product-item-card'
+      
+          const status =
+            service.status || '사용'
+      
+          item.innerHTML =
+            '<div class="product-info">' +
+              '<h3>' +
+                (service.service_name || '-') +
+              '</h3>' +
+      
+              '<p>' +
+                Number(service.price || 0).toLocaleString() +
+                '원' +
+              '</p>' +
+      
+              '<p>소요시간 : ' +
+                Number(service.duration || 0) +
+                '분</p>' +
+      
+              '<p>결제방식 : ' +
+                (service.reservation_type || '예약금') +
+                '</p>' +
+      
+              '<p>예약금 : ' +
+                Number(
+                  service.deposit_amount || 0
+                ).toLocaleString() +
+                '원</p>' +
+      
+              '<span class="' +
+                (status === '사용'
+                  ? 'product-on'
+                  : 'product-off') +
+              '">' +
+                status +
+              '</span>' +
+            '</div>' +
+      
+            '<div class="product-actions">' +
+              '<button class="beauty-service-edit" ' +
+                'data-id="' + service.id + '">' +
+                '수정' +
+              '</button>' +
+      
+              '<button class="beauty-service-status" ' +
+                'data-id="' + service.id + '" ' +
+                'data-status="' + status + '">' +
+                (status === '사용'
+                  ? '사용중지'
+                  : '사용') +
+              '</button>' +
+      
+              '<button class="beauty-service-delete" ' +
+                'data-id="' + service.id + '">' +
+                '삭제' +
+              '</button>' +
+            '</div>'
+      
+          serviceBody.appendChild(item)
+        })
+      
+        document.querySelector(
+          '#beauty-service-reservation-type'
+        )?.addEventListener('change', () => {
+          const reservationType =
+            (
+              document.getElementById(
+                'beauty-service-reservation-type'
+              ) as HTMLSelectElement
+            ).value
+      
+          const depositInput =
+            document.getElementById(
+              'beauty-service-deposit'
+            ) as HTMLInputElement
+      
+          const priceInput =
+            document.getElementById(
+              'beauty-service-price'
+            ) as HTMLInputElement
+      
+          if (reservationType === '결제없음') {
+            depositInput.value = '0'
+            depositInput.disabled = true
+            return
+          }
+      
+          depositInput.disabled = false
+      
+          if (reservationType === '전액결제') {
+            depositInput.value =
+              priceInput.value || '0'
+          }
+        })
+      
+        document.querySelector('#beauty-service-create')
+          ?.addEventListener('click', async () => {
+            const serviceName =
+              (
+                document.getElementById(
+                  'beauty-service-name'
+                ) as HTMLInputElement
+              ).value.trim()
+      
+            const price =
+              Number(
+                (
+                  document.getElementById(
+                    'beauty-service-price'
+                  ) as HTMLInputElement
+                ).value || 0
+              )
+      
+            const duration =
+              Number(
+                (
+                  document.getElementById(
+                    'beauty-service-duration'
+                  ) as HTMLSelectElement
+                ).value || 30
+              )
+      
+            const reservationType =
+              (
+                document.getElementById(
+                  'beauty-service-reservation-type'
+                ) as HTMLSelectElement
+              ).value
+      
+            let depositAmount =
+              Number(
+                (
+                  document.getElementById(
+                    'beauty-service-deposit'
+                  ) as HTMLInputElement
+                ).value || 0
+              )
+      
+            if (!serviceName) {
+              alert('서비스명을 입력해주세요.')
+              return
+            }
+      
+            if (price < 0) {
+              alert('가격을 확인해주세요.')
+              return
+            }
+      
+            if (reservationType === '결제없음') {
+              depositAmount = 0
+            }
+      
+            if (reservationType === '전액결제') {
+              depositAmount = price
+            }
+      
+            if (
+              reservationType === '예약금' &&
+              depositAmount > price
+            ) {
+              alert('예약금은 서비스 가격보다 클 수 없습니다.')
+              return
+            }
+      
+            const { error } = await supabase
+              .from('beauty_services')
+              .insert({
+                merchant_id: merchantId,
+                service_name: serviceName,
+                price: price,
+                duration: duration,
+                deposit_amount: depositAmount,
+                reservation_type: reservationType,
+                status: '사용'
+              })
+      
+            if (error) {
+              alert('서비스 등록 실패: ' + error.message)
+              return
+            }
+      
+            alert('서비스가 등록되었습니다.')
+            location.reload()
+          })
+      
+        document.querySelectorAll('.beauty-service-edit')
+          .forEach((button) => {
+            button.addEventListener('click', async () => {
+              const serviceId =
+                Number(
+                  (button as HTMLElement).getAttribute(
+                    'data-id'
+                  )
+                )
+      
+              const service =
+                services?.find(
+                  (item) => item.id === serviceId
+                )
+      
+              if (!service) {
+                alert('서비스 정보를 찾을 수 없습니다.')
+                return
+              }
+      
+              const newName =
+                prompt(
+                  '서비스명',
+                  service.service_name || ''
+                )
+      
+              if (!newName) return
+      
+              const newPrice =
+                prompt(
+                  '가격',
+                  String(service.price || 0)
+                )
+      
+              if (newPrice === null) return
+      
+              const newDuration =
+                prompt(
+                  '소요시간(분)',
+                  String(service.duration || 30)
+                )
+      
+              if (newDuration === null) return
+      
+              const newDeposit =
+                prompt(
+                  '예약금',
+                  String(service.deposit_amount || 0)
+                )
+      
+              if (newDeposit === null) return
+      
+              const { error } = await supabase
+                .from('beauty_services')
+                .update({
+                  service_name: newName,
+                  price: Number(newPrice),
+                  duration: Number(newDuration),
+                  deposit_amount: Number(newDeposit)
+                })
+                .eq('id', serviceId)
+      
+              if (error) {
+                alert('서비스 수정 실패: ' + error.message)
+                return
+              }
+      
+              alert('수정되었습니다.')
+              location.reload()
+            })
+          })
+      
+        document.querySelectorAll('.beauty-service-status')
+          .forEach((button) => {
+            button.addEventListener('click', async () => {
+              const serviceId =
+                Number(
+                  (button as HTMLElement).getAttribute(
+                    'data-id'
+                  )
+                )
+      
+              const currentStatus =
+                (button as HTMLElement).getAttribute(
+                  'data-status'
+                ) || '사용'
+      
+              const nextStatus =
+                currentStatus === '사용'
+                  ? '사용중지'
+                  : '사용'
+      
+              const { error } = await supabase
+                .from('beauty_services')
+                .update({
+                  status: nextStatus
+                })
+                .eq('id', serviceId)
+      
+              if (error) {
+                alert('상태 변경 실패: ' + error.message)
+                return
+              }
+      
+              location.reload()
+            })
+          })
+      
+        document.querySelectorAll('.beauty-service-delete')
+          .forEach((button) => {
+            button.addEventListener('click', async () => {
+              const serviceId =
+                Number(
+                  (button as HTMLElement).getAttribute(
+                    'data-id'
+                  )
+                )
+      
+              if (!confirm('이 서비스를 삭제할까요?')) {
+                return
+              }
+      
+              const { error } = await supabase
+                .from('beauty_services')
+                .delete()
+                .eq('id', serviceId)
+      
+              if (error) {
+                alert('서비스 삭제 실패: ' + error.message)
+                return
+              }
+      
+              alert('서비스가 삭제되었습니다.')
+              location.reload()
+            })
+          })
+      
+        document.querySelector('#service-go-admin')
+          ?.addEventListener('click', () => {
+            location.href = '/merchant-admin'
+          })
+      
+        document.querySelector('#service-go-service')
+          ?.addEventListener('click', () => {
+            location.href = '/merchant-service'
+          })
+      
+        document.querySelector('#service-go-staff')
+          ?.addEventListener('click', () => {
+            alert('직원관리는 다음 단계에서 연결합니다.')
+          })
+      
+        document.querySelector('#service-go-customer')
+          ?.addEventListener('click', () => {
+            alert('고객관리는 다음 단계에서 연결합니다.')
+          })
+      
+        document.querySelector('#merchant-service-logout')
+          ?.addEventListener('click', () => {
+            sessionStorage.removeItem('login_merchant_id')
+            sessionStorage.removeItem('login_merchant_name')
+            sessionStorage.removeItem('login_merchant_code')
+            location.href = '/merchant-login'
+          })        
 
 } else if (path === '/merchant-product') {
 
