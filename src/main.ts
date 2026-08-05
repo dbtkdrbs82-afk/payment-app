@@ -15060,17 +15060,6 @@ if (orderRequestError) {
             .select('*')
             .eq('merchant_id', merchantId)
             .order('id', { ascending: false })
-
-            const { data: beautyServices, error: serviceError } = await supabase
-  .from('beauty_services')
-  .select('*')
-  .eq('merchant_id', merchantId)
-  .eq('status', '사용')
-  .order('id', { ascending: false })
-
-if (serviceError) {
-  alert('서비스 목록 조회 실패: ' + serviceError.message)
-}
         
           if (error) {
             alert('직원 목록 조회 실패: ' + error.message)
@@ -15164,25 +15153,6 @@ if (serviceError) {
                         <label><input type="checkbox" class="beauty-staff-off-day" value="일" /> 일</label>
                       </div>
                     </div>
-
-                    <div class="input-group">
-  <label>가능 서비스</label>
-
-  <div class="beauty-service-check-list">
-
-    ${(beautyServices || []).map((service) => `
-      <label>
-        <input
-          type="checkbox"
-          class="beauty-staff-service"
-          value="${service.id}"
-        />
-        ${service.service_name}
-      </label>
-    `).join('')}
-
-  </div>
-</div>
         
                     <button id="beauty-staff-create">
                       직원 등록
