@@ -16108,6 +16108,7 @@ document.querySelector('#pay-link-btn')
         })
         document.querySelector('#cash-receipt-payment')
   ?.addEventListener('click', () => {
+    alert('현금영수증 클릭됨')
     const existingModal =
       document.querySelector('#cash-receipt-modal')
 
