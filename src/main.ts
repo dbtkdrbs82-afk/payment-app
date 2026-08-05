@@ -7083,7 +7083,6 @@ merchantButtons.forEach((button) => {
 '<select id="merchant-type">' +
 '<option value="일반매장" ' + (merchant.merchant_type === '일반매장' ? 'selected' : '') + '>일반매장</option>' +
 '<option value="학원" ' + (merchant.merchant_type === '학원' ? 'selected' : '') + '>학원</option>' +
-'<option value="뷰티" ' + (merchant.merchant_type === '뷰티' ? 'selected' : '') + '>뷰티</option>' +
 '<option value="아파트관리" ' + (merchant.merchant_type === '아파트관리' ? 'selected' : '') + '>아파트관리</option>' +
 '<option value="청소업체" ' + (merchant.merchant_type === '청소업체' ? 'selected' : '') + '>청소업체</option>' +
 '<option value="렌탈" ' + (merchant.merchant_type === '렌탈' ? 'selected' : '') + '>렌탈</option>' +
@@ -14870,7 +14869,7 @@ document.querySelector('#merchant-product-image-file')
 
     alert('직원 사진이 선택되었습니다.\n' + previewUrl)
   })
-
+  
     const file =
       (document.getElementById('merchant-product-image-file') as HTMLInputElement)
         ?.files?.[0]
