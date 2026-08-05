@@ -12226,14 +12226,19 @@ if (isWirelessTerminal) {
 let merchantMenu = ''
 let merchantContent = ''
 
-if (isNormalStore) {
-  merchantMenu = `
-    <button id="merchant-order-tab">주문관리</button>
-    <button id="merchant-product-tab">상품관리</button>
-    <button id="merchant-qr-tab">PICK QR</button>
-    <button id="merchant-card-tab">카드결제</button>
-    
-  `
+if (isNormalStore || isBeauty) {
+  merchantMenu = isBeauty
+  ? `
+      <button id="merchant-order-tab">예약관리</button>
+      <button id="merchant-product-tab">직원 및 서비스 관리</button>
+      <button id="merchant-qr-tab">PICK QR</button>
+    `
+  : `
+      <button id="merchant-order-tab">주문관리</button>
+      <button id="merchant-product-tab">상품관리</button>
+      <button id="merchant-qr-tab">PICK QR</button>
+      <button id="merchant-card-tab">카드결제</button>
+    `
 
   merchantContent = ''
 
@@ -12789,7 +12794,7 @@ const channel = supabase
       app.innerHTML = `
         <div class="pg-admin-page">
           <div class="merchant-pick-header">
-         <h1>NXG PICK 주문관리</h1>
+         <h1>${isBeauty ? '예약관리' : 'NXG PICK 주문관리'}</h1>
 
   <div class="merchant-user-box">
   <strong>${merchantName}님</strong>
@@ -12810,7 +12815,7 @@ const channel = supabase
 <div class="merchant-toolbar">
   ${merchantMenu}
 
-  ${isNormalStore ? `
+  ${isNormalStore && !isBeauty ? `
     <span class="toolbar-divider"></span>
     <button class="order-filter-btn" data-status="전체">전체</button>
     <button class="order-filter-btn" data-status="준비중">준비중</button>
@@ -12821,7 +12826,7 @@ const channel = supabase
 
 ${merchantContent}
 
-<div class="merchant-sales-filter ${isNormalStore ? '' : 'hide-for-type'}">
+<div class="merchant-sales-filter ${isNormalStore && !isBeauty ? '' : 'hide-for-type'}">
   <button id="sales-today">오늘</button>
   <button id="sales-month">이번달</button>
   <button id="sales-year">올해</button>
