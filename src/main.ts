@@ -12182,6 +12182,9 @@ const settlementComplete =
 const isAcademy =
   merchantType === '학원'
 
+  const isBeauty =
+  merchantType === '뷰티'
+
 const isWirelessTerminal =
   merchantType === '무선단말기'
 
@@ -12655,6 +12658,19 @@ const terminalPagedPayments =
         </div>
 
       </div>
+    </div>
+  `
+
+} else if (isBeauty) {
+  merchantMenu = `
+    <button id="merchant-beauty-reservation-tab">예약관리</button>
+    <button id="merchant-beauty-management-tab">직원 및 서비스 관리</button>
+    <button id="merchant-qr-tab">PICK QR</button>
+  `
+
+  merchantContent = `
+    <div class="merchant-type-ready-box">
+      뷰티 관리 메뉴를 선택해주세요.
     </div>
   `
 
@@ -13630,6 +13646,16 @@ document.querySelector('#merchant-qr-tab')
     location.href = '/merchant-admin'
   })
 
+  document.querySelector('#merchant-beauty-reservation-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-admin'
+  })
+
+document.querySelector('#merchant-beauty-management-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-product'
+  })
+
   let currentOrderFilter = '전체'
 
   let currentPageSize = Number(
@@ -14490,6 +14516,12 @@ if (orderRequestError) {
   const merchantName =
     sessionStorage.getItem('login_merchant_name') || ''
 
+    const merchantType =
+  sessionStorage.getItem('login_merchant_type') || '일반매장'
+
+const isBeauty =
+  merchantType === '뷰티'
+
   if (!merchantId) {
     alert('로그인이 필요합니다.')
     location.href = '/merchant-login'
@@ -14509,7 +14541,7 @@ if (orderRequestError) {
   app.innerHTML = `
     <div class="pg-admin-page">
       <div class="merchant-pick-header">
-        <h1>NXG PICK 상품관리</h1>
+        <h1>${isBeauty ? '직원 및 서비스 관리' : 'NXG PICK 상품관리'}</h1>
 
         <div class="merchant-user-box">
           <strong>${merchantName}님</strong>
@@ -14518,8 +14550,8 @@ if (orderRequestError) {
       </div>
 
       <div class="merchant-toolbar">
-        <button id="go-merchant-order">주문관리</button>
-        <button id="go-merchant-product">상품관리</button>
+        <button id="go-merchant-order">${isBeauty ? '예약관리' : '주문관리'}</button>
+<button id="go-merchant-product">${isBeauty ? '직원 및 서비스 관리' : '상품관리'}</button>
         <button id="go-merchant-qr">PICK QR</button>
       </div>
 
@@ -14527,11 +14559,14 @@ if (orderRequestError) {
   <div class="merchant-product-layout">
 
     <div class="product-create-card">
-      <h2>상품 등록</h2>
+      <h2>${isBeauty ? '직원 및 서비스 등록' : '상품 등록'}</h2>
 
     <div class="input-group">
-      <label>상품명</label>
-      <input id="merchant-product-name" placeholder="예: 아메리카노" />
+      <label>${isBeauty ? '서비스명' : '상품명'}</label>
+<input
+  id="merchant-product-name"
+  placeholder="${isBeauty ? '예: 여성 커트' : '예: 아메리카노'}"
+/>
     </div>
 
     <div class="input-group">
@@ -14539,17 +14574,43 @@ if (orderRequestError) {
       <input id="merchant-product-price" type="number" placeholder="예: 4500" />
     </div>
     <div class="input-group">
-  <label>카테고리</label>
+  <label>${isBeauty ? '직원명' : '카테고리'}</label>
 
-  <select id="merchant-product-category">
-    <option value="커피">커피</option>
-    <option value="에이드">에이드</option>
-    <option value="음료">음료</option>
-    <option value="식사">식사</option>
-    <option value="디저트">디저트</option>
-    <option value="기타">기타</option>
-  </select>
+  ${
+    isBeauty
+      ? `
+        <input
+          id="merchant-product-category"
+          placeholder="예: 김디자이너"
+        />
+      `
+      : `
+        <select id="merchant-product-category">
+          <option value="커피">커피</option>
+          <option value="에이드">에이드</option>
+          <option value="음료">음료</option>
+          <option value="식사">식사</option>
+          <option value="디저트">디저트</option>
+          <option value="기타">기타</option>
+        </select>
+      `
+  }
 </div>
+
+${
+  isBeauty
+    ? `
+      <div class="input-group">
+        <label>직원 사진</label>
+        <input
+          id="merchant-category-image-file"
+          type="file"
+          accept="image/*"
+        />
+      </div>
+    `
+    : ''
+}
 
     <div class="input-group">
       <label>상품 이미지</label>
@@ -14791,6 +14852,24 @@ document.querySelectorAll('.product-delete-button')
 
 document.querySelector('#merchant-product-image-file')
   ?.addEventListener('change', () => {
+
+    document.querySelector('#merchant-category-image-file')
+  ?.addEventListener('change', () => {
+    const file =
+      (
+        document.getElementById(
+          'merchant-category-image-file'
+        ) as HTMLInputElement
+      )?.files?.[0]
+
+    if (!file) return
+
+    const previewUrl =
+      URL.createObjectURL(file)
+
+    alert('직원 사진이 선택되었습니다.\n' + previewUrl)
+  })
+  
     const file =
       (document.getElementById('merchant-product-image-file') as HTMLInputElement)
         ?.files?.[0]
@@ -14818,6 +14897,42 @@ document.querySelector('#merchant-product-image-file')
 
         const category =
         (document.getElementById('merchant-product-category') as HTMLSelectElement)?.value || '기타'
+
+        const categoryImageFile =
+  (
+    document.getElementById(
+      'merchant-category-image-file'
+    ) as HTMLInputElement
+  )?.files?.[0]
+
+let categoryImageUrl = ''
+
+if (isBeauty && categoryImageFile) {
+  const fileExt =
+    categoryImageFile.name.split('.').pop() || 'png'
+
+  const fileName =
+    Date.now() + '_designer.' + fileExt
+
+  const { error: categoryUploadError } =
+    await supabase.storage
+      .from('merchant-files')
+      .upload(fileName, categoryImageFile)
+
+  if (categoryUploadError) {
+    alert(
+      '직원 사진 업로드 실패: ' +
+      categoryUploadError.message
+    )
+    return
+  }
+
+  const { data } = supabase.storage
+    .from('merchant-files')
+    .getPublicUrl(fileName)
+
+  categoryImageUrl = data.publicUrl
+}
 
         const imageFile =
         (document.getElementById(
@@ -14865,6 +14980,9 @@ document.querySelector('#merchant-product-image-file')
           product_name: productName,
           price: price,
           category: category,
+          category_image_url: isBeauty
+            ? categoryImageUrl
+            : null,
           image_url: imageUrl,
           status: '판매중'
         })
