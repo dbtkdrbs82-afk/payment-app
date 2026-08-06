@@ -17847,21 +17847,35 @@ if (isBeautyKiosk) {
                 : ''
             }
 
-            <div class="kiosk-category-tabs">
-  ${Object.keys(groupedProducts).map((category, index) => `
-    <button
-      class="kiosk-category-tab ${index === 0 ? 'active' : ''}"
-      data-category="${category}"
-    >
-      ${category}
-    </button>
-  `).join('')}
-</div>
+            ${
+              isBeautyKiosk
+                ? ''
+                : `
+                  <div class="kiosk-category-tabs">
+                    ${Object.keys(groupedProducts).map((category, index) => `
+                      <button
+                        class="kiosk-category-tab ${index === 0 ? 'active' : ''}"
+                        data-category="${category}"
+                      >
+                        ${category}
+                      </button>
+                    `).join('')}
+                  </div>
+                `
+            }
 
             <div class="kiosk-category-list">
   ${Object.keys(groupedProducts).map((category) => `
     <section
-  class="kiosk-category-section ${Object.keys(groupedProducts)[0] === category ? '' : 'hidden-category'}"
+  class="kiosk-category-section ${
+  isBeautyKiosk
+    ? ''
+    : (
+        Object.keys(groupedProducts)[0] === category
+          ? ''
+          : 'hidden-category'
+      )
+}"
   data-category-section="${category}"
 >
       <h2 class="kiosk-category-title">${category}</h2>
@@ -18013,6 +18027,24 @@ if (isBeautyKiosk) {
                     ? ''
                     : 'none'
               })
+
+              document
+  .querySelectorAll<HTMLElement>(
+    '.kiosk-category-section'
+  )
+  .forEach((section) => {
+    const visibleCards =
+      Array.from(
+        section.querySelectorAll<HTMLElement>(
+          '.kiosk-product-card'
+        )
+      ).some(
+        (card) => card.style.display !== 'none'
+      )
+
+    section.style.display =
+      visibleCards ? '' : 'none'
+  })
           }
         
           document
