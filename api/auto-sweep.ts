@@ -69,6 +69,11 @@ export default async function handler(
       balanceResult?.data?.availableAmount?.value || 0
     )
 
+    console.log(
+        'AUTO_SWEEP_BALANCE',
+        availableAmount
+      )
+
     if (
       !Number.isInteger(availableAmount) ||
       availableAmount < 0
@@ -129,6 +134,11 @@ export default async function handler(
         SWEEP_SELLER_ID
     )
 
+    console.log(
+        'AUTO_SWEEP_SELLER',
+        sweepSeller
+      )
+
     if (!sweepSeller?.id) {
       return res.status(404).json({
         success: false,
@@ -172,6 +182,12 @@ export default async function handler(
 
     const payoutResponseText =
       await payoutResponse.text()
+
+      console.log(
+        'AUTO_SWEEP_PAYOUT',
+        payoutResponse.status,
+        payoutResponseText
+      )
 
     let payoutResult: any
 
