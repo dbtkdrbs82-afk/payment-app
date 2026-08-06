@@ -14726,32 +14726,23 @@ const assignedStaff =
     assignedStaffIds.includes(Number(staff.id))
   )
 
-const assignedStaffHtml =
+  const assignedStaffHtml =
   isBeauty
     ? (
         assignedStaff.length > 0
-          ? '<div style="margin-top:10px;width:100%;display:flex;flex-direction:column;align-items:center;">' +
+          ? '<div style="margin-top:10px;width:100%;text-align:center;">' +
               '<div style="font-size:12px;color:#64748b;margin-bottom:6px;">담당직원</div>' +
-              '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;">' +
-                assignedStaff.map((staff) =>
-                  '<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #e2e8f0;border-radius:999px;background:#f8fafc;">' +
-                    (
-                      staff.photo_url
-                        ? '<img src="' + staff.photo_url + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;" />'
-                        : ''
-                    ) +
-                    '<span style="font-size:13px;font-weight:700;">' +
-                      (staff.staff_name || '-') +
-                    '</span>' +
-                  '</div>'
-                ).join('') +
+              '<div style="font-size:13px;font-weight:700;">' +
+                assignedStaff
+                  .map((staff) => staff.staff_name || '-')
+                  .join(', ') +
               '</div>' +
             '</div>'
           : '<p style="margin-top:10px;color:#94a3b8;font-size:13px;">담당직원 미설정</p>'
       )
     : ''
 
-  item.className = 'product-item-card'
+item.className = 'product-item-card'
 
   item.innerHTML =
     '<div class="product-thumb">' +
@@ -17728,6 +17719,50 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
 
+      const { data: kioskMerchant } = await supabase
+  .from('merchants')
+  .select('merchant_type')
+  .eq('id', merchantId)
+  .maybeSingle()
+
+const isBeautyKiosk =
+  kioskMerchant?.merchant_type === '뷰티'
+
+let beautyKioskStaff: any[] = []
+let beautyKioskStaffServices: any[] = []
+
+if (isBeautyKiosk) {
+  const { data: staffData, error: staffError } =
+    await supabase
+      .from('beauty_staff')
+      .select('id, staff_name, position, photo_url')
+      .eq('merchant_id', merchantId)
+      .eq('status', '근무중')
+      .order('id', { ascending: true })
+
+  if (staffError) {
+    alert('직원 목록 조회 실패: ' + staffError.message)
+  } else {
+    beautyKioskStaff = staffData || []
+  }
+
+  const { data: connectionData, error: connectionError } =
+    await supabase
+      .from('beauty_staff_services')
+      .select('staff_id, service_id')
+      .eq('merchant_id', merchantId)
+
+  if (connectionError) {
+    alert(
+      '직원 서비스 조회 실패: ' +
+      connectionError.message
+    )
+  } else {
+    beautyKioskStaffServices =
+      connectionData || []
+  }
+}
+
       const { data: products, error } = await supabase
         .from('products')
         .select('*')
@@ -17772,6 +17807,46 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
               <p>원하시는 상품을 선택해주세요.</p>
             </div>
 
+            ${
+              isBeautyKiosk
+                ? `
+                  <div class="beauty-kiosk-staff-list">
+                    ${beautyKioskStaff.map((staff, index) => `
+                      <button
+                        class="beauty-kiosk-staff-button ${index === 0 ? 'active' : ''}"
+                        data-staff-id="${staff.id}"
+                      >
+                        ${
+                          staff.photo_url
+                            ? `
+                              <img
+                                src="${staff.photo_url}"
+                                alt="${staff.staff_name || ''}"
+                                style="
+                                  width:76px;
+                                  height:76px;
+                                  border-radius:50%;
+                                  object-fit:cover;
+                                "
+                              />
+                            `
+                            : ''
+                        }
+            
+                        <strong>${staff.staff_name || '-'}</strong>
+            
+                        ${
+                          staff.position
+                            ? `<span>${staff.position}</span>`
+                            : ''
+                        }
+                      </button>
+                    `).join('')}
+                  </div>
+                `
+                : ''
+            }
+
             <div class="kiosk-category-tabs">
   ${Object.keys(groupedProducts).map((category, index) => `
     <button
@@ -17793,7 +17868,10 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
 
       <div class="kiosk-products">
         ${groupedProducts[category].map((product: any) => `
-          <div class="kiosk-product-card">
+          <div
+  class="kiosk-product-card"
+  data-product-id="${product.id}"
+>
             ${product.image_url ? `
               <img src="${product.image_url}" alt="${product.product_name}">
             ` : `
@@ -17903,6 +17981,76 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
           </div>
         `
 
+        if (isBeautyKiosk && beautyKioskStaff.length > 0) {
+          const filterBeautyProductsByStaff = (
+            staffId: number
+          ) => {
+            const allowedServiceIds =
+              beautyKioskStaffServices
+                .filter(
+                  (row) =>
+                    Number(row.staff_id) === staffId
+                )
+                .map(
+                  (row) =>
+                    Number(row.service_id)
+                )
+        
+            document
+              .querySelectorAll<HTMLElement>(
+                '.kiosk-product-card'
+              )
+              .forEach((card) => {
+                const productId =
+                  Number(
+                    card.getAttribute(
+                      'data-product-id'
+                    )
+                  )
+        
+                card.style.display =
+                  allowedServiceIds.includes(productId)
+                    ? ''
+                    : 'none'
+              })
+          }
+        
+          document
+            .querySelectorAll<HTMLElement>(
+              '.beauty-kiosk-staff-button'
+            )
+            .forEach((button) => {
+              button.addEventListener('click', () => {
+                document
+                  .querySelectorAll(
+                    '.beauty-kiosk-staff-button'
+                  )
+                  .forEach((item) =>
+                    item.classList.remove('active')
+                  )
+
+                  selectedBeautyStaffId =
+  Number(
+    button.getAttribute('data-staff-id')
+  )
+        
+                button.classList.add('active')
+        
+                filterBeautyProductsByStaff(
+                  Number(
+                    button.getAttribute(
+                      'data-staff-id'
+                    )
+                  )
+                )
+              })
+            })
+        
+          filterBeautyProductsByStaff(
+            Number(beautyKioskStaff[0].id)
+          )
+        }
+
         document.querySelectorAll('.kiosk-category-tab')
   .forEach((button) => {
     button.addEventListener('click', () => {
@@ -17928,12 +18076,13 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
     })
   })
 
-        const cart: {
-          id: number
-          name: string
-          price: number
-          quantity: number
-        }[] = []
+  const cart: {
+    id: number
+    name: string
+    price: number
+    quantity: number
+    beauty_staff_id?: number
+  }[] = []
 
         const renderCart = () => {
           const cartItems = document.querySelector<HTMLDivElement>('#cart-items')!
@@ -17966,6 +18115,19 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
             <div class="cart-item">
               <div>
                 <strong>${item.name}</strong>
+                ${
+                  item.beauty_staff_id
+                    ? `<p style="font-size:12px;color:#64748b;">
+                        ${
+                          beautyKioskStaff.find(
+                            (s) =>
+                              Number(s.id) ===
+                              Number(item.beauty_staff_id)
+                          )?.staff_name || ''
+                        }
+                      </p>`
+                    : ''
+                }
                 <p>${item.price.toLocaleString()}원 x ${item.quantity}</p>
               </div>
               <div class="cart-item-buttons">
@@ -18006,6 +18168,11 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
           })
         }
 
+        let selectedBeautyStaffId =
+  isBeautyKiosk && beautyKioskStaff.length > 0
+    ? Number(beautyKioskStaff[0].id)
+    : 0
+
         document.querySelectorAll<HTMLButtonElement>('.add-cart-button').forEach((button) => {
           button.addEventListener('click', () => {
             const id = Number(button.dataset.id)
@@ -18022,6 +18189,11 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
                 name,
                 price,
                 quantity: 1,
+              
+                beauty_staff_id:
+                  isBeautyKiosk
+                    ? selectedBeautyStaffId
+                    : undefined
               })
             }
 
@@ -18108,6 +18280,13 @@ const orderNo =
       'kiosk_items',
       JSON.stringify(cart)
     )
+
+    if (isBeautyKiosk) {
+      sessionStorage.setItem(
+        'beauty_staff_id',
+        String(selectedBeautyStaffId)
+      )
+    }
 
     sessionStorage.setItem(
       'kiosk_total_amount',
@@ -18233,6 +18412,10 @@ document.querySelector('#kiosk-card-pay-button')
             merchant_id: Number(merchantId),
             order_no: orderNo,
             items: items,
+            beauty_staff_id:
+  sessionStorage.getItem('beauty_staff_id')
+    ? Number(sessionStorage.getItem('beauty_staff_id'))
+    : null,
             total_amount: Number(totalAmount),
             order_status: '접수',
             payment_status: '결제완료',
@@ -18274,6 +18457,11 @@ let branchFeeRate = 0
   
       merchant_id: Number(merchantId),
       merchant_name: merchantData?.merchant_name || '',
+
+      beauty_staff_id:
+  sessionStorage.getItem('beauty_staff_id')
+    ? Number(sessionStorage.getItem('beauty_staff_id'))
+    : null,
   
       manager_admin_id: managerAdminId,
 manager_admin_name: managerAdminName,
