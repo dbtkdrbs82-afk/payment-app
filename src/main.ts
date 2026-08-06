@@ -14770,7 +14770,6 @@ const assignedStaffHtml =
       : ''
   ) +
 
-  assignedStaffHtml +
 
   '<span class="' +
     ((product.status || '판매중') === '판매중'
@@ -14779,6 +14778,7 @@ const assignedStaffHtml =
   '">' +
     (product.status || '판매중') +
   '</span>' +
+  assignedStaffHtml +
 '</div>' +
 
     '<div class="product-actions">' +
