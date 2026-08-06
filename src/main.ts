@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import Tesseract from 'tesseract.js'
 import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
-
+import { renderBeautyStaff } from './beauty/staff'
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 const adminPassword = '1234'
@@ -7089,6 +7089,7 @@ merchantButtons.forEach((button) => {
 '<option value="결혼" ' + (merchant.merchant_type === '결혼' ? 'selected' : '') + '>결혼</option>' +
 '<option value="장례" ' + (merchant.merchant_type === '장례' ? 'selected' : '') + '>장례</option>' +
 '<option value="무선단말기" ' + (merchant.merchant_type === '무선단말기' ? 'selected' : '') + '>무선단말기</option>' +
+'<option value="뷰티" ' + (merchant.merchant_type === '뷰티' ? 'selected' : '') + '>뷰티</option>' +
 '</select>' +
 
     '<label>대표자</label>' +
@@ -12179,6 +12180,9 @@ const settlementComplete =
   const isNormalStore =
   merchantType === '일반매장'
 
+  const isBeauty =
+  merchantType === '뷰티'
+
 const isAcademy =
   merchantType === '학원'
 
@@ -12222,13 +12226,23 @@ if (isWirelessTerminal) {
 let merchantMenu = ''
 let merchantContent = ''
 
-if (isNormalStore) {
+if (isBeauty) {
+  merchantMenu = `
+    <button id="merchant-order-tab">주문관리</button>
+    <button id="merchant-staff-tab">직원관리</button>
+    <button id="merchant-product-tab">서비스관리</button>
+    <button id="merchant-qr-tab">PICK QR</button>
+    <button id="merchant-card-tab">카드결제</button>
+  `
+
+  merchantContent = ''
+
+} else if (isNormalStore) {
   merchantMenu = `
     <button id="merchant-order-tab">주문관리</button>
     <button id="merchant-product-tab">상품관리</button>
     <button id="merchant-qr-tab">PICK QR</button>
     <button id="merchant-card-tab">카드결제</button>
-    
   `
 
   merchantContent = ''
@@ -13603,6 +13617,11 @@ document.querySelector('#merchant-product-tab')
     location.href = '/merchant-product'
   })
 
+  document.querySelector('#merchant-staff-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-staff'
+  })  
+
 document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-qr'
@@ -14928,6 +14947,11 @@ document.querySelector('#merchant-product-image-file')
       sessionStorage.removeItem('login_merchant_code')
       location.href = '/merchant-login'
     })
+
+  } else if (path === '/merchant-staff') {
+
+    await renderBeautyStaff(app, supabase)
+  
 
   } else if (path === '/merchant-qr') {
 
