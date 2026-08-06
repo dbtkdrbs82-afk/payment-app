@@ -88,9 +88,9 @@ if (staffListArea) {
         location.href = '/merchant-admin'
       })
   
-    document.querySelector('#staff-go-service')
+      document.querySelector('#staff-go-service')
       ?.addEventListener('click', () => {
-        location.href = '/merchant-service'
+        location.href = '/merchant-product'
       })
   
     document.querySelector('#staff-go-staff')
