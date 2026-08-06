@@ -14746,27 +14746,27 @@ document.querySelectorAll('.beauty-staff-setting-button')
       }
 
       const { data: connectedStaff, error: connectedError } =
-        await supabase
-          .from('beauty_staff_services')
-          .select('staff_id')
-          .eq('merchant_id', merchantId)
-          .eq('service_id', productId)
+  await supabase
+    .from('beauty_staff_services')
+    .select('staff_id')
+    .eq('merchant_id', merchantId)
+    .eq('service_id', productId)
 
-      if (connectedError) {
-        alert(
-          '담당직원 조회 실패: ' +
-          connectedError.message
-        )
-        return
-      }
+if (connectedError) {
+  alert(
+    '담당직원 조회 실패: ' +
+    connectedError.message
+  )
+  return
+}
 
-      const connectedStaffIds =
-        (connectedStaff || []).map(
-          (item) => Number(item.staff_id)
-        )
+const connectedStaffIds =
+  (connectedStaff || []).map(
+    (item) => Number(item.staff_id)
+  )
 
-      const overlay =
-        document.createElement('div')
+const overlay =
+  document.createElement('div')
 
       overlay.style.cssText = `
         position:fixed;
@@ -15056,10 +15056,11 @@ document.querySelectorAll('.beauty-staff-setting-button')
                       border-bottom:1px solid #f1f5f9;
                     ">
                       <input
-                        type="checkbox"
-                        class="beauty-service-staff-checkbox"
-                        value="${staff.id}"
-                      />
+  type="checkbox"
+  class="beauty-service-staff-checkbox"
+  value="${staff.id}"
+  ''
+/>
 
                       ${
                         staff.photo_url
