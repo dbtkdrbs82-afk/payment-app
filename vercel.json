@@ -9,6 +9,10 @@
     {
       "path": "/api/auto-payout",
       "schedule": "30 4 * * *"
+    },
+    {
+      "path": "/api/auto-sweep",
+      "schedule": "0 5 * * *"
     }
   ]
 }

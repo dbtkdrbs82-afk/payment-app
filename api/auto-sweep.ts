@@ -80,14 +80,15 @@ export default async function handler(
       })
     }
 
-    if (availableAmount === 0) {
-      return res.status(200).json({
-        success: true,
-        swept: false,
-        amount: 0,
-        message: '회수할 잔액이 없습니다.',
-      })
-    }
+    if (availableAmount < 10000) {
+        return res.status(200).json({
+          success: true,
+          swept: false,
+          amount: availableAmount,
+          minimumAmount: 10000,
+          message: '회수 대상이 아닙니다. (1만원 이상부터 자동회수)',
+        })
+      }
 
     const sellerResponse = await fetch(
       `${BASE_URL}/api/toss-seller-get`
