@@ -1,3 +1,5 @@
+import { renderBeautyStaffRegister } from './staff/register'
+
 export async function renderBeautyStaff(
     app: HTMLElement,
     supabase: any
@@ -14,11 +16,11 @@ export async function renderBeautyStaff(
       return
     }
   
-    const { data: staffList, error } = await supabase
-      .from('beauty_staff')
-      .select('*')
-      .eq('merchant_id', merchantId)
-      .order('id', { ascending: false })
+    const { error } = await supabase
+  .from('beauty_staff')
+  .select('id')
+  .eq('merchant_id', merchantId)
+  .limit(1)
   
     if (error) {
       alert('직원 목록 조회 실패: ' + error.message)
@@ -44,21 +46,24 @@ export async function renderBeautyStaff(
         </div>
   
         <div class="payment-card">
-          <h2>직원관리 연결 완료</h2>
-  
-          <p>
-            등록된 직원:
-            ${(staffList || []).length}명
-          </p>
-  
-          <p>
-            다음 단계에서 직원 사진과 이름 등록 기능을 연결합니다.
-          </p>
-        </div>
+  <div id="beauty-staff-register-area"></div>
+</div>
   
       </div>
     `
+    const staffRegisterArea =
+    document.getElementById(
+      'beauty-staff-register-area'
+    )
   
+  if (staffRegisterArea) {
+    renderBeautyStaffRegister(
+      staffRegisterArea,
+      supabase,
+      merchantId
+    )
+  }
+
     document.querySelector('#staff-go-admin')
       ?.addEventListener('click', () => {
         location.href = '/merchant-admin'
