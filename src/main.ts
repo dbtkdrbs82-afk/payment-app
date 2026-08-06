@@ -14750,7 +14750,7 @@ document.querySelectorAll('.beauty-staff-setting-button')
           .from('beauty_staff_services')
           .select('staff_id')
           .eq('merchant_id', merchantId)
-          .eq('product_id', productId)
+          .eq('service_id', productId)
 
       if (connectedError) {
         alert(
@@ -14968,7 +14968,7 @@ document.querySelectorAll('.beauty-staff-setting-button')
             selectedStaffIds.map((staffId) => ({
               merchant_id: merchantId,
               staff_id: staffId,
-              product_id: productId
+              service_id: productId
             }))
 
           const { error: insertError } =
