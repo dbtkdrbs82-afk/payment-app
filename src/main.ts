@@ -14730,9 +14730,9 @@ const assignedStaffHtml =
   isBeauty
     ? (
         assignedStaff.length > 0
-          ? '<div style="margin-top:10px;">' +
+          ? '<div style="margin-top:10px;width:100%;display:flex;flex-direction:column;align-items:center;">' +
               '<div style="font-size:12px;color:#64748b;margin-bottom:6px;">담당직원</div>' +
-              '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+              '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;">' +
                 assignedStaff.map((staff) =>
                   '<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #e2e8f0;border-radius:999px;background:#f8fafc;">' +
                     (
