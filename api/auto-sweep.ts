@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 
-const BASE_URL = 'https://payment-app-lv6a.vercel.app'
+const BASE_URL = 'https://payment-app-ybtf.vercel.app'
 const SWEEP_SELLER_ID = 'NXGSOFT01'
 
 export default async function handler(
