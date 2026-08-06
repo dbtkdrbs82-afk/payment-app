@@ -14509,6 +14509,12 @@ if (orderRequestError) {
   const merchantName =
     sessionStorage.getItem('login_merchant_name') || ''
 
+    const merchantType =
+  sessionStorage.getItem('login_merchant_type') || '일반매장'
+
+const isBeauty =
+  merchantType === '뷰티'
+
   if (!merchantId) {
     alert('로그인이 필요합니다.')
     location.href = '/merchant-login'
@@ -14521,6 +14527,24 @@ if (orderRequestError) {
   .order('sort_order', { ascending: true })
   .order('id', { ascending: false })
 
+  let beautyStaff: any[] = []
+
+if (isBeauty) {
+  const { data: staffData, error: staffError } =
+    await supabase
+      .from('beauty_staff')
+      .select('id, staff_name, position, photo_url, status')
+      .eq('merchant_id', merchantId)
+      .eq('status', '근무중')
+      .order('id', { ascending: false })
+
+  if (staffError) {
+    alert('직원 목록 조회 실패: ' + staffError.message)
+  } else {
+    beautyStaff = staffData || []
+  }
+}
+
   if (error) {
     alert('상품 목록 조회 실패: ' + error.message)
   }
@@ -14528,7 +14552,13 @@ if (orderRequestError) {
   app.innerHTML = `
     <div class="pg-admin-page">
       <div class="merchant-pick-header">
-        <h1>NXG PICK 상품관리</h1>
+        <h1>
+${
+  isBeauty
+    ? 'NXG BEAUTY 서비스관리'
+    : 'NXG PICK 상품관리'
+}
+</h1>
 
         <div class="merchant-user-box">
           <strong>${merchantName}님</strong>
@@ -14546,11 +14576,27 @@ if (orderRequestError) {
   <div class="merchant-product-layout">
 
     <div class="product-create-card">
-      <h2>상품 등록</h2>
+      <h2>
+${
+  isBeauty
+    ? '서비스 등록'
+    : '상품 등록'
+}
+</h2>
 
     <div class="input-group">
-      <label>상품명</label>
-      <input id="merchant-product-name" placeholder="예: 아메리카노" />
+      <label>
+${
+  isBeauty
+    ? '서비스명'
+    : '상품명'
+}
+</label>
+      <input id="merchant-product-name"placeholder="${
+  isBeauty
+    ? '예: 셋팅펌'
+    : '예: 아메리카노'
+}"" />
     </div>
 
     <div class="input-group">
@@ -14570,6 +14616,88 @@ if (orderRequestError) {
   </select>
 </div>
 
+${
+  isBeauty
+    ? `
+      <div class="input-group">
+        <label>소요시간</label>
+
+        <select id="merchant-product-duration">
+          <option value="15">15분</option>
+          <option value="30" selected>30분</option>
+          <option value="45">45분</option>
+          <option value="60">60분</option>
+          <option value="90">90분</option>
+          <option value="120">120분</option>
+          <option value="150">150분</option>
+          <option value="180">180분</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>담당직원</label>
+
+        <div class="beauty-service-staff-list">
+          ${
+            beautyStaff.length > 0
+              ? beautyStaff
+                  .map(
+                    (staff) => `
+                      <label
+                        style="
+                          display:flex;
+                          align-items:center;
+                          gap:8px;
+                          margin-bottom:10px;
+                        "
+                      >
+                        <input
+                          type="checkbox"
+                          class="beauty-product-staff"
+                          value="${staff.id}"
+                        />
+
+                        ${
+                          staff.photo_url
+                            ? `
+                              <img
+                                src="${staff.photo_url}"
+                                alt="${staff.staff_name || ''}"
+                                style="
+                                  width:44px;
+                                  height:44px;
+                                  border-radius:50%;
+                                  object-fit:cover;
+                                "
+                              />
+                            `
+                            : ''
+                        }
+
+                        <span>
+                          ${staff.staff_name || '-'}
+                          ${
+                            staff.position
+                              ? ` · ${staff.position}`
+                              : ''
+                          }
+                        </span>
+                      </label>
+                    `
+                  )
+                  .join('')
+              : `
+                <p style="color:#64748b;">
+                  먼저 직원관리에서 직원을 등록해주세요.
+                </p>
+              `
+          }
+        </div>
+      </div>
+    `
+    : ''
+}
+
     <div class="input-group">
       <label>상품 이미지</label>
       <input
@@ -14588,7 +14716,13 @@ if (orderRequestError) {
   </div>
 
   <div class="product-list-card">
-    <h2>등록된 상품</h2>
+    <h2>
+${
+  isBeauty
+    ? '등록된 서비스'
+    : '등록된 상품'
+}
+</h2>
 
     <div class="product-summary-row">
       <span>총 상품 : ${(products || []).length}개</span>
@@ -14636,6 +14770,13 @@ productBody.innerHTML = ''
   '<button class="product-up-button" data-id="' + product.id + '" data-sort="' + (product.sort_order || 0) + '">▲</button>' +
   '<button class="product-down-button" data-id="' + product.id + '" data-sort="' + (product.sort_order || 0) + '">▼</button>' +
 '</div>' +
+
+(isBeauty
+  ? '<button class="beauty-staff-setting-button" data-id="' +
+      product.id +
+      '">담당직원 설정</button>'
+  : '') +
+
   '<button class="product-edit-button" data-id="' + product.id + '">수정</button>' +
   '<button class="product-status-button" data-id="' + product.id + '" data-status="' + (product.status || '판매중') + '">' +
     ((product.status || '판매중') === '판매중' ? '판매중지' : '판매중') +
@@ -14645,6 +14786,270 @@ productBody.innerHTML = ''
 
   productBody.appendChild(item)
 })
+
+document.querySelectorAll('.beauty-staff-setting-button')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const productId =
+        Number(
+          (button as HTMLElement).getAttribute('data-id')
+        )
+
+      const product =
+        products?.find(
+          (item) => item.id === productId
+        )
+
+      if (!product) {
+        alert('서비스 정보를 찾을 수 없습니다.')
+        return
+      }
+
+      const { data: connectedStaff, error: connectedError } =
+        await supabase
+          .from('beauty_staff_services')
+          .select('staff_id')
+          .eq('merchant_id', merchantId)
+          .eq('product_id', productId)
+
+      if (connectedError) {
+        alert(
+          '담당직원 조회 실패: ' +
+          connectedError.message
+        )
+        return
+      }
+
+      const connectedStaffIds =
+        (connectedStaff || []).map(
+          (item) => Number(item.staff_id)
+        )
+
+      const overlay =
+        document.createElement('div')
+
+      overlay.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        box-sizing:border-box;
+        background:rgba(0,0,0,0.45);
+      `
+
+      overlay.innerHTML = `
+        <div style="
+          width:100%;
+          max-width:480px;
+          max-height:80vh;
+          overflow-y:auto;
+          padding:26px;
+          box-sizing:border-box;
+          border-radius:18px;
+          background:#ffffff;
+          box-shadow:0 20px 60px rgba(0,0,0,0.25);
+        ">
+          <h2 style="margin:0 0 8px;">
+            담당직원 설정
+          </h2>
+
+          <p style="margin:0 0 22px;">
+            ${product.product_name || '서비스'}
+          </p>
+
+          <label style="
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:14px 0;
+            border-bottom:1px solid #e5e7eb;
+            font-weight:700;
+          ">
+            <input
+              id="beauty-select-all-staff"
+              type="checkbox"
+            />
+            전체 직원 선택
+          </label>
+
+          <div style="margin-top:12px;">
+            ${
+              beautyStaff.length > 0
+                ? beautyStaff.map((staff) => `
+                    <label style="
+                      display:flex;
+                      align-items:center;
+                      gap:12px;
+                      padding:12px 0;
+                      border-bottom:1px solid #f1f5f9;
+                    ">
+                      <input
+                        type="checkbox"
+                        class="beauty-service-staff-checkbox"
+                        value="${staff.id}"
+                        ${
+                          connectedStaffIds.includes(
+                            Number(staff.id)
+                          )
+                            ? 'checked'
+                            : ''
+                        }
+                      />
+
+                      ${
+                        staff.photo_url
+                          ? `
+                            <img
+                              src="${staff.photo_url}"
+                              alt="${staff.staff_name || ''}"
+                              style="
+                                width:52px;
+                                height:52px;
+                                border-radius:50%;
+                                object-fit:cover;
+                              "
+                            />
+                          `
+                          : ''
+                      }
+
+                      <span>
+                        <strong>
+                          ${staff.staff_name || '-'}
+                        </strong>
+
+                        ${
+                          staff.position
+                            ? `<br><small>${staff.position}</small>`
+                            : ''
+                        }
+                      </span>
+                    </label>
+                  `).join('')
+                : `
+                  <p style="color:#64748b;">
+                    등록된 직원이 없습니다.
+                  </p>
+                `
+            }
+          </div>
+
+          <div style="
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+            margin-top:24px;
+          ">
+            <button id="beauty-staff-setting-cancel">
+              취소
+            </button>
+
+            <button id="beauty-staff-setting-save">
+              저장
+            </button>
+          </div>
+        </div>
+      `
+
+      document.body.appendChild(overlay)
+
+      const staffCheckboxes =
+        Array.from(
+          overlay.querySelectorAll<HTMLInputElement>(
+            '.beauty-service-staff-checkbox'
+          )
+        )
+
+      const selectAll =
+        overlay.querySelector<HTMLInputElement>(
+          '#beauty-select-all-staff'
+        )
+
+      if (selectAll) {
+        selectAll.checked =
+          staffCheckboxes.length > 0 &&
+          staffCheckboxes.every(
+            (checkbox) => checkbox.checked
+          )
+
+        selectAll.addEventListener('change', () => {
+          staffCheckboxes.forEach((checkbox) => {
+            checkbox.checked = selectAll.checked
+          })
+        })
+      }
+
+      staffCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', () => {
+          if (!selectAll) return
+
+          selectAll.checked =
+            staffCheckboxes.length > 0 &&
+            staffCheckboxes.every(
+              (item) => item.checked
+            )
+        })
+      })
+
+      overlay.querySelector(
+        '#beauty-staff-setting-cancel'
+      )?.addEventListener('click', () => {
+        overlay.remove()
+      })
+
+      overlay.querySelector(
+        '#beauty-staff-setting-save'
+      )?.addEventListener('click', async () => {
+        const selectedStaffIds =
+          staffCheckboxes
+            .filter((checkbox) => checkbox.checked)
+            .map((checkbox) => Number(checkbox.value))
+
+        const { error: deleteError } =
+          await supabase
+            .from('beauty_staff_services')
+            .delete()
+            .eq('merchant_id', merchantId)
+            .eq('product_id', productId)
+
+        if (deleteError) {
+          alert(
+            '기존 담당직원 삭제 실패: ' +
+            deleteError.message
+          )
+          return
+        }
+
+        if (selectedStaffIds.length > 0) {
+          const rows =
+            selectedStaffIds.map((staffId) => ({
+              merchant_id: merchantId,
+              staff_id: staffId,
+              product_id: productId
+            }))
+
+          const { error: insertError } =
+            await supabase
+              .from('beauty_staff_services')
+              .insert(rows)
+
+          if (insertError) {
+            alert(
+              '담당직원 저장 실패: ' +
+              insertError.message
+            )
+            return
+          }
+        }
+
+        alert('담당직원이 저장되었습니다.')
+        overlay.remove()
+      })
+    })
+  })
  
 document.querySelectorAll('.product-up-button')
   .forEach((button) => {
