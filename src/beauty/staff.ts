@@ -1,4 +1,5 @@
 import { renderBeautyStaffRegister } from './staff/register'
+import { renderBeautyStaffList } from './staff/list'
 
 export async function renderBeautyStaff(
     app: HTMLElement,
@@ -16,11 +17,11 @@ export async function renderBeautyStaff(
       return
     }
   
-    const { error } = await supabase
+    const { data: staffList, error } = await supabase
   .from('beauty_staff')
-  .select('id')
+  .select('*')
   .eq('merchant_id', merchantId)
-  .limit(1)
+  .order('id', { ascending: false })
   
     if (error) {
       alert('직원 목록 조회 실패: ' + error.message)
@@ -46,7 +47,13 @@ export async function renderBeautyStaff(
         </div>
   
         <div class="payment-card">
-  <div id="beauty-staff-register-area"></div>
+  <div class="merchant-product-layout">
+
+    <div id="beauty-staff-register-area"></div>
+
+    <div id="beauty-staff-list-area"></div>
+
+  </div>
 </div>
   
       </div>
@@ -63,6 +70,18 @@ export async function renderBeautyStaff(
       merchantId
     )
   }
+
+  const staffListArea =
+  document.getElementById(
+    'beauty-staff-list-area'
+  )
+
+if (staffListArea) {
+  renderBeautyStaffList(
+    staffListArea,
+    staffList || []
+  )
+}
 
     document.querySelector('#staff-go-admin')
       ?.addEventListener('click', () => {
