@@ -14734,10 +14734,10 @@ const assignedStaffHtml =
               '<div style="font-size:12px;color:#64748b;margin-bottom:6px;">담당직원</div>' +
               '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
                 assignedStaff.map((staff) =>
-                  '<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:999px;background:#f8fafc;">' +
+                  '<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid #e2e8f0;border-radius:999px;background:#f8fafc;">' +
                     (
                       staff.photo_url
-                        ? '<img src="' + staff.photo_url + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />'
+                        ? '<img src="' + staff.photo_url + '" style="width:42px;height:42px;border-radius:50%;object-fit:cover;" />'
                         : ''
                     ) +
                     '<span style="font-size:13px;font-weight:700;">' +
