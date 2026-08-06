@@ -14633,70 +14633,10 @@ ${
           <option value="180">180분</option>
         </select>
       </div>
-
-      <div class="input-group">
-        <label>담당직원</label>
-
-        <div class="beauty-service-staff-list">
-          ${
-            beautyStaff.length > 0
-              ? beautyStaff
-                  .map(
-                    (staff) => `
-                      <label
-                        style="
-                          display:flex;
-                          align-items:center;
-                          gap:8px;
-                          margin-bottom:10px;
-                        "
-                      >
-                        <input
-                          type="checkbox"
-                          class="beauty-product-staff"
-                          value="${staff.id}"
-                        />
-
-                        ${
-                          staff.photo_url
-                            ? `
-                              <img
-                                src="${staff.photo_url}"
-                                alt="${staff.staff_name || ''}"
-                                style="
-                                  width:44px;
-                                  height:44px;
-                                  border-radius:50%;
-                                  object-fit:cover;
-                                "
-                              />
-                            `
-                            : ''
-                        }
-
-                        <span>
-                          ${staff.staff_name || '-'}
-                          ${
-                            staff.position
-                              ? ` · ${staff.position}`
-                              : ''
-                          }
-                        </span>
-                      </label>
-                    `
-                  )
-                  .join('')
-              : `
-                <p style="color:#64748b;">
-                  먼저 직원관리에서 직원을 등록해주세요.
-                </p>
-              `
-          }
-        </div>
-      </div>
     `
     : ''
 }
+
 
     <div class="input-group">
       <label>상품 이미지</label>
@@ -15047,6 +14987,147 @@ document.querySelectorAll('.beauty-staff-setting-button')
 
         alert('담당직원이 저장되었습니다.')
         overlay.remove()
+      })
+    })
+  })
+
+  document.querySelectorAll('.beauty-staff-setting-button')
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const productId =
+        Number(
+          (button as HTMLElement).getAttribute('data-id')
+        )
+
+      const product =
+        products?.find(
+          (item) => item.id === productId
+        )
+
+      if (!product) {
+        alert('서비스 정보를 찾을 수 없습니다.')
+        return
+      }
+
+      const overlay =
+        document.createElement('div')
+
+      overlay.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        box-sizing:border-box;
+        background:rgba(0,0,0,0.45);
+      `
+
+      overlay.innerHTML = `
+        <div style="
+          width:100%;
+          max-width:480px;
+          max-height:80vh;
+          overflow-y:auto;
+          padding:26px;
+          box-sizing:border-box;
+          border-radius:18px;
+          background:#ffffff;
+          box-shadow:0 20px 60px rgba(0,0,0,0.25);
+        ">
+          <h2 style="margin:0 0 8px;">
+            담당직원 설정
+          </h2>
+
+          <p style="margin:0 0 22px;">
+            ${product.product_name || '서비스'}
+          </p>
+
+          <div>
+            ${
+              beautyStaff.length > 0
+                ? beautyStaff.map((staff) => `
+                    <label style="
+                      display:flex;
+                      align-items:center;
+                      gap:12px;
+                      padding:12px 0;
+                      border-bottom:1px solid #f1f5f9;
+                    ">
+                      <input
+                        type="checkbox"
+                        class="beauty-service-staff-checkbox"
+                        value="${staff.id}"
+                      />
+
+                      ${
+                        staff.photo_url
+                          ? `
+                            <img
+                              src="${staff.photo_url}"
+                              alt="${staff.staff_name || ''}"
+                              style="
+                                width:52px;
+                                height:52px;
+                                border-radius:50%;
+                                object-fit:cover;
+                              "
+                            />
+                          `
+                          : ''
+                      }
+
+                      <span>
+                        <strong>
+                          ${staff.staff_name || '-'}
+                        </strong>
+
+                        ${
+                          staff.position
+                            ? `<br><small>${staff.position}</small>`
+                            : ''
+                        }
+                      </span>
+                    </label>
+                  `).join('')
+                : `
+                  <p style="color:#64748b;">
+                    등록된 직원이 없습니다.
+                  </p>
+                `
+            }
+          </div>
+
+          <div style="
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:10px;
+            margin-top:24px;
+          ">
+            <button id="beauty-staff-setting-cancel">
+              취소
+            </button>
+
+            <button id="beauty-staff-setting-save">
+              저장
+            </button>
+          </div>
+        </div>
+      `
+
+      document.body.appendChild(overlay)
+
+      overlay.querySelector(
+        '#beauty-staff-setting-cancel'
+      )?.addEventListener('click', () => {
+        overlay.remove()
+      })
+
+      overlay.querySelector(
+        '#beauty-staff-setting-save'
+      )?.addEventListener('click', () => {
+        alert('저장 기능은 다음 단계에서 연결합니다.')
       })
     })
   })
