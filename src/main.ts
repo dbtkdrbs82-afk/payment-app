@@ -17947,6 +17947,33 @@ ${
   `).join('')}
 </div>
 
+${
+  isBeautyKiosk
+    ? `
+      <div class="beauty-reservation-area">
+
+        <div class="beauty-reservation-row">
+          <label>예약일</label>
+
+          <input
+            type="date"
+            id="beauty-reservation-date"
+          />
+        </div>
+
+        <div class="beauty-reservation-row">
+          <label>예약시간</label>
+
+          <select id="beauty-reservation-time">
+            <option value="">시간 선택</option>
+          </select>
+        </div>
+
+      </div>
+    `
+    : ''
+}
+
             <div class="kiosk-cart">
               <h2>장바구니</h2>
               <div id="cart-items">
@@ -18030,6 +18057,31 @@ ${
           </div>
         `
 
+        const beautyReservationTimes: string[] = [
+          '09:00',
+          '09:30',
+          '10:00',
+          '10:30',
+          '11:00',
+          '11:30',
+          '12:00',
+          '12:30',
+          '13:00',
+          '13:30',
+          '14:00',
+          '14:30',
+          '15:00',
+          '15:30',
+          '16:00',
+          '16:30',
+          '17:00',
+          '17:30',
+          '18:00',
+          '18:30'
+        ]
+        
+        
+
         if (isBeautyKiosk && beautyKioskStaff.length > 0) {
           const filterBeautyProductsByStaff = (
             staffId: number
@@ -18100,6 +18152,21 @@ ${
           filterBeautyProductsByStaff(
             Number(beautyKioskStaff[0].id)
           )
+          const timeSelect =
+  document.querySelector<HTMLSelectElement>(
+    '#beauty-reservation-time'
+  )
+
+if (timeSelect) {
+  beautyReservationTimes.forEach((time) => {
+    const option = document.createElement('option')
+
+    option.value = time
+    option.textContent = time
+
+    timeSelect.appendChild(option)
+  })
+}
         }
 
         document.querySelectorAll('.kiosk-category-tab')
@@ -18218,6 +18285,8 @@ ${
             })
           })
         }
+
+        
 
         let selectedBeautyStaffId =
   isBeautyKiosk && beautyKioskStaff.length > 0
