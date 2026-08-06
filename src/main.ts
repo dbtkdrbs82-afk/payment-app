@@ -14545,6 +14545,28 @@ if (isBeauty) {
   }
 }
 
+let beautyStaffServiceRows: any[] = []
+
+if (isBeauty) {
+  const {
+    data: staffServiceData,
+    error: staffServiceError
+  } = await supabase
+    .from('beauty_staff_services')
+    .select('staff_id, service_id')
+    .eq('merchant_id', merchantId)
+
+  if (staffServiceError) {
+    alert(
+      '담당직원 연결 조회 실패: ' +
+      staffServiceError.message
+    )
+  } else {
+    beautyStaffServiceRows =
+      staffServiceData || []
+  }
+}
+
   if (error) {
     alert('상품 목록 조회 실패: ' + error.message)
   }
@@ -14690,6 +14712,45 @@ productBody.innerHTML = ''
       ? '<img src="' + product.image_url + '" />'
       : '<div class="product-no-image">이미지 없음</div>'
 
+      const assignedStaffIds =
+  beautyStaffServiceRows
+    .filter(
+      (row) =>
+        Number(row.service_id) ===
+        Number(product.id)
+    )
+    .map((row) => Number(row.staff_id))
+
+const assignedStaff =
+  beautyStaff.filter((staff) =>
+    assignedStaffIds.includes(Number(staff.id))
+  )
+
+const assignedStaffHtml =
+  isBeauty
+    ? (
+        assignedStaff.length > 0
+          ? '<div style="margin-top:10px;">' +
+              '<div style="font-size:12px;color:#64748b;margin-bottom:6px;">담당직원</div>' +
+              '<div style="display:flex;flex-wrap:wrap;gap:8px;">' +
+                assignedStaff.map((staff) =>
+                  '<div style="display:flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:999px;background:#f8fafc;">' +
+                    (
+                      staff.photo_url
+                        ? '<img src="' + staff.photo_url + '" style="width:28px;height:28px;border-radius:50%;object-fit:cover;" />'
+                        : ''
+                    ) +
+                    '<span style="font-size:13px;font-weight:700;">' +
+                      (staff.staff_name || '-') +
+                    '</span>' +
+                  '</div>'
+                ).join('') +
+              '</div>' +
+            '</div>'
+          : '<p style="margin-top:10px;color:#94a3b8;font-size:13px;">담당직원 미설정</p>'
+      )
+    : ''
+
   item.className = 'product-item-card'
 
   item.innerHTML =
@@ -14698,12 +14759,27 @@ productBody.innerHTML = ''
     '</div>' +
 
     '<div class="product-info">' +
-      '<h3>' + (product.product_name || '-') + '</h3>' +
-      '<p>' + Number(product.price || 0).toLocaleString() + '원</p>' +
-      '<span class="' + ((product.status || '판매중') === '판매중' ? 'product-on' : 'product-off') + '">' +
-        (product.status || '판매중') +
-      '</span>' +
-    '</div>' +
+  '<h3>' + (product.product_name || '-') + '</h3>' +
+  '<p>' + Number(product.price || 0).toLocaleString() + '원</p>' +
+
+  (
+    isBeauty
+      ? '<p>소요시간 : ' +
+          Number(product.duration_minutes || 30) +
+          '분</p>'
+      : ''
+  ) +
+
+  assignedStaffHtml +
+
+  '<span class="' +
+    ((product.status || '판매중') === '판매중'
+      ? 'product-on'
+      : 'product-off') +
+  '">' +
+    (product.status || '판매중') +
+  '</span>' +
+'</div>' +
 
     '<div class="product-actions">' +
     '<div class="product-sort-row">' +
