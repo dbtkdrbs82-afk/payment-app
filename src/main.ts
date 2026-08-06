@@ -14953,7 +14953,7 @@ document.querySelectorAll('.beauty-staff-setting-button')
             .from('beauty_staff_services')
             .delete()
             .eq('merchant_id', merchantId)
-            .eq('product_id', productId)
+            .eq('service_id', productId)
 
         if (deleteError) {
           alert(
