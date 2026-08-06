@@ -17810,12 +17810,32 @@ if (isBeautyKiosk) {
             ${
               isBeautyKiosk
                 ? `
-                  <div class="beauty-kiosk-staff-list">
+                  <div
+  class="beauty-kiosk-staff-list"
+  style="
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:14px;
+    margin:30px 0;
+  "
+>
                     ${beautyKioskStaff.map((staff, index) => `
                       <button
-                        class="beauty-kiosk-staff-button ${index === 0 ? 'active' : ''}"
-                        data-staff-id="${staff.id}"
-                      >
+  class="beauty-kiosk-staff-button ${index === 0 ? 'active' : ''}"
+  data-staff-id="${staff.id}"
+  style="
+    width:180px;
+    min-height:130px;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:7px;
+    border-radius:16px;
+  "
+>
                         ${
                           staff.photo_url
                             ? `
@@ -17864,7 +17884,14 @@ if (isBeautyKiosk) {
                 `
             }
 
-            <div class="kiosk-category-list">
+            <div
+  class="kiosk-category-list"
+  style="${
+    isBeautyKiosk
+      ? 'display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;'
+      : ''
+  }"
+>
   ${Object.keys(groupedProducts).map((category) => `
     <section
   class="kiosk-category-section ${
@@ -17877,10 +17904,18 @@ if (isBeautyKiosk) {
       )
 }"
   data-category-section="${category}"
+  style="${isBeautyKiosk ? 'display:contents;' : ''}"
 >
-      <h2 class="kiosk-category-title">${category}</h2>
+${
+  isBeautyKiosk
+    ? ''
+    : `<h2 class="kiosk-category-title">${category}</h2>`
+}
 
-      <div class="kiosk-products">
+      <div
+  class="kiosk-products"
+  style="${isBeautyKiosk ? 'display:contents;' : ''}"
+>
         ${groupedProducts[category].map((product: any) => `
           <div
   class="kiosk-product-card"
@@ -18028,23 +18063,7 @@ if (isBeautyKiosk) {
                     : 'none'
               })
 
-              document
-  .querySelectorAll<HTMLElement>(
-    '.kiosk-category-section'
-  )
-  .forEach((section) => {
-    const visibleCards =
-      Array.from(
-        section.querySelectorAll<HTMLElement>(
-          '.kiosk-product-card'
-        )
-      ).some(
-        (card) => card.style.display !== 'none'
-      )
-
-    section.style.display =
-      visibleCards ? '' : 'none'
-  })
+              
           }
         
           document
