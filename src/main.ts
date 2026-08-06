@@ -18080,7 +18080,42 @@ ${
           '18:30'
         ]
         
+        function updateBeautyReservationTimes(
+          reservedOrders: any[]
+        ) {
+          const timeSelect =
+            document.querySelector<HTMLSelectElement>(
+              '#beauty-reservation-time'
+            )
         
+          if (!timeSelect) return
+        
+          timeSelect.innerHTML =
+            '<option value="">시간 선택</option>'
+        
+          beautyReservationTimes.forEach((time) => {
+            const option =
+              document.createElement('option')
+        
+            option.value = time
+        
+            option.textContent =
+              reservedOrders.some(
+                (row) =>
+                  row.reservation_time === time
+              )
+                ? time + ' (예약완료)'
+                : time
+        
+            option.disabled =
+              reservedOrders.some(
+                (row) =>
+                  row.reservation_time === time
+              )
+        
+            timeSelect.appendChild(option)
+          })
+        }
 
         if (isBeautyKiosk && beautyKioskStaff.length > 0) {
           const filterBeautyProductsByStaff = (
@@ -18169,6 +18204,40 @@ if (timeSelect) {
 }
         }
 
+        const reservationDateInput =
+  document.querySelector<HTMLInputElement>(
+    '#beauty-reservation-date'
+  )
+
+reservationDateInput?.addEventListener(
+  'change',
+  async () => {
+    if (!selectedBeautyStaffId) return
+
+    const reservationDate =
+      reservationDateInput.value
+
+    if (!reservationDate) return
+
+    const { data: reservedOrders } =
+      await supabase
+        .from('orders')
+        .select('reservation_time')
+        .eq(
+          'beauty_staff_id',
+          selectedBeautyStaffId
+        )
+        .eq(
+          'reservation_date',
+          reservationDate
+        )
+
+    updateBeautyReservationTimes(
+      reservedOrders || []
+    )
+  }
+)
+
         document.querySelectorAll('.kiosk-category-tab')
   .forEach((button) => {
     button.addEventListener('click', () => {
@@ -18233,19 +18302,36 @@ if (timeSelect) {
             <div class="cart-item">
               <div>
                 <strong>${item.name}</strong>
-                ${
-                  item.beauty_staff_id
-                    ? `<p style="font-size:12px;color:#64748b;">
-                        ${
-                          beautyKioskStaff.find(
-                            (s) =>
-                              Number(s.id) ===
-                              Number(item.beauty_staff_id)
-                          )?.staff_name || ''
-                        }
-                      </p>`
-                    : ''
-                }
+
+${
+  item.beauty_staff_id
+    ? `<p style="font-size:12px;color:#64748b;">
+        ${
+          beautyKioskStaff.find(
+            (s) =>
+              Number(s.id) ===
+              Number(item.beauty_staff_id)
+          )?.staff_name || ''
+        }
+      </p>`
+    : ''
+}
+
+${
+  sessionStorage.getItem('beauty_reservation_date')
+    ? `<p style="font-size:12px;color:#64748b;">
+        📅 ${sessionStorage.getItem('beauty_reservation_date')}
+      </p>`
+    : ''
+}
+
+${
+  sessionStorage.getItem('beauty_reservation_time')
+    ? `<p style="font-size:12px;color:#64748b;">
+        🕒 ${sessionStorage.getItem('beauty_reservation_time')}
+      </p>`
+    : ''
+}
                 <p>${item.price.toLocaleString()}원 x ${item.quantity}</p>
               </div>
               <div class="cart-item-buttons">
@@ -18409,6 +18495,24 @@ const orderNo =
     }
 
     sessionStorage.setItem(
+      'beauty_reservation_date',
+      (
+        document.querySelector<HTMLInputElement>(
+          '#beauty-reservation-date'
+        )?.value || ''
+      )
+    )
+    
+    sessionStorage.setItem(
+      'beauty_reservation_time',
+      (
+        document.querySelector<HTMLSelectElement>(
+          '#beauty-reservation-time'
+        )?.value || ''
+      )
+    )
+
+    sessionStorage.setItem(
       'kiosk_total_amount',
       String(totalPrice)
     )
@@ -18536,7 +18640,18 @@ document.querySelector('#kiosk-card-pay-button')
   sessionStorage.getItem('beauty_staff_id')
     ? Number(sessionStorage.getItem('beauty_staff_id'))
     : null,
-            total_amount: Number(totalAmount),
+
+reservation_date:
+  sessionStorage.getItem(
+    'beauty_reservation_date'
+  ) || null,
+
+reservation_time:
+  sessionStorage.getItem(
+    'beauty_reservation_time'
+  ) || null,
+
+total_amount: Number(totalAmount),
             order_status: '접수',
             payment_status: '결제완료',
           })
@@ -18579,11 +18694,21 @@ let branchFeeRate = 0
       merchant_name: merchantData?.merchant_name || '',
 
       beauty_staff_id:
-  sessionStorage.getItem('beauty_staff_id')
-    ? Number(sessionStorage.getItem('beauty_staff_id'))
-    : null,
-  
-      manager_admin_id: managerAdminId,
+      sessionStorage.getItem('beauty_staff_id')
+        ? Number(sessionStorage.getItem('beauty_staff_id'))
+        : null,
+    
+    reservation_date:
+      sessionStorage.getItem(
+        'beauty_reservation_date'
+      ) || null,
+    
+    reservation_time:
+      sessionStorage.getItem(
+        'beauty_reservation_time'
+      ) || null,
+    
+    manager_admin_id: managerAdminId,
 manager_admin_name: managerAdminName,
 manager_fee_rate: managerFeeRate,
 
