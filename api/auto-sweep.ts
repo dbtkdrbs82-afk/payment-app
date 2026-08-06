@@ -66,8 +66,8 @@ export default async function handler(
     }
 
     const availableAmount = Number(
-      balanceResult?.data?.availableAmount?.value || 0
-    )
+        balanceResult?.data?.data?.availableAmount?.value || 0
+      )
 
     console.log(
         'AUTO_SWEEP_BALANCE',
