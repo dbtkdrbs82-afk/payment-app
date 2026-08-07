@@ -9869,6 +9869,8 @@ const isBeautyOrderPage =
     return
   }
 
+ 
+
   if (summaryBox) {
     summaryBox.innerHTML =
       '주문수 : ' + (orders || []).length + '건'
@@ -9877,20 +9879,8 @@ const isBeautyOrderPage =
   let orderPageSize = 10
   const orderList = orders || []
 
-  const { data: beautyOrderStaff } =
-  await supabase
-    .from('beauty_staff')
-    .select('id, staff_name')
-    .eq('merchant_id', loginMerchantId)
+  
 
-const getBeautyStaffName = (staffId: any) => {
-  return (
-    (beautyOrderStaff || []).find(
-      (staff: any) =>
-        Number(staff.id) === Number(staffId)
-    )?.staff_name || '직원ID ' + (staffId || '-')
-  )
-}
   
   
 if (tableHead) {
@@ -9957,15 +9947,12 @@ function renderMerchantOrderPage() {
     const beautyOrderItems = Array.isArray(order.items)
       ? order.items
           .map((item: any) => {
-            const staffId =
-              item.beauty_staff_id ||
-              order.beauty_staff_id ||
-              ''
+            
 
             return (
               (item.name || '-') +
               ' / ' +
-              getBeautyStaffName(staffId) +
+              '직원ID ' + (item.beauty_staff_id || order.beauty_staff_id || '-') +
               ' / ' +
               Number(item.price || 0).toLocaleString() +
               '원 x ' +
@@ -9994,7 +9981,16 @@ function renderMerchantOrderPage() {
               '</button>' +
             '</td>' +
 
-            '<td>' + (order.reservation_date || '-') + '</td>' +
+            '<td>' +
+  (order.reservation_date || '-') +
+  '<br/>' +
+  '<span class="approval-number cancel-approval-link" ' +
+    'data-id="' + order.id + '" ' +
+    'data-created-at="' + order.created_at + '" ' +
+    'data-amount="' + order.total_amount + '">' +
+    '결제/예약취소' +
+  '</span>' +
+'</td>' +
 
             '<td>' + (order.reservation_time || '-') + '</td>' +
 
@@ -13034,7 +13030,7 @@ const channel = supabase
 <div class="merchant-toolbar">
   ${merchantMenu}
 
-  ${isNormalStore ? `
+  ${(isNormalStore || isBeauty) ? `
     <span class="toolbar-divider"></span>
     <button class="order-filter-btn" data-status="전체">전체</button>
     <button class="order-filter-btn" data-status="준비중">준비중</button>
@@ -13045,7 +13041,7 @@ const channel = supabase
 
 ${merchantContent}
 
-<div class="merchant-sales-filter ${isNormalStore ? '' : 'hide-for-type'}">
+<div class="merchant-sales-filter ${(isNormalStore || isBeauty) ? '' : 'hide-for-type'}">
   <button id="sales-today">오늘</button>
   <button id="sales-month">이번달</button>
   <button id="sales-year">올해</button>
@@ -13063,7 +13059,7 @@ ${merchantContent}
 </div>
 
 
-  <div class="merchant-sales-summary ${isNormalStore ? '' : 'hide-for-type'}">
+  <div class="merchant-sales-summary ${(isNormalStore || isBeauty) ? '' : 'hide-for-type'}">
   <div>
     <strong>주문수</strong>
     <span>${(orders || []).length}건</span>
@@ -13113,7 +13109,7 @@ ${merchantContent}
 </div>
 
 
-  <div class="order-bottom-toolbar ${isNormalStore ? '' : 'hide-for-type'}">
+  <div class="order-bottom-toolbar ${(isNormalStore || isBeauty) ? '' : 'hide-for-type'}">
 
    <select id="merchant-page-size">
     <option value="10">10개씩 보기</option>
@@ -13552,7 +13548,7 @@ if (merchantOrderCardList) {
               (item.name || '-') +
               (
                 item.beauty_staff_id || order.beauty_staff_id
-                  ? ' / 직원ID ' + (item.beauty_staff_id || order.beauty_staff_id)
+                  ? ' / 직원ID ' + (item.beauty_staff_id || order.beauty_staff_id || '-')
                   : ''
               ) +
               ' x ' +
@@ -14826,6 +14822,8 @@ if (orderRequestError) {
 
 const isBeauty =
   merchantType === '뷰티'
+
+  
 
   if (!merchantId) {
     alert('로그인이 필요합니다.')
