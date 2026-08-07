@@ -8619,7 +8619,89 @@ if (withdrawAmount > accountBalance) {
       return
     }
 
-    alert('비밀번호 확인 완료\n토스 지급 API 연결 후 실제 회수가 실행됩니다.')
+    try {
+      const sellerResponse = await fetch('/api/toss-seller-get')
+      const sellerResult = await sellerResponse.json()
+    
+      if (!sellerResponse.ok || !sellerResult.success) {
+        alert('회사 회수용 셀러 조회에 실패했습니다.')
+        return
+      }
+    
+      const sellers =
+        sellerResult?.data?.entityBody?.items || []
+    
+      const sweepSeller = sellers.find(
+        (seller: any) =>
+          String(seller.refSellerId || '').trim() ===
+          'NXGSOFT01'
+      )
+    
+      if (!sweepSeller?.id) {
+        alert('NXGSOFT01 회수용 셀러를 찾을 수 없습니다.')
+        return
+      }
+    
+      if (sweepSeller.status !== 'APPROVED') {
+        alert('NXGSOFT01 셀러가 지급가능 상태가 아닙니다.')
+        return
+      }
+    
+      const refPayoutId =
+        'SWEEP-' +
+        Date.now() +
+        '-' +
+        withdrawAmount
+    
+      const payoutResponse = await fetch(
+        '/api/toss-payout',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            destination: sweepSeller.id,
+            amount: withdrawAmount,
+            transactionDescription: '잔액회수',
+            refPayoutId,
+          }),
+        }
+      )
+    
+      const payoutResult = await payoutResponse.json()
+    
+      if (!payoutResponse.ok || !payoutResult.success) {
+        const errorMessage =
+          payoutResult?.data?.error?.message ||
+          payoutResult?.data?.message ||
+          payoutResult?.message ||
+          '회사계좌 회수에 실패했습니다.'
+    
+        alert(
+          '회사계좌 회수 실패\n\n' +
+          errorMessage
+        )
+    
+        return
+      }
+    
+      alert(
+        '회사계좌 회수가 완료되었습니다.\n\n' +
+        '회수금액: ' +
+        withdrawAmount.toLocaleString() +
+        '원'
+      )
+    
+      modal.remove()
+    
+    } catch (error) {
+      console.error('회사계좌 회수 오류:', error)
+    
+      alert(
+        '회사계좌 회수 중 오류가 발생했습니다.'
+      )
+    }
   })
 })
 
@@ -9748,9 +9830,9 @@ document.querySelector('#payout-target-filter')
       subMenu.innerHTML = ''
     }
 
-  if (titleBox) {
-    titleBox.innerHTML = '▶ 주문관리 > 주문접수'
-  }
+    if (titleBox) {
+      titleBox.innerHTML = '▶ 주문관리 > 주문접수'
+    }
 
   if (searchBox) {
     searchBox.innerHTML =
@@ -12189,6 +12271,7 @@ const isAcademy =
 const isWirelessTerminal =
   merchantType === '무선단말기'
 
+ 
   let terminalPayments: any[] = []
 
 if (isWirelessTerminal) {
