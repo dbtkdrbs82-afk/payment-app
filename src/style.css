@@ -6407,3 +6407,38 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   opacity: 0.6;
   cursor: default;
 }
+.beauty-reservation-area{
+  margin:16px 0 20px;
+}
+
+.beauty-reservation-card{
+  display:flex;
+  gap:12px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,.06);
+}
+
+.beauty-reservation-input{
+  flex:1;
+  height:48px;
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  padding:0 14px;
+  font-size:15px;
+  background:#fff;
+}
+
+@media (max-width:768px){
+
+  .beauty-reservation-card{
+    flex-direction:column;
+  }
+
+  .beauty-reservation-input{
+    width:100%;
+  }
+
+}

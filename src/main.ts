@@ -17952,6 +17952,25 @@ ${
     ? `
       <div class="beauty-reservation-area">
 
+  <div class="beauty-reservation-card">
+
+    <input
+      type="date"
+      id="beauty-reservation-date"
+      class="beauty-reservation-input"
+    />
+
+    <select
+      id="beauty-reservation-time"
+      class="beauty-reservation-input"
+    >
+      <option value="">예약시간 선택</option>
+    </select>
+
+  </div>
+
+</div>
+
         <div class="beauty-reservation-row">
           <label>예약일</label>
 
