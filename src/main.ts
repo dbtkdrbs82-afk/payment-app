@@ -9830,8 +9830,17 @@ document.querySelector('#payout-target-filter')
       subMenu.innerHTML = ''
     }
 
+    const orderMerchantType =
+  sessionStorage.getItem('login_merchant_type') || ''
+
+const isBeautyOrderPage =
+  orderMerchantType === '뷰티'
+
     if (titleBox) {
-      titleBox.innerHTML = '▶ 주문관리 > 주문접수'
+      titleBox.innerHTML =
+        isBeautyOrderPage
+          ? '▶ 뷰티 주문관리 > 예약접수'
+          : '▶ 주문관리 > 주문접수'
     }
 
   if (searchBox) {
@@ -9846,6 +9855,8 @@ document.querySelector('#payout-target-filter')
   const loginMerchantId = Number(
     sessionStorage.getItem('login_merchant_id')
   )
+
+  
 
   const { data: orders, error } = await supabase
   .from('orders')
@@ -9869,16 +9880,31 @@ document.querySelector('#payout-target-filter')
   
   if (tableHead) {
     tableHead.innerHTML =
-      '<tr>' +
-        '<th>No</th>' +
-        '<th>주문번호</th>' +
-        '<th>가맹점명</th>' +
-        '<th>주문내용</th>' +
-        '<th>결제금액</th>' +
-        '<th>주문상태</th>' +
-        '<th>처리</th>' +
-        '<th>고객호출</th>' +
-      '</tr>'
+      isBeautyOrderPage
+        ? (
+            '<tr>' +
+              '<th>No</th>' +
+              '<th>주문번호</th>' +
+              '<th>예약일</th>' +
+              '<th>예약시간</th>' +
+              '<th>서비스</th>' +
+              '<th>결제금액</th>' +
+              '<th>상태</th>' +
+              '<th>처리</th>' +
+            '</tr>'
+          )
+        : (
+            '<tr>' +
+              '<th>No</th>' +
+              '<th>주문번호</th>' +
+              '<th>가맹점명</th>' +
+              '<th>주문내용</th>' +
+              '<th>결제금액</th>' +
+              '<th>주문상태</th>' +
+              '<th>처리</th>' +
+              '<th>고객호출</th>' +
+            '</tr>'
+          )
   }
 
   function renderMerchantOrderPage() {
@@ -9910,46 +9936,117 @@ document.querySelector('#payout-target-filter')
             .map((item: any) => item.name + ' x ' + item.quantity)
             .join(', ')
         : '-'
+
+        const beautyOrderItems = Array.isArray(order.items)
+  ? order.items
+      .map((item: any) =>
+        (item.name || '-') +
+        ' / 직원ID ' +
+        (item.beauty_staff_id || order.beauty_staff_id || '-') +
+        ' / ' +
+        Number(item.price || 0).toLocaleString() +
+        '원 x ' +
+        Number(item.quantity || 1)
+      )
+      .join('<br/>')
+  : '-'
   
-      tr.innerHTML =
+  tr.innerHTML =
+  isBeautyOrderPage
+    ? (
         '<td>' + (start + index + 1) + '</td>' +
+
         '<td>' +
-        '<button ' +
-          'class="merchant-receipt-link" ' +
-          'data-order="' + orderNumber + '" ' +
-          'data-amount="' + (order.total_amount || 0) + '" ' +
-          'data-date="' + (order.created_at || '') + '" ' +
-          'data-items="' + orderItems + '" ' +
-          'data-payment-key="' + (order.payment_key || '-') + '" ' +
-          'data-customer="' + (order.customer_name || '현장고객') + '"' +
-        '>' +
-          orderNumber + '번' +
-        '</button>' +
+          '<button ' +
+            'class="merchant-receipt-link" ' +
+            'data-order="' + orderNumber + '" ' +
+            'data-amount="' + (order.total_amount || 0) + '" ' +
+            'data-date="' + (order.created_at || '') + '" ' +
+            'data-items="' + beautyOrderItems + '" ' +
+            'data-payment-key="' + (order.payment_key || '-') + '" ' +
+            'data-customer="' + (order.customer_name || '현장고객') + '"' +
+          '>' +
+            orderNumber + '번' +
+          '</button>' +
         '</td>' +
-        '<td>MER' + String(order.merchant_id || 1).padStart(4, '0') + '</td>' +
+
+        '<td>' + (order.reservation_date || '-') + '</td>' +
+
+        '<td>' + (order.reservation_time || '-') + '</td>' +
+
+        '<td style="line-height:1.8;">' +
+          beautyOrderItems +
+        '</td>' +
+
+        '<td>' +
+          Number(order.total_amount || 0).toLocaleString() +
+          '원' +
+        '</td>' +
+
+        '<td>' +
+          (order.order_status || '접수') +
+        '</td>' +
+
+        '<td>' +
+          (
+            order.order_status === '완료'
+              ? '완료'
+              : '<button class="order-complete-button" data-id="' +
+                  order.id +
+                '">완료처리</button>'
+          ) +
+        '</td>'
+      )
+    : (
+        '<td>' + (start + index + 1) + '</td>' +
+
+        '<td>' +
+          '<button ' +
+            'class="merchant-receipt-link" ' +
+            'data-order="' + orderNumber + '" ' +
+            'data-amount="' + (order.total_amount || 0) + '" ' +
+            'data-date="' + (order.created_at || '') + '" ' +
+            'data-items="' + orderItems + '" ' +
+            'data-payment-key="' + (order.payment_key || '-') + '" ' +
+            'data-customer="' + (order.customer_name || '현장고객') + '"' +
+          '>' +
+            orderNumber + '번' +
+          '</button>' +
+        '</td>' +
+
+        '<td>MER' +
+          String(order.merchant_id || 1).padStart(4, '0') +
+        '</td>' +
+
         '<td>' + orderItems + '</td>' +
-        '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
-        '<td>' + (order.order_status || '접수') + '</td>' +
+
         '<td>' +
-          (order.order_status === '완료'
-            ? '완료'
-            : '<button class="order-complete-button" data-id="' + order.id + '">조리완료</button>') +
+          Number(order.total_amount || 0).toLocaleString() +
+          '원' +
         '</td>' +
+
         '<td>' +
-          '<select class="call-message-select">' +
-            '<option value="주문 나왔습니다.">주문 나왔습니다.</option>' +
-            '<option value="주문이 준비되었습니다.">주문이 준비되었습니다.</option>' +
-            '<option value="음식을 찾아가 주세요.">음식을 찾아가 주세요.</option>' +
-            '<option value="카운터로 와주세요.">카운터로 와주세요.</option>' +
-            '<option value="픽업 부탁드립니다.">픽업 부탁드립니다.</option>' +
-            '<option value="아따 싸게싸게 챙겨가쇼.">아따 싸게싸게 챙겨가쇼.</option>' +
-            '<option value="챙겨 갈껀가 말껀가.">챙겨 갈껀가 말껀가.</option>' +
-            '<option value="행님 주문 나왔습니다.">행님 주문 나왔습니다.</option>' +
-          '</select>' +
-          '<button class="customer-call-button" data-number="' + orderNumber + '">' +
+          (order.order_status || '접수') +
+        '</td>' +
+
+        '<td>' +
+          (
+            order.order_status === '완료'
+              ? '완료'
+              : '<button class="order-complete-button" data-id="' +
+                  order.id +
+                '">조리완료</button>'
+          ) +
+        '</td>' +
+
+        '<td>' +
+          '<button class="customer-call-button" data-number="' +
+            orderNumber +
+          '">' +
             '고객호출' +
           '</button>' +
         '</td>'
+      )
   
       paymentTableBody.appendChild(tr)
     })
