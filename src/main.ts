@@ -11628,20 +11628,97 @@ document.querySelectorAll('.payment-cancel-link')
       }
 
 
-      if (payment.pg_company !== '코페이') {
+      const cancelRequest =
+      paymentCancelRequestMap.get(Number(payment.id))
+    
+    const cancelReason =
+      String(cancelRequest?.reason || '관리자 취소 승인').trim()
+
+    if (String(payment.pg_company || '').includes('토스')) {
+      if (!payment.payment_key) {
+        alert('토스 paymentKey가 없습니다.')
+        return
+      }
+
+      const tossCancelResponse = await fetch(
+        '/api/toss-cancel',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            paymentKey: payment.payment_key,
+            cancelReason
+          })
+        }
+      )
+
+      const tossCancelData =
+        await tossCancelResponse.json()
+
+      if (!tossCancelResponse.ok) {
         alert(
-          '현재 관리자 취소 API는 코페이 결제만 지원합니다.\n' +
-          '결제 PG사: ' +
-          (payment.pg_company || '-')
+          '토스 실제 취소에 실패했습니다.\n\n' +
+          (
+            tossCancelData.message ||
+            tossCancelData.error?.message ||
+            '알 수 없는 오류'
+          )
         )
         return
       }
-      
-      const cancelRequest =
-        paymentCancelRequestMap.get(Number(payment.id))
-      
-      const cancelReason =
-        String(cancelRequest?.reason || '관리자 취소 승인').trim()
+
+      const { error: paymentUpdateError } =
+        await supabase
+          .from('payments')
+          .update({
+            status: 'cancel',
+            canceled_at: new Date().toISOString(),
+            payout_status: '출금제외',
+            settlement_status: '취소'
+          })
+          .eq('id', Number(payment.id))
+
+      if (paymentUpdateError) {
+        alert(
+          '토스 취소는 성공했지만 결제내역 수정에 실패했습니다.\n' +
+          paymentUpdateError.message
+        )
+        return
+      }
+
+      const { error: cancelRequestUpdateError } =
+        await supabase
+          .from('cancel_requests')
+          .update({
+            status: '승인완료',
+            processed_at: new Date().toISOString()
+          })
+          .eq('payment_id', Number(payment.id))
+          .eq('status', '요청중')
+
+      if (cancelRequestUpdateError) {
+        alert(
+          '토스 취소는 성공했지만 취소요청 상태 변경에 실패했습니다.\n' +
+          cancelRequestUpdateError.message
+        )
+        return
+      }
+
+      alert('토스 결제가 실제 취소되었습니다.')
+      location.reload()
+      return
+    }
+
+    if (payment.pg_company !== '코페이') {
+      alert(
+        '현재 관리자 취소 API는 코페이 결제만 지원합니다.\n' +
+        '결제 PG사: ' +
+        (payment.pg_company || '-')
+      )
+      return
+    } 
       
       const cancelResponse = await fetch(
         '/api/korpay-cancel',
