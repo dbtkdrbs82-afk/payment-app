@@ -18179,9 +18179,14 @@ if (isBeautyKiosk) {
         app.innerHTML = `
           <div class="kiosk-page">
             <div class="kiosk-header">
-              <h1>키오스 PICK</h1>
+              <h1
+  id="kiosk-main-home-title"
+  style="cursor:pointer;"
+>
+  키오스 PICK
+</h1>
               <div class="cart-badge">
-                장바구니 <span id="cart-count">0</span>
+                PICK <span id="cart-count">0</span>
               </div>
             </div>          
 
@@ -18488,6 +18493,10 @@ ${
                  </div>
                  </div>
         `
+        document.querySelector('#kiosk-main-home-title')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-admin'
+  })
 
         const beautyReservationTimes: string[] = [
           '09:00',
