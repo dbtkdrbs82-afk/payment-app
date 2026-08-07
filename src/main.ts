@@ -14902,8 +14902,22 @@ ${
 
       <div class="merchant-toolbar">
         <button id="go-merchant-order">주문관리</button>
-        <button id="go-merchant-product">상품관리</button>
-        <button id="go-merchant-qr">PICK QR</button>
+
+${
+  isBeauty
+    ? '<button id="go-merchant-staff">직원관리</button>'
+    : ''
+}
+
+<button id="go-merchant-product">
+${
+  isBeauty
+    ? '서비스관리'
+    : '상품관리'
+}
+</button>
+
+<button id="go-merchant-qr">PICK QR</button>
       </div>
 
       <div class="payment-card">
@@ -14937,18 +14951,24 @@ ${
       <label>가격</label>
       <input id="merchant-product-price" type="number" placeholder="예: 4500" />
     </div>
-    <div class="input-group">
-  <label>카테고리</label>
-
-  <select id="merchant-product-category">
-    <option value="커피">커피</option>
-    <option value="에이드">에이드</option>
-    <option value="음료">음료</option>
-    <option value="식사">식사</option>
-    <option value="디저트">디저트</option>
-    <option value="기타">기타</option>
-  </select>
-</div>
+    ${
+      isBeauty
+        ? ''
+        : `
+          <div class="input-group">
+            <label>카테고리</label>
+    
+            <select id="merchant-product-category">
+              <option value="커피">커피</option>
+              <option value="에이드">에이드</option>
+              <option value="음료">음료</option>
+              <option value="식사">식사</option>
+              <option value="디저트">디저트</option>
+              <option value="기타">기타</option>
+            </select>
+          </div>
+        `
+    }
 
 ${
   isBeauty
@@ -14973,7 +14993,13 @@ ${
 
 
     <div class="input-group">
-      <label>상품 이미지</label>
+      <label>
+${
+  isBeauty
+    ? '서비스 이미지'
+    : '상품 이미지'
+}
+</label>
       <input
         id="merchant-product-image-file"
         type="file"
@@ -14986,7 +15012,13 @@ ${
       <span id="product-image-preview-text">이미지 미리보기</span>
     </div>
 
-    <button id="merchant-product-create">상품 등록</button>
+    <button id="merchant-product-create">
+${
+  isBeauty
+    ? '서비스 등록'
+    : '상품 등록'
+}
+</button>
   </div>
 
   <div class="product-list-card">
@@ -14999,7 +15031,14 @@ ${
 </h2>
 
     <div class="product-summary-row">
-      <span>총 상품 : ${(products || []).length}개</span>
+      <span>
+${
+  isBeauty
+    ? '총 서비스 : '
+    : '총 상품 : '
+}
+${(products || []).length}개
+</span>
       <span>판매중 : ${(products || []).filter((p) => (p.status || '판매중') === '판매중').length}개</span>
       <span>판매중지 : ${(products || []).filter((p) => p.status === '판매중지').length}개</span>
     </div>
@@ -15702,7 +15741,12 @@ document.querySelector('#merchant-product-image-file')
         Number((document.getElementById('merchant-product-price') as HTMLInputElement)?.value || 0)
 
         const category =
-        (document.getElementById('merchant-product-category') as HTMLSelectElement)?.value || '기타'
+  isBeauty
+    ? '뷰티서비스'
+    : (
+        (document.getElementById('merchant-product-category') as HTMLSelectElement)
+          ?.value || '기타'
+      )
 
         const imageFile =
         (document.getElementById(
@@ -15795,6 +15839,11 @@ document.querySelector('#merchant-product-image-file')
     ?.addEventListener('click', () => {
       location.href = '/merchant-admin'
     })
+
+    document.querySelector('#go-merchant-staff')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-staff'
+  })
 
   document.querySelector('#go-merchant-product')
     ?.addEventListener('click', () => {
