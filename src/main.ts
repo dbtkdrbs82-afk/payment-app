@@ -13548,7 +13548,11 @@ if (merchantOrderCardList) {
               (item.name || '-') +
               (
                 item.beauty_staff_id || order.beauty_staff_id
-                  ? ' / 직원ID ' + (item.beauty_staff_id || order.beauty_staff_id || '-')
+                  ? ' / ' +
+(
+  item.beauty_staff_name ||
+  ('직원ID ' + (item.beauty_staff_id || order.beauty_staff_id || '-'))
+)
                   : ''
               ) +
               ' x ' +
@@ -18678,6 +18682,7 @@ reservationDateInput?.addEventListener(
     price: number
     quantity: number
     beauty_staff_id?: number
+beauty_staff_name?: string
   }[] = []
 
         const renderCart = () => {
@@ -18827,9 +18832,19 @@ const existingItem = cart.find(
                 quantity: 1,
               
                 beauty_staff_id:
-                  isBeautyKiosk
-                    ? selectedBeautyStaffId
-                    : undefined
+  isBeautyKiosk
+    ? selectedBeautyStaffId
+    : undefined,
+
+beauty_staff_name:
+  isBeautyKiosk
+    ? (
+        beautyKioskStaff.find(
+          (staff) =>
+            Number(staff.id) === Number(selectedBeautyStaffId)
+        )?.staff_name || ''
+      )
+    : undefined
               })
             }
 
@@ -19032,6 +19047,31 @@ document.querySelector('#kiosk-card-pay-button')
             sum + item.price * item.quantity,
           0
         )
+      )
+    )
+
+    if (isBeautyKiosk) {
+      sessionStorage.setItem(
+        'beauty_staff_id',
+        String(selectedBeautyStaffId)
+      )
+    }
+    
+    sessionStorage.setItem(
+      'beauty_reservation_date',
+      (
+        document.querySelector<HTMLInputElement>(
+          '#beauty-reservation-date'
+        )?.value || ''
+      )
+    )
+    
+    sessionStorage.setItem(
+      'beauty_reservation_time',
+      (
+        document.querySelector<HTMLSelectElement>(
+          '#beauty-reservation-time'
+        )?.value || ''
       )
     )
 
@@ -19386,7 +19426,18 @@ document.querySelector('#receipt-view-btn')
                 items,
                 total_amount: Number(totalAmount),
                 order_status: '접수',
-                payment_status: '결제완료'
+                payment_status: '결제완료',
+
+beauty_staff_id:
+  sessionStorage.getItem('beauty_staff_id')
+    ? Number(sessionStorage.getItem('beauty_staff_id'))
+    : null,
+
+reservation_date:
+  sessionStorage.getItem('beauty_reservation_date') || null,
+
+reservation_time:
+  sessionStorage.getItem('beauty_reservation_time') || null
               })
         
             if (error) {
