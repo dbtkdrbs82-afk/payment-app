@@ -17883,7 +17883,7 @@ if (isBeautyKiosk) {
   class="kiosk-category-list"
   style="${
     isBeautyKiosk
-      ? 'display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,190px));gap:12px;justify-content:center;'
+      ? 'display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,240px));gap:14px;justify-content:center;'
       : ''
   }"
 >
@@ -17929,7 +17929,7 @@ if (isBeautyKiosk) {
                     alt="${product.product_name}"
                     style="${
                       isBeautyKiosk
-                        ? 'width:100%;height:105px;object-fit:cover;display:block;'
+                        ? 'width:100%;height:130px;object-fit:cover;display:block;'
                         : ''
                     }"
                   >
@@ -18011,10 +18011,21 @@ ${
     `
     : ''
 }
-            <div class="kiosk-cart">
-              <h2>PICK</h2>
+            <div
+  class="kiosk-cart"
+  style="${
+    isBeautyKiosk
+      ? 'max-width:760px;margin:16px auto 110px;padding:20px 24px;min-height:0;'
+      : ''
+  }"
+>
+              <h2 style="${isBeautyKiosk ? 'margin:0 0 18px;font-size:24px;' : ''}">PICK</h2>
               <div id="cart-items">
-                <p class="empty-cart">상품을 선택해주세요.</p>
+              ${
+                isBeautyKiosk
+                  ? ''
+                  : '<p class="empty-cart">상품을 선택해주세요.</p>'
+              }
               </div>
 
               <div class="cart-total">
@@ -18302,6 +18313,7 @@ reservationDateInput?.addEventListener(
   })
 
   const cart: {
+    cart_key: string
     id: number
     name: string
     price: number
@@ -18332,7 +18344,9 @@ reservationDateInput?.addEventListener(
           
 
           if (cart.length === 0) {
-            cartItems.innerHTML = '<p class="empty-cart">상품을 선택해주세요.</p>'
+            cartItems.innerHTML = isBeautyKiosk
+  ? ''
+  : '<p class="empty-cart">상품을 선택해주세요.</p>'
             return
           }
 
@@ -18373,17 +18387,19 @@ ${
                 <p>${item.price.toLocaleString()}원 x ${item.quantity}</p>
               </div>
               <div class="cart-item-buttons">
-                <button class="cart-minus" data-id="${item.id}">-</button>
-                <span>${item.quantity}</span>
-                <button class="cart-plus" data-id="${item.id}">+</button>
+                <button class="cart-minus" data-key="${item.cart_key}">-</button>
+<span>${item.quantity}</span>
+<button class="cart-plus" data-key="${item.cart_key}">+</button>
               </div>
             </div>
           `).join('')
 
           document.querySelectorAll<HTMLButtonElement>('.cart-plus').forEach((button) => {
             button.addEventListener('click', () => {
-              const id = Number(button.dataset.id)
-              const item = cart.find((cartItem) => cartItem.id === id)
+              const key = button.dataset.key || ''
+const item = cart.find(
+  (cartItem) => cartItem.cart_key === key
+)
               if (item) {
                 item.quantity += 1
                 renderCart()
@@ -18393,14 +18409,18 @@ ${
 
           document.querySelectorAll<HTMLButtonElement>('.cart-minus').forEach((button) => {
             button.addEventListener('click', () => {
-              const id = Number(button.dataset.id)
-              const item = cart.find((cartItem) => cartItem.id === id)
+              const key = button.dataset.key || ''
+const item = cart.find(
+  (cartItem) => cartItem.cart_key === key
+)
 
               if (item) {
                 item.quantity -= 1
 
                 if (item.quantity <= 0) {
-                  const index = cart.findIndex((cartItem) => cartItem.id === id)
+                  const index = cart.findIndex(
+                    (cartItem) => cartItem.cart_key === key
+                  )
                   cart.splice(index, 1)
                 }
 
@@ -18423,12 +18443,25 @@ ${
             const name = button.dataset.name || ''
             const price = Number(button.dataset.price)
 
-            const existingItem = cart.find((item) => item.id === id)
+            const beautyStaffIdForCart =
+  isBeautyKiosk
+    ? selectedBeautyStaffId
+    : 0
+
+const cartKey =
+  isBeautyKiosk
+    ? String(id) + '-' + String(beautyStaffIdForCart)
+    : String(id)
+
+const existingItem = cart.find(
+  (item) => item.cart_key === cartKey
+)
 
             if (existingItem) {
               existingItem.quantity += 1
             } else {
               cart.push({
+                cart_key: cartKey,
                 id,
                 name,
                 price,
