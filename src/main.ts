@@ -13090,7 +13090,7 @@ ${merchantContent}
 
 </div>
    
-          <div class="admin-table-wrap ${isNormalStore ? '' : 'hide-for-type'}">
+          <div class="merchant-order-table-wrap">
             <table class="admin-table">
               <thead>
                 <tr>
