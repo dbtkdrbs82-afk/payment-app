@@ -13577,9 +13577,29 @@ if (merchantOrderCardList) {
           '</button>' +
         '</td>' +
     
-        '<td>' + (order.reservation_date || '-') + '</td>' +
+        '<td>' +
+  (
+    order.reservation_date ||
+    (
+      Array.isArray(order.items)
+        ? order.items[0]?.reservation_date
+        : ''
+    ) ||
+    '-'
+  ) +
+'</td>' +
     
-        '<td>' + (order.reservation_time || '-') + '</td>' +
+        '<td>' +
+  (
+    order.reservation_time ||
+    (
+      Array.isArray(order.items)
+        ? order.items[0]?.reservation_time
+        : ''
+    ) ||
+    '-'
+  ) +
+'</td>' +
     
         '<td style="line-height:1.8;">' +
           beautyTableItems +
@@ -18927,10 +18947,48 @@ const orderNo =
       String(merchantId)
     )
 
-    sessionStorage.setItem(
-      'kiosk_items',
-      JSON.stringify(cart)
-    )
+    const beautyReservationDate =
+  (
+    document.querySelector<HTMLInputElement>(
+      '#beauty-reservation-date'
+    )?.value || ''
+  )
+
+const beautyReservationTime =
+  (
+    document.querySelector<HTMLSelectElement>(
+      '#beauty-reservation-time'
+    )?.value || ''
+  )
+
+if (isBeautyKiosk && (!beautyReservationDate || !beautyReservationTime)) {
+  alert('예약일과 예약시간을 선택해주세요.')
+  return
+}
+
+const kioskOrderItems =
+  isBeautyKiosk
+    ? cart.map((item) => ({
+        ...item,
+        reservation_date: beautyReservationDate,
+        reservation_time: beautyReservationTime
+      }))
+    : cart
+
+sessionStorage.setItem(
+  'kiosk_items',
+  JSON.stringify(kioskOrderItems)
+)
+
+sessionStorage.setItem(
+  'beauty_reservation_date',
+  beautyReservationDate
+)
+
+sessionStorage.setItem(
+  'beauty_reservation_time',
+  beautyReservationTime
+)
 
     if (isBeautyKiosk) {
       sessionStorage.setItem(
@@ -19034,10 +19092,48 @@ document.querySelector('#kiosk-card-pay-button')
       merchantId
     )
 
-    sessionStorage.setItem(
-      'card_payment_items',
-      JSON.stringify(cart)
-    )
+    const beautyReservationDate =
+  (
+    document.querySelector<HTMLInputElement>(
+      '#beauty-reservation-date'
+    )?.value || ''
+  )
+
+const beautyReservationTime =
+  (
+    document.querySelector<HTMLSelectElement>(
+      '#beauty-reservation-time'
+    )?.value || ''
+  )
+
+if (isBeautyKiosk && (!beautyReservationDate || !beautyReservationTime)) {
+  alert('예약일과 예약시간을 선택해주세요.')
+  return
+}
+
+const cardOrderItems =
+  isBeautyKiosk
+    ? cart.map((item) => ({
+        ...item,
+        reservation_date: beautyReservationDate,
+        reservation_time: beautyReservationTime
+      }))
+    : cart
+
+sessionStorage.setItem(
+  'card_payment_items',
+  JSON.stringify(cardOrderItems)
+)
+
+sessionStorage.setItem(
+  'beauty_reservation_date',
+  beautyReservationDate
+)
+
+sessionStorage.setItem(
+  'beauty_reservation_time',
+  beautyReservationTime
+)
     
     sessionStorage.setItem(
       'card_payment_amount',
