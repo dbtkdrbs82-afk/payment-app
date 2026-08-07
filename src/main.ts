@@ -9876,200 +9876,247 @@ const isBeautyOrderPage =
   let currentOrderPage = 1
   let orderPageSize = 10
   const orderList = orders || []
+
+  const { data: beautyOrderStaff } =
+  await supabase
+    .from('beauty_staff')
+    .select('id, staff_name')
+    .eq('merchant_id', loginMerchantId)
+
+const getBeautyStaffName = (staffId: any) => {
+  return (
+    (beautyOrderStaff || []).find(
+      (staff: any) =>
+        Number(staff.id) === Number(staffId)
+    )?.staff_name || '직원ID ' + (staffId || '-')
+  )
+}
   
   
-  if (tableHead) {
-    tableHead.innerHTML =
+if (tableHead) {
+  tableHead.innerHTML =
+    isBeautyOrderPage
+      ? (
+          '<tr>' +
+            '<th>No</th>' +
+            '<th>주문번호</th>' +
+            '<th>예약일</th>' +
+            '<th>예약시간</th>' +
+            '<th>서비스 / 직원</th>' +
+            '<th>결제금액</th>' +
+            '<th>상태</th>' +
+            '<th>처리</th>' +
+          '</tr>'
+        )
+      : (
+          '<tr>' +
+            '<th>No</th>' +
+            '<th>주문번호</th>' +
+            '<th>가맹점명</th>' +
+            '<th>주문내용</th>' +
+            '<th>결제금액</th>' +
+            '<th>주문상태</th>' +
+            '<th>처리</th>' +
+            '<th>고객호출</th>' +
+          '</tr>'
+        )
+}
+
+function renderMerchantOrderPage() {
+  paymentTableBody.innerHTML = ''
+
+  const totalOrderPage = Math.max(
+    1,
+    Math.ceil(orderList.length / orderPageSize)
+  )
+
+  if (currentOrderPage > totalOrderPage) {
+    currentOrderPage = totalOrderPage
+  }
+
+  const start = (currentOrderPage - 1) * orderPageSize
+  const end = start + orderPageSize
+  const pageOrders = orderList.slice(start, end)
+
+  pageOrders.forEach((order, index) => {
+    const tr = document.createElement('tr')
+
+    const orderNumber =
+      order.order_no?.split('-')[1] ||
+      order.order_no ||
+      start + index + 1
+
+    const orderItems = Array.isArray(order.items)
+      ? order.items
+          .map((item: any) =>
+            item.name + ' x ' + item.quantity
+          )
+          .join(', ')
+      : '-'
+
+    const beautyOrderItems = Array.isArray(order.items)
+      ? order.items
+          .map((item: any) => {
+            const staffId =
+              item.beauty_staff_id ||
+              order.beauty_staff_id ||
+              ''
+
+            return (
+              (item.name || '-') +
+              ' / ' +
+              getBeautyStaffName(staffId) +
+              ' / ' +
+              Number(item.price || 0).toLocaleString() +
+              '원 x ' +
+              Number(item.quantity || 1)
+            )
+          })
+          .join('<br/>')
+      : '-'
+
+    tr.innerHTML =
       isBeautyOrderPage
         ? (
-            '<tr>' +
-              '<th>No</th>' +
-              '<th>주문번호</th>' +
-              '<th>예약일</th>' +
-              '<th>예약시간</th>' +
-              '<th>서비스</th>' +
-              '<th>결제금액</th>' +
-              '<th>상태</th>' +
-              '<th>처리</th>' +
-            '</tr>'
+            '<td>' + (start + index + 1) + '</td>' +
+
+            '<td>' +
+              '<button ' +
+                'class="merchant-receipt-link" ' +
+                'data-order="' + orderNumber + '" ' +
+                'data-amount="' + (order.total_amount || 0) + '" ' +
+                'data-date="' + (order.created_at || '') + '" ' +
+                'data-items="' + beautyOrderItems + '" ' +
+                'data-payment-key="' + (order.payment_key || '-') + '" ' +
+                'data-customer="' + (order.customer_name || '현장고객') + '"' +
+              '>' +
+                orderNumber + '번' +
+              '</button>' +
+            '</td>' +
+
+            '<td>' + (order.reservation_date || '-') + '</td>' +
+
+            '<td>' + (order.reservation_time || '-') + '</td>' +
+
+            '<td style="line-height:1.8;">' +
+              beautyOrderItems +
+            '</td>' +
+
+            '<td>' +
+              Number(order.total_amount || 0).toLocaleString() +
+              '원' +
+            '</td>' +
+
+            '<td>' +
+              (
+                order.cancel_status === '취소요청'
+                  ? '<span class="order-status-cancel-request">취소요청</span>'
+                  : order.order_status === '취소완료'
+                    ? '<span class="order-status-cancel">취소완료</span>'
+                    : order.order_status === '완료'
+                      ? '<span class="order-status-complete">완료</span>'
+                      : '<span class="order-status-received">접수</span>'
+              ) +
+            '</td>' +
+
+            '<td>' +
+              (
+                order.order_status === '완료'
+                  ? '완료'
+                  : '<button class="order-complete-button" data-id="' +
+                      order.id +
+                    '">완료처리</button>'
+              ) +
+            '</td>'
           )
         : (
-            '<tr>' +
-              '<th>No</th>' +
-              '<th>주문번호</th>' +
-              '<th>가맹점명</th>' +
-              '<th>주문내용</th>' +
-              '<th>결제금액</th>' +
-              '<th>주문상태</th>' +
-              '<th>처리</th>' +
-              '<th>고객호출</th>' +
-            '</tr>'
+            '<td>' + (start + index + 1) + '</td>' +
+
+            '<td>' +
+              '<button ' +
+                'class="merchant-receipt-link" ' +
+                'data-order="' + orderNumber + '" ' +
+                'data-amount="' + (order.total_amount || 0) + '" ' +
+                'data-date="' + (order.created_at || '') + '" ' +
+                'data-items="' + orderItems + '" ' +
+                'data-payment-key="' + (order.payment_key || '-') + '" ' +
+                'data-customer="' + (order.customer_name || '현장고객') + '"' +
+              '>' +
+                orderNumber + '번' +
+              '</button>' +
+            '</td>' +
+
+            '<td>MER' +
+              String(order.merchant_id || 1).padStart(4, '0') +
+            '</td>' +
+
+            '<td>' + orderItems + '</td>' +
+
+            '<td>' +
+              Number(order.total_amount || 0).toLocaleString() +
+              '원' +
+            '</td>' +
+
+            '<td>' +
+              (
+                order.cancel_status === '취소요청'
+                  ? '<span class="order-status-cancel-request">취소요청</span>'
+                  : order.order_status === '취소완료'
+                    ? '<span class="order-status-cancel">취소완료</span>'
+                    : order.order_status === '완료'
+                      ? '<span class="order-status-complete">완료</span>'
+                      : '<span class="order-status-received">접수</span>'
+              ) +
+            '</td>' +
+
+            '<td>' +
+              (
+                order.order_status === '완료'
+                  ? '완료'
+                  : '<button class="order-complete-button" data-id="' +
+                      order.id +
+                    '">조리완료</button>'
+              ) +
+            '</td>' +
+
+            '<td>' +
+              '<button class="customer-call-button" data-number="' +
+                orderNumber +
+              '">' +
+                '고객호출' +
+              '</button>' +
+            '</td>'
           )
-  }
 
-  function renderMerchantOrderPage() {
-    paymentTableBody.innerHTML = ''
-  
-    const totalOrderPage = Math.max(
-      1,
-      Math.ceil(orderList.length / orderPageSize)
+    tr.setAttribute(
+      'data-status',
+      order.order_status || '접수'
     )
-  
-    if (currentOrderPage > totalOrderPage) {
-      currentOrderPage = totalOrderPage
-    }
-  
-    const start = (currentOrderPage - 1) * orderPageSize
-    const end = start + orderPageSize
-    const pageOrders = orderList.slice(start, end)
-  
-    pageOrders.forEach((order, index) => {
-      const tr = document.createElement('tr')
-  
-      const orderNumber =
-        order.order_no?.split('-')[1] ||
-        order.order_no ||
-        start + index + 1
 
-        const orderItems = Array.isArray(order.items)
-  ? order.items
-      .map((item: any) => item.name + ' x ' + item.quantity)
-      .join(', ')
-  : '-'
-  
-  const beautyOrderItems = Array.isArray(order.items)
-  ? order.items
-      .map((item: any) =>
-        (item.name || '-') +
-        ' / 직원ID ' +
-        (item.beauty_staff_id || order.beauty_staff_id || '-') +
-        ' / ' +
-        Number(item.price || 0).toLocaleString() +
-        '원 x ' +
-        Number(item.quantity || 1)
-      )
-      .join('<br/>')
-  : '-'
-      
-      tr.innerHTML =
-        (sessionStorage.getItem('login_merchant_type') || '') === '뷰티'
-          ? (
-              '<td>' + (start + index + 1) + '</td>' +
-      
-              '<td>' +
-                '<button ' +
-                  'class="merchant-receipt-link" ' +
-                  'data-order="' + orderNumber + '" ' +
-                  'data-amount="' + (order.total_amount || 0) + '" ' +
-                  'data-date="' + (order.created_at || '') + '" ' +
-                  'data-items="' + beautyOrderItems + '" ' +
-                  'data-payment-key="' + (order.payment_key || '-') + '" ' +
-                  'data-customer="' + (order.customer_name || '현장고객') + '"' +
-                '>' +
-                  orderNumber + '번' +
-                '</button>' +
-              '</td>' +
-      
-              '<td>' + (order.reservation_date || '-') + '</td>' +
-      
-              '<td>' + (order.reservation_time || '-') + '</td>' +
-      
-              '<td style="line-height:1.8;">' +
-                beautyOrderItems +
-              '</td>' +
-      
-              '<td>' +
-                Number(order.total_amount || 0).toLocaleString() +
-                '원' +
-              '</td>' +
-      
-              '<td>' +
-                (order.order_status || '접수') +
-              '</td>' +
-      
-              '<td>' +
-                (
-                  order.order_status === '완료'
-                    ? '완료'
-                    : '<button class="order-complete-button" data-id="' +
-                        order.id +
-                      '">완료처리</button>'
-                ) +
-              '</td>'
-            )
-          : (
-              '<td>' + (start + index + 1) + '</td>' +
-      
-              '<td>' +
-                '<button ' +
-                  'class="merchant-receipt-link" ' +
-                  'data-order="' + orderNumber + '" ' +
-                  'data-amount="' + (order.total_amount || 0) + '" ' +
-                  'data-date="' + (order.created_at || '') + '" ' +
-                  'data-items="' + orderItems + '" ' +
-                  'data-payment-key="' + (order.payment_key || '-') + '" ' +
-                  'data-customer="' + (order.customer_name || '현장고객') + '"' +
-                '>' +
-                  orderNumber + '번' +
-                '</button>' +
-              '</td>' +
-      
-              '<td>MER' +
-                String(order.merchant_id || 1).padStart(4, '0') +
-              '</td>' +
-      
-              '<td>' + orderItems + '</td>' +
-      
-              '<td>' +
-                Number(order.total_amount || 0).toLocaleString() +
-                '원' +
-              '</td>' +
-      
-              '<td>' +
-                (order.order_status || '접수') +
-              '</td>' +
-      
-              '<td>' +
-                (
-                  order.order_status === '완료'
-                    ? '완료'
-                    : '<button class="order-complete-button" data-id="' +
-                        order.id +
-                      '">조리완료</button>'
-                ) +
-              '</td>' +
-      
-              '<td>' +
-                '<button class="customer-call-button" data-number="' +
-                  orderNumber +
-                '">' +
-                  '고객호출' +
-                '</button>' +
-              '</td>'
-            )
-  
-      paymentTableBody.appendChild(tr)
-    })
-  
-    const pageInfo = document.querySelector('#order-page-info')
-    if (pageInfo) {
-      pageInfo.textContent = currentOrderPage + ' / ' + totalOrderPage
-    }
-  
-    const prevButton =
-      document.querySelector<HTMLButtonElement>('#order-prev-page')
-  
-    const nextButton =
-      document.querySelector<HTMLButtonElement>('#order-next-page')
-  
-    if (prevButton) {
-      prevButton.disabled = currentOrderPage <= 1
-    }
-  
-    if (nextButton) {
-      nextButton.disabled = currentOrderPage >= totalOrderPage
-    }
+    paymentTableBody.appendChild(tr)
+  })
+
+  const pageInfo = document.querySelector('#order-page-info')
+
+  if (pageInfo) {
+    pageInfo.textContent =
+      currentOrderPage + ' / ' + totalOrderPage
   }
+
+  const prevButton =
+    document.querySelector<HTMLButtonElement>('#order-prev-page')
+
+  const nextButton =
+    document.querySelector<HTMLButtonElement>('#order-next-page')
+
+  if (prevButton) {
+    prevButton.disabled = currentOrderPage <= 1
+  }
+
+  if (nextButton) {
+    nextButton.disabled = currentOrderPage >= totalOrderPage
+  }
+}
   
   renderMerchantOrderPage()
   
