@@ -17800,12 +17800,7 @@ if (isBeautyKiosk) {
               <div class="cart-badge">
                 장바구니 <span id="cart-count">0</span>
               </div>
-            </div>
-
-            <div class="kiosk-hero">
-              <h2>어서오세요!</h2>
-              <p>원하시는 상품을 선택해주세요.</p>
-            </div>
+            </div>          
 
             ${
               isBeautyKiosk
@@ -17817,7 +17812,7 @@ if (isBeautyKiosk) {
     flex-wrap:wrap;
     justify-content:center;
     gap:14px;
-    margin:30px 0;
+    margin:12px 0 16px;
   "
 >
                     ${beautyKioskStaff.map((staff, index) => `
@@ -17825,8 +17820,8 @@ if (isBeautyKiosk) {
   class="beauty-kiosk-staff-button ${index === 0 ? 'active' : ''}"
   data-staff-id="${staff.id}"
   style="
-    width:180px;
-    min-height:130px;
+    width:150px;
+    min-height:105px;
     padding:14px;
     display:flex;
     flex-direction:column;
@@ -17884,52 +17879,95 @@ if (isBeautyKiosk) {
                 `
             }
 
-            <div
+             <div
   class="kiosk-category-list"
   style="${
     isBeautyKiosk
-      ? 'display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;'
+      ? 'display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,190px));gap:12px;justify-content:center;'
       : ''
   }"
 >
   ${Object.keys(groupedProducts).map((category) => `
     <section
-  class="kiosk-category-section ${
-  isBeautyKiosk
-    ? ''
-    : (
-        Object.keys(groupedProducts)[0] === category
+      class="kiosk-category-section ${
+        isBeautyKiosk
           ? ''
-          : 'hidden-category'
-      )
-}"
-  data-category-section="${category}"
-  style="${isBeautyKiosk ? 'display:contents;' : ''}"
->
-${
-  isBeautyKiosk
-    ? ''
-    : `<h2 class="kiosk-category-title">${category}</h2>`
-}
+          : (
+              Object.keys(groupedProducts)[0] === category
+                ? ''
+                : 'hidden-category'
+            )
+      }"
+      data-category-section="${category}"
+      style="${isBeautyKiosk ? 'display:contents;' : ''}"
+    >
+      ${
+        isBeautyKiosk
+          ? ''
+          : `<h2 class="kiosk-category-title">${category}</h2>`
+      }
 
       <div
-  class="kiosk-products"
-  style="${isBeautyKiosk ? 'display:contents;' : ''}"
->
+        class="kiosk-products"
+        style="${isBeautyKiosk ? 'display:contents;' : ''}"
+      >
         ${groupedProducts[category].map((product: any) => `
           <div
-  class="kiosk-product-card"
-  data-product-id="${product.id}"
->
-            ${product.image_url ? `
-              <img src="${product.image_url}" alt="${product.product_name}">
-            ` : `
-              <div class="no-image">이미지 없음</div>
-            `}
+            class="kiosk-product-card"
+            data-product-id="${product.id}"
+            style="${
+              isBeautyKiosk
+                ? 'min-height:0;height:auto;overflow:hidden;'
+                : ''
+            }"
+          >
+            ${
+              product.image_url
+                ? `
+                  <img
+                    src="${product.image_url}"
+                    alt="${product.product_name}"
+                    style="${
+                      isBeautyKiosk
+                        ? 'width:100%;height:105px;object-fit:cover;display:block;'
+                        : ''
+                    }"
+                  >
+                `
+                : (
+                  isBeautyKiosk
+                    ? ''
+                    : '<div class="no-image">이미지 없음</div>'
+                )
+            }
 
-            <div class="kiosk-product-info">
-              <h3>${product.product_name}</h3>
-              <p>${Number(product.price).toLocaleString()}원</p>
+            <div
+              class="kiosk-product-info"
+              style="${
+                isBeautyKiosk
+                  ? 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 12px 6px;'
+                  : ''
+              }"
+            >
+              <h3
+                style="${
+                  isBeautyKiosk
+                    ? 'margin:0;font-size:17px;line-height:1.2;'
+                    : ''
+                }"
+              >
+                ${product.product_name}
+              </h3>
+
+              <p
+                style="${
+                  isBeautyKiosk
+                    ? 'margin:0;font-size:14px;font-weight:700;white-space:nowrap;'
+                    : ''
+                }"
+              >
+                ${Number(product.price).toLocaleString()}원
+              </p>
             </div>
 
             <button 
@@ -17937,6 +17975,11 @@ ${
               data-id="${product.id}"
               data-name="${product.product_name}"
               data-price="${product.price}"
+              style="${
+                isBeautyKiosk
+                  ? 'width:calc(100% - 20px);height:38px;margin:8px 10px 10px;'
+                  : ''
+              }"
             >
               담기
             </button>
@@ -17946,55 +17989,30 @@ ${
     </section>
   `).join('')}
 </div>
-
 ${
   isBeautyKiosk
     ? `
       <div class="beauty-reservation-area">
-
-  <div class="beauty-reservation-card">
-
-    <input
-      type="date"
-      id="beauty-reservation-date"
-      class="beauty-reservation-input"
-    />
-
-    <select
-      id="beauty-reservation-time"
-      class="beauty-reservation-input"
-    >
-      <option value="">예약시간 선택</option>
-    </select>
-
-  </div>
-
-</div>
-
-        <div class="beauty-reservation-row">
-          <label>예약일</label>
-
+        <div class="beauty-reservation-card">
           <input
             type="date"
             id="beauty-reservation-date"
+            class="beauty-reservation-input"
           />
-        </div>
 
-        <div class="beauty-reservation-row">
-          <label>예약시간</label>
-
-          <select id="beauty-reservation-time">
-            <option value="">시간 선택</option>
+          <select
+            id="beauty-reservation-time"
+            class="beauty-reservation-input"
+          >
+            <option value="">예약시간 선택</option>
           </select>
         </div>
-
       </div>
     `
     : ''
 }
-
             <div class="kiosk-cart">
-              <h2>장바구니</h2>
+              <h2>PICK</h2>
               <div id="cart-items">
                 <p class="empty-cart">상품을 선택해주세요.</p>
               </div>
@@ -18073,7 +18091,8 @@ ${
 </div>
 </div>
             </div>
-          </div>
+                 </div>
+                 </div>
         `
 
         const beautyReservationTimes: string[] = [
