@@ -2500,10 +2500,22 @@ approved_at:
         pg_order_id:
           orderNo.replace(/[^a-zA-Z0-9]/g, ''),
       
-        items,
-        total_amount: Number(totalAmount),
-        order_status: '접수',
-        payment_status: '결제완료',
+          items,
+
+          beauty_staff_id:
+            sessionStorage.getItem('beauty_staff_id')
+              ? Number(sessionStorage.getItem('beauty_staff_id'))
+              : null,
+          
+          reservation_date:
+            sessionStorage.getItem('beauty_reservation_date') || null,
+          
+          reservation_time:
+            sessionStorage.getItem('beauty_reservation_time') || null,
+          
+          total_amount: Number(totalAmount),
+          order_status: '접수',
+          payment_status: '결제완료',
       })
   
       sessionStorage.removeItem('kiosk_order_no')
