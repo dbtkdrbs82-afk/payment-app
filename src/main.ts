@@ -13545,6 +13545,74 @@ if (merchantOrderCardList) {
 
     tr.setAttribute('data-status', order.order_status || '접수')
 
+    if ((sessionStorage.getItem('login_merchant_type') || '') === '뷰티') {
+      const beautyTableItems = Array.isArray(order.items)
+        ? order.items
+            .map((item: any) =>
+              (item.name || '-') +
+              (
+                item.beauty_staff_id || order.beauty_staff_id
+                  ? ' / 직원ID ' + (item.beauty_staff_id || order.beauty_staff_id)
+                  : ''
+              ) +
+              ' x ' +
+              Number(item.quantity || 1)
+            )
+            .join('<br/>')
+        : '-'
+    
+      tr.innerHTML =
+        '<td>' + (index + 1) + '</td>' +
+    
+        '<td>' +
+          '<button ' +
+            'class="merchant-receipt-link" ' +
+            'data-id="' + order.id + '" ' +
+            'data-order="' + orderNumber + '" ' +
+            'data-amount="' + (order.total_amount || 0) + '" ' +
+            'data-date="' + (order.created_at || '') + '" ' +
+            'data-items="' + beautyTableItems + '"' +
+          '>' +
+            orderNumber + '번' +
+          '</button>' +
+        '</td>' +
+    
+        '<td>' + (order.reservation_date || '-') + '</td>' +
+    
+        '<td>' + (order.reservation_time || '-') + '</td>' +
+    
+        '<td style="line-height:1.8;">' +
+          beautyTableItems +
+        '</td>' +
+    
+        '<td>' +
+          Number(order.total_amount || 0).toLocaleString() +
+          '원' +
+        '</td>' +
+    
+        '<td>' +
+          (
+            order.cancel_status === '취소요청'
+              ? '<span class="order-status-cancel-request">취소요청</span>'
+              : order.order_status === '취소완료'
+                ? '<span class="order-status-cancel">취소완료</span>'
+                : order.order_status === '완료'
+                  ? '<span class="order-status-complete">완료</span>'
+                  : '<span class="order-status-received">접수</span>'
+          ) +
+        '</td>' +
+    
+        '<td>' +
+          (
+            order.order_status === '완료'
+              ? '완료'
+              : '<button class="order-complete-button" data-id="' +
+                  order.id +
+                '">완료처리</button>'
+          ) +
+        '</td>'
+    }
+
     merchantOrderBody.appendChild(tr)
 
   const cardList =
