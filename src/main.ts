@@ -17929,7 +17929,7 @@ if (isBeautyKiosk) {
                     alt="${product.product_name}"
                     style="${
                       isBeautyKiosk
-                        ? 'width:100%;height:130px;object-fit:cover;display:block;'
+                        ? 'width:100%;height:155px;object-fit:cover;display:block;'
                         : ''
                     }"
                   >
