@@ -14057,7 +14057,13 @@ if (merchantOrderCardList) {
   'data-date="' + (order.created_at || '') + '" ' +
   'data-items="' + orderItems + '"' +
 '>' +
-  orderNumber + '번' +
+  (
+    order.customer_name || order.customer_phone
+      ? (order.customer_name || '-') +
+        '<br>' +
+        (order.customer_phone || '-')
+      : orderNumber + '번'
+  ) +
 '</button>' +
         '<span>' +
           Number(order.total_amount || 0).toLocaleString() +
@@ -18933,7 +18939,60 @@ ${
       : ''
   }"
 >
-              <h2 style="${isBeautyKiosk ? 'margin:0 0 18px;font-size:24px;' : ''}">PICK</h2>
+${
+  isBeautyKiosk
+    ? `
+      <div style="
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:12px;
+        margin:0 0 14px;
+      ">
+        <h2 style="margin:0;font-size:24px;">PICK</h2>
+
+        <div style="
+          display:flex;
+          align-items:center;
+          gap:6px;
+        ">
+          <strong style="
+            font-size:14px;
+            white-space:nowrap;
+          ">예약자</strong>
+
+          <input
+            id="beauty-customer-name"
+            type="text"
+            placeholder="이름"
+            style="
+              width:120px;
+              height:32px;
+              border:1px solid #d1d5db;
+              border-radius:8px;
+              padding:0 8px;
+              box-sizing:border-box;
+            "
+          />
+
+          <input
+            id="beauty-customer-phone"
+            type="tel"
+            placeholder="연락처"
+            style="
+              width:150px;
+              height:32px;
+              border:1px solid #d1d5db;
+              border-radius:8px;
+              padding:0 8px;
+              box-sizing:border-box;
+            "
+          />
+        </div>
+      </div>
+    `
+    : '<h2>PICK</h2>'
+}
               <div id="cart-items">
               ${
                 isBeautyKiosk
@@ -19568,6 +19627,28 @@ const orderNo =
         return
       }
 
+      const beautyCustomerName =
+  document
+    .querySelector<HTMLInputElement>(
+      '#beauty-customer-name'
+    )
+    ?.value.trim() || ''
+
+const beautyCustomerPhone =
+  document
+    .querySelector<HTMLInputElement>(
+      '#beauty-customer-phone'
+    )
+    ?.value.trim() || ''
+
+if (
+  isBeautyKiosk &&
+  (!beautyCustomerName || !beautyCustomerPhone)
+) {
+  alert('예약자 이름과 연락처를 입력해주세요.')
+  return
+}
+
   const kioskOrderItems =
   isBeautyKiosk
     ? cart.map((item) => ({
@@ -19580,6 +19661,16 @@ const orderNo =
 sessionStorage.setItem(
   'kiosk_items',
   JSON.stringify(kioskOrderItems)
+)
+
+sessionStorage.setItem(
+  'beauty_customer_name',
+  beautyCustomerName
+)
+
+sessionStorage.setItem(
+  'beauty_customer_phone',
+  beautyCustomerPhone
 )
 
 sessionStorage.setItem(
@@ -19710,6 +19801,28 @@ document.querySelector('#kiosk-card-pay-button')
       return
     }
 
+    const beautyCustomerName =
+  document
+    .querySelector<HTMLInputElement>(
+      '#beauty-customer-name'
+    )
+    ?.value.trim() || ''
+
+const beautyCustomerPhone =
+  document
+    .querySelector<HTMLInputElement>(
+      '#beauty-customer-phone'
+    )
+    ?.value.trim() || ''
+
+if (
+  isBeautyKiosk &&
+  (!beautyCustomerName || !beautyCustomerPhone)
+) {
+  alert('예약자 이름과 연락처를 입력해주세요.')
+  return
+}
+
     const cardOrderItems =
     isBeautyKiosk
       ? cart.map((item) => ({
@@ -19722,6 +19835,16 @@ document.querySelector('#kiosk-card-pay-button')
 sessionStorage.setItem(
   'card_payment_items',
   JSON.stringify(cardOrderItems)
+)
+
+sessionStorage.setItem(
+  'beauty_customer_name',
+  beautyCustomerName
+)
+
+sessionStorage.setItem(
+  'beauty_customer_phone',
+  beautyCustomerPhone
 )
 
 sessionStorage.setItem(
@@ -19798,6 +19921,16 @@ reservation_date:
 reservation_time:
   sessionStorage.getItem(
     'beauty_reservation_time'
+  ) || null,
+
+  customer_name:
+  sessionStorage.getItem(
+    'beauty_customer_name'
+  ) || null,
+
+customer_phone:
+  sessionStorage.getItem(
+    'beauty_customer_phone'
   ) || null,
 
 total_amount: Number(totalAmount),
@@ -19892,6 +20025,8 @@ branch_fee_rate: branchFeeRate,
           sessionStorage.removeItem('kiosk_merchant_id')
           sessionStorage.removeItem('kiosk_items')
           sessionStorage.removeItem('kiosk_total_amount')
+          sessionStorage.removeItem('beauty_customer_name')
+          sessionStorage.removeItem('beauty_customer_phone')
   
           app.innerHTML = `
   <div class="page">
