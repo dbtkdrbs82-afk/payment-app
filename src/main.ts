@@ -12529,18 +12529,31 @@ let orderQuery = supabase
   .select('*')
   .eq('merchant_id', merchantId)
 
-  if (isBeautyOrderQuery) {
-    orderQuery = orderQuery
-      .gte('reservation_date', beautySearchStartDate)
-      .lte('reservation_date', beautySearchEndDate)
-  } else if (startDate && endDate) {
+  if (!isBeautyOrderQuery && startDate && endDate) {
     orderQuery = orderQuery
       .gte('created_at', startDate + 'T00:00:00')
       .lte('created_at', endDate + 'T23:59:59')
   }
 
-const { data: orders, error } = await orderQuery
+  let { data: orders, error } = await orderQuery
   .order('created_at', { ascending: false })
+
+if (isBeautyOrderQuery) {
+  orders = (orders || []).filter((order: any) => {
+    const orderReservationDate =
+      order.reservation_date ||
+      (
+        Array.isArray(order.items)
+          ? order.items[0]?.reservation_date
+          : ''
+      )
+
+    return (
+      orderReservationDate >= beautySearchStartDate &&
+      orderReservationDate <= beautySearchEndDate
+    )
+  })
+}
  
   const receivedOrders =
   (orders || []).filter((order) => order.order_status !== '완료')
