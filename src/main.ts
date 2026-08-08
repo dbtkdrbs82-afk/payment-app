@@ -18905,17 +18905,7 @@ if (isBeautyKiosk) {
 ${
   isBeautyKiosk
     ? `
-      <div class="beauty-reservation-area">
-        <div class="beauty-reservation-card">
-          <input
-            type="date"
-            id="beauty-reservation-date"
-            class="beauty-reservation-input"
-          />
-
-          
-        </div>
-      </div>
+      
     `
     : ''
 }
@@ -19232,6 +19222,7 @@ reservationDateInput?.addEventListener(
     quantity: number
     beauty_staff_id?: number
 beauty_staff_name?: string
+reservation_date?: string
 reservation_time?: string
   }[] = []
 
@@ -19284,10 +19275,24 @@ ${
 }
 
 ${
-  sessionStorage.getItem('beauty_reservation_date')
-    ? `<p style="font-size:12px;color:#64748b;">
-        📅 ${sessionStorage.getItem('beauty_reservation_date')}
-      </p>`
+  isBeautyKiosk
+    ? `
+      <input
+        type="date"
+        class="beauty-cart-date-input"
+        data-key="${item.cart_key}"
+        value="${item.reservation_date || ''}"
+        style="
+          width:150px;
+          height:34px;
+          margin:6px 0;
+          border:1px solid #d1d5db;
+          border-radius:8px;
+          padding:0 8px;
+          display:block;
+        "
+      />
+    `
     : ''
 }
 
@@ -19342,6 +19347,24 @@ const item = cart.find(
               }
             })
           })
+
+          document
+  .querySelectorAll<HTMLInputElement>(
+    '.beauty-cart-date-input'
+  )
+  .forEach((input) => {
+    input.addEventListener('change', () => {
+      const key = input.dataset.key || ''
+
+      const item = cart.find(
+        (cartItem) => cartItem.cart_key === key
+      )
+
+      if (item) {
+        item.reservation_date = input.value
+      }
+    })
+  })
 
           document
   .querySelectorAll<HTMLSelectElement>(
@@ -19436,6 +19459,7 @@ beauty_staff_name:
       )
       : undefined,
 
+      reservation_date: '',
       reservation_time: ''
               })
             }
@@ -19520,30 +19544,26 @@ const orderNo =
     )
 
     const beautyReservationDate =
-  (
-    document.querySelector<HTMLInputElement>(
-      '#beauty-reservation-date'
-    )?.value || ''
-  )
+    cart.find((item) => item.reservation_date)
+      ?.reservation_date || ''
 
-  if (isBeautyKiosk && !beautyReservationDate) {
-    alert('예약일을 선택해주세요.')
-    return
-  }
-  
-  if (
-    isBeautyKiosk &&
-    cart.some((item) => !item.reservation_time)
-  ) {
-    alert('PICK 항목별 예약시간을 모두 선택해주세요.')
-    return
-  }
+      if (
+        isBeautyKiosk &&
+        cart.some(
+          (item) =>
+            !item.reservation_date ||
+            !item.reservation_time
+        )
+      ) {
+        alert('PICK 항목별 예약날짜와 예약시간을 모두 선택해주세요.')
+        return
+      }
 
   const kioskOrderItems =
   isBeautyKiosk
     ? cart.map((item) => ({
         ...item,
-        reservation_date: beautyReservationDate,
+        reservation_date: item.reservation_date || '',
         reservation_time: item.reservation_time || ''
       }))
     : cart
@@ -19666,33 +19686,29 @@ document.querySelector('#kiosk-card-pay-button')
     )
 
     const beautyReservationDate =
-  (
-    document.querySelector<HTMLInputElement>(
-      '#beauty-reservation-date'
-    )?.value || ''
-  )
+  cart.find((item) => item.reservation_date)
+    ?.reservation_date || ''
 
-  if (isBeautyKiosk && !beautyReservationDate) {
-    alert('예약일을 선택해주세요.')
-    return
-  }
-  
-  if (
-    isBeautyKiosk &&
-    cart.some((item) => !item.reservation_time)
-  ) {
-    alert('PICK 항목별 예약시간을 모두 선택해주세요.')
-    return
-  }
+    if (
+      isBeautyKiosk &&
+      cart.some(
+        (item) =>
+          !item.reservation_date ||
+          !item.reservation_time
+      )
+    ) {
+      alert('PICK 항목별 예약날짜와 예약시간을 모두 선택해주세요.')
+      return
+    }
 
-  const cardOrderItems =
-  isBeautyKiosk
-    ? cart.map((item) => ({
-        ...item,
-        reservation_date: beautyReservationDate,
-        reservation_time: item.reservation_time || ''
-      }))
-    : cart
+    const cardOrderItems =
+    isBeautyKiosk
+      ? cart.map((item) => ({
+          ...item,
+          reservation_date: item.reservation_date || '',
+          reservation_time: item.reservation_time || ''
+        }))
+      : cart
 
 sessionStorage.setItem(
   'card_payment_items',
