@@ -14753,47 +14753,94 @@ document.querySelector('#save-call-message')
     alert('설정이 저장되었습니다.')
 })
 
+const getLocalDateTextForMerchant = (date: Date) => {
+  const year = date.getFullYear()
+
+  const month =
+    String(date.getMonth() + 1).padStart(2, '0')
+
+  const day =
+    String(date.getDate()).padStart(2, '0')
+
+  return year + '-' + month + '-' + day
+}
+
+const moveMerchantDate = (start: string, end: string) => {
+  if (isBeauty) {
+    const nextParams =
+      new URLSearchParams(window.location.search)
+
+    nextParams.set('start', start)
+    nextParams.set('end', end)
+
+    location.href =
+      '/merchant-admin?' + nextParams.toString()
+
+    return
+  }
+
+  location.href =
+    '/merchant-admin?start=' + start + '&end=' + end
+}
+
 document.querySelector('#sales-today')
   ?.addEventListener('click', () => {
-    const today = new Date().toISOString().slice(0, 10)
-    location.href = '/merchant-admin?start=' + today + '&end=' + today
+    const today =
+      getLocalDateTextForMerchant(new Date())
+
+    moveMerchantDate(today, today)
   })
 
 document.querySelector('#sales-month')
   ?.addEventListener('click', () => {
     const now = new Date()
-    const start = new Date(now.getFullYear(), now.getMonth(), 1)
-      .toISOString()
-      .slice(0, 10)
 
-    const end = new Date().toISOString().slice(0, 10)
+    const start =
+      getLocalDateTextForMerchant(
+        new Date(now.getFullYear(), now.getMonth(), 1)
+      )
 
-    location.href = '/merchant-admin?start=' + start + '&end=' + end
+    const end =
+      getLocalDateTextForMerchant(new Date())
+
+    moveMerchantDate(start, end)
   })
 
 document.querySelector('#sales-year')
   ?.addEventListener('click', () => {
     const now = new Date()
-    const start = now.getFullYear() + '-01-01'
-    const end = new Date().toISOString().slice(0, 10)
 
-    location.href = '/merchant-admin?start=' + start + '&end=' + end
+    const start =
+      now.getFullYear() + '-01-01'
+
+    const end =
+      getLocalDateTextForMerchant(new Date())
+
+    moveMerchantDate(start, end)
   })
 
 document.querySelector('#sales-search')
   ?.addEventListener('click', () => {
     const start =
-      (document.getElementById('sales-start-date') as HTMLInputElement)?.value
+      (
+        document.getElementById(
+          'sales-start-date'
+        ) as HTMLInputElement
+      )?.value
 
     const end =
-      (document.getElementById('sales-end-date') as HTMLInputElement)?.value
+      (
+        document.getElementById(
+          'sales-end-date'
+        ) as HTMLInputElement
+      )?.value
 
     if (!start || !end) {
       alert('시작일과 종료일을 선택해주세요.')
       return
     }
 
-    location.href = '/merchant-admin?start=' + start + '&end=' + end
+    moveMerchantDate(start, end)
   })
 
 
