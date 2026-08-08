@@ -13599,7 +13599,9 @@ document
     business_number,
     phone,
     address,
-    address_detail
+address_detail,
+toss_mid,
+korpay_mid
   `)
   .eq('id', merchantId)
   .single()
@@ -13728,13 +13730,19 @@ if (merchantOrderCardList) {
     paymentForOrder?.card_number || '결제사 제공값'
 
   const receiptCardCompany =
-    paymentForOrder?.card_company || '신용카드'
+    '신용카드'
 
   const receiptPgCompany =
     paymentForOrder?.pg_company || '-'
 
-  const receiptPgMid =
-    paymentForOrder?.pg_mid || '-'
+    const receiptPgMid =
+    paymentForOrder?.pg_mid ||
+    (
+      String(paymentForOrder?.pg_company || '').includes('토스')
+        ? merchantSetting?.toss_mid
+        : merchantSetting?.korpay_mid
+    ) ||
+    '-'
 
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
@@ -13745,6 +13753,7 @@ if (merchantOrderCardList) {
     'data-order="' + orderNumber + '" ' +
     'data-amount="' + (order.total_amount || 0) + '" ' +
     'data-date="' + (order.created_at || '') + '" ' +
+    'data-items="' + orderItems + '" ' +
     'data-payment-key="' + receiptPaymentKey + '" ' +
     'data-approval-number="' + receiptApprovalNumber + '" ' +
     'data-card-number="' + receiptCardNumber + '" ' +
