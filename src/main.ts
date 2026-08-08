@@ -11649,6 +11649,75 @@ document.querySelectorAll<HTMLElement>('.payment-cancel-link')
     const cancelReason =
       String(cancelRequest?.reason || '관리자 취소 승인').trim()
 
+      const updateMerchantOrderCancelStatus = async () => {
+        const orderCancelData = {
+          order_status: '취소완료',
+          payment_status: '취소완료',
+          cancel_status: '취소완료',
+          cancel_reason: cancelReason,
+          cancel_requested_at: new Date().toISOString()
+        }
+
+        const paymentKeyForOrder =
+          String(payment.payment_key || '').trim()
+
+        const orderIdForOrder =
+          String(payment.order_id || '').trim()
+
+        const pgOrderIdForOrder =
+          orderIdForOrder.replace(/[^a-zA-Z0-9]/g, '')
+
+        let updatedOrderCount = 0
+
+        if (paymentKeyForOrder) {
+          const { data, error } =
+            await supabase
+              .from('orders')
+              .update(orderCancelData)
+              .eq('payment_key', paymentKeyForOrder)
+              .select('id')
+
+          if (error) {
+            alert(
+              '결제는 취소됐지만 가맹점 주문상태 반영에 실패했습니다.\n' +
+              error.message
+            )
+            return false
+          }
+
+          updatedOrderCount += data?.length || 0
+        }
+
+        if (pgOrderIdForOrder) {
+          const { data, error } =
+            await supabase
+              .from('orders')
+              .update(orderCancelData)
+              .eq('pg_order_id', pgOrderIdForOrder)
+              .select('id')
+
+          if (error) {
+            alert(
+              '결제는 취소됐지만 가맹점 주문상태 반영에 실패했습니다.\n' +
+              error.message
+            )
+            return false
+          }
+
+          updatedOrderCount += data?.length || 0
+        }
+
+        if (updatedOrderCount === 0) {
+          alert(
+            '결제는 취소됐지만 가맹점 주문을 찾지 못했습니다.\n' +
+            'payment_key 또는 주문번호 연결을 확인해야 합니다.'
+          )
+          return false
+        }
+
+        return true
+      }
+
     if (String(payment.pg_company || '').includes('토스')) {
       if (!payment.payment_key) {
         alert('토스 paymentKey가 없습니다.')
@@ -11721,6 +11790,13 @@ document.querySelectorAll<HTMLElement>('.payment-cancel-link')
         return
       }
 
+      const orderUpdateOk =
+      await updateMerchantOrderCancelStatus()
+
+    if (!orderUpdateOk) {
+      return
+    }
+
       alert('토스 결제가 실제 취소되었습니다.')
       location.reload()
       return
@@ -11785,6 +11861,13 @@ document.querySelectorAll<HTMLElement>('.payment-cancel-link')
         )
         return
       }
+
+      const orderUpdateOk =
+      await updateMerchantOrderCancelStatus()
+
+    if (!orderUpdateOk) {
+      return
+    }
       
       alert(
         '코페이 결제가 실제 취소되었습니다.\n' +
