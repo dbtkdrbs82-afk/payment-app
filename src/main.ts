@@ -11599,17 +11599,32 @@ if (payment.status === 'cancel') {
 paymentTableBody.appendChild(tr)
 })
 
+let isPaymentCancelProcessing = false
+
 document.querySelectorAll('.payment-cancel-link')
   .forEach((button) => {
     button.addEventListener('click', async (event) => {
       event.preventDefault()
       event.stopPropagation()
 
+      if (isPaymentCancelProcessing) {
+        alert('취소 처리가 진행 중입니다. 잠시 후 다시 시도해주세요.')
+        return
+      }
+
       const paymentId = Number((button as HTMLElement).dataset.id)
 
       if (!window.confirm('이 결제를 실제 취소 처리할까요?')) {
         return
       }
+
+      isPaymentCancelProcessing = true
+
+document.querySelectorAll<HTMLElement>('.payment-cancel-link')
+  .forEach((cancelButton) => {
+    cancelButton.style.pointerEvents = 'none'
+    cancelButton.style.opacity = '0.5'
+  })
 
       const { data: payment, error: paymentError } = await supabase
         .from('payments')
