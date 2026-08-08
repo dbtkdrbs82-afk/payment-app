@@ -19274,7 +19274,14 @@ reservation_time?: string
           cartItems.innerHTML = cart.map((item) => `
             <div class="cart-item">
               <div>
-                <strong>${item.name}</strong>
+                <strong>
+  ${item.name}
+  ${
+    isBeautyKiosk
+      ? ' / ' + (item.beauty_staff_name || '-')
+      : ''
+  }
+</strong>
 
                 ${
                   isBeautyKiosk
