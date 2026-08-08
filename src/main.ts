@@ -18913,12 +18913,7 @@ ${
             class="beauty-reservation-input"
           />
 
-          <select
-            id="beauty-reservation-time"
-            class="beauty-reservation-input"
-          >
-            <option value="">예약시간 선택</option>
-          </select>
+          
         </div>
       </div>
     `
@@ -19237,6 +19232,7 @@ reservationDateInput?.addEventListener(
     quantity: number
     beauty_staff_id?: number
 beauty_staff_name?: string
+reservation_time?: string
   }[] = []
 
         const renderCart = () => {
@@ -19296,12 +19292,34 @@ ${
 }
 
 ${
-  sessionStorage.getItem('beauty_reservation_time')
-    ? `<p style="font-size:12px;color:#64748b;">
-        🕒 ${sessionStorage.getItem('beauty_reservation_time')}
-      </p>`
+  isBeautyKiosk
+    ? `
+      <select
+        class="beauty-cart-time-select"
+        data-key="${item.cart_key}"
+        style="
+          width:150px;
+          height:34px;
+          margin:6px 0;
+          border:1px solid #d1d5db;
+          border-radius:8px;
+          padding:0 8px;
+        "
+      >
+        <option value="">예약시간 선택</option>
+        ${beautyReservationTimes.map((time) => `
+          <option
+            value="${time}"
+            ${item.reservation_time === time ? 'selected' : ''}
+          >
+            ${time}
+          </option>
+        `).join('')}
+      </select>
+    `
     : ''
 }
+
                 <p>${item.price.toLocaleString()}원 x ${item.quantity}</p>
               </div>
               <div class="cart-item-buttons">
@@ -19324,6 +19342,24 @@ const item = cart.find(
               }
             })
           })
+
+          document
+  .querySelectorAll<HTMLSelectElement>(
+    '.beauty-cart-time-select'
+  )
+  .forEach((select) => {
+    select.addEventListener('change', () => {
+      const key = select.dataset.key || ''
+
+      const item = cart.find(
+        (cartItem) => cartItem.cart_key === key
+      )
+
+      if (item) {
+        item.reservation_time = select.value
+      }
+    })
+  })
 
           document.querySelectorAll<HTMLButtonElement>('.cart-minus').forEach((button) => {
             button.addEventListener('click', () => {
@@ -19398,7 +19434,9 @@ beauty_staff_name:
             Number(staff.id) === Number(selectedBeautyStaffId)
         )?.staff_name || ''
       )
-    : undefined
+      : undefined,
+
+      reservation_time: ''
               })
             }
 
@@ -19488,24 +19526,25 @@ const orderNo =
     )?.value || ''
   )
 
-const beautyReservationTime =
-  (
-    document.querySelector<HTMLSelectElement>(
-      '#beauty-reservation-time'
-    )?.value || ''
-  )
+  if (isBeautyKiosk && !beautyReservationDate) {
+    alert('예약일을 선택해주세요.')
+    return
+  }
+  
+  if (
+    isBeautyKiosk &&
+    cart.some((item) => !item.reservation_time)
+  ) {
+    alert('PICK 항목별 예약시간을 모두 선택해주세요.')
+    return
+  }
 
-if (isBeautyKiosk && (!beautyReservationDate || !beautyReservationTime)) {
-  alert('예약일과 예약시간을 선택해주세요.')
-  return
-}
-
-const kioskOrderItems =
+  const kioskOrderItems =
   isBeautyKiosk
     ? cart.map((item) => ({
         ...item,
         reservation_date: beautyReservationDate,
-        reservation_time: beautyReservationTime
+        reservation_time: item.reservation_time || ''
       }))
     : cart
 
@@ -19521,7 +19560,7 @@ sessionStorage.setItem(
 
 sessionStorage.setItem(
   'beauty_reservation_time',
-  beautyReservationTime
+  ''
 )
 
     if (isBeautyKiosk) {
@@ -19633,24 +19672,25 @@ document.querySelector('#kiosk-card-pay-button')
     )?.value || ''
   )
 
-const beautyReservationTime =
-  (
-    document.querySelector<HTMLSelectElement>(
-      '#beauty-reservation-time'
-    )?.value || ''
-  )
+  if (isBeautyKiosk && !beautyReservationDate) {
+    alert('예약일을 선택해주세요.')
+    return
+  }
+  
+  if (
+    isBeautyKiosk &&
+    cart.some((item) => !item.reservation_time)
+  ) {
+    alert('PICK 항목별 예약시간을 모두 선택해주세요.')
+    return
+  }
 
-if (isBeautyKiosk && (!beautyReservationDate || !beautyReservationTime)) {
-  alert('예약일과 예약시간을 선택해주세요.')
-  return
-}
-
-const cardOrderItems =
+  const cardOrderItems =
   isBeautyKiosk
     ? cart.map((item) => ({
         ...item,
         reservation_date: beautyReservationDate,
-        reservation_time: beautyReservationTime
+        reservation_time: item.reservation_time || ''
       }))
     : cart
 
@@ -19666,7 +19706,7 @@ sessionStorage.setItem(
 
 sessionStorage.setItem(
   'beauty_reservation_time',
-  beautyReservationTime
+  ''
 )
     
     sessionStorage.setItem(
