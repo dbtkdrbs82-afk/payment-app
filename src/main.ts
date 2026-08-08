@@ -13973,8 +13973,14 @@ if (merchantOrderCardList) {
             'data-date="' + (order.created_at || '') + '" ' +
             'data-items="' + beautyTableItems + '"' +
           '>' +
-            orderNumber + '번' +
-          '</button>' +
+  (
+    order.customer_name || order.customer_phone
+      ? (order.customer_name || '-') +
+        '<br>' +
+        (order.customer_phone || '-')
+      : orderNumber + '번'
+  ) +
+'</button>' +
         '</td>' +
     
        '<td>' +
