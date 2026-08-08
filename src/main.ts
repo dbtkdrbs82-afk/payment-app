@@ -12550,17 +12550,21 @@ let orderQuery = supabase
 
   if (isBeautyOrderQuery && !isBeautySalesView) {
     orders = (orders || []).filter((order: any) => {
-    const orderReservationDate =
-      order.reservation_date ||
-      (
-        Array.isArray(order.items)
-          ? order.items[0]?.reservation_date
-          : ''
-      )
-
-    return (
-      orderReservationDate >= beautySearchStartDate &&
-      orderReservationDate <= beautySearchEndDate
+      const beautyItemDates =
+      Array.isArray(order.items)
+        ? order.items
+            .map((item: any) => item.reservation_date || '')
+            .filter((date: string) => !!date)
+        : []
+    
+    const checkDates =
+      beautyItemDates.length > 0
+        ? beautyItemDates
+        : [order.reservation_date || '']
+    
+    return checkDates.some((date: string) =>
+      date >= beautySearchStartDate &&
+      date <= beautySearchEndDate
     )
   })
 }
@@ -13933,23 +13937,32 @@ if (merchantOrderCardList) {
 
     if ((sessionStorage.getItem('login_merchant_type') || '') === '뷰티') {
       const beautyTableItems = Array.isArray(order.items)
-        ? order.items
-            .map((item: any) =>
-              (item.name || '-') +
-              (
-                item.beauty_staff_id || order.beauty_staff_id
-                  ? ' / ' +
-(
-  item.beauty_staff_name ||
-  ('직원ID ' + (item.beauty_staff_id || order.beauty_staff_id || '-'))
-)
-                  : ''
-              ) +
-              ' x ' +
-              Number(item.quantity || 1)
-            )
-            .join('<br/>')
-        : '-'
+  ? order.items
+      .map((item: any) =>
+        (item.name || '-') +
+        ' / ' +
+        (
+          item.beauty_staff_name ||
+          (
+            item.beauty_staff_id || order.beauty_staff_id
+              ? '직원ID ' +
+                (item.beauty_staff_id || order.beauty_staff_id || '-')
+              : '-'
+          )
+        ) +
+        (
+          item.reservation_date || item.reservation_time
+            ? ' / ' +
+              (item.reservation_date || '-') +
+              ' ' +
+              (item.reservation_time || '-')
+            : ''
+        ) +
+        ' x ' +
+        Number(item.quantity || 1)
+      )
+      .join('<br>')
+  : '-'
     
       tr.innerHTML =
         '<td>' + (index + 1) + '</td>' +
@@ -13967,28 +13980,32 @@ if (merchantOrderCardList) {
           '</button>' +
         '</td>' +
     
-        '<td>' +
-  (
-    order.reservation_date ||
-    (
-      Array.isArray(order.items)
-        ? order.items[0]?.reservation_date
-        : ''
-    ) ||
-    '-'
-  ) +
+       '<td>' +
+(
+  Array.isArray(order.items)
+    ? order.items
+        .map((item: any) =>
+          item.reservation_date ||
+          order.reservation_date ||
+          '-'
+        )
+        .join('<br>')
+    : order.reservation_date || '-'
+) +
 '</td>' +
-    
-        '<td>' +
-  (
-    order.reservation_time ||
-    (
-      Array.isArray(order.items)
-        ? order.items[0]?.reservation_time
-        : ''
-    ) ||
-    '-'
-  ) +
+
+'<td>' +
+(
+  Array.isArray(order.items)
+    ? order.items
+        .map((item: any) =>
+          item.reservation_time ||
+          order.reservation_time ||
+          '-'
+        )
+        .join('<br>')
+    : order.reservation_time || '-'
+) +
 '</td>' +
     
         '<td style="line-height:1.8;">' +
@@ -19743,23 +19760,7 @@ sessionStorage.setItem(
       )
     }
     
-    sessionStorage.setItem(
-      'beauty_reservation_date',
-      (
-        document.querySelector<HTMLInputElement>(
-          '#beauty-reservation-date'
-        )?.value || ''
-      )
-    )
-    
-    sessionStorage.setItem(
-      'beauty_reservation_time',
-      (
-        document.querySelector<HTMLSelectElement>(
-          '#beauty-reservation-time'
-        )?.value || ''
-      )
-    )
+   
 
     location.href =
   '/merchant-card-ocr?mode=ocr&merchant_id=' +
