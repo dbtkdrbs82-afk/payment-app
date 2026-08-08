@@ -19276,70 +19276,56 @@ reservation_time?: string
               <div>
                 <strong>${item.name}</strong>
 
-${
-  item.beauty_staff_id
-    ? `<p style="font-size:12px;color:#64748b;">
-        ${
-          beautyKioskStaff.find(
-            (s) =>
-              Number(s.id) ===
-              Number(item.beauty_staff_id)
-          )?.staff_name || ''
-        }
-      </p>`
-    : ''
-}
-
-${
-  isBeautyKiosk
-    ? `
-      <input
-        type="date"
-        class="beauty-cart-date-input"
-        data-key="${item.cart_key}"
-        value="${item.reservation_date || ''}"
-        style="
-          width:150px;
-          height:34px;
-          margin:6px 0;
-          border:1px solid #d1d5db;
-          border-radius:8px;
-          padding:0 8px;
-          display:block;
-        "
-      />
-    `
-    : ''
-}
-
-${
-  isBeautyKiosk
-    ? `
-      <select
-        class="beauty-cart-time-select"
-        data-key="${item.cart_key}"
-        style="
-          width:150px;
-          height:34px;
-          margin:6px 0;
-          border:1px solid #d1d5db;
-          border-radius:8px;
-          padding:0 8px;
-        "
-      >
-        <option value="">예약시간 선택</option>
-        ${beautyReservationTimes.map((time) => `
-          <option
-            value="${time}"
-            ${item.reservation_time === time ? 'selected' : ''}
-          >
-            ${time}
-          </option>
-        `).join('')}
-      </select>
-    `
-    : ''
-}
+                ${
+                  isBeautyKiosk
+                    ? `
+                      <div style="
+                        display:flex;
+                        align-items:center;
+                        gap:4px;
+                        margin:4px 0 0 0;
+                      ">
+                        <input
+                          type="date"
+                          class="beauty-cart-date-input"
+                          data-key="${item.cart_key}"
+                          value="${item.reservation_date || ''}"
+                          style="
+                            width:140px;
+                            height:32px;
+                            border:1px solid #d1d5db;
+                            border-radius:8px;
+                            padding:0 6px;
+                            box-sizing:border-box;
+                          "
+                        />
+                
+                        <select
+                          class="beauty-cart-time-select"
+                          data-key="${item.cart_key}"
+                          style="
+                            width:130px;
+                            height:32px;
+                            border:1px solid #d1d5db;
+                            border-radius:8px;
+                            padding:0 6px;
+                            box-sizing:border-box;
+                          "
+                        >
+                          <option value="">예약시간 선택</option>
+                          ${beautyReservationTimes.map((time) => `
+                            <option
+                              value="${time}"
+                              ${item.reservation_time === time ? 'selected' : ''}
+                            >
+                              ${time}
+                            </option>
+                          `).join('')}
+                        </select>
+                      </div>
+                    `
+                    : ''
+                }
 
                 <p>${item.price.toLocaleString()}원 x ${item.quantity}</p>
               </div>
