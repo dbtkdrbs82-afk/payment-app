@@ -12569,7 +12569,24 @@ const settlementComplete =
       payment.payout_status === '출금완료'
   )
 
-  
+  const { data: merchantReceiptPayments } =
+  await supabase
+    .from('payments')
+    .select(`
+      id,
+      order_id,
+      payment_key,
+      approval_number,
+      card_number,
+      card_company,
+      pg_company,
+      pg_mid,
+      amount,
+      created_at
+    `)
+    .eq('merchant_id', merchantId)
+    .order('created_at', { ascending: false })
+    .limit(500)
 
     const merchantType =
   sessionStorage.getItem('login_merchant_type') || '일반매장'
@@ -13660,6 +13677,65 @@ if (merchantOrderCardList) {
         .join(', ')
     : '-'
 
+    const paymentForOrder =
+    (merchantReceiptPayments || []).find((payment: any) => {
+      const paymentOrderId =
+        String(payment.order_id || '')
+          .replace(/[^a-zA-Z0-9]/g, '')
+
+      const orderPgId =
+        String(order.pg_order_id || '')
+          .replace(/[^a-zA-Z0-9]/g, '')
+
+      const sameOrderId =
+        paymentOrderId &&
+        orderPgId &&
+        paymentOrderId === orderPgId
+
+      const samePaymentKey =
+        order.payment_key &&
+        payment.payment_key &&
+        String(order.payment_key) ===
+          String(payment.payment_key)
+
+      const sameAmount =
+        Number(payment.amount || 0) ===
+        Number(order.total_amount || 0)
+
+      const timeGap =
+        Math.abs(
+          new Date(payment.created_at).getTime() -
+          new Date(order.created_at).getTime()
+        )
+
+      return (
+        sameOrderId ||
+        samePaymentKey ||
+        (
+          sameAmount &&
+          timeGap < 1000 * 60 * 5
+        )
+      )
+    })
+
+  const receiptApprovalNumber =
+    paymentForOrder?.approval_number || '-'
+
+  const receiptPaymentKey =
+    paymentForOrder?.payment_key || '-'
+
+  const receiptCardNumber =
+    paymentForOrder?.card_number || '결제사 제공값'
+
+  const receiptCardCompany =
+    paymentForOrder?.card_company || '신용카드'
+
+  const receiptPgCompany =
+    paymentForOrder?.pg_company || '-'
+
+  const receiptPgMid =
+    paymentForOrder?.pg_mid || '-'
+
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
     '<td>' +
@@ -13669,6 +13745,12 @@ if (merchantOrderCardList) {
     'data-order="' + orderNumber + '" ' +
     'data-amount="' + (order.total_amount || 0) + '" ' +
     'data-date="' + (order.created_at || '') + '" ' +
+    'data-payment-key="' + receiptPaymentKey + '" ' +
+    'data-approval-number="' + receiptApprovalNumber + '" ' +
+    'data-card-number="' + receiptCardNumber + '" ' +
+    'data-card-company="' + receiptCardCompany + '" ' +
+    'data-pg-company="' + receiptPgCompany + '" ' +
+    'data-pg-mid="' + receiptPgMid + '" ' +
   '>' +
     orderNumber + '번' +
   '</button>' +
@@ -13679,7 +13761,7 @@ if (merchantOrderCardList) {
   'data-id="' + order.id + '" ' +
   'data-created-at="' + order.created_at + '" ' +
   'data-amount="' + order.total_amount + '">' +
-  '승인번호 ' + (order.approval_number || '-') +
+  '승인번호 ' + receiptApprovalNumber +
 '</div>' + 
 (
   order.cancel_status === '취소완료'
@@ -13842,7 +13924,7 @@ if (merchantOrderCardList) {
   'data-id="' + order.id + '" ' +
   'data-created-at="' + order.created_at + '" ' +
   'data-amount="' + order.total_amount + '">' +
-  '승인번호 : ' + (order.approval_number || '-') +
+  '승인번호 : ' + receiptApprovalNumber +
 '</div>' +
       
 
@@ -13899,6 +13981,21 @@ receiptButtons.forEach((button) => {
       const paymentKey =
       target.getAttribute('data-payment-key') || '-'
 
+      const approvalNumber =
+      target.getAttribute('data-approval-number') || '-'
+
+    const cardNumber =
+      target.getAttribute('data-card-number') || '결제사 제공값'
+
+    const cardCompany =
+      target.getAttribute('data-card-company') || '신용카드'
+
+    const pgCompany =
+      target.getAttribute('data-pg-company') || '-'
+
+    const pgMid =
+      target.getAttribute('data-pg-mid') || '-'
+
     const customerName =
       target.getAttribute('data-customer') || '현장고객'
 
@@ -13916,9 +14013,9 @@ receiptButtons.forEach((button) => {
             <table>
               <tr>
                 <th>카드번호</th>
-                <td>결제사 제공값</td>
+                <td>${cardNumber}</td>
                 <th>카드종류</th>
-                <td>신용카드</td>
+                <td>${cardCompany}</td>
               </tr>
               <tr>
                 <th>거래종류</th>
@@ -13938,7 +14035,8 @@ receiptButtons.forEach((button) => {
               <h4>구매정보</h4>
               <table>
                 <tr><th>주문자명</th><td>${customerName}</td></tr>
-<tr><th>승인번호</th><td>${paymentKey}</td></tr>
+<tr><th>승인번호</th><td>${approvalNumber}</td></tr>
+<tr><th>거래번호</th><td>${paymentKey}</td></tr>
 <tr><th>주문번호</th><td>${orderNo}</td></tr>
 <tr><th>상품명 / 구매자</th><td>${items}</td></tr>
               </table>
@@ -13994,14 +14092,15 @@ receiptButtons.forEach((button) => {
           <section>
             <h4>결제서비스업체(PG)정보</h4>
             <table>
-              <tr><th>카드사 가맹점명</th><td>토스페이먼츠</td><th>사업자번호</th><td>-</td></tr>
-              <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>-</td></tr>
+              <tr><th>카드사 가맹점명</th><td>${pgCompany}</td><th>사업자번호</th><td>-</td></tr>
+              <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>${pgMid}</td></tr>
               <tr><th>주소</th><td colspan="3">-</td></tr>
             </table>
           </section>
     
           <div class="receipt-actions">
             <button onclick="window.print()">인쇄하기</button>
+            <button id="receipt-share-button">문자/카카오톡 발송</button>
             <button id="admin-receipt-close-btn">닫기</button>
           </div>
     
@@ -14014,6 +14113,34 @@ receiptButtons.forEach((button) => {
     
     document.querySelector<HTMLElement>('#admin-receipt-modal')!.style.display = 'flex'
     
+    document.querySelector('#receipt-share-button')
+    ?.addEventListener('click', async () => {
+      const receiptShareText =
+        '[NXG PICK 영수증]\n' +
+        '상점명: ' + (merchantSetting?.merchant_name || '-') + '\n' +
+        '주문번호: ' + orderNo + '\n' +
+        '승인번호: ' + approvalNumber + '\n' +
+        '결제일시: ' + date + '\n' +
+        '상품명: ' + items.replace(/<br\/>/g, ', ') + '\n' +
+        '결제금액: ' + amount.toLocaleString() + '원'
+
+      if (navigator.share) {
+        await navigator.share({
+          title: 'NXG PICK 영수증',
+          text: receiptShareText
+        })
+
+        return
+      }
+
+      await navigator.clipboard.writeText(receiptShareText)
+
+      alert(
+        '영수증 내용이 복사되었습니다.\n' +
+        '문자나 카카오톡에 붙여넣기 해주세요.'
+      )
+    })
+
     document.querySelector('#admin-receipt-close-btn')
       ?.addEventListener('click', () => {
         document.querySelector('#admin-receipt-modal')?.remove()
