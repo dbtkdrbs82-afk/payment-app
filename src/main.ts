@@ -12504,6 +12504,12 @@ const merchantTypeForOrderQuery =
 const isBeautyOrderQuery =
   merchantTypeForOrderQuery === '뷰티'
 
+  const beautyViewMode =
+  params.get('view') || 'schedule'
+
+const isBeautySalesView =
+  isBeautyOrderQuery && beautyViewMode === 'sales'
+
 const getTodayDateValue = () => {
   const now = new Date()
 
@@ -12529,7 +12535,11 @@ let orderQuery = supabase
   .select('*')
   .eq('merchant_id', merchantId)
 
-  if (!isBeautyOrderQuery && startDate && endDate) {
+  if (
+    (!isBeautyOrderQuery || isBeautySalesView) &&
+    startDate &&
+    endDate
+  ) {
     orderQuery = orderQuery
       .gte('created_at', startDate + 'T00:00:00')
       .lte('created_at', endDate + 'T23:59:59')
@@ -12538,8 +12548,8 @@ let orderQuery = supabase
   let { data: orders, error } = await orderQuery
   .order('created_at', { ascending: false })
 
-if (isBeautyOrderQuery) {
-  orders = (orders || []).filter((order: any) => {
+  if (isBeautyOrderQuery && !isBeautySalesView) {
+    orders = (orders || []).filter((order: any) => {
     const orderReservationDate =
       order.reservation_date ||
       (
@@ -13343,6 +13353,46 @@ ${merchantContent}
   </div>
 </div>
 
+${isBeauty ? `
+  <div style="
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:16px 0;
+  ">
+    <button
+      id="beauty-schedule-view-button"
+      type="button"
+      style="
+        padding:10px 18px;
+        border-radius:999px;
+        border:1px solid #d1d5db;
+        background:${!isBeautySalesView ? '#111827' : '#ffffff'};
+        color:${!isBeautySalesView ? '#ffffff' : '#111827'};
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      예약 스케줄
+    </button>
+
+    <button
+      id="beauty-sales-view-button"
+      type="button"
+      style="
+        padding:10px 18px;
+        border-radius:999px;
+        border:1px solid #d1d5db;
+        background:${isBeautySalesView ? '#111827' : '#ffffff'};
+        color:${isBeautySalesView ? '#ffffff' : '#111827'};
+        font-weight:700;
+        cursor:pointer;
+      "
+    >
+      전체 매출
+    </button>
+  </div>
+` : ''}
 
   <div class="order-bottom-toolbar ${(isNormalStore || isBeauty) ? '' : 'hide-for-type'}">
 
@@ -13463,6 +13513,34 @@ ${merchantContent}
         </div>
       
       `
+
+      document
+  .querySelector('#beauty-schedule-view-button')
+  ?.addEventListener('click', () => {
+    const nextParams =
+      new URLSearchParams(window.location.search)
+
+    nextParams.delete('view')
+
+    const queryText =
+      nextParams.toString()
+
+    location.href =
+      '/merchant-admin' +
+      (queryText ? '?' + queryText : '')
+  })
+
+document
+  .querySelector('#beauty-sales-view-button')
+  ?.addEventListener('click', () => {
+    const nextParams =
+      new URLSearchParams(window.location.search)
+
+    nextParams.set('view', 'sales')
+
+    location.href =
+      '/merchant-admin?' + nextParams.toString()
+  })
 
       document
   .querySelector('#terminal-date-search-button')
