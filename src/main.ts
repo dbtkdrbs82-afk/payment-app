@@ -12528,7 +12528,12 @@ const beautySearchStartDate =
   startDate || getTodayDateValue()
 
 const beautySearchEndDate =
-  endDate || getTodayDateValue()
+  endDate ||
+  (
+    isBeautyOrderQuery && !isBeautySalesView
+      ? '9999-12-31'
+      : getTodayDateValue()
+  )
 
 let orderQuery = supabase
   .from('orders')
@@ -13950,14 +13955,6 @@ if (merchantOrderCardList) {
               : '-'
           )
         ) +
-        (
-          item.reservation_date || item.reservation_time
-            ? ' / ' +
-              (item.reservation_date || '-') +
-              ' ' +
-              (item.reservation_time || '-')
-            : ''
-        ) +
         ' x ' +
         Number(item.quantity || 1)
       )
@@ -13983,14 +13980,16 @@ if (merchantOrderCardList) {
        '<td>' +
 (
   Array.isArray(order.items)
-    ? order.items
-        .map((item: any) =>
+  ? Array.from(
+      new Set(
+        order.items.map((item: any) =>
           item.reservation_date ||
           order.reservation_date ||
           '-'
         )
-        .join('<br>')
-    : order.reservation_date || '-'
+      )
+    ).join('<br>')
+  : order.reservation_date || '-'
 ) +
 '</td>' +
 
