@@ -12498,16 +12498,46 @@ const orderIdValue =
 const startDate = params.get('start')
 const endDate = params.get('end')
 
+const merchantTypeForOrderQuery =
+  sessionStorage.getItem('login_merchant_type') || '일반매장'
+
+const isBeautyOrderQuery =
+  merchantTypeForOrderQuery === '뷰티'
+
+const getTodayDateValue = () => {
+  const now = new Date()
+
+  const year = now.getFullYear()
+
+  const month =
+    String(now.getMonth() + 1).padStart(2, '0')
+
+  const day =
+    String(now.getDate()).padStart(2, '0')
+
+  return year + '-' + month + '-' + day
+}
+
+const beautySearchStartDate =
+  startDate || getTodayDateValue()
+
+const beautySearchEndDate =
+  endDate || getTodayDateValue()
+
 let orderQuery = supabase
   .from('orders')
   .select('*')
   .eq('merchant_id', merchantId)
 
-if (startDate && endDate) {
-  orderQuery = orderQuery
-    .gte('created_at', startDate + 'T00:00:00')
-    .lte('created_at', endDate + 'T23:59:59')
-}
+  if (isBeautyOrderQuery) {
+    orderQuery = orderQuery
+      .gte('reservation_date', beautySearchStartDate)
+      .lte('reservation_date', beautySearchEndDate)
+  } else if (startDate && endDate) {
+    orderQuery = orderQuery
+      .gte('created_at', startDate + 'T00:00:00')
+      .lte('created_at', endDate + 'T23:59:59')
+  }
 
 const { data: orders, error } = await orderQuery
   .order('created_at', { ascending: false })
