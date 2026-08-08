@@ -13753,6 +13753,9 @@ if (merchantOrderCardList) {
     'data-order="' + orderNumber + '" ' +
     'data-amount="' + (order.total_amount || 0) + '" ' +
     'data-date="' + (order.created_at || '') + '" ' +
+    'data-status="' + (order.order_status || '') + '" ' +
+'data-cancel-status="' + (order.cancel_status || '') + '" ' +
+'data-cancel-date="' + (order.cancel_requested_at || '') + '" ' +
     'data-items="' + orderItems + '" ' +
     'data-payment-key="' + receiptPaymentKey + '" ' +
     'data-approval-number="' + receiptApprovalNumber + '" ' +
@@ -14005,6 +14008,34 @@ receiptButtons.forEach((button) => {
     const pgMid =
       target.getAttribute('data-pg-mid') || '-'
 
+      const receiptStatus =
+      target.getAttribute('data-status') || ''
+
+    const receiptCancelStatus =
+      target.getAttribute('data-cancel-status') || ''
+
+    const receiptCancelDateText =
+      target.getAttribute('data-cancel-date')
+        ? new Date(
+            target.getAttribute('data-cancel-date')!
+          ).toLocaleString('ko-KR')
+        : '-'
+
+    const isCanceledReceipt =
+      receiptStatus === '취소완료' ||
+      receiptCancelStatus === '취소완료'
+
+    const receiptTypeText =
+      isCanceledReceipt ? '취소' : '승인'
+
+    const receiptTradeText =
+      isCanceledReceipt ? '취소완료' : '승인성공'
+
+    const receiptTotalAmountText =
+      isCanceledReceipt
+        ? '-' + amount.toLocaleString() + '원'
+        : amount.toLocaleString() + '원'
+
     const customerName =
       target.getAttribute('data-customer') || '현장고객'
 
@@ -14012,9 +14043,11 @@ receiptButtons.forEach((button) => {
       <div id="admin-receipt-modal" class="receipt-modal">
         <div class="receipt-box receipt-approve">
     
-          <div class="receipt-header">
+          <div class="receipt-header ${isCanceledReceipt ? 'receipt-cancel-mode' : 'receipt-approve-mode'}">
             <h2>NXG PICK</h2>
-            <h3>신용카드 매출전표 <span>(승인)</span></h3>
+            <h3 class="${isCanceledReceipt ? 'receipt-cancel-title' : 'receipt-approve-title'}">
+              신용카드 매출전표 <span>(${receiptTypeText})</span>
+            </h3>
           </div>
     
           <section>
@@ -14028,7 +14061,9 @@ receiptButtons.forEach((button) => {
               </tr>
               <tr>
                 <th>거래종류</th>
-                <td>승인성공</td>
+                <td class="${isCanceledReceipt ? 'receipt-cancel-text' : 'receipt-approve-text'}">
+                  ${receiptTradeText}
+                </td>
                 <th>할부개월</th>
                 <td>일시불</td>
               </tr>
@@ -14036,6 +14071,17 @@ receiptButtons.forEach((button) => {
                 <th>거래일시</th>
                 <td colspan="3">${date}</td>
               </tr>
+
+              ${
+                isCanceledReceipt
+                  ? `
+                    <tr>
+                      <th>취소시각</th>
+                      <td colspan="3">${receiptCancelDateText}</td>
+                    </tr>
+                  `
+                  : ''
+              }
             </table>
           </section>
     
@@ -14061,7 +14107,7 @@ receiptButtons.forEach((button) => {
                 <tr><th>할인금액</th><td>0원</td></tr>
                 <tr class="receipt-total">
                   <th>총 결제금액</th>
-                  <td>${amount.toLocaleString()}원</td>
+                  <td>${receiptTotalAmountText}</td>
                 </tr>
               </table>
             </section>
