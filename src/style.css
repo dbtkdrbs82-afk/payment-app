@@ -6958,3 +6958,34 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     margin-top: 70px !important;
   }
 }
+/* 가맹점 관리자 모바일 상단 탭 정리 */
+@media (max-width: 768px) {
+  .merchant-tabs,
+  .merchant-tab-row,
+  .merchant-menu-tabs,
+  .merchant-admin-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    padding: 0 12px 10px !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+  }
+
+  .merchant-tabs button,
+  .merchant-tab-row button,
+  .merchant-menu-tabs button,
+  .merchant-admin-tabs button {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 86px !important;
+    height: 42px !important;
+    padding: 0 14px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+    white-space: nowrap !important;
+  }
+}
