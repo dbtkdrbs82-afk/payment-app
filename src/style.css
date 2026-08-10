@@ -6888,3 +6888,27 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     white-space: nowrap !important;
   }
 }
+/* 주문관리 모바일: 주문번호 버튼과 고객호출 버튼 높이 맞춤 */
+@media (max-width: 768px) {
+  .merchant-card-receipt-link,
+  .merchant-card-call-button {
+    top: 24px !important;
+    height: 42px !important;
+  }
+
+  .merchant-card-receipt-link {
+    left: 24px !important;
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+  }
+
+  .merchant-card-call-button {
+    right: 24px !important;
+    width: 112px !important;
+  }
+
+  .merchant-order-card-date {
+    margin-top: 64px !important;
+  }
+}
