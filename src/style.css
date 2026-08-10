@@ -6912,3 +6912,13 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     margin-top: 64px !important;
   }
 }
+/* 주문관리 모바일: 주문번호 버튼만 위로 보정 */
+@media (max-width: 768px) {
+  .merchant-card-receipt-link {
+    top: 14px !important;
+  }
+
+  .merchant-card-call-button {
+    top: 24px !important;
+  }
+}
