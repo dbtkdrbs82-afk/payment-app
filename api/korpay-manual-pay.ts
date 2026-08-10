@@ -27,13 +27,11 @@ export default async function handler(
   }
 
   try {   
-   const {
+    const {
       merchantId,
       amount,
       cardNumber,
       expiryYymm,
-      birth,
-      cardPassword,
       installment,
       buyerName,
       goodsName,
@@ -44,8 +42,7 @@ export default async function handler(
 const goodsAmt = Number(amount)
 const cardNo = onlyDigits(cardNumber)
 const expiry = onlyDigits(expiryYymm)
-const birthNo = onlyDigits(birth)
-const cardPwd = onlyDigits(cardPassword)
+
 const quotaMon = onlyDigits(installment || '00').padStart(2, '0')
 const ordHp = onlyDigits(customerPhone)
 
@@ -77,19 +74,7 @@ const ordHp = onlyDigits(customerPhone)
       })
     }
 
-    if (!/^\d{6}$/.test(birthNo)) {
-      return res.status(400).json({
-        success: false,
-        message: '생년월일은 6자리로 입력해주세요.'
-      })
-    }
     
-    if (!/^\d{2}$/.test(cardPwd)) {
-      return res.status(400).json({
-        success: false,
-        message: '카드 비밀번호 앞 2자리를 입력해주세요.'
-      })
-    }
 
     const supabaseHeaders = {
       apikey: serviceRoleKey,
@@ -159,8 +144,6 @@ const ordHp = onlyDigits(customerPhone)
         goodsAmt: String(goodsAmt),
         cardNo,
         expireYymm: expiry,
-        certNo: birthNo,
-        certPw: cardPwd,
         quotaMon,
         buyer_nm: String(buyerName || '구매자').trim(),
         goodsNm: String(goodsName || '일반 카드결제').trim(),
