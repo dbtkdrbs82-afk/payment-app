@@ -15533,14 +15533,18 @@ ${
           <div class="input-group">
             <label>카테고리</label>
     
-            <select id="merchant-product-category">
-              <option value="커피">커피</option>
-              <option value="에이드">에이드</option>
-              <option value="음료">음료</option>
-              <option value="식사">식사</option>
-              <option value="디저트">디저트</option>
-              <option value="기타">기타</option>
-            </select>
+            <input
+  id="merchant-product-category"
+  type="text"
+  placeholder="카테고리 직접 입력"
+  style="
+    height:42px;
+    border:1px solid #d1d5db;
+    border-radius:8px;
+    padding:0 12px;
+    box-sizing:border-box;
+  "
+/>
           </div>
         `
     }
