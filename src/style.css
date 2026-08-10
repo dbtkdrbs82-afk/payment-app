@@ -6483,3 +6483,38 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   background: transparent !important;
   color: #174a8b !important;
 }
+/* 일반매장 카드결제 태블릿 / 모바일 카테고리 탭 */
+@media (max-width: 900px) {
+  .kiosk-category-tabs {
+    max-width: 100% !important;
+    margin: 22px auto 22px !important;
+    padding: 0 16px !important;
+    gap: 42px !important;
+    overflow-x: auto !important;
+    justify-content: flex-start !important;
+  }
+
+  .kiosk-category-tab {
+    min-width: 72px !important;
+    font-size: 16px !important;
+    padding: 0 2px 12px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  .kiosk-category-tabs {
+    margin: 18px auto 18px !important;
+    padding: 0 14px !important;
+    gap: 30px !important;
+  }
+
+  .kiosk-category-tab {
+    min-width: 58px !important;
+    font-size: 15px !important;
+    padding: 0 2px 10px !important;
+  }
+
+  .kiosk-category-tab.active {
+    border-bottom-width: 3px !important;
+  }
+}
