@@ -6598,3 +6598,18 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     padding: 18px 14px !important;
   }
 }
+@media (max-width: 1200px) {
+  .manual-payment-card {
+    display: block !important;
+    width: 92vw !important;
+    max-width: 92vw !important;
+  }
+
+  .manual-payment-card input,
+  .manual-payment-card select,
+  .manual-payment-card button {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+}

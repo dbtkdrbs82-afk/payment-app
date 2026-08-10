@@ -17857,7 +17857,7 @@ document.querySelector('#pay-link-btn')
             <h1>일반 수기결제</h1>
             <p>카드정보를 직접 입력해주세요.</p>
       
-            <div class="payment-card">
+            <div class="payment-card manual-payment-card">
       
               <label>결제금액</label>
               <input
