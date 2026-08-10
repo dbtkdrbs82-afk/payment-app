@@ -6922,3 +6922,39 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     top: 24px !important;
   }
 }
+/* 주문관리 모바일: 7번 / 고객호출 최종 높이 강제 맞춤 */
+@media (max-width: 768px) {
+  body:has(#merchantOrderCardList) .merchant-order-card {
+    position: relative !important;
+  }
+
+  body:has(#merchantOrderCardList) .merchant-order-card .merchant-card-receipt-link {
+    position: absolute !important;
+    top: 24px !important;
+    left: 24px !important;
+    width: 82px !important;
+    min-width: 82px !important;
+    max-width: 82px !important;
+    height: 42px !important;
+    line-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  body:has(#merchantOrderCardList) .merchant-order-card .merchant-card-call-button {
+    position: absolute !important;
+    top: 24px !important;
+    right: 24px !important;
+    width: 112px !important;
+    height: 42px !important;
+    line-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  body:has(#merchantOrderCardList) .merchant-order-card-date {
+    margin-top: 70px !important;
+  }
+}
