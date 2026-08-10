@@ -7073,3 +7073,36 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     gap: 14px !important;
   }
 }
+/* 주문관리 태블릿 가로/세로 강제 분리 최종 */
+@media (max-width: 1400px) and (orientation: landscape) {
+  html body:has(#merchantOrderCardList) #merchantOrderCardList,
+  html body:has(#merchantOrderCardList) .merchant-order-card-list,
+  html body:has(#merchantOrderCardList) .merchant-order-card {
+    display: none !important;
+  }
+
+  html body:has(#merchantOrderCardList) table:has(#merchantOrderBody) {
+    display: table !important;
+    width: 100% !important;
+  }
+
+  html body:has(#merchantOrderCardList) #merchantOrderBody tr {
+    display: table-row !important;
+  }
+}
+
+@media (max-width: 1400px) and (orientation: portrait) {
+  html body:has(#merchantOrderCardList) table:has(#merchantOrderBody) {
+    display: none !important;
+  }
+
+  html body:has(#merchantOrderCardList) #merchantOrderCardList {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+
+  html body:has(#merchantOrderCardList) .merchant-order-card {
+    display: block !important;
+  }
+}
