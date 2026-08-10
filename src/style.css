@@ -6442,3 +6442,43 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
   }
 
 }
+/* 카드결제 메뉴선택 화면 버튼 파스텔톤 */
+.category-button,
+.kiosk-category-button,
+.menu-category-button {
+  background: #dbeafe !important;
+  color: #174a8b !important;
+  border: 1px solid #bfdbfe !important;
+  box-shadow: none !important;
+}
+
+.category-button:hover,
+.kiosk-category-button:hover,
+.menu-category-button:hover {
+  background: #bfdbfe !important;
+}
+
+.category-button.active,
+.kiosk-category-button.active,
+.menu-category-button.active {
+  background: #174a8b !important;
+  color: #ffffff !important;
+  border: 1px solid #174a8b !important;
+}
+
+/* 담기 버튼 */
+.product-add-button,
+.kiosk-add-button {
+  background: #dbeafe !important;
+  color: #174a8b !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+/* 하단 결제 버튼 */
+#kiosk-mobile-pay-button,
+#kiosk-toss-pay-button,
+#kiosk-card-pay-button {
+  background: #dbeafe !important;
+  color: #174a8b !important;
+  border: 1px solid #bfdbfe !important;
+}
