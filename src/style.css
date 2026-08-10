@@ -7397,3 +7397,20 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     box-sizing: border-box !important;
   }
 }
+/* 상품관리 등록상품 이미지 전체 보이게 확대 */
+@media (min-width: 769px) {
+  body:has(#merchantProductBody) #merchantProductBody > div {
+    min-height: 118px !important;
+    grid-template-columns: 110px 1fr 120px !important;
+  }
+
+  body:has(#merchantProductBody) #merchantProductBody img {
+    width: 92px !important;
+    height: 92px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+    background: #f3f4f6 !important;
+    border-radius: 12px !important;
+    display: block !important;
+  }
+}
