@@ -7162,3 +7162,19 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     border-radius: 8px !important;
   }
 }
+/* 주문관리 모바일/태블릿: 세로/가로 모두 테이블형 고정 */
+@media (max-width: 1400px) {
+  body:has(#merchantOrderCardList) #merchantOrderCardList {
+    display: none !important;
+  }
+
+  body:has(#merchantOrderCardList) table:has(#merchantOrderBody) {
+    display: table !important;
+    width: 100% !important;
+    min-width: 900px !important;
+  }
+
+  body:has(#merchantOrderCardList) .payment-card:has(table:has(#merchantOrderBody)) {
+    overflow-x: auto !important;
+  }
+}
