@@ -6613,20 +6613,46 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     box-sizing: border-box !important;
   }
 }
-/* 일반매장 주문관리 모바일 화면 정리 */
+/* 일반매장 주문관리 모바일 최종 정리 */
 @media (max-width: 768px) {
-  table:has(#merchantOrderBody) {
+  body:has(#merchantOrderCardList) {
+    overflow-x: hidden !important;
+  }
+
+  body:has(#merchantOrderCardList) .page {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  body:has(#merchantOrderCardList) *,
+  body:has(#merchantOrderCardList) *::before,
+  body:has(#merchantOrderCardList) *::after {
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderCardList) button,
+  body:has(#merchantOrderCardList) input,
+  body:has(#merchantOrderCardList) select {
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(#merchantOrderCardList) table:has(#merchantOrderBody) {
     display: none !important;
   }
 
   #merchantOrderCardList {
     display: flex !important;
     flex-direction: column !important;
-    gap: 12px !important;
+    gap: 14px !important;
     width: 100% !important;
     max-width: 100% !important;
-    padding: 0 12px 100px !important;
-    box-sizing: border-box !important;
+    padding: 0 0 100px !important;
+    margin: 0 !important;
   }
 
   .merchant-order-card {
@@ -6635,53 +6661,61 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     margin: 0 !important;
     padding: 16px !important;
     border: 1px solid #e5e7eb !important;
-    border-radius: 16px !important;
+    border-radius: 18px !important;
     background: #ffffff !important;
-    box-sizing: border-box !important;
     overflow: hidden !important;
   }
 
   .merchant-order-card-top {
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: space-between !important;
-    gap: 10px !important;
-    margin-bottom: 10px !important;
+    gap: 12px !important;
+    margin-bottom: 12px !important;
   }
 
   .merchant-card-receipt-link {
-    max-width: 52% !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 120px) !important;
     white-space: normal !important;
     word-break: keep-all !important;
     text-align: left !important;
   }
 
   .merchant-order-card-top span {
-    font-size: 17px !important;
-    font-weight: 800 !important;
+    flex: 0 0 auto !important;
     white-space: nowrap !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
   }
 
   .merchant-order-card-date,
+  .approval-number,
   .merchant-order-card-items,
-  .merchant-order-card-status,
-  .approval-number {
+  .merchant-order-card-status {
     width: 100% !important;
     max-width: 100% !important;
     word-break: break-word !important;
-    box-sizing: border-box !important;
   }
 
   .merchant-card-call-button {
     width: 100% !important;
-    height: 46px !important;
+    height: 48px !important;
     margin-top: 12px !important;
-    box-sizing: border-box !important;
   }
-}
 
-@media (min-width: 769px) {
-  #merchantOrderCardList {
-    display: none !important;
+  /* 상단 버튼/검색영역 폭 넘침 방지 */
+  body:has(#merchantOrderCardList) div[style*="display:flex"] {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
+
+  body:has(#merchantOrderCardList) div[style*="display:flex"] > button,
+  body:has(#merchantOrderCardList) div[style*="display:flex"] > a,
+  body:has(#merchantOrderCardList) div[style*="display:flex"] > input,
+  body:has(#merchantOrderCardList) div[style*="display:flex"] > select {
+    flex: 1 1 calc(50% - 10px) !important;
+    min-width: 0 !important;
   }
 }
