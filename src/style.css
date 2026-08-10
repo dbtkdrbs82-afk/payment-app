@@ -7310,3 +7310,46 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     box-sizing: border-box !important;
   }
 }
+/* 상품관리 태블릿/PC 좌우 반반 정리 */
+@media (min-width: 769px) {
+  body:has(#merchantProductBody) .merchant-product-layout {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    gap: 24px !important;
+    width: 100% !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantProductBody) .product-create-card,
+  body:has(#merchantProductBody) .product-list-card {
+    flex: 0 0 calc(50% - 12px) !important;
+    width: calc(50% - 12px) !important;
+    max-width: calc(50% - 12px) !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantProductBody) #merchantProductBody {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100vh - 280px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* 상품관리 모바일 세로는 위아래 유지 */
+@media (max-width: 768px) {
+  body:has(#merchantProductBody) .merchant-product-layout {
+    display: block !important;
+  }
+
+  body:has(#merchantProductBody) .product-create-card,
+  body:has(#merchantProductBody) .product-list-card {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
