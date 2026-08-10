@@ -7264,3 +7264,49 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     overflow: visible !important;
   }
 }
+/* 상품관리 좌우분리 겹침 방지 최종 */
+@media (min-width: 769px) {
+  body:has(#merchantProductBody) .payment-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    justify-content: center !important;
+    gap: 24px !important;
+    width: 100% !important;
+    max-width: 1280px !important;
+    margin: 0 auto !important;
+    padding: 24px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantProductBody) .product-create-card {
+    flex: 0 0 420px !important;
+    width: 420px !important;
+    max-width: 420px !important;
+    min-width: 420px !important;
+    position: sticky !important;
+    top: 16px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantProductBody) .product-summary-row,
+  body:has(#merchantProductBody) #merchantProductBody {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+  }
+
+  body:has(#merchantProductBody) .product-summary-row {
+    position: static !important;
+    margin: 0 0 14px !important;
+  }
+
+  body:has(#merchantProductBody) #merchantProductBody {
+    width: auto !important;
+    max-height: calc(100vh - 260px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    padding-right: 6px !important;
+    box-sizing: border-box !important;
+  }
+}
