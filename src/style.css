@@ -6613,3 +6613,75 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     box-sizing: border-box !important;
   }
 }
+/* 일반매장 주문관리 모바일 화면 정리 */
+@media (max-width: 768px) {
+  table:has(#merchantOrderBody) {
+    display: none !important;
+  }
+
+  #merchantOrderCardList {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 12px 100px !important;
+    box-sizing: border-box !important;
+  }
+
+  .merchant-order-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 16px !important;
+    background: #ffffff !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .merchant-order-card-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  .merchant-card-receipt-link {
+    max-width: 52% !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    text-align: left !important;
+  }
+
+  .merchant-order-card-top span {
+    font-size: 17px !important;
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+  }
+
+  .merchant-order-card-date,
+  .merchant-order-card-items,
+  .merchant-order-card-status,
+  .approval-number {
+    width: 100% !important;
+    max-width: 100% !important;
+    word-break: break-word !important;
+    box-sizing: border-box !important;
+  }
+
+  .merchant-card-call-button {
+    width: 100% !important;
+    height: 46px !important;
+    margin-top: 12px !important;
+    box-sizing: border-box !important;
+  }
+}
+
+@media (min-width: 769px) {
+  #merchantOrderCardList {
+    display: none !important;
+  }
+}
