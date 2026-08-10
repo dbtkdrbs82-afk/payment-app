@@ -6719,3 +6719,63 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     min-width: 0 !important;
   }
 }
+/* 주문관리 모바일: 주문번호 / 고객호출 한줄 배치 */
+@media (max-width: 768px) {
+  .merchant-order-card {
+    position: relative !important;
+    padding: 16px !important;
+  }
+
+  .merchant-order-card-top {
+    display: block !important;
+    width: 100% !important;
+    min-height: 86px !important;
+    margin-bottom: 6px !important;
+  }
+
+  .merchant-card-receipt-link {
+    position: absolute !important;
+    top: 16px !important;
+    left: 16px !important;
+    width: 88px !important;
+    min-width: 88px !important;
+    max-width: 88px !important;
+    height: 42px !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  .merchant-card-call-button {
+    position: absolute !important;
+    top: 16px !important;
+    right: 16px !important;
+    width: 104px !important;
+    height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 10px !important;
+    font-size: 15px !important;
+    font-weight: 800 !important;
+  }
+
+  .merchant-order-card-top span {
+    position: absolute !important;
+    top: 66px !important;
+    right: 16px !important;
+    margin: 0 !important;
+    font-size: 18px !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    text-align: right !important;
+  }
+
+  .merchant-order-card-date {
+    margin-top: 0 !important;
+  }
+}
