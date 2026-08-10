@@ -7051,3 +7051,25 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     max-width: 100% !important;
   }
 }
+/* 주문관리 태블릿 방향별 정리 */
+@media (max-width: 1100px) and (orientation: landscape) {
+  body:has(#merchantOrderCardList) table:has(#merchantOrderBody) {
+    display: table !important;
+  }
+
+  body:has(#merchantOrderCardList) #merchantOrderCardList {
+    display: none !important;
+  }
+}
+
+@media (max-width: 1100px) and (orientation: portrait) {
+  body:has(#merchantOrderCardList) table:has(#merchantOrderBody) {
+    display: none !important;
+  }
+
+  body:has(#merchantOrderCardList) #merchantOrderCardList {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 14px !important;
+  }
+}
