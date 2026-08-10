@@ -75,6 +75,8 @@ const ordHp = onlyDigits(customerPhone)
     }
 
     
+    
+    
 
     const supabaseHeaders = {
       apikey: serviceRoleKey,
@@ -144,6 +146,7 @@ const ordHp = onlyDigits(customerPhone)
         goodsAmt: String(goodsAmt),
         cardNo,
         expireYymm: expiry,
+        
         quotaMon,
         buyer_nm: String(buyerName || '구매자').trim(),
         goodsNm: String(goodsName || '일반 카드결제').trim(),
