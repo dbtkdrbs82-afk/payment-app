@@ -17852,99 +17852,114 @@ document.querySelector('#pay-link-btn')
         }
       
         app.innerHTML = `
-          <div class="merchant-card-ocr-page">
-      
-            <h1>일반 수기결제</h1>
-            <p>카드정보를 직접 입력해주세요.</p>
-      
-            <div
-  class="payment-card manual-payment-card"
-  style="
-    display:flex;
-    flex-direction:column;
-    width:calc(100vw - 32px);
-    max-width:420px;
-    min-width:0;
-    margin:0 auto;
-    padding:18px 14px;
-    box-sizing:border-box;
-    overflow:hidden;
-  "
->
-      
-              <label>결제금액</label>
-              <input
-                id="manual-payment-amount"
-                type="number"
-                min="100"
-                placeholder="결제금액"
-              />
-      
-              <label>상품명</label>
-              <input
-                id="manual-product-name"
-                type="text"
-                placeholder="상품명"
-              />
-      
-              <label>카드번호</label>
-              <input
-                id="manual-card-number"
-                type="text"
-                inputmode="numeric"
-                maxlength="19"
-                placeholder="0000-0000-0000-0000"
-              />
-      
-              <label>유효기간</label>
-              <input
-                id="manual-expiry"
-                type="text"
-                inputmode="numeric"
-                maxlength="5"
-                placeholder="MM/YY"
-              />
-      
-              <label>할부개월</label>
-              <select id="manual-installment">
-                <option value="0">일시불</option>
-                <option value="2">2개월</option>
-                <option value="3">3개월</option>
-                <option value="4">4개월</option>
-                <option value="5">5개월</option>
-                <option value="6">6개월</option>
-                <option value="12">12개월</option>
-              </select>
-      
-              <label>비밀번호 앞 2자리</label>
-              <input
-                id="manual-card-password"
-                type="password"
-                inputmode="numeric"
-                maxlength="2"
-                placeholder="**"
-              />
-      
-              <label>생년월일 또는 사업자번호</label>
-              <input
-                id="manual-buyer-number"
-                type="text"
-                inputmode="numeric"
-                maxlength="10"
-                placeholder="YYMMDD 또는 사업자번호"
-              />
-      
-              <button id="manual-payment-submit" class="merchant-save-btn">
-                결제 요청
-              </button>
-      
-              <button id="manual-payment-back" class="merchant-close-btn">
-                이전
-              </button>
-      
-            </div>
-          </div>
-        `
+  <div
+    class="merchant-card-ocr-page"
+    style="
+      width:100%;
+      max-width:100%;
+      padding:24px 14px 110px;
+      box-sizing:border-box;
+      overflow-x:hidden;
+    "
+  >
+
+    <h1
+      style="
+        margin:0 0 12px;
+        font-size:30px;
+        line-height:1.2;
+      "
+    >
+      일반 수기결제
+    </h1>
+
+    <p
+      style="
+        margin:0 0 22px;
+        font-size:16px;
+        color:#555;
+      "
+    >
+      카드정보를 직접 입력해주세요.
+    </p>
+
+    <div
+      class="payment-card manual-payment-card"
+      style="
+        display:flex;
+        flex-direction:column;
+        width:100%;
+        max-width:420px;
+        min-width:0;
+        margin:0 auto;
+        padding:18px 14px;
+        box-sizing:border-box;
+        overflow:hidden;
+      "
+    >
+
+      <label>결제금액</label>
+      <input
+        id="manual-payment-amount"
+        type="number"
+        min="100"
+        placeholder="결제금액"
+        style="width:100%;box-sizing:border-box;"
+      />
+
+      <label>상품명</label>
+      <input
+        id="manual-product-name"
+        type="text"
+        placeholder="상품명"
+        style="width:100%;box-sizing:border-box;"
+      />
+
+      <label>카드번호</label>
+      <input
+        id="manual-card-number"
+        type="text"
+        inputmode="numeric"
+        maxlength="19"
+        placeholder="0000-0000-0000-0000"
+        style="width:100%;box-sizing:border-box;"
+      />
+
+      <label>유효기간</label>
+      <input
+        id="manual-expiry"
+        type="text"
+        inputmode="numeric"
+        maxlength="5"
+        placeholder="MM/YY"
+        style="width:100%;box-sizing:border-box;"
+      />
+
+      <label>할부개월</label>
+      <select
+        id="manual-installment"
+        style="width:100%;box-sizing:border-box;"
+      >
+        <option value="0">일시불</option>
+        <option value="2">2개월</option>
+        <option value="3">3개월</option>
+        <option value="4">4개월</option>
+        <option value="5">5개월</option>
+        <option value="6">6개월</option>
+        <option value="12">12개월</option>
+      </select>
+
+      <button id="manual-payment-submit" class="merchant-save-btn">
+        결제 요청
+      </button>
+
+      <button id="manual-payment-back" class="merchant-close-btn">
+        이전
+      </button>
+
+    </div>
+  </div>
+`
       
         document.querySelector('#manual-payment-back')
           ?.addEventListener('click', () => {
