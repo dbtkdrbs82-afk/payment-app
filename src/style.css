@@ -6957,3 +6957,31 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     align-self: center !important;
   }
 }
+/* 무선단말기 모바일: 요약 카드 글자 크기 압축 */
+@media (max-width: 768px) {
+  body:has(.terminal-date-search-box) .academy-card {
+    min-height: 96px !important;
+    padding: 12px 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(.terminal-date-search-box) .academy-card span {
+    font-size: 13px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(.terminal-date-search-box) .academy-card strong {
+    font-size: 26px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(.terminal-date-search-box) .academy-card small,
+  body:has(.terminal-date-search-box) .academy-card p,
+  body:has(.terminal-date-search-box) .academy-card div {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    word-break: keep-all !important;
+  }
+}
