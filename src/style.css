@@ -7224,3 +7224,76 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     min-width: 0 !important;
   }
 }
+/* 주문관리 작은 휴대폰: 전체 더 압축 */
+@media (max-width: 430px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .page {
+    padding: 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) h1 {
+    font-size: 16px !important;
+    margin: 6px 0 12px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) button[id^="merchant-"][id$="-tab"],
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .order-filter-btn,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter button,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
+    height: 24px !important;
+    min-width: 46px !important;
+    padding: 0 4px !important;
+    font-size: 8px !important;
+    border-radius: 5px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
+    gap: 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter input,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter select {
+    height: 24px !important;
+    font-size: 8px !important;
+    padding: 0 3px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary {
+    gap: 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary > div {
+    min-height: 54px !important;
+    padding: 4px 3px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary strong {
+    font-size: 8px !important;
+    line-height: 1.1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary span {
+    font-size: 14px !important;
+    line-height: 1.05 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-page-size {
+    width: 58px !important;
+    min-width: 58px !important;
+    height: 24px !important;
+    font-size: 8px !important;
+    padding: 0 2px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .order-pagination button {
+    width: 46px !important;
+    min-width: 46px !important;
+    height: 24px !important;
+    font-size: 8px !important;
+    padding: 0 3px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #order-page-info {
+    font-size: 10px !important;
+  }
+}
