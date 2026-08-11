@@ -7380,3 +7380,67 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     font-size: 17px !important;
   }
 }
+/* 일반매장 모바일: 주문관리 거래내역 표 오른쪽 짤림 방지 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .payment-card:has(#merchantOrderBody) {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td {
+    padding: 6px 1px !important;
+    font-size: 7px !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(1),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(1) {
+    width: 14% !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(2),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(2) {
+    width: 16% !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(3),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(3) {
+    width: 16% !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(4),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(4) {
+    width: 16% !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(5),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(5) {
+    width: 14% !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(6),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(6) {
+    width: 12% !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(7),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(7) {
+    width: 12% !important;
+    font-size: 6px !important;
+    letter-spacing: -0.4px !important;
+  }
+}
