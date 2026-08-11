@@ -6913,35 +6913,34 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     flex-wrap: nowrap !important;
   }
 }
-/* 무선단말기 모바일: 10개씩 보기 select 강제 버튼화 */
+/* 무선단말기 10개씩 보기 select 직접 보정 */
 @media (max-width: 768px) {
-  body:has(.terminal-date-search-box) select#terminal-page-size {
+  #terminal-page-size {
     width: 72px !important;
     min-width: 72px !important;
     max-width: 72px !important;
 
-    height: 32px !important;
-    min-height: 32px !important;
-    max-height: 32px !important;
+    height: 28px !important;
+    min-height: 28px !important;
+    max-height: 28px !important;
 
-    padding: 0 4px !important;
+    padding: 0 2px !important;
     margin: 0 !important;
 
     font-size: 10px !important;
     font-weight: 700 !important;
-    line-height: 1 !important;
+    line-height: 28px !important;
 
     border: 2px solid #174a80 !important;
     border-radius: 7px !important;
-    background: #ffffff !important;
+    background-color: #ffffff !important;
     color: #174a80 !important;
-
-    appearance: none !important;
-    -webkit-appearance: none !important;
 
     box-sizing: border-box !important;
     text-align: center !important;
     text-align-last: center !important;
-    vertical-align: middle !important;
+
+    transform: translateY(-1px) scaleY(0.9) !important;
+    transform-origin: center !important;
   }
 }
