@@ -6771,7 +6771,7 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     word-break: break-word !important;
   }
 }
-/* 무선단말기 모바일: 하단 버튼줄 한 줄 압축 */
+/* 무선단말기 모바일: 하단 버튼줄 위치 + 거래내역 표 정리 */
 @media (max-width: 768px) {
   body:has(.terminal-date-search-box) .admin-table-wrap {
     width: 100% !important;
@@ -6781,55 +6781,63 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
   }
 
   body:has(.terminal-date-search-box) .admin-table-top {
-    display: grid !important;
-    grid-template-columns: 86px 1fr 76px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     gap: 6px !important;
     width: 100% !important;
     max-width: 100% !important;
-    align-items: center !important;
+    margin: 18px 0 10px !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
-  }
-
-  body:has(.terminal-date-search-box) #terminal-excel-download {
-    grid-column: 1 / 2 !important;
-    width: 100% !important;
-    min-width: 0 !important;
+    overflow: hidden !important;
   }
 
   body:has(.terminal-date-search-box) .admin-pagination {
-    grid-column: 2 / 3 !important;
-    display: grid !important;
-    grid-template-columns: 1fr 34px 1fr !important;
-    gap: 4px !important;
-    width: 100% !important;
-    min-width: 0 !important;
+    display: flex !important;
     align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    width: auto !important;
+    min-width: 0 !important;
+  }
+
+  body:has(.terminal-date-search-box) #terminal-excel-download {
+    width: 72px !important;
+    min-width: 72px !important;
+  }
+
+  body:has(.terminal-date-search-box) #terminal-prev-page,
+  body:has(.terminal-date-search-box) #terminal-next-page {
+    width: 64px !important;
+    min-width: 64px !important;
   }
 
   body:has(.terminal-date-search-box) #terminal-page-size {
-    grid-column: 3 / 4 !important;
-    width: 100% !important;
-    min-width: 0 !important;
+    width: 74px !important;
+    min-width: 74px !important;
   }
 
   body:has(.terminal-date-search-box) #terminal-excel-download,
   body:has(.terminal-date-search-box) #terminal-prev-page,
   body:has(.terminal-date-search-box) #terminal-next-page,
   body:has(.terminal-date-search-box) #terminal-page-size {
-    height: 34px !important;
-    padding: 0 4px !important;
-    font-size: 11px !important;
+    height: 32px !important;
+    padding: 0 3px !important;
+    font-size: 10px !important;
     border-radius: 7px !important;
     box-sizing: border-box !important;
     white-space: nowrap !important;
   }
 
   body:has(.terminal-date-search-box) .admin-pagination span {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 32px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    height: 34px !important;
-    font-size: 12px !important;
+    font-size: 11px !important;
     white-space: nowrap !important;
   }
 
@@ -6842,10 +6850,41 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
 
   body:has(.terminal-date-search-box) .terminal-payment-table th,
   body:has(.terminal-date-search-box) .terminal-payment-table td {
-    padding: 7px 2px !important;
-    font-size: 10px !important;
+    padding: 7px 1px !important;
+    font-size: 9px !important;
     line-height: 1.2 !important;
     white-space: normal !important;
     word-break: break-word !important;
+    text-align: center !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(1),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(1) {
+    width: 24% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(2),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(2) {
+    width: 17% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(3),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(3) {
+    width: 20% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(4),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(4) {
+    width: 13% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(5),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(5) {
+    width: 12% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(6),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(6) {
+    width: 14% !important;
   }
 }
