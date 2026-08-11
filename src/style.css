@@ -7398,13 +7398,11 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     table-layout: fixed !important;
   }
 
-  /* 모바일에서는 No, 주문내용 숨김 */
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(1),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(1),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(4),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(4) {
-    display: none !important;
-  }
+  /* 모바일에서는 No만 숨김, 주문내용은 표시 */
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(1),
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(1) {
+  display: none !important;
+}
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th,
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td {
@@ -7417,46 +7415,44 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     box-sizing: border-box !important;
   }
 
-  /* 주문번호 */
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(2),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(2) {
-    width: 22% !important;
-  }
+ /* 주문번호 */
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(2),
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(2) {
+  width: 15% !important;
+}
 
-  /* 결제일시 */
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(3),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(3) {
-    width: 25% !important;
-    font-size: 6px !important;
-  }
+/* 결제일시 */
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(3),
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(3) {
+  width: 21% !important;
+  font-size: 5px !important;
+}
 
-  /* 결제금액 */
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(5),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(5) {
-    width: 17% !important;
-    font-size: 6px !important;
-  }
+/* 주문내용 */
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(4),
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(4) {
+  width: 20% !important;
+  font-size: 5px !important;
+}
 
-  /* 주문상태 */
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(6),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(6) {
-    width: 16% !important;
-  }
+/* 결제금액 */
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(5),
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(5) {
+  width: 14% !important;
+  font-size: 5px !important;
+}
 
-  /* 마지막 버튼/관리 */
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(7),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(7) {
-    width: 20% !important;
-  }
+/* 주문상태 */
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(6),
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(6) {
+  width: 13% !important;
+}
 
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td button {
-    width: 42px !important;
-    min-width: 42px !important;
-    height: 30px !important;
-    padding: 0 3px !important;
-    font-size: 9px !important;
-    border-radius: 7px !important;
-  }
+/* 고객호출 */
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(7),
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(7) {
+  width: 17% !important;
+}
 }
 /* 일반매장 모바일: 주문관리 표 글자/주문번호 버튼 추가 축소 */
 @media (max-width: 520px) {
