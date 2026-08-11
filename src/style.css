@@ -7058,3 +7058,30 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     border-radius: 7px !important;
   }
 }
+/* 주문관리 모바일: 요약 카드 글자 크기 정리 */
+@media (max-width: 768px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary > div {
+    min-height: 82px !important;
+    padding: 8px 4px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary strong {
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary span {
+    font-size: 18px !important;
+    line-height: 1.15 !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary .status-badge,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary .badge {
+    font-size: 11px !important;
+    padding: 4px 6px !important;
+  }
+}
