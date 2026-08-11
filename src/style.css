@@ -7497,20 +7497,29 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     line-height: 1 !important;
   }
 }
-/* 일반매장 모바일: 내역칸 박스 좌우 끝까지 확장 */
+/* 일반매장 모바일: 주문내역 테이블 박스 화면 끝까지 확장 */
 @media (max-width: 520px) {
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .payment-card:has(table:has(#merchantOrderBody)) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .payment-card:has(#merchantOrderBody) {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: 0 !important;
     padding-left: 0 !important;
     padding-right: 0 !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
   }
 
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .payment-card:has(table:has(#merchantOrderBody)) .admin-table-wrap,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .payment-card:has(table:has(#merchantOrderBody)) .payment-table-scroll,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .payment-card:has(table:has(#merchantOrderBody)) table:has(#merchantOrderBody) {
-    width: 100% !important;
-    max-width: 100% !important;
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
-    box-sizing: border-box !important;
+    table-layout: fixed !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchantOrderBody {
+    width: 100% !important;
   }
 }
