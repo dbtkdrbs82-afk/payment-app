@@ -6888,3 +6888,28 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     width: 14% !important;
   }
 }
+/* 무선단말기 모바일: 하단 10개씩 보기 한 줄 정렬 */
+@media (max-width: 768px) {
+  body:has(.terminal-date-search-box) #terminal-page-size {
+    width: 72px !important;
+    min-width: 72px !important;
+    height: 32px !important;
+    padding: 0 4px !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    border: 2px solid #174a80 !important;
+    border-radius: 7px !important;
+    background: #ffffff !important;
+    color: #174a80 !important;
+    box-sizing: border-box !important;
+    vertical-align: middle !important;
+  }
+
+  body:has(.terminal-date-search-box) .admin-table-top {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    flex-wrap: nowrap !important;
+  }
+}
