@@ -6913,3 +6913,13 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     flex-wrap: nowrap !important;
   }
 }
+/* 무선단말기 모바일: 10개씩 보기 높이 보정 */
+@media (max-width: 768px) {
+  body:has(.terminal-date-search-box) #terminal-page-size {
+    height: 30px !important;
+    line-height: 30px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    transform: translateY(-1px) !important;
+  }
+}
