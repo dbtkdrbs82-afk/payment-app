@@ -7547,3 +7547,61 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     gap: 5px !important;
   }
 }
+/* 일반매장 모바일: 날짜 검색줄 2줄 안정화 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr 1fr !important;
+    gap: 5px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .quick-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap:nth-of-type(1) {
+    grid-column: 1 / 2 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wave {
+    grid-column: 2 / 3 !important;
+    text-align: center !important;
+    line-height: 28px !important;
+    font-size: 10px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap:nth-of-type(2) {
+    grid-column: 3 / 4 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 28px !important;
+    font-size: 8px !important;
+    padding: 0 3px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search {
+    grid-column: 1 / 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
+    grid-column: 2 / 4 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
