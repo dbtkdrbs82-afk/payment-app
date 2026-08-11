@@ -1,4 +1,4 @@
-body {
+﻿body {
   margin: 0;
 }
 
@@ -6693,17 +6693,18 @@ button.payout-summary-card.payout-summary-button .payout-summary-value {
     white-space: nowrap !important;
   }
 }
-/* 주문관리: 모든 화면에서 테이블형 고정 */
-body #merchantOrderCardList {
+/* 주문관리: 모든 가맹점유형 테이블형 고정 */
+#merchantOrderCardList,
+.merchant-order-card-list {
   display: none !important;
 }
 
-body table:has(#merchantOrderBody) {
+table:has(#merchantOrderBody) {
   display: table !important;
   width: 100% !important;
   min-width: 900px !important;
 }
 
-body .payment-card:has(#merchantOrderBody) {
+.payment-card:has(#merchantOrderBody) {
   overflow-x: auto !important;
 }
