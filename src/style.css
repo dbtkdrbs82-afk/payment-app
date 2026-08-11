@@ -7519,3 +7519,31 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     width: 100% !important;
   }
 }
+/* 일반매장 모바일: 상단 메뉴/상태/기간 버튼 전체 축소 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) button[id^="merchant-"][id$="-tab"],
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .order-filter-btn,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .quick-btn,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
+    height: 30px !important;
+    min-width: 52px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    border-radius: 7px !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter input,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter select {
+    height: 30px !important;
+    font-size: 9px !important;
+    padding: 0 4px !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
+    gap: 5px !important;
+  }
+}
