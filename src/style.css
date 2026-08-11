@@ -6985,67 +6985,8 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     word-break: keep-all !important;
   }
 }
-/* 일반매장/뷰티 주문관리 모바일: 자연 정리 */
+/* 주문관리 모바일: 테이블 글자만 압축 */
 @media (max-width: 768px) {
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 6px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter button {
-    flex: 1 1 calc(25% - 6px) !important;
-    min-width: 68px !important;
-    height: 34px !important;
-    padding: 0 6px !important;
-    font-size: 11px !important;
-    border-radius: 7px !important;
-    box-sizing: border-box !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter input,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter select {
-    flex: 1 1 calc(50% - 6px) !important;
-    min-width: 0 !important;
-    height: 34px !important;
-    padding: 0 6px !important;
-    font-size: 11px !important;
-    box-sizing: border-box !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 6px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary > div {
-    min-width: 0 !important;
-    padding: 8px 4px !important;
-    box-sizing: border-box !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary strong {
-    font-size: 11px !important;
-    line-height: 1.2 !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary span {
-    font-size: 18px !important;
-    line-height: 1.15 !important;
-  }
-
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) {
     width: 100% !important;
     min-width: 0 !important;
@@ -7057,8 +6998,8 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     padding: 7px 2px !important;
     font-size: 10px !important;
     line-height: 1.2 !important;
-    word-break: break-word !important;
     white-space: normal !important;
+    word-break: break-word !important;
     text-align: center !important;
   }
 }
