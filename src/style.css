@@ -7162,3 +7162,58 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     text-align: center !important;
   }
 }
+/* 무선단말기 모바일: 거래내역 표 오른쪽 짤림 방지 */
+@media (max-width: 520px) {
+  body:has(.terminal-date-search-box) .admin-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table {
+    width: 100% !important;
+    min-width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th,
+  body:has(.terminal-date-search-box) .terminal-payment-table td {
+    padding: 8px 1px !important;
+    font-size: 8px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    word-break: keep-all !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(1),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(1) {
+    width: 22% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(2),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(2) {
+    width: 16% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(3),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(3) {
+    width: 18% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(4),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(4) {
+    width: 13% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(5),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(5) {
+    width: 13% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(6),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(6) {
+    width: 18% !important;
+    font-size: 7px !important;
+  }
+}
