@@ -7458,3 +7458,42 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     border-radius: 7px !important;
   }
 }
+/* 일반매장 모바일: 주문관리 표 글자/주문번호 버튼 추가 축소 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td {
+    font-size: 6px !important;
+    padding: 5px 0 !important;
+    line-height: 1.1 !important;
+    letter-spacing: -0.4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(3),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(3),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(5),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(5) {
+    font-size: 5px !important;
+  }
+
+  /* 주문번호 파란 버튼 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(2) button {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 26px !important;
+    padding: 0 2px !important;
+    font-size: 8px !important;
+    border-radius: 6px !important;
+    line-height: 1 !important;
+  }
+
+  /* 관리 버튼 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(7) button {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 26px !important;
+    padding: 0 2px !important;
+    font-size: 8px !important;
+    border-radius: 6px !important;
+    line-height: 1 !important;
+  }
+}
