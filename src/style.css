@@ -7217,3 +7217,63 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     font-size: 7px !important;
   }
 }
+/* 무선단말기 모바일: 거래내역 표 최종 폭 축소 */
+@media (max-width: 520px) {
+  body:has(.terminal-date-search-box) .admin-table-wrap {
+    width: calc(100vw - 22px) !important;
+    max-width: calc(100vw - 22px) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: hidden !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th,
+  body:has(.terminal-date-search-box) .terminal-payment-table td {
+    padding: 7px 0 !important;
+    font-size: 7px !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    white-space: normal !important;
+    word-break: keep-all !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(1),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(1) {
+    width: 20% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(2),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(2) {
+    width: 15% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(3),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(3) {
+    width: 17% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(4),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(4) {
+    width: 13% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(5),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(5) {
+    width: 12% !important;
+  }
+
+  body:has(.terminal-date-search-box) .terminal-payment-table th:nth-child(6),
+  body:has(.terminal-date-search-box) .terminal-payment-table td:nth-child(6) {
+    width: 23% !important;
+    font-size: 6px !important;
+    letter-spacing: -0.5px !important;
+  }
+}
