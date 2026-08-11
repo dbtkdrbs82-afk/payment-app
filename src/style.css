@@ -6771,53 +6771,73 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     word-break: break-word !important;
   }
 }
-/* 무선단말기 모바일: 하단 버튼/거래내역 폭 맞춤 */
+/* 무선단말기 모바일: 하단 버튼줄/거래내역 표 정확 정리 */
 @media (max-width: 768px) {
-  body:has(.terminal-date-search-box) .payment-card {
+  body:has(.terminal-date-search-box) .admin-table-wrap {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
     box-sizing: border-box !important;
   }
 
-  body:has(.terminal-date-search-box) .payment-card div[style*="display:flex"] {
+  body:has(.terminal-date-search-box) .admin-table-top {
     display: grid !important;
-    grid-template-columns: 1fr 1fr 70px !important;
+    grid-template-columns: 1fr 1fr 64px !important;
     gap: 8px !important;
     width: 100% !important;
     max-width: 100% !important;
+    align-items: center !important;
     box-sizing: border-box !important;
   }
 
-  body:has(.terminal-date-search-box) .payment-card div[style*="display:flex"] button,
-  body:has(.terminal-date-search-box) .payment-card div[style*="display:flex"] select {
+  body:has(.terminal-date-search-box) #terminal-excel-download {
+    grid-column: 1 / 2 !important;
     width: 100% !important;
     min-width: 0 !important;
-    max-width: 100% !important;
-    height: 40px !important;
-    padding: 0 8px !important;
-    font-size: 13px !important;
+  }
+
+  body:has(.terminal-date-search-box) .admin-pagination {
+    grid-column: 2 / 3 !important;
+    display: grid !important;
+    grid-template-columns: 1fr 34px 1fr !important;
+    gap: 4px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    align-items: center !important;
+  }
+
+  body:has(.terminal-date-search-box) #terminal-page-size {
+    grid-column: 3 / 4 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(.terminal-date-search-box) #terminal-excel-download,
+  body:has(.terminal-date-search-box) #terminal-prev-page,
+  body:has(.terminal-date-search-box) #terminal-next-page,
+  body:has(.terminal-date-search-box) #terminal-page-size {
+    height: 38px !important;
+    padding: 0 6px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
     box-sizing: border-box !important;
   }
 
-  body:has(.terminal-date-search-box) .payment-card div[style*="display:flex"] span {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    min-width: 34px !important;
-    font-size: 14px !important;
+  body:has(.terminal-date-search-box) .admin-pagination span {
+    font-size: 13px !important;
+    text-align: center !important;
     white-space: nowrap !important;
   }
 
-  body:has(.terminal-date-search-box) table {
+  body:has(.terminal-date-search-box) .terminal-payment-table {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     table-layout: fixed !important;
   }
 
-  body:has(.terminal-date-search-box) table th,
-  body:has(.terminal-date-search-box) table td {
+  body:has(.terminal-date-search-box) .terminal-payment-table th,
+  body:has(.terminal-date-search-box) .terminal-payment-table td {
     padding: 8px 2px !important;
     font-size: 10px !important;
     line-height: 1.2 !important;
