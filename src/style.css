@@ -6708,3 +6708,11 @@ table:has(#merchantOrderBody) {
 .payment-card:has(#merchantOrderBody) {
   overflow-x: auto !important;
 }
+/* 무선단말기 유형: 일반 주문관리 테이블 중복 표시 제거 */
+body:has(.terminal-date-search-box) #merchantOrderCardList {
+  display: none !important;
+}
+
+body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
+  display: none !important;
+}
