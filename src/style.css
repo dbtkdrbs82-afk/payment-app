@@ -7380,12 +7380,14 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     font-size: 17px !important;
   }
 }
-/* 일반매장 모바일: 주문관리 거래내역 표 오른쪽 짤림 방지 */
+/* 일반매장 모바일: 주문관리 표 핵심 컬럼만 표시 */
 @media (max-width: 520px) {
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .payment-card:has(#merchantOrderBody) {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
+    width: calc(100vw - 18px) !important;
+    max-width: calc(100vw - 18px) !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: hidden !important;
     box-sizing: border-box !important;
   }
 
@@ -7394,6 +7396,14 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     min-width: 0 !important;
     max-width: 100% !important;
     table-layout: fixed !important;
+  }
+
+  /* 모바일에서는 No, 주문내용 숨김 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(1),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(1),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(4),
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(4) {
+    display: none !important;
   }
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th,
@@ -7407,40 +7417,44 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     box-sizing: border-box !important;
   }
 
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(1),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(1) {
-    width: 14% !important;
-  }
-
+  /* 주문번호 */
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(2),
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(2) {
-    width: 16% !important;
+    width: 22% !important;
   }
 
+  /* 결제일시 */
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(3),
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(3) {
-    width: 16% !important;
+    width: 25% !important;
+    font-size: 6px !important;
   }
 
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(4),
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(4) {
-    width: 16% !important;
-  }
-
+  /* 결제금액 */
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(5),
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(5) {
-    width: 14% !important;
+    width: 17% !important;
+    font-size: 6px !important;
   }
 
+  /* 주문상태 */
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(6),
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(6) {
-    width: 12% !important;
+    width: 16% !important;
   }
 
+  /* 마지막 버튼/관리 */
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) th:nth-child(7),
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td:nth-child(7) {
-    width: 12% !important;
-    font-size: 6px !important;
-    letter-spacing: -0.4px !important;
+    width: 20% !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#merchantOrderBody) td button {
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 30px !important;
+    padding: 0 3px !important;
+    font-size: 9px !important;
+    border-radius: 7px !important;
   }
 }
