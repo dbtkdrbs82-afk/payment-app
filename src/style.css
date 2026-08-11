@@ -7677,3 +7677,24 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     line-height: 22px !important;
   }
 }
+/* 일반매장 모바일: 상단 빈공간 줄이고 버튼영역 위로 올림 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .page {
+    padding-top: 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) h1 {
+    margin-bottom: 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-menu-tabs,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-admin-tabs,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-tabs {
+    margin-top: -18px !important;
+    margin-bottom: 6px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
+    margin-top: 4px !important;
+  }
+}
