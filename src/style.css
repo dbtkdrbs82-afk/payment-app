@@ -7348,3 +7348,35 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     font-size: 20px !important;
   }
 }
+/* 일반매장 모바일: 상단 NXG PICK / 가맹점명 / 로그아웃 크기 축소 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) h1 {
+    font-size: 14px !important;
+    line-height: 1.15 !important;
+    letter-spacing: -1.5px !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-logout,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #logout-button,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .logout-button {
+    width: 62px !important;
+    min-width: 62px !important;
+    height: 28px !important;
+    padding: 0 4px !important;
+    font-size: 10px !important;
+    border-radius: 7px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .setting-button,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .settings-button,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-setting,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-settings {
+    width: 28px !important;
+    min-width: 28px !important;
+    height: 28px !important;
+    padding: 0 !important;
+    font-size: 17px !important;
+  }
+}
