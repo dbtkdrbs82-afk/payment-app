@@ -7605,17 +7605,22 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     min-width: 0 !important;
   }
 }
-/* 일반매장 모바일: 기간 버튼줄 높이/겹침 정리 */
+/* 일반매장 모바일: 날짜/검색줄 겹침 최종 정리 */
 @media (max-width: 520px) {
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
     display: grid !important;
     grid-template-columns: repeat(3, 1fr) !important;
+    grid-auto-rows: 26px !important;
     gap: 6px !important;
     width: 100% !important;
     max-width: 100% !important;
-    margin: 10px 0 10px !important;
+    height: auto !important;
+    min-height: 92px !important;
+    margin: 10px 0 14px !important;
+    padding: 0 !important;
     overflow: visible !important;
     box-sizing: border-box !important;
+    position: relative !important;
   }
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .quick-btn {
@@ -7629,30 +7634,57 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     box-sizing: border-box !important;
   }
 
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wave {
-    height: 24px !important;
-    min-height: 24px !important;
-    overflow: hidden !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap input {
-    height: 24px !important;
-    font-size: 7px !important;
-    padding: 0 2px !important;
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 26px !important;
     box-sizing: border-box !important;
   }
 
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
-    height: 24px !important;
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 26px !important;
+    padding: 0 3px !important;
+    font-size: 7px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wave {
+    text-align: center !important;
+    font-size: 9px !important;
+    line-height: 26px !important;
+    height: 26px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search {
+    grid-column: 1 / 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 26px !important;
     padding: 0 4px !important;
     font-size: 8px !important;
-    line-height: 24px !important;
+    line-height: 26px !important;
     border-radius: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
+    grid-column: 2 / 4 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 26px !important;
+    padding: 0 4px !important;
+    font-size: 8px !important;
+    line-height: 26px !important;
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
   }
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary {
-    margin-top: 8px !important;
+    clear: both !important;
+    margin-top: 12px !important;
+    position: relative !important;
+    z-index: 1 !important;
   }
 }
