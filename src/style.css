@@ -7323,3 +7323,28 @@ body:has(.terminal-date-search-box) table:has(#merchantOrderBody) {
     padding: 0 !important;
   }
 }
+/* 무선단말기 모바일: 상단 제목 글자만 축소 */
+@media (max-width: 520px) {
+  body:has(.terminal-date-search-box) h1 {
+    font-size: 17px !important;
+    letter-spacing: -1.5px !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(.terminal-date-search-box) #merchant-logout,
+  body:has(.terminal-date-search-box) #logout-button,
+  body:has(.terminal-date-search-box) .logout-button {
+    width: 72px !important;
+    min-width: 72px !important;
+    height: 32px !important;
+    font-size: 12px !important;
+    padding: 0 6px !important;
+  }
+
+  body:has(.terminal-date-search-box) .setting-button,
+  body:has(.terminal-date-search-box) .settings-button,
+  body:has(.terminal-date-search-box) #merchant-setting,
+  body:has(.terminal-date-search-box) #merchant-settings {
+    font-size: 20px !important;
+  }
+}
