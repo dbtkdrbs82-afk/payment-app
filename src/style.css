@@ -7688,3 +7688,61 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     z-index: 1 !important;
   }
 }
+/* 일반매장 모바일: 전체 버튼/글자 최종 압축 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) {
+    font-size: 11px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) h1 {
+    font-size: 12px !important;
+    letter-spacing: -1.6px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) button[id^="merchant-"][id$="-tab"],
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .order-filter-btn,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .quick-btn,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
+    height: 24px !important;
+    min-width: 44px !important;
+    padding: 0 4px !important;
+    font-size: 8px !important;
+    line-height: 24px !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
+    grid-auto-rows: 24px !important;
+    gap: 5px !important;
+    min-height: 84px !important;
+    margin: 8px 0 10px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wave,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap input {
+    height: 24px !important;
+    line-height: 24px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap input {
+    font-size: 6px !important;
+    padding: 0 2px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary > div {
+    min-height: 72px !important;
+    padding: 8px 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary strong {
+    font-size: 11px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary span {
+    font-size: 20px !important;
+    line-height: 1.1 !important;
+  }
+}
