@@ -7883,3 +7883,19 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     line-height: 1.05 !important;
   }
 }
+/* 일반매장 모바일: 메인 메뉴 버튼만 추가 축소 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-order-tab,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-product-tab,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #go-merchant-qr,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-card-pay-tab {
+    height: 19px !important;
+    min-width: 36px !important;
+    padding: 0 3px !important;
+    font-size: 6px !important;
+    line-height: 19px !important;
+    border-radius: 5px !important;
+    letter-spacing: -0.4px !important;
+    white-space: nowrap !important;
+  }
+}
