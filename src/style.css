@@ -7842,3 +7842,98 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
 
   box-sizing: border-box !important;
 }
+/* =========================================================
+   일반매장 주문관리
+   폴드 / 휴대폰 가로모드 전용
+   기존 세로모드 / 태블릿 수정 없음
+========================================================= */
+
+/* 휴대폰 가로모드 */
+@media screen and (orientation: landscape) and (max-height: 600px) {
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-toolbar,
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-filter,
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary,
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .order-bottom-toolbar,
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-order-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-toolbar {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 5px !important;
+    padding: 0 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-filter {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary {
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 4px !important;
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+}
+
+
+/* 폴드 펼친 화면
+   일반 태블릿 세로 화면은 제외 */
+@media screen and (min-width: 521px) and (max-width: 900px)
+and (orientation: landscape) {
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-toolbar,
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-filter,
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary,
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .order-bottom-toolbar,
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-order-table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-toolbar {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-filter {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+}
