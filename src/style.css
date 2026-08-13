@@ -7604,43 +7604,11 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
   }
 
 
-  /* 2줄
-     [전체] [준비중] [완료]
-  */
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
-  .order-filter-btn[data-status="전체"] {
-    grid-column: 1 / span 4 !important;
-    grid-row: 2 !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
-  .order-filter-btn[data-status="준비중"] {
-    grid-column: 5 / span 4 !important;
-    grid-row: 2 !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
-  .order-filter-btn[data-status="완료"] {
-    grid-column: 9 / span 4 !important;
-    grid-row: 2 !important;
-  }
-
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .order-filter-btn {
-    width: 100% !important;
-    min-width: 0 !important;
-    height: 26px !important;
-
-    margin: 0 !important;
-    padding: 0 2px !important;
-
-    font-size: 9px !important;
-    line-height: 26px !important;
-
-    border-radius: 6px !important;
-    box-sizing: border-box !important;
-    white-space: nowrap !important;
-  }
+   /* 일반매장 모바일: 주문상태 버튼 숨김 */
+   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+   .order-filter-btn {
+     display: none !important;
+   }
 
 
   /* =====================================================
@@ -7775,7 +7743,7 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     width: 100% !important;
     gap: 4px !important;
 
-    margin-top: 5px !important;
+    margin-top: 22px !important;
     margin-bottom: 6px !important;
   }
 
