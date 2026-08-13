@@ -4956,6 +4956,8 @@ const renderManagerList = (managers: any[]) => {
       ).join('') +
     '</div>'
 
+    bindManagerClick()
+
   document.querySelector('#org-manager-search')
     ?.addEventListener('input', () => renderManagerList(managers))
 
