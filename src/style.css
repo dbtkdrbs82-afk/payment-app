@@ -7623,8 +7623,9 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     width: 100% !important;
     max-width: 100% !important;
   
-    height: auto !important;
-    min-height: 57px !important;
+    height: 62px !important;
+min-height: 62px !important;
+max-height: 62px !important;
   
     gap: 5px !important;
   
