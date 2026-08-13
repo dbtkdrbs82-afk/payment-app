@@ -4956,7 +4956,6 @@ const renderManagerList = (managers: any[]) => {
       ).join('') +
     '</div>'
 
-    bindManagerClick()
 
   document.querySelector('#org-manager-search')
     ?.addEventListener('input', () => renderManagerList(managers))
@@ -4965,33 +4964,58 @@ const renderManagerList = (managers: any[]) => {
 }
 
 const bindManagerClick = () => {
-  document.querySelectorAll<HTMLButtonElement>('.org-v2-manager-row')
-    .forEach((button) => {
-      button.addEventListener('click', () => {
-        const managerId = Number(button.dataset.id)
-        const manager = managerUsers.find((item) => Number(item.id) === managerId)
+  const listBox =
+    document.querySelector<HTMLElement>('#org-manager-list')
 
-        const merchantList = (orgMerchants || []).filter((merchant) =>
+  if (!listBox) return
+
+  listBox.onclick = (event) => {
+    const target = event.target as HTMLElement
+
+    const button =
+      target.closest<HTMLButtonElement>('.org-v2-manager-row')
+
+    if (!button) return
+
+    const managerId = Number(button.dataset.id)
+
+    const manager =
+      managerUsers.find(
+        (item) => Number(item.id) === managerId
+      )
+
+    const merchantList =
+      (orgMerchants || []).filter(
+        (merchant) =>
           Number(merchant.manager_admin_id) === managerId
-        )
+      )
 
-        const listBox = document.querySelector<HTMLElement>('#org-manager-list')
-        if (!listBox) return
+    listBox.innerHTML =
+      '<div class="org-v2-breadcrumb">' +
+        '담당자 > ' + (manager?.admin_name || '-') +
+      '</div>' +
 
-        listBox.innerHTML =
-          '<div class="org-v2-breadcrumb">담당자 > ' + (manager?.admin_name || '-') + '</div>' +
-          '<h3>담당 가맹점</h3>' +
-          '<div class="org-v2-merchant-box">' +
-            (
-              merchantList.length === 0
-                ? '<p>연결된 가맹점이 없습니다.</p>'
-                : merchantList.slice(0, 20).map((merchant, index) =>
-                    '<p>' + (index + 1) + '. ' + (merchant.merchant_name || '-') + '</p>'
-                  ).join('')
-            ) +
-          '</div>'
-      })
-    })
+      '<h3>담당 가맹점</h3>' +
+
+      '<div class="org-v2-merchant-box">' +
+
+        (
+          merchantList.length === 0
+            ? '<p>연결된 가맹점이 없습니다.</p>'
+            : merchantList
+                .slice(0, 20)
+                .map(
+                  (merchant, index) =>
+                    '<p>' +
+                      (index + 1) + '. ' +
+                      (merchant.merchant_name || '-') +
+                    '</p>'
+                )
+                .join('')
+        ) +
+
+      '</div>'
+  }
 }
 
 renderOrganizationHome()
