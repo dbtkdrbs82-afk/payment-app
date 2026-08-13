@@ -7052,6 +7052,10 @@ const residentNumbers =
               (merchant.merchant_name || '-') +
             '</strong>' +
 
+            '<div style="margin-top:4px; font-size:12px; font-weight:700;">' +
+  '가맹점ID: MER' + String(merchant.id).padStart(4, '0') +
+'</div>' +
+
             '<div style="margin-top:4px; font-size:12px;">' +
               (businessNumber
                 ? '사업자번호: ' + businessNumber
