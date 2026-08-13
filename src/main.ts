@@ -7557,7 +7557,7 @@ const managerSelect =
 const { data: organizationUsers, error: organizationUsersError } =
   await supabase
     .from('admin_users')
-    .select('id, admin_name, login_id, role, status, parent_admin_id')
+    .select('id, admin_name, login_id, role, status, parent_admin_id, phone')
     .eq('status', '사용중')
 
 if (organizationUsersError) {
@@ -7725,9 +7725,34 @@ if (organizationUsersError) {
   fee_rate: feeRate,
   register_type: getValue('register_type'),
   manager_admin_id: Number(getValue('manager_admin_id')) || null,
-  manager_admin_name:
+
+manager_admin_name:
   document.querySelector<HTMLSelectElement>('#manager_admin_id')
-    ?.selectedOptions[0]?.textContent || '',
+    ?.selectedOptions[0]?.textContent?.trim() || '',
+
+manager_phone:
+  organizationUsers?.find(
+    (user: any) =>
+      Number(user.id) === Number(getValue('manager_admin_id'))
+  )?.phone || '',
+
+agency_admin_id:
+  Number(getValue('agency_admin_select')) || null,
+
+agency_name:
+  document.querySelector<HTMLSelectElement>('#agency_admin_select')
+    ?.selectedOptions[0]?.textContent?.trim() || '',
+
+agency_admin_name:
+  document.querySelector<HTMLSelectElement>('#agency_admin_select')
+    ?.selectedOptions[0]?.textContent?.trim() || '',
+
+branch_admin_id:
+  Number(getValue('branch_admin_select')) || null,
+
+branch_admin_name:
+  document.querySelector<HTMLSelectElement>('#branch_admin_select')
+    ?.selectedOptions[0]?.textContent?.trim() || '',
     pg_company:
     getValue('online-pg-company-1') ||
     getValue('online-pg-company-2') ||
