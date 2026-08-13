@@ -1160,9 +1160,33 @@ location.href = ref
   </div>
 `
 
-document.querySelector('#find-postcode-btn')
+document.querySelector<HTMLButtonElement>('#find-postcode-btn')
   ?.addEventListener('click', () => {
-    alert('우편번호 찾기 기능 연결 예정')
+
+    new (window as any).daum.Postcode({
+      oncomplete: (data: any) => {
+
+        const zipcode =
+          document.querySelector<HTMLInputElement>('#apply-zipcode')
+
+        const address =
+          document.querySelector<HTMLInputElement>('#apply-address')
+
+        const addressDetail =
+          document.querySelector<HTMLInputElement>('#apply-address-detail')
+
+        if (zipcode) {
+          zipcode.value = data.zonecode
+        }
+
+        if (address) {
+          address.value =
+            data.roadAddress || data.jibunAddress
+        }
+
+        addressDetail?.focus()
+      }
+    }).open()
   })
    
 document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
