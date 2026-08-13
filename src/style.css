@@ -7743,7 +7743,7 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     width: 100% !important;
     gap: 4px !important;
 
-    margin-top: 22px !important;
+    margin-top: 30px !important;
     margin-bottom: 6px !important;
   }
 
