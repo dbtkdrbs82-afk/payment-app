@@ -5730,6 +5730,35 @@ paymentTableBody.innerHTML =
     '</td>' +
   '</tr>'
 
+  document.querySelector<HTMLButtonElement>('.address-search-btn')
+  ?.addEventListener('click', () => {
+
+    new (window as any).daum.Postcode({
+      oncomplete: (data: any) => {
+
+        const zipcode =
+          document.querySelector<HTMLInputElement>('#zipcode')
+
+        const address =
+          document.querySelector<HTMLInputElement>('#address')
+
+        const addressDetail =
+          document.querySelector<HTMLInputElement>('#address_detail')
+
+        if (zipcode) {
+          zipcode.value = data.zonecode
+        }
+
+        if (address) {
+          address.value =
+            data.roadAddress || data.jibunAddress
+        }
+
+        addressDetail?.focus()
+      }
+    }).open()
+  })
+
 document.querySelector('#save-new-merchant')
   ?.addEventListener('click', async () => {
     const merchantName = (document.querySelector<HTMLInputElement>('#merchant-name')?.value || '').trim()
