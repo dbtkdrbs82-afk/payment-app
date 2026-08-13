@@ -7546,7 +7546,7 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     gap: 5px !important;
 
     width: 100% !important;
-    margin: 0 0 6px !important;
+    margin: -22px 0 6px !important;
     padding: 0 !important;
 
     box-sizing: border-box !important;
