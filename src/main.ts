@@ -4957,65 +4957,61 @@ const renderManagerList = (managers: any[]) => {
     '</div>'
 
 
-  document.querySelector('#org-manager-search')
-    ?.addEventListener('input', () => renderManagerList(managers))
+    document.querySelector('#org-manager-search')
+    ?.addEventListener('input', () => {
+      renderManagerList(managers)
+    })
 
   bindManagerClick()
 }
 
-const bindManagerClick = () => {
-  const listBox =
-    document.querySelector<HTMLElement>('#org-manager-list')
+function bindManagerClick() {
+  document.querySelectorAll<HTMLButtonElement>('.org-v2-manager-row')
+    .forEach((button) => {
 
-  if (!listBox) return
+      button.onclick = () => {
+        const managerId = Number(button.dataset.id)
 
-  listBox.onclick = (event) => {
-    const target = event.target as HTMLElement
+        const manager =
+          managerUsers.find(
+            (item) => Number(item.id) === managerId
+          )
 
-    const button =
-      target.closest<HTMLButtonElement>('.org-v2-manager-row')
+        const merchantList =
+          (orgMerchants || []).filter(
+            (merchant) =>
+              Number(merchant.manager_admin_id) === managerId
+          )
 
-    if (!button) return
+        const outputArea =
+          document.querySelector<HTMLElement>('#org-manager-list') ||
+          document.querySelector<HTMLElement>('#org-v2-detail-area')
 
-    const managerId = Number(button.dataset.id)
+        if (!outputArea) return
 
-    const manager =
-      managerUsers.find(
-        (item) => Number(item.id) === managerId
-      )
-
-    const merchantList =
-      (orgMerchants || []).filter(
-        (merchant) =>
-          Number(merchant.manager_admin_id) === managerId
-      )
-
-    listBox.innerHTML =
-      '<div class="org-v2-breadcrumb">' +
-        '담당자 > ' + (manager?.admin_name || '-') +
-      '</div>' +
-
-      '<h3>담당 가맹점</h3>' +
-
-      '<div class="org-v2-merchant-box">' +
-
-        (
-          merchantList.length === 0
-            ? '<p>연결된 가맹점이 없습니다.</p>'
-            : merchantList
-                .slice(0, 20)
-                .map(
-                  (merchant, index) =>
-                    '<p>' +
-                      (index + 1) + '. ' +
-                      (merchant.merchant_name || '-') +
-                    '</p>'
-                )
-                .join('')
-        ) +
-
-      '</div>'
-  }
+        outputArea.innerHTML =
+          '<div class="org-v2-breadcrumb">' +
+            '담당자 > ' + (manager?.admin_name || '-') +
+          '</div>' +
+          '<h3>담당 가맹점</h3>' +
+          '<div class="org-v2-merchant-box">' +
+            (
+              merchantList.length === 0
+                ? '<p>연결된 가맹점이 없습니다.</p>'
+                : merchantList
+                    .slice(0, 20)
+                    .map(
+                      (merchant, index) =>
+                        '<p>' +
+                          (index + 1) + '. ' +
+                          (merchant.merchant_name || '-') +
+                        '</p>'
+                    )
+                    .join('')
+            ) +
+          '</div>'
+      }
+    })
 }
 
 renderOrganizationHome()
