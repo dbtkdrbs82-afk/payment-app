@@ -13296,20 +13296,23 @@ const channel = supabase
 ${merchantContent}
 
 <div class="merchant-sales-filter ${(isNormalStore || isBeauty) ? '' : 'hide-for-type'}">
-  <button id="sales-today">오늘</button>
-  <button id="sales-month">이번달</button>
-  <button id="sales-year">올해</button>
+  <div class="sales-filter-row sales-filter-button-row">
+    <button id="sales-today" class="quick-btn">오늘</button>
+    <button id="sales-month" class="quick-btn">이번달</button>
+    <button id="sales-year" class="quick-btn">올해</button>
+    <button id="excel-download" class="quick-btn">엑셀 다운로드</button>
+  </div>
 
-  <span class="date-wrap">
-  <input id="sales-start-date" type="date" />
-</span>
-<span class="date-wave">~</span>
-<span class="date-wrap">
-  <input id="sales-end-date" type="date" />
-</span>
-
-  <button id="sales-search">검색</button>
-  <button id="excel-download">엑셀 다운로드</button>
+  <div class="sales-filter-row sales-filter-date-row">
+    <span class="date-wrap">
+      <input id="sales-start-date" type="date" />
+    </span>
+    <span class="date-wave">~</span>
+    <span class="date-wrap">
+      <input id="sales-end-date" type="date" />
+    </span>
+    <button id="sales-search" class="quick-btn">검색</button>
+  </div>
 </div>
 
 
