@@ -7796,15 +7796,7 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
   gap: 6px !important;
 }
 
-body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
-#merchant-page-size {
-  width: auto !important;
-  height: 26px !important;
-  min-height: 26px !important;
-  padding: 2px 5px !important;
-  font-size: 10px !important;
-  border-radius: 5px !important;
-}
+
 
 body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
 .order-pagination {
@@ -7833,15 +7825,20 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
 }
 body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
 .order-bottom-toolbar #merchant-page-size {
-  width: 90px !important;
-  max-width: 90px !important;
+  width: 86px !important;
+  min-width: 86px !important;
+  max-width: 86px !important;
+
   height: 22px !important;
   min-height: 22px !important;
 
+  padding: 0 3px !important;
+
   font-size: 8px !important;
-  line-height: 1 !important;
-  padding: 0 4px !important;
+  line-height: normal !important;
 
   position: relative !important;
   top: 4px !important;
+
+  box-sizing: border-box !important;
 }
