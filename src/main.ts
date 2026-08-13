@@ -6869,9 +6869,10 @@ const rejectedCount =
           '<strong>' + rejectedCount + '건</strong>' +
         '</div>' +
       '</div>' +
-      '<div style="margin-top:16px;">' +
-        '<button id="copy-merchant-apply-link" class="merchant-search-btn">🔗 가입신청 링크 생성</button>' +
-      '</div>'
+      '<div style="margin-top:16px; display:flex; gap:8px;">' +
+  '<button id="copy-merchant-apply-link" class="merchant-search-btn">🔗 가입신청 링크 생성</button>' +
+  '<button id="merchant-bulk-check" class="merchant-search-btn">가맹점일괄조회</button>' +
+'</div>'
   }
   
   document.querySelector('#copy-merchant-apply-link')
@@ -6884,7 +6885,188 @@ const rejectedCount =
       alert('가입신청 링크가 복사되었습니다.')
     })
       
-    
+    document.querySelector('#merchant-bulk-check')
+  ?.addEventListener('click', () => {
+
+    const existingModal =
+      document.querySelector('#merchant-bulk-check-modal')
+
+    if (existingModal) {
+      existingModal.remove()
+    }
+
+    const modal = document.createElement('div')
+    modal.id = 'merchant-bulk-check-modal'
+
+    modal.innerHTML = `
+      <div class="merchant-bulk-check-backdrop">
+        <div class="merchant-bulk-check-box">
+
+          <h3>가맹점일괄조회</h3>
+
+          <p>
+            PG사 메일 내용을 그대로 붙여넣어 주세요.
+          </p>
+
+          <textarea
+            id="merchant-bulk-check-input"
+            placeholder="가맹점명, 사업자번호, 생년월일 등이 포함된 내용을 그대로 붙여넣어 주세요."
+          ></textarea>
+
+          <div class="merchant-bulk-check-actions">
+            <button id="merchant-bulk-check-search" class="merchant-search-btn">
+              조회
+            </button>
+
+            <button id="merchant-bulk-check-close" class="merchant-close-btn">
+              닫기
+            </button>
+          </div>
+
+          <div id="merchant-bulk-check-result"></div>
+
+        </div>
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    document.querySelector('#merchant-bulk-check-close')
+      ?.addEventListener('click', () => {
+        modal.remove()
+      })
+
+      document.querySelector('#merchant-bulk-check-search')
+  ?.addEventListener('click', async () => {
+
+    const input =
+      document.querySelector<HTMLTextAreaElement>('#merchant-bulk-check-input')
+
+    const resultBox =
+      document.querySelector<HTMLDivElement>('#merchant-bulk-check-result')
+
+    if (!input || !resultBox) return
+
+    const rawText = input.value.trim()
+
+    if (!rawText) {
+      alert('조회할 내용을 붙여넣어 주세요.')
+      return
+    }
+
+    const businessNumbers =
+      rawText.match(/\b\d{3}-\d{2}-\d{5}\b/g) || []
+
+    const residentNumbers =
+      rawText.match(/\b\d{6}-\d\b/g) || []
+
+    const normalizedBusinessNumbers =
+      [...new Set(
+        businessNumbers.map(value =>
+          value.replace(/[^0-9]/g, '')
+        )
+      )]
+
+    const normalizedResidentNumbers =
+      [...new Set(
+        residentNumbers.map(value =>
+          value.replace(/[^0-9]/g, '')
+        )
+      )]
+
+    if (
+      normalizedBusinessNumbers.length === 0 &&
+      normalizedResidentNumbers.length === 0
+    ) {
+      resultBox.innerHTML =
+        '<div style="padding:12px;">조회 가능한 사업자번호 또는 식별번호가 없습니다.</div>'
+      return
+    }
+
+    const { data: merchants, error } = await supabase
+      .from('merchants')
+      .select('id, merchant_name, business_number, resident_number, status')
+
+    if (error) {
+      alert('가맹점 조회 실패: ' + error.message)
+      return
+    }
+
+    const matchedMerchants =
+      (merchants || []).filter((merchant: any) => {
+
+        const businessNumber =
+          String(merchant.business_number || '')
+            .replace(/[^0-9]/g, '')
+
+        const residentNumber =
+          String(merchant.resident_number || '')
+            .replace(/[^0-9]/g, '')
+
+        const businessMatched =
+          businessNumber &&
+          normalizedBusinessNumbers.includes(businessNumber)
+
+        const residentMatched =
+          residentNumber &&
+          normalizedResidentNumbers.some(number =>
+            residentNumber.startsWith(number)
+          )
+
+        return businessMatched || residentMatched
+      })
+
+    if (matchedMerchants.length === 0) {
+      resultBox.innerHTML =
+        '<div style="padding:14px; font-weight:700;">' +
+          '일치하는 가맹점이 없습니다.' +
+        '</div>'
+      return
+    }
+
+    resultBox.innerHTML =
+      '<div style="margin-bottom:10px; font-weight:700;">' +
+        '일치 가맹점 ' + matchedMerchants.length + '건' +
+      '</div>' +
+
+      matchedMerchants.map((merchant: any) => {
+
+        const businessNumber =
+          merchant.business_number || ''
+
+        const residentNumber =
+          merchant.resident_number
+            ? String(merchant.resident_number).slice(0, 8)
+            : ''
+
+        return (
+          '<div style="' +
+            'padding:10px 12px;' +
+            'margin-bottom:8px;' +
+            'border:1px solid #f0b3b3;' +
+            'border-radius:8px;' +
+            'background:#fff6f6;' +
+          '">' +
+
+            '<strong>' +
+              (merchant.merchant_name || '-') +
+            '</strong>' +
+
+            '<div style="margin-top:4px; font-size:12px;">' +
+              (businessNumber
+                ? '사업자번호: ' + businessNumber
+                : '식별번호: ' + residentNumber) +
+            '</div>' +
+
+            '<div style="margin-top:2px; font-size:12px;">' +
+              '상태: ' + (merchant.status || '-') +
+            '</div>' +
+
+          '</div>'
+        )
+      }).join('')
+  })
+  })
 
       if (tableHead) {
         tableHead.innerHTML =

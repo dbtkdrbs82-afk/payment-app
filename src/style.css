@@ -7942,3 +7942,74 @@ and (orientation: landscape) {
     padding-right: 4px !important;
   }
 }
+/* =====================================================
+   가맹점 일괄조회 팝업
+===================================================== */
+
+.merchant-bulk-check-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background: rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
+
+.merchant-bulk-check-box {
+  width: min(620px, 100%);
+  max-height: 85vh;
+
+  padding: 22px;
+
+  background: #fff;
+  border-radius: 14px;
+  box-sizing: border-box;
+
+  overflow-y: auto;
+}
+
+.merchant-bulk-check-box h3 {
+  margin: 0 0 8px;
+
+  font-size: 20px;
+}
+
+.merchant-bulk-check-box p {
+  margin: 0 0 12px;
+
+  font-size: 13px;
+  color: #555;
+}
+
+#merchant-bulk-check-input {
+  width: 100%;
+  min-height: 220px;
+
+  padding: 12px;
+
+  border: 1px solid #cfd6df;
+  border-radius: 8px;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.merchant-bulk-check-actions {
+  display: flex;
+  gap: 8px;
+
+  margin-top: 12px;
+}
+
+#merchant-bulk-check-result {
+  margin-top: 16px;
+}
