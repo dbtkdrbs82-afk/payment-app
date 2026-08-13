@@ -7522,11 +7522,11 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
 /* =========================================================
    일반매장 모바일 최종
    메뉴 / 주문상태 / 날짜검색 / 요약카드
-   무선단말기 및 주문내역 테이블 제외
+   주문내역 테이블 및 무선단말기 제외
 ========================================================= */
 @media (max-width: 520px) {
 
-  /* 일반매장 전체 여백 */
+  /* 전체 좌우 여백 */
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .page,
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .pg-admin-page {
     padding-top: 4px !important;
@@ -7537,32 +7537,65 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
 
 
   /* =====================================================
-     1. 메인 메뉴
-     [주문관리] [상품관리] [PICK QR] [카드결제]
+     상단 메뉴 + 주문상태
   ===================================================== */
 
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-menu-tabs,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-admin-tabs,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-tabs {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-toolbar {
     display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
     gap: 5px !important;
+
     width: 100% !important;
-    margin-top: -18px !important;
-    margin-bottom: 6px !important;
+    margin: 0 0 6px !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+    align-items: center !important;
+  }
+
+  /* 구분선 모바일에서 제거 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .toolbar-divider {
+    display: none !important;
+  }
+
+
+  /* 1줄
+     [주문관리] [상품관리] [PICK QR] [카드결제]
+  */
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-order-tab {
+    grid-column: 1 / span 3 !important;
+    grid-row: 1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-product-tab {
+    grid-column: 4 / span 3 !important;
+    grid-row: 1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-qr-tab {
+    grid-column: 7 / span 3 !important;
+    grid-row: 1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-card-tab {
+    grid-column: 10 / span 3 !important;
+    grid-row: 1 !important;
   }
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-order-tab,
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-product-tab,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #go-merchant-qr,
-  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-card-pay-tab {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-qr-tab,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-card-tab {
     width: 100% !important;
     min-width: 0 !important;
-    height: 24px !important;
+    height: 26px !important;
+
+    margin: 0 !important;
     padding: 0 2px !important;
 
-    font-size: 8px !important;
-    line-height: 24px !important;
+    font-size: 9px !important;
+    line-height: 26px !important;
     letter-spacing: -0.5px !important;
 
     border-radius: 6px !important;
@@ -7571,19 +7604,38 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
   }
 
 
-  /* =====================================================
-     2. 주문상태
+  /* 2줄
      [전체] [준비중] [완료]
-  ===================================================== */
+  */
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .order-filter-btn[data-status="전체"] {
+    grid-column: 1 / span 4 !important;
+    grid-row: 2 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .order-filter-btn[data-status="준비중"] {
+    grid-column: 5 / span 4 !important;
+    grid-row: 2 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .order-filter-btn[data-status="완료"] {
+    grid-column: 9 / span 4 !important;
+    grid-row: 2 !important;
+  }
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .order-filter-btn {
-    width: 58px !important;
-    min-width: 58px !important;
-    height: 24px !important;
-    padding: 0 4px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 26px !important;
 
-    font-size: 8px !important;
-    line-height: 24px !important;
+    margin: 0 !important;
+    padding: 0 2px !important;
+
+    font-size: 9px !important;
+    line-height: 26px !important;
 
     border-radius: 6px !important;
     box-sizing: border-box !important;
@@ -7592,7 +7644,7 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
 
 
   /* =====================================================
-     3. 날짜 검색 전체
+     날짜 검색
   ===================================================== */
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
@@ -7603,7 +7655,7 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     max-width: 100% !important;
 
     gap: 5px !important;
-    margin: 5px 0 7px !important;
+    margin: 4px 0 6px !important;
     padding: 0 !important;
 
     box-sizing: border-box !important;
@@ -7611,9 +7663,8 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
   }
 
 
-  /* 첫째 줄
-     [오늘] [이번달] [올해] [엑셀 다운로드]
-  */
+  /* [오늘] [이번달] [올해] [엑셀 다운로드] */
+
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .sales-filter-button-row {
     display: grid !important;
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -7626,12 +7677,13 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
     width: 100% !important;
     min-width: 0 !important;
+    height: 26px !important;
 
-    height: 24px !important;
+    margin: 0 !important;
     padding: 0 2px !important;
 
-    font-size: 8px !important;
-    line-height: 24px !important;
+    font-size: 9px !important;
+    line-height: 26px !important;
 
     border-radius: 6px !important;
     box-sizing: border-box !important;
@@ -7639,9 +7691,8 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
   }
 
 
-  /* 둘째 줄
-     [시작일] ~ [종료일] [검색]
-  */
+  /* [시작일] ~ [종료일] [검색] */
+
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .sales-filter-date-row {
     display: grid !important;
 
@@ -7668,13 +7719,13 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
 
     width: 100% !important;
     min-width: 0 !important;
-    height: 24px !important;
+    height: 26px !important;
 
     margin: 0 !important;
     padding: 0 2px !important;
 
     font-size: 7px !important;
-    line-height: 24px !important;
+    line-height: 26px !important;
 
     border-radius: 6px !important;
     box-sizing: border-box !important;
@@ -7690,20 +7741,20 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     padding: 0 !important;
 
     font-size: 9px !important;
-    line-height: 24px !important;
+    line-height: 26px !important;
     text-align: center !important;
   }
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search {
     width: 58px !important;
     min-width: 58px !important;
-    height: 24px !important;
+    height: 26px !important;
 
     margin: 0 !important;
-    padding: 0 3px !important;
+    padding: 0 2px !important;
 
-    font-size: 8px !important;
-    line-height: 24px !important;
+    font-size: 9px !important;
+    line-height: 26px !important;
 
     border-radius: 6px !important;
     box-sizing: border-box !important;
@@ -7712,7 +7763,7 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
 
 
   /* =====================================================
-     4. 매출 요약카드
+     요약카드
   ===================================================== */
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary {
