@@ -7234,9 +7234,21 @@ merchantButtons.forEach((button) => {
 '</select>' +
 
 '<label>담당자</label>' +
-'<select id="manager_admin_id">' +
-  '<option value="">선택</option>' +
-'</select>' +
+'<div class="manager-select-group">' +
+
+  '<select id="branch_admin_select">' +
+    '<option value="">지사 선택</option>' +
+  '</select>' +
+
+  '<select id="agency_admin_select">' +
+    '<option value="">대리점 선택</option>' +
+  '</select>' +
+
+  '<select id="manager_admin_id">' +
+    '<option value="">담당자 선택</option>' +
+  '</select>' +
+
+'</div>' +
 
 '<label>사용 PG사</label>' +
 '<div class="merchant-pg-select-grid">' +
@@ -7532,6 +7544,152 @@ merchantButtons.forEach((button) => {
       }
     }).open()
   })
+
+  const branchSelect =
+  document.querySelector<HTMLSelectElement>('#branch_admin_select')
+
+const agencySelect =
+  document.querySelector<HTMLSelectElement>('#agency_admin_select')
+
+const managerSelect =
+  document.querySelector<HTMLSelectElement>('#manager_admin_id')
+
+const { data: organizationUsers, error: organizationUsersError } =
+  await supabase
+    .from('admin_users')
+    .select('id, admin_name, login_id, role, status, parent_admin_id')
+    .eq('status', '사용중')
+
+if (organizationUsersError) {
+  console.error('조직정보 조회 실패:', organizationUsersError)
+} else {
+
+  const users = organizationUsers || []
+
+  const branches =
+    users.filter((user: any) =>
+      user.role === 'BRANCH' ||
+      String(user.login_id || '').startsWith('S')
+    )
+
+  const agencies =
+    users.filter((user: any) =>
+      user.role === 'AGENCY' ||
+      String(user.login_id || '').startsWith('A')
+    )
+
+  const managers =
+    users.filter((user: any) =>
+      user.role === 'MANAGER' ||
+      String(user.login_id || '').startsWith('B')
+    )
+
+  if (branchSelect) {
+    branchSelect.innerHTML =
+      '<option value="">지사 선택</option>' +
+      branches.map((branch: any) =>
+        '<option value="' + branch.id + '">' +
+          (branch.admin_name || '-') +
+        '</option>'
+      ).join('')
+  }
+
+  branchSelect?.addEventListener('change', () => {
+
+    const branchId = Number(branchSelect.value)
+
+    if (agencySelect) {
+      agencySelect.innerHTML =
+        '<option value="">대리점 선택</option>'
+    }
+
+    if (managerSelect) {
+      managerSelect.innerHTML =
+        '<option value="">담당자 선택</option>'
+    }
+
+    if (!branchId) return
+
+    const filteredAgencies =
+      agencies.filter((agency: any) =>
+        Number(agency.parent_admin_id) === branchId
+      )
+
+    if (agencySelect) {
+      agencySelect.innerHTML =
+        '<option value="">대리점 선택</option>' +
+        filteredAgencies.map((agency: any) =>
+          '<option value="' + agency.id + '">' +
+            (agency.admin_name || '-') +
+          '</option>'
+        ).join('')
+    }
+  })
+
+  agencySelect?.addEventListener('change', () => {
+
+    const agencyId = Number(agencySelect.value)
+
+    if (managerSelect) {
+      managerSelect.innerHTML =
+        '<option value="">담당자 선택</option>'
+    }
+
+    if (!agencyId) return
+
+    const filteredManagers =
+      managers.filter((manager: any) =>
+        Number(manager.parent_admin_id) === agencyId
+      )
+
+    if (managerSelect) {
+      managerSelect.innerHTML =
+        '<option value="">담당자 선택</option>' +
+        filteredManagers.map((manager: any) =>
+          '<option value="' + manager.id + '">' +
+            (manager.admin_name || '-') +
+          '</option>'
+        ).join('')
+    }
+  })
+
+  if (merchant.manager_admin_id) {
+
+    const savedManager =
+      managers.find((manager: any) =>
+        Number(manager.id) === Number(merchant.manager_admin_id)
+      )
+
+    if (savedManager) {
+
+      const savedAgency =
+        agencies.find((agency: any) =>
+          Number(agency.id) === Number(savedManager.parent_admin_id)
+        )
+
+      const savedBranch =
+        savedAgency
+          ? branches.find((branch: any) =>
+              Number(branch.id) === Number(savedAgency.parent_admin_id)
+            )
+          : null
+
+      if (savedBranch && branchSelect) {
+        branchSelect.value = String(savedBranch.id)
+        branchSelect.dispatchEvent(new Event('change'))
+      }
+
+      if (savedAgency && agencySelect) {
+        agencySelect.value = String(savedAgency.id)
+        agencySelect.dispatchEvent(new Event('change'))
+      }
+
+      if (managerSelect) {
+        managerSelect.value = String(savedManager.id)
+      }
+    }
+  }
+}
     
       document.querySelector('#back-merchant-list')
       ?.addEventListener('click', () => {
