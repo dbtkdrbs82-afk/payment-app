@@ -7751,6 +7751,9 @@ max-height: 62px !important;
 
     margin-top: 5px !important;
     margin-bottom: 6px !important;
+
+    position: relative !important;
+    top: 20px !important;
   }
 
   body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-summary > div {
