@@ -6955,10 +6955,10 @@ const rejectedCount =
     }
 
     const businessNumbers =
-      rawText.match(/\b\d{3}-\d{2}-\d{5}\b/g) || []
+  rawText.match(/\b(?:\d{3}-\d{2}-\d{5}|\d{10})\b/g) || []
 
-    const residentNumbers =
-      rawText.match(/\b\d{6}-\d\b/g) || []
+const residentNumbers =
+  rawText.match(/\b(?:\d{6}-\d|\d{7})\b/g) || []
 
     const normalizedBusinessNumbers =
       [...new Set(
