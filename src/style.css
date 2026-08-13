@@ -7899,3 +7899,166 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) table:has(#mer
     white-space: nowrap !important;
   }
 }
+/* 일반매장 모바일 최종 통합본: 버튼 크기/간격/배치 통일 */
+@media (max-width: 520px) {
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-pick-header h1 {
+    font-size: 12px !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-user-box strong {
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #merchant-logout {
+    height: 26px !important;
+    min-width: 58px !important;
+    padding: 0 8px !important;
+    font-size: 10px !important;
+    border-radius: 7px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-setting-button {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+    padding: 0 !important;
+    font-size: 14px !important;
+  }
+
+  /* 상단 메뉴/상태 버튼 전체 통일 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-toolbar {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-top: 6px !important;
+    margin-bottom: 6px !important;
+    align-items: center !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-toolbar .toolbar-divider {
+    display: none !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-toolbar > button,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-toolbar .order-filter-btn {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 28px !important;
+    padding: 0 4px !important;
+    font-size: 9px !important;
+    line-height: 28px !important;
+    border-radius: 7px !important;
+    white-space: nowrap !important;
+    letter-spacing: -0.4px !important;
+  }
+
+  /* 오늘 / 이번달 / 올해 / 엑셀다운로드 한 줄 동일 크기 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-top: 2px !important;
+    margin-bottom: 8px !important;
+    align-items: center !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-today,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-month,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-year,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 28px !important;
+    padding: 0 4px !important;
+    font-size: 9px !important;
+    line-height: 28px !important;
+    border-radius: 7px !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-today {
+    grid-column: 1 / 2 !important;
+    grid-row: 1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-month {
+    grid-column: 2 / 3 !important;
+    grid-row: 1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-year {
+    grid-column: 3 / 4 !important;
+    grid-row: 1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #excel-download {
+    grid-column: 4 / 5 !important;
+    grid-row: 1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap:nth-of-type(1) {
+    grid-column: 1 / 2 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wave {
+    grid-column: 2 / 3 !important;
+    grid-row: 2 !important;
+    text-align: center !important;
+    font-size: 10px !important;
+    line-height: 28px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap:nth-of-type(2) {
+    grid-column: 3 / 4 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-sales-filter .date-wrap input {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 28px !important;
+    padding: 0 4px !important;
+    font-size: 9px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) #sales-search {
+    grid-column: 4 / 5 !important;
+    grid-row: 2 !important;
+  }
+
+  /* 카드형 숫자/글자 조금 축소 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-card,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-box,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-item {
+    min-height: 92px !important;
+    padding: 10px 8px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-card h3,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-box h3,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-item h3,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-card .label,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-box .label,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-item .label {
+    font-size: 10px !important;
+    margin-bottom: 6px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-card .value,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-box .value,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) .merchant-summary-item .value {
+    font-size: 15px !important;
+    line-height: 1.2 !important;
+  }
+}
