@@ -7787,3 +7787,47 @@ max-height: 62px !important;
     white-space: nowrap !important;
   }
 }
+/* 주문관리 하단 페이지네이션 정리 */
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+.order-bottom-toolbar {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 6px !important;
+}
+
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+#merchant-page-size {
+  width: auto !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 2px 5px !important;
+  font-size: 10px !important;
+  border-radius: 5px !important;
+}
+
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+.order-pagination {
+  display: flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+#order-prev-page,
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+#order-next-page {
+  width: auto !important;
+  min-width: 34px !important;
+  height: 26px !important;
+  min-height: 26px !important;
+  padding: 2px 6px !important;
+  font-size: 10px !important;
+  border-radius: 5px !important;
+}
+
+body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+#order-page-info {
+  font-size: 10px !important;
+  white-space: nowrap !important;
+}
