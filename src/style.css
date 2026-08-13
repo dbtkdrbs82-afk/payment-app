@@ -7832,14 +7832,16 @@ body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
   white-space: nowrap !important;
 }
 body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
-#merchant-page-size {
-  width: 105px !important;
-  height: 24px !important;
-  min-height: 24px !important;
+.order-bottom-toolbar #merchant-page-size {
+  width: 90px !important;
+  max-width: 90px !important;
+  height: 22px !important;
+  min-height: 22px !important;
 
-  font-size: 9px !important;
-  padding: 1px 5px !important;
+  font-size: 8px !important;
+  line-height: 1 !important;
+  padding: 0 4px !important;
 
   position: relative !important;
-  top: 3px !important;
+  top: 4px !important;
 }
