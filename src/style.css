@@ -8013,3 +8013,31 @@ and (orientation: landscape) {
 #merchant-bulk-check-result {
   margin-top: 16px;
 }
+/* =====================================================
+가맹점관리 담당자 3단계 선택 정리
+===================================================== */
+
+.manager-select-group {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+
+  width: 100% !important;
+}
+
+.manager-select-group select {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 42px !important;
+
+  padding: 0 12px !important;
+
+  border: 1px solid #cfd6df !important;
+  border-radius: 8px !important;
+
+  background: #fff !important;
+  color: #111 !important;
+
+  font-size: 14px !important;
+  box-sizing: border-box !important;
+}
