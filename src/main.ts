@@ -11832,11 +11832,26 @@ if (paymentCancelRequestError) {
   return
 }
 
-const paymentCancelRequestMap = new Map<number, any>()
+const visiblePaymentIds =
+  new Set(
+    payments.map((payment) =>
+      Number(payment.id)
+    )
+  )
+
+const paymentCancelRequestMap =
+  new Map<number, any>()
 
 ;(paymentCancelRequests || []).forEach((request: any) => {
+  const paymentId =
+    Number(request.payment_id)
+
+  if (!visiblePaymentIds.has(paymentId)) {
+    return
+  }
+
   paymentCancelRequestMap.set(
-    Number(request.payment_id),
+    paymentId,
     request
   )
 })
