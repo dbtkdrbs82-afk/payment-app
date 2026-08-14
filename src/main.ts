@@ -7535,7 +7535,7 @@ merchantButtons.forEach((button) => {
   '<option ' + (merchant.status === '심사중' ? 'selected' : '') + '>심사중</option>' +
   '<option ' + (merchant.status === '운영' ? 'selected' : '') + '>운영</option>' +
   '<option ' + (merchant.status === '중지' ? 'selected' : '') + '>중지</option>' +
-'</select>'
+'</select>' +
 '<label>개통일자</label>' +
 '<input id="opened_at" type="date" value="' + (merchant.opened_at || '') + '"' +
   ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
