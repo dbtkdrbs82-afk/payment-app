@@ -2850,6 +2850,9 @@ if (!sessionStorage.getItem('admin_id')) {
 
       const adminId =
   sessionStorage.getItem('admin_id') || ''
+
+  const adminRole =
+  sessionStorage.getItem('admin_role') || ''
   
     app.innerHTML = `
       <div class="admin-wrap">
@@ -2861,12 +2864,24 @@ if (!sessionStorage.getItem('admin_id')) {
         </div>
   
         <div class="admin-menu">
+
   <a class="admin-tab" data-page="merchant">가맹점관리</a>
-<a class="admin-tab" data-page="payment">결제관리</a>
-<a class="admin-tab" data-page="payout">출금관리</a>
-<a class="admin-tab" data-page="tax">세무관리</a>
-<a class="admin-tab" data-page="organization">조직관리</a>
-  
+  <a class="admin-tab" data-page="payment">결제관리</a>
+
+  ${
+    adminRole === 'MANAGER'
+      ? ''
+      : adminRole === 'AGENCY' || adminRole === 'BRANCH'
+        ? `
+          <a class="admin-tab" data-page="organization">조직관리</a>
+        `
+        : `
+          <a class="admin-tab" data-page="payout">출금관리</a>
+          <a class="admin-tab" data-page="tax">세무관리</a>
+          <a class="admin-tab" data-page="organization">조직관리</a>
+        `
+  }
+
 </div>
   
         <div class="admin-sub-menu">
@@ -3013,6 +3028,14 @@ if (summaryBox) {
           const target = event.target as HTMLElement
       
           if (!target.classList.contains('cancel-approve-btn')) return
+
+          const currentAdminId =
+  sessionStorage.getItem('admin_id') || ''
+
+if (currentAdminId !== 'NXGMASTER16') {
+  alert('결제취소 승인은 대표관리자만 처리할 수 있습니다.')
+  return
+}
       
           const requestId = Number(target.dataset.id)
       
@@ -4660,17 +4683,62 @@ const getManagerCancelBadge = (managerId: number) => {
               user.login_id === 'NXGMASTER16'
             )
           
-            const branchUsers = (adminUsers || []).filter((user) =>
+            let branchUsers = (adminUsers || []).filter((user) =>
               user.role === 'BRANCH'
             )
-          
-            const agencyUsers = (adminUsers || []).filter((user) =>
+            
+            let agencyUsers = (adminUsers || []).filter((user) =>
               user.role === 'AGENCY'
             )
-          
-            const managerUsers = (adminUsers || []).filter((user) =>
+            
+            let managerUsers = (adminUsers || []).filter((user) =>
               user.role === 'MANAGER'
             )
+            
+            const currentOrganizationAdmin =
+              (adminUsers || []).find((user) =>
+                String(user.login_id || '').toUpperCase() === adminId.toUpperCase()
+              )
+            
+            if (adminRole === 'BRANCH' && currentOrganizationAdmin) {
+              branchUsers = branchUsers.filter((branch) =>
+                Number(branch.id) === Number(currentOrganizationAdmin.id)
+              )
+            
+              agencyUsers = agencyUsers.filter((agency) =>
+                Number(agency.parent_admin_id) === Number(currentOrganizationAdmin.id)
+              )
+            
+              const agencyIds = agencyUsers.map((agency) =>
+                Number(agency.id)
+              )
+            
+              managerUsers = managerUsers.filter((manager) =>
+                agencyIds.includes(Number(manager.parent_admin_id)) ||
+                Number(manager.parent_admin_id) === Number(currentOrganizationAdmin.id)
+              )
+            }
+            
+            if (adminRole === 'AGENCY' && currentOrganizationAdmin) {
+              const currentAgencyId =
+                Number(currentOrganizationAdmin.id)
+            
+              const parentBranchId =
+                Number(currentOrganizationAdmin.parent_admin_id)
+            
+              branchUsers = branchUsers.filter((branch) =>
+                Number(branch.id) === parentBranchId
+              )
+            
+              agencyUsers = agencyUsers.filter((agency) =>
+                Number(agency.id) === currentAgencyId
+              )
+            
+              managerUsers = managerUsers.filter((manager) =>
+                Number(manager.parent_admin_id) === currentAgencyId
+              )
+            }
+
             const branchCardHtml = branchUsers.map((branch) =>
               '<button class="org-branch-card" data-branch-id="' + branch.id + '">' +
                 '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
@@ -5231,7 +5299,11 @@ const titleBox = document.querySelector('.admin-title')
 if (subMenu) {
   subMenu.innerHTML =
     '<span class="sub-tab" data-sub="merchant-add">업체/가맹점 등록</span>' +
-    '<span class="sub-tab" data-sub="admin-users">담당자관리</span>'
+    (
+      adminRole === 'MANAGER'
+        ? ''
+        : '<span class="sub-tab" data-sub="admin-users">담당자관리</span>'
+    )
 }
     document.querySelector('[data-sub="merchant-add"]')
   ?.addEventListener('click', () => {
@@ -5995,15 +6067,58 @@ document.addEventListener('click', async (event) => {
   if (tableHead) tableHead.innerHTML = ''
   if (paymentTableBody) paymentTableBody.innerHTML = ''
 
-  const { data: adminUsers, error } = await supabase
-    .from('admin_users')
-    .select('*')
-    .order('id', { ascending: true })
+  const { data: allAdminUsers, error } = await supabase
+  .from('admin_users')
+  .select('*')
+  .order('id', { ascending: true })
 
-  if (error) {
-    alert('담당자 조회 실패: ' + error.message)
-    return
-  }
+if (error) {
+  alert('담당자 조회 실패: ' + error.message)
+  return
+}
+
+let adminUsers = allAdminUsers || []
+
+const currentAdminUser =
+  adminUsers.find((user) =>
+    String(user.login_id || '').toUpperCase() === adminId.toUpperCase()
+  )
+
+if (adminRole === 'BRANCH' && currentAdminUser) {
+  const branchId = Number(currentAdminUser.id)
+
+  const agencyIds =
+    adminUsers
+      .filter((user) =>
+        user.role === 'AGENCY' &&
+        Number(user.parent_admin_id) === branchId
+      )
+      .map((user) => Number(user.id))
+
+  adminUsers = adminUsers.filter((user) =>
+    Number(user.id) === branchId ||
+    agencyIds.includes(Number(user.id)) ||
+    (
+      user.role === 'MANAGER' &&
+      (
+        Number(user.parent_admin_id) === branchId ||
+        agencyIds.includes(Number(user.parent_admin_id))
+      )
+    )
+  )
+}
+
+if (adminRole === 'AGENCY' && currentAdminUser) {
+  const agencyId = Number(currentAdminUser.id)
+
+  adminUsers = adminUsers.filter((user) =>
+    Number(user.id) === agencyId ||
+    (
+      user.role === 'MANAGER' &&
+      Number(user.parent_admin_id) === agencyId
+    )
+  )
+}
 
   if (!summaryBox) return
 
@@ -6743,6 +6858,48 @@ const endDate =
 
 let merchants = result.data || []
 
+if (adminRole === 'MANAGER') {
+  const { data: currentManager, error: managerError } = await supabase
+    .from('admin_users')
+    .select('id')
+    .eq('login_id', adminId)
+    .single()
+
+  if (managerError || !currentManager) {
+    alert('담당자 정보를 확인하지 못했습니다.')
+    return
+  }
+
+  merchants = merchants.filter((merchant) =>
+    Number(merchant.manager_admin_id) === Number(currentManager.id)
+  )
+}
+
+if (adminRole === 'AGENCY' || adminRole === 'BRANCH') {
+  const { data: currentAdmin, error: currentAdminError } = await supabase
+    .from('admin_users')
+    .select('id')
+    .eq('login_id', adminId)
+    .single()
+
+  if (currentAdminError || !currentAdmin) {
+    alert('조직 정보를 확인하지 못했습니다.')
+    return
+  }
+
+  if (adminRole === 'AGENCY') {
+    merchants = merchants.filter((merchant) =>
+      Number(merchant.agency_admin_id) === Number(currentAdmin.id)
+    )
+  }
+
+  if (adminRole === 'BRANCH') {
+    merchants = merchants.filter((merchant) =>
+      Number(merchant.branch_admin_id) === Number(currentAdmin.id)
+    )
+  }
+}
+
 if (pgFilter) {
   merchants = merchants.filter((merchant) =>
     String(merchant.pg_company || '').includes(pgFilter)
@@ -6855,9 +7012,27 @@ merchants = sortedMerchants.slice(
   
 
       
-  const { data: allMerchants } = await supabase
+  let allMerchantsQuery = supabase
   .from('merchants')
-  .select('status')
+  .select('status, manager_admin_id')
+
+if (adminRole === 'MANAGER') {
+  const { data: currentManager, error: managerSummaryError } = await supabase
+    .from('admin_users')
+    .select('id')
+    .eq('login_id', adminId)
+    .single()
+
+  if (managerSummaryError || !currentManager) {
+    alert('담당자 정보를 확인하지 못했습니다.')
+    return
+  }
+
+  allMerchantsQuery =
+    allMerchantsQuery.eq('manager_admin_id', currentManager.id)
+}
+
+const { data: allMerchants } = await allMerchantsQuery
 
 const waitingCount =
   allMerchants?.filter((item) => item.status === '신청').length || 0
@@ -7443,9 +7618,17 @@ merchantButtons.forEach((button) => {
             '<div class="merchant-detail-section">' +
   '<h3>정산정보</h3>' +
   '<div class="merchant-detail-grid">' +
-   '<label>정산은행</label><input id="bank_name" value="' + (merchant.bank_name || '') + '" />' +
-'<label>계좌번호</label><input id="account_number" value="' + (merchant.account_number || '') + '" />' +
-'<label>예금주</label><input id="account_holder" value="' + (merchant.account_holder || '') + '" />' +
+   '<label>정산은행</label><input id="bank_name" value="' + (merchant.bank_name || '') + '"' +
+  (adminId === 'NXGMASTER16' ? '' : ' readonly') +
+' />' +
+
+'<label>계좌번호</label><input id="account_number" value="' + (merchant.account_number || '') + '"' +
+  (adminId === 'NXGMASTER16' ? '' : ' readonly') +
+' />' +
+
+'<label>예금주</label><input id="account_holder" value="' + (merchant.account_holder || '') + '"' +
+  (adminId === 'NXGMASTER16' ? '' : ' readonly') +
+' />' +
 '<label>정산주기</label>' +
 '<select id="settlement_cycle">' +
   '<option value="1일" ' + (merchant.settlement_cycle === '1일' ? 'selected' : '') + '>1일</option>' +
@@ -7824,6 +8007,15 @@ daou_manual_mkey: getValue('daou_manual_mkey'),
         settlement_cycle: getValue('settlement_cycle'),
         memo: getValue('merchant-memo')
       }
+
+      const currentAdminId =
+  sessionStorage.getItem('admin_id') || ''
+
+if (currentAdminId !== 'NXGMASTER16') {
+  delete updateData.bank_name
+  delete updateData.account_number
+  delete updateData.account_holder
+}
 
       const newPassword = getValue('merchant-password-input')
 
@@ -11495,6 +11687,80 @@ if (result.error) {
 
 let payments = result.data || []
 
+if (adminRole === 'MANAGER') {
+  const { data: currentManager, error: managerPaymentError } = await supabase
+    .from('admin_users')
+    .select('id')
+    .eq('login_id', adminId)
+    .single()
+
+  if (managerPaymentError || !currentManager) {
+    alert('담당자 정보를 확인하지 못했습니다.')
+    return
+  }
+
+  const { data: managerMerchants, error: managerMerchantError } = await supabase
+    .from('merchants')
+    .select('id')
+    .eq('manager_admin_id', currentManager.id)
+
+  if (managerMerchantError) {
+    alert('담당 가맹점 정보를 확인하지 못했습니다.')
+    return
+  }
+
+  const managerMerchantIds =
+    (managerMerchants || []).map((merchant) => Number(merchant.id))
+
+  payments = payments.filter((payment) =>
+    managerMerchantIds.includes(Number(payment.merchant_id))
+  )
+}
+
+if (adminRole === 'AGENCY' || adminRole === 'BRANCH') {
+  const { data: currentAdmin, error: currentAdminError } = await supabase
+    .from('admin_users')
+    .select('id')
+    .eq('login_id', adminId)
+    .single()
+
+  if (currentAdminError || !currentAdmin) {
+    alert('조직 정보를 확인하지 못했습니다.')
+    return
+  }
+
+  let merchantQuery = supabase
+    .from('merchants')
+    .select('id')
+
+  if (adminRole === 'AGENCY') {
+    merchantQuery =
+      merchantQuery.eq('agency_admin_id', currentAdmin.id)
+  }
+
+  if (adminRole === 'BRANCH') {
+    merchantQuery =
+      merchantQuery.eq('branch_admin_id', currentAdmin.id)
+  }
+
+  const { data: organizationMerchants, error: organizationMerchantError } =
+    await merchantQuery
+
+  if (organizationMerchantError) {
+    alert('소속 가맹점 정보를 확인하지 못했습니다.')
+    return
+  }
+
+  const organizationMerchantIds =
+    (organizationMerchants || []).map((merchant) =>
+      Number(merchant.id)
+    )
+
+  payments = payments.filter((payment) =>
+    organizationMerchantIds.includes(Number(payment.merchant_id))
+  )
+}
+
 const paymentFilters = (window as any).paymentFilters
 
 if (paymentFilters) {
@@ -12772,13 +13038,7 @@ const orderIdValue =
     })
 
     if (!merchant) {
-      alert(
-        '로그인 실패 확인\n\n' +
-        '입력 아이디: ' + loginId + '\n' +
-        '입력 비밀번호: ' + password + '\n' +
-        '조회된 가맹점 수: ' + (merchants || []).length + '\n' +
-        'DB 비밀번호: ' + ((merchants || [])[0]?.merchant_password || '없음')
-      )
+      alert('아이디 또는 비밀번호가 올바르지 않습니다.')
       return
     }
 
