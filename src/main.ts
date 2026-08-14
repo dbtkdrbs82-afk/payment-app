@@ -7424,7 +7424,9 @@ merchantButtons.forEach((button) => {
               '<h3>등록정보</h3>' +
               '<div class="merchant-detail-grid">' +
 '<label>등록구분</label>' +
-'<select id="register_type">' +
+'<select id="register_type"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
   '<option ' + (merchant.register_type === '가맹점' ? 'selected' : '') + '>가맹점</option>' +
   '<option ' + (merchant.register_type === '담당자' ? 'selected' : '') + '>담당자</option>' +
   '<option ' + (merchant.register_type === '대리점' ? 'selected' : '') + '>대리점</option>' +
@@ -7433,15 +7435,21 @@ merchantButtons.forEach((button) => {
 '<label>담당자</label>' +
 '<div class="manager-select-group">' +
 
-  '<select id="branch_admin_select">' +
+  '<select id="branch_admin_select"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
     '<option value="">지사 선택</option>' +
   '</select>' +
 
-  '<select id="agency_admin_select">' +
+  '<select id="agency_admin_select"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
     '<option value="">대리점 선택</option>' +
   '</select>' +
 
-  '<select id="manager_admin_id">' +
+  '<select id="manager_admin_id"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
     '<option value="">담당자 선택</option>' +
   '</select>' +
 
@@ -7452,7 +7460,9 @@ merchantButtons.forEach((button) => {
 
   '<div class="merchant-pg-select-item">' +
     '<span>온라인결제 1</span>' +
-    '<select id="online-pg-company-1">' +
+    '<select id="online-pg-company-1"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
       '<option value="">사용안함</option>' +
       '<option value="토스페이먼츠" ' +
         (merchant.online_pg_company_1 === '토스페이먼츠' ? 'selected' : '') +
@@ -7468,7 +7478,9 @@ merchantButtons.forEach((button) => {
 
   '<div class="merchant-pg-select-item">' +
     '<span>온라인결제 2</span>' +
-    '<select id="online-pg-company-2">' +
+    '<select id="online-pg-company-2"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
       '<option value="">사용안함</option>' +
       '<option value="토스페이먼츠" ' +
         (merchant.online_pg_company_2 === '토스페이먼츠' ? 'selected' : '') +
@@ -7484,7 +7496,9 @@ merchantButtons.forEach((button) => {
 
   '<div class="merchant-pg-select-item">' +
     '<span>수기결제</span>' +
-    '<select id="manual-pg-company">' +
+    '<select id="manual-pg-company"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
       '<option value="">사용안함</option>' +
       '<option value="코페이" ' +
         (merchant.manual_pg_company === '코페이' ? 'selected' : '') +
@@ -7498,22 +7512,34 @@ merchantButtons.forEach((button) => {
 '</div>' +
 
 '<label>회사구분</label>' +
-'<select id="company_type">' +
+'<select id="company_type"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
   '<option ' + (merchant.company_type === '개인(일반)' ? 'selected' : '') + '>개인(일반)</option>' +
   '<option ' + (merchant.company_type === '개인사업자' ? 'selected' : '') + '>개인사업자</option>' +
   '<option ' + (merchant.company_type === '법인사업자' ? 'selected' : '') + '>법인사업자</option>' +
 '</select>' +
-                '<label>CPID</label><input id="cpid" value="' + (merchant.cpid || ('MER' + String(merchant.id).padStart(4, '0'))) + '" />' +
-                '<label>사업자번호</label><input id="business_number" value="' + (merchant.business_number || '') + '" />' +
+                '<label>CPID</label><input id="cpid" value="' +
+  (merchant.cpid || ('MER' + String(merchant.id).padStart(4, '0'))) + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
+                '<label>사업자번호</label><input id="business_number" value="' +
+  (merchant.business_number || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
                 '<label>운영상태</label>' +
-'<select id="merchant_status">' +
+'<select id="merchant_status"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
   '<option ' + (merchant.status === '신청' ? 'selected' : '') + '>신청</option>' +
   '<option ' + (merchant.status === '심사중' ? 'selected' : '') + '>심사중</option>' +
   '<option ' + (merchant.status === '운영' ? 'selected' : '') + '>운영</option>' +
   '<option ' + (merchant.status === '중지' ? 'selected' : '') + '>중지</option>' +
-'</select>' +
+'</select>'
 '<label>개통일자</label>' +
-'<input id="opened_at" type="date" value="' + (merchant.opened_at || '') + '" />' +
+'<input id="opened_at" type="date" value="' + (merchant.opened_at || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
 
 '<label>비밀번호</label>' +
 '<input id="merchant-password-input" type="text" value="' + (merchant.merchant_password || '') + '" placeholder="비밀번호 입력" />' +
@@ -7526,9 +7552,13 @@ merchantButtons.forEach((button) => {
   '<div class="merchant-detail-grid">' +
 
     '<label>가맹점명</label>' +
-    '<input id="merchant-name" value="' + (merchant.merchant_name || '') + '" />' +
+    '<input id="merchant-name" value="' + (merchant.merchant_name || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
     '<label>가맹점 유형</label>' +
-'<select id="merchant-type">' +
+'<select id="merchant-type"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
 '<option value="일반매장" ' + (merchant.merchant_type === '일반매장' ? 'selected' : '') + '>일반매장</option>' +
 '<option value="학원" ' + (merchant.merchant_type === '학원' ? 'selected' : '') + '>학원</option>' +
 '<option value="아파트관리" ' + (merchant.merchant_type === '아파트관리' ? 'selected' : '') + '>아파트관리</option>' +
@@ -7541,34 +7571,58 @@ merchantButtons.forEach((button) => {
 '</select>' +
 
     '<label>대표자</label>' +
-    '<input id="owner-name" value="' + (merchant.owner_name || '') + '" />' +
+    '<input id="owner-name" value="' + (merchant.owner_name || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
 
     '<label>주민번호</label>' +
-'<input id="resident-number" value="' + (merchant.resident_number || '') + '" placeholder="000000-0000000" />' +
+'<input id="resident-number" value="' +
+  (
+    adminRole === 'AGENCY' || adminRole === 'MANAGER'
+      ? String(merchant.resident_number || '')
+          .replace(/^(\d{6}-?\d)(\d*)$/, '$1******')
+      : (merchant.resident_number || '')
+  ) +
+'" placeholder="000000-0000000"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
 
     '<label>연락처</label>' +
     '<input id="phone" value="' + (merchant.phone || '') + '" />' +
 
     '<label>수수료율</label>' +
-    '<input id="fee-rate" value="' + (merchant.fee_rate || 0) + '" />' +
+    '<input id="fee-rate" value="' + (merchant.fee_rate || 0) + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
 
    '<label>이메일</label><input id="email" value="' + (merchant.email || '') + '" />' +
 
-'<label>법인번호</label><input id="corporate-number" value="' + (merchant.corporate_number || '') + '" />' +
+'<label>법인번호</label><input id="corporate-number" value="' + (merchant.corporate_number || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
 
     '<label>과세구분</label>' +
-'<select id="tax-type">' +
+'<select id="tax-type"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
   '<option ' + (merchant.tax_type === '과세' ? 'selected' : '') + '>과세</option>' +
   '<option ' + (merchant.tax_type === '비과세' ? 'selected' : '') + '>비과세</option>' +
 '</select>' +
 
     '<label>취급품목</label>' +
-'<input id="product-item" value="' + (merchant.product_item || '') + '" />' +
+'<input id="product-item" value="' + (merchant.product_item || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
 
     '<label>업태/종목</label>' +
     '<div class="business-type-row">' +
-      '<input id="business-type" value="' + (merchant.business_type || '') + '" placeholder="업태" />' +
-      '<input id="business-category" value="' + (merchant.business_category || '') + '" placeholder="종목" />' +
+      '<input id="business-type" value="' + (merchant.business_type || '') + '" placeholder="업태"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
+
+'<input id="business-category" value="' + (merchant.business_category || '') + '" placeholder="종목"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
     '</div>' +
 
    '<label>주소</label>' +
@@ -7582,6 +7636,10 @@ merchantButtons.forEach((button) => {
   '</div>' +
 '</div>' +
 
+(
+  adminRole === 'AGENCY' || adminRole === 'MANAGER'
+    ? ''
+    :
 '<div class="merchant-detail-section">' +
   '<h3>PG / 단말기 정보</h3>' +
   '<div class="merchant-detail-grid">' +
@@ -7611,10 +7669,11 @@ merchantButtons.forEach((button) => {
     '<label>다우 수기 MKEY</label><input id="daou_manual_mkey" value="' + (merchant.daou_manual_mkey || '') + '" />' +
 
   '</div>' +
+'</div>' 
+)+
 '</div>' +
-'</div>' +
-'</div>' +
-    
+'</div>'+ 
+
             '<div class="merchant-detail-section">' +
   '<h3>정산정보</h3>' +
   '<div class="merchant-detail-grid">' +
@@ -7622,7 +7681,13 @@ merchantButtons.forEach((button) => {
   (adminId === 'NXGMASTER16' ? '' : ' readonly') +
 ' />' +
 
-'<label>계좌번호</label><input id="account_number" value="' + (merchant.account_number || '') + '"' +
+'<label>계좌번호</label><input id="account_number" value="' +
+  (
+    adminRole === 'AGENCY' || adminRole === 'MANAGER'
+      ? String(merchant.account_number || '').replace(/(\d{4})$/, '****')
+      : (merchant.account_number || '')
+  ) +
+'"' +
   (adminId === 'NXGMASTER16' ? '' : ' readonly') +
 ' />' +
 
@@ -7630,7 +7695,9 @@ merchantButtons.forEach((button) => {
   (adminId === 'NXGMASTER16' ? '' : ' readonly') +
 ' />' +
 '<label>정산주기</label>' +
-'<select id="settlement_cycle">' +
+'<select id="settlement_cycle"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
   '<option value="1일" ' + (merchant.settlement_cycle === '1일' ? 'selected' : '') + '>1일</option>' +
   '<option value="3일" ' + (merchant.settlement_cycle === '3일' ? 'selected' : '') + '>3일</option>' +
   '<option value="4일" ' + ((merchant.settlement_cycle || '4일') === '4일' ? 'selected' : '') + '>4일</option>' +
@@ -7658,6 +7725,14 @@ merchantButtons.forEach((button) => {
   '</div>' +
 '</div>' +
     
+(
+  adminRole === 'AGENCY' || adminRole === 'MANAGER'
+    ? 
+      '<div class="merchant-detail-section">' +
+        '<h3>첨부서류</h3>' +
+        '<p style="color:#777; padding:10px 0;">열람 권한이 없습니다.</p>' +
+      '</div>'
+    :
 '<div class="merchant-detail-section">' +
   '<h3>첨부서류</h3>' +
   '<div class="merchant-file-list">' +
@@ -7705,10 +7780,11 @@ merchantButtons.forEach((button) => {
     '<div class="merchant-file-row">' +
       '<label>메모</label>' +
       '<textarea id="merchant-memo" placeholder="심사 메모를 입력하세요">' + (merchant.memo || '') + '</textarea>' +
-    '</div>' +
-
+    '</div>'+ 
+ 
   '</div>' +
-'</div>' +
+'</div>' 
+) +
             '<div class="merchant-detail-actions">' +
             '<button class="merchant-save-btn" id="save-merchant-info">저장</button>' +
               '<button class="merchant-save-btn" id="approve-merchant">개통완료</button>' +
@@ -8017,6 +8093,22 @@ if (currentAdminId !== 'NXGMASTER16') {
   delete updateData.account_holder
 }
 
+if (adminRole === 'AGENCY' || adminRole === 'MANAGER') {
+  const allowedUpdateData = {
+    phone: updateData.phone,
+    email: updateData.email,
+    zipcode: updateData.zipcode,
+    address: updateData.address,
+    address_detail: updateData.address_detail
+  }
+
+  Object.keys(updateData).forEach((key) => {
+    delete updateData[key]
+  })
+
+  Object.assign(updateData, allowedUpdateData)
+}
+
       const newPassword = getValue('merchant-password-input')
 
 if (newPassword) {
@@ -8045,6 +8137,12 @@ console.log('저장 error:', error)
   })
   document.querySelector('#approve-merchant')
   ?.addEventListener('click', async () => {
+
+    if (adminRole === 'AGENCY' || adminRole === 'MANAGER') {
+      alert('권한이 없습니다.')
+      return
+    }
+
     if (!confirm('개통완료 처리하시겠습니까?')) return
 
     const loginId =
@@ -8075,6 +8173,12 @@ location.reload()
 
   document.querySelector('#show-merchant-login')
   ?.addEventListener('click', () => {
+
+    if (adminRole === 'AGENCY' || adminRole === 'MANAGER') {
+      alert('권한이 없습니다.')
+      return
+    }
+
     alert(
       '가맹점 로그인정보\n\n' +
       '로그인 주소 : https://payment-app-ybtf.vercel.app/merchant-login\n' +
@@ -8084,6 +8188,12 @@ location.reload()
   })
   document.querySelector('#delete-merchant')
   ?.addEventListener('click', async () => {
+
+    if (adminRole === 'AGENCY' || adminRole === 'MANAGER') {
+      alert('권한이 없습니다.')
+      return
+    }
+
     if (!confirm('이 신청내역을 삭제하시겠습니까?')) return
 
     const { error } = await supabase
