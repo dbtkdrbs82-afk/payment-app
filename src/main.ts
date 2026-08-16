@@ -5552,8 +5552,20 @@ if (subMenu) {
               company_name: (document.querySelector<HTMLInputElement>('#edit-admin-company-name')?.value || '').trim(),
               business_number: (document.querySelector<HTMLInputElement>('#edit-admin-business-number')?.value || '').trim(),
           
-              commission_rate: Number(
-                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate')?.value || 0
+              commission_rate_1day: Number(
+                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate-1day')?.value || 0
+              ),
+              
+              commission_rate_3day: Number(
+                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate-3day')?.value || 0
+              ),
+              
+              commission_rate_4day: Number(
+                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate-4day')?.value || 0
+              ),
+              
+              commission_rate_7day: Number(
+                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate-7day')?.value || 0
               ),
           
               bank_name: (document.querySelector<HTMLInputElement>('#edit-admin-bank-name')?.value || '').trim(),
@@ -5651,8 +5663,20 @@ const password =
     company_name: (document.querySelector<HTMLInputElement>('#admin-company-name')?.value || '').trim(),
     business_number: (document.querySelector<HTMLInputElement>('#admin-business-number')?.value || '').trim(),
 
-    commission_rate: Number(
-      document.querySelector<HTMLInputElement>('#admin-commission-rate')?.value || 0
+    commission_rate_1day: Number(
+      document.querySelector<HTMLInputElement>('#admin-commission-rate-1day')?.value || 0
+    ),
+    
+    commission_rate_3day: Number(
+      document.querySelector<HTMLInputElement>('#admin-commission-rate-3day')?.value || 0
+    ),
+    
+    commission_rate_4day: Number(
+      document.querySelector<HTMLInputElement>('#admin-commission-rate-4day')?.value || 0
+    ),
+    
+    commission_rate_7day: Number(
+      document.querySelector<HTMLInputElement>('#admin-commission-rate-7day')?.value || 0
     ),
 
     bank_name: (document.querySelector<HTMLInputElement>('#admin-bank-name')?.value || '').trim(),
@@ -6285,8 +6309,17 @@ summaryBox.innerHTML =
 '<label>사업자번호</label>' +
 '<input id="edit-admin-business-number" value="' + (adminUser.business_number || '') + '" />' +
 
-'<label>수수료율(%)</label>' +
-'<input id="edit-admin-commission-rate" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate || '') + '" />' +
+'<label>1일 정산 수수료율(%)</label>' +
+'<input id="edit-admin-commission-rate-1day" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate_1day || 0) + '" />' +
+
+'<label>3일 정산 수수료율(%)</label>' +
+'<input id="edit-admin-commission-rate-3day" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate_3day || 0) + '" />' +
+
+'<label>4일 정산 수수료율(%)</label>' +
+'<input id="edit-admin-commission-rate-4day" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate_4day || 0) + '" />' +
+
+'<label>7일 정산 수수료율(%)</label>' +
+'<input id="edit-admin-commission-rate-7day" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate_7day || 0) + '" />' +
 
 '<label>은행명</label>' +
 '<input id="edit-admin-bank-name" value="' + (adminUser.bank_name || '') + '" />' +
@@ -6550,8 +6583,17 @@ const newMemo =
 '<label>사업자번호</label>' +
 '<input id="admin-business-number" />' +
 
-'<label>수수료율(%)</label>' +
-'<input id="admin-commission-rate" type="number" step="0.01" min="0" max="100" />' +
+'<label>1일 정산 수수료율(%)</label>' +
+'<input id="admin-commission-rate-1day" type="number" step="0.01" min="0" max="100" value="0" />' +
+
+'<label>3일 정산 수수료율(%)</label>' +
+'<input id="admin-commission-rate-3day" type="number" step="0.01" min="0" max="100" value="0" />' +
+
+'<label>4일 정산 수수료율(%)</label>' +
+'<input id="admin-commission-rate-4day" type="number" step="0.01" min="0" max="100" value="0" />' +
+
+'<label>7일 정산 수수료율(%)</label>' +
+'<input id="admin-commission-rate-7day" type="number" step="0.01" min="0" max="100" value="0" />' +
 
 '<label>은행명</label>' +
 '<input id="admin-bank-name" />' +
@@ -20857,7 +20899,9 @@ total_amount: Number(totalAmount),
   
           const { data: merchantData } = await supabase
   .from('merchants')
-  .select('merchant_name, fee_rate, manager_admin_id')
+  .select(
+    'merchant_name, fee_rate, settlement_cycle, branch_admin_id, agency_admin_id, manager_admin_id'
+  )
   .eq('id', Number(merchantId))
   .maybeSingle()
 
@@ -20867,16 +20911,109 @@ total_amount: Number(totalAmount),
   const kioskSettlementAmount = kioskAmount - kioskFeeAmount
   
   const managerAdminId = merchantData?.manager_admin_id
-  let managerAdminName = ''
+let managerAdminName = ''
 let managerFeeRate = 0
 
-let agencyAdminId: number | null = null
+let agencyAdminId: number | null =
+  merchantData?.agency_admin_id
+    ? Number(merchantData.agency_admin_id)
+    : null
+
 let agencyAdminName = ''
 let agencyFeeRate = 0
 
-let branchAdminId: number | null = null
+let branchAdminId: number | null =
+  merchantData?.branch_admin_id
+    ? Number(merchantData.branch_admin_id)
+    : null
+
 let branchAdminName = ''
 let branchFeeRate = 0
+
+const settlementCycle =
+  String(merchantData?.settlement_cycle || '4일')
+
+const getCommissionRate = (adminUser: any) => {
+  if (!adminUser) return 0
+
+  if (settlementCycle === '1일') {
+    return Number(adminUser.commission_rate_1day || 0)
+  }
+
+  if (settlementCycle === '3일') {
+    return Number(adminUser.commission_rate_3day || 0)
+  }
+
+  if (settlementCycle === '7일') {
+    return Number(adminUser.commission_rate_7day || 0)
+  }
+
+  return Number(adminUser.commission_rate_4day || 0)
+}
+
+if (managerAdminId) {
+  const { data: managerData } = await supabase
+    .from('admin_users')
+    .select(
+      'id, admin_name, parent_admin_id, commission_rate_1day, commission_rate_3day, commission_rate_4day, commission_rate_7day'
+    )
+    .eq('id', Number(managerAdminId))
+    .maybeSingle()
+
+  if (managerData) {
+    managerAdminName =
+      managerData.admin_name || ''
+
+    managerFeeRate =
+      getCommissionRate(managerData)
+
+    if (!agencyAdminId && managerData.parent_admin_id) {
+      agencyAdminId =
+        Number(managerData.parent_admin_id)
+    }
+  }
+}
+
+if (agencyAdminId) {
+  const { data: agencyData } = await supabase
+    .from('admin_users')
+    .select(
+      'id, admin_name, parent_admin_id, commission_rate_1day, commission_rate_3day, commission_rate_4day, commission_rate_7day'
+    )
+    .eq('id', agencyAdminId)
+    .maybeSingle()
+
+  if (agencyData) {
+    agencyAdminName =
+      agencyData.admin_name || ''
+
+    agencyFeeRate =
+      getCommissionRate(agencyData)
+
+    if (!branchAdminId && agencyData.parent_admin_id) {
+      branchAdminId =
+        Number(agencyData.parent_admin_id)
+    }
+  }
+}
+
+if (branchAdminId) {
+  const { data: branchData } = await supabase
+    .from('admin_users')
+    .select(
+      'id, admin_name, commission_rate_1day, commission_rate_3day, commission_rate_4day, commission_rate_7day'
+    )
+    .eq('id', branchAdminId)
+    .maybeSingle()
+
+  if (branchData) {
+    branchAdminName =
+      branchData.admin_name || ''
+
+    branchFeeRate =
+      getCommissionRate(branchData)
+  }
+}
 
 if (managerAdminId) {
   const { data: managerData } = await supabase
