@@ -4662,18 +4662,106 @@ return
            
 
             const { data: orgMerchants, error: orgMerchantError } = await supabase
-  .from('merchants')
-  .select('id, merchant_name, manager_admin_id')
+            .from('merchants')
+            .select(`
+              id,
+              merchant_name,
+              settlement_cycle,
+              branch_admin_id,
+              agency_admin_id,
+              manager_admin_id
+            `)
 
 if (orgMerchantError) {
   alert('조직 가맹점 정보를 불러오지 못했습니다: ' + orgMerchantError.message)
   return
 }
 
+const { data: orgPayments, error: orgPaymentError } = await supabase
+  .from('payments')
+  .select(`
+    id,
+    merchant_id,
+    amount,
+    status
+  `)
+  .eq('status', 'paid')
+
+if (orgPaymentError) {
+  alert('조직 매출 정보를 불러오지 못했습니다: ' + orgPaymentError.message)
+  return
+}
+
+const getOrgCommissionRate = (
+  adminUser: any,
+  settlementCycle: string
+) => {
+  if (!adminUser) return 0
+
+  if (settlementCycle === '1일') {
+    return Number(adminUser.commission_rate_1day || 0)
+  }
+
+  if (settlementCycle === '3일') {
+    return Number(adminUser.commission_rate_3day || 0)
+  }
+
+  if (settlementCycle === '7일') {
+    return Number(adminUser.commission_rate_7day || 0)
+  }
+
+  return Number(adminUser.commission_rate_4day || 0)
+}
+
 const getManagerMerchantCount = (managerId: number) =>
   (orgMerchants || []).filter((merchant) =>
     Number(merchant.manager_admin_id) === managerId
   ).length
+
+  const getMerchantPaymentAmount = (merchantId: number) =>
+    (orgPayments || [])
+      .filter((payment) =>
+        Number(payment.merchant_id) === merchantId
+      )
+      .reduce(
+        (sum, payment) =>
+          sum + Number(payment.amount || 0),
+        0
+      )
+  
+  const getManagerCommissionSummary = (managerId: number) => {
+    const manager = managerUsers.find((user) =>
+      Number(user.id) === managerId
+    )
+  
+    let totalSales = 0
+    let commissionAmount = 0
+  
+    ;(orgMerchants || [])
+      .filter((merchant) =>
+        Number(merchant.manager_admin_id) === managerId
+      )
+      .forEach((merchant) => {
+        const sales = getMerchantPaymentAmount(
+          Number(merchant.id)
+        )
+  
+        const rate = getOrgCommissionRate(
+          manager,
+          String(merchant.settlement_cycle || '4일')
+        )
+  
+        totalSales += sales
+        commissionAmount += Math.floor(
+          sales * rate / 100
+        )
+      })
+  
+    return {
+      totalSales,
+      commissionAmount
+    }
+  }
 
 const renderOrganizationHome = () => {
  
@@ -4877,12 +4965,19 @@ const renderManagerList = (managers: any[]) => {
   listBox.innerHTML =
     '<h3>담당자 목록</h3>' +
     '<div class="org-v2-list">' +
-      filtered.slice(0, 20).map((manager) =>
+    filtered.slice(0, 20).map((manager) => {
+      const summary =
+        getManagerCommissionSummary(Number(manager.id))
+    
+      return (
         '<button class="org-v2-manager-row" data-id="' + manager.id + '">' +
-          '👤 ' + (manager.admin_name || '-') +
-          '<strong>' + getManagerMerchantCount(Number(manager.id)) + '</strong>' +
+          '<span>👤 ' + (manager.admin_name || '-') + '</span>' +
+          '<span>가맹점 ' + getManagerMerchantCount(Number(manager.id)) + '개</span>' +
+          '<span>총매출 ' + summary.totalSales.toLocaleString() + '원</span>' +
+          '<strong>수수료 ' + summary.commissionAmount.toLocaleString() + '원</strong>' +
         '</button>'
-      ).join('') +
+      )
+    }).join('')
     '</div>'
 
 
