@@ -7709,7 +7709,9 @@ merchantButtons.forEach((button) => {
   '<h3>위험관리 / 한도설정</h3>' +
   '<div class="merchant-detail-grid merchant-risk-grid">' +
     '<label>최대할부기간</label>' +
-'<select id="installment-month">' +
+'<select id="installment-month"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
+'>' +
       '<option ' + (merchant.installment_month === '2개월' ? 'selected' : '') + '>2개월</option>' +
 '<option ' + (merchant.installment_month === '3개월' ? 'selected' : '') + '>3개월</option>' +
 '<option ' + (merchant.installment_month === '4개월' ? 'selected' : '') + '>4개월</option>' +
@@ -7718,9 +7720,17 @@ merchantButtons.forEach((button) => {
 '<option ' + (merchant.installment_month === '10개월' ? 'selected' : '') + '>10개월</option>' +
 '<option ' + (merchant.installment_month === '12개월' ? 'selected' : '') + '>12개월</option>' +
     '</select>' +
-    '<label>1일 승인한도</label><input id="daily-limit" value="' + (merchant.daily_limit || '') + '" />' +
-    '<label>월한도</label><input id="monthly-limit" value="' + (merchant.monthly_limit || '') + '" />' +
-    '<label>연한도</label><input id="yearly-limit" value="' + (merchant.yearly_limit || '') + '" />' +
+    '<label>1일 승인한도</label><input id="daily-limit" value="' + (merchant.daily_limit || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
+
+'<label>월한도</label><input id="monthly-limit" value="' + (merchant.monthly_limit || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
+
+'<label>연한도</label><input id="yearly-limit" value="' + (merchant.yearly_limit || '') + '"' +
+  ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' readonly' : '') +
+' />' +
   '</div>' +
 '</div>' +
     
