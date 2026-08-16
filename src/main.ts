@@ -5013,27 +5013,36 @@ function bindManagerClick() {
 
         if (!outputArea) return
 
-        outputArea.innerHTML =
-          '<div class="org-v2-breadcrumb">' +
-            '담당자 > ' + (manager?.admin_name || '-') +
-          '</div>' +
-          '<h3>담당 가맹점</h3>' +
-          '<div class="org-v2-merchant-box">' +
-            (
-              merchantList.length === 0
-                ? '<p>연결된 가맹점이 없습니다.</p>'
-                : merchantList
-                    .slice(0, 20)
-                    .map(
-                      (merchant, index) =>
-                        '<p>' +
-                          (index + 1) + '. ' +
-                          (merchant.merchant_name || '-') +
-                        '</p>'
-                    )
-                    .join('')
-            ) +
-          '</div>'
+        const managerSummary =
+  getManagerCommissionSummary(managerId)
+
+  outputArea.innerHTML =
+  '<div class="org-v2-breadcrumb">' +
+    '담당자 > ' + (manager?.admin_name || '-') +
+  '</div>' +
+
+  '<div style="display:flex; gap:24px; margin:14px 0 18px 0; font-weight:700;">' +
+    '<span>총매출 ' + managerSummary.totalSales.toLocaleString() + '원</span>' +
+    '<span>수수료 ' + managerSummary.commissionAmount.toLocaleString() + '원</span>' +
+  '</div>' +
+
+  '<h3>담당 가맹점</h3>' +
+  '<div class="org-v2-merchant-box">' +
+    (
+      merchantList.length === 0
+        ? '<p>연결된 가맹점이 없습니다.</p>'
+        : merchantList
+            .slice(0, 20)
+            .map(
+              (merchant, index) =>
+                '<p>' +
+                  (index + 1) + '. ' +
+                  (merchant.merchant_name || '-') +
+                '</p>'
+            )
+            .join('')
+    ) +
+  '</div>'
       }
     })
 }
