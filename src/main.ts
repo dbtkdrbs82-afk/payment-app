@@ -1830,7 +1830,6 @@ document.querySelector<HTMLButtonElement>('#download-qr-button')!
 </div>
 
            <div id="payment-list"></div>
-           <div id="payment-list"></div>
 
 <div class="sales-filter-buttons">
   <button id="sales-daily">일별 매출</button>
@@ -1839,8 +1838,7 @@ document.querySelector<HTMLButtonElement>('#download-qr-button')!
 </div>
 
 <div id="sales-summary"></div>
-
-<h2>생성된 행사 목록</h2> 
+ 
             <h2>생성된 행사 목록</h2>
 
 <div class="event-filter-buttons">
@@ -2827,11 +2825,6 @@ if (adminUser && !adminLoginError) {
 
     document.querySelector('#go-merchant-apply-button')
   ?.addEventListener('click', () => {
-    location.href = '/merchant-create'
-  })
-
-    document.querySelector('#go-merchant-apply-button')
-  ?.addEventListener('click', () => {
     location.href = '/merchant-apply'
   })
 
@@ -2925,10 +2918,6 @@ if (!sessionStorage.getItem('admin_id')) {
 </div>
 </div>
 `
-
-       const searchBtn = document.querySelector('.search-btn')
-       const paymentTableBody =
-  document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
    
   document.querySelector('.admin-table-scroll')?.classList.add('payment-table-scroll')
 document.querySelector('.admin-table')?.classList.add('payment-admin-table')
@@ -2954,55 +2943,7 @@ document.querySelector('.admin-table')?.classList.add('payment-admin-table')
         return status || '-'
       }
 
-       searchBtn?.addEventListener('click', async () => {
-         const result = await supabase
-           .from('payments')
-           .select('*')
-           .order('created_at', { ascending: false })
        
-         if (result.error) {
-           alert('결제내역 조회 실패: ' + result.error.message)
-           return
-         }
-       
-         const payments = result.data || []
-
-         const summaryBox = document.querySelector('.admin-summary')
-
-const totalAmount = payments.reduce((sum, payment) => {
-  return sum + Number(payment.amount || 0)
-}, 0)
-
-if (summaryBox) {
-  summaryBox.innerHTML =
-    '검색된 데이터 : ' + payments.length + '건 &nbsp;&nbsp;&nbsp;' +
-    '사용자 : ' + payments.length + '명 &nbsp;&nbsp;&nbsp;' +
-    '전체금액 : ' + totalAmount.toLocaleString() + '원 ' +
-    '<span>카드취소를 원하는 데이터의 거래번호를 클릭해주세요.</span>'
-}
-       
-         paymentTableBody.innerHTML = ''
-       
-         payments.forEach((payment, index) => {
-           const tr = document.createElement('tr')
-
-       
-           tr.innerHTML =
-             '<td>' + (index + 1) + '</td>' +
-             '<td>' + formatDate(payment.created_at) + '<br/>' + (payment.order_id || '-') + '</td>' +
-             '<td>-<br/>' + (payment.payment_key || '-') + '</td>' +
-             '<td>' + (payment.merchant_name || '-') + '<br/>' + (payment.merchant_id || '-') + '</td>' +
-             '<td>-<br/>-</td>' +
-             '<td>-</td>' +
-             '<td>-<br/>-</td>' +
-             '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-             '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-             '<td>0원<br/>0원</td>' +
-             '<td>0원<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>'
-       
-           paymentTableBody.appendChild(tr)
-         })
-       })
        document.querySelector('#admin-logout')
 ?.addEventListener('click', () => {
 
@@ -4659,29 +4600,7 @@ return
               alert('조직 정보를 불러오지 못했습니다: ' + error.message)
               return
             }
-            const { data: cancelRequests, error: cancelError } = await supabase
-  .from('cancel_requests')
-  .select('*')
-  .eq('status', '요청중')
-
-if (cancelError) {
-  alert('취소요청 정보를 불러오지 못했습니다: ' + cancelError.message)
-  return
-}
-
-const getManagerCancelBadge = (managerId: number) => {
-  const count = (cancelRequests || []).filter((request) =>
-    Number(request.manager_admin_id) === Number(managerId)
-  ).length
-
-  return count > 0
-  ? ' <span class="manager-cancel-btn" data-manager-id="' + managerId + '" style="display:inline-block; cursor:pointer; color:red; font-weight:700; margin-left:8px;">🔴' + count + '</span>'
-  : ''
-}
-          
-            const rootUsers = (adminUsers || []).filter((user) =>
-              user.login_id === 'NXGMASTER16'
-            )
+              
           
             let branchUsers = (adminUsers || []).filter((user) =>
               user.role === 'BRANCH'
@@ -4739,68 +4658,7 @@ const getManagerCancelBadge = (managerId: number) => {
               )
             }
 
-            const branchCardHtml = branchUsers.map((branch) =>
-              '<button class="org-branch-card" data-branch-id="' + branch.id + '">' +
-                '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
-              '</button>'
-            ).join('')
-
-            if (summaryBox) {
-              summaryBox.innerHTML =
-                '<div class="merchant-detail-header">' +
-                  '<h2>조직관리</h2>' +
-                  '<p>지사를 선택하면 하위 대리점과 담당자를 확인할 수 있습니다.</p>' +
-'<div class="org-branch-card-row">' + branchCardHtml + '</div>' +
-                '</div>' +
-          
-                '<div class="merchant-detail-page" style="border:1px solid #ddd; border-radius:12px; background:#fff; overflow:hidden;">' +
-  '<div style="display:grid; grid-template-columns: 1fr 420px; min-height:260px;">' +
-    '<div id="organization-tree-panel" style="padding:24px; border-right:1px solid #ddd;">' +
-                  rootUsers.map((root) =>
-                    '<div style="padding:16px; border:1px solid #ddd; border-radius:10px; margin-bottom:16px;">' +
-                      '<h3>👑 ' + (root.admin_name || '-') + '</h3>' +
-          
-                      branchUsers
-                        .filter((branch) => branch.parent_admin_id === root.id)
-                        .map((branch) =>
-                          '<div style="margin-left:24px; margin-top:12px;">' +
-                            '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
-          
-                            agencyUsers
-                              .filter((agency) => agency.parent_admin_id === branch.id)
-                              .map((agency) =>
-                                '<div style="margin-left:24px; margin-top:8px;">' +
-                                  '🏬 ' + (agency.admin_name || '-') +
-          
-                                  managerUsers
-                                    .filter((manager) => manager.parent_admin_id === agency.id)
-                                    .map((manager) =>
-                                      '<div style="margin-left:24px; margin-top:6px;">' +
-                                        '👤 ' + (manager.admin_name || '-') + getManagerCancelBadge(manager.id) +
-                                      '</div>'
-                                    ).join('') +
-                                '</div>'
-                              ).join('') +
-          
-                            managerUsers
-                              .filter((manager) => manager.parent_admin_id === branch.id)
-                              .map((manager) =>
-                                '<div style="margin-left:24px; margin-top:6px;">' +
-                                  '👤 ' + (manager.admin_name || '-') + getManagerCancelBadge(manager.id) +
-                                '</div>'
-                              ).join('') +
-                          '</div>'
-                        ).join('') +
-                        '</div>'
-                      ).join('') +
-                      '</div>' +
-'<div id="organization-work-panel" style="padding:24px; background:#fff;">' +
-  '<h3>업무 패널</h3>' +
-  '<p>왼쪽 조직도에서 담당자 또는 알림을 선택하면 상세 업무가 표시됩니다.</p>' +
-'</div>' +
-'</div>' +
-'</div>'
-            }
+           
 
             const { data: orgMerchants, error: orgMerchantError } = await supabase
   .from('merchants')
@@ -4817,53 +4675,7 @@ const getManagerMerchantCount = (managerId: number) =>
   ).length
 
 const renderOrganizationHome = () => {
-  const commissionRows = [
-    ...branchUsers.map((user) => ({
-      role: '지사',
-      name: user.admin_name || '-',
-      loginId: user.login_id || '-',
-      rate: Number(user.commission_rate || 0)
-    })),
-    ...agencyUsers.map((user) => ({
-      role: '대리점',
-      name: user.admin_name || '-',
-      loginId: user.login_id || '-',
-      rate: Number(user.commission_rate || 0)
-    })),
-    ...managerUsers.map((user) => ({
-      role: '담당자',
-      name: user.admin_name || '-',
-      loginId: user.login_id || '-',
-      rate: Number(user.commission_rate || 0)
-    }))
-  ]
-
-  const commissionTableHtml =
-    '<div style="margin-bottom:24px;">' +
-      '<h3>수수료 현황</h3>' +
-      '<div class="admin-table-wrap">' +
-        '<table class="admin-table">' +
-          '<thead>' +
-            '<tr>' +
-              '<th>구분</th>' +
-              '<th>이름</th>' +
-              '<th>아이디</th>' +
-              '<th>설정 수수료율</th>' +
-            '</tr>' +
-          '</thead>' +
-          '<tbody>' +
-            commissionRows.map((row) =>
-              '<tr>' +
-                '<td>' + row.role + '</td>' +
-                '<td>' + row.name + '</td>' +
-                '<td>' + row.loginId + '</td>' +
-                '<td><strong>' + row.rate.toFixed(2) + '%</strong></td>' +
-              '</tr>'
-            ).join('') +
-          '</tbody>' +
-        '</table>' +
-      '</div>' +
-    '</div>'
+ 
   const branchCards = branchUsers.map((branch) => {
     const agencies = agencyUsers.filter((agency) =>
       Number(agency.parent_admin_id) === Number(branch.id)
@@ -4896,7 +4708,7 @@ const renderOrganizationHome = () => {
       '<h2>조직관리</h2>' +
       '<p>본사 > 지사 > 대리점 > 담당자 순서로 조회합니다.</p>' +
     '</div>' +
-    commissionTableHtml +
+    
     '<div class="org-v2-wrap">' +
       '<div class="org-v2-breadcrumb">본사</div>' +
       '<h3>지사 목록</h3>' +
@@ -5217,129 +5029,7 @@ workPanel.innerHTML =
             return
           }
 
-          if (page === 'dashboard') {
-      const subMenu = document.querySelector('.admin-sub-menu')
-      const titleBox = document.querySelector('.admin-title')
-      const searchBox = document.querySelector('.admin-search-box')
-      const summaryBox = document.querySelector('.admin-summary')
-      const tableHead = document.querySelector('.admin-table thead')
-      const paymentTableBody =
-        document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
-    
-      if (subMenu) {
-        subMenu.innerHTML = '오늘 현황 | 월간 현황 | 정산 현황 | 출금 현황'
-      }
-    
-      if (titleBox) {
-        titleBox.innerHTML = `
-          <div class="dashboard-title">
-            <h2>NXG 관리자 대시보드</h2>
-            <p>결제, 정산, 출금 현황을 실시간으로 확인할 수 있습니다.</p>
-          </div>
-      
-          <div style="margin-top:10px;">
-            ▶ 대시보드 > 오늘 현황
-          </div>
-        `
-      }
-    
-      if (searchBox) {
-        searchBox.innerHTML = ''
-      }
-    
-      const { data: payments, error: paymentError } = await supabase
-        .from('payments')
-        .select('*')
-    
-      const { data: merchants, error: merchantError } = await supabase
-        .from('merchants')
-        .select('*')
-    
-      if (paymentError || merchantError) {
-        alert('대시보드 데이터를 불러오지 못했습니다')
-        return
-      }
-    
-      const today = new Date().toISOString().slice(0, 10)
-    
-      const todayPayments = (payments || []).filter((payment) => {
-        return String(payment.created_at || '').slice(0, 10) === today
-      })
-    
-      const todayAmount = todayPayments.reduce((sum, payment) => {
-        return sum + Number(payment.amount || 0)
-      }, 0)
-    
-      const totalAmount = (payments || []).reduce((sum, payment) => {
-        return sum + Number(payment.amount || 0)
-      }, 0)
-    
-      const settlementWaitingAmount = (payments || []).reduce((sum, payment) => {
-        if (payment.settlement_status === '정산완료') {
-          return sum
-        }
-    
-        const amount = Number(payment.amount || 0)
-        const feeAmount = Math.floor(amount * 0.02)
-    
-        return sum + amount - feeAmount
-      }, 0)
-    
-      const payoutWaitingAmount = (payments || []).reduce((sum, payment) => {
-        if (
-          payment.settlement_status === '정산완료' &&
-          payment.payout_status !== '출금완료'
-        ) {
-          return sum + Number(payment.settlement_amount || payment.amount || 0)
-        }
-    
-        return sum
-      }, 0)
-    
-      if (summaryBox) {
-        summaryBox.innerHTML =
-          '<div class="dashboard-cards">' +
-            '<div class="dashboard-card"><h3>오늘 결제금액</h3><strong>' + todayAmount.toLocaleString() + '원</strong></div>' +
-            '<div class="dashboard-card"><h3>전체 결제금액</h3><strong>' + totalAmount.toLocaleString() + '원</strong></div>' +
-            '<div class="dashboard-card"><h3>정산대기금액</h3><strong>' + settlementWaitingAmount.toLocaleString() + '원</strong></div>' +
-            '<div class="dashboard-card"><h3>출금대기금액</h3><strong>' + payoutWaitingAmount.toLocaleString() + '원</strong></div>' +
-            '<div class="dashboard-card"><h3>가맹점 수</h3><strong>' + (merchants || []).length + '개</strong></div>' +
-          '</div>'
-      }
-    
-      if (tableHead) {
-        tableHead.innerHTML =
-          '<tr>' +
-            '<th>No</th>' +
-            '<th>가맹점명</th>' +
-            '<th>주문번호</th>' +
-            '<th>결제금액</th>' +
-            '<th>결제상태</th>' +
-            '<th>정산상태</th>' +
-            '<th>출금상태</th>' +
-            '<th>결제일</th>' +
-          '</tr>'
-      }
-    
-      paymentTableBody.innerHTML = ''
-    
-      ;(payments || []).slice(0, 10).forEach((payment, index) => {
-        const tr = document.createElement('tr')
-    
-        tr.innerHTML =
-          '<td>' + (index + 1) + '</td>' +
-          '<td>' + (payment.merchant_name || '-') + '</td>' +
-          '<td>' + (payment.order_id || '-') + '</td>' +
-          '<td>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
-          '<td>' + (payment.status || '-') + '</td>' +
-          '<td>' + (payment.settlement_status || '정산대기') + '</td>' +
-          '<td>' + (payment.payout_status || '출금대기') + '</td>' +
-          '<td>' + formatDate(payment.created_at) + '</td>'
-    
-        paymentTableBody.appendChild(tr)
-      })
-    }
-
+          
     if (page === 'merchant') {
       const subMenu = document.querySelector('.admin-sub-menu')
 const titleBox = document.querySelector('.admin-title')
@@ -5437,160 +5127,7 @@ if (subMenu) {
     document.querySelector('#add-admin-user-btn')
   ?.addEventListener('click', () => {
 
-    document.querySelectorAll<HTMLButtonElement>('.admin-user-edit-btn')
-  .forEach((button) => {
-    button.addEventListener('click', async () => {
-      const adminUserId = Number(button.dataset.id)
-
-      const { data: adminUser, error } = await supabase
-        .from('admin_users')
-        .select('*')
-        .eq('id', adminUserId)
-        .single()
-
-      if (error || !adminUser) {
-        alert('담당자 정보를 불러오지 못했습니다.')
-        return
-      }
-
-      if (!summaryBox) return
-
-      summaryBox.innerHTML =
-        '<div class="merchant-detail-header">' +
-          '<h2>담당자 수정</h2>' +
-          '<p>담당자 계정 정보를 수정합니다.</p>' +
-        '</div>' +
-
-        '<div class="merchant-detail-grid">' +
-
-          '<label>권한</label>' +
-          '<select id="edit-admin-role">' +
-            '<option value="MASTER" ' + (adminUser.role === 'MASTER' ? 'selected' : '') + '>최고관리자</option>' +
-            '<option value="BRANCH" ' + (adminUser.role === 'BRANCH' ? 'selected' : '') + '>지사</option>' +
-            '<option value="AGENCY" ' + (adminUser.role === 'AGENCY' ? 'selected' : '') + '>대리점</option>' +
-            '<option value="MANAGER" ' + (adminUser.role === 'MANAGER' ? 'selected' : '') + '>담당자</option>' +
-          '</select>' +
-
-          '<label>이름</label>' +
-          '<input id="edit-admin-name" value="' + (adminUser.admin_name || '') + '" />' +
-
-          '<label>아이디</label>' +
-          '<input id="edit-admin-login-id" value="' + (adminUser.login_id || '') + '" readonly />' +
-
-          '<label>비밀번호</label>' +
-          '<input id="edit-admin-password" value="' + (adminUser.password || '') + '" />' +
-
-'<label>이메일</label>' +
-'<input id="edit-admin-email" value="' + (adminUser.email || '') + '" />' +
-
-'<label>주민번호</label>' +
-'<input id="edit-admin-resident-number" value="' + (adminUser.resident_number || '') + '" />' +
-
-'<label>회사명</label>' +
-'<input id="edit-admin-company-name" value="' + (adminUser.company_name || '') + '" />' +
-
-'<label>사업자번호</label>' +
-'<input id="edit-admin-business-number" value="' + (adminUser.business_number || '') + '" />' +
-
-'<label>수수료율(%)</label>' +
-'<input id="edit-admin-commission-rate" type="number" step="0.01" min="0" max="100" value="' + (adminUser.commission_rate || '') + '" />' +
-
-'<label>은행명</label>' +
-'<input id="edit-admin-bank-name" value="' + (adminUser.bank_name || '') + '" />' +
-
-'<label>계좌번호</label>' +
-'<input id="edit-admin-account-number" value="' + (adminUser.account_number || '') + '" />' +
-
-'<label>예금주</label>' +
-'<input id="edit-admin-account-holder" value="' + (adminUser.account_holder || '') + '" />' +
-
-'<label>메모</label>' +
-'<textarea id="edit-admin-memo">' + (adminUser.memo || '') + '</textarea>' +
-
-          '<label>휴대폰번호</label>' +
-          '<input id="edit-admin-phone" value="' + (adminUser.phone || '') + '" placeholder="010-0000-0000" />' +
-          
-          '<label>상태</label>' +
-          '<select id="edit-admin-status">' +
-            '<option value="사용중" ' + (adminUser.status === '사용중' ? 'selected' : '') + '>사용중</option>' +
-            '<option value="사용정지" ' + (adminUser.status === '사용정지' ? 'selected' : '') + '>사용정지</option>' +
-          '</select>' +
-
-        '</div>' +
-
-        '<div class="merchant-detail-actions">' +
-          '<button id="update-admin-user" class="merchant-save-btn">저장</button>' +
-          '<button id="back-admin-user-list" class="merchant-close-btn">목록</button>' +
-        '</div>'
-
-      document.querySelector('#back-admin-user-list')
-        ?.addEventListener('click', () => {
-          document.querySelector('[data-sub="admin-users"]')
-            ?.dispatchEvent(new Event('click'))
-        })
-
-        document.querySelector('#update-admin-user')
-        ?.addEventListener('click', async () => {
-      
-          const newParentAdminId =
-            Number(
-              document.querySelector<HTMLSelectElement>('#edit-parent-admin-id')
-                ?.value || 0
-            )
-      
-            const { error: updateError } = await supabase
-            .from('admin_users')
-            .update({
-              admin_name: (document.querySelector<HTMLInputElement>('#edit-admin-name')?.value || '').trim(),
-              password: (document.querySelector<HTMLInputElement>('#edit-admin-password')?.value || '').trim(),
-              role: (document.querySelector<HTMLSelectElement>('#edit-admin-role')?.value || '').trim(),
-          
-              phone: (document.querySelector<HTMLInputElement>('#edit-admin-phone')?.value || '').trim(),
-              email: (document.querySelector<HTMLInputElement>('#edit-admin-email')?.value || '').trim(),
-              resident_number: (document.querySelector<HTMLInputElement>('#edit-admin-resident-number')?.value || '').trim(),
-          
-              company_name: (document.querySelector<HTMLInputElement>('#edit-admin-company-name')?.value || '').trim(),
-              business_number: (document.querySelector<HTMLInputElement>('#edit-admin-business-number')?.value || '').trim(),
-          
-              commission_rate_1day: Number(
-                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate-1day')?.value || 0
-              ),
-              
-              commission_rate_3day: Number(
-                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate-3day')?.value || 0
-              ),
-              
-              commission_rate_4day: Number(
-                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate-4day')?.value || 0
-              ),
-              
-              commission_rate_7day: Number(
-                document.querySelector<HTMLInputElement>('#edit-admin-commission-rate-7day')?.value || 0
-              ),
-          
-              bank_name: (document.querySelector<HTMLInputElement>('#edit-admin-bank-name')?.value || '').trim(),
-              account_number: (document.querySelector<HTMLInputElement>('#edit-admin-account-number')?.value || '').trim(),
-              account_holder: (document.querySelector<HTMLInputElement>('#edit-admin-account-holder')?.value || '').trim(),
-          
-              memo: (document.querySelector<HTMLTextAreaElement>('#edit-admin-memo')?.value || '').trim(),
-          
-              status: (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || '').trim(),
-              parent_admin_id: newParentAdminId
-            })
-            .eq('id', adminUser.id)
-
-          if (updateError) {
-            alert('수정 실패: ' + updateError.message)
-            return
-          }
-
-          alert('수정되었습니다.')
-
-          document.querySelector('[data-sub="admin-users"]')
-            ?.dispatchEvent(new Event('click'))
-        })
-    })
-  })
+    
 
     if (!summaryBox) return
 
