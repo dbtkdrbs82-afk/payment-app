@@ -8370,6 +8370,27 @@ if (page === 'payout') {
         document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
         const tableTop = document.querySelector('.admin-table-top')
 
+        if (titleBox) {
+          titleBox.innerHTML = '▶ 출금관리'
+        }
+      
+        if (searchBox) {
+          searchBox.innerHTML = ''
+        }
+      
+        if (summaryBox) {
+          summaryBox.innerHTML =
+            '<div style="padding:24px; text-align:center;">출금관리 불러오는 중...</div>'
+        }
+      
+        if (tableHead) {
+          tableHead.innerHTML = ''
+        }
+      
+        if (paymentTableBody) {
+          paymentTableBody.innerHTML = ''
+        }
+
         if (tableTop) {
           tableTop.innerHTML =
             '<button>엑셀 다운로드</button>' +
