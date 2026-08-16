@@ -4817,6 +4817,53 @@ const getManagerMerchantCount = (managerId: number) =>
   ).length
 
 const renderOrganizationHome = () => {
+  const commissionRows = [
+    ...branchUsers.map((user) => ({
+      role: '지사',
+      name: user.admin_name || '-',
+      loginId: user.login_id || '-',
+      rate: Number(user.commission_rate || 0)
+    })),
+    ...agencyUsers.map((user) => ({
+      role: '대리점',
+      name: user.admin_name || '-',
+      loginId: user.login_id || '-',
+      rate: Number(user.commission_rate || 0)
+    })),
+    ...managerUsers.map((user) => ({
+      role: '담당자',
+      name: user.admin_name || '-',
+      loginId: user.login_id || '-',
+      rate: Number(user.commission_rate || 0)
+    }))
+  ]
+
+  const commissionTableHtml =
+    '<div style="margin-bottom:24px;">' +
+      '<h3>수수료 현황</h3>' +
+      '<div class="admin-table-wrap">' +
+        '<table class="admin-table">' +
+          '<thead>' +
+            '<tr>' +
+              '<th>구분</th>' +
+              '<th>이름</th>' +
+              '<th>아이디</th>' +
+              '<th>설정 수수료율</th>' +
+            '</tr>' +
+          '</thead>' +
+          '<tbody>' +
+            commissionRows.map((row) =>
+              '<tr>' +
+                '<td>' + row.role + '</td>' +
+                '<td>' + row.name + '</td>' +
+                '<td>' + row.loginId + '</td>' +
+                '<td><strong>' + row.rate.toFixed(2) + '%</strong></td>' +
+              '</tr>'
+            ).join('') +
+          '</tbody>' +
+        '</table>' +
+      '</div>' +
+    '</div>'
   const branchCards = branchUsers.map((branch) => {
     const agencies = agencyUsers.filter((agency) =>
       Number(agency.parent_admin_id) === Number(branch.id)
@@ -4849,6 +4896,7 @@ const renderOrganizationHome = () => {
       '<h2>조직관리</h2>' +
       '<p>본사 > 지사 > 대리점 > 담당자 순서로 조회합니다.</p>' +
     '</div>' +
+    commissionTableHtml +
     '<div class="org-v2-wrap">' +
       '<div class="org-v2-breadcrumb">본사</div>' +
       '<h3>지사 목록</h3>' +
@@ -20829,6 +20877,53 @@ let agencyFeeRate = 0
 let branchAdminId: number | null = null
 let branchAdminName = ''
 let branchFeeRate = 0
+
+if (managerAdminId) {
+  const { data: managerData } = await supabase
+    .from('admin_users')
+    .select('id, admin_name, commission_rate, parent_admin_id')
+    .eq('id', Number(managerAdminId))
+    .maybeSingle()
+
+  if (managerData) {
+    managerAdminName = managerData.admin_name || ''
+    managerFeeRate = Number(managerData.commission_rate || 0)
+
+    agencyAdminId = managerData.parent_admin_id
+      ? Number(managerData.parent_admin_id)
+      : null
+  }
+}
+
+if (agencyAdminId) {
+  const { data: agencyData } = await supabase
+    .from('admin_users')
+    .select('id, admin_name, commission_rate, parent_admin_id')
+    .eq('id', agencyAdminId)
+    .maybeSingle()
+
+  if (agencyData) {
+    agencyAdminName = agencyData.admin_name || ''
+    agencyFeeRate = Number(agencyData.commission_rate || 0)
+
+    branchAdminId = agencyData.parent_admin_id
+      ? Number(agencyData.parent_admin_id)
+      : null
+  }
+}
+
+if (branchAdminId) {
+  const { data: branchData } = await supabase
+    .from('admin_users')
+    .select('id, admin_name, commission_rate')
+    .eq('id', branchAdminId)
+    .maybeSingle()
+
+  if (branchData) {
+    branchAdminName = branchData.admin_name || ''
+    branchFeeRate = Number(branchData.commission_rate || 0)
+  }
+}
   
   const { error: paymentSaveError } = await supabase
     .from('payments')
