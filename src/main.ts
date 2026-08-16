@@ -4578,18 +4578,19 @@ return
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')
 
 
-              if (subMenu) {
-                subMenu.innerHTML = ''
-              }
-              
-              if (titleBox) {
-                titleBox.innerHTML = '▶ 조직관리'
-              }
-          
-            if (searchBox) searchBox.innerHTML = ''
-            if (tableTop) tableTop.innerHTML = ''
-            if (tableHead) tableHead.innerHTML = ''
-            if (paymentTableBody) paymentTableBody.innerHTML = ''
+  if (subMenu) {
+    subMenu.innerHTML = ''
+  }
+  
+  if (titleBox) {
+    titleBox.innerHTML = '▶ 조직관리'
+  }
+  
+  if (searchBox) searchBox.innerHTML = ''
+  if (summaryBox) summaryBox.innerHTML = ''
+  if (tableTop) tableTop.innerHTML = ''
+  if (tableHead) tableHead.innerHTML = ''
+  if (paymentTableBody) paymentTableBody.innerHTML = ''
           
             const { data: adminUsers, error } = await supabase
               .from('admin_users')
@@ -7916,8 +7917,8 @@ if (page === 'payout') {
         }
       
         if (summaryBox) {
-          summaryBox.innerHTML =
-            '<div style="padding:24px; text-align:center;">출금관리 불러오는 중...</div>'
+          summaryBox.innerHTML = ''
+        
         }
       
         if (tableHead) {
