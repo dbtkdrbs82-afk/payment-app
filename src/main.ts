@@ -4763,6 +4763,78 @@ const getManagerMerchantCount = (managerId: number) =>
     }
   }
 
+  const getAgencyCommissionSummary = (agencyId: number) => {
+  const agency = agencyUsers.find((user) =>
+    Number(user.id) === agencyId
+  )
+
+  const managers = managerUsers.filter((manager) =>
+    Number(manager.parent_admin_id) === agencyId
+  )
+
+  const managerIds = managers.map((manager) =>
+    Number(manager.id)
+  )
+
+  let totalSales = 0
+  let commissionAmount = 0
+
+  ;(orgMerchants || []).forEach((merchant) => {
+    const merchantAgencyId =
+      Number(merchant.agency_admin_id || 0)
+
+    const merchantManagerId =
+      Number(merchant.manager_admin_id || 0)
+
+    const belongsToAgency =
+      merchantAgencyId === agencyId ||
+      managerIds.includes(merchantManagerId)
+
+    if (!belongsToAgency) return
+
+    const sales =
+      getMerchantPaymentAmount(Number(merchant.id))
+
+    if (sales <= 0) return
+
+    const settlementCycle =
+      String(merchant.settlement_cycle || '4일')
+
+    const agencyRate =
+      getOrgCommissionRate(agency, settlementCycle)
+
+    let actualRate = agencyRate
+
+    // 담당자가 연결된 가맹점이면
+    // 대리점 설정률에서 담당자 설정률을 뺀 금액이 대리점 몫
+    if (merchantManagerId) {
+      const manager = managerUsers.find((user) =>
+        Number(user.id) === merchantManagerId
+      )
+
+      const managerRate =
+        getOrgCommissionRate(manager, settlementCycle)
+
+      actualRate = Math.max(
+        agencyRate - managerRate,
+        0
+      )
+    }
+
+    totalSales += sales
+
+    commissionAmount += Math.floor(
+      sales * actualRate / 100
+    )
+  })
+
+  return {
+    totalSales,
+    commissionAmount
+  }
+}
+
+
 const renderOrganizationHome = () => {
  
   const branchCards = branchUsers.map((branch) => {
@@ -4871,25 +4943,37 @@ const renderAgencyList = (agencies: any[]) => {
   listBox.innerHTML =
     '<h3>대리점 목록</h3>' +
     '<div class="org-v2-grid">' +
-      filtered.slice(0, 20).map((agency) => {
-        const managers = managerUsers.filter((manager) =>
-          Number(manager.parent_admin_id) === Number(agency.id)
-        )
-
-        const merchantCount = managers.reduce((sum, manager) =>
-          sum + getManagerMerchantCount(Number(manager.id)), 0
-        )
-
-        return (
-          '<button class="org-v2-card org-agency-v2" data-id="' + agency.id + '">' +
-            '<strong>🤝 ' + (agency.admin_name || '-') + '</strong>' +
-            '<span>담당자 ' + managers.length + '명</span>' +
-            '<span>가맹점 ' + merchantCount + '개</span>' +
-          '</button>'
-        )
-      }).join('') +
+    filtered.slice(0, 20).map((agency) => {
+      const managers = managerUsers.filter((manager) =>
+        Number(manager.parent_admin_id) === Number(agency.id)
+      )
+    
+      const managerIds = managers.map((manager) =>
+        Number(manager.id)
+      )
+    
+      const merchantCount =
+        (orgMerchants || []).filter((merchant) =>
+          Number(merchant.agency_admin_id) === Number(agency.id) ||
+          managerIds.includes(Number(merchant.manager_admin_id))
+        ).length
+    
+      const summary =
+        getAgencyCommissionSummary(Number(agency.id))
+    
+      return (
+        '<button class="org-v2-card org-agency-v2" data-id="' + agency.id + '">' +
+          '<strong>🤝 ' + (agency.admin_name || '-') + '</strong>' +
+          '<span>담당자 ' + managers.length + '명</span>' +
+          '<span>가맹점 ' + merchantCount + '개</span>' +
+          '<span>총매출 ' + summary.totalSales.toLocaleString() + '원</span>' +
+          '<strong>수수료 ' + summary.commissionAmount.toLocaleString() + '원</strong>' +
+        '</button>'
+      )
+    }).join('') +
     '</div>'
 
+    
   document.querySelector('#org-agency-search')
     ?.addEventListener('input', () => renderAgencyList(agencies))
 
