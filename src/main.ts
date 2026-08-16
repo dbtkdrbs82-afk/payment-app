@@ -6414,11 +6414,7 @@ const newCompanyName =
 const newBusinessNumber =
   (document.querySelector<HTMLInputElement>('#edit-admin-business-number')?.value || '').trim()
 
-const newCommissionRate =
-  Number(
-    document.querySelector<HTMLInputElement>('#edit-admin-commission-rate')
-      ?.value || 0
-  )
+
 
 const newBankName =
   (document.querySelector<HTMLInputElement>('#edit-admin-bank-name')?.value || '').trim()
@@ -6496,7 +6492,31 @@ const newMemo =
       resident_number: newResidentNumber,
       company_name: newCompanyName,
       business_number: newBusinessNumber,
-      commission_rate: newCommissionRate,
+
+      commission_rate_1day: Number(
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-commission-rate-1day'
+        )?.value || 0
+      ),
+
+      commission_rate_3day: Number(
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-commission-rate-3day'
+        )?.value || 0
+      ),
+
+      commission_rate_4day: Number(
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-commission-rate-4day'
+        )?.value || 0
+      ),
+
+      commission_rate_7day: Number(
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-commission-rate-7day'
+        )?.value || 0
+      ),
+
       bank_name: newBankName,
       account_number: newAccountNumber,
       account_holder: newAccountHolder,
@@ -6510,7 +6530,31 @@ const newMemo =
       resident_number: newResidentNumber,
       company_name: newCompanyName,
       business_number: newBusinessNumber,
-      commission_rate: newCommissionRate,
+
+      commission_rate_1day: Number(
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-commission-rate-1day'
+        )?.value || 0
+      ),
+
+      commission_rate_3day: Number(
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-commission-rate-3day'
+        )?.value || 0
+      ),
+
+      commission_rate_4day: Number(
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-commission-rate-4day'
+        )?.value || 0
+      ),
+
+      commission_rate_7day: Number(
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-commission-rate-7day'
+        )?.value || 0
+      ),
+
       bank_name: newBankName,
       account_number: newAccountNumber,
       account_holder: newAccountHolder,
