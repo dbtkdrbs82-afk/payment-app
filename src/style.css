@@ -8635,3 +8635,28 @@ and (orientation: landscape) {
     width: 210mm !important;
   }
 }
+.qr-guide-poster-wrap {
+  width: 100%;
+  margin: 0 auto 18px;
+}
+
+.qr-guide-poster {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media print {
+  .qr-guide-poster-wrap {
+    width: 100% !important;
+    margin: 0 auto 5mm !important;
+  }
+
+  .qr-guide-poster {
+    display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    object-fit: contain !important;
+  }
+}
