@@ -17450,29 +17450,36 @@ document.querySelector('#merchant-product-image-file')
           <p>3단계만 따라하면 쉽고 빠르게 결제할 수 있습니다.</p>
         </div>
 
-        <div class="qr-guide-grid">
+       <div class="qr-guide-grid">
 
-          <div class="qr-guide-card">
-  
-  <div class="qr-guide-image qr-guide-image-1"></div>
-  <strong>QR코드 스캔 후 nxgsoft.co.kr 클릭</strong>
+  <div class="qr-guide-card">
+    <img
+      class="qr-guide-img"
+      src="/qr-step-1.png"
+      alt="QR코드 스캔 후 nxgsoft.co.kr 클릭"
+    />
+    <strong>QR코드 스캔 후 nxgsoft.co.kr 클릭</strong>
+  </div>
+
+  <div class="qr-guide-card">
+    <img
+      class="qr-guide-img"
+      src="/qr-step-2.png"
+      alt="크롬으로 연결"
+    />
+    <strong>크롬으로 연결</strong>
+  </div>
+
+  <div class="qr-guide-card">
+    <img
+      class="qr-guide-img"
+      src="/qr-step-3.png"
+      alt="메뉴 선택 후 결제 완료"
+    />
+    <strong>메뉴 선택 후 결제 완료</strong>
+  </div>
+
 </div>
-
-<div class="qr-guide-card">
-  
-  <div class="qr-guide-image qr-guide-image-2"></div>
-  <strong>크롬으로 연결</strong>
-</div>
-
-<div class="qr-guide-card">
-  
-  <div class="qr-guide-image qr-guide-image-3"></div>
-  <strong>메뉴 선택 후 결제 완료</strong>
-</div>
-
-        </div>
-
-        <div class="qr-print-main">
 
           <div class="qr-print-main">
 
