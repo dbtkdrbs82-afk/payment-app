@@ -4683,7 +4683,9 @@ const { data: orgPayments, error: orgPaymentError } = await supabase
     id,
     merchant_id,
     amount,
-    status
+    status,
+    approved_at,
+    created_at
   `)
   .eq('status', 'paid')
 
@@ -4718,16 +4720,50 @@ const getManagerMerchantCount = (managerId: number) =>
     Number(merchant.manager_admin_id) === managerId
   ).length
 
-  const getMerchantPaymentAmount = (merchantId: number) =>
-    (orgPayments || [])
-      .filter((payment) =>
-        Number(payment.merchant_id) === merchantId
-      )
+  const getMerchantPaymentAmount = (merchantId: number) => {
+    const now = new Date()
+  
+    const previousMonthStart = new Date(
+      now.getFullYear(),
+      now.getMonth() - 1,
+      1,
+      0,
+      0,
+      0,
+      0
+    )
+  
+    const currentMonthStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      1,
+      0,
+      0,
+      0,
+      0
+    )
+  
+    return (orgPayments || [])
+      .filter((payment) => {
+        if (Number(payment.merchant_id) !== merchantId) {
+          return false
+        }
+  
+        const paymentDate = new Date(
+          payment.approved_at || payment.created_at
+        )
+  
+        return (
+          paymentDate >= previousMonthStart &&
+          paymentDate < currentMonthStart
+        )
+      })
       .reduce(
         (sum, payment) =>
           sum + Number(payment.amount || 0),
         0
       )
+  }
   
   const getManagerCommissionSummary = (managerId: number) => {
     const manager = managerUsers.find((user) =>
