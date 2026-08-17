@@ -17422,165 +17422,108 @@ document.querySelector('#merchant-product-image-file')
   'https://nxgsoft.co.kr/pay/?merchant_id=' +
   merchantId
   
-    app.innerHTML = `
-      <div class="pg-admin-page">
-        <div class="merchant-pick-header">
-          <h1>NXG PICK QR관리</h1>
-  
-          <div class="merchant-user-box">
-            <strong>${merchantName}님</strong>
-            <button id="merchant-qr-logout">로그아웃</button>
+  app.innerHTML = `
+  <div class="pg-admin-page">
+
+    <div class="merchant-pick-header no-print">
+      <h1>NXG PICK QR관리</h1>
+
+      <div class="merchant-user-box">
+        <strong>${merchantName}님</strong>
+        <button id="merchant-qr-logout">로그아웃</button>
+      </div>
+    </div>
+
+    <div class="merchant-toolbar no-print">
+      <button id="qr-go-order">주문관리</button>
+      <button id="qr-go-product">상품관리</button>
+      <button id="qr-go-qr">PICK QR</button>
+    </div>
+
+    <div class="qr-management-wrap">
+
+      <div id="qr-print-area" class="qr-print-area">
+
+        <div class="qr-print-title">
+          <div class="qr-print-brand">키오스 PICK</div>
+          <h2>QR코드 결제 방법</h2>
+          <p>3단계만 따라하면 쉽고 빠르게 결제할 수 있습니다.</p>
+        </div>
+
+        <div class="qr-guide-grid">
+
+          <div class="qr-guide-card">
+            <div class="qr-guide-number">1</div>
+            <strong>QR코드를 스캔해주세요</strong>
+            <p>
+              휴대폰 카메라로 아래 QR코드를 비춰주세요.
+            </p>
           </div>
+
+          <div class="qr-guide-card">
+            <div class="qr-guide-number">2</div>
+            <strong>nxgsoft.co.kr을 눌러주세요</strong>
+            <p>
+              화면에 표시되는 주소를 누른 뒤 크롬으로 연결해주세요.
+            </p>
+          </div>
+
+          <div class="qr-guide-card">
+            <div class="qr-guide-number">3</div>
+            <strong>메뉴 선택 후 결제해주세요</strong>
+            <p>
+              원하는 상품을 선택하고 결제하기 버튼을 누르면 완료됩니다.
+            </p>
+          </div>
+
         </div>
-  
-        <div class="merchant-toolbar">
-          <button id="qr-go-order">주문관리</button>
-          <button id="qr-go-product">상품관리</button>
-          <button id="qr-go-qr">PICK QR</button>
+
+        <div class="qr-print-main">
+
+          <div class="qr-store-name">
+            ${merchantName}
+          </div>
+
+          <div id="merchant-qr-box" class="merchant-qr-box"></div>
+
+          <div class="qr-print-message">
+            QR코드를 스캔해 주문해주세요
+          </div>
+
         </div>
-  
-       <div class="payment-card" style="
-  max-width:720px;
-  margin:0 auto;
-  border-radius:18px;
-  overflow:hidden;
-">
 
-  <div style="
-    background:#18477f;
-    color:#fff;
-    padding:22px;
-    text-align:center;
-  ">
-    <div style="font-size:34px;">📱</div>
-
-    <h2 style="
-      margin:10px 0 0;
-      color:#fff;
-      font-size:26px;
-    ">
-      NXG PICK
-    </h2>
-
-    <div style="
-      margin-top:8px;
-      font-size:16px;
-      font-weight:700;
-    ">
-      ${merchantName}
-    </div>
-
-  </div>
-
-  <div style="
-    padding:28px;
-    background:#fff;
-  ">
-
-    <div id="merchant-qr-box"
-      style="
-      width:270px;
-      height:270px;
-      margin:0 auto 24px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid #d9dee7;
-      border-radius:16px;
-      background:#fff;
-    ">
-    </div>
-
-    <div style="
-      background:#f8fafc;
-      border:1px solid #d9dee7;
-      border-radius:12px;
-      padding:18px;
-      margin-bottom:22px;
-    ">
-
-      <div style="
-        color:#6b7280;
-        font-size:13px;
-        font-weight:700;
-        margin-bottom:8px;
-      ">
-        링크주소
       </div>
 
-      <div style="
-        font-size:15px;
-        word-break:break-all;
-      ">
-        ${kioskUrl}
+      <div class="qr-admin-controls no-print">
+
+        <div class="qr-link-box">
+          <div class="qr-link-label">링크주소</div>
+          <div class="qr-link-url">${kioskUrl}</div>
+        </div>
+
+        <div
+          id="copy-kiosk-url"
+          role="button"
+          tabindex="0"
+          class="qr-admin-button"
+        >
+          📋 링크 복사
+        </div>
+
+        <div
+          id="print-qr"
+          role="button"
+          tabindex="0"
+          class="qr-admin-button qr-print-button"
+        >
+          🖨️ 인쇄
+        </div>
+
       </div>
 
     </div>
 
-    <div style="
-  display:grid;
-  grid-template-columns:1fr;
-  gap:10px;
-  width:100%;
-  margin-top:20px;
-  box-sizing:border-box;
-">
-
-  <div
-    id="copy-kiosk-url"
-    role="button"
-    tabindex="0"
-    style="
-      width:100%;
-      height:56px;
-      margin:0;
-      padding:0 16px;
-      box-sizing:border-box;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid #18477f;
-      border-radius:10px;
-      background:#18477f;
-      color:#ffffff;
-      font-size:16px;
-      font-weight:700;
-      cursor:pointer;
-      user-select:none;
-    ">
-    📋 링크 복사
   </div>
-
-  <div
-    id="print-qr"
-    role="button"
-    tabindex="0"
-    style="
-      width:100%;
-      height:56px;
-      margin:0;
-      padding:0 16px;
-      box-sizing:border-box;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      border:1px solid #18477f;
-      border-radius:10px;
-      background:#18477f;
-      color:#ffffff;
-      font-size:16px;
-      font-weight:700;
-      cursor:pointer;
-      user-select:none;
-    ">
-    🖨️ 인쇄
-  </div>
-
-</div>
-
-  </div>
-
-</div>
 `
 
   const qrBox =
