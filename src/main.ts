@@ -17453,42 +17453,36 @@ document.querySelector('#merchant-product-image-file')
         <div class="qr-guide-grid">
 
           <div class="qr-guide-card">
-            <div class="qr-guide-number">1</div>
-            <strong>QR코드를 스캔해주세요</strong>
-            <p>
-              휴대폰 카메라로 아래 QR코드를 비춰주세요.
-            </p>
-          </div>
+  
+  <div class="qr-guide-image qr-guide-image-1"></div>
+  <strong>QR코드 스캔 후 nxgsoft.co.kr 클릭</strong>
+</div>
 
-          <div class="qr-guide-card">
-            <div class="qr-guide-number">2</div>
-            <strong>nxgsoft.co.kr을 눌러주세요</strong>
-            <p>
-              화면에 표시되는 주소를 누른 뒤 크롬으로 연결해주세요.
-            </p>
-          </div>
+<div class="qr-guide-card">
+  
+  <div class="qr-guide-image qr-guide-image-2"></div>
+  <strong>크롬으로 연결</strong>
+</div>
 
-          <div class="qr-guide-card">
-            <div class="qr-guide-number">3</div>
-            <strong>메뉴 선택 후 결제해주세요</strong>
-            <p>
-              원하는 상품을 선택하고 결제하기 버튼을 누르면 완료됩니다.
-            </p>
-          </div>
+<div class="qr-guide-card">
+  
+  <div class="qr-guide-image qr-guide-image-3"></div>
+  <strong>메뉴 선택 후 결제 완료</strong>
+</div>
 
         </div>
 
         <div class="qr-print-main">
 
-          <div class="qr-store-name">
-            ${merchantName}
-          </div>
+          <div class="qr-print-main">
 
-          <div id="merchant-qr-box" class="merchant-qr-box"></div>
+  <div id="merchant-qr-box" class="merchant-qr-box"></div>
 
-          <div class="qr-print-message">
-            QR코드를 스캔해 주문해주세요
-          </div>
+  <div class="qr-print-message">
+    QR코드를 스캔해 주문해주세요
+  </div>
+
+</div>
 
         </div>
 

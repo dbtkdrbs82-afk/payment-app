@@ -8140,8 +8140,8 @@ and (orientation: landscape) {
 }
 
 .merchant-qr-box {
-  width: 290px;
-  height: 290px;
+  width: 360px;
+  height: 360px;
   margin: 0 auto;
   border: 1px solid #d9e2ec;
   border-radius: 18px;
@@ -8263,17 +8263,44 @@ and (orientation: landscape) {
   }
 
   .merchant-qr-box {
-    width: 78mm;
-    height: 78mm;
+    width: 100mm;
+    height: 100mm;
   }
-
+  
   .merchant-qr-box canvas {
-    width: 72mm !important;
-    height: 72mm !important;
+    width: 94mm !important;
+    height: 94mm !important;
   }
 
   @page {
     size: A4 portrait;
     margin: 0;
   }
+}
+.qr-guide-image {
+  width: 100%;
+  height: 220px;
+  margin: 12px 0 14px;
+  border-radius: 12px;
+  background: #f3f6fa;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+@media print {
+  .qr-guide-image {
+    height: 62mm;
+  }
+}
+.qr-guide-image-1 {
+  background-image: url('/qr-step-1.png');
+}
+
+.qr-guide-image-2 {
+  background-image: url('/qr-step-2.png');
+}
+
+.qr-guide-image-3 {
+  background-image: url('/qr-step-3.png');
 }
