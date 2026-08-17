@@ -4871,28 +4871,12 @@ const getBranchCommissionSummary = (branchId: number) => {
     const branchRate =
       getOrgCommissionRate(branch, settlementCycle)
 
-    let actualRate = branchRate
-
-    // 대리점이 연결된 가맹점이면
-    // 지사 설정률에서 대리점 설정률을 뺀 금액이 지사 몫
-    if (merchantAgencyId) {
-      const agency = agencyUsers.find((user) =>
-        Number(user.id) === merchantAgencyId
-      )
-
-      const agencyRate =
-        getOrgCommissionRate(agency, settlementCycle)
-
-      actualRate = Math.max(
-        branchRate - agencyRate,
-        0
-      )
-    }
+   
 
     totalSales += sales
 
     commissionAmount += Math.floor(
-      sales * actualRate / 100
+      sales * branchRate / 100
     )
   })
 
@@ -4915,6 +4899,62 @@ const getOrgAdminDisplayName = (adminUser: any) => {
 
 
 const renderOrganizationHome = () => {
+
+  const currentLoginId =
+  sessionStorage.getItem('admin_id') || ''
+
+if (adminRole === 'AGENCY') {
+  const currentAgency = agencyUsers.find((agency) =>
+    String(agency.login_id || '') === currentLoginId
+  )
+
+  if (!currentAgency || !summaryBox) {
+    return
+  }
+
+  const managers = managerUsers.filter((manager) =>
+    Number(manager.parent_admin_id) === Number(currentAgency.id)
+  )
+
+  const managerIds = managers.map((manager) =>
+    Number(manager.id)
+  )
+
+  const merchantCount =
+    (orgMerchants || []).filter((merchant) =>
+      Number(merchant.agency_admin_id) === Number(currentAgency.id) ||
+      managerIds.includes(Number(merchant.manager_admin_id))
+    ).length
+
+  const summary =
+    getAgencyCommissionSummary(Number(currentAgency.id))
+
+  summaryBox.innerHTML =
+    '<div class="merchant-detail-header">' +
+      '<h2>조직관리</h2>' +
+      '<p>대리점 > 담당자 순서로 조회합니다.</p>' +
+    '</div>' +
+
+    '<div class="org-v2-wrap">' +
+      '<div class="org-v2-breadcrumb">대리점</div>' +
+      '<h3>내 대리점</h3>' +
+
+      '<div class="org-v2-grid">' +
+        '<button class="org-v2-card org-agency-v2" data-id="' + currentAgency.id + '">' +
+          '<strong>🤝 ' + getOrgAdminDisplayName(currentAgency) + '</strong>' +
+          '<span>담당자 ' + managers.length + '명</span>' +
+          '<span>가맹점 ' + merchantCount + '개</span>' +
+          '<span>총매출 ' + summary.totalSales.toLocaleString() + '원</span>' +
+          '<strong>수수료 ' + summary.commissionAmount.toLocaleString() + '원</strong>' +
+        '</button>' +
+      '</div>' +
+
+      '<div id="org-v2-detail-area"></div>' +
+    '</div>'
+
+  bindAgencyClick()
+  return
+}
  
   const branchCards = branchUsers.map((branch) => {
     const agencies = agencyUsers.filter((agency) =>
