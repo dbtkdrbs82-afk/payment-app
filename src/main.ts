@@ -17444,12 +17444,6 @@ document.querySelector('#merchant-product-image-file')
 
       <div id="qr-print-area" class="qr-print-area">
 
-        <div class="qr-print-title">
-          <div class="qr-print-brand">키오스 PICK</div>
-          <h2>QR코드 결제 방법</h2>
-          <p>3단계만 따라하면 쉽고 빠르게 결제할 수 있습니다.</p>
-        </div>
-
       <div class="qr-guide-poster-wrap">
   <img
     class="qr-guide-poster"
