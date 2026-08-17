@@ -4902,6 +4902,17 @@ const getBranchCommissionSummary = (branchId: number) => {
   }
 }
 
+const getOrgAdminDisplayName = (adminUser: any) => {
+  const name = String(adminUser?.admin_name || '').trim()
+  const companyName = String(adminUser?.company_name || '').trim()
+
+  if (companyName) {
+    return companyName + (name ? '(' + name + ')' : '')
+  }
+
+  return name || '-'
+}
+
 
 const renderOrganizationHome = () => {
  
@@ -4925,7 +4936,7 @@ const renderOrganizationHome = () => {
 
   return (
     '<button class="org-v2-card org-branch-v2" data-id="' + branch.id + '">' +
-      '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
+      '<strong>🏢 ' + getOrgAdminDisplayName(branch) + '</strong>' +
       '<span>대리점 ' + agencies.length + '개</span>' +
       '<span>담당자 ' + managers.length + '명</span>' +
       '<span>가맹점 ' + merchantCount + '개</span>' +
@@ -4989,7 +5000,7 @@ const bindBranchClick = () => {
               '<div class="org-v2-list">' +
                 directManagers.map((manager) =>
                   '<button class="org-v2-manager-row" data-id="' + manager.id + '">' +
-                    '👤 ' + (manager.admin_name || '-') +
+                    '👤 ' + getOrgAdminDisplayName(manager) +
                     '<strong>' + getManagerMerchantCount(Number(manager.id)) + '</strong>' +
                   '</button>'
                 ).join('') +
@@ -5036,7 +5047,7 @@ const renderAgencyList = (agencies: any[]) => {
     
       return (
         '<button class="org-v2-card org-agency-v2" data-id="' + agency.id + '">' +
-          '<strong>🤝 ' + (agency.admin_name || '-') + '</strong>' +
+          '<strong>🤝 ' + getOrgAdminDisplayName(agency) + '</strong>' +
           '<span>담당자 ' + managers.length + '명</span>' +
           '<span>가맹점 ' + merchantCount + '개</span>' +
           '<span>총매출 ' + summary.totalSales.toLocaleString() + '원</span>' +
@@ -5071,7 +5082,7 @@ const renderAgencyList = (agencies: any[]) => {
         '<div class="org-v2-list">' +
           managers.map((manager) =>
             '<button class="org-v2-manager-row" data-id="' + manager.id + '">' +
-              '👤 ' + (manager.admin_name || '-') +
+              '👤 ' + getOrgAdminDisplayName(manager) +
               '<strong>' + getManagerMerchantCount(Number(manager.id)) + '</strong>' +
             '</button>'
           ).join('') +
@@ -5128,7 +5139,7 @@ const renderManagerList = (managers: any[]) => {
     
       return (
         '<button class="org-v2-manager-row" data-id="' + manager.id + '">' +
-          '<span>👤 ' + (manager.admin_name || '-') + '</span>' +
+          '<span>👤 ' + getOrgAdminDisplayName(manager) + '</span>' +
           '<span>가맹점 ' + getManagerMerchantCount(Number(manager.id)) + '개</span>' +
           '<span>총매출 ' + summary.totalSales.toLocaleString() + '원</span>' +
           '<strong>수수료 ' + summary.commissionAmount.toLocaleString() + '원</strong>' +
@@ -5175,7 +5186,7 @@ function bindManagerClick() {
 
   outputArea.innerHTML =
   '<div class="org-v2-breadcrumb">' +
-    '담당자 > ' + (manager?.admin_name || '-') +
+    '담당자 > ' + getOrgAdminDisplayName(manager) +
   '</div>' +
 
   '<div style="display:flex; gap:24px; margin:14px 0 18px 0; font-weight:700;">' +
@@ -5195,6 +5206,11 @@ function bindManagerClick() {
                 '<p>' +
                   (index + 1) + '. ' +
                   (merchant.merchant_name || '-') +
+                  ' (' +
+                  (merchant.id
+                    ? 'MER' + String(merchant.id).padStart(4, '0')
+                    : '-') +
+                  ')' +
                 '</p>'
             )
             .join('')
