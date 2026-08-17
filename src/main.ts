@@ -4927,9 +4927,9 @@ const renderOrganizationHome = () => {
       agencyIds.includes(Number(manager.parent_admin_id))
     )
 
-    const merchantCount = managers.reduce((sum, manager) =>
-      sum + getManagerMerchantCount(Number(manager.id)), 0
-    )
+    const merchantCount = (orgMerchants || []).filter((merchant) =>
+      Number(merchant.branch_admin_id) === Number(branch.id)
+    ).length
 
     const summary =
   getBranchCommissionSummary(Number(branch.id))
@@ -7923,7 +7923,7 @@ if (organizationUsersError) {
         agencySelect.dispatchEvent(new Event('change'))
       }
 
-      if (managerSelect) {
+      if (managerSelect && savedManager) {
         managerSelect.value = String(savedManager.id)
       }
     }
