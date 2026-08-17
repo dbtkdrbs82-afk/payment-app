@@ -12055,6 +12055,10 @@ const paymentCancelRequestMap =
 
 if (summaryBox) {
   const totalAmount = payments.reduce((sum, payment) => {
+    if (payment.status !== 'paid') {
+      return sum
+    }
+  
     return sum + Number(payment.amount || 0)
   }, 0)
 
