@@ -7892,42 +7892,28 @@ if (organizationUsersError) {
     }
   })
 
-  if (merchant.manager_admin_id) {
+  const savedBranchId =
+  Number(merchant.branch_admin_id || 0)
 
-    const savedManager =
-      managers.find((manager: any) =>
-        Number(manager.id) === Number(merchant.manager_admin_id)
-      )
+const savedAgencyId =
+  Number(merchant.agency_admin_id || 0)
 
-    if (savedManager) {
+const savedManagerId =
+  Number(merchant.manager_admin_id || 0)
 
-      const savedAgency =
-        agencies.find((agency: any) =>
-          Number(agency.id) === Number(savedManager.parent_admin_id)
-        )
+if (savedBranchId && branchSelect) {
+  branchSelect.value = String(savedBranchId)
+  branchSelect.dispatchEvent(new Event('change'))
+}
 
-      const savedBranch =
-        savedAgency
-          ? branches.find((branch: any) =>
-              Number(branch.id) === Number(savedAgency.parent_admin_id)
-            )
-          : null
+if (savedAgencyId && agencySelect) {
+  agencySelect.value = String(savedAgencyId)
+  agencySelect.dispatchEvent(new Event('change'))
+}
 
-      if (savedBranch && branchSelect) {
-        branchSelect.value = String(savedBranch.id)
-        branchSelect.dispatchEvent(new Event('change'))
-      }
-
-      if (savedAgency && agencySelect) {
-        agencySelect.value = String(savedAgency.id)
-        agencySelect.dispatchEvent(new Event('change'))
-      }
-
-      if (managerSelect && savedManager) {
-        managerSelect.value = String(savedManager.id)
-      }
-    }
-  }
+if (savedManagerId && managerSelect) {
+  managerSelect.value = String(savedManagerId)
+}
 }
     
       document.querySelector('#back-merchant-list')
