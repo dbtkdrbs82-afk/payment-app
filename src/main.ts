@@ -4803,28 +4803,12 @@ const getManagerMerchantCount = (managerId: number) =>
     const agencyRate =
       getOrgCommissionRate(agency, settlementCycle)
 
-    let actualRate = agencyRate
-
-    // 담당자가 연결된 가맹점이면
-    // 대리점 설정률에서 담당자 설정률을 뺀 금액이 대리점 몫
-    if (merchantManagerId) {
-      const manager = managerUsers.find((user) =>
-        Number(user.id) === merchantManagerId
-      )
-
-      const managerRate =
-        getOrgCommissionRate(manager, settlementCycle)
-
-      actualRate = Math.max(
-        agencyRate - managerRate,
-        0
-      )
-    }
+    
 
     totalSales += sales
 
     commissionAmount += Math.floor(
-      sales * actualRate / 100
+      sales * agencyRate / 100
     )
   })
 
