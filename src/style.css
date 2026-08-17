@@ -8304,3 +8304,147 @@ and (orientation: landscape) {
 .qr-guide-image-3 {
   background-image: url('/qr-step-3.png');
 }
+/* ===== QR 안내판 최종 크기 보정 ===== */
+
+.qr-management-wrap {
+  max-width: 900px;
+  margin: 24px auto 40px;
+}
+
+.qr-print-area {
+  padding: 24px;
+}
+
+.qr-print-title {
+  margin-bottom: 18px;
+}
+
+.qr-print-title h2 {
+  font-size: 34px;
+}
+
+.qr-print-title p {
+  margin-top: 6px;
+  font-size: 15px;
+}
+
+/* 1,2,3 안내 */
+.qr-guide-grid {
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.qr-guide-card {
+  min-height: 0;
+  padding: 10px;
+}
+
+.qr-guide-image {
+  width: 100%;
+  height: 180px;
+  margin: 0 0 8px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.qr-guide-card strong {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+/* QR 영역 */
+.qr-print-main {
+  padding: 18px 10px 10px;
+}
+
+.merchant-qr-box {
+  width: 280px !important;
+  height: 280px !important;
+  padding: 8px !important;
+  margin: 0 auto !important;
+  box-sizing: border-box;
+}
+
+.merchant-qr-box canvas {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.qr-print-message {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+
+/* ===== A4 인쇄 ===== */
+
+@media print {
+
+  #qr-print-area {
+    width: 190mm !important;
+    padding: 8mm !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .qr-print-title {
+    margin-bottom: 5mm !important;
+  }
+
+  .qr-print-title h2 {
+    font-size: 26pt !important;
+  }
+
+  .qr-print-title p {
+    font-size: 11pt !important;
+  }
+
+  .qr-guide-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 4mm !important;
+    margin-bottom: 5mm !important;
+  }
+
+  .qr-guide-card {
+    padding: 3mm !important;
+  }
+
+  .qr-guide-image {
+    height: 48mm !important;
+    margin: 0 0 2mm !important;
+    background-size: contain !important;
+  }
+
+  .qr-guide-card strong {
+    font-size: 9pt !important;
+  }
+
+  .qr-print-main {
+    padding: 5mm 0 0 !important;
+  }
+
+  .merchant-qr-box {
+    width: 72mm !important;
+    height: 72mm !important;
+    padding: 2mm !important;
+  }
+
+  .merchant-qr-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .qr-print-message {
+    margin-top: 3mm !important;
+    font-size: 12pt !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+}
