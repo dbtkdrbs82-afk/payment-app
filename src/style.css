@@ -8465,3 +8465,13 @@ and (orientation: landscape) {
     background-position: center top !important;
   }
 }
+/* QR 안내 이미지 잘림 보정 */
+.qr-guide-image {
+  height: 230px !important;
+}
+
+@media print {
+  .qr-guide-image {
+    height: 58mm !important;
+  }
+}
