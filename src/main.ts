@@ -4834,6 +4834,90 @@ const getManagerMerchantCount = (managerId: number) =>
   }
 }
 
+const getBranchCommissionSummary = (branchId: number) => {
+  const branch = branchUsers.find((user) =>
+    Number(user.id) === branchId
+  )
+
+  const agencies = agencyUsers.filter((agency) =>
+    Number(agency.parent_admin_id) === branchId
+  )
+
+  const agencyIds = agencies.map((agency) =>
+    Number(agency.id)
+  )
+
+  const managers = managerUsers.filter((manager) =>
+    agencyIds.includes(Number(manager.parent_admin_id)) ||
+    Number(manager.parent_admin_id) === branchId
+  )
+
+  const managerIds = managers.map((manager) =>
+    Number(manager.id)
+  )
+
+  let totalSales = 0
+  let commissionAmount = 0
+
+  ;(orgMerchants || []).forEach((merchant) => {
+    const merchantBranchId =
+      Number(merchant.branch_admin_id || 0)
+
+    const merchantAgencyId =
+      Number(merchant.agency_admin_id || 0)
+
+    const merchantManagerId =
+      Number(merchant.manager_admin_id || 0)
+
+    const belongsToBranch =
+      merchantBranchId === branchId ||
+      agencyIds.includes(merchantAgencyId) ||
+      managerIds.includes(merchantManagerId)
+
+    if (!belongsToBranch) return
+
+    const sales =
+      getMerchantPaymentAmount(Number(merchant.id))
+
+    if (sales <= 0) return
+
+    const settlementCycle =
+      String(merchant.settlement_cycle || '4일')
+
+    const branchRate =
+      getOrgCommissionRate(branch, settlementCycle)
+
+    let actualRate = branchRate
+
+    // 대리점이 연결된 가맹점이면
+    // 지사 설정률에서 대리점 설정률을 뺀 금액이 지사 몫
+    if (merchantAgencyId) {
+      const agency = agencyUsers.find((user) =>
+        Number(user.id) === merchantAgencyId
+      )
+
+      const agencyRate =
+        getOrgCommissionRate(agency, settlementCycle)
+
+      actualRate = Math.max(
+        branchRate - agencyRate,
+        0
+      )
+    }
+
+    totalSales += sales
+
+    commissionAmount += Math.floor(
+      sales * actualRate / 100
+    )
+  })
+
+  return {
+    totalSales,
+    commissionAmount
+  }
+}
+
 
 const renderOrganizationHome = () => {
  
@@ -4852,14 +4936,19 @@ const renderOrganizationHome = () => {
       sum + getManagerMerchantCount(Number(manager.id)), 0
     )
 
-    return (
-      '<button class="org-v2-card org-branch-v2" data-id="' + branch.id + '">' +
-        '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
-        '<span>대리점 ' + agencies.length + '개</span>' +
-        '<span>담당자 ' + managers.length + '명</span>' +
-        '<span>가맹점 ' + merchantCount + '개</span>' +
-      '</button>'
-    )
+    const summary =
+  getBranchCommissionSummary(Number(branch.id))
+
+  return (
+    '<button class="org-v2-card org-branch-v2" data-id="' + branch.id + '">' +
+      '<strong>🏢 ' + (branch.admin_name || '-') + '</strong>' +
+      '<span>대리점 ' + agencies.length + '개</span>' +
+      '<span>담당자 ' + managers.length + '명</span>' +
+      '<span>가맹점 ' + merchantCount + '개</span>' +
+      '<span>총매출 ' + summary.totalSales.toLocaleString() + '원</span>' +
+      '<strong>수수료 ' + summary.commissionAmount.toLocaleString() + '원</strong>' +
+    '</button>'
+  )
   }).join('')
 
   if (!summaryBox) return
