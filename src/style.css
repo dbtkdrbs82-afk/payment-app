@@ -8124,11 +8124,11 @@ and (orientation: landscape) {
   #merchant-qr-box {
     position: absolute !important;
 
-    left: 236mm !important;
-    top: 69mm !important;
+    left: 232mm !important;
+    top: 65mm !important;
 
-    width: 41mm !important;
-    height: 41mm !important;
+    width: 50mm !important;
+    height: 50mm !important;
 
     margin: 0 !important;
     padding: 0 !important;
@@ -8141,15 +8141,13 @@ and (orientation: landscape) {
   }
 
   #merchant-qr-box canvas,
-  #merchant-qr-box img {
-    display: block !important;
-
-    width: 41mm !important;
-    height: 41mm !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-  }
+#merchant-qr-box img {
+  display: block !important;
+  width: 50mm !important;
+  height: 50mm !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 
   .qr-print-message {
     display: none !important;
