@@ -8042,190 +8042,84 @@ and (orientation: landscape) {
   box-sizing: border-box !important;
 }
 .qr-management-wrap {
-  max-width: 980px;
-  margin: 30px auto 60px;
+  max-width: 1100px;
+  margin: 24px auto 40px;
 }
 
 .qr-print-area {
-  background: #ffffff;
-  border: 1px solid #d9e2ec;
-  border-radius: 20px;
-  padding: 32px;
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08);
-}
-
-.qr-print-title {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.qr-print-brand {
-  font-size: 22px;
-  font-weight: 800;
-  color: #111827;
-  margin-bottom: 4px;
-}
-
-.qr-print-title h2 {
-  margin: 0;
-  font-size: 40px;
-  font-weight: 900;
-  color: #0d47a1;
-}
-
-.qr-print-title p {
-  margin: 10px 0 0;
-  font-size: 17px;
-  font-weight: 700;
-  color: #374151;
-}
-
-.qr-guide-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 30px;
-}
-
-.qr-guide-card {
   position: relative;
-  min-height: 145px;
-  padding: 24px 18px 18px;
-  border: 1px solid #d7e2f0;
-  border-radius: 16px;
-  background: #f8fbff;
-  text-align: center;
-  box-sizing: border-box;
+  width: 100%;
+  background: #ffffff;
+  overflow: hidden;
 }
 
-.qr-guide-number {
-  width: 42px;
-  height: 42px;
-  margin: 0 auto 14px;
-  border-radius: 50%;
-  background: #0d47a1;
-  color: #ffffff;
-  font-size: 24px;
-  font-weight: 900;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.qr-guide-card strong {
-  display: block;
-  font-size: 16px;
-  color: #111827;
-  margin-bottom: 8px;
-}
-
-.qr-guide-card p {
+.qr-guide-poster-wrap {
+  width: 100%;
   margin: 0;
-  color: #4b5563;
-  font-size: 14px;
-  line-height: 1.6;
 }
 
+.qr-guide-poster {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* 실제 가맹점 QR을 포스터 오른쪽 QR 자리에 배치 */
 .qr-print-main {
-  text-align: center;
-  padding: 28px 20px 20px;
-  border-top: 2px solid #e5edf7;
-}
-
-.qr-store-name {
-  font-size: 22px;
-  font-weight: 900;
-  color: #111827;
-  margin-bottom: 18px;
+  position: absolute;
+  top: 36%;
+  right: 4.5%;
+  width: 19%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
 }
 
 .merchant-qr-box {
-  width: 360px;
-  height: 360px;
-  margin: 0 auto;
-  border: 1px solid #d9e2ec;
-  border-radius: 18px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 0;
+  padding: 0;
+  border: 0;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+}
+
+.merchant-qr-box canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
 }
 
 .qr-print-message {
-  margin-top: 16px;
-  font-size: 18px;
-  font-weight: 800;
-  color: #0d47a1;
+  display: none;
 }
 
 .qr-admin-controls {
   margin-top: 20px;
-  padding: 20px;
-  background: #ffffff;
-  border: 1px solid #d9e2ec;
-  border-radius: 16px;
-}
-
-.qr-link-box {
-  padding: 16px;
-  margin-bottom: 12px;
-  background: #f8fafc;
-  border: 1px solid #d9e2ec;
-  border-radius: 12px;
-}
-
-.qr-link-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: #6b7280;
-  margin-bottom: 7px;
-}
-
-.qr-link-url {
-  font-size: 14px;
-  color: #111827;
-  word-break: break-all;
-}
-
-.qr-admin-button {
-  width: 100%;
-  height: 52px;
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 10px;
-  background: #18477f;
-  color: #ffffff;
-  font-weight: 800;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-
-@media (max-width: 760px) {
-  .qr-management-wrap {
-    margin: 18px 12px 40px;
-  }
-
-  .qr-print-area {
-    padding: 20px 14px;
-  }
-
-  .qr-print-title h2 {
-    font-size: 30px;
-  }
-
-  .qr-guide-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .merchant-qr-box {
-    width: 260px;
-    height: 260px;
-  }
 }
 
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 297mm;
+    height: 210mm;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
   body * {
     visibility: hidden !important;
   }
@@ -8236,473 +8130,56 @@ and (orientation: landscape) {
   }
 
   #qr-print-area {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    box-sizing: border-box;
-    border: none;
-    border-radius: 0;
-    box-shadow: none;
-    padding: 18mm 14mm;
-    background: #ffffff;
-  }
+    position: absolute !important;
+    left: 0 !important;
+    top: 6mm !important;
 
-  .no-print,
-  .qr-admin-controls {
-    display: none !important;
-  }
-
-  .qr-guide-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10mm;
-  }
-
-  .qr-guide-card {
-    break-inside: avoid;
-  }
-
-  .merchant-qr-box {
-    width: 100mm;
-    height: 100mm;
-  }
-  
-  .merchant-qr-box canvas {
-    width: 94mm !important;
-    height: 94mm !important;
-  }
-
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-}
-.qr-guide-image {
-  width: 100%;
-  height: 220px;
-  margin: 12px 0 14px;
-  border-radius: 12px;
-  background: #f3f6fa;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-}
-
-@media print {
-  .qr-guide-image {
-    height: 62mm;
-  }
-}
-.qr-guide-image-1 {
-  background-image: url('/qr-step-1.png');
-}
-
-.qr-guide-image-2 {
-  background-image: url('/qr-step-2.png');
-}
-
-.qr-guide-image-3 {
-  background-image: url('/qr-step-3.png');
-}
-/* ===== QR 안내판 최종 크기 보정 ===== */
-
-.qr-management-wrap {
-  max-width: 900px;
-  margin: 24px auto 40px;
-}
-
-.qr-print-area {
-  padding: 24px;
-}
-
-.qr-print-title {
-  margin-bottom: 18px;
-}
-
-.qr-print-title h2 {
-  font-size: 34px;
-}
-
-.qr-print-title p {
-  margin-top: 6px;
-  font-size: 15px;
-}
-
-/* 1,2,3 안내 */
-.qr-guide-grid {
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.qr-guide-card {
-  min-height: 0;
-  padding: 10px;
-}
-
-.qr-guide-image {
-  width: 100%;
-  height: 180px;
-  margin: 0 0 8px;
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.qr-guide-card strong {
-  font-size: 13px;
-  line-height: 1.4;
-}
-
-/* QR 영역 */
-.qr-print-main {
-  padding: 18px 10px 10px;
-}
-
-.merchant-qr-box {
-  width: 280px !important;
-  height: 280px !important;
-  padding: 8px !important;
-  margin: 0 auto !important;
-  box-sizing: border-box;
-}
-
-.merchant-qr-box canvas {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-}
-
-.qr-print-message {
-  margin-top: 10px;
-  font-size: 16px;
-}
-
-
-/* ===== A4 인쇄 ===== */
-
-@media print {
-
-  #qr-print-area {
-    width: 190mm !important;
-    padding: 8mm !important;
-    margin: 0 auto !important;
-    box-sizing: border-box !important;
-  }
-
-  .qr-print-title {
-    margin-bottom: 5mm !important;
-  }
-
-  .qr-print-title h2 {
-    font-size: 26pt !important;
-  }
-
-  .qr-print-title p {
-    font-size: 11pt !important;
-  }
-
-  .qr-guide-grid {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4mm !important;
-    margin-bottom: 5mm !important;
-  }
-
-  .qr-guide-card {
-    padding: 3mm !important;
-  }
-
-  .qr-guide-image {
-    height: 48mm !important;
-    margin: 0 0 2mm !important;
-    background-size: contain !important;
-  }
-
-  .qr-guide-card strong {
-    font-size: 9pt !important;
-  }
-
-  .qr-print-main {
-    padding: 5mm 0 0 !important;
-  }
-
-  .merchant-qr-box {
-    width: 72mm !important;
-    height: 72mm !important;
-    padding: 2mm !important;
-  }
-
-  .merchant-qr-box canvas {
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  .qr-print-message {
-    margin-top: 3mm !important;
-    font-size: 12pt !important;
-  }
-
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-}
-.qr-guide-image {
-  width: 100%;
-  height: 190px;
-  margin: 0 0 8px;
-  background-size: cover !important;
-  background-position: center top !important;
-  background-repeat: no-repeat !important;
-  border-radius: 10px;
-}
-
-@media print {
-  .qr-guide-image {
-    height: 50mm !important;
-    background-size: cover !important;
-    background-position: center top !important;
-  }
-}
-/* QR 안내 이미지 잘림 보정 */
-.qr-guide-image {
-  height: 230px !important;
-}
-
-@media print {
-  .qr-guide-image {
-    height: 58mm !important;
-  }
-}
-.qr-guide-img {
-  display: block;
-  width: 100%;
-  height: 250px;
-  object-fit: contain;
-  object-position: center;
-  margin: 0 0 8px;
-}
-
-@media print {
-  html,
-  body {
-    width: 210mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  #qr-print-area {
-    position: static !important;
-    width: 180mm !important;
-    margin: 0 auto !important;
-    padding: 10mm 0 !important;
-    box-sizing: border-box !important;
-    transform: none !important;
-  }
-
-  .qr-guide-img {
-    display: block !important;
-    width: 100% !important;
-    height: 58mm !important;
-    object-fit: contain !important;
-    object-position: center !important;
-  }
-
-  .qr-guide-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4mm !important;
-  }
-
-  .merchant-qr-box {
-    width: 78mm !important;
-    height: 78mm !important;
-    margin: 0 auto !important;
-  }
-
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
-}
-/* ===== QR 인쇄 최종 가로형 ===== */
-
-@media print {
-
-  @page {
-    size: A4 landscape;
-    margin: 0;
-  }
-
-  html,
-  body {
     width: 297mm !important;
-    height: 210mm !important;
+    height: 198mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    box-shadow: none !important;
+    overflow: hidden !important;
+  }
+
+  .qr-guide-poster-wrap {
+    width: 297mm !important;
+    height: 198mm !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  #qr-print-area {
-    position: static !important;
-    width: 285mm !important;
+  .qr-guide-poster {
+    display: block !important;
+    width: 297mm !important;
     height: 198mm !important;
-    margin: 0 auto !important;
-    padding: 8mm 6mm !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-  }
-
-  .qr-print-title {
-    margin: 0 0 5mm !important;
-    text-align: center !important;
-  }
-
-  .qr-print-brand {
-    font-size: 16pt !important;
-  }
-
-  .qr-print-title h2 {
-    margin: 1mm 0 !important;
-    font-size: 25pt !important;
-  }
-
-  .qr-print-title p {
-    margin: 1mm 0 0 !important;
-    font-size: 10pt !important;
-  }
-
-  /* 1, 2, 3 + QR = 한 줄 4칸 */
-  .qr-guide-grid {
-    display: grid !important;
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 4mm !important;
-    margin: 0 !important;
-    flex: 1 !important;
-  }
-
-  .qr-guide-card {
-    height: 145mm !important;
-    padding: 3mm !important;
-    box-sizing: border-box !important;
-  }
-
-  .qr-guide-img {
-    width: 100% !important;
-    height: 130mm !important;
-    object-fit: contain !important;
-    margin: 0 !important;
-  }
-
-  .qr-guide-card strong {
-    display: none !important;
+    object-fit: fill !important;
   }
 
   .qr-print-main {
     position: absolute !important;
-    right: 6mm !important;
-    top: 44mm !important;
-    width: 66mm !important;
-    height: 145mm !important;
-    padding: 3mm !important;
-    box-sizing: border-box !important;
-    border: 1px solid #d9e2ec !important;
-    border-radius: 4mm !important;
+    top: 36% !important;
+    right: 4.5% !important;
+    width: 19% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    background: transparent !important;
+    z-index: 10 !important;
   }
 
   .merchant-qr-box {
-    width: 60mm !important;
-    height: 60mm !important;
-    padding: 1.5mm !important;
-    margin: 24mm auto 0 !important;
-  }
-
-  .merchant-qr-box canvas {
     width: 100% !important;
-    height: 100% !important;
-  }
-
-  .qr-print-message {
-    margin-top: 6mm !important;
-    font-size: 12pt !important;
-    font-weight: 800 !important;
-    text-align: center !important;
-  }
-
-  /* 이미지 3칸이 QR 자리까지 먹지 않게 */
-  .qr-guide-grid {
-    width: 210mm !important;
-  }
-}
-.qr-guide-poster-wrap {
-  width: 100%;
-  margin: 0 auto 18px;
-}
-
-.qr-guide-poster {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-@media print {
-  .qr-guide-poster-wrap {
-    width: 100% !important;
-    margin: 0 auto 5mm !important;
-  }
-
-  .qr-guide-poster {
-    display: block !important;
-    width: 100% !important;
-    height: auto !important;
-    object-fit: contain !important;
-  }
-}
-@media print {
-  .qr-print-title {
-    display: none !important;
-  }
-
-  #qr-print-area {
-    width: 277mm !important;
-    height: 190mm !important;
-    margin: 0 auto !important;
-    padding: 8mm !important;
-    box-sizing: border-box !important;
-    display: grid !important;
-    grid-template-columns: 1fr 72mm !important;
-    gap: 8mm !important;
-    align-items: center !important;
-  }
-
-  .qr-guide-poster-wrap {
-    width: 100% !important;
-    margin: 0 !important;
-  }
-
-  .qr-guide-poster {
-    width: 100% !important;
-    height: auto !important;
-    display: block !important;
-  }
-
-  .qr-print-main {
+    aspect-ratio: 1 / 1 !important;
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-  }
-
-  .merchant-qr-box {
-    width: 68mm !important;
-    height: 68mm !important;
-    margin: 0 auto !important;
-    padding: 2mm !important;
+    background: #ffffff !important;
   }
 
   .merchant-qr-box canvas {
@@ -8710,14 +8187,9 @@ and (orientation: landscape) {
     height: 100% !important;
   }
 
-  .qr-print-message {
-    margin-top: 4mm !important;
-    font-size: 13pt !important;
-    text-align: center !important;
-  }
-
-  @page {
-    size: A4 landscape;
-    margin: 0;
+  .qr-print-message,
+  .qr-admin-controls,
+  .no-print {
+    display: none !important;
   }
 }
