@@ -12054,13 +12054,20 @@ const paymentCancelRequestMap =
 })
 
 if (summaryBox) {
-  const totalAmount = payments.reduce((sum, payment) => {
-    if (payment.status !== 'paid') {
-      return sum
-    }
-  
-    return sum + Number(payment.amount || 0)
-  }, 0)
+  const selectedDateType =
+  document.querySelector<HTMLSelectElement>('#payment-date-type')?.value ||
+  'created_at'
+
+const totalAmount = payments.reduce((sum, payment) => {
+  if (
+    selectedDateType === 'created_at' &&
+    payment.status !== 'paid'
+  ) {
+    return sum
+  }
+
+  return sum + Number(payment.amount || 0)
+}, 0)
 
   const merchantCount =
     new Set(
