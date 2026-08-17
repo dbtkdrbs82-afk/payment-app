@@ -8448,3 +8448,20 @@ and (orientation: landscape) {
     margin: 0;
   }
 }
+.qr-guide-image {
+  width: 100%;
+  height: 190px;
+  margin: 0 0 8px;
+  background-size: cover !important;
+  background-position: center top !important;
+  background-repeat: no-repeat !important;
+  border-radius: 10px;
+}
+
+@media print {
+  .qr-guide-image {
+    height: 50mm !important;
+    background-size: cover !important;
+    background-position: center top !important;
+  }
+}
