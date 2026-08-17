@@ -4986,6 +4986,39 @@ const bindBranchClick = () => {
 
         renderAgencyList(agencies)
 
+        const directBranchMerchants =
+  (orgMerchants || []).filter((merchant) =>
+    Number(merchant.branch_admin_id) === branchId &&
+    !merchant.agency_admin_id &&
+    !merchant.manager_admin_id
+  )
+
+if (directBranchMerchants.length > 0) {
+  const merchantArea =
+    document.querySelector<HTMLElement>('#org-v2-detail-area')
+
+  if (merchantArea) {
+    merchantArea.innerHTML +=
+      '<h3>지사 직속 가맹점</h3>' +
+      '<div class="org-v2-merchant-box">' +
+        directBranchMerchants
+          .slice(0, 20)
+          .map((merchant, index) =>
+            '<p>' +
+              (index + 1) + '. ' +
+              (merchant.merchant_name || '-') +
+              ' (' +
+              (merchant.id
+                ? 'MER' + String(merchant.id).padStart(4, '0')
+                : '-') +
+              ')' +
+            '</p>'
+          )
+          .join('') +
+      '</div>'
+  }
+}
+
         const directManagers = managerUsers.filter((manager) =>
           Number(manager.parent_admin_id) === branchId
         )
@@ -5098,21 +5131,61 @@ const bindAgencyClick = () => {
     .forEach((button) => {
       button.addEventListener('click', () => {
         const agencyId = Number(button.dataset.id)
-        const agency = agencyUsers.find((item) => Number(item.id) === agencyId)
+
+        const agency = agencyUsers.find((item) =>
+          Number(item.id) === agencyId
+        )
 
         const managers = managerUsers.filter((manager) =>
           Number(manager.parent_admin_id) === agencyId
         )
 
-        const detailArea = document.querySelector<HTMLElement>('#org-v2-detail-area')
+        const directAgencyMerchants =
+          (orgMerchants || []).filter((merchant) =>
+            Number(merchant.agency_admin_id) === agencyId &&
+            !merchant.manager_admin_id
+          )
+
+        const detailArea =
+          document.querySelector<HTMLElement>('#org-v2-detail-area')
+
         if (!detailArea) return
 
         detailArea.innerHTML =
-          '<div class="org-v2-breadcrumb">본사 > 대리점 > ' + (agency?.admin_name || '-') + '</div>' +
+          '<div class="org-v2-breadcrumb">' +
+            '본사 > 대리점 > ' +
+            getOrgAdminDisplayName(agency) +
+          '</div>' +
+
           '<div class="org-v2-toolbar">' +
             '<input id="org-manager-search" placeholder="담당자 검색" />' +
           '</div>' +
-          '<div id="org-manager-list"></div>'
+
+          '<div id="org-manager-list"></div>' +
+
+          (
+            directAgencyMerchants.length > 0
+              ? '<h3>대리점 직속 가맹점</h3>' +
+                '<div class="org-v2-merchant-box">' +
+                  directAgencyMerchants
+                    .slice(0, 20)
+                    .map((merchant, index) =>
+                      '<p>' +
+                        (index + 1) + '. ' +
+                        (merchant.merchant_name || '-') +
+                        ' (' +
+                        (
+                          merchant.id
+                            ? 'MER' + String(merchant.id).padStart(4, '0')
+                            : '-'
+                        ) +
+                        ')' +
+                      '</p>'
+                    )
+                    .join('') +
+                '</div>'
+              : ''
+          )
 
         renderManagerList(managers)
       })
