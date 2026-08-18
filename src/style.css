@@ -8041,131 +8041,205 @@ and (orientation: landscape) {
   font-size: 14px !important;
   box-sizing: border-box !important;
 }
-/* ==============================
+/* =========================================
    PICK QR 관리자 화면 전용
    인쇄 화면에는 영향 없음
-============================== */
+========================================= */
 
 @media screen {
 
+  /* 전체 QR 영역 */
   #qr-print-area {
+    position: relative;
+
     width: 100%;
-    max-width: 620px;
+    max-width: 800px;
+
     margin: 10px auto 0;
-    padding: 8px;
+    padding: 10px;
+
     box-sizing: border-box;
+
+    background: #ffffff;
+    border: none;
+    box-shadow: none;
   }
 
+
+  /* 안내 포스터 영역 */
   .qr-guide-poster-wrap {
+    position: relative;
+
     width: 100%;
-    max-width: 590px;
+    max-width: 780px;
+
     margin: 0 auto;
+    padding: 0;
   }
 
+
+  /* 안내 포스터 */
   .qr-guide-poster {
     display: block;
+
     width: 100%;
-    max-width: 590px;
+    max-width: 780px;
     height: auto;
+
     margin: 0 auto;
+    padding: 0;
   }
 
+
+  /* 실제 QR을 포스터 위에 겹쳐놓는 영역 */
   .qr-print-main {
-    margin: 8px auto 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    position: absolute;
+
+    left: 10px;
+    top: 10px;
+
+    width: calc(100% - 20px);
+    aspect-ratio: 287 / 200;
+
+    margin: 0;
+    padding: 0;
+
+    pointer-events: none;
   }
 
+
+  /* 실제 가맹점 QR */
   #merchant-qr-box {
-    width: 145px;
-    height: 145px;
-    margin: 0 auto;
+    position: absolute;
+
+    /*
+      포스터 오른쪽 점선칸 중앙
+    */
+    left: 86.8%;
+    top: 59%;
+
+    transform: translate(-50%, -50%);
+
+    width: 160px;
+    height: 160px;
+
+    margin: 0;
+    padding: 0;
+
+    border: none;
+    background: #ffffff;
+
+    z-index: 10;
   }
+
 
   #merchant-qr-box canvas,
   #merchant-qr-box img {
-    width: 145px !important;
-    height: 145px !important;
     display: block;
+
+    width: 160px !important;
+    height: 160px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
+
+  /*
+    포스터 자체에 QR 안내문구가 있으므로
+    아래 중복 문구는 화면에서 숨김
+  */
   .qr-print-message {
-    margin-top: 5px;
-    text-align: center;
-    font-size: 12px;
-    font-weight: 600;
-    color: #174f91;
+    display: none;
   }
 
+
+  /* 링크 / 버튼 전체 영역 */
   .qr-admin-controls {
     width: 100%;
-    max-width: 620px;
+    max-width: 800px;
+
     margin: 8px auto 0;
+
+    padding: 0 10px;
     box-sizing: border-box;
   }
 
+
+  /* 링크주소 박스 */
   .qr-link-box {
     width: 100%;
+    max-width: 100%;
+
     padding: 8px 10px;
-    margin-bottom: 5px;
+    margin: 0 0 5px 0;
+
     box-sizing: border-box;
+
     border: 1px solid #d9e2ec;
     border-radius: 7px;
+
     background: #f8fafc;
   }
 
+
   .qr-link-label {
     margin-bottom: 3px;
+
     font-size: 11px;
     color: #64748b;
   }
 
+
   .qr-link-url {
     font-size: 12px;
     color: #1e293b;
+
     word-break: break-all;
   }
 
+
+  /* 공통 버튼 */
   .qr-admin-button {
     width: 100% !important;
+    max-width: 100% !important;
+
     height: 34px;
     min-height: 34px;
-    margin-top: 5px;
-    padding: 0 10px;
-    box-sizing: border-box;
+
+    margin: 5px 0 0 0 !important;
+    padding: 0 10px !important;
+
+    box-sizing: border-box !important;
 
     display: flex;
     align-items: center;
     justify-content: center;
 
+    border: none;
     border-radius: 6px;
+
     background: #1f5591;
     color: #ffffff;
 
     font-size: 12px;
     font-weight: 700;
+
     cursor: pointer;
   }
 
+
+  /* 링크복사 + 인쇄 버튼 동일 크기 */
   #copy-kiosk-url,
   .qr-print-button {
     width: 100% !important;
+    max-width: 100% !important;
+
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+
+    box-sizing: border-box !important;
   }
-  .qr-link-box,
-#copy-kiosk-url,
-.qr-print-button {
-  width: 100% !important;
-  max-width: 100% !important;
-  margin-left: 0 !important;
-  margin-right: 0 !important;
-  box-sizing: border-box !important;
-}
-#copy-kiosk-url,
-.qr-print-button {
-  padding-left: 10px !important;
-  padding-right: 10px !important;
-}
 }
 @media print {
   @page {
