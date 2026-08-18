@@ -8127,8 +8127,8 @@ and (orientation: landscape) {
     left: 225mm !important;
     top: 88mm !important;
 
-    width: 50mm !important;
-    height: 50mm !important;
+    width: 60mm !important;
+    height: 60mm !important;
 
     margin: 0 !important;
     padding: 0 !important;
@@ -8143,8 +8143,8 @@ and (orientation: landscape) {
   #merchant-qr-box canvas,
 #merchant-qr-box img {
   display: block !important;
-  width: 50mm !important;
-  height: 50mm !important;
+  width: 60mm !important;
+  height: 60mm !important;
   margin: 0 !important;
   padding: 0 !important;
 }
