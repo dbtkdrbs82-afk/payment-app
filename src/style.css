@@ -8124,7 +8124,7 @@ and (orientation: landscape) {
   #merchant-qr-box {
     position: absolute !important;
 
-    left: 215mm !important;
+    left: 220mm !important;
     top: 88mm !important;
 
     width: 60mm !important;
