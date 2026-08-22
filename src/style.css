@@ -8892,3 +8892,256 @@ and (orientation: landscape) {
     padding-bottom: 5px !important;
   }
 }
+/* =========================================================
+   일반매장 주문관리
+   갤럭시 폴드 전용 상단 정리
+   일반휴대폰 / PC 영향 없음
+========================================================= */
+
+@media screen
+and (min-width: 700px)
+and (max-width: 1400px)
+and (hover: none)
+and (pointer: coarse) {
+
+  /* 일반매장 주문관리만 적용 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box)) {
+    overflow-x: hidden !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .pg-admin-page {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 상단 제목 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-pick-header {
+    margin-bottom: 12px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-pick-header h1 {
+    font-size: 20px !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-user-box {
+    gap: 6px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-user-box strong {
+    font-size: 13px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  #merchant-logout {
+    min-width: 70px !important;
+    width: 70px !important;
+    height: 32px !important;
+    padding: 0 6px !important;
+    font-size: 11px !important;
+  }
+
+  /* =====================================================
+     메뉴
+     주문관리 상품관리 PICK QR 카드결제 전체 준비중 완료
+  ===================================================== */
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-toolbar {
+    display: grid !important;
+    grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+
+    width: 100% !important;
+    margin: 0 0 8px !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .toolbar-divider {
+    display: none !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-toolbar button {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+
+    font-size: 11px !important;
+    line-height: 34px !important;
+
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+  }
+
+  /* =====================================================
+     날짜 검색 한 줄
+  ===================================================== */
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-filter {
+    display: grid !important;
+
+    grid-template-columns:
+      70px 70px 70px
+      minmax(115px, 1fr)
+      12px
+      minmax(115px, 1fr)
+      64px 88px !important;
+
+    align-items: center !important;
+    gap: 5px !important;
+
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+
+    margin: 0 0 8px !important;
+    padding: 0 !important;
+
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-filter button {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    margin: 0 !important;
+    padding: 0 4px !important;
+    font-size: 10px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-filter .date-wrap {
+    display: block !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  #sales-start-date,
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  #sales-end-date {
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 32px !important;
+    margin: 0 !important;
+    padding: 0 5px !important;
+    font-size: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .date-wave {
+    width: 12px !important;
+    height: 32px !important;
+    line-height: 32px !important;
+    text-align: center !important;
+    transform: none !important;
+  }
+
+  /* =====================================================
+     요약 카드
+  ===================================================== */
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+
+    width: 100% !important;
+    gap: 6px !important;
+
+    margin: 8px 0 10px !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary > div {
+    min-width: 0 !important;
+    min-height: 66px !important;
+    padding: 8px 3px !important;
+
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+
+    box-sizing: border-box !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary strong {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+    white-space: nowrap !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary span {
+    font-size: 17px !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+  }
+}
+
+
+/* =========================================================
+   폴드 세로만
+========================================================= */
+
+@media screen
+and (min-width: 700px)
+and (max-width: 950px)
+and (orientation: portrait)
+and (hover: none)
+and (pointer: coarse) {
+
+  /* 메뉴는 4개 + 상태 3개 두 줄 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-toolbar {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-toolbar button {
+    height: 32px !important;
+    font-size: 10px !important;
+    line-height: 32px !important;
+  }
+
+  /* 날짜검색은 2줄로 가지런히 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-filter {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr))
+      minmax(0, 1fr) !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .date-wrap:first-of-type {
+    grid-column: 1 / span 1 !important;
+  }
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .date-wave {
+    display: none !important;
+  }
+
+  /* 요약카드 3 x 2 */
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  .merchant-sales-summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
