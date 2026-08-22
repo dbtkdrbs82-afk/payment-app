@@ -17,66 +17,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
 
-// =====================================================
-// 갤럭시 폴드 + 크롬 전용 화면 감지
-// 삼성인터넷 / 일반휴대폰 / PC 제외
-// =====================================================
 
-const browserUserAgent = navigator.userAgent
-
-const isSamsungBrowser =
-  /SamsungBrowser/i.test(browserUserAgent)
-
-const isChromeBrowser =
-  /Chrome|CriOS/i.test(browserUserAgent) &&
-  !isSamsungBrowser
-
-const updateChromeFoldClass = () => {
-  const screenWidth = window.innerWidth
-  const screenHeight = window.innerHeight
-
-  const shortSide = Math.min(screenWidth, screenHeight)
-  const longSide = Math.max(screenWidth, screenHeight)
-
-  const isFoldSize =
-    shortSide >= 600 &&
-    shortSide <= 1000 &&
-    longSide <= 1600
-
-  document.body.classList.toggle(
-    'chrome-fold',
-    isChromeBrowser && isFoldSize
-  )
-
-  document.body.classList.toggle(
-    'chrome-fold-portrait',
-    isChromeBrowser &&
-    isFoldSize &&
-    screenHeight > screenWidth
-  )
-
-  document.body.classList.toggle(
-    'chrome-fold-landscape',
-    isChromeBrowser &&
-    isFoldSize &&
-    screenWidth > screenHeight
-  )
-  console.log(
-    'NXG DEVICE CHECK:',
-    {
-      userAgent: browserUserAgent,
-      width: window.innerWidth,
-      height: window.innerHeight,
-      chromeFold: document.body.classList.contains('chrome-fold'),
-      portrait: document.body.classList.contains('chrome-fold-portrait'),
-      landscape: document.body.classList.contains('chrome-fold-landscape')
-    }
-  )
-}
-
-updateChromeFoldClass()
-
-window.addEventListener('resize', updateChromeFoldClass)
 
 function getMemberMenuHtml(activeMenu: string) {
   return `
