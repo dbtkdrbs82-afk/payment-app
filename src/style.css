@@ -8892,3 +8892,260 @@ and (orientation: landscape) {
     padding-bottom: 5px !important;
   }
 }
+/* =========================================================
+   PG 관리자 > 가맹점관리
+   갤럭시 폴드 최종 보정
+   일반휴대폰 / PC 영향 없음
+========================================================= */
+
+@media screen
+and (min-width: 700px)
+and (max-width: 1400px)
+and (hover: none)
+and (pointer: coarse) {
+
+  /* 전체 화면 */
+  body:has(.merchant-status-cards) .admin-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  /* 검색박스 / 카드 / 목록 좌우 여백 */
+  body:has(.merchant-status-cards) .admin-search-box,
+  body:has(.merchant-status-cards) .admin-summary,
+  body:has(.merchant-status-cards) .admin-table-top {
+    width: calc(100% - 12px) !important;
+    max-width: calc(100% - 12px) !important;
+    margin-left: 6px !important;
+    margin-right: 6px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* 검색 영역 */
+  body:has(.merchant-status-cards) .admin-search-box {
+    padding: 6px !important;
+    overflow-x: auto !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-filter-line {
+    gap: 4px !important;
+    flex-wrap: nowrap !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-filter-line select,
+  body:has(.merchant-status-cards) .merchant-filter-line input,
+  body:has(.merchant-status-cards) .merchant-filter-line .quick-btn,
+  body:has(.merchant-status-cards) .merchant-search-btn {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-filter-line .quick-btn {
+    min-width: 48px !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-search-btn {
+    min-width: 58px !important;
+    width: 58px !important;
+  }
+
+  /* 상태 카드 */
+  body:has(.merchant-status-cards) .merchant-status-cards {
+    gap: 6px !important;
+    margin: 0 !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card {
+    min-width: 0 !important;
+    height: 64px !important;
+    min-height: 64px !important;
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card p {
+    margin: 0 0 3px !important;
+    font-size: 10px !important;
+    line-height: 1.1 !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card strong {
+    font-size: 19px !important;
+    line-height: 1 !important;
+  }
+
+  /* 가입신청 / 일괄조회 */
+  body:has(.merchant-status-cards) #copy-merchant-apply-link,
+  body:has(.merchant-status-cards) #merchant-bulk-check {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 10px !important;
+    margin-top: 8px !important;
+    font-size: 10px !important;
+  }
+
+  /* 페이지네이션 */
+  body:has(.merchant-status-cards) .admin-table-top {
+    min-height: 0 !important;
+    padding: 8px !important;
+    margin-top: 8px !important;
+  }
+
+  body:has(.merchant-status-cards) #admin-page-size {
+    height: 30px !important;
+    min-height: 30px !important;
+    font-size: 10px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination {
+    gap: 6px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination button {
+    height: 30px !important;
+    min-height: 30px !important;
+    padding: 0 8px !important;
+    font-size: 10px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination span {
+    font-size: 11px !important;
+  }
+
+  /* 테이블 */
+  body:has(.merchant-status-cards) .admin-table {
+    font-size: 10px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-table th,
+  body:has(.merchant-status-cards) .admin-table td {
+    height: auto !important;
+    padding: 6px 4px !important;
+    font-size: 10px !important;
+  }
+}
+
+
+/* =========================================================
+   폴드 세로
+========================================================= */
+
+@media screen
+and (min-width: 700px)
+and (max-width: 1000px)
+and (orientation: portrait)
+and (hover: none)
+and (pointer: coarse) {
+
+  /* 검색줄을 한 화면 안으로 더 압축 */
+  body:has(.merchant-status-cards) .merchant-filter-line {
+    transform: scale(0.88) !important;
+    transform-origin: left center !important;
+    width: 113.6% !important;
+  }
+
+  /* 상태카드 2 x 2 */
+  body:has(.merchant-status-cards) .merchant-status-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card {
+    height: 60px !important;
+    min-height: 60px !important;
+  }
+
+  /* 버튼 2개 */
+  body:has(.merchant-status-cards) .admin-summary {
+    padding: 8px !important;
+  }
+
+  body:has(.merchant-status-cards) #copy-merchant-apply-link,
+  body:has(.merchant-status-cards) #merchant-bulk-check {
+    min-width: 150px !important;
+  }
+
+  /* 페이지네이션 */
+  body:has(.merchant-status-cards) .admin-table-top {
+    display: grid !important;
+    grid-template-columns: 110px minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  body:has(.merchant-status-cards) #admin-page-size {
+    width: 110px !important;
+    min-width: 110px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination {
+    justify-content: center !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination button {
+    min-width: 72px !important;
+    width: 72px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-table {
+    min-width: 720px !important;
+  }
+}
+
+
+/* =========================================================
+   폴드 가로
+========================================================= */
+
+@media screen
+and (min-width: 900px)
+and (max-width: 1400px)
+and (orientation: landscape)
+and (hover: none)
+and (pointer: coarse) {
+
+  /* 검색줄 */
+  body:has(.merchant-status-cards) .merchant-filter-line {
+    transform: scale(0.92) !important;
+    transform-origin: left center !important;
+    width: 108.7% !important;
+  }
+
+  /* 상태카드 한 줄 */
+  body:has(.merchant-status-cards) .merchant-status-cards {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card {
+    height: 64px !important;
+    min-height: 64px !important;
+  }
+
+  /* 페이지네이션 */
+  body:has(.merchant-status-cards) .admin-table-top {
+    display: grid !important;
+    grid-template-columns: 130px minmax(0, 1fr) 130px !important;
+    align-items: center !important;
+  }
+
+  body:has(.merchant-status-cards) #admin-page-size {
+    width: 130px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination {
+    justify-content: center !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination button {
+    width: 90px !important;
+    min-width: 90px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-table {
+    min-width: 900px !important;
+  }
+}
