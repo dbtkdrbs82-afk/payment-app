@@ -8617,3 +8617,100 @@ and (orientation: landscape) {
     min-width: 100px !important;
   }
 }
+/* =========================================================
+   폴드 화면 전체 압축
+   PC / 일반 스마트폰 영향 없음
+========================================================= */
+
+@media screen
+and (min-width: 700px)
+and (max-width: 1400px)
+and (hover: none)
+and (pointer: coarse) {
+
+  /* 검색 영역 확 줄이기 */
+  body:has(.merchant-status-cards) .admin-search-box {
+    padding: 6px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-search-box .filter-row {
+    gap: 4px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-search-box select,
+  body:has(.merchant-status-cards) .admin-search-box input,
+  body:has(.merchant-status-cards) .quick-btn,
+  body:has(.merchant-status-cards) .merchant-search-btn {
+    height: 30px !important;
+    font-size: 9px !important;
+  }
+
+
+  /* 상태 카드 확 줄이기 */
+  body:has(.merchant-status-cards) .merchant-status-cards {
+    gap: 6px !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card {
+    height: 76px !important;
+    min-height: 76px !important;
+    padding: 9px 12px !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card p {
+    margin: 0 0 6px !important;
+    font-size: 10px !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card strong {
+    font-size: 18px !important;
+  }
+
+
+  /* 가입신청 / 일괄조회 */
+  body:has(.merchant-status-cards) #copy-merchant-apply-link,
+  body:has(.merchant-status-cards) #merchant-bulk-check {
+    height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 10px !important;
+  }
+
+
+  /* 목록 위 페이지 영역 */
+  body:has(.merchant-status-cards) .admin-table-top {
+    padding: 7px !important;
+  }
+
+  body:has(.merchant-status-cards) #admin-page-size {
+    height: 30px !important;
+    font-size: 10px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination {
+    gap: 5px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination button {
+    height: 30px !important;
+    min-height: 30px !important;
+    font-size: 10px !important;
+    padding: 0 6px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination span {
+    font-size: 10px !important;
+  }
+
+
+  /* 테이블도 한 단계 축소 */
+  body:has(.merchant-status-cards) .admin-table {
+    min-width: 760px !important;
+    font-size: 10px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-table th,
+  body:has(.merchant-status-cards) .admin-table td {
+    padding: 7px 5px !important;
+    font-size: 10px !important;
+  }
+}
