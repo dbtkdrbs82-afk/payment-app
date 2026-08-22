@@ -8366,376 +8366,254 @@ and (orientation: landscape) {
 }
 /* =========================================================
    PG 관리자 > 가맹점관리
-   갤럭시 폴드 전용
-   PC / 일반 휴대폰 영향 없음
+   펼친 폴드 화면 전용
+   PC / 일반 스마트폰 제외
 ========================================================= */
 
-
-/* =========================
-   폴드 세로
-========================= */
 @media screen
-and (min-width: 600px)
-and (max-width: 850px)
-and (orientation: portrait) {
+and (min-width: 700px)
+and (max-width: 1400px)
+and (hover: none)
+and (pointer: coarse) {
 
-  .admin-wrap {
+  /* 가맹점관리 화면일 때만 적용 */
+  body:has(.merchant-status-cards) .admin-wrap {
     width: 100% !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
   }
 
-  .admin-search-box,
-  .admin-summary,
-  .admin-table-top {
-    width: calc(100% - 20px) !important;
-    max-width: calc(100% - 20px) !important;
+  body:has(.merchant-status-cards) .admin-search-box,
+  body:has(.merchant-status-cards) .admin-summary,
+  body:has(.merchant-status-cards) .admin-table-top {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
 
-    margin-left: 10px !important;
-    margin-right: 10px !important;
+    margin-left: 8px !important;
+    margin-right: 8px !important;
 
     box-sizing: border-box !important;
   }
 
 
   /* 검색영역 */
-  .admin-search-box {
-    padding: 12px !important;
-    overflow: hidden !important;
+  body:has(.merchant-status-cards) .admin-search-box {
+    padding: 10px !important;
+    overflow-x: auto !important;
   }
 
-  .admin-search-box .filter-row {
-    display: flex !important;
-    flex-wrap: wrap !important;
+  body:has(.merchant-status-cards) .admin-search-box .filter-row {
+    gap: 6px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-search-box select,
+  body:has(.merchant-status-cards) .admin-search-box input {
+    min-width: 0 !important;
+    height: 36px !important;
+    font-size: 11px !important;
+  }
+
+  body:has(.merchant-status-cards) .quick-btn,
+  body:has(.merchant-status-cards) .merchant-search-btn {
+    height: 36px !important;
+    min-width: 56px !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+  }
+
+
+  /* 카드 */
+  body:has(.merchant-status-cards) .merchant-status-cards {
+    width: 100% !important;
+    max-width: 100% !important;
 
     gap: 8px !important;
-    margin: 8px 0 !important;
   }
 
-  .admin-search-box select,
-  .admin-search-box input {
-    min-width: 0 !important;
-    max-width: 100% !important;
-    height: 38px !important;
-    font-size: 12px !important;
-  }
-
-  .admin-search-box .quick-btn {
-    min-width: 58px !important;
-    height: 38px !important;
-    padding: 0 8px !important;
-    font-size: 12px !important;
-  }
-
-  .merchant-search-btn {
-    min-width: 90px !important;
-    height: 38px !important;
-    font-size: 12px !important;
-  }
-
-
-  /* 요약 카드 2 x 2 */
-  .merchant-status-cards {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-
-    gap: 10px !important;
-
-    width: 100% !important;
-    max-width: 100% !important;
-  }
-
-  .merchant-status-card {
+  body:has(.merchant-status-cards) .merchant-status-card {
     min-width: 0 !important;
     width: 100% !important;
 
-    height: 110px !important;
-
-    padding: 16px !important;
-
+    padding: 14px !important;
     box-sizing: border-box !important;
   }
 
-  .merchant-status-card p {
-    font-size: 14px !important;
+  body:has(.merchant-status-cards) .merchant-status-card p {
+    font-size: 13px !important;
   }
 
-  .merchant-status-card strong {
-    font-size: 24px !important;
+  body:has(.merchant-status-cards) .merchant-status-card strong {
+    font-size: 23px !important;
   }
 
 
   /* 가입신청 / 일괄조회 */
-  .admin-summary > div:last-child {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  body:has(.merchant-status-cards) #copy-merchant-apply-link,
+  body:has(.merchant-status-cards) #merchant-bulk-check {
+    height: 40px !important;
 
-    gap: 8px !important;
-
-    width: 100% !important;
-  }
-
-  #copy-merchant-apply-link,
-  #merchant-bulk-check {
-    width: 100% !important;
     min-width: 0 !important;
-    max-width: 100% !important;
-
-    height: 42px !important;
-
     margin: 0 !important;
 
-    font-size: 13px !important;
-  }
-
-
-  /* 페이지 개수 + 이전/다음 */
-  .admin-table-top {
-    display: grid !important;
-
-    grid-template-columns:
-      120px
-      minmax(0, 1fr) !important;
-
-    align-items: center !important;
-
-    gap: 10px !important;
-
-    padding: 14px !important;
-  }
-
-  #admin-page-size {
-    width: 120px !important;
-    min-width: 120px !important;
-    max-width: 120px !important;
-
-    height: 38px !important;
+    padding: 0 14px !important;
 
     font-size: 12px !important;
-  }
-
-  #merchant-pagination {
-    width: 100% !important;
-
-    display: grid !important;
-    grid-template-columns:
-      minmax(70px, 1fr)
-      55px
-      minmax(70px, 1fr) !important;
-
-    align-items: center !important;
-
-    gap: 6px !important;
-
-    margin: 0 !important;
-
-    justify-self: stretch !important;
-  }
-
-  #merchant-pagination button {
-    width: 100% !important;
-    min-width: 0 !important;
-
-    height: 38px !important;
-
-    padding: 0 6px !important;
-
-    font-size: 12px !important;
-  }
-
-  #merchant-pagination span {
-    min-width: 0 !important;
-
-    font-size: 12px !important;
-
-    text-align: center !important;
-  }
-
-
-  /* 테이블은 화면 안에서 좌우 스크롤 */
-  .admin-table-scroll {
-    width: calc(100% - 20px) !important;
-    max-width: calc(100% - 20px) !important;
-
-    margin: 0 10px !important;
-
-    overflow-x: auto !important;
-    overflow-y: visible !important;
-
-    box-sizing: border-box !important;
-
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .admin-table {
-    width: 900px !important;
-    min-width: 900px !important;
-
-    margin: 0 !important;
-  }
-
-}
-
-
-/* =========================
-   폴드 가로
-========================= */
-@media screen
-and (min-width: 850px)
-and (max-width: 1200px)
-and (orientation: landscape) {
-
-  .admin-wrap {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
-  }
-
-
-  .admin-search-box,
-  .admin-summary,
-  .admin-table-top {
-    width: calc(100% - 24px) !important;
-    max-width: calc(100% - 24px) !important;
-
-    margin-left: 12px !important;
-    margin-right: 12px !important;
-
-    box-sizing: border-box !important;
-  }
-
-
-  /* 검색영역 */
-  .admin-search-box {
-    padding: 12px !important;
-    overflow: hidden !important;
-  }
-
-  .admin-search-box .filter-row {
-    gap: 8px !important;
-    flex-wrap: wrap !important;
-  }
-
-  .admin-search-box select,
-  .admin-search-box input {
-    min-width: 0 !important;
-    font-size: 12px !important;
-  }
-
-  .admin-search-box .quick-btn {
-    min-width: 58px !important;
-    padding: 0 8px !important;
-    font-size: 12px !important;
-  }
-
-
-  /* 카드 4개 한 줄 */
-  .merchant-status-cards {
-    display: grid !important;
-    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-
-    gap: 10px !important;
-
-    width: 100% !important;
-  }
-
-  .merchant-status-card {
-    width: 100% !important;
-    min-width: 0 !important;
-
-    height: 110px !important;
-
-    padding: 16px !important;
-
-    box-sizing: border-box !important;
-  }
-
-
-  /* 하단 버튼 */
-  .admin-summary > div:last-child {
-    display: flex !important;
-
-    gap: 8px !important;
-
-    flex-wrap: nowrap !important;
-  }
-
-  #copy-merchant-apply-link,
-  #merchant-bulk-check {
-    width: 230px !important;
-    min-width: 0 !important;
-
-    height: 42px !important;
-
-    margin: 0 !important;
-
-    font-size: 13px !important;
   }
 
 
   /* 페이지네이션 */
-  .admin-table-top {
-    display: grid !important;
-
-    grid-template-columns:
-      150px
-      minmax(0, 1fr)
-      150px !important;
-
-    align-items: center !important;
-
-    padding: 14px !important;
+  body:has(.merchant-status-cards) .admin-table-top {
+    padding: 12px !important;
+    box-sizing: border-box !important;
   }
 
-  #admin-page-size {
-    width: 150px !important;
-
-    height: 38px !important;
-
-    font-size: 12px !important;
+  body:has(.merchant-status-cards) #admin-page-size {
+    height: 36px !important;
+    font-size: 11px !important;
   }
 
-  #merchant-pagination {
-    display: flex !important;
-
-    align-items: center !important;
-    justify-content: center !important;
-
-    gap: 10px !important;
-
-    width: auto !important;
-
+  body:has(.merchant-status-cards) #merchant-pagination {
     margin: 0 !important;
+    gap: 8px !important;
   }
 
-  #merchant-pagination button {
-    min-width: 100px !important;
-    height: 38px !important;
+  body:has(.merchant-status-cards) #merchant-pagination button {
+    height: 36px !important;
 
-    padding: 0 10px !important;
+    padding: 0 8px !important;
 
-    font-size: 12px !important;
+    font-size: 11px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination span {
+    font-size: 11px !important;
   }
 
 
-  /* 테이블 */
-  .admin-table-scroll {
-    width: calc(100% - 24px) !important;
-    max-width: calc(100% - 24px) !important;
+  /* 가맹점 테이블만 좌우 스크롤 */
+  body:has(.merchant-status-cards) .admin-table-scroll {
+    width: calc(100% - 16px) !important;
+    max-width: calc(100% - 16px) !important;
 
-    margin: 0 12px !important;
+    margin-left: 8px !important;
+    margin-right: 8px !important;
 
     overflow-x: auto !important;
 
     box-sizing: border-box !important;
-
     -webkit-overflow-scrolling: touch;
   }
 
-  .admin-table {
-    width: 1000px !important;
-    min-width: 1000px !important;
-
+  body:has(.merchant-status-cards) .admin-table {
+    min-width: 900px !important;
     margin: 0 !important;
+  }
+}
+
+
+/* =========================================================
+   폴드 세로
+========================================================= */
+
+@media screen
+and (min-width: 700px)
+and (max-width: 1400px)
+and (hover: none)
+and (pointer: coarse)
+and (orientation: portrait) {
+
+  body:has(.merchant-status-cards) .merchant-status-cards {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card {
+    height: 105px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-table-top {
+    display: grid !important;
+
+    grid-template-columns:
+      115px
+      minmax(0, 1fr) !important;
+
+    gap: 8px !important;
+    align-items: center !important;
+  }
+
+  body:has(.merchant-status-cards) #admin-page-size {
+    width: 115px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination {
+    width: 100% !important;
+
+    display: grid !important;
+
+    grid-template-columns:
+      minmax(65px, 1fr)
+      45px
+      minmax(65px, 1fr) !important;
+
+    align-items: center !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination button {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+
+/* =========================================================
+   폴드 가로
+========================================================= */
+
+@media screen
+and (min-width: 700px)
+and (max-width: 1400px)
+and (hover: none)
+and (pointer: coarse)
+and (orientation: landscape) {
+
+  body:has(.merchant-status-cards) .merchant-status-cards {
+    display: grid !important;
+
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  body:has(.merchant-status-cards) .merchant-status-card {
+    height: 100px !important;
+  }
+
+  body:has(.merchant-status-cards) .admin-table-top {
+    display: grid !important;
+
+    grid-template-columns:
+      140px
+      minmax(0, 1fr)
+      140px !important;
+
+    align-items: center !important;
+  }
+
+  body:has(.merchant-status-cards) #admin-page-size {
+    width: 140px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination {
+    display: flex !important;
+
+    justify-content: center !important;
+    align-items: center !important;
+
+    gap: 10px !important;
+  }
+
+  body:has(.merchant-status-cards) #merchant-pagination button {
+    width: 100px !important;
+    min-width: 100px !important;
   }
 }
