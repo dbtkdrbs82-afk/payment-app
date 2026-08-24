@@ -18064,7 +18064,7 @@ document.querySelector('#close-member-modal')
 
     if (editId) {
 
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('members')
         .update({
           member_name: memberName,
@@ -18077,19 +18077,9 @@ document.querySelector('#close-member-modal')
           monthly_fee: monthlyFee
         })
         .eq('id', editId)
-        .eq('merchant_id', merchantId)
-        .select()
     
       if (error) {
         alert('회원 수정 실패: ' + error.message)
-        return
-      }
-    
-      if (!data || data.length === 0) {
-        alert(
-          '수정된 회원이 없습니다.\n' +
-          '회원ID: ' + editId
-        )
         return
       }
     
