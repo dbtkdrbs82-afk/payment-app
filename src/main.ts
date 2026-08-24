@@ -18904,6 +18904,17 @@ document.querySelector('#batch-template-download-btn')
   const worksheet =
     XLSX.utils.json_to_sheet(excelRows)
 
+    /* 카드번호 열(E열)을 텍스트 형식으로 고정 */
+for (let rowIndex = 2; rowIndex <= excelRows.length + 1; rowIndex += 1) {
+  const cellAddress = `E${rowIndex}`
+  const cell = worksheet[cellAddress]
+
+  if (cell) {
+    cell.t = 's'
+    cell.z = '@'
+  }
+}
+
   worksheet['!cols'] = [
     { wch: 10 },
     { wch: 24 },
