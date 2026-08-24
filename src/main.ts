@@ -18593,6 +18593,50 @@ const billings =
 
   bindMemberMenuEvents()
 
+  document.querySelectorAll('.billing-complete-btn')
+  .forEach((button) => {
+
+    button.addEventListener('click', async () => {
+
+      const billingId =
+        Number(
+          (button as HTMLElement).dataset.id
+        )
+
+      if (!billingId) {
+        alert('청구 정보를 찾을 수 없습니다.')
+        return
+      }
+
+      const confirmed =
+        confirm('이 청구건을 완료처리하시겠습니까?')
+
+      if (!confirmed) {
+        return
+      }
+
+      const { error } =
+        await supabase
+          .from('billings')
+          .update({
+            payment_status: '완료'
+          })
+          .eq('id', billingId)
+
+      if (error) {
+        alert(
+          '완료처리 실패: ' +
+          error.message
+        )
+        return
+      }
+
+      alert('완료처리되었습니다.')
+      location.reload()
+    })
+
+  })
+
   document.querySelector('#add-billing-btn')
   ?.addEventListener('click', () => {
     document.querySelector<HTMLElement>('#billing-modal')!.style.display = 'flex'
