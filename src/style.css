@@ -9195,3 +9195,179 @@ and (orientation: landscape) {
 
   box-sizing: border-box !important;
 }
+/* =========================================
+   아카데미 공통 페이징
+========================================= */
+
+.academy-pagination-toolbar {
+  display: grid;
+  grid-template-columns: 160px 1fr 160px;
+
+  align-items: center;
+
+  width: 100%;
+
+  margin-top: 16px;
+
+  box-sizing: border-box;
+}
+
+.academy-pagination-toolbar > select {
+  grid-column: 1;
+
+  width: 130px;
+  height: 40px;
+
+  padding: 0 10px;
+
+  border: 1px solid #ccd6e2;
+  border-radius: 6px;
+
+  background: #ffffff;
+
+  font-size: 13px;
+
+  box-sizing: border-box;
+}
+
+.academy-pagination-buttons {
+  grid-column: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 18px;
+}
+
+.academy-pagination-buttons button {
+  width: 90px;
+  height: 40px;
+
+  margin: 0;
+  padding: 0;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #174f91;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-sizing: border-box;
+}
+
+.academy-pagination-buttons strong {
+  min-width: 52px;
+
+  text-align: center;
+
+  font-size: 14px;
+  color: #0d315c;
+}
+
+.academy-pagination-buttons button:disabled {
+  background: #ffffff;
+  color: #aab8c8;
+
+  border: 2px solid #aab8c8;
+
+  cursor: default;
+}
+
+
+/* 모바일 */
+
+@media screen and (max-width: 700px) {
+
+  .academy-pagination-toolbar {
+    grid-template-columns: 115px 1fr;
+
+    gap: 8px;
+  }
+
+  .academy-pagination-toolbar > select {
+    width: 110px;
+    height: 38px;
+
+    font-size: 11px;
+  }
+
+  .academy-pagination-buttons {
+    grid-column: 2;
+
+    gap: 7px;
+  }
+
+  .academy-pagination-buttons button {
+    width: 64px;
+    height: 38px;
+
+    font-size: 11px;
+  }
+
+  .academy-pagination-buttons strong {
+    min-width: 42px;
+
+    font-size: 12px;
+  }
+}
+/* =========================================
+   아카데미 결제내역
+========================================= */
+
+.academy-payment-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.academy-payment-table th,
+.academy-payment-table td {
+  padding: 11px 8px;
+
+  font-size: 12px;
+
+  text-align: center;
+  vertical-align: middle;
+
+  box-sizing: border-box;
+}
+
+.academy-payment-table th:nth-child(1),
+.academy-payment-table td:nth-child(1) {
+  width: 70px;
+}
+
+.academy-payment-table th:nth-child(2),
+.academy-payment-table td:nth-child(2) {
+  width: 190px;
+}
+
+.academy-payment-table th:nth-child(3),
+.academy-payment-table td:nth-child(3) {
+  width: 190px;
+}
+
+.academy-payment-table th:nth-child(4),
+.academy-payment-table td:nth-child(4) {
+  width: 140px;
+}
+
+.academy-payment-table th:nth-child(5),
+.academy-payment-table td:nth-child(5) {
+  width: 140px;
+}
+
+.academy-payment-table th:nth-child(6),
+.academy-payment-table td:nth-child(6) {
+  width: 150px;
+}
+
+.academy-payment-table th:nth-child(7),
+.academy-payment-table td:nth-child(7) {
+  width: 120px;
+}

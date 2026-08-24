@@ -52,10 +52,10 @@ function bindMemberMenuEvents() {
       location.href = '/merchant-batch'
     })
 
-    document.querySelector('#merchant-payment-list-tab')
-    ?.addEventListener('click', () => {
-      alert('결제내역 화면 준비중입니다.')
-    })
+    document.querySelector('#merchant-payment-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-academy-payments'
+  })
 
     document.querySelector('#batch-dashboard-search-button')
   ?.addEventListener('click', () => {
@@ -97,6 +97,210 @@ function bindMemberMenuEvents() {
       '/merchant-admin?' +
       params.toString()
   })
+}
+
+/* =========================================
+   아카데미 공통 페이징
+========================================= */
+
+function getAcademyPagination(
+  totalCount: number,
+  storagePrefix: string
+) {
+  const pageSize =
+    Number(
+      sessionStorage.getItem(
+        storagePrefix + '_page_size'
+      ) || '10'
+    )
+
+  let currentPage =
+    Number(
+      sessionStorage.getItem(
+        storagePrefix + '_page'
+      ) || '1'
+    )
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(totalCount / pageSize)
+    )
+
+  if (currentPage > totalPages) {
+    currentPage = totalPages
+  }
+
+  if (currentPage < 1) {
+    currentPage = 1
+  }
+
+  const startIndex =
+    (currentPage - 1) * pageSize
+
+  return {
+    pageSize,
+    currentPage,
+    totalPages,
+    startIndex
+  }
+}
+
+
+function getAcademyPaginationHtml(
+  idPrefix: string,
+  pageSize: number,
+  currentPage: number,
+  totalPages: number
+) {
+  return `
+    <div class="academy-pagination-toolbar">
+
+      <select id="${idPrefix}-page-size">
+
+        <option
+          value="10"
+          ${pageSize === 10 ? 'selected' : ''}
+        >
+          10개씩 보기
+        </option>
+
+        <option
+          value="20"
+          ${pageSize === 20 ? 'selected' : ''}
+        >
+          20개씩 보기
+        </option>
+
+        <option
+          value="30"
+          ${pageSize === 30 ? 'selected' : ''}
+        >
+          30개씩 보기
+        </option>
+
+        <option
+          value="50"
+          ${pageSize === 50 ? 'selected' : ''}
+        >
+          50개씩 보기
+        </option>
+
+        <option
+          value="100"
+          ${pageSize === 100 ? 'selected' : ''}
+        >
+          100개씩 보기
+        </option>
+
+      </select>
+
+
+      <div class="academy-pagination-buttons">
+
+        <button
+          id="${idPrefix}-prev"
+          ${currentPage <= 1 ? 'disabled' : ''}
+        >
+          이전
+        </button>
+
+        <strong>
+          ${currentPage} / ${totalPages}
+        </strong>
+
+        <button
+          id="${idPrefix}-next"
+          ${currentPage >= totalPages ? 'disabled' : ''}
+        >
+          다음
+        </button>
+
+      </div>
+
+    </div>
+  `
+}
+
+
+function bindAcademyPagination(
+  idPrefix: string,
+  storagePrefix: string,
+  currentPage: number,
+  totalPages: number
+) {
+  document
+    .querySelector<HTMLSelectElement>(
+      '#' + idPrefix + '-page-size'
+    )
+    ?.addEventListener(
+      'change',
+      (event) => {
+
+        const pageSize =
+          Number(
+            (
+              event.target as HTMLSelectElement
+            ).value
+          )
+
+        sessionStorage.setItem(
+          storagePrefix + '_page_size',
+          String(pageSize)
+        )
+
+        sessionStorage.setItem(
+          storagePrefix + '_page',
+          '1'
+        )
+
+        location.reload()
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#' + idPrefix + '-prev'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        if (currentPage <= 1) {
+          return
+        }
+
+        sessionStorage.setItem(
+          storagePrefix + '_page',
+          String(currentPage - 1)
+        )
+
+        location.reload()
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#' + idPrefix + '-next'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        if (currentPage >= totalPages) {
+          return
+        }
+
+        sessionStorage.setItem(
+          storagePrefix + '_page',
+          String(currentPage + 1)
+        )
+
+        location.reload()
+      }
+    )
 }
 
 const isFuneral = path.includes('funeral')
@@ -17804,6 +18008,22 @@ document.querySelector('#merchant-product-image-file')
         .select('*')
         .eq('merchant_id', merchantId)
         .order('id', { ascending: false })
+
+        const memberRows =
+  members || []
+
+const memberPagination =
+  getAcademyPagination(
+    memberRows.length,
+    'academy_members'
+  )
+
+const memberPageRows =
+  memberRows.slice(
+    memberPagination.startIndex,
+    memberPagination.startIndex +
+      memberPagination.pageSize
+  )
     
       app.innerHTML = `
         <div class="merchant-members-page">
@@ -17839,7 +18059,7 @@ ${getMemberMenuHtml('members')}
             </thead>
     
             <tbody>
-              ${(members || []).map(member => `
+              ${memberPageRows.map(member => `
                 <tr>
   <td>${member.member_name || ''}</td>
 
@@ -17883,6 +18103,13 @@ ${getMemberMenuHtml('members')}
               `).join('')}
             </tbody>
           </table>
+
+          ${getAcademyPaginationHtml(
+            'academy-members',
+            memberPagination.pageSize,
+            memberPagination.currentPage,
+            memberPagination.totalPages
+          )}
 
 <div id="member-modal" class="member-modal">
   <div class="member-modal-box">
@@ -17932,6 +18159,13 @@ ${getMemberMenuHtml('members')}
       `
 
       bindMemberMenuEvents()
+
+      bindAcademyPagination(
+        'academy-members',
+        'academy_members',
+        memberPagination.currentPage,
+        memberPagination.totalPages
+      )
 
       document.querySelector('#add-member-btn')
   ?.addEventListener('click', () => {
@@ -18453,6 +18687,19 @@ const billings =
     )
   })
 
+  const billingPagination =
+  getAcademyPagination(
+    billings.length,
+    'academy_billings'
+  )
+
+const billingPageRows =
+  billings.slice(
+    billingPagination.startIndex,
+    billingPagination.startIndex +
+      billingPagination.pageSize
+  )
+
   app.innerHTML = `
     <div class="merchant-members-page">
       <h1>청구관리</h1>
@@ -18520,7 +18767,7 @@ const billings =
         </thead>
 
         <tbody id="billingBody">
-  ${(billings || []).map(billing => `
+  ${billingPageRows.map(billing => `
     <tr>
 
   <td>
@@ -18560,6 +18807,13 @@ const billings =
 </tbody>
       </table>
 
+      ${getAcademyPaginationHtml(
+        'academy-billings',
+        billingPagination.pageSize,
+        billingPagination.currentPage,
+        billingPagination.totalPages
+      )}
+
       <div id="billing-modal" class="member-modal">
   <div class="member-modal-box">
     <h2>➕ 추가 청구</h2>
@@ -18592,6 +18846,13 @@ const billings =
   `
 
   bindMemberMenuEvents()
+
+  bindAcademyPagination(
+    'academy-billings',
+    'academy_billings',
+    billingPagination.currentPage,
+    billingPagination.totalPages
+  )
 
   document.querySelectorAll('.billing-complete-btn')
   .forEach((button) => {
@@ -18750,6 +19011,340 @@ document.querySelector('#close-billing-modal')
   })
 
 
+} else if (path === '/merchant-academy-payments') {
+
+  const merchantId =
+    Number(
+      sessionStorage.getItem('login_merchant_id')
+    )
+
+  if (!merchantId) {
+    alert('로그인이 필요합니다.')
+    location.href = '/merchant-login'
+  }
+
+
+  /* =========================
+     기본 날짜
+  ========================= */
+
+  const today =
+    new Date()
+
+  const currentYear =
+    today.getFullYear()
+
+  const currentMonthNumber =
+    today.getMonth() + 1
+
+  const currentMonth =
+    currentYear +
+    '-' +
+    String(currentMonthNumber).padStart(2, '0')
+
+  const currentMonthStart =
+    currentMonth + '-01'
+
+  const currentMonthLastDay =
+    new Date(
+      currentYear,
+      currentMonthNumber,
+      0
+    ).getDate()
+
+  const currentMonthEnd =
+    currentMonth +
+    '-' +
+    String(currentMonthLastDay).padStart(2, '0')
+
+
+  const paymentParams =
+    new URLSearchParams(location.search)
+
+  const paymentStartDate =
+    paymentParams.get('payment_start_date') ||
+    currentMonthStart
+
+  const paymentEndDate =
+    paymentParams.get('payment_end_date') ||
+    currentMonthEnd
+
+
+  /* =========================
+     회원 조회
+  ========================= */
+
+  const { data: members } =
+    await supabase
+      .from('members')
+      .select('*')
+      .eq('merchant_id', merchantId)
+
+
+  /* =========================
+     결제내역 조회
+  ========================= */
+
+  const { data: paymentRows, error: paymentError } =
+    await supabase
+      .from('payments')
+      .select('*')
+      .eq('merchant_id', merchantId)
+      .order('id', { ascending: false })
+
+  if (paymentError) {
+    alert(
+      '결제내역 조회 실패: ' +
+      paymentError.message
+    )
+  }
+
+
+  /* =========================
+     날짜 필터
+  ========================= */
+
+  const academyPayments =
+    (paymentRows || []).filter((payment) => {
+
+      const paymentDate =
+        String(
+          payment.approved_at ||
+          payment.created_at ||
+          ''
+        ).slice(0, 10)
+
+      if (!paymentDate) {
+        return false
+      }
+
+      return (
+        paymentDate >= paymentStartDate &&
+        paymentDate <= paymentEndDate
+      )
+    })
+
+
+  /* =========================
+     페이징
+  ========================= */
+
+  const paymentPagination =
+    getAcademyPagination(
+      academyPayments.length,
+      'academy_payments'
+    )
+
+  const paymentPageRows =
+    academyPayments.slice(
+      paymentPagination.startIndex,
+      paymentPagination.startIndex +
+        paymentPagination.pageSize
+    )
+
+
+  app.innerHTML = `
+    <div class="merchant-members-page">
+
+      <h1>결제내역</h1>
+
+      ${getMemberMenuHtml('payments')}
+
+
+      <div class="billing-date-search">
+
+        <input
+          id="academy-payment-start-date"
+          type="date"
+          value="${paymentStartDate}"
+        />
+
+        <span>~</span>
+
+        <input
+          id="academy-payment-end-date"
+          type="date"
+          value="${paymentEndDate}"
+        />
+
+        <button
+          id="academy-payment-search-btn"
+          type="button"
+        >
+          검색
+        </button>
+
+      </div>
+
+
+      <table class="admin-table academy-payment-table">
+
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>승인일시</th>
+            <th>회원명</th>
+            <th>결제금액</th>
+            <th>카드번호</th>
+            <th>승인번호</th>
+            <th>결제상태</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          ${
+            paymentPageRows.map((payment, index) => {
+
+              const member =
+                (members || []).find(
+                  (item) =>
+                    Number(item.id) ===
+                    Number(payment.member_id)
+                )
+
+              const cardNumber =
+                payment.card_number
+                  ? String(payment.card_number)
+                  : '-'
+
+              return `
+                <tr>
+
+                  <td>
+                    ${
+                      paymentPagination.startIndex +
+                      index +
+                      1
+                    }
+                  </td>
+
+                  <td>
+                    ${
+                      payment.approved_at ||
+                      payment.created_at ||
+                      '-'
+                    }
+                  </td>
+
+                  <td>
+                    ${
+                      member?.member_name ||
+                      payment.buyer_name ||
+                      payment.sender_name ||
+                      '-'
+                    }
+                  </td>
+
+                  <td>
+                    ${Number(
+                      payment.amount || 0
+                    ).toLocaleString()}원
+                  </td>
+
+                  <td>
+                    ${cardNumber}
+                  </td>
+
+                  <td>
+                    ${
+                      payment.approval_number ||
+                      '-'
+                    }
+                  </td>
+
+                  <td>
+                    ${
+                      payment.status ||
+                      payment.order_status ||
+                      '-'
+                    }
+                  </td>
+
+                </tr>
+              `
+            }).join('')
+          }
+
+        </tbody>
+
+      </table>
+
+
+      ${getAcademyPaginationHtml(
+        'academy-payments',
+        paymentPagination.pageSize,
+        paymentPagination.currentPage,
+        paymentPagination.totalPages
+      )}
+
+    </div>
+  `
+
+
+  bindMemberMenuEvents()
+
+
+  bindAcademyPagination(
+    'academy-payments',
+    'academy_payments',
+    paymentPagination.currentPage,
+    paymentPagination.totalPages
+  )
+
+
+  document
+    .querySelector('#academy-payment-search-btn')
+    ?.addEventListener('click', () => {
+
+      const startDate =
+        document.querySelector<HTMLInputElement>(
+          '#academy-payment-start-date'
+        )?.value || ''
+
+      const endDate =
+        document.querySelector<HTMLInputElement>(
+          '#academy-payment-end-date'
+        )?.value || ''
+
+      if (!startDate || !endDate) {
+        alert(
+          '시작일과 종료일을 선택해주세요.'
+        )
+        return
+      }
+
+      if (startDate > endDate) {
+        alert(
+          '시작일이 종료일보다 늦을 수 없습니다.'
+        )
+        return
+      }
+
+      sessionStorage.setItem(
+        'academy_payments_page',
+        '1'
+      )
+
+      const params =
+        new URLSearchParams()
+
+      params.set(
+        'payment_start_date',
+        startDate
+      )
+
+      params.set(
+        'payment_end_date',
+        endDate
+      )
+
+      location.href =
+        '/merchant-academy-payments?' +
+        params.toString()
+    })
+
+
 } else if (path === '/merchant-batch') {
 
   const merchantId =
@@ -18771,6 +19366,22 @@ document.querySelector('#close-billing-modal')
     .eq('merchant_id', merchantId)
     .eq('payment_status', '미납')
     .order('id', { ascending: false })
+
+    const batchRows =
+  billings || []
+
+const batchPagination =
+  getAcademyPagination(
+    batchRows.length,
+    'academy_batch'
+  )
+
+const batchPageRows =
+  batchRows.slice(
+    batchPagination.startIndex,
+    batchPagination.startIndex +
+      batchPagination.pageSize
+  )
 
   app.innerHTML = `
     <div class="merchant-members-page">
@@ -18836,7 +19447,7 @@ ${getMemberMenuHtml('batch')}
         </thead>
 
         <tbody>
-          ${(billings || []).map((billing) => `
+          ${batchPageRows.map((billing) => `
             <tr>
               <td>
                 <input
@@ -18855,6 +19466,13 @@ ${getMemberMenuHtml('batch')}
           `).join('')}
         </tbody>
       </table>
+
+      ${getAcademyPaginationHtml(
+        'academy-batch',
+        batchPagination.pageSize,
+        batchPagination.currentPage,
+        batchPagination.totalPages
+      )}
 
       <div id="payment-method-modal" class="modal-overlay" style="display:none;">
   <div class="modal-box">
@@ -18892,6 +19510,13 @@ ${getMemberMenuHtml('batch')}
   `
 
   bindMemberMenuEvents()
+
+  bindAcademyPagination(
+    'academy-batch',
+    'academy_batch',
+    batchPagination.currentPage,
+    batchPagination.totalPages
+  )
 
   /* =========================================
    선택 청구건 엑셀 양식 다운로드
