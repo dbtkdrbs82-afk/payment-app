@@ -9174,3 +9174,24 @@ and (orientation: landscape) {
   opacity: 0.6;
   cursor: wait;
 }
+/* 아카데미 수기결제 상단 4개 버튼 강제 동일폭 */
+.academy-batch-tools {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.academy-batch-tools > button,
+.academy-batch-tools > .academy-batch-upload-label,
+.academy-batch-tools #batch-complete-btn {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+
+  height: 44px !important;
+
+  margin: 0 !important;
+  padding: 0 12px !important;
+
+  box-sizing: border-box !important;
+}
