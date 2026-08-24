@@ -18296,7 +18296,7 @@ document.querySelector('#close-member-modal')
   </button>
 </div>
 
-      <table class="admin-table">
+      <table class="admin-table academy-billing-table">
         <thead>
           <tr>
   <th>

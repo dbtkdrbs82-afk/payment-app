@@ -8687,6 +8687,71 @@ and (orientation: landscape) {
 
   font-size: 12px;
 }
+/* =========================================
+   아카데미 청구관리 테이블 정렬
+========================================= */
 
+.academy-billing-table {
+  width: 100%;
+  table-layout: fixed;
+}
 
+/* 전체 글자 크기 */
+.academy-billing-table th,
+.academy-billing-table td {
+  padding: 10px 8px;
+  font-size: 12px;
+  text-align: center;
+  vertical-align: middle;
+  box-sizing: border-box;
+}
 
+/* 1. 선택 */
+.academy-billing-table th:nth-child(1),
+.academy-billing-table td:nth-child(1) {
+  width: 55px !important;
+  min-width: 55px !important;
+  max-width: 55px !important;
+}
+
+/* 2. 회원명 */
+.academy-billing-table th:nth-child(2),
+.academy-billing-table td:nth-child(2) {
+  width: 180px;
+}
+
+/* 3. 청구월 */
+.academy-billing-table th:nth-child(3),
+.academy-billing-table td:nth-child(3) {
+  width: 120px;
+}
+
+/* 4. 금액 */
+.academy-billing-table th:nth-child(4),
+.academy-billing-table td:nth-child(4) {
+  width: 130px;
+}
+
+/* 5. 메모 */
+.academy-billing-table th:nth-child(5),
+.academy-billing-table td:nth-child(5) {
+  width: 180px;
+}
+
+/* 6. 발송상태 */
+.academy-billing-table th:nth-child(6),
+.academy-billing-table td:nth-child(6) {
+  width: 120px;
+}
+
+/* 7. 결제상태 */
+.academy-billing-table th:nth-child(7),
+.academy-billing-table td:nth-child(7) {
+  width: 120px;
+}
+
+/* 8. 처리 */
+.academy-billing-table th:nth-child(8),
+.academy-billing-table td:nth-child(8) {
+  width: 130px;
+}
