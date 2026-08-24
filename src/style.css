@@ -9371,3 +9371,47 @@ and (orientation: landscape) {
 .academy-payment-table td:nth-child(7) {
   width: 120px;
 }
+/* =========================================
+   아카데미 결제내역 날짜검색 정렬
+========================================= */
+
+#academy-payment-search-btn {
+  width: 120px !important;
+  min-width: 120px !important;
+  max-width: 120px !important;
+
+  height: 42px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 1px solid #174f91;
+  border-radius: 10px;
+
+  background: #174f91;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+
+  box-sizing: border-box;
+
+  cursor: pointer;
+}
+
+
+@media screen and (max-width: 700px) {
+
+  #academy-payment-search-btn {
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+
+    height: 40px !important;
+  }
+}
