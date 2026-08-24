@@ -18734,9 +18734,49 @@ document.querySelector('#close-billing-modal')
 
 ${getMemberMenuHtml('batch')}
 
-      <div class="billing-button-group">
-        <button id="batch-complete-btn">💳 선택건 결제</button>
-      </div>
+      <div class="academy-batch-tools">
+
+  <button id="batch-template-download-btn">
+    📥 선택건 엑셀 다운로드
+  </button>
+
+  <label
+    for="batch-excel-file"
+    class="academy-batch-upload-label"
+  >
+    📂 결제파일 선택
+  </label>
+
+  <input
+    id="batch-excel-file"
+    type="file"
+    accept=".xlsx,.xls"
+    style="display:none;"
+  />
+
+  <button id="batch-excel-load-btn">
+    엑셀 불러오기
+  </button>
+
+  <button id="batch-complete-btn">
+    💳 선택건 결제
+  </button>
+
+</div>
+
+<div
+  id="batch-excel-file-name"
+  class="academy-batch-file-name"
+>
+  선택된 파일 없음
+</div>
+
+<div
+  id="batch-excel-preview"
+  class="academy-batch-excel-preview"
+  style="display:none;"
+>
+</div>
 
       <table class="admin-table">
         <thead>
@@ -18808,6 +18848,744 @@ ${getMemberMenuHtml('batch')}
   `
 
   bindMemberMenuEvents()
+
+  /* =========================================
+   선택 청구건 엑셀 양식 다운로드
+========================================= */
+
+document.querySelector('#batch-template-download-btn')
+?.addEventListener('click', () => {
+
+  const checkedItems = Array.from(
+    document.querySelectorAll<HTMLInputElement>(
+      '.batch-billing-check:checked'
+    )
+  )
+
+  const ids =
+    checkedItems.map((item) =>
+      Number(item.dataset.id)
+    )
+
+  if (ids.length === 0) {
+    alert('엑셀로 내려받을 청구건을 선택해주세요.')
+    return
+  }
+
+  const selectedBillings =
+    (billings || []).filter((billing) =>
+      ids.includes(Number(billing.id))
+    )
+
+  const excelRows =
+    selectedBillings.map((billing) => {
+
+      const member =
+        (members || []).find(
+          (item) =>
+            Number(item.id) ===
+            Number(billing.member_id)
+        )
+
+      return {
+        청구ID: billing.id,
+        회원명: member?.member_name || '',
+        청구월: billing.billing_month || '',
+        결제금액: Number(billing.amount || 0),
+        카드번호: '',
+        유효기간월: '',
+        유효기간년: '',
+        할부개월: '00',
+        상품명: '정기결제',
+        연락처: member?.phone || ''
+      }
+    })
+
+  const worksheet =
+    XLSX.utils.json_to_sheet(excelRows)
+
+  worksheet['!cols'] = [
+    { wch: 10 },
+    { wch: 24 },
+    { wch: 12 },
+    { wch: 14 },
+    { wch: 24 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 12 },
+    { wch: 20 },
+    { wch: 18 }
+  ]
+
+  const workbook =
+    XLSX.utils.book_new()
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    '수기결제'
+  )
+
+  const todayText =
+    new Date().toISOString().slice(0, 10)
+
+  XLSX.writeFile(
+    workbook,
+    `아카데미_수기결제_${todayText}.xlsx`
+  )
+})
+
+
+/* =========================================
+ 파일 선택 표시
+========================================= */
+
+const batchExcelFileInput =
+document.querySelector<HTMLInputElement>(
+  '#batch-excel-file'
+)
+
+batchExcelFileInput
+?.addEventListener('change', () => {
+
+  const fileNameBox =
+    document.querySelector<HTMLElement>(
+      '#batch-excel-file-name'
+    )
+
+  const file =
+    batchExcelFileInput.files?.[0]
+
+  if (!fileNameBox) {
+    return
+  }
+
+  fileNameBox.textContent =
+    file
+      ? file.name
+      : '선택된 파일 없음'
+})
+
+/* =========================================
+   아카데미 비인증 엑셀 결제 데이터
+   카드 원문은 DB 저장 안 함
+========================================= */
+
+let academyBatchExcelRows: Array<{
+  billingId: number
+  memberName: string
+  billingMonth: string
+  amount: number
+
+  cardNumber: string
+  expiryMonth: string
+  expiryYear: string
+
+  installment: string
+  productName: string
+  phone: string
+
+  valid: boolean
+  errorMessage: string
+}> = []
+
+
+/* =========================================
+   엑셀 불러오기
+========================================= */
+
+document.querySelector('#batch-excel-load-btn')
+  ?.addEventListener('click', async () => {
+
+    const fileInput =
+      document.querySelector<HTMLInputElement>(
+        '#batch-excel-file'
+      )
+
+    const file =
+      fileInput?.files?.[0]
+
+    if (!file) {
+      alert('결제할 엑셀 파일을 선택해주세요.')
+      return
+    }
+
+    try {
+
+      const buffer =
+        await file.arrayBuffer()
+
+      const workbook =
+        XLSX.read(buffer, {
+          type: 'array'
+        })
+
+      const firstSheetName =
+        workbook.SheetNames[0]
+
+      if (!firstSheetName) {
+        alert('엑셀 시트를 찾을 수 없습니다.')
+        return
+      }
+
+      const worksheet =
+        workbook.Sheets[firstSheetName]
+
+      const rawRows =
+        XLSX.utils.sheet_to_json<Record<string, any>>(
+          worksheet,
+          {
+            defval: '',
+            raw: false
+          }
+        )
+
+      if (rawRows.length === 0) {
+        alert('엑셀에 결제 데이터가 없습니다.')
+        return
+      }
+
+
+      academyBatchExcelRows =
+        rawRows.map((row) => {
+
+          const billingId =
+            Number(row['청구ID'] || 0)
+
+          const memberName =
+            String(row['회원명'] || '').trim()
+
+          const billingMonth =
+            String(row['청구월'] || '').trim()
+
+          const amount =
+            Number(
+              String(row['결제금액'] || '0')
+                .replace(/,/g, '')
+                .replace(/원/g, '')
+                .trim()
+            )
+
+          const cardNumber =
+            String(row['카드번호'] || '')
+              .replace(/[^0-9]/g, '')
+
+          const expiryMonth =
+            String(row['유효기간월'] || '')
+              .replace(/[^0-9]/g, '')
+              .padStart(2, '0')
+              .slice(-2)
+
+          const expiryYear =
+            String(row['유효기간년'] || '')
+              .replace(/[^0-9]/g, '')
+              .slice(-2)
+
+          const installment =
+            String(row['할부개월'] || '00')
+              .replace(/[^0-9]/g, '')
+              .padStart(2, '0')
+              .slice(-2)
+
+          const productName =
+            String(
+              row['상품명'] || '정기결제'
+            ).trim()
+
+          const phone =
+            String(row['연락처'] || '')
+              .replace(/[^0-9]/g, '')
+
+
+          const errors: string[] = []
+
+
+          if (!billingId) {
+            errors.push('청구ID 없음')
+          }
+
+          if (!memberName) {
+            errors.push('회원명 없음')
+          }
+
+          if (!amount || amount <= 0) {
+            errors.push('결제금액 오류')
+          }
+
+          if (
+            cardNumber.length < 14 ||
+            cardNumber.length > 16
+          ) {
+            errors.push('카드번호 오류')
+          }
+
+          if (
+            Number(expiryMonth) < 1 ||
+            Number(expiryMonth) > 12
+          ) {
+            errors.push('유효기간 월 오류')
+          }
+
+          if (expiryYear.length !== 2) {
+            errors.push('유효기간 년 오류')
+          }
+
+
+          return {
+            billingId,
+            memberName,
+            billingMonth,
+            amount,
+
+            cardNumber,
+            expiryMonth,
+            expiryYear,
+
+            installment,
+            productName,
+            phone,
+
+            valid: errors.length === 0,
+            errorMessage: errors.join(', ')
+          }
+        })
+
+
+      const preview =
+        document.querySelector<HTMLElement>(
+          '#batch-excel-preview'
+        )
+
+      if (!preview) {
+        return
+      }
+
+
+      const validCount =
+        academyBatchExcelRows.filter(
+          (row) => row.valid
+        ).length
+
+      const invalidCount =
+        academyBatchExcelRows.length -
+        validCount
+
+      const totalAmount =
+        academyBatchExcelRows
+          .filter((row) => row.valid)
+          .reduce(
+            (sum, row) =>
+              sum + row.amount,
+            0
+          )
+
+
+      preview.innerHTML = `
+        <div class="academy-batch-preview-summary">
+
+          <strong>
+            총 ${academyBatchExcelRows.length}건
+          </strong>
+
+          <span>
+            정상 ${validCount}건
+          </span>
+
+          <span>
+            오류 ${invalidCount}건
+          </span>
+
+          <span>
+            결제예정 ${totalAmount.toLocaleString()}원
+          </span>
+
+        </div>
+
+        <div class="academy-batch-preview-table-wrap">
+
+          <table class="academy-batch-preview-table">
+
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>회원명</th>
+                <th>청구월</th>
+                <th>결제금액</th>
+                <th>카드번호</th>
+                <th>유효기간</th>
+                <th>할부</th>
+                <th>상품명</th>
+                <th>연락처</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              ${
+                academyBatchExcelRows
+                  .map((row, index) => {
+
+                    const last4 =
+                      row.cardNumber.length >= 4
+                        ? row.cardNumber.slice(-4)
+                        : ''
+
+                    const maskedCard =
+                      last4
+                        ? `****-${last4}`
+                        : '-'
+
+                    return `
+                      <tr>
+
+                        <td>
+                          ${index + 1}
+                        </td>
+
+                        <td>
+                          ${row.memberName || '-'}
+                        </td>
+
+                        <td>
+                          ${row.billingMonth || '-'}
+                        </td>
+
+                        <td>
+                          ${row.amount.toLocaleString()}원
+                        </td>
+
+                        <td>
+                          ${maskedCard}
+                        </td>
+
+                        <td>
+                          ${
+                            row.expiryMonth &&
+                            row.expiryYear
+                              ? row.expiryMonth +
+                                '/' +
+                                row.expiryYear
+                              : '-'
+                          }
+                        </td>
+
+                        <td>
+                          ${
+                            row.installment === '00'
+                              ? '일시불'
+                              : Number(row.installment) +
+                                '개월'
+                          }
+                        </td>
+
+                        <td>
+                          ${row.productName || '-'}
+                        </td>
+
+                        <td>
+                          ${row.phone || '-'}
+                        </td>
+
+                        <td>
+                          ${
+                            row.valid
+                              ? `
+                                <span class="academy-batch-valid">
+                                  정상
+                                </span>
+                              `
+                              : `
+                                <span
+                                  class="academy-batch-invalid"
+                                  title="${row.errorMessage}"
+                                >
+                                  오류
+                                </span>
+                              `
+                          }
+                        </td>
+
+                      </tr>
+                    `
+                  })
+                  .join('')
+              }
+
+            </tbody>
+
+          </table>
+
+        </div>
+      `
+
+      preview.style.display = 'block'
+
+      preview.insertAdjacentHTML(
+        'beforeend',
+        `
+          <div class="academy-batch-submit-wrap">
+            <button
+              id="academy-batch-payment-submit"
+              type="button"
+            >
+              💳 일괄 결제 실행
+            </button>
+          </div>
+        `
+      )
+      
+      
+      document.querySelector('#academy-batch-payment-submit')
+        ?.addEventListener('click', async () => {
+      
+          const merchantId =
+            Number(
+              sessionStorage.getItem('login_merchant_id') || 0
+            )
+      
+          if (!merchantId) {
+            alert('가맹점 정보를 찾을 수 없습니다.')
+            return
+          }
+      
+          const validRows =
+            academyBatchExcelRows.filter(
+              (row) => row.valid
+            )
+      
+          if (validRows.length === 0) {
+            alert('결제 가능한 정상 데이터가 없습니다.')
+            return
+          }
+      
+          const invalidCount =
+            academyBatchExcelRows.length -
+            validRows.length
+      
+          if (invalidCount > 0) {
+            alert(
+              '오류 데이터가 ' +
+              invalidCount +
+              '건 있습니다.\n' +
+              '오류건을 수정한 뒤 다시 불러와주세요.'
+            )
+            return
+          }
+      
+          const totalAmount =
+            validRows.reduce(
+              (sum, row) =>
+                sum + Number(row.amount || 0),
+              0
+            )
+      
+          const confirmed =
+            confirm(
+              '총 ' +
+              validRows.length +
+              '건을 결제합니다.\n' +
+              '총 결제금액: ' +
+              totalAmount.toLocaleString() +
+              '원\n\n' +
+              '결제를 실행하시겠습니까?'
+            )
+      
+          if (!confirmed) {
+            return
+          }
+      
+          const submitButton =
+            document.querySelector<HTMLButtonElement>(
+              '#academy-batch-payment-submit'
+            )
+      
+          if (submitButton) {
+            submitButton.disabled = true
+            submitButton.textContent =
+              '결제 처리 중...'
+          }
+      
+          let successCount = 0
+          let failCount = 0
+      
+          const failMessages: string[] = []
+      
+          try {
+      
+            for (
+              let index = 0;
+              index < validRows.length;
+              index += 1
+            ) {
+      
+              const row =
+                validRows[index]
+      
+              if (submitButton) {
+                submitButton.textContent =
+                  '결제 처리 중 ' +
+                  (index + 1) +
+                  ' / ' +
+                  validRows.length
+              }
+      
+              try {
+      
+                const expiryYymm =
+                  row.expiryYear +
+                  row.expiryMonth
+      
+                const response =
+                  await fetch(
+                    '/api/korpay-manual-pay',
+                    {
+                      method: 'POST',
+      
+                      headers: {
+                        'Content-Type':
+                          'application/json'
+                      },
+      
+                      body: JSON.stringify({
+                        merchantId,
+                        amount: row.amount,
+                        cardNumber: row.cardNumber,
+                        expiryYymm,
+                        installment: row.installment,
+                        goodsName:
+                          row.productName || '정기결제',
+                        customerPhone:
+                          row.phone || ''
+                      })
+                    }
+                  )
+      
+                const data =
+                  await response.json()
+      
+                if (
+                  !response.ok ||
+                  !data.success
+                ) {
+      
+                  failCount += 1
+      
+                  failMessages.push(
+                    row.memberName +
+                    ' : ' +
+                    (
+                      data.message ||
+                      '결제 실패'
+                    )
+                  )
+      
+                  continue
+                }
+      
+      
+                const { error: billingUpdateError } =
+                  await supabase
+                    .from('billings')
+                    .update({
+                      payment_status: '완료'
+                    })
+                    .eq('id', row.billingId)
+                    .eq('merchant_id', merchantId)
+      
+                if (billingUpdateError) {
+      
+                  failCount += 1
+      
+                  failMessages.push(
+                    row.memberName +
+                    ' : 결제 승인 성공 / 청구 완료처리 실패'
+                  )
+      
+                  continue
+                }
+      
+      
+                row.cardNumber = ''
+                row.expiryMonth = ''
+                row.expiryYear = ''
+      
+                successCount += 1
+      
+              } catch (rowError) {
+      
+                console.error(
+                  '다건 수기결제 행 오류:',
+                  rowError
+                )
+      
+                failCount += 1
+      
+                failMessages.push(
+                  row.memberName +
+                  ' : 결제 요청 오류'
+                )
+              }
+            }
+      
+      
+            let resultMessage =
+              '일괄결제가 완료되었습니다.\n\n' +
+              '성공: ' +
+              successCount +
+              '건\n' +
+              '실패: ' +
+              failCount +
+              '건'
+      
+            if (failMessages.length > 0) {
+      
+              resultMessage +=
+                '\n\n[실패내역]\n' +
+                failMessages
+                  .slice(0, 10)
+                  .join('\n')
+            }
+      
+            alert(resultMessage)
+      
+      
+            academyBatchExcelRows.forEach(
+              (row) => {
+                row.cardNumber = ''
+                row.expiryMonth = ''
+                row.expiryYear = ''
+              }
+            )
+      
+            if (successCount > 0) {
+              location.reload()
+            }
+      
+          } finally {
+      
+            if (submitButton) {
+              submitButton.disabled = false
+              submitButton.textContent =
+                '💳 일괄 결제 실행'
+            }
+          }
+      
+        })
+
+    } catch (error) {
+
+      console.error(
+        '엑셀 불러오기 실패:',
+        error
+      )
+
+      alert(
+        '엑셀 파일을 읽는 중 오류가 발생했습니다.'
+      )
+    }
+
+  })
 
   document.querySelector('#batch-check-all')
   ?.addEventListener('change', (event) => {

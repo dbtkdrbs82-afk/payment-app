@@ -8904,3 +8904,193 @@ and (orientation: landscape) {
     gap: 8px !important;
   }
 }
+/* =========================================
+   아카데미 다건 수기결제 도구
+========================================= */
+
+.academy-batch-tools {
+  display: grid;
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 10px;
+
+  width: 100%;
+
+  margin: 0 0 10px;
+
+  box-sizing: border-box;
+}
+
+.academy-batch-tools button,
+.academy-batch-upload-label {
+  height: 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin: 0;
+  padding: 0 12px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #174f91;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.academy-batch-file-name {
+  width: 100%;
+
+  margin: 0 0 14px;
+  padding: 9px 12px;
+
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+
+  background: #f8fafc;
+
+  font-size: 12px;
+  color: #526173;
+
+  box-sizing: border-box;
+}
+
+
+@media screen and (max-width: 700px) {
+
+  .academy-batch-tools {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 8px;
+  }
+
+  .academy-batch-tools button,
+  .academy-batch-upload-label {
+    height: 40px;
+
+    font-size: 11px;
+  }
+}
+/* =========================================
+   아카데미 엑셀 결제 미리보기
+========================================= */
+
+.academy-batch-excel-preview {
+  width: 100%;
+  margin-top: 18px;
+  box-sizing: border-box;
+}
+
+.academy-batch-preview-summary {
+  display: flex;
+  align-items: center;
+
+  gap: 20px;
+
+  padding: 14px 16px;
+
+  border: 1px solid #dfe6ef;
+  border-radius: 10px;
+
+  background: #f8fafc;
+
+  font-size: 13px;
+
+  box-sizing: border-box;
+}
+
+.academy-batch-preview-summary strong {
+  color: #174f91;
+}
+
+.academy-batch-preview-table-wrap {
+  width: 100%;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+
+.academy-batch-preview-table {
+  width: 100%;
+  min-width: 1050px;
+
+  border-collapse: collapse;
+  table-layout: fixed;
+
+  background: #ffffff;
+
+  font-size: 12px;
+}
+
+.academy-batch-preview-table th,
+.academy-batch-preview-table td {
+  padding: 10px 8px;
+
+  border: 1px solid #dfe6ef;
+
+  text-align: center;
+  vertical-align: middle;
+
+  box-sizing: border-box;
+}
+
+.academy-batch-preview-table th {
+  background: #f8fafc;
+  font-weight: 700;
+}
+
+.academy-batch-valid {
+  font-weight: 700;
+  color: #16794b;
+}
+
+.academy-batch-invalid {
+  font-weight: 700;
+  color: #d8392f;
+}
+
+@media screen and (max-width: 700px) {
+
+  .academy-batch-preview-summary {
+    flex-wrap: wrap;
+
+    gap: 8px 16px;
+
+    font-size: 11px;
+  }
+}
+.academy-batch-submit-wrap {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 14px;
+}
+
+#academy-batch-payment-submit {
+  width: 240px;
+  height: 46px;
+
+  border: none;
+  border-radius: 9px;
+
+  background: #174f91;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+#academy-batch-payment-submit:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
