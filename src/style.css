@@ -8364,3 +8364,168 @@ and (orientation: landscape) {
     box-shadow: none !important;
   }
 }
+/* =========================================
+   아카데미 메인홈
+========================================= */
+
+.batch-home-dashboard {
+  max-width: 1180px;
+  margin: 20px auto;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+
+/* 6개 카드 */
+.batch-dashboard-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+
+  gap: 14px !important;
+
+  width: 100%;
+}
+
+
+/* 카드 */
+.batch-dashboard-grid .academy-card {
+  min-width: 0;
+
+  padding: 22px 18px;
+
+  border: 1px solid #dfe6ef;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.batch-dashboard-grid .academy-card span {
+  display: block;
+
+  margin-bottom: 10px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  color: #526173;
+}
+
+.batch-dashboard-grid .academy-card strong {
+  display: block;
+
+  font-size: 25px;
+  font-weight: 800;
+
+  color: #173f73;
+}
+
+
+/* 날짜검색 */
+.batch-dashboard-search {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 10px;
+
+  margin-top: 22px;
+  padding: 16px;
+
+  border: 1px solid #dfe6ef;
+  border-radius: 10px;
+
+  background: #f8fafc;
+
+  box-sizing: border-box;
+}
+
+.batch-dashboard-search input {
+  width: 180px;
+  height: 38px;
+
+  padding: 0 10px;
+
+  border: 1px solid #ccd6e2;
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  font-size: 13px;
+
+  box-sizing: border-box;
+}
+
+.batch-dashboard-search span {
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #566477;
+}
+
+#batch-dashboard-search-button {
+  width: 80px;
+  height: 38px;
+
+  padding: 0;
+
+  border: none;
+  border-radius: 7px;
+
+  background: #174f91;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+/* 모바일 */
+@media screen and (max-width: 700px) {
+
+  .batch-home-dashboard {
+    margin: 12px auto;
+    padding: 14px;
+  }
+
+  .batch-dashboard-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr)) !important;
+
+    gap: 9px !important;
+  }
+
+  .batch-dashboard-grid .academy-card {
+    padding: 16px 8px;
+  }
+
+  .batch-dashboard-grid .academy-card span {
+    font-size: 12px;
+  }
+
+  .batch-dashboard-grid .academy-card strong {
+    font-size: 20px;
+  }
+
+  .batch-dashboard-search {
+    flex-wrap: wrap;
+
+    gap: 7px;
+
+    padding: 12px;
+  }
+
+  .batch-dashboard-search input {
+    width: calc(50% - 16px);
+    min-width: 120px;
+  }
+
+  #batch-dashboard-search-button {
+    width: 100%;
+  }
+}

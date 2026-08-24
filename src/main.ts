@@ -56,6 +56,47 @@ function bindMemberMenuEvents() {
     ?.addEventListener('click', () => {
       alert('결제내역 화면 준비중입니다.')
     })
+
+    document.querySelector('#batch-dashboard-search-button')
+  ?.addEventListener('click', () => {
+
+    const startDate =
+      document.querySelector<HTMLInputElement>(
+        '#batch-dashboard-start-date'
+      )?.value || ''
+
+    const endDate =
+      document.querySelector<HTMLInputElement>(
+        '#batch-dashboard-end-date'
+      )?.value || ''
+
+    if (!startDate || !endDate) {
+      alert('시작일과 종료일을 선택해주세요.')
+      return
+    }
+
+    if (startDate > endDate) {
+      alert('시작일이 종료일보다 늦을 수 없습니다.')
+      return
+    }
+
+    const params =
+      new URLSearchParams(location.search)
+
+    params.set(
+      'member_start_date',
+      startDate
+    )
+
+    params.set(
+      'member_end_date',
+      endDate
+    )
+
+    location.href =
+      '/merchant-admin?' +
+      params.toString()
+  })
 }
 
 const isFuneral = path.includes('funeral')
@@ -7633,10 +7674,7 @@ merchantButtons.forEach((button) => {
   ((adminRole === 'AGENCY' || adminRole === 'MANAGER') ? ' disabled' : '') +
 '>' +
 '<option value="일반매장" ' + (merchant.merchant_type === '일반매장' ? 'selected' : '') + '>일반매장</option>' +
-'<option value="학원" ' + (merchant.merchant_type === '학원' ? 'selected' : '') + '>학원</option>' +
-'<option value="아파트관리" ' + (merchant.merchant_type === '아파트관리' ? 'selected' : '') + '>아파트관리</option>' +
-'<option value="청소업체" ' + (merchant.merchant_type === '청소업체' ? 'selected' : '') + '>청소업체</option>' +
-'<option value="렌탈" ' + (merchant.merchant_type === '렌탈' ? 'selected' : '') + '>렌탈</option>' +
+'<option value="아카데미" ' + (merchant.merchant_type === '아카데미' ? 'selected' : '') + '>아카데미</option>' +
 '<option value="결혼" ' + (merchant.merchant_type === '결혼' ? 'selected' : '') + '>결혼</option>' +
 '<option value="장례" ' + (merchant.merchant_type === '장례' ? 'selected' : '') + '>장례</option>' +
 '<option value="무선단말기" ' + (merchant.merchant_type === '무선단말기' ? 'selected' : '') + '>무선단말기</option>' +
@@ -13617,7 +13655,7 @@ const settlementComplete =
   merchantType === '뷰티'
 
 const isAcademy =
-  merchantType === '학원'
+  merchantType === '아카데미'
 
 const isWirelessTerminal =
   merchantType === '무선단말기'
@@ -14070,39 +14108,243 @@ const terminalPagedPayments =
   `
 
 } else if (isAcademy) {
+
+  const memberDashboardParams =
+    new URLSearchParams(window.location.search)
+
+  const now = new Date()
+
+  const currentYear =
+    now.getFullYear()
+
+  const currentMonth =
+    String(now.getMonth() + 1).padStart(2, '0')
+
+  const monthStart =
+    `${currentYear}-${currentMonth}-01`
+
+  const monthEndDate =
+    new Date(currentYear, now.getMonth() + 1, 0)
+
+  const monthEnd =
+    `${currentYear}-${currentMonth}-${String(
+      monthEndDate.getDate()
+    ).padStart(2, '0')}`
+
+  const selectedStartDate =
+    memberDashboardParams.get('member_start_date') ||
+    monthStart
+
+  const selectedEndDate =
+    memberDashboardParams.get('member_end_date') ||
+    monthEnd
+
+
+  /* =========================
+     회원 조회
+  ========================= */
+
+  const {
+    data: memberDashboardMembers,
+    error: memberDashboardMemberError
+  } = await supabase
+    .from('members')
+    .select('*')
+    .eq('merchant_id', merchantId)
+
+  if (memberDashboardMemberError) {
+    console.error(
+      '회원 현황 조회 실패:',
+      memberDashboardMemberError
+    )
+  }
+
+
+  /* =========================
+     청구 조회
+  ========================= */
+
+  const {
+    data: memberDashboardBillings,
+    error: memberDashboardBillingError
+  } = await supabase
+    .from('billings')
+    .select('*')
+    .eq('merchant_id', merchantId)
+
+  if (memberDashboardBillingError) {
+    console.error(
+      '청구 현황 조회 실패:',
+      memberDashboardBillingError
+    )
+  }
+
+
+  const allMembers =
+    memberDashboardMembers || []
+
+  const allBillings =
+    memberDashboardBillings || []
+
+
+  /* =========================
+     전체 회원수
+  ========================= */
+
+  const totalMemberCount =
+    allMembers.length
+
+
+  /* =========================
+     이번달 신규회원
+     members.joined_at 기준
+  ========================= */
+
+  const newMemberCount =
+    allMembers.filter((member) => {
+
+      const joinedAt =
+        String(member.joined_at || '').slice(0, 10)
+
+      return (
+        joinedAt >= monthStart &&
+        joinedAt <= monthEnd
+      )
+    }).length
+
+
+  /* =========================
+     선택 기간 청구
+  ========================= */
+
+  const filteredBillings =
+    allBillings.filter((billing) => {
+
+      /*
+        created_at이 있으면 실제 청구 생성일 사용
+        없으면 billing_month의 1일을 기준으로 사용
+      */
+      const billingDate =
+        billing.created_at
+          ? String(billing.created_at).slice(0, 10)
+          : billing.billing_month
+            ? String(billing.billing_month) + '-01'
+            : ''
+
+      if (!billingDate) {
+        return false
+      }
+
+      return (
+        billingDate >= selectedStartDate &&
+        billingDate <= selectedEndDate
+      )
+    })
+
+
+  const billingCount =
+    filteredBillings.length
+
+
+  const unpaidCount =
+    filteredBillings.filter((billing) =>
+      billing.payment_status !== '완료'
+    ).length
+
+
+  const completedCount =
+    filteredBillings.filter((billing) =>
+      billing.payment_status === '완료'
+    ).length
+
+
+  const billingAmount =
+    filteredBillings.reduce(
+      (sum, billing) =>
+        sum + Number(billing.amount || 0),
+      0
+    )
+
+
+  /* =========================
+     상단 메뉴
+  ========================= */
+
   merchantMenu = `
     <button id="merchant-member-tab">회원관리</button>
     <button id="merchant-billing-tab">청구관리</button>
     <button id="merchant-batch-tab">수기결제</button>
     <button id="merchant-payment-list-tab">결제내역</button>
-    
   `
 
+
+  /* =========================
+     일괄관리 메인홈
+  ========================= */
+
   merchantContent = `
-    <div class="merchant-type-ready-box">
-      <div class="academy-dashboard">
+    <div class="merchant-type-ready-box batch-home-dashboard">
+
+      <div class="academy-dashboard batch-dashboard-grid">
 
         <div class="academy-card">
-          <span>회원 수</span>
-          <strong>3명</strong>
+          <span>전체 회원수</span>
+          <strong>${totalMemberCount.toLocaleString()}명</strong>
         </div>
 
         <div class="academy-card">
-          <span>미납 건수</span>
-          <strong>3건</strong>
+          <span>이번달 신규회원</span>
+          <strong>${newMemberCount.toLocaleString()}명</strong>
         </div>
 
         <div class="academy-card">
-          <span>완료 건수</span>
-          <strong>1건</strong>
+          <span>청구건수</span>
+          <strong>${billingCount.toLocaleString()}건</strong>
         </div>
 
         <div class="academy-card">
-          <span>이번달 청구금액</span>
-          <strong>350,000원</strong>
+          <span>미납건수</span>
+          <strong>${unpaidCount.toLocaleString()}건</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>완료건수</span>
+          <strong>${completedCount.toLocaleString()}건</strong>
+        </div>
+
+        <div class="academy-card">
+          <span>청구금액</span>
+          <strong>${billingAmount.toLocaleString()}원</strong>
         </div>
 
       </div>
+
+
+      <div class="batch-dashboard-search">
+
+        <input
+          id="batch-dashboard-start-date"
+          type="date"
+          value="${selectedStartDate}"
+        />
+
+        <span>~</span>
+
+        <input
+          id="batch-dashboard-end-date"
+          type="date"
+          value="${selectedEndDate}"
+        />
+
+        <button
+          id="batch-dashboard-search-button"
+          type="button"
+        >
+          검색
+        </button>
+
+      </div>
+
     </div>
   `
 
