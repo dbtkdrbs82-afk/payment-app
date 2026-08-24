@@ -20185,6 +20185,34 @@ document.querySelector('#batch-excel-load-btn')
                   continue
                 }
       
+                /* =========================
+   결제내역에 아카데미 회원 연결
+========================= */
+
+const approvalNumber =
+String(data.approvalNumber || '').trim()
+
+if (approvalNumber) {
+
+const { error: paymentMemberError } =
+  await supabase
+    .from('payments')
+    .update({
+      sender_name: row.memberName,
+      message:
+        '아카데미 정기결제 / 청구ID ' +
+        row.billingId
+    })
+    .eq('merchant_id', merchantId)
+    .eq('approval_number', approvalNumber)
+
+if (paymentMemberError) {
+  console.error(
+    '아카데미 결제 회원 연결 실패:',
+    paymentMemberError
+  )
+}
+}
       
                 row.cardNumber = ''
                 row.expiryMonth = ''
