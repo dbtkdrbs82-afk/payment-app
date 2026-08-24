@@ -8677,8 +8677,6 @@ and (orientation: landscape) {
 .merchant-members-page .admin-table td:nth-child(13) {
   min-width: 85px;
 }
-
-
 /* 회원관리 버튼도 조금 축소 */
 .merchant-members-page .member-edit-btn,
 .merchant-members-page .member-delete-btn {
@@ -8689,3 +8687,6 @@ and (orientation: landscape) {
 
   font-size: 12px;
 }
+
+
+
