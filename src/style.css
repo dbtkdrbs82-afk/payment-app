@@ -8421,8 +8421,6 @@ and (orientation: landscape) {
 
   color: #173f73;
 }
-
-
 /* 날짜검색 */
 .batch-dashboard-search {
   display: flex;
@@ -8532,3 +8530,4 @@ and (orientation: landscape) {
 .academy-hide-order-list {
   display: none !important;
 }
+
