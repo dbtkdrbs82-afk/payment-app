@@ -52,7 +52,7 @@ function bindMemberMenuEvents() {
       location.href = '/merchant-batch'
     })
 
-    document.querySelector('#merchant-payment-tab')
+    document.querySelector('#merchant-payment-list-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-academy-payments'
   })
