@@ -8422,9 +8422,9 @@ and (orientation: landscape) {
   color: #173f73;
 }
 /* 날짜검색 */
+
 .batch-dashboard-search {
   display: flex;
-
   align-items: center;
   justify-content: center;
 
@@ -8443,12 +8443,12 @@ and (orientation: landscape) {
 
 .batch-dashboard-search input {
   width: 180px;
-  height: 38px;
+  height: 42px;
 
   padding: 0 10px;
 
   border: 1px solid #ccd6e2;
-  border-radius: 7px;
+  border-radius: 10px;
 
   background: #ffffff;
 
@@ -8458,6 +8458,12 @@ and (orientation: landscape) {
 }
 
 .batch-dashboard-search span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 42px;
+
   font-size: 14px;
   font-weight: 700;
 
@@ -8465,25 +8471,36 @@ and (orientation: landscape) {
 }
 
 #batch-dashboard-search-button {
-  width: 80px;
-  height: 38px;
+  width: 120px;
+  height: 42px;
 
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
 
-  border: none;
-  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #174f91;
+  border-radius: 10px;
 
   background: #174f91;
   color: #ffffff;
 
   font-size: 13px;
   font-weight: 700;
+  line-height: 1;
+
+  box-sizing: border-box;
 
   cursor: pointer;
+
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 
 /* 모바일 */
+
 @media screen and (max-width: 700px) {
 
   .batch-home-dashboard {
@@ -8521,13 +8538,23 @@ and (orientation: landscape) {
   .batch-dashboard-search input {
     width: calc(50% - 16px);
     min-width: 120px;
+
+    height: 40px;
+  }
+
+  .batch-dashboard-search span {
+    height: 40px;
   }
 
   #batch-dashboard-search-button {
     width: 100%;
+    height: 40px;
+
+    margin-top: 2px !important;
   }
 }
+
+
 .academy-hide-order-list {
   display: none !important;
 }
-
