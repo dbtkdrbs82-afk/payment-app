@@ -17943,56 +17943,117 @@ document.querySelector('#close-member-modal')
     document.querySelector<HTMLElement>('#member-modal')!.style.display = 'none'
   })
 
-document.querySelector('#save-member-btn')
+  document.querySelector('#save-member-btn')
   ?.addEventListener('click', async () => {
+
+    const saveButton =
+      document.querySelector<HTMLButtonElement>('#save-member-btn')
+
+    const editId =
+      Number(saveButton?.dataset.editId || 0)
+
     const memberName =
-      (document.querySelector<HTMLInputElement>('#member-name')?.value || '').trim()
+      (
+        document.querySelector<HTMLInputElement>('#member-name')?.value || ''
+      ).trim()
 
     const phone =
-      (document.querySelector<HTMLInputElement>('#member-phone')?.value || '').trim()
+      (
+        document.querySelector<HTMLInputElement>('#member-phone')?.value || ''
+      ).trim()
 
     const email =
-      (document.querySelector<HTMLInputElement>('#member-email')?.value || '').trim()
+      (
+        document.querySelector<HTMLInputElement>('#member-email')?.value || ''
+      ).trim()
 
     const address =
-      (document.querySelector<HTMLInputElement>('#member-address')?.value || '').trim()
+      (
+        document.querySelector<HTMLInputElement>('#member-address')?.value || ''
+      ).trim()
 
     const memo =
-      (document.querySelector<HTMLTextAreaElement>('#member-memo')?.value || '').trim()
+      (
+        document.querySelector<HTMLTextAreaElement>('#member-memo')?.value || ''
+      ).trim()
 
-      const birthDate =
-  document.querySelector<HTMLInputElement>('#member-birth-date')?.value || ''
+    const birthDate =
+      document.querySelector<HTMLInputElement>(
+        '#member-birth-date'
+      )?.value || ''
 
-const billingDay =
-  Number(
-    document.querySelector<HTMLInputElement>('#member-billing-day')?.value || 0
-  )
+    const billingDay =
+      Number(
+        document.querySelector<HTMLInputElement>(
+          '#member-billing-day'
+        )?.value || 0
+      )
 
-  const monthlyFee =
-  Number(
-    document.querySelector<HTMLInputElement>('#member-monthly-fee')?.value || 0
-  )
+    const monthlyFee =
+      Number(
+        document.querySelector<HTMLInputElement>(
+          '#member-monthly-fee'
+        )?.value || 0
+      )
+
 
     if (!memberName) {
       alert('회원명을 입력해주세요.')
       return
     }
 
+
+    /* =========================
+       수정
+    ========================= */
+
+    if (editId) {
+
+      const { error } = await supabase
+        .from('members')
+        .update({
+          member_name: memberName,
+          phone,
+          email,
+          address,
+          memo,
+          birth_date: birthDate,
+          billing_day: billingDay,
+          monthly_fee: monthlyFee
+        })
+        .eq('id', editId)
+        .eq('merchant_id', merchantId)
+
+      if (error) {
+        alert('회원 수정 실패: ' + error.message)
+        return
+      }
+
+      alert('회원 정보가 수정되었습니다.')
+      location.reload()
+      return
+    }
+
+
+    /* =========================
+       신규 등록
+    ========================= */
+
     const { error } = await supabase
-  .from('members')
-  .insert({
-    merchant_id: merchantId,
-    member_name: memberName,
-    phone,
-    email,
-    address,
-    memo,
-    birth_date: birthDate,
-    billing_day: billingDay,
-    monthly_fee: monthlyFee,
-    joined_at: new Date().toISOString().slice(0, 10),
-    status: '사용중'
-  })
+      .from('members')
+      .insert({
+        merchant_id: merchantId,
+        member_name: memberName,
+        phone,
+        email,
+        address,
+        memo,
+        birth_date: birthDate,
+        billing_day: billingDay,
+        monthly_fee: monthlyFee,
+        joined_at: new Date().toISOString().slice(0, 10),
+        status: '사용중'
+      })
 
     if (error) {
       alert('회원 저장 실패: ' + error.message)
@@ -18001,6 +18062,115 @@ const billingDay =
 
     alert('회원이 등록되었습니다.')
     location.reload()
+  })
+
+  document.querySelectorAll('.member-edit-btn')
+  .forEach((button) => {
+
+    button.addEventListener('click', () => {
+
+      const memberId =
+        Number((button as HTMLElement).dataset.id)
+
+      const member =
+        (members || []).find(
+          (item) => Number(item.id) === memberId
+        )
+
+      if (!member) {
+        alert('회원 정보를 찾을 수 없습니다.')
+        return
+      }
+
+      const modal =
+        document.querySelector<HTMLElement>('#member-modal')
+
+      if (!modal) {
+        return
+      }
+
+      const title =
+        modal.querySelector('h2')
+
+      if (title) {
+        title.textContent = '회원 수정'
+      }
+
+      const nameInput =
+        document.querySelector<HTMLInputElement>('#member-name')
+
+      const birthInput =
+        document.querySelector<HTMLInputElement>('#member-birth-date')
+
+      const phoneInput =
+        document.querySelector<HTMLInputElement>('#member-phone')
+
+      const billingDayInput =
+        document.querySelector<HTMLInputElement>('#member-billing-day')
+
+      const monthlyFeeInput =
+        document.querySelector<HTMLInputElement>('#member-monthly-fee')
+
+      const emailInput =
+        document.querySelector<HTMLInputElement>('#member-email')
+
+      const addressInput =
+        document.querySelector<HTMLInputElement>('#member-address')
+
+      const memoInput =
+        document.querySelector<HTMLTextAreaElement>('#member-memo')
+
+      if (nameInput) {
+        nameInput.value = member.member_name || ''
+      }
+
+      if (birthInput) {
+        birthInput.value = member.birth_date || ''
+      }
+
+      if (phoneInput) {
+        phoneInput.value = member.phone || ''
+      }
+
+      if (billingDayInput) {
+        billingDayInput.value =
+          member.billing_day
+            ? String(member.billing_day)
+            : ''
+      }
+
+      if (monthlyFeeInput) {
+        monthlyFeeInput.value =
+          member.monthly_fee
+            ? String(member.monthly_fee)
+            : ''
+      }
+
+      if (emailInput) {
+        emailInput.value = member.email || ''
+      }
+
+      if (addressInput) {
+        addressInput.value = member.address || ''
+      }
+
+      if (memoInput) {
+        memoInput.value = member.memo || ''
+      }
+
+      const saveButton =
+        document.querySelector<HTMLButtonElement>('#save-member-btn')
+
+      if (saveButton) {
+        saveButton.dataset.editId =
+          String(member.id)
+
+        saveButton.textContent = '수정 저장'
+      }
+
+      modal.style.display = 'flex'
+    })
+
   })
 
   document.querySelectorAll('.member-delete-btn')

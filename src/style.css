@@ -8558,3 +8558,15 @@ and (orientation: landscape) {
 .academy-hide-order-list {
   display: none !important;
 }
+/* 아카데미 회원관리 이름/사업자명 칸 */
+.merchant-members-page .admin-table th:first-child,
+.merchant-members-page .admin-table td:first-child {
+  min-width: 200px !important;
+  width: 200px !important;
+  max-width: 200px !important;
+
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: keep-all !important;
+}
