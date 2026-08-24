@@ -18259,41 +18259,248 @@ document.querySelector('#close-member-modal')
 } else if (path === '/merchant-billings') {
 
   const merchantId =
-    Number(sessionStorage.getItem('login_merchant_id'))
+  Number(sessionStorage.getItem('login_merchant_id'))
 
-    if (!merchantId) {
-      alert('로그인이 필요합니다.')
-      location.href = '/merchant-login'
+if (!merchantId) {
+  alert('로그인이 필요합니다.')
+  location.href = '/merchant-login'
+}
+
+
+const today = new Date()
+
+const currentYear =
+  today.getFullYear()
+
+const currentMonthNumber =
+  today.getMonth() + 1
+
+const currentMonth =
+  currentYear +
+  '-' +
+  String(currentMonthNumber).padStart(2, '0')
+
+const currentMonthStart =
+  currentMonth + '-01'
+
+const currentMonthLastDay =
+  new Date(
+    currentYear,
+    currentMonthNumber,
+    0
+  ).getDate()
+
+const currentMonthEnd =
+  currentMonth +
+  '-' +
+  String(currentMonthLastDay).padStart(2, '0')
+
+
+const billingParams =
+  new URLSearchParams(location.search)
+
+const billingStartDate =
+  billingParams.get('billing_start_date') ||
+  currentMonthStart
+
+const billingEndDate =
+  billingParams.get('billing_end_date') ||
+  currentMonthEnd
+
+
+/* =========================
+   회원 조회
+========================= */
+
+const { data: members, error: membersError } =
+  await supabase
+    .from('members')
+    .select('*')
+    .eq('merchant_id', merchantId)
+
+    if (membersError) {
+      alert('회원 조회 실패: ' + membersError.message)
     }
-    const { data: members } = await supabase
-  .from('members')
-  .select('*')
-  .eq('merchant_id', merchantId)
 
-  const { data: billings } = await supabase
+
+/* =========================
+   기존 이번달 청구 조회
+========================= */
+
+const {
+  data: currentMonthBillings,
+  error: currentMonthBillingError
+} = await supabase
   .from('billings')
   .select('*')
   .eq('merchant_id', merchantId)
-  .order('id', { ascending: false })
+  .eq('billing_month', currentMonth)
+
+  if (currentMonthBillingError) {
+    alert(
+      '이번달 청구 조회 실패: ' +
+      currentMonthBillingError.message
+    )
+    
+  }
+
+
+/* =========================
+   청구일이 도래한 회원 자동청구
+========================= */
+
+const existingMemberIds =
+  (currentMonthBillings || []).map(
+    (billing) => Number(billing.member_id)
+  )
+
+const todayDay =
+  today.getDate()
+
+const autoBillingMembers =
+  (members || []).filter((member) => {
+
+    const billingDay =
+      Number(member.billing_day || 0)
+
+    const monthlyFee =
+      Number(member.monthly_fee || 0)
+
+    const isActive =
+      (member.status || '사용중') === '사용중'
+
+    const billingAlreadyExists =
+      existingMemberIds.includes(
+        Number(member.id)
+      )
+
+    return (
+      isActive &&
+      monthlyFee > 0 &&
+      billingDay > 0 &&
+      billingDay <= todayDay &&
+      !billingAlreadyExists
+    )
+  })
+
+
+  if (autoBillingMembers.length > 0) {
+
+    const autoBillingRows =
+      autoBillingMembers.map((member) => ({
+        merchant_id: merchantId,
+        member_id: member.id,
+        billing_month: currentMonth,
+        amount: Number(member.monthly_fee || 0),
+        memo: '정기청구',
+        payment_status: '미납',
+        send_status: '미발송'
+      }))
+  
+    const { error: autoBillingError } =
+      await supabase
+        .from('billings')
+        .insert(autoBillingRows)
+  
+    if (autoBillingError) {
+      alert(
+        '자동 청구 생성 실패: ' +
+        autoBillingError.message
+      )
+    }
+  }
+  
+  /* =========================
+     전체 청구 다시 조회
+  ========================= */
+
+const { data: allBillings, error: billingError } =
+  await supabase
+    .from('billings')
+    .select('*')
+    .eq('merchant_id', merchantId)
+    .order('id', { ascending: false })
+
+if (billingError) {
+  alert('청구 조회 실패: ' + billingError.message)
+}
+
+
+/* =========================
+   날짜 검색
+========================= */
+
+const billings =
+  (allBillings || []).filter((billing) => {
+
+    let billingDate = ''
+
+    if (billing.created_at) {
+      billingDate =
+        String(billing.created_at).slice(0, 10)
+    } else if (billing.billing_month) {
+      billingDate =
+        String(billing.billing_month) + '-01'
+    }
+
+    if (!billingDate) {
+      return false
+    }
+
+    return (
+      billingDate >= billingStartDate &&
+      billingDate <= billingEndDate
+    )
+  })
 
   app.innerHTML = `
     <div class="merchant-members-page">
       <h1>청구관리</h1>
       ${getMemberMenuHtml('billings')}
 
-      <div class="billing-button-group">
-  <button id="auto-billing-btn" class="billing-action-btn auto-billing-btn">
-    📅 오늘 청구 생성
+      <div class="billing-date-search">
+
+  <input
+    id="billing-start-date"
+    type="date"
+    value="${billingStartDate}"
+  />
+
+  <span>~</span>
+
+  <input
+    id="billing-end-date"
+    type="date"
+    value="${billingEndDate}"
+  />
+
+  <button
+    id="billing-date-search-btn"
+    type="button"
+  >
+    검색
   </button>
 
-  <button id="bulk-add-billing-btn" class="billing-action-btn bulk-add-billing-btn">
+</div>
+
+
+<div class="billing-button-group">
+
+  <button
+    id="bulk-add-billing-btn"
+    class="billing-action-btn bulk-add-billing-btn"
+  >
     ➕ 선택건 추가청구
   </button>
 
-  <button id="billing-kakao-send-btn" class="billing-action-btn kakao-send-btn">
+  <button
+    id="billing-kakao-send-btn"
+    class="billing-action-btn kakao-send-btn"
+  >
     <span class="kakao-talk-badge">TALK</span>
-    선택건 카카오발송
+    선택건 문자 / 카카오 발송
   </button>
+
 </div>
 
       <table class="admin-table academy-billing-table">
@@ -18498,180 +18705,6 @@ document.querySelector('#close-billing-modal')
     location.reload()
   })
 
-  document.querySelector('#auto-billing-btn')
-  ?.addEventListener('click', async () => {
-    const today = new Date()
-
-    const billingMonth =
-      today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0')
-
-      if (!confirm('오늘 청구일에 해당하는 회원의 ' + billingMonth + ' 청구를 생성하시겠습니까?')) {
-      return
-    }
-
-    const { data: membersData, error: memberError } = await supabase
-      .from('members')
-      .select('*')
-      .eq('merchant_id', merchantId)
-      .eq('status', '사용중')
-
-    if (memberError) {
-      alert('회원 조회 실패: ' + memberError.message)
-      return
-    }
-
-    const todayDay = today.getDate()
-
-const targetMembers = (membersData || []).filter((member) => {
-  return (
-    Number(member.monthly_fee || 0) > 0 &&
-    Number(member.billing_day || 0) === todayDay
-  )
-})
-
-    if (targetMembers.length === 0) {
-      alert('오늘 청구일에 해당하는 회원이 없습니다.')
-      return
-    }
-
-    const { data: existingBillings, error: existingError } = await supabase
-  .from('billings')
-  .select('member_id')
-  .eq('merchant_id', merchantId)
-  .eq('billing_month', billingMonth)
-
-if (existingError) {
-  alert('기존 청구 조회 실패: ' + existingError.message)
-  return
-}
-
-const existingMemberIds =
-  (existingBillings || []).map((billing) => billing.member_id)
-
-const newTargetMembers = targetMembers.filter((member) => {
-  return !existingMemberIds.includes(member.id)
-})
-
-if (newTargetMembers.length === 0) {
-  alert('이미 이번달 청구가 모두 생성되어 있습니다.')
-  return
-}
-
-const billingRows = newTargetMembers.map((member) => {
-      return {
-        merchant_id: merchantId,
-        member_id: member.id,
-        billing_month: billingMonth,
-        amount: Number(member.monthly_fee || 0),
-        memo: '자동청구',
-        payment_status: '미납',
-        send_status: '미발송',
-      }
-    })
-
-    const { error } = await supabase
-      .from('billings')
-      .insert(billingRows)
-
-    if (error) {
-      alert('자동청구 생성 실패: ' + error.message)
-      return
-    }
-
-    alert(newTargetMembers.length + '건의 청구가 생성되었습니다.')
-    location.reload()
-  })
-  document.querySelector('#billing-check-all')
-?.addEventListener('change', (event) => {
-  const checked = (event.target as HTMLInputElement).checked
-
-  document
-    .querySelectorAll<HTMLInputElement>('.billing-send-check')
-    .forEach((checkbox) => {
-      checkbox.checked = checked
-    })
-})
-
-  document.querySelector('#save-billing-btn')
-  ?.addEventListener('click', async () => {
-    const memberId =
-      Number((document.querySelector<HTMLSelectElement>('#billing-member-id')?.value || 0))
-
-    const billingMonth =
-      (document.querySelector<HTMLInputElement>('#billing-month')?.value || '').trim()
-
-    const amount =
-      Number(document.querySelector<HTMLInputElement>('#billing-amount')?.value || 0)
-
-    const memo =
-      (document.querySelector<HTMLTextAreaElement>('#billing-memo')?.value || '').trim()
-
-    if (!memberId || !billingMonth || !amount) {
-      alert('회원명, 청구월, 금액을 입력해주세요.')
-      return
-    }
-
-    const { error } = await supabase
-      .from('billings')
-      .insert({
-        merchant_id: merchantId,
-        member_id: memberId,
-        billing_month: billingMonth,
-        amount: amount,
-        memo: memo,
-        payment_status: '미납'
-      })
-
-    if (error) {
-      alert('청구 저장 실패: ' + error.message)
-      return
-    }
-
-    alert('추가 청구가 등록되었습니다.')
-    location.reload()
-  })
-  
-  document.addEventListener('click', async (event) => {
-    const target = event.target as HTMLElement
-  
-    if (!target.classList.contains('billing-complete-btn')) {
-      return
-    }
-    
-
-    const billingId = target.getAttribute('data-id')
-  
-    if (!billingId) {
-      return
-    }
-  
-    if (!confirm('수납 완료 처리하시겠습니까?')) {
-      return
-    }
-  
-    const { data, error } = await supabase
-  .from('billings')
-  .update({
-    payment_status: '완료'
-  })
-  .eq('id', Number(billingId))
-  .select()
-
-
-  
-    if (error) {
-      alert('수납 처리 실패: ' + error.message)
-      return
-    }
-  
-    if (!data || data.length === 0) {
-      alert('수정된 데이터가 없습니다. billingId=' + billingId)
-      return
-    }
-
-    alert('수납 완료 처리되었습니다.')
-    location.reload()
-  })
 
 } else if (path === '/merchant-batch') {
 
