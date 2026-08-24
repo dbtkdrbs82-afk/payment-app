@@ -15888,6 +15888,10 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-billings'
   })
+  document.querySelector('#merchant-payment-list-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-academy-payments'
+  })
   document.querySelector('#billing-back-btn')
   ?.addEventListener('click', () => {
     location.href = '/merchant-admin'
