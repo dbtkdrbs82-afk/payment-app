@@ -18822,7 +18822,7 @@ ${getMemberMenuHtml('batch')}
 >
 </div>
 
-      <table class="admin-table">
+      <table class="admin-table academy-batch-table">
         <thead>
           <tr>
             <th>

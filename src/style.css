@@ -8905,15 +8905,14 @@ and (orientation: landscape) {
   }
 }
 /* =========================================
-   아카데미 다건 수기결제 도구
+   아카데미 수기결제 상단 버튼
 ========================================= */
 
 .academy-batch-tools {
-  display: grid;
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
 
-  gap: 10px;
+  gap: 10px !important;
 
   width: 100%;
 
@@ -8924,14 +8923,17 @@ and (orientation: landscape) {
 
 .academy-batch-tools button,
 .academy-batch-upload-label {
-  height: 44px;
+  width: 100% !important;
+  min-width: 0 !important;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 44px !important;
 
-  margin: 0;
-  padding: 0 12px;
+  margin: 0 !important;
+  padding: 0 12px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 
   border: none;
   border-radius: 8px;
@@ -8943,14 +8945,87 @@ and (orientation: landscape) {
   font-weight: 700;
 
   box-sizing: border-box;
+
   cursor: pointer;
 }
 
+
+/* =========================================
+   아카데미 수기결제 목록
+========================================= */
+
+.academy-batch-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+}
+
+.academy-batch-table th,
+.academy-batch-table td {
+  padding: 12px 8px !important;
+
+  font-size: 12px;
+
+  text-align: center;
+  vertical-align: middle;
+
+  box-sizing: border-box;
+}
+
+
+/* 1. 선택 */
+.academy-batch-table th:nth-child(1),
+.academy-batch-table td:nth-child(1) {
+  width: 60px !important;
+  min-width: 60px !important;
+  max-width: 60px !important;
+}
+
+
+/* 2. 회원명 */
+.academy-batch-table th:nth-child(2),
+.academy-batch-table td:nth-child(2) {
+  width: 280px !important;
+}
+
+
+/* 3. 청구월 */
+.academy-batch-table th:nth-child(3),
+.academy-batch-table td:nth-child(3) {
+  width: 150px !important;
+}
+
+
+/* 4. 금액 */
+.academy-batch-table th:nth-child(4),
+.academy-batch-table td:nth-child(4) {
+  width: 150px !important;
+}
+
+
+/* 5. 상태 */
+.academy-batch-table th:nth-child(5),
+.academy-batch-table td:nth-child(5) {
+  width: 120px !important;
+}
+
+
+/* 체크박스 자체 */
+.academy-batch-table input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+
+  margin: 0;
+
+  cursor: pointer;
+}
+
+
+/* 파일명 영역 */
 .academy-batch-file-name {
   width: 100%;
 
   margin: 0 0 14px;
-  padding: 9px 12px;
+  padding: 10px 12px;
 
   border: 1px solid #dfe6ef;
   border-radius: 8px;
@@ -8964,20 +9039,25 @@ and (orientation: landscape) {
 }
 
 
+/* 모바일 */
 @media screen and (max-width: 700px) {
 
   .academy-batch-tools {
     grid-template-columns:
-      repeat(2, minmax(0, 1fr));
+      repeat(2, minmax(0, 1fr)) !important;
 
-    gap: 8px;
+    gap: 8px !important;
   }
 
   .academy-batch-tools button,
   .academy-batch-upload-label {
-    height: 40px;
+    height: 40px !important;
 
     font-size: 11px;
+  }
+
+  .academy-batch-table {
+    min-width: 760px !important;
   }
 }
 /* =========================================
