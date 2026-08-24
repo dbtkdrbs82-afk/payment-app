@@ -8558,15 +8558,134 @@ and (orientation: landscape) {
 .academy-hide-order-list {
   display: none !important;
 }
-/* 아카데미 회원관리 이름/사업자명 칸 */
-.merchant-members-page .admin-table th:first-child,
-.merchant-members-page .admin-table td:first-child {
-  min-width: 200px !important;
-  width: 200px !important;
-  max-width: 200px !important;
+/* =========================================
+   아카데미 회원관리 테이블 전용
+========================================= */
 
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
-  word-break: keep-all !important;
+.merchant-members-page .admin-table {
+  width: 100%;
+  min-width: 1400px;
+
+  table-layout: auto;
+
+  font-size: 12px;
+}
+
+.merchant-members-page .admin-table th,
+.merchant-members-page .admin-table td {
+  padding: 10px 8px;
+
+  font-size: 12px;
+  line-height: 1.35;
+
+  white-space: nowrap;
+  vertical-align: middle;
+
+  box-sizing: border-box;
+}
+
+
+/* 이름 / 사업자명 */
+.merchant-members-page .admin-table th:nth-child(1),
+.merchant-members-page .admin-table td:nth-child(1) {
+  min-width: 200px;
+  width: 200px;
+
+  white-space: normal;
+  word-break: keep-all;
+}
+
+
+/* 생년월일 */
+.merchant-members-page .admin-table th:nth-child(2),
+.merchant-members-page .admin-table td:nth-child(2) {
+  min-width: 110px;
+}
+
+
+/* 가입일 */
+.merchant-members-page .admin-table th:nth-child(3),
+.merchant-members-page .admin-table td:nth-child(3) {
+  min-width: 110px;
+}
+
+
+/* 청구일 */
+.merchant-members-page .admin-table th:nth-child(4),
+.merchant-members-page .admin-table td:nth-child(4) {
+  min-width: 80px;
+}
+
+
+/* 월회비 */
+.merchant-members-page .admin-table th:nth-child(5),
+.merchant-members-page .admin-table td:nth-child(5) {
+  min-width: 110px;
+}
+
+
+/* 연락처 */
+.merchant-members-page .admin-table th:nth-child(6),
+.merchant-members-page .admin-table td:nth-child(6) {
+  min-width: 130px;
+}
+
+
+/* 이메일 */
+.merchant-members-page .admin-table th:nth-child(7),
+.merchant-members-page .admin-table td:nth-child(7) {
+  min-width: 160px;
+}
+
+
+/* 주소 */
+.merchant-members-page .admin-table th:nth-child(8),
+.merchant-members-page .admin-table td:nth-child(8) {
+  min-width: 180px;
+
+  white-space: normal;
+}
+
+
+/* 결제방식 */
+.merchant-members-page .admin-table th:nth-child(9),
+.merchant-members-page .admin-table td:nth-child(9) {
+  min-width: 100px;
+}
+
+
+/* 메모 */
+.merchant-members-page .admin-table th:nth-child(10),
+.merchant-members-page .admin-table td:nth-child(10) {
+  min-width: 130px;
+
+  white-space: normal;
+}
+
+
+/* 상태 */
+.merchant-members-page .admin-table th:nth-child(11),
+.merchant-members-page .admin-table td:nth-child(11) {
+  min-width: 80px;
+}
+
+
+/* 수정 / 삭제 */
+.merchant-members-page .admin-table th:nth-child(12),
+.merchant-members-page .admin-table td:nth-child(12),
+.merchant-members-page .admin-table th:nth-child(13),
+.merchant-members-page .admin-table td:nth-child(13) {
+  min-width: 85px;
+}
+
+
+/* 회원관리 버튼도 조금 축소 */
+.merchant-members-page .member-edit-btn,
+.merchant-members-page .member-delete-btn {
+  min-width: 68px;
+  height: 36px;
+
+  padding: 0 10px;
+
+  font-size: 12px;
 }

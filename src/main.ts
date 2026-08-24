@@ -17935,7 +17935,62 @@ ${getMemberMenuHtml('members')}
 
       document.querySelector('#add-member-btn')
   ?.addEventListener('click', () => {
-    document.querySelector<HTMLElement>('#member-modal')!.style.display = 'flex'
+
+    const modal =
+      document.querySelector<HTMLElement>('#member-modal')
+
+    const title =
+      modal?.querySelector('h2')
+
+    const saveButton =
+      document.querySelector<HTMLButtonElement>('#save-member-btn')
+
+    const nameInput =
+      document.querySelector<HTMLInputElement>('#member-name')
+
+    const birthInput =
+      document.querySelector<HTMLInputElement>('#member-birth-date')
+
+    const phoneInput =
+      document.querySelector<HTMLInputElement>('#member-phone')
+
+    const billingDayInput =
+      document.querySelector<HTMLInputElement>('#member-billing-day')
+
+    const monthlyFeeInput =
+      document.querySelector<HTMLInputElement>('#member-monthly-fee')
+
+    const emailInput =
+      document.querySelector<HTMLInputElement>('#member-email')
+
+    const addressInput =
+      document.querySelector<HTMLInputElement>('#member-address')
+
+    const memoInput =
+      document.querySelector<HTMLTextAreaElement>('#member-memo')
+
+
+    if (title) {
+      title.textContent = '회원 추가'
+    }
+
+    if (saveButton) {
+      delete saveButton.dataset.editId
+      saveButton.textContent = '저장'
+    }
+
+    if (nameInput) nameInput.value = ''
+    if (birthInput) birthInput.value = ''
+    if (phoneInput) phoneInput.value = ''
+    if (billingDayInput) billingDayInput.value = ''
+    if (monthlyFeeInput) monthlyFeeInput.value = ''
+    if (emailInput) emailInput.value = ''
+    if (addressInput) addressInput.value = ''
+    if (memoInput) memoInput.value = ''
+
+    if (modal) {
+      modal.style.display = 'flex'
+    }
   })
 
 document.querySelector('#close-member-modal')
@@ -18009,7 +18064,7 @@ document.querySelector('#close-member-modal')
 
     if (editId) {
 
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('members')
         .update({
           member_name: memberName,
@@ -18023,12 +18078,21 @@ document.querySelector('#close-member-modal')
         })
         .eq('id', editId)
         .eq('merchant_id', merchantId)
-
+        .select()
+    
       if (error) {
         alert('회원 수정 실패: ' + error.message)
         return
       }
-
+    
+      if (!data || data.length === 0) {
+        alert(
+          '수정된 회원이 없습니다.\n' +
+          '회원ID: ' + editId
+        )
+        return
+      }
+    
       alert('회원 정보가 수정되었습니다.')
       location.reload()
       return
