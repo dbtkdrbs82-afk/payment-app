@@ -19297,11 +19297,11 @@ document.querySelector('#batch-excel-load-btn')
                               `
                               : `
                                 <span
-                                  class="academy-batch-invalid"
-                                  title="${row.errorMessage}"
-                                >
-                                  오류
-                                </span>
+  class="academy-batch-invalid"
+  title="${row.errorMessage}"
+>
+  오류 - ${row.errorMessage}
+</span>
                               `
                           }
                         </td>
