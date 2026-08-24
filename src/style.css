@@ -8529,3 +8529,6 @@ and (orientation: landscape) {
     width: 100%;
   }
 }
+.academy-hide-order-list {
+  display: none !important;
+}

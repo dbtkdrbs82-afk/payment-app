@@ -14287,37 +14287,37 @@ const terminalPagedPayments =
 
       <div class="academy-dashboard batch-dashboard-grid">
 
-        <div class="academy-card">
-          <span>전체 회원수</span>
-          <strong>${totalMemberCount.toLocaleString()}명</strong>
-        </div>
+  <div class="academy-card">
+    <span>전체 회원수</span>
+    <strong>${totalMemberCount.toLocaleString()}명</strong>
+  </div>
 
-        <div class="academy-card">
-          <span>이번달 신규회원</span>
-          <strong>${newMemberCount.toLocaleString()}명</strong>
-        </div>
+  <div class="academy-card">
+    <span>이번달 신규회원</span>
+    <strong>${newMemberCount.toLocaleString()}명</strong>
+  </div>
 
-        <div class="academy-card">
-          <span>청구건수</span>
-          <strong>${billingCount.toLocaleString()}건</strong>
-        </div>
+  <div class="academy-card">
+    <span>청구금액</span>
+    <strong>${billingAmount.toLocaleString()}원</strong>
+  </div>
 
-        <div class="academy-card">
-          <span>미납건수</span>
-          <strong>${unpaidCount.toLocaleString()}건</strong>
-        </div>
+  <div class="academy-card">
+    <span>청구건수</span>
+    <strong>${billingCount.toLocaleString()}건</strong>
+  </div>
 
-        <div class="academy-card">
-          <span>완료건수</span>
-          <strong>${completedCount.toLocaleString()}건</strong>
-        </div>
+  <div class="academy-card">
+    <span>미납건수</span>
+    <strong>${unpaidCount.toLocaleString()}건</strong>
+  </div>
 
-        <div class="academy-card">
-          <span>청구금액</span>
-          <strong>${billingAmount.toLocaleString()}원</strong>
-        </div>
+  <div class="academy-card">
+    <span>완료건수</span>
+    <strong>${completedCount.toLocaleString()}건</strong>
+  </div>
 
-      </div>
+</div>
 
 
       <div class="batch-dashboard-search">
@@ -14605,7 +14605,7 @@ ${isBeauty ? `
   </div>
 ` : ''}
 
-  <div class="order-bottom-toolbar ${(isNormalStore || isBeauty) ? '' : 'hide-for-type'}">
+  <div class="order-bottom-toolbar ${(isNormalStore || isBeauty) && !isAcademy ? '' : 'hide-for-type'}">
 
    <select id="merchant-page-size">
     <option value="10">10개씩 보기</option>
@@ -14629,7 +14629,7 @@ ${isBeauty ? `
 
 </div>
    
-          <div class="merchant-order-table-wrap">
+          <div class="merchant-order-table-wrap ${isAcademy ? 'academy-hide-order-list' : ''}">
             <table class="admin-table">
               <thead>
   ${
@@ -18526,24 +18526,24 @@ ${getMemberMenuHtml('batch')}
 </div>
 
     <button id="pay-card-btn" class="payment-method-btn">
-      💳 카드번호 결제
-    </button>
+  💳 카드번호 결제
+</button>
 
-    <button id="pay-phone-btn" class="payment-method-btn">
-      📱 휴대폰페이
-    </button>
+<button id="pay-qr-btn" class="payment-method-btn">
+  🔳 QR결제
+</button>
 
-    <button id="pay-qr-btn" class="payment-method-btn">
-      🔳 QR결제
-    </button>
+<button id="pay-link-btn" class="payment-method-btn">
+  🔗 문자 / 카카오 결제링크
+</button>
 
-    <button id="pay-link-btn" class="payment-method-btn">
-      🔗 결제링크 발송
-    </button>
+<button id="pay-cash-receipt-btn" class="payment-method-btn">
+  🧾 현금영수증
+</button>
 
-    <button id="close-payment-method-modal">
-      닫기
-    </button>
+<button id="close-payment-method-modal">
+  닫기
+</button>
 
   </div>
 </div>
@@ -18601,21 +18601,6 @@ if (paymentModal) {
 }
 
 return
-
-    const { error } = await supabase
-      .from('billings')
-      .update({
-        payment_status: '완료'
-      })
-      .in('id', ids)
-
-    if (error) {
-      alert('일괄승인 실패: ' + (error?.message || '알 수 없는 오류'))
-      return
-    }
-
-    alert('일괄승인 완료')
-    location.reload()
   })
 
 document.querySelector('#close-payment-method-modal')
@@ -18633,21 +18618,20 @@ document.querySelector('#close-payment-method-modal')
     alert('카드번호 결제 연결 예정입니다.')
   })
 
-document.querySelector('#pay-phone-btn')
-  ?.addEventListener('click', () => {
-    alert('휴대폰페이 연결 예정입니다.')
-  })
-
 document.querySelector('#pay-qr-btn')
   ?.addEventListener('click', () => {
     alert('QR결제 연결 예정입니다.')
   })
 
-document.querySelector('#pay-link-btn')
+  document.querySelector('#pay-link-btn')
   ?.addEventListener('click', () => {
-    alert('결제링크 발송 연결 예정입니다.')
+    alert('문자 / 카카오 결제링크 연결 예정입니다.')
   })
 
+  document.querySelector('#pay-cash-receipt-btn')
+  ?.addEventListener('click', () => {
+    alert('현금영수증 발급 연결 예정입니다.')
+  })
 
     } else if (path === '/merchant-card') { 
       const merchantId = Number(sessionStorage.getItem('login_merchant_id'))
