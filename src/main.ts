@@ -623,11 +623,24 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
     } else {
   
       const targetUrl =
-        window.location.origin +
-        '/academy-pay?merchant_id=' +
-        encodeURIComponent(merchantId)
-  
-      app.innerHTML = `
+  window.location.origin +
+  '/academy-pay?merchant_id=' +
+  encodeURIComponent(merchantId)
+
+const cleanTarget =
+  targetUrl.replace(/^https?:\/\//, '')
+
+const chromeIntentUrl =
+  'intent://' +
+  cleanTarget +
+  '#Intent;' +
+  'scheme=https;' +
+  'package=com.android.chrome;' +
+  'S.browser_fallback_url=' +
+  encodeURIComponent(targetUrl) +
+  ';end'
+
+app.innerHTML = `
         <div class="page">
           <div class="payment-card">
   
@@ -642,50 +655,30 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
               Chrome 브라우저로 연결합니다.
             </p>
   
-            <button
-              id="academy-open-chrome"
-              style="width:100%;"
-            >
-              크롬으로 연결
-            </button>
+            <a
+  href="${chromeIntentUrl}"
+  id="academy-open-chrome"
+  style="
+    display:block;
+    width:100%;
+    box-sizing:border-box;
+    padding:16px;
+    text-align:center;
+    text-decoration:none;
+    background:#174981;
+    color:white;
+    border-radius:8px;
+    font-weight:700;
+  "
+>
+  크롬으로 연결
+</a>
   
           </div>
         </div>
       `
   
-      document
-        .querySelector('#academy-open-chrome')
-        ?.addEventListener('click', () => {
-  
-          const isAndroid =
-            /Android/i.test(
-              navigator.userAgent
-            )
-  
-          if (isAndroid) {
-  
-            const cleanTarget =
-              targetUrl.replace(
-                /^https?:\/\//,
-                ''
-              )
-  
-            location.href =
-              'intent://' +
-              cleanTarget +
-              '#Intent;' +
-              'scheme=https;' +
-              'package=com.android.chrome;' +
-              'S.browser_fallback_url=' +
-              encodeURIComponent(targetUrl) +
-              ';end'
-  
-            return
-          }
-  
-          location.href =
-            targetUrl
-        })
+      
     }
   
 
@@ -18176,6 +18169,8 @@ document.querySelector('#merchant-product-image-file')
         'https://nxgsoft.co.kr/pay/?merchant_id=' +
         merchantId
       )
+
+   
   
   app.innerHTML = `
   <div class="pg-admin-page">
