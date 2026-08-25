@@ -20665,9 +20665,13 @@ document
   class="receipt-modal"
   style="display:flex;"
 >
-            <div
-              class="receipt-box receipt-approve"
-            >
+  <div
+    class="receipt-box receipt-approve ${
+      isCanceled
+        ? 'academy-receipt-cancel'
+        : ''
+    }"
+  >
 
               <div class="receipt-header ${
                 isCanceled
@@ -20818,50 +20822,61 @@ document
 
                   <table>
 
-                    <tr>
-                      <th>과세금액</th>
-                      <td>
-                        ${supplyAmount.toLocaleString()}원
-                      </td>
-                    </tr>
+  <tr>
+    <th>과세금액</th>
+    <td>
+      ${
+        isCanceled
+          ? '-' + supplyAmount.toLocaleString()
+          : supplyAmount.toLocaleString()
+      }원
+    </td>
+  </tr>
 
-                    <tr>
-                      <th>비과세금액</th>
-                      <td>0원</td>
-                    </tr>
+  <tr>
+    <th>비과세금액</th>
+    <td>0원</td>
+  </tr>
 
-                    <tr>
-                      <th>부가세</th>
-                      <td>
-                        ${vatAmount.toLocaleString()}원
-                      </td>
-                    </tr>
+  <tr>
+    <th>부가세</th>
+    <td>
+      ${
+        isCanceled
+          ? '-' + vatAmount.toLocaleString()
+          : vatAmount.toLocaleString()
+      }원
+    </td>
+  </tr>
 
-                    <tr>
-                      <th>주문금액</th>
-                      <td>
-                        ${amount.toLocaleString()}원
-                      </td>
-                    </tr>
+  <tr>
+    <th>주문금액</th>
+    <td>
+      ${
+        isCanceled
+          ? '-' + amount.toLocaleString()
+          : amount.toLocaleString()
+      }원
+    </td>
+  </tr>
 
-                    <tr>
-                      <th>할인금액</th>
-                      <td>0원</td>
-                    </tr>
+  <tr>
+    <th>할인금액</th>
+    <td>0원</td>
+  </tr>
 
-                    <tr class="receipt-total">
-                      <th>총 결제금액</th>
-                      <td>
-                        ${
-                          isCanceled
-                            ? '-' +
-                              amount.toLocaleString()
-                            : amount.toLocaleString()
-                        }원
-                      </td>
-                    </tr>
+  <tr class="receipt-total">
+    <th>총 결제금액</th>
+    <td>
+      ${
+        isCanceled
+          ? '-' + amount.toLocaleString()
+          : amount.toLocaleString()
+      }원
+    </td>
+  </tr>
 
-                  </table>
+</table>
                 </section>
 
               </div>

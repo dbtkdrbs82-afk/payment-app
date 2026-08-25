@@ -9475,3 +9475,54 @@ and (orientation: landscape) {
   margin: 0;
   white-space: nowrap;
 }
+/* =========================================
+   아카데미 취소 영수증
+========================================= */
+
+.academy-receipt-cancel {
+  --cancel-red: #d71920;
+  --cancel-dark-red: #b51218;
+  --cancel-light-red: #fff1f1;
+  --cancel-border-red: #f2a3a6;
+}
+
+.academy-receipt-cancel .receipt-header h2,
+.academy-receipt-cancel .receipt-header h3,
+.academy-receipt-cancel h4,
+.academy-receipt-cancel .receipt-cancel-text {
+  color: var(--cancel-red) !important;
+}
+
+.academy-receipt-cancel .receipt-header {
+  border-bottom-color: var(--cancel-red) !important;
+}
+
+.academy-receipt-cancel table {
+  border-color: var(--cancel-border-red) !important;
+}
+
+.academy-receipt-cancel th,
+.academy-receipt-cancel td {
+  border-color: var(--cancel-border-red) !important;
+}
+
+.academy-receipt-cancel th {
+  background: var(--cancel-light-red) !important;
+  color: var(--cancel-dark-red) !important;
+}
+
+.academy-receipt-cancel .receipt-total th,
+.academy-receipt-cancel .receipt-total td {
+  background: var(--cancel-red) !important;
+  color: #ffffff !important;
+}
+
+.academy-receipt-cancel .receipt-actions button {
+  background: var(--cancel-red) !important;
+  color: #ffffff !important;
+  border-color: var(--cancel-red) !important;
+}
+
+.academy-receipt-cancel .receipt-actions button:hover {
+  background: var(--cancel-dark-red) !important;
+}
