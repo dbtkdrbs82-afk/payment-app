@@ -9415,3 +9415,48 @@ and (orientation: landscape) {
     height: 40px !important;
   }
 }
+/* =========================================
+   아카데미 회원관리 검색
+========================================= */
+
+.academy-member-search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  margin: 0 0 16px;
+
+  box-sizing: border-box;
+}
+
+#academy-member-search-input {
+  flex: 1;
+  height: 44px;
+
+  padding: 0 14px;
+
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+
+  box-sizing: border-box;
+}
+
+#academy-member-search-btn,
+.academy-member-search-row #add-member-btn {
+  width: 140px;
+  height: 44px;
+
+  margin: 0;
+}
+#billing-member-search-input {
+  width: 180px;
+  height: 42px;
+
+  padding: 0 12px;
+
+  border: 1px solid #d9e1ec;
+  border-radius: 8px;
+
+  box-sizing: border-box;
+}
