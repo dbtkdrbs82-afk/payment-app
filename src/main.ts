@@ -20594,16 +20594,16 @@ document.querySelector('#batch-excel-load-btn')
    결제내역에 아카데미 회원 연결
 ========================= */
 
-const approvalNumber =
-  String(data.approvalNumber || '').trim()
+const paymentTid =
+  String(data.tid || '').trim()
 
-if (approvalNumber) {
+if (paymentTid) {
 
   let paymentId: number | null = null
 
   for (
     let retry = 0;
-    retry < 10;
+    retry < 20;
     retry += 1
   ) {
 
@@ -20613,8 +20613,7 @@ if (approvalNumber) {
     } = await supabase
       .from('payments')
       .select('id')
-      .eq('merchant_id', merchantId)
-      .eq('approval_number', approvalNumber)
+      .eq('payment_key', paymentTid)
       .maybeSingle()
 
     if (findPaymentError) {
@@ -20639,18 +20638,21 @@ if (approvalNumber) {
 
   if (paymentId) {
 
-    const { error: paymentMemberError } =
-      await supabase
-        .from('payments')
-        .update({
-          sender_name:
-            row.memberName,
+    const {
+      data: updatedPayment,
+      error: paymentMemberError
+    } = await supabase
+      .from('payments')
+      .update({
+        sender_name:
+          row.memberName,
 
-          message:
-            '아카데미 정기결제 / 청구ID ' +
-            row.billingIds.join(',')
-        })
-        .eq('id', paymentId)
+        message:
+          '아카데미 정기결제 / 청구ID ' +
+          row.billingIds.join(',')
+      })
+      .eq('id', paymentId)
+      .select('id, sender_name')
 
     if (paymentMemberError) {
 
@@ -20659,17 +20661,25 @@ if (approvalNumber) {
         paymentMemberError
       )
 
+    } else {
+
+      console.log(
+        '아카데미 결제 회원 연결 완료:',
+        updatedPayment
+      )
+
     }
 
   } else {
 
     console.error(
-      '아카데미 결제 회원 연결 대상 없음:',
-      approvalNumber
+      '아카데미 결제 TID 조회 실패:',
+      paymentTid
     )
 
   }
 }
+
       
                 row.cardNumber = ''
                 row.expiryMonth = ''
