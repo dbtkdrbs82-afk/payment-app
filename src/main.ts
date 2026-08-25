@@ -18923,19 +18923,21 @@ const billingPageRows =
   ${
     (billing.payment_status || '미납') === '미납'
       ? `
-        <button
-          class="billing-complete-btn"
-          data-id="${billing.id}"
-        >
-          완료처리
-        </button>
+        <div class="billing-action-buttons">
+  <button
+    class="billing-complete-btn"
+    data-id="${billing.id}"
+  >
+    완료
+  </button>
 
-        <button
-          class="billing-delete-btn"
-          data-id="${billing.id}"
-        >
-          청구취소
-        </button>
+  <button
+    class="billing-delete-btn"
+    data-id="${billing.id}"
+  >
+    취소
+  </button>
+</div>
       `
       : '-'
   }

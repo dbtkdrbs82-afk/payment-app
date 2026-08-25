@@ -9460,3 +9460,18 @@ and (orientation: landscape) {
 
   box-sizing: border-box;
 }
+.billing-action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.billing-action-buttons button {
+  width: auto;
+  min-width: 64px;
+  height: 34px;
+  padding: 0 12px;
+  margin: 0;
+  white-space: nowrap;
+}
