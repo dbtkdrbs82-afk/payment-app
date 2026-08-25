@@ -34,6 +34,7 @@ export default async function handler(
       expiryYymm,
       installment,
       buyerName,
+      billingIds,
       goodsName,
       customerPhone
     } = req.body || {}
@@ -208,6 +209,96 @@ const ordHp = onlyDigits(customerPhone)
           detail: korpayData
         })
       }
+
+      const paymentTid =
+  String(korpayData.TID || '').trim()
+
+if (
+  paymentTid &&
+  String(buyerName || '').trim()
+) {
+
+  const normalizedBillingIds =
+    Array.isArray(billingIds)
+      ? billingIds
+          .map((id) => Number(id))
+          .filter((id) => id > 0)
+      : []
+
+  for (
+    let retry = 0;
+    retry < 20;
+    retry += 1
+  ) {
+
+    const findPaymentResponse =
+      await fetch(
+        `${supabaseUrl}/rest/v1/payments` +
+          `?select=id` +
+          `&payment_key=eq.${encodeURIComponent(paymentTid)}` +
+          `&limit=1`,
+        {
+          method: 'GET',
+          headers: supabaseHeaders
+        }
+      )
+
+    const paymentRows =
+      await findPaymentResponse.json()
+
+    const payment =
+      Array.isArray(paymentRows) &&
+      paymentRows.length > 0
+        ? paymentRows[0]
+        : null
+
+    if (payment?.id) {
+
+      const updatePaymentResponse =
+        await fetch(
+          `${supabaseUrl}/rest/v1/payments` +
+            `?id=eq.${payment.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              ...supabaseHeaders,
+              Prefer: 'return=representation'
+            },
+            body: JSON.stringify({
+              sender_name:
+                String(buyerName).trim(),
+
+              message:
+                normalizedBillingIds.length > 0
+                  ? (
+                      '아카데미 결제 / 청구ID ' +
+                      normalizedBillingIds.join(',')
+                    )
+                  : (
+                      String(goodsName || '아카데미 결제')
+                    )
+            })
+          }
+        )
+
+      if (!updatePaymentResponse.ok) {
+        const updateError =
+          await updatePaymentResponse.json()
+
+        console.error(
+          '아카데미 회원명 저장 실패:',
+          updateError
+        )
+      }
+
+      break
+    }
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, 500)
+    )
+  }
+}
 
     return res.status(200).json({
       success: true,

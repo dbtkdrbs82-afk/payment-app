@@ -20538,8 +20538,16 @@ document.querySelector('#batch-excel-load-btn')
                         cardNumber: row.cardNumber,
                         expiryYymm,
                         installment: row.installment,
+                      
+                        buyerName:
+                          row.memberName,
+                      
+                        billingIds:
+                          row.billingIds,
+                      
                         goodsName:
                           row.productName || '정기결제',
+                      
                         customerPhone:
                           row.phone || ''
                       })
