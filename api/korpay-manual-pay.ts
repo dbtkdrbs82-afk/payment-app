@@ -259,6 +259,16 @@ if (
           approval_number:
             korpayData.APP_NO || null,
 
+            card_number:
+  String(
+    korpayData.CARD_NO ||
+    korpayData.cardNo ||
+    ''
+  ).trim() || null,
+
+installment_months:
+  quotaMon || '00',
+
           approved_at:
             new Date().toISOString(),
 
