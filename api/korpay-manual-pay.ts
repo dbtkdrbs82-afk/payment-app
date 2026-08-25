@@ -220,72 +220,59 @@ const normalizedBillingIds =
         .filter((id) => id > 0)
     : []
 
-/* 학원 일괄결제만 회원명 연결 */
+/* 학원 일괄결제만 즉시 payments 저장 */
 if (
   normalizedBillingIds.length > 0 &&
   paymentTid &&
   String(buyerName || '').trim()
 ) {
-  for (
-    let retry = 0;
-    retry < 30;
-    retry += 1
-  ) {
-    const findPaymentResponse =
-      await fetch(
-        `${supabaseUrl}/rest/v1/payments` +
-          `?select=id` +
-          `&payment_key=eq.${encodeURIComponent(paymentTid)}` +
-          `&limit=1`,
-        {
-          method: 'GET',
-          headers: supabaseHeaders
-        }
-      )
+  const academyPaymentResponse =
+    await fetch(
+      `${supabaseUrl}/rest/v1/payments`,
+      {
+        method: 'POST',
+        headers: {
+          ...supabaseHeaders,
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({
+          order_id: ordNo,
+          payment_key: paymentTid,
 
-    const paymentRows =
-      await findPaymentResponse.json()
+          merchant_id: merchantDbId,
+          merchant_name:
+            merchant.merchant_name || null,
 
-    const payment =
-      Array.isArray(paymentRows) &&
-      paymentRows.length > 0
-        ? paymentRows[0]
-        : null
+          amount: goodsAmt,
+          status: 'paid',
 
-    if (payment?.id) {
-      const updateResponse =
-        await fetch(
-          `${supabaseUrl}/rest/v1/payments` +
-            `?id=eq.${payment.id}`,
-          {
-            method: 'PATCH',
-            headers: {
-              ...supabaseHeaders,
-              Prefer: 'return=minimal'
-            },
-            body: JSON.stringify({
-              sender_name:
-                String(buyerName).trim(),
+          pg_company: '코페이',
+          payment_method: '수기결제',
 
-              message:
-                '아카데미 정기결제 / 청구ID ' +
-                normalizedBillingIds.join(',')
-            })
-          }
-        )
+          sender_name:
+            String(buyerName).trim(),
 
-      if (!updateResponse.ok) {
-        console.error(
-          '아카데미 회원명 저장 실패:',
-          await updateResponse.text()
-        )
+          message:
+            '아카데미 정기결제 / 청구ID ' +
+            normalizedBillingIds.join(','),
+
+          approval_number:
+            korpayData.APP_NO || null,
+
+          approved_at:
+            new Date().toISOString(),
+
+          settlement_status: '정산대기',
+          payout_status: '출금대기',
+          duplicate_status: '정상'
+        })
       }
+    )
 
-      break
-    }
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, 300)
+  if (!academyPaymentResponse.ok) {
+    console.error(
+      '아카데미 결제 즉시 저장 실패:',
+      await academyPaymentResponse.text()
     )
   }
 }
