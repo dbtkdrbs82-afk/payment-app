@@ -16058,6 +16058,10 @@ if (orderNextPageButton) {
 
 applyOrderFilter()
 
+if (isAcademy) {
+  bindMemberMenuEvents()
+}
+
   document.querySelector('#merchant-setting-button')
   ?.addEventListener('click', () => {
 
