@@ -19887,12 +19887,27 @@ return (
                   </td>
 
                   <td>
-                    ${
-                      payment.approved_at ||
-                      payment.created_at ||
-                      '-'
-                    }
-                  </td>
+  <button
+    type="button"
+    class="academy-receipt-link"
+    data-id="${payment.id}"
+    style="
+      border:0;
+      background:none;
+      padding:0;
+      cursor:pointer;
+      text-decoration:underline;
+      color:#174981;
+      font:inherit;
+    "
+  >
+    ${
+      payment.approved_at ||
+      payment.created_at ||
+      '-'
+    }
+  </button>
+</td>
 
                   <td>
                     ${
@@ -20357,118 +20372,7 @@ document
     }
   })
 
-  document
-  .querySelector('#academy-request-cancel-button')
-  ?.addEventListener('click', async () => {
-
-    const modal =
-      document.querySelector<HTMLElement>(
-        '#academy-cancel-modal'
-      )
-
-    if (!modal) return
-
-    const paymentId =
-      Number(modal.dataset.paymentId || 0)
-
-    const reason =
-      (
-        document.querySelector<HTMLTextAreaElement>(
-          '#academy-cancel-reason'
-        )?.value || ''
-      ).trim()
-
-    if (!paymentId) {
-      alert('취소할 결제정보를 찾을 수 없습니다.')
-      return
-    }
-
-    if (!reason) {
-      alert('취소 사유를 입력해주세요.')
-      return
-    }
-
-    const {
-      data: payment,
-      error: paymentError
-    } =
-      await supabase
-        .from('payments')
-        .select('*')
-        .eq('id', paymentId)
-        .single()
-
-    if (
-      paymentError ||
-      !payment
-    ) {
-      alert('결제정보를 불러오지 못했습니다.')
-      return
-    }
-
-    if (payment.status === 'cancel') {
-      alert('이미 취소된 결제입니다.')
-      return
-    }
-
-    const {
-      data: existingRequest
-    } =
-      await supabase
-        .from('cancel_requests')
-        .select('id, status')
-        .eq('payment_id', paymentId)
-        .eq('status', '요청중')
-        .maybeSingle()
-
-    if (existingRequest) {
-      alert('이미 본사 취소 승인요청이 접수되어 있습니다.')
-      return
-    }
-
-    const {
-      error: requestError
-    } =
-      await supabase
-        .from('cancel_requests')
-        .insert({
-          payment_id: paymentId,
-
-          merchant_id:
-            payment.merchant_id,
-
-          merchant_name:
-            payment.merchant_name || null,
-
-          amount:
-            payment.amount || 0,
-
-          reason:
-            reason,
-
-          status:
-            '요청중'
-        })
-
-    if (requestError) {
-      console.error(
-        '아카데미 취소 승인요청 실패:',
-        requestError
-      )
-
-      alert(
-        '본사 승인요청에 실패했습니다.\n' +
-        requestError.message
-      )
-      return
-    }
-
-    alert(
-      '본사에 취소 승인요청이 접수되었습니다.'
-    )
-
-    modal.style.display = 'none'
-  })
+  
 
   document
   .querySelector('#academy-request-cancel-button')
@@ -20663,6 +20567,465 @@ document
           '본사 승인요청'
       }
     }
+  })
+
+  document
+  .querySelectorAll<HTMLButtonElement>(
+    '.academy-receipt-link'
+  )
+  .forEach((button) => {
+
+    button.addEventListener(
+      'click',
+      async () => {
+
+        const paymentId =
+          Number(button.dataset.id || 0)
+
+        if (!paymentId) {
+          return
+        }
+
+        const {
+          data: payment,
+          error: paymentError
+        } =
+          await supabase
+            .from('payments')
+            .select('*')
+            .eq('id', paymentId)
+            .single()
+
+        if (
+          paymentError ||
+          !payment
+        ) {
+          alert('영수증 정보를 불러오지 못했습니다.')
+          return
+        }
+
+        const {
+          data: merchant
+        } =
+          await supabase
+            .from('merchants')
+            .select('*')
+            .eq(
+              'id',
+              Number(payment.merchant_id)
+            )
+            .maybeSingle()
+
+        const isCanceled =
+          payment.status === 'cancel'
+
+        const amount =
+          Number(payment.amount || 0)
+
+        const supplyAmount =
+          Math.floor(amount / 1.1)
+
+        const vatAmount =
+          amount - supplyAmount
+
+        const date =
+          payment.approved_at ||
+          payment.created_at
+            ? new Date(
+                payment.approved_at ||
+                payment.created_at
+              ).toLocaleString('ko-KR')
+            : '-'
+
+        const canceledAt =
+          payment.canceled_at
+            ? new Date(
+                payment.canceled_at
+              ).toLocaleString('ko-KR')
+            : '-'
+
+        const receiptHtml = `
+          <div
+            id="academy-receipt-modal"
+            class="receipt-modal"
+          >
+            <div
+              class="receipt-box receipt-approve"
+            >
+
+              <div class="receipt-header ${
+                isCanceled
+                  ? 'receipt-cancel-mode'
+                  : 'receipt-approve-mode'
+              }">
+
+                <h2>NXG PICK</h2>
+
+                <h3 class="${
+                  isCanceled
+                    ? 'receipt-cancel-title'
+                    : 'receipt-approve-title'
+                }">
+                  신용카드 매출전표
+                  <span>
+                    ${
+                      isCanceled
+                        ? '(취소)'
+                        : '(승인)'
+                    }
+                  </span>
+                </h3>
+
+              </div>
+
+
+              <section>
+                <h4>결제정보</h4>
+
+                <table>
+
+                  <tr>
+                    <th>카드번호</th>
+                    <td>
+                      ${
+                        payment.card_number ||
+                        '-'
+                      }
+                    </td>
+
+                    <th>카드종류</th>
+                    <td>신용카드</td>
+                  </tr>
+
+                  <tr>
+                    <th>거래종류</th>
+
+                    <td class="${
+                      isCanceled
+                        ? 'receipt-cancel-text'
+                        : 'receipt-approve-text'
+                    }">
+                      ${
+                        isCanceled
+                          ? '취소완료'
+                          : '승인성공'
+                      }
+                    </td>
+
+                    <th>할부개월</th>
+                    <td>
+                      ${
+                        payment.installment_months ||
+                        '일시불'
+                      }
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <th>거래일시</th>
+                    <td colspan="3">
+                      ${date}
+                    </td>
+                  </tr>
+
+                  ${
+                    isCanceled
+                      ? `
+                        <tr>
+                          <th>취소시각</th>
+                          <td colspan="3">
+                            ${canceledAt}
+                          </td>
+                        </tr>
+                      `
+                      : ''
+                  }
+
+                </table>
+              </section>
+
+
+              <div class="receipt-grid">
+
+                <section>
+                  <h4>구매정보</h4>
+
+                  <table>
+
+                    <tr>
+                      <th>회원명</th>
+                      <td>
+                        ${
+                          payment.sender_name ||
+                          payment.buyer_name ||
+                          '-'
+                        }
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <th>승인번호</th>
+                      <td>
+                        ${
+                          payment.approval_number ||
+                          '-'
+                        }
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <th>거래번호</th>
+                      <td>
+                        ${
+                          payment.payment_key ||
+                          '-'
+                        }
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <th>요청사항</th>
+                      <td>
+                        ${
+                          payment.message ||
+                          '-'
+                        }
+                      </td>
+                    </tr>
+
+                  </table>
+                </section>
+
+
+                <section>
+                  <h4>결제금액정보</h4>
+
+                  <table>
+
+                    <tr>
+                      <th>과세금액</th>
+                      <td>
+                        ${supplyAmount.toLocaleString()}원
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <th>비과세금액</th>
+                      <td>0원</td>
+                    </tr>
+
+                    <tr>
+                      <th>부가세</th>
+                      <td>
+                        ${vatAmount.toLocaleString()}원
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <th>주문금액</th>
+                      <td>
+                        ${amount.toLocaleString()}원
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <th>할인금액</th>
+                      <td>0원</td>
+                    </tr>
+
+                    <tr class="receipt-total">
+                      <th>총 결제금액</th>
+                      <td>
+                        ${
+                          isCanceled
+                            ? '-' +
+                              amount.toLocaleString()
+                            : amount.toLocaleString()
+                        }원
+                      </td>
+                    </tr>
+
+                  </table>
+                </section>
+
+              </div>
+
+
+              <section>
+                <h4>상점정보</h4>
+
+                <table>
+
+                  <tr>
+                    <th>상점명</th>
+                    <td>
+                      ${
+                        merchant?.merchant_name ||
+                        payment.merchant_name ||
+                        '-'
+                      }
+                    </td>
+
+                    <th>대표자명</th>
+                    <td>
+                      ${
+                        merchant?.owner_name ||
+                        '-'
+                      }
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <th>URL주소</th>
+                    <td>-</td>
+
+                    <th>사업자번호</th>
+                    <td>
+                      ${
+                        merchant?.business_number ||
+                        '-'
+                      }
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <th>이용문의</th>
+                    <td colspan="3">
+                      ${
+                        merchant?.phone ||
+                        '-'
+                      }
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <th>주소</th>
+                    <td colspan="3">
+                      ${
+                        [
+                          merchant?.address,
+                          merchant?.address_detail
+                        ]
+                          .filter(Boolean)
+                          .join(' ') ||
+                        '-'
+                      }
+                    </td>
+                  </tr>
+
+                </table>
+              </section>
+
+
+              <section>
+                <h4>결제서비스업체(PG)정보</h4>
+
+                <table>
+
+                  <tr>
+                    <th>카드사 가맹점명</th>
+                    <td>
+                      ${
+                        payment.pg_company ||
+                        '-'
+                      }
+                    </td>
+
+                    <th>가맹점번호</th>
+                    <td>
+                      ${
+                        payment.pg_mid ||
+                        merchant?.toss_mid ||
+                        merchant?.korpay_manual_mid ||
+                        '-'
+                      }
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <th>카드사</th>
+                    <td>
+                      ${
+                        payment.card_company ||
+                        '-'
+                      }
+                    </td>
+
+                    <th>결제방식</th>
+                    <td>
+                      ${
+                        payment.payment_method ||
+                        '-'
+                      }
+                    </td>
+                  </tr>
+
+                </table>
+              </section>
+
+
+              <div class="receipt-actions">
+
+                <button
+                  id="academy-receipt-print"
+                >
+                  인쇄하기
+                </button>
+
+                <button
+                  id="academy-receipt-close"
+                >
+                  닫기
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+        `
+
+        document
+          .querySelector(
+            '#academy-receipt-modal'
+          )
+          ?.remove()
+
+        document.body.insertAdjacentHTML(
+          'beforeend',
+          receiptHtml
+        )
+
+
+        document
+          .querySelector(
+            '#academy-receipt-print'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+              window.print()
+            }
+          )
+
+
+        document
+          .querySelector(
+            '#academy-receipt-close'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+
+              document
+                .querySelector(
+                  '#academy-receipt-modal'
+                )
+                ?.remove()
+
+            }
+          )
+      }
+    )
   })
 
   document
