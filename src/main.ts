@@ -18913,6 +18913,7 @@ document.querySelector('#close-billing-modal')
   })
   document.querySelector('#bulk-add-billing-btn')
   ?.addEventListener('click', async () => {
+
     const checkedItems = Array.from(
       document.querySelectorAll<HTMLInputElement>(
         '.billing-send-check:checked'
@@ -18924,61 +18925,107 @@ document.querySelector('#close-billing-modal')
     )
 
     if (ids.length === 0) {
-      alert('추가청구할 청구건을 선택해주세요.')
+      alert('추가청구할 회원을 선택해주세요.')
       return
     }
 
-    const amountText = prompt('추가할 금액을 입력해주세요. 예: 30000')
+    const amountText =
+      prompt(
+        '추가 청구금액을 입력해주세요.\n예: 30000'
+      )
 
     if (!amountText) {
       return
     }
 
-    const addAmount = Number(amountText)
+    const addAmount =
+      Number(
+        amountText
+          .replace(/,/g, '')
+          .trim()
+      )
 
     if (!addAmount || addAmount <= 0) {
       alert('추가금액을 올바르게 입력해주세요.')
       return
     }
 
-    const addMemo = prompt('추가청구 메모를 입력해주세요. 예: 교재비') || '추가청구'
+    const addMemo =
+      (
+        prompt(
+          '추가청구 내용을 입력해주세요.\n예: 교재비, 재료비, 추가수업비'
+        ) || ''
+      ).trim()
 
-    const { data: selectedBillings, error: selectError } = await supabase
-      .from('billings')
-      .select('*')
-      .in('id', ids)
-
-    if (selectError) {
-      alert('청구 조회 실패: ' + selectError.message)
+    if (!addMemo) {
+      alert('추가청구 내용을 입력해주세요.')
       return
     }
 
-    for (const billing of selectedBillings || []) {
-      const currentAmount = Number(billing.amount || 0)
-      const currentMemo = billing.memo || ''
+    const {
+      data: selectedBillings,
+      error: selectError
+    } = await supabase
+      .from('billings')
+      .select('*')
+      .eq('merchant_id', merchantId)
+      .in('id', ids)
 
-      const nextMemo =
-        currentMemo
-          ? currentMemo + ' / ' + addMemo + '(+' + addAmount.toLocaleString() + '원)'
-          : addMemo + '(+' + addAmount.toLocaleString() + '원)'
-
-      const { error } = await supabase
-        .from('billings')
-        .update({
-          amount: currentAmount + addAmount,
-          memo: nextMemo
-        })
-        .eq('id', billing.id)
-
-      if (error) {
-        alert('추가청구 실패: ' + error.message)
-        return
-      }
+    if (selectError) {
+      alert(
+        '청구 조회 실패: ' +
+        selectError.message
+      )
+      return
     }
 
-    alert(ids.length + '건에 추가청구가 반영되었습니다.')
+    if (
+      !selectedBillings ||
+      selectedBillings.length === 0
+    ) {
+      alert('선택한 청구정보를 찾을 수 없습니다.')
+      return
+    }
+
+    const newBillingRows =
+      selectedBillings.map((billing) => ({
+        merchant_id: merchantId,
+        member_id: Number(billing.member_id),
+        billing_month:
+          billing.billing_month || currentMonth,
+        amount: addAmount,
+        memo: '추가청구 - ' + addMemo,
+        payment_status: '미납',
+        send_status: '미발송'
+      }))
+
+    const { error: insertError } =
+      await supabase
+        .from('billings')
+        .insert(newBillingRows)
+
+    if (insertError) {
+      alert(
+        '추가청구 등록 실패: ' +
+        insertError.message
+      )
+      return
+    }
+
+    alert(
+      selectedBillings.length +
+      '건의 추가청구가 등록되었습니다.\n\n' +
+      '추가금액: ' +
+      addAmount.toLocaleString() +
+      '원\n' +
+      '내용: ' +
+      addMemo
+    )
+
     location.reload()
-  })  
+  })
+
+      
   document.querySelector('#billing-kakao-send-btn')
   ?.addEventListener('click', async () => {
   
