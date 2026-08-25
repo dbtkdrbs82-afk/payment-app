@@ -18018,8 +18018,28 @@ document.querySelector('#merchant-product-image-file')
         .eq('merchant_id', merchantId)
         .order('id', { ascending: false })
 
-        const memberRows =
-  members || []
+        const memberParams =
+  new URLSearchParams(location.search)
+
+const memberKeyword =
+  (memberParams.get('member_keyword') || '')
+    .trim()
+    .toLowerCase()
+
+const memberRows =
+  (members || []).filter((member) => {
+
+    if (!memberKeyword) {
+      return true
+    }
+
+    const memberName =
+      String(member.member_name || '')
+        .trim()
+        .toLowerCase()
+
+    return memberName.includes(memberKeyword)
+  })
 
 const memberPagination =
   getAcademyPagination(
@@ -18039,14 +18059,32 @@ const memberPageRows =
     
           <h1>회원관리</h1>
 
-${getMemberMenuHtml('members')}
+          ${getMemberMenuHtml('members')}
 
-<div style="margin-bottom:16px;">
-            <button id="add-member-btn">
+          <div class="academy-member-search-row">
+          
+            <input
+              id="academy-member-search-input"
+              type="text"
+              placeholder="회원명 입력"
+              value="${memberParams.get('member_keyword') || ''}"
+            />
+          
+            <button
+              id="academy-member-search-btn"
+              type="button"
+            >
+              검색
+            </button>
+          
+            <button
+              id="add-member-btn"
+              type="button"
+            >
               회원 추가
             </button>
-            
-            </div>
+          
+          </div>
         
           <table class="admin-table">
             <thead>
@@ -18168,6 +18206,52 @@ ${getMemberMenuHtml('members')}
       `
 
       bindMemberMenuEvents()
+
+      document.querySelector('#academy-member-search-btn')
+  ?.addEventListener('click', () => {
+
+    const keyword =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#academy-member-search-input'
+        )?.value || ''
+      ).trim()
+
+    sessionStorage.setItem(
+      'academy_members_page',
+      '1'
+    )
+
+    const params =
+      new URLSearchParams()
+
+    if (keyword) {
+      params.set(
+        'member_keyword',
+        keyword
+      )
+    }
+
+    location.href =
+      '/merchant-members' +
+      (
+        params.toString()
+          ? '?' + params.toString()
+          : ''
+      )
+  })
+
+  document.querySelector('#academy-member-search-input')
+  ?.addEventListener('keydown', (event) => {
+
+    if ((event as KeyboardEvent).key !== 'Enter') {
+      return
+    }
+
+    document.querySelector<HTMLButtonElement>(
+      '#academy-member-search-btn'
+    )?.click()
+  })
 
       bindAcademyPagination(
         'academy-members',
@@ -18550,6 +18634,11 @@ const billingEndDate =
   billingParams.get('billing_end_date') ||
   currentMonthEnd
 
+  const billingMemberKeyword =
+  (billingParams.get('billing_member_keyword') || '')
+    .trim()
+    .toLowerCase()
+
 
 /* =========================
    회원 조회
@@ -18690,10 +18779,29 @@ const billings =
       return false
     }
 
-    return (
-      billingDate >= billingStartDate &&
-      billingDate <= billingEndDate
-    )
+    const memberName =
+  String(
+    (members || []).find(
+      (member) =>
+        Number(member.id) ===
+        Number(billing.member_id)
+    )?.member_name || ''
+  )
+    .trim()
+    .toLowerCase()
+
+const dateMatched =
+  billingDate >= billingStartDate &&
+  billingDate <= billingEndDate
+
+const memberMatched =
+  !billingMemberKeyword ||
+  memberName.includes(billingMemberKeyword)
+
+return (
+  dateMatched &&
+  memberMatched
+)
   })
 
   const billingPagination =
@@ -18728,6 +18836,13 @@ const billingPageRows =
     id="billing-end-date"
     type="date"
     value="${billingEndDate}"
+  />
+
+  <input
+    id="billing-member-search-input"
+    type="text"
+    placeholder="회원명 입력"
+    value="${billingParams.get('billing_member_keyword') || ''}"
   />
 
   <button
@@ -18855,6 +18970,66 @@ const billingPageRows =
   `
 
   bindMemberMenuEvents()
+
+  document.querySelector('#billing-date-search-btn')
+  ?.addEventListener('click', () => {
+
+    const startDate =
+      document.querySelector<HTMLInputElement>(
+        '#billing-start-date'
+      )?.value || ''
+
+    const endDate =
+      document.querySelector<HTMLInputElement>(
+        '#billing-end-date'
+      )?.value || ''
+
+    const memberKeyword =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#billing-member-search-input'
+        )?.value || ''
+      ).trim()
+
+    if (!startDate || !endDate) {
+      alert('시작일과 종료일을 선택해주세요.')
+      return
+    }
+
+    if (startDate > endDate) {
+      alert('시작일이 종료일보다 늦을 수 없습니다.')
+      return
+    }
+
+    sessionStorage.setItem(
+      'academy_billings_page',
+      '1'
+    )
+
+    const params =
+      new URLSearchParams()
+
+    params.set(
+      'billing_start_date',
+      startDate
+    )
+
+    params.set(
+      'billing_end_date',
+      endDate
+    )
+
+    if (memberKeyword) {
+      params.set(
+        'billing_member_keyword',
+        memberKeyword
+      )
+    }
+
+    location.href =
+      '/merchant-billings?' +
+      params.toString()
+  })
 
   bindAcademyPagination(
     'academy-billings',
@@ -19125,6 +19300,11 @@ document.querySelector('#close-billing-modal')
     paymentParams.get('payment_end_date') ||
     currentMonthEnd
 
+    const paymentMemberKeyword =
+  (paymentParams.get('payment_member_keyword') || '')
+    .trim()
+    .toLowerCase()
+
 
   /* =========================
      회원 조회
@@ -19174,10 +19354,27 @@ document.querySelector('#close-billing-modal')
         return false
       }
 
-      return (
-        paymentDate >= paymentStartDate &&
-        paymentDate <= paymentEndDate
-      )
+      const memberName =
+  String(
+    payment.sender_name ||
+    payment.buyer_name ||
+    ''
+  )
+    .trim()
+    .toLowerCase()
+
+const dateMatched =
+  paymentDate >= paymentStartDate &&
+  paymentDate <= paymentEndDate
+
+const memberMatched =
+  !paymentMemberKeyword ||
+  memberName.includes(paymentMemberKeyword)
+
+return (
+  dateMatched &&
+  memberMatched
+)
     })
 
 
@@ -19222,6 +19419,13 @@ document.querySelector('#close-billing-modal')
           type="date"
           value="${paymentEndDate}"
         />
+
+        <input
+  id="academy-payment-member-search-input"
+  type="text"
+  placeholder="회원명 입력"
+  value="${paymentParams.get('payment_member_keyword') || ''}"
+/>
 
         <button
           id="academy-payment-search-btn"
@@ -19395,6 +19599,20 @@ document.querySelector('#close-billing-modal')
         endDate
       )
 
+      const memberKeyword =
+  (
+    document.querySelector<HTMLInputElement>(
+      '#academy-payment-member-search-input'
+    )?.value || ''
+  ).trim()
+
+if (memberKeyword) {
+  params.set(
+    'payment_member_keyword',
+    memberKeyword
+  )
+}
+
       location.href =
         '/merchant-academy-payments?' +
         params.toString()
@@ -19423,21 +19641,78 @@ document.querySelector('#close-billing-modal')
     .eq('payment_status', '미납')
     .order('id', { ascending: false })
 
-    const batchRows =
-  billings || []
+    
 
-const batchPagination =
-  getAcademyPagination(
-    batchRows.length,
-    'academy_batch'
-  )
-
-const batchPageRows =
-  batchRows.slice(
-    batchPagination.startIndex,
-    batchPagination.startIndex +
-      batchPagination.pageSize
-  )
+    const batchGroupedMap =
+    new Map<string, any>()
+  
+  ;(billings || []).forEach((billing) => {
+  
+    const member =
+      (members || []).find(
+        (item) =>
+          Number(item.id) ===
+          Number(billing.member_id)
+      )
+  
+    const groupKey =
+      String(billing.member_id) +
+      '|' +
+      String(billing.billing_month || '')
+  
+    const existing =
+      batchGroupedMap.get(groupKey)
+  
+      if (existing) {
+        existing.amount +=
+          Number(billing.amount || 0)
+      
+        existing.billing_count += 1
+      
+        existing.billing_ids.push(
+          Number(billing.id)
+        )
+      
+        return
+      }
+  
+      batchGroupedMap.set(
+        groupKey,
+        {
+          ...billing,
+      
+          member_name:
+            member?.member_name || '',
+      
+          amount:
+            Number(billing.amount || 0),
+      
+          billing_count: 1,
+      
+          billing_ids: [
+            Number(billing.id)
+          ]
+        }
+      )
+  })
+  
+  const batchRows =
+    Array.from(
+      batchGroupedMap.values()
+    )
+  
+  const batchPagination =
+    getAcademyPagination(
+      batchRows.length,
+      'academy_batch'
+    )
+  
+  const batchPageRows =
+    batchRows.slice(
+      batchPagination.startIndex,
+      batchPagination.startIndex +
+        batchPagination.pageSize
+    )
 
   app.innerHTML = `
     <div class="merchant-members-page">
@@ -19503,24 +19778,43 @@ ${getMemberMenuHtml('batch')}
         </thead>
 
         <tbody>
-          ${batchPageRows.map((billing) => `
-            <tr>
-              <td>
-                <input
-                  type="checkbox"
-                  class="batch-billing-check"
-                  data-id="${billing.id}"
-                />
-              </td>
-              <td>${
-                (members || []).find((member) => member.id === billing.member_id)?.member_name || ''
-              }</td>
-              <td>${billing.billing_month || ''}</td>
-              <td>${Number(billing.amount || 0).toLocaleString()}원</td>
-              <td>${billing.payment_status || '미납'}</td>
-            </tr>
-          `).join('')}
-        </tbody>
+  ${batchPageRows.map((billing) => `
+    <tr>
+      <td>
+        <input
+  type="checkbox"
+  class="batch-billing-check"
+  data-id="${billing.id}"
+  data-ids="${(billing.billing_ids || []).join(',')}"
+/>
+      </td>
+
+      <td>
+        ${billing.member_name || ''}
+      </td>
+
+      <td>
+        ${billing.billing_month || ''}
+      </td>
+
+      <td>
+        ${Number(
+          billing.amount || 0
+        ).toLocaleString()}원
+      </td>
+
+      <td>
+        ${
+          Number(billing.billing_count || 1) > 1
+            ? '미납 (' +
+              billing.billing_count +
+              '건 합산)'
+            : '미납'
+        }
+      </td>
+    </tr>
+  `).join('')}
+</tbody>
       </table>
 
       ${getAcademyPaginationHtml(
@@ -19588,9 +19882,12 @@ document.querySelector('#batch-template-download-btn')
   )
 
   const ids =
-    checkedItems.map((item) =>
-      Number(item.dataset.id)
-    )
+  checkedItems.flatMap((item) =>
+    String(item.dataset.ids || '')
+      .split(',')
+      .map((id) => Number(id))
+      .filter((id) => id > 0)
+  )
 
   if (ids.length === 0) {
     alert('엑셀로 내려받을 청구건을 선택해주세요.')
@@ -19602,29 +19899,74 @@ document.querySelector('#batch-template-download-btn')
       ids.includes(Number(billing.id))
     )
 
-  const excelRows =
-    selectedBillings.map((billing) => {
-
-      const member =
-        (members || []).find(
-          (item) =>
-            Number(item.id) ===
-            Number(billing.member_id)
-        )
-
-      return {
-        청구ID: billing.id,
-        회원명: member?.member_name || '',
-        청구월: billing.billing_month || '',
-        결제금액: Number(billing.amount || 0),
+    const excelGroupedMap =
+    new Map<string, any>()
+  
+  selectedBillings.forEach((billing) => {
+  
+    const member =
+      (members || []).find(
+        (item) =>
+          Number(item.id) ===
+          Number(billing.member_id)
+      )
+  
+    const groupKey =
+      String(billing.member_id) +
+      '|' +
+      String(billing.billing_month || '')
+  
+    const existing =
+      excelGroupedMap.get(groupKey)
+  
+    if (existing) {
+      existing.결제금액 +=
+        Number(billing.amount || 0)
+  
+      existing.청구ID +=
+        ',' + String(billing.id)
+  
+      existing.상품명 =
+        '정기/추가청구 합산'
+  
+      return
+    }
+  
+    excelGroupedMap.set(
+      groupKey,
+      {
+        청구ID:
+          String(billing.id),
+  
+        회원명:
+          member?.member_name || '',
+  
+        청구월:
+          billing.billing_month || '',
+  
+        결제금액:
+          Number(billing.amount || 0),
+  
         카드번호: '',
         유효기간월: '',
         유효기간년: '',
         할부개월: '00',
-        상품명: '정기결제',
-        연락처: member?.phone || ''
+  
+        상품명:
+          billing.memo?.includes('추가청구')
+            ? '추가청구'
+            : '정기결제',
+  
+        연락처:
+          member?.phone || ''
       }
-    })
+    )
+  })
+  
+  const excelRows =
+    Array.from(
+      excelGroupedMap.values()
+    )
 
   const worksheet =
     XLSX.utils.json_to_sheet(excelRows)
@@ -19708,7 +20050,7 @@ batchExcelFileInput
 ========================================= */
 
 let academyBatchExcelRows: Array<{
-  billingId: number
+  billingIds: number[]
   memberName: string
   billingMonth: string
   amount: number
@@ -19785,8 +20127,15 @@ document.querySelector('#batch-excel-load-btn')
       academyBatchExcelRows =
         rawRows.map((row) => {
 
-          const billingId =
-            Number(row['청구ID'] || 0)
+          const billingIds =
+  String(row['청구ID'] || '')
+    .split(',')
+    .map((id) =>
+      Number(
+        String(id).trim()
+      )
+    )
+    .filter((id) => id > 0)
 
           const memberName =
             String(row['회원명'] || '').trim()
@@ -19836,7 +20185,7 @@ document.querySelector('#batch-excel-load-btn')
           const errors: string[] = []
 
 
-          if (!billingId) {
+          if (billingIds.length === 0) {
             errors.push('청구ID 없음')
           }
 
@@ -19868,7 +20217,7 @@ document.querySelector('#batch-excel-load-btn')
 
 
           return {
-            billingId,
+            billingIds,
             memberName,
             billingMonth,
             amount,
@@ -20221,13 +20570,13 @@ document.querySelector('#batch-excel-load-btn')
       
       
                 const { error: billingUpdateError } =
-                  await supabase
-                    .from('billings')
-                    .update({
-                      payment_status: '완료'
-                    })
-                    .eq('id', row.billingId)
-                    .eq('merchant_id', merchantId)
+  await supabase
+    .from('billings')
+    .update({
+      payment_status: '완료'
+    })
+    .in('id', row.billingIds)
+    .eq('merchant_id', merchantId)
       
                 if (billingUpdateError) {
       
@@ -20256,8 +20605,8 @@ const { error: paymentMemberError } =
     .update({
       sender_name: row.memberName,
       message:
-        '아카데미 정기결제 / 청구ID ' +
-        row.billingId
+  '아카데미 정기결제 / 청구ID ' +
+  row.billingIds.join(',')
     })
     .eq('merchant_id', merchantId)
     .eq('approval_number', approvalNumber)
