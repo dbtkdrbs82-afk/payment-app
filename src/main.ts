@@ -604,6 +604,208 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
       })
     })
 
+  } else if (path === '/academy-pay') {
+
+    const academyParams =
+      new URLSearchParams(window.location.search)
+  
+    const merchantId =
+      Number(
+        academyParams.get('merchant_id') || 0
+      )
+  
+    if (!merchantId) {
+      app.innerHTML = `
+        <div class="page">
+          <div class="payment-card">
+            <h2>결제정보를 찾을 수 없습니다.</h2>
+          </div>
+        </div>
+      `
+    } else {
+  
+      const {
+        data: merchant,
+        error: merchantError
+      } =
+        await supabase
+          .from('merchants')
+          .select('id, merchant_name')
+          .eq('id', merchantId)
+          .single()
+  
+      if (
+        merchantError ||
+        !merchant
+      ) {
+        app.innerHTML = `
+          <div class="page">
+            <div class="payment-card">
+              <h2>가맹점 정보를 찾을 수 없습니다.</h2>
+            </div>
+          </div>
+        `
+      } else {
+  
+        app.innerHTML = `
+          <div class="page">
+            <div class="payment-card">
+  
+              <h1>
+                ${merchant.merchant_name}
+              </h1>
+  
+              <h2 style="margin-top:12px;">
+                QR 결제
+              </h2>
+  
+              <div class="input-group">
+                <label>회원명</label>
+  
+                <input
+                  id="academy-pay-name"
+                  type="text"
+                  placeholder="이름을 입력해주세요"
+                />
+              </div>
+  
+              <div class="input-group">
+                <label>요청사항</label>
+  
+                <textarea
+                  id="academy-pay-message"
+                  placeholder="동·호수, 이용료, 요청사항 등을 입력해주세요"
+                ></textarea>
+              </div>
+  
+              <div class="input-group">
+                <label>결제금액</label>
+  
+                <input
+                  id="academy-pay-amount"
+                  type="number"
+                  min="1"
+                  placeholder="결제금액 입력"
+                />
+              </div>
+  
+              <button id="academy-pay-submit">
+                결제하기
+              </button>
+  
+            </div>
+          </div>
+        `
+  
+  
+        document
+          .querySelector('#academy-pay-submit')
+          ?.addEventListener(
+            'click',
+            async () => {
+  
+              const memberName =
+                (
+                  document.querySelector<HTMLInputElement>(
+                    '#academy-pay-name'
+                  )?.value || ''
+                ).trim()
+  
+              const message =
+                (
+                  document.querySelector<HTMLTextAreaElement>(
+                    '#academy-pay-message'
+                  )?.value || ''
+                ).trim()
+  
+              const amount =
+                Number(
+                  document.querySelector<HTMLInputElement>(
+                    '#academy-pay-amount'
+                  )?.value || 0
+                )
+  
+              if (!memberName) {
+                alert('회원명을 입력해주세요.')
+                return
+              }
+  
+              if (
+                !Number.isFinite(amount) ||
+                amount <= 0
+              ) {
+                alert('결제금액을 입력해주세요.')
+                return
+              }
+  
+  
+              sessionStorage.setItem(
+                'merchantId',
+                String(merchant.id)
+              )
+  
+              sessionStorage.setItem(
+                'merchantName',
+                merchant.merchant_name || ''
+              )
+  
+              sessionStorage.setItem(
+                'senderName',
+                memberName
+              )
+  
+              sessionStorage.setItem(
+                'message',
+                message || '아카데미 QR 직접결제'
+              )
+  
+              sessionStorage.setItem(
+                'selected_pg_company',
+                '토스페이먼츠'
+              )
+  
+  
+              const tossPayments =
+                await loadTossPayments(clientKey)
+  
+              await tossPayments.requestPayment(
+                '카드',
+                {
+                  amount,
+  
+                  orderId:
+                    'ACADEMY-' +
+                    merchant.id +
+                    '-' +
+                    Date.now(),
+  
+                  orderName:
+                    merchant.merchant_name +
+                    ' QR결제',
+  
+                  customerName:
+                    memberName,
+  
+                  successUrl:
+                    window.location.origin +
+                    '/success?source=academy' +
+                    '&merchantId=' +
+                    merchant.id +
+                    '&merchantName=' +
+                    encodeURIComponent(
+                      merchant.merchant_name || ''
+                    ),
+  
+                  failUrl:
+                    window.location.origin +
+                    '/fail'
+                }
+              )
+            }
+          )
+      }
+    }
+
 } else if (path === '/payment-link-create') {
   const { data: merchantData, error: merchantError } = await supabase
     .from('merchants')
@@ -17875,9 +18077,20 @@ document.querySelector('#merchant-product-image-file')
       location.href = '/merchant-login'
     }
   
-    const kioskUrl =
-  'https://nxgsoft.co.kr/pay/?merchant_id=' +
-  merchantId
+    const merchantType =
+  sessionStorage.getItem('login_merchant_type') || '일반매장'
+
+const kioskUrl =
+  merchantType === '아카데미'
+    ? (
+        window.location.origin +
+        '/academy-pay?merchant_id=' +
+        merchantId
+      )
+    : (
+        'https://nxgsoft.co.kr/pay/?merchant_id=' +
+        merchantId
+      )
   
   app.innerHTML = `
   <div class="pg-admin-page">
@@ -20631,16 +20844,8 @@ ${getMemberMenuHtml('batch')}
   총 결제금액: 0원
 </div>
 
-    <button id="pay-card-btn" class="payment-method-btn">
-  💳 카드번호 결제
-</button>
-
 <button id="pay-qr-btn" class="payment-method-btn">
   🔳 QR결제
-</button>
-
-<button id="pay-link-btn" class="payment-method-btn">
-  🔗 문자 / 카카오 결제링크
 </button>
 
 <button id="pay-cash-receipt-btn" class="payment-method-btn">
@@ -21623,24 +21828,426 @@ document.querySelector('#close-payment-method-modal')
     }
   })
 
-  document.querySelector('#pay-card-btn')
+  document.querySelector('#pay-qr-btn')
   ?.addEventListener('click', () => {
-    alert('카드번호 결제 연결 예정입니다.')
-  })
 
-document.querySelector('#pay-qr-btn')
-  ?.addEventListener('click', () => {
-    alert('QR결제 연결 예정입니다.')
-  })
+    const checkedItems = Array.from(
+      document.querySelectorAll<HTMLInputElement>(
+        '.batch-billing-check:checked'
+      )
+    )
 
-  document.querySelector('#pay-link-btn')
-  ?.addEventListener('click', () => {
-    alert('문자 / 카카오 결제링크 연결 예정입니다.')
+    const ids =
+      checkedItems.flatMap((item) =>
+        String(item.dataset.ids || item.dataset.id || '')
+          .split(',')
+          .map((id) => Number(id))
+          .filter((id) => id > 0)
+      )
+
+    if (ids.length === 0) {
+      alert('QR결제할 청구건을 선택해주세요.')
+      return
+    }
+
+    const selectedBillings =
+      (billings || []).filter((billing) =>
+        ids.includes(Number(billing.id))
+      )
+
+    const totalAmount =
+      selectedBillings.reduce(
+        (sum, billing) =>
+          sum + Number(billing.amount || 0),
+        0
+      )
+
+    sessionStorage.setItem(
+      'academy_qr_billing_ids',
+      ids.join(',')
+    )
+
+    sessionStorage.setItem(
+      'academy_qr_amount',
+      String(totalAmount)
+    )
+
+    location.href =
+      '/merchant-qr'
   })
 
   document.querySelector('#pay-cash-receipt-btn')
   ?.addEventListener('click', () => {
-    alert('현금영수증 발급 연결 예정입니다.')
+
+    const checkedItems =
+      Array.from(
+        document.querySelectorAll<HTMLInputElement>(
+          '.batch-billing-check:checked'
+        )
+      )
+
+    const ids =
+      checkedItems.flatMap((item) =>
+        String(
+          item.dataset.ids ||
+          item.dataset.id ||
+          ''
+        )
+          .split(',')
+          .map((id) => Number(id))
+          .filter((id) => id > 0)
+      )
+
+    if (ids.length === 0) {
+      alert('현금영수증을 발급할 청구건을 선택해주세요.')
+      return
+    }
+
+    const selectedBillings =
+      (billings || []).filter((billing) =>
+        ids.includes(Number(billing.id))
+      )
+
+    const totalAmount =
+      selectedBillings.reduce(
+        (sum, billing) =>
+          sum + Number(billing.amount || 0),
+        0
+      )
+
+    const existingModal =
+      document.querySelector(
+        '#cash-receipt-modal'
+      )
+
+    if (existingModal) {
+      existingModal.remove()
+    }
+
+    const modal =
+      document.createElement('div')
+
+    modal.id =
+      'cash-receipt-modal'
+
+    modal.className =
+      'cash-receipt-modal'
+
+    modal.innerHTML = `
+      <div class="cash-receipt-modal-card">
+
+        <div class="cash-receipt-modal-header">
+
+          <h3>현금영수증 발급</h3>
+
+          <button
+            type="button"
+            id="cash-receipt-modal-close"
+            class="cash-receipt-modal-close"
+          >
+            ×
+          </button>
+
+        </div>
+
+        <div class="cash-receipt-modal-body">
+
+          <label>구분</label>
+
+          <select id="cash-receipt-type">
+            <option value="소득공제">
+              소득공제
+            </option>
+
+            <option value="지출증빙">
+              지출증빙
+            </option>
+          </select>
+
+
+          <label>결제금액</label>
+
+          <input
+            id="cash-receipt-amount"
+            type="number"
+            min="1"
+            value="${totalAmount}"
+            readonly
+          />
+
+
+          <label>
+            휴대폰번호 / 사업자번호
+          </label>
+
+          <input
+            id="cash-receipt-number"
+            type="text"
+            placeholder="숫자만 입력"
+          />
+
+
+          <label>품목명</label>
+
+          <input
+            id="cash-receipt-order-name"
+            type="text"
+            value="아카데미 현금결제"
+          />
+
+
+          <button
+            type="button"
+            id="cash-receipt-submit"
+            class="cash-receipt-submit"
+          >
+            현금영수증 발급
+          </button>
+
+        </div>
+
+      </div>
+    `
+
+    document.body.appendChild(modal)
+
+    const paymentMethodModal =
+      document.querySelector<HTMLElement>(
+        '#payment-method-modal'
+      )
+
+    if (paymentMethodModal) {
+      paymentMethodModal.style.display =
+        'none'
+    }
+
+
+    document
+      .querySelector(
+        '#cash-receipt-modal-close'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+          modal.remove()
+        }
+      )
+
+
+    modal.addEventListener(
+      'click',
+      (event) => {
+
+        if (event.target === modal) {
+          modal.remove()
+        }
+
+      }
+    )
+
+
+    document
+      .querySelector(
+        '#cash-receipt-type'
+      )
+      ?.addEventListener(
+        'change',
+        () => {
+
+          const typeSelect =
+            document.querySelector<HTMLSelectElement>(
+              '#cash-receipt-type'
+            )
+
+          const numberInput =
+            document.querySelector<HTMLInputElement>(
+              '#cash-receipt-number'
+            )
+
+          if (
+            !typeSelect ||
+            !numberInput
+          ) {
+            return
+          }
+
+          numberInput.placeholder =
+            typeSelect.value ===
+            '지출증빙'
+              ? '사업자번호 10자리'
+              : '휴대폰번호 또는 현금영수증 카드번호'
+        }
+      )
+
+
+    document
+      .querySelector(
+        '#cash-receipt-submit'
+      )
+      ?.addEventListener(
+        'click',
+        async () => {
+
+          const type =
+            (
+              document.querySelector<HTMLSelectElement>(
+                '#cash-receipt-type'
+              )?.value || ''
+            )
+
+          const amount =
+            Number(
+              document.querySelector<HTMLInputElement>(
+                '#cash-receipt-amount'
+              )?.value || 0
+            )
+
+          const customerIdentityNumber =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#cash-receipt-number'
+              )?.value || ''
+            ).trim()
+
+          const orderName =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#cash-receipt-order-name'
+              )?.value ||
+              '아카데미 현금결제'
+            )
+
+          if (!customerIdentityNumber) {
+
+            alert(
+              type === '지출증빙'
+                ? '사업자번호를 입력해주세요.'
+                : '휴대폰번호를 입력해주세요.'
+            )
+
+            return
+          }
+
+          const orderId =
+            'CASH-' +
+            merchantId +
+            '-' +
+            Date.now()
+
+          const submitButton =
+            document.querySelector<HTMLButtonElement>(
+              '#cash-receipt-submit'
+            )
+
+          if (submitButton) {
+            submitButton.disabled =
+              true
+
+            submitButton.textContent =
+              '발급 중...'
+          }
+
+          try {
+
+            const response =
+              await fetch(
+                '/api/toss-cash-receipt',
+                {
+                  method: 'POST',
+
+                  headers: {
+                    'Content-Type':
+                      'application/json'
+                  },
+
+                  body: JSON.stringify({
+                    amount,
+                    orderId,
+                    orderName,
+                    type,
+                    customerIdentityNumber,
+                    taxFreeAmount: 0
+                  })
+                }
+              )
+
+            const result =
+              await response.json()
+
+            if (
+              !response.ok ||
+              !result.success
+            ) {
+
+              alert(
+                '현금영수증 발급 실패: ' +
+                (
+                  result.message ||
+                  '알 수 없는 오류'
+                )
+              )
+
+              return
+            }
+
+
+            const {
+              error: billingUpdateError
+            } =
+              await supabase
+                .from('billings')
+                .update({
+                  payment_status:
+                    '완료'
+                })
+                .in(
+                  'id',
+                  ids
+                )
+
+            if (billingUpdateError) {
+
+              alert(
+                '현금영수증은 발급됐지만 청구상태 변경에 실패했습니다.\n' +
+                billingUpdateError.message
+              )
+
+              return
+            }
+
+
+            alert(
+              '현금영수증 발급이 완료되었습니다.'
+            )
+
+            modal.remove()
+
+            location.reload()
+
+          } catch (error) {
+
+            console.error(error)
+
+            alert(
+              '현금영수증 발급 중 오류가 발생했습니다.'
+            )
+
+          } finally {
+
+            if (submitButton) {
+
+              submitButton.disabled =
+                false
+
+              submitButton.textContent =
+                '현금영수증 발급'
+            }
+
+          }
+
+        }
+      )
+
   })
 
     } else if (path === '/merchant-card') { 
