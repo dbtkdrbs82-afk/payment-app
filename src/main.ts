@@ -19888,19 +19888,22 @@ return (
 
                   <td>
   <button
-    type="button"
-    class="academy-receipt-link"
-    data-id="${payment.id}"
-    style="
-      border:0;
-      background:none;
-      padding:0;
-      cursor:pointer;
-      text-decoration:underline;
-      color:#174981;
-      font:inherit;
-    "
-  >
+  type="button"
+  class="academy-receipt-link"
+  data-id="${payment.id}"
+  style="
+    border:0;
+    background:#174981;
+    color:#ffffff;
+    padding:6px 10px;
+    width:170px;
+    border-radius:7px;
+    cursor:pointer;
+    font:inherit;
+    font-weight:700;
+    white-space:nowrap;
+  "
+>
     ${
       payment.approved_at ||
       payment.created_at ||
@@ -19937,19 +19940,31 @@ return (
         )
       : `
         <button
-          type="button"
-          class="academy-cancel-approval-link"
-          data-payment-id="${payment.id}"
-          data-amount="${payment.amount || 0}"
-          data-created-at="${
-            payment.approved_at ||
-            payment.created_at ||
-            ''
-          }"
-          data-pg="${payment.pg_company || ''}"
-        >
-          ${payment.approval_number || '-'}
-        </button>
+  type="button"
+  class="academy-cancel-approval-link"
+  data-payment-id="${payment.id}"
+  data-amount="${payment.amount || 0}"
+  data-created-at="${
+    payment.approved_at ||
+    payment.created_at ||
+    ''
+  }"
+  data-pg="${payment.pg_company || ''}"
+  style="
+    border:0;
+    background:#174981;
+    color:#ffffff;
+    padding:6px 10px;
+    width:110px;
+    border-radius:7px;
+    cursor:pointer;
+    font:inherit;
+    font-weight:700;
+    white-space:nowrap;
+  "
+>
+  ${payment.approval_number || '-'}
+</button>
       `
   }
 </td>
@@ -20646,9 +20661,10 @@ document
 
         const receiptHtml = `
           <div
-            id="academy-receipt-modal"
-            class="receipt-modal"
-          >
+  id="academy-receipt-modal"
+  class="receipt-modal"
+  style="display:flex;"
+>
             <div
               class="receipt-box receipt-approve"
             >
