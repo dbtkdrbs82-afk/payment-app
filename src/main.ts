@@ -20598,94 +20598,137 @@ document.querySelector('#batch-excel-load-btn')
                   continue
                 }
       
-                /* =========================
+              /* =========================
    결제내역에 아카데미 회원 연결
 ========================= */
 
 const paymentTid =
-  String(data.tid || '').trim()
+String(data.tid || '').trim()
 
+const paymentOrderId =
+String(data.orderId || '').trim()
+
+let paymentId: number | null = null
+
+for (
+let retry = 0;
+retry < 30;
+retry += 1
+) {
+
+let foundPayment: any = null
+let findPaymentError: any = null
+
+/* 1차: 코페이 TID로 조회 */
 if (paymentTid) {
-
-  let paymentId: number | null = null
-
-  for (
-    let retry = 0;
-    retry < 20;
-    retry += 1
-  ) {
-
-    const {
-      data: foundPayment,
-      error: findPaymentError
-    } = await supabase
+  const result =
+    await supabase
       .from('payments')
-      .select('id')
+      .select('id, payment_key, order_id')
+      .eq('merchant_id', merchantId)
       .eq('payment_key', paymentTid)
       .maybeSingle()
 
-    if (findPaymentError) {
-      console.error(
-        '아카데미 결제 조회 실패:',
-        findPaymentError
-      )
-    }
+  foundPayment =
+    result.data
 
-    if (foundPayment?.id) {
-      paymentId =
-        Number(foundPayment.id)
+  findPaymentError =
+    result.error
+}
 
-      break
-    }
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, 500)
-    )
-  }
-
-
-  if (paymentId) {
-
-    const {
-      data: updatedPayment,
-      error: paymentMemberError
-    } = await supabase
+/* 2차: 주문번호로 조회 */
+if (
+  !foundPayment &&
+  paymentOrderId
+) {
+  const result =
+    await supabase
       .from('payments')
-      .update({
-        sender_name:
-          row.memberName,
+      .select('id, payment_key, order_id')
+      .eq('merchant_id', merchantId)
+      .eq('order_id', paymentOrderId)
+      .maybeSingle()
 
-        message:
-          '아카데미 정기결제 / 청구ID ' +
-          row.billingIds.join(',')
-      })
-      .eq('id', paymentId)
-      .select('id, sender_name')
+  foundPayment =
+    result.data
 
-    if (paymentMemberError) {
+  findPaymentError =
+    result.error
+}
 
-      console.error(
-        '아카데미 결제 회원 연결 실패:',
-        paymentMemberError
-      )
+if (findPaymentError) {
+  console.error(
+    '아카데미 결제 조회 실패:',
+    findPaymentError
+  )
+}
 
-    } else {
+if (foundPayment?.id) {
+  paymentId =
+    Number(foundPayment.id)
 
-      console.log(
-        '아카데미 결제 회원 연결 완료:',
-        updatedPayment
-      )
+  break
+}
 
-    }
+await new Promise((resolve) =>
+  setTimeout(resolve, 500)
+)
+}
 
-  } else {
 
-    console.error(
-      '아카데미 결제 TID 조회 실패:',
-      paymentTid
+if (paymentId) {
+
+const {
+  data: updatedPayment,
+  error: paymentMemberError
+} =
+  await supabase
+    .from('payments')
+    .update({
+      sender_name:
+        row.memberName,
+
+      message:
+        '아카데미 정기결제 / 청구ID ' +
+        row.billingIds.join(',')
+    })
+    .eq('id', paymentId)
+    .select(
+      'id, sender_name, order_id, payment_key'
     )
 
+if (paymentMemberError) {
+
+  console.error(
+    '아카데미 결제 회원 연결 실패:',
+    paymentMemberError
+  )
+
+} else {
+
+  console.log(
+    '아카데미 결제 회원 연결 완료:',
+    updatedPayment
+  )
+
+}
+
+} else {
+
+console.error(
+  '아카데미 결제 연결 대상 조회 실패:',
+  {
+    memberName:
+      row.memberName,
+
+    tid:
+      paymentTid,
+
+    orderId:
+      paymentOrderId
   }
+)
+
 }
 
       
