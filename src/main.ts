@@ -19507,11 +19507,30 @@ return (
                   </td>
 
                   <td>
-                    ${
-                      payment.approval_number ||
-                      '-'
-                    }
-                  </td>
+  ${
+    payment.status === 'cancel'
+      ? (
+          payment.approval_number ||
+          '취소완료'
+        )
+      : `
+        <button
+          type="button"
+          class="academy-cancel-approval-link"
+          data-payment-id="${payment.id}"
+          data-amount="${payment.amount || 0}"
+          data-created-at="${
+            payment.approved_at ||
+            payment.created_at ||
+            ''
+          }"
+          data-pg="${payment.pg_company || ''}"
+        >
+          ${payment.approval_number || '-'}
+        </button>
+      `
+  }
+</td>
 
                   <td>
                     ${
@@ -19538,6 +19557,45 @@ return (
         paymentPagination.totalPages
       )}
 
+      <div id="academy-cancel-modal" class="cancel-modal">
+  <div class="cancel-box">
+
+    <h3>결제 취소</h3>
+
+    <p id="academy-cancel-order-info">
+      결제를 취소하시겠습니까?
+    </p>
+
+    <input
+      id="academy-cancel-password"
+      type="password"
+      placeholder="취소 비밀번호 입력"
+    />
+
+    <textarea
+      id="academy-cancel-reason"
+      placeholder="취소 사유 입력"
+    ></textarea>
+
+    <div class="cancel-button-row">
+
+      <button id="academy-direct-cancel-button">
+        직접 취소
+      </button>
+
+      <button id="academy-request-cancel-button">
+        본사 승인요청
+      </button>
+
+      <button id="academy-close-cancel-modal">
+        닫기
+      </button>
+
+    </div>
+
+  </div>
+</div>
+
     </div>
   `
 
@@ -19552,6 +19610,653 @@ return (
     paymentPagination.totalPages
   )
 
+  document
+  .querySelectorAll<HTMLElement>(
+    '.academy-cancel-approval-link'
+  )
+  .forEach((item) => {
+
+    item.addEventListener('click', () => {
+
+      const modal =
+        document.querySelector<HTMLElement>(
+          '#academy-cancel-modal'
+        )
+
+      if (!modal) return
+
+      const paymentId =
+        item.dataset.paymentId || ''
+
+      const amount =
+        Number(item.dataset.amount || 0)
+
+      const createdAt =
+        item.dataset.createdAt || ''
+
+      const pgCompany =
+        item.dataset.pg || ''
+
+      const info =
+        document.querySelector<HTMLElement>(
+          '#academy-cancel-order-info'
+        )
+
+      if (info) {
+        info.textContent =
+          '결제금액 ' +
+          amount.toLocaleString() +
+          '원을 취소하시겠습니까?'
+      }
+
+      modal.dataset.paymentId =
+        paymentId
+
+      modal.dataset.createdAt =
+        createdAt
+
+      modal.dataset.pg =
+        pgCompany
+
+      modal.style.display =
+        'flex'
+    })
+  })
+
+
+document
+  .querySelector(
+    '#academy-close-cancel-modal'
+  )
+  ?.addEventListener('click', () => {
+
+    const modal =
+      document.querySelector<HTMLElement>(
+        '#academy-cancel-modal'
+      )
+
+    if (modal) {
+      modal.style.display =
+        'none'
+    }
+  })
+
+  document
+  .querySelector('#academy-direct-cancel-button')
+  ?.addEventListener('click', async () => {
+
+    const modal =
+      document.querySelector<HTMLElement>(
+        '#academy-cancel-modal'
+      )
+
+    if (!modal) return
+
+    const paymentId =
+      Number(
+        modal.dataset.paymentId || 0
+      )
+
+    const createdAt =
+      modal.dataset.createdAt || ''
+
+    const password =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#academy-cancel-password'
+        )?.value || ''
+      ).trim()
+
+    const reason =
+      (
+        document.querySelector<HTMLTextAreaElement>(
+          '#academy-cancel-reason'
+        )?.value || ''
+      ).trim()
+
+    if (!paymentId) {
+      alert('취소할 결제정보를 찾을 수 없습니다.')
+      return
+    }
+
+    if (!reason) {
+      alert('취소 사유를 입력해주세요.')
+      return
+    }
+
+    const today =
+      new Date().toISOString().slice(0, 10)
+
+    const paymentDate =
+      createdAt.slice(0, 10)
+
+    if (paymentDate !== today) {
+      alert(
+        '당일 결제건만 직접 취소할 수 있습니다.\n' +
+        '본사 승인요청을 이용해주세요.'
+      )
+      return
+    }
+
+    if (password !== '1234') {
+      alert('취소 비밀번호가 일치하지 않습니다.')
+      return
+    }
+
+    const {
+      data: payment,
+      error: paymentError
+    } =
+      await supabase
+        .from('payments')
+        .select(
+          'id, merchant_id, pg_company, payment_key, status'
+        )
+        .eq('id', paymentId)
+        .single()
+
+    if (
+      paymentError ||
+      !payment
+    ) {
+      alert('결제정보를 불러오지 못했습니다.')
+      return
+    }
+
+    if (payment.status === 'cancel') {
+      alert('이미 취소된 결제입니다.')
+      return
+    }
+
+    const directCancelButton =
+      document.querySelector<HTMLButtonElement>(
+        '#academy-direct-cancel-button'
+      )
+
+    if (directCancelButton) {
+      directCancelButton.disabled = true
+      directCancelButton.textContent =
+        '취소 처리 중...'
+    }
+
+    try {
+
+      /* =========================
+         코페이
+      ========================= */
+
+      if (payment.pg_company === '코페이') {
+
+        const cancelResponse =
+          await fetch(
+            '/api/korpay-cancel',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+              body: JSON.stringify({
+                paymentId:
+                  Number(payment.id),
+
+                cancelName:
+                  sessionStorage.getItem(
+                    'login_merchant_name'
+                  ) || '가맹점',
+
+                cancelMessage:
+                  reason
+              })
+            }
+          )
+
+        const cancelData =
+          await cancelResponse.json()
+
+        if (
+          !cancelResponse.ok ||
+          !cancelData.success
+        ) {
+          alert(
+            '코페이 실제 취소에 실패했습니다.\n\n' +
+            (
+              cancelData.message ||
+              '알 수 없는 오류'
+            )
+          )
+          return
+        }
+      }
+
+      /* =========================
+         토스페이먼츠
+      ========================= */
+
+      else if (
+        payment.pg_company ===
+        '토스페이먼츠'
+      ) {
+
+        if (!payment.payment_key) {
+          alert(
+            '토스 paymentKey가 없습니다.'
+          )
+          return
+        }
+
+        const cancelResponse =
+          await fetch(
+            '/api/toss-cancel',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+              body: JSON.stringify({
+                paymentKey:
+                  payment.payment_key,
+
+                cancelReason:
+                  reason
+              })
+            }
+          )
+
+        const cancelData =
+          await cancelResponse.json()
+
+        if (!cancelResponse.ok) {
+          alert(
+            '토스 실제 취소에 실패했습니다.\n\n' +
+            (
+              cancelData.message ||
+              '알 수 없는 오류'
+            )
+          )
+          return
+        }
+
+        const {
+          error: updateError
+        } =
+          await supabase
+            .from('payments')
+            .update({
+              status: 'cancel',
+              canceled_at:
+                new Date().toISOString(),
+
+              payout_status:
+                '출금제외',
+
+              settlement_status:
+                '취소'
+            })
+            .eq(
+              'id',
+              Number(payment.id)
+            )
+
+        if (updateError) {
+          alert(
+            '토스 취소는 성공했지만 ' +
+            '결제내역 수정에 실패했습니다.\n' +
+            updateError.message
+          )
+          return
+        }
+      }
+
+      /* =========================
+         지원하지 않는 PG
+      ========================= */
+
+      else {
+
+        alert(
+          '직접 취소를 지원하지 않는 PG사입니다.\n' +
+          '결제 PG사: ' +
+          (payment.pg_company || '-')
+        )
+
+        return
+      }
+
+      alert(
+        '결제가 취소되었습니다.'
+      )
+
+      location.reload()
+
+    } catch (error) {
+
+      console.error(error)
+
+      alert(
+        '취소 처리 중 오류가 발생했습니다.'
+      )
+
+    } finally {
+
+      if (directCancelButton) {
+        directCancelButton.disabled =
+          false
+
+        directCancelButton.textContent =
+          '직접 취소'
+      }
+    }
+  })
+
+  document
+  .querySelector('#academy-request-cancel-button')
+  ?.addEventListener('click', async () => {
+
+    const modal =
+      document.querySelector<HTMLElement>(
+        '#academy-cancel-modal'
+      )
+
+    if (!modal) return
+
+    const paymentId =
+      Number(modal.dataset.paymentId || 0)
+
+    const reason =
+      (
+        document.querySelector<HTMLTextAreaElement>(
+          '#academy-cancel-reason'
+        )?.value || ''
+      ).trim()
+
+    if (!paymentId) {
+      alert('취소할 결제정보를 찾을 수 없습니다.')
+      return
+    }
+
+    if (!reason) {
+      alert('취소 사유를 입력해주세요.')
+      return
+    }
+
+    const {
+      data: payment,
+      error: paymentError
+    } =
+      await supabase
+        .from('payments')
+        .select('*')
+        .eq('id', paymentId)
+        .single()
+
+    if (
+      paymentError ||
+      !payment
+    ) {
+      alert('결제정보를 불러오지 못했습니다.')
+      return
+    }
+
+    if (payment.status === 'cancel') {
+      alert('이미 취소된 결제입니다.')
+      return
+    }
+
+    const {
+      data: existingRequest
+    } =
+      await supabase
+        .from('cancel_requests')
+        .select('id, status')
+        .eq('payment_id', paymentId)
+        .eq('status', '요청중')
+        .maybeSingle()
+
+    if (existingRequest) {
+      alert('이미 본사 취소 승인요청이 접수되어 있습니다.')
+      return
+    }
+
+    const {
+      error: requestError
+    } =
+      await supabase
+        .from('cancel_requests')
+        .insert({
+          payment_id: paymentId,
+
+          merchant_id:
+            payment.merchant_id,
+
+          merchant_name:
+            payment.merchant_name || null,
+
+          amount:
+            payment.amount || 0,
+
+          reason:
+            reason,
+
+          status:
+            '요청중'
+        })
+
+    if (requestError) {
+      console.error(
+        '아카데미 취소 승인요청 실패:',
+        requestError
+      )
+
+      alert(
+        '본사 승인요청에 실패했습니다.\n' +
+        requestError.message
+      )
+      return
+    }
+
+    alert(
+      '본사에 취소 승인요청이 접수되었습니다.'
+    )
+
+    modal.style.display = 'none'
+  })
+
+  document
+  .querySelector('#academy-request-cancel-button')
+  ?.addEventListener('click', async () => {
+
+    const modal =
+      document.querySelector<HTMLElement>(
+        '#academy-cancel-modal'
+      )
+
+    if (!modal) return
+
+    const paymentId =
+      Number(modal.dataset.paymentId || 0)
+
+    const reason =
+      (
+        document.querySelector<HTMLTextAreaElement>(
+          '#academy-cancel-reason'
+        )?.value || ''
+      ).trim()
+
+    if (!paymentId) {
+      alert('취소할 결제정보를 찾을 수 없습니다.')
+      return
+    }
+
+    if (!reason) {
+      alert('취소 사유를 입력해주세요.')
+      return
+    }
+
+    const requestButton =
+      document.querySelector<HTMLButtonElement>(
+        '#academy-request-cancel-button'
+      )
+
+    if (requestButton) {
+      requestButton.disabled = true
+      requestButton.textContent = '요청 처리 중...'
+    }
+
+    try {
+
+      const {
+        data: payment,
+        error: paymentError
+      } =
+        await supabase
+          .from('payments')
+          .select(`
+            id,
+            merchant_id,
+            merchant_name,
+            amount,
+            settlement_amount,
+            manager_admin_id,
+            manager_admin_name,
+            status
+          `)
+          .eq('id', paymentId)
+          .single()
+
+      if (
+        paymentError ||
+        !payment
+      ) {
+        alert('결제정보를 불러오지 못했습니다.')
+        return
+      }
+
+      if (payment.status === 'cancel') {
+        alert('이미 취소된 결제입니다.')
+        return
+      }
+
+      const {
+        data: existingRequest
+      } =
+        await supabase
+          .from('cancel_requests')
+          .select('id')
+          .eq(
+            'payment_id',
+            Number(payment.id)
+          )
+          .eq('status', '요청중')
+          .maybeSingle()
+
+      if (existingRequest) {
+        alert(
+          '이미 본사 승인요청이 접수된 거래입니다.'
+        )
+        return
+      }
+
+      const {
+        error: requestError
+      } =
+        await supabase
+          .from('cancel_requests')
+          .insert({
+            payment_id:
+              Number(payment.id),
+
+            merchant_id:
+              Number(payment.merchant_id),
+
+            manager_admin_id:
+              payment.manager_admin_id || null,
+
+            manager_admin_name:
+              payment.manager_admin_name || null,
+
+            reason,
+            status: '요청중'
+          })
+
+      if (requestError) {
+        alert(
+          '본사 승인요청 저장에 실패했습니다.\n' +
+          requestError.message
+        )
+        return
+      }
+
+      const {
+        error: holdError
+      } =
+        await supabase
+          .from('payments')
+          .update({
+            payout_hold: true,
+
+            payout_hold_reason:
+              '익일 취소 본사 승인요청: ' +
+              reason,
+
+            payout_hold_at:
+              new Date().toISOString(),
+
+            payout_status:
+              '지급정지'
+          })
+          .eq(
+            'id',
+            Number(payment.id)
+          )
+
+      if (holdError) {
+        alert(
+          '취소요청은 접수됐지만 지급정지 처리에 실패했습니다.\n' +
+          holdError.message
+        )
+        return
+      }
+
+      const settlementAmount =
+        Number(
+          payment.settlement_amount || 0
+        )
+
+      const transferFee = 500
+
+      alert(
+        '본사 승인요청이 접수되었습니다.\n\n' +
+        '지급상태: 지급정지\n' +
+        '반환 예정금액: ' +
+        (
+          settlementAmount +
+          transferFee
+        ).toLocaleString() +
+        '원\n\n' +
+        '본사 안내 후 지정 계좌로 입금해주세요.'
+      )
+
+      location.reload()
+
+    } catch (error) {
+
+      console.error(error)
+
+      alert(
+        '본사 승인요청 중 오류가 발생했습니다.'
+      )
+
+    } finally {
+
+      if (requestButton) {
+        requestButton.disabled = false
+        requestButton.textContent =
+          '본사 승인요청'
+      }
+    }
+  })
 
   document
     .querySelector('#academy-payment-search-btn')
