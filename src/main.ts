@@ -18190,7 +18190,13 @@ document.querySelector('#merchant-product-image-file')
 
     ${
       merchantType === '아카데미'
-        ? ''
+        ? `
+          <div class="merchant-toolbar no-print">
+            <button id="qr-go-academy-home">
+              관리홈
+            </button>
+          </div>
+        `
         : `
           <div class="merchant-toolbar no-print">
             <button id="qr-go-order">주문관리</button>
@@ -18296,6 +18302,12 @@ document.querySelector('#merchant-product-image-file')
       ?.addEventListener('click', () => {
         location.href = '/merchant-qr'
       })
+
+      document
+  .querySelector('#qr-go-academy-home')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-admin'
+  })
   
     document.querySelector('#merchant-qr-logout')
       ?.addEventListener('click', () => {
