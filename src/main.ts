@@ -604,6 +604,91 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
       })
     })
 
+  } else if (path === '/academy-chrome') {
+
+    const chromeParams =
+      new URLSearchParams(window.location.search)
+  
+    const merchantId =
+      chromeParams.get('merchant_id') || ''
+  
+    if (!merchantId) {
+      app.innerHTML = `
+        <div class="page">
+          <div class="payment-card">
+            <h2>결제정보를 찾을 수 없습니다.</h2>
+          </div>
+        </div>
+      `
+    } else {
+  
+      const targetUrl =
+        window.location.origin +
+        '/academy-pay?merchant_id=' +
+        encodeURIComponent(merchantId)
+  
+      app.innerHTML = `
+        <div class="page">
+          <div class="payment-card">
+  
+            <h1>안내</h1>
+  
+            <p style="
+              text-align:center;
+              line-height:1.7;
+              margin:20px 0;
+            ">
+              안전한 결제를 위해<br />
+              Chrome 브라우저로 연결합니다.
+            </p>
+  
+            <button
+              id="academy-open-chrome"
+              style="width:100%;"
+            >
+              크롬으로 연결
+            </button>
+  
+          </div>
+        </div>
+      `
+  
+      document
+        .querySelector('#academy-open-chrome')
+        ?.addEventListener('click', () => {
+  
+          const isAndroid =
+            /Android/i.test(
+              navigator.userAgent
+            )
+  
+          if (isAndroid) {
+  
+            const cleanTarget =
+              targetUrl.replace(
+                /^https?:\/\//,
+                ''
+              )
+  
+            location.href =
+              'intent://' +
+              cleanTarget +
+              '#Intent;' +
+              'scheme=https;' +
+              'package=com.android.chrome;' +
+              'S.browser_fallback_url=' +
+              encodeURIComponent(targetUrl) +
+              ';end'
+  
+            return
+          }
+  
+          location.href =
+            targetUrl
+        })
+    }
+  
+
   } else if (path === '/academy-pay') {
 
     const academyParams =
@@ -18080,11 +18165,11 @@ document.querySelector('#merchant-product-image-file')
     const merchantType =
   sessionStorage.getItem('login_merchant_type') || '일반매장'
 
-const kioskUrl =
+  const kioskUrl =
   merchantType === '아카데미'
     ? (
         window.location.origin +
-        '/academy-pay?merchant_id=' +
+        '/academy-chrome?merchant_id=' +
         merchantId
       )
     : (
