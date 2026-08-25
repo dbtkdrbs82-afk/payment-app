@@ -18176,7 +18176,11 @@ document.querySelector('#merchant-product-image-file')
   <div class="pg-admin-page">
 
     <div class="merchant-pick-header no-print">
-      <h1>NXG PICK QR관리</h1>
+      <h1>
+  ${merchantType === '아카데미'
+    ? '아카데미 QR관리'
+    : 'NXG PICK QR관리'}
+</h1>
 
       <div class="merchant-user-box">
         <strong>${merchantName}님</strong>
@@ -18184,11 +18188,17 @@ document.querySelector('#merchant-product-image-file')
       </div>
     </div>
 
-    <div class="merchant-toolbar no-print">
-      <button id="qr-go-order">주문관리</button>
-      <button id="qr-go-product">상품관리</button>
-      <button id="qr-go-qr">PICK QR</button>
-    </div>
+    ${
+      merchantType === '아카데미'
+        ? ''
+        : `
+          <div class="merchant-toolbar no-print">
+            <button id="qr-go-order">주문관리</button>
+            <button id="qr-go-product">상품관리</button>
+            <button id="qr-go-qr">PICK QR</button>
+          </div>
+        `
+    }
 
     <div class="qr-management-wrap">
 
