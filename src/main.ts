@@ -14395,26 +14395,27 @@ const terminalPagedPayments =
      전체 회원수
   ========================= */
 
-  const totalMemberCount =
-    allMembers.length
+  const filteredMembers =
+  allMembers.filter((member) => {
 
+    const joinedAt =
+      String(member.joined_at || '').slice(0, 10)
 
-  /* =========================
-     이번달 신규회원
-     members.joined_at 기준
-  ========================= */
+    if (!joinedAt) {
+      return false
+    }
 
-  const newMemberCount =
-    allMembers.filter((member) => {
+    return (
+      joinedAt >= selectedStartDate &&
+      joinedAt <= selectedEndDate
+    )
+  })
 
-      const joinedAt =
-        String(member.joined_at || '').slice(0, 10)
+const totalMemberCount =
+  filteredMembers.length
 
-      return (
-        joinedAt >= monthStart &&
-        joinedAt <= monthEnd
-      )
-    }).length
+const newMemberCount =
+  filteredMembers.length
 
 
   /* =========================
@@ -14497,7 +14498,7 @@ const terminalPagedPayments =
   </div>
 
   <div class="academy-card">
-    <span>이번달 신규회원</span>
+    <span>신규회원</span>
     <strong>${newMemberCount.toLocaleString()}명</strong>
   </div>
 
