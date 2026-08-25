@@ -18922,7 +18922,21 @@ const billingPageRows =
 <td>
   ${
     (billing.payment_status || '미납') === '미납'
-      ? `<button class="billing-complete-btn" data-id="${billing.id}">완료처리</button>`
+      ? `
+        <button
+          class="billing-complete-btn"
+          data-id="${billing.id}"
+        >
+          완료처리
+        </button>
+
+        <button
+          class="billing-delete-btn"
+          data-id="${billing.id}"
+        >
+          청구취소
+        </button>
+      `
       : '-'
   }
 </td>
@@ -19080,6 +19094,82 @@ const billingPageRows =
       location.reload()
     })
 
+  })
+
+  document
+  .querySelectorAll<HTMLButtonElement>(
+    '.billing-delete-btn'
+  )
+  .forEach((button) => {
+
+    button.addEventListener(
+      'click',
+      async () => {
+
+        const billingId =
+          Number(button.dataset.id || 0)
+
+        if (!billingId) {
+          alert('청구정보를 찾을 수 없습니다.')
+          return
+        }
+
+        if (
+          !confirm(
+            '이 청구건을 취소하시겠습니까?\n\n' +
+            '아직 결제되지 않은 청구건만 취소할 수 있습니다.'
+          )
+        ) {
+          return
+        }
+
+        const {
+          data: billing,
+          error: findError
+        } =
+          await supabase
+            .from('billings')
+            .select('id, payment_status')
+            .eq('id', billingId)
+            .eq('merchant_id', merchantId)
+            .single()
+
+        if (
+          findError ||
+          !billing
+        ) {
+          alert('청구정보 조회 실패')
+          return
+        }
+
+        if (
+          (billing.payment_status || '미납') !== '미납'
+        ) {
+          alert(
+            '이미 결제 완료된 청구건은 여기서 취소할 수 없습니다.'
+          )
+          return
+        }
+
+        const { error } =
+          await supabase
+            .from('billings')
+            .delete()
+            .eq('id', billingId)
+            .eq('merchant_id', merchantId)
+
+        if (error) {
+          alert(
+            '청구취소 실패: ' +
+            error.message
+          )
+          return
+        }
+
+        alert('청구가 취소되었습니다.')
+        location.reload()
+      }
+    )
   })
 
   document.querySelector('#add-billing-btn')
