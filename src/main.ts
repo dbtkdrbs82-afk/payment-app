@@ -20595,28 +20595,80 @@ document.querySelector('#batch-excel-load-btn')
 ========================= */
 
 const approvalNumber =
-String(data.approvalNumber || '').trim()
+  String(data.approvalNumber || '').trim()
 
 if (approvalNumber) {
 
-const { error: paymentMemberError } =
-  await supabase
-    .from('payments')
-    .update({
-      sender_name: row.memberName,
-      message:
-  '아카데미 정기결제 / 청구ID ' +
-  row.billingIds.join(',')
-    })
-    .eq('merchant_id', merchantId)
-    .eq('approval_number', approvalNumber)
+  let paymentId: number | null = null
 
-if (paymentMemberError) {
-  console.error(
-    '아카데미 결제 회원 연결 실패:',
-    paymentMemberError
-  )
-}
+  for (
+    let retry = 0;
+    retry < 10;
+    retry += 1
+  ) {
+
+    const {
+      data: foundPayment,
+      error: findPaymentError
+    } = await supabase
+      .from('payments')
+      .select('id')
+      .eq('merchant_id', merchantId)
+      .eq('approval_number', approvalNumber)
+      .maybeSingle()
+
+    if (findPaymentError) {
+      console.error(
+        '아카데미 결제 조회 실패:',
+        findPaymentError
+      )
+    }
+
+    if (foundPayment?.id) {
+      paymentId =
+        Number(foundPayment.id)
+
+      break
+    }
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, 500)
+    )
+  }
+
+
+  if (paymentId) {
+
+    const { error: paymentMemberError } =
+      await supabase
+        .from('payments')
+        .update({
+          sender_name:
+            row.memberName,
+
+          message:
+            '아카데미 정기결제 / 청구ID ' +
+            row.billingIds.join(',')
+        })
+        .eq('id', paymentId)
+
+    if (paymentMemberError) {
+
+      console.error(
+        '아카데미 결제 회원 연결 실패:',
+        paymentMemberError
+      )
+
+    }
+
+  } else {
+
+    console.error(
+      '아카데미 결제 회원 연결 대상 없음:',
+      approvalNumber
+    )
+
+  }
 }
       
                 row.cardNumber = ''
