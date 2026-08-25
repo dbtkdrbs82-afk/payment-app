@@ -20496,7 +20496,7 @@ let failCount = 0
 
 const failMessages: string[] = []
 
-const paymentLinkTasks: Promise<void>[] = []
+
       
           try {
       
@@ -20600,9 +20600,9 @@ const paymentLinkTasks: Promise<void>[] = []
                   continue
                 }
       
-   /* =========================
-   결제내역에 아카데미 회원 연결
-   결제 진행을 막지 않고 비동기로 처리
+  /* =========================
+   아카데미 회원명 연결
+   짧게 재시도 후 다음 결제로 진행
 ========================= */
 
 const paymentTid =
@@ -20611,138 +20611,76 @@ String(data.tid || '').trim()
 const paymentOrderId =
 String(data.orderId || '').trim()
 
-paymentLinkTasks.push(
-(async () => {
+let paymentId: number | null = null
 
-  let paymentId: number | null = null
+for (
+let retry = 0;
+retry < 6;
+retry += 1
+) {
 
-  for (
-    let retry = 0;
-    retry < 30;
-    retry += 1
-  ) {
+let foundPayment: any = null
 
-    let foundPayment: any = null
-    let findPaymentError: any = null
-
-    /* 1차: 코페이 TID */
-    if (paymentTid) {
-
-      const result =
-        await supabase
-          .from('payments')
-          .select('id, payment_key, order_id')
-          .eq('merchant_id', merchantId)
-          .eq('payment_key', paymentTid)
-          .maybeSingle()
-
-      foundPayment =
-        result.data
-
-      findPaymentError =
-        result.error
-    }
-
-    /* 2차: 주문번호 */
-    if (
-      !foundPayment &&
-      paymentOrderId
-    ) {
-
-      const result =
-        await supabase
-          .from('payments')
-          .select('id, payment_key, order_id')
-          .eq('merchant_id', merchantId)
-          .eq('order_id', paymentOrderId)
-          .maybeSingle()
-
-      foundPayment =
-        result.data
-
-      findPaymentError =
-        result.error
-    }
-
-    if (findPaymentError) {
-      console.error(
-        '아카데미 결제 조회 실패:',
-        findPaymentError
-      )
-    }
-
-    if (foundPayment?.id) {
-
-      paymentId =
-        Number(foundPayment.id)
-
-      break
-    }
-
-    await new Promise((resolve) =>
-      setTimeout(resolve, 500)
-    )
-  }
-
-
-  if (!paymentId) {
-
-    console.error(
-      '아카데미 결제 연결 대상 조회 실패:',
-      {
-        memberName:
-          row.memberName,
-
-        tid:
-          paymentTid,
-
-        orderId:
-          paymentOrderId
-      }
-    )
-
-    return
-  }
-
-
-  const {
-    data: updatedPayment,
-    error: paymentMemberError
-  } =
+if (paymentTid) {
+  const { data: tidPayment } =
     await supabase
       .from('payments')
-      .update({
-        sender_name:
-          row.memberName,
+      .select('id')
+      .eq('merchant_id', merchantId)
+      .eq('payment_key', paymentTid)
+      .maybeSingle()
 
-        message:
-          '아카데미 정기결제 / 청구ID ' +
-          row.billingIds.join(',')
-      })
-      .eq('id', paymentId)
-      .select(
-        'id, sender_name, order_id, payment_key'
-      )
+  foundPayment = tidPayment
+}
 
+if (
+  !foundPayment &&
+  paymentOrderId
+) {
+  const { data: orderPayment } =
+    await supabase
+      .from('payments')
+      .select('id')
+      .eq('merchant_id', merchantId)
+      .eq('order_id', paymentOrderId)
+      .maybeSingle()
 
-  if (paymentMemberError) {
+  foundPayment = orderPayment
+}
 
-    console.error(
-      '아카데미 결제 회원 연결 실패:',
-      paymentMemberError
-    )
+if (foundPayment?.id) {
+  paymentId =
+    Number(foundPayment.id)
 
-    return
-  }
+  break
+}
 
-
-  console.log(
-    '아카데미 결제 회원 연결 완료:',
-    updatedPayment
-  )
-
-})()
+await new Promise((resolve) =>
+  setTimeout(resolve, 300)
 )
+}
+
+if (paymentId) {
+const { error: paymentMemberError } =
+  await supabase
+    .from('payments')
+    .update({
+      sender_name:
+        row.memberName,
+
+      message:
+        '아카데미 정기결제 / 청구ID ' +
+        row.billingIds.join(',')
+    })
+    .eq('id', paymentId)
+
+if (paymentMemberError) {
+  console.error(
+    '아카데미 회원명 저장 실패:',
+    paymentMemberError
+  )
+}
+}
 
       
                 row.cardNumber = ''
@@ -20767,17 +20705,7 @@ paymentLinkTasks.push(
               }
             }
       
-            if (paymentLinkTasks.length > 0) {
-
-              if (submitButton) {
-                submitButton.textContent =
-                  '결제내역 연결 확인 중...'
-              }
             
-              await Promise.all(
-                paymentLinkTasks
-              )
-            }
       
             let resultMessage =
               '일괄결제가 완료되었습니다.\n\n' +
