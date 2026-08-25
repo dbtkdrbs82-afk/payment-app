@@ -19613,39 +19613,10 @@ document.querySelector('#close-billing-modal')
   })
 
       
-  document.querySelector('#billing-kakao-send-btn')
-  ?.addEventListener('click', async () => {
-  
-    const checkedItems = Array.from(
-      document.querySelectorAll<HTMLInputElement>(
-        '.billing-send-check:checked'
-      )
-    )
-  
-    const ids = checkedItems.map(item =>
-      Number(item.dataset.id)
-    )
-  
-    if (ids.length === 0) {
-      alert('발송할 회원을 선택해주세요.')
-      return
-    }
-  
-    const { error } = await supabase
-      .from('billings')
-      .update({
-        send_status: '발송완료'
-      })
-      .in('id', ids)
-  
-    if (error) {
-      alert('발송 처리 실패: ' + error.message)
-      return
-    }
-  
-    alert(ids.length + '건 발송 처리되었습니다.')
-  
-    location.reload()
+  document
+  .querySelector('#billing-kakao-send-btn')
+  ?.addEventListener('click', () => {
+    alert('준비중')
   })
 
 
