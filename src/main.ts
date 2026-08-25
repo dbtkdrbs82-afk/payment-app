@@ -21920,10 +21920,7 @@ document.querySelector('#close-payment-method-modal')
           .filter((id) => id > 0)
       )
 
-    if (ids.length === 0) {
-      alert('QR결제할 청구건을 선택해주세요.')
-      return
-    }
+    
 
     const selectedBillings =
       (billings || []).filter((billing) =>
@@ -21973,10 +21970,7 @@ document.querySelector('#close-payment-method-modal')
           .filter((id) => id > 0)
       )
 
-    if (ids.length === 0) {
-      alert('현금영수증을 발급할 청구건을 선택해주세요.')
-      return
-    }
+    
 
     const selectedBillings =
       (billings || []).filter((billing) =>
@@ -22043,12 +22037,12 @@ document.querySelector('#close-payment-method-modal')
           <label>결제금액</label>
 
           <input
-            id="cash-receipt-amount"
-            type="number"
-            min="1"
-            value="${totalAmount}"
-            readonly
-          />
+  id="cash-receipt-amount"
+  type="number"
+  min="1"
+  value="${totalAmount > 0 ? totalAmount : ''}"
+  placeholder="결제금액 입력"
+/>
 
 
           <label>
