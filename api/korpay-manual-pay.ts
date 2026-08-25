@@ -210,7 +210,85 @@ const ordHp = onlyDigits(customerPhone)
         })
       }
 
-      
+      const paymentTid =
+  String(korpayData.TID || '').trim()
+
+const normalizedBillingIds =
+  Array.isArray(billingIds)
+    ? billingIds
+        .map((id) => Number(id))
+        .filter((id) => id > 0)
+    : []
+
+/* 학원 일괄결제만 회원명 연결 */
+if (
+  normalizedBillingIds.length > 0 &&
+  paymentTid &&
+  String(buyerName || '').trim()
+) {
+  for (
+    let retry = 0;
+    retry < 30;
+    retry += 1
+  ) {
+    const findPaymentResponse =
+      await fetch(
+        `${supabaseUrl}/rest/v1/payments` +
+          `?select=id` +
+          `&payment_key=eq.${encodeURIComponent(paymentTid)}` +
+          `&limit=1`,
+        {
+          method: 'GET',
+          headers: supabaseHeaders
+        }
+      )
+
+    const paymentRows =
+      await findPaymentResponse.json()
+
+    const payment =
+      Array.isArray(paymentRows) &&
+      paymentRows.length > 0
+        ? paymentRows[0]
+        : null
+
+    if (payment?.id) {
+      const updateResponse =
+        await fetch(
+          `${supabaseUrl}/rest/v1/payments` +
+            `?id=eq.${payment.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              ...supabaseHeaders,
+              Prefer: 'return=minimal'
+            },
+            body: JSON.stringify({
+              sender_name:
+                String(buyerName).trim(),
+
+              message:
+                '아카데미 정기결제 / 청구ID ' +
+                normalizedBillingIds.join(',')
+            })
+          }
+        )
+
+      if (!updateResponse.ok) {
+        console.error(
+          '아카데미 회원명 저장 실패:',
+          await updateResponse.text()
+        )
+      }
+
+      break
+    }
+
+    await new Promise((resolve) =>
+      setTimeout(resolve, 300)
+    )
+  }
+}
 
     return res.status(200).json({
       success: true,
