@@ -21866,11 +21866,6 @@ if (paymentMemberError) {
 
     const ids = checkedItems.map((item) => Number(item.dataset.id))
 
-    if (ids.length === 0) {
-      alert('승인할 청구건을 선택해주세요.')
-      return
-    }
-
     const selectedBillings = (billings || []).filter((billing) => {
       return ids.includes(billing.id)
     })
