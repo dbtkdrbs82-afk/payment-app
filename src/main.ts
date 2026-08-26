@@ -17726,184 +17726,58 @@ const hotelQrUrl =
             }
           )
       
-      
-        document
+          document
           .querySelectorAll<HTMLButtonElement>(
             '.hotel-room-open-button'
           )
-          .forEach(
-            (button) => {
-      
-              button.addEventListener(
-                'click',
-                () => {
-      
-                  const url =
-                    button.dataset.url || ''
-      
-                  if (!url) {
-                    return
-                  }
-      
-                  window.open(
-                    url,
-                    '_blank'
-                  )
+          .forEach((button) => {
+        
+            button.addEventListener(
+              'click',
+              () => {
+        
+                const url =
+                  button.dataset.url || ''
+        
+                if (!url) {
+                  return
                 }
-              )
-            }
+        
+                window.open(
+                  url,
+                  '_blank'
+                )
+              }
+            )
+          })
+        
+        
+        document
+          .querySelectorAll<HTMLButtonElement>(
+            '.hotel-room-qr-button'
           )
-
-          let currentHotelQrRoom = ''
-
-document
-  .querySelectorAll<HTMLButtonElement>(
-    '.hotel-room-qr-button'
-  )
-  .forEach(
-    (button) => {
-
-      button.addEventListener(
-        'click',
-        async () => {
-
-          const roomNumber =
-            button.dataset.room || ''
-
-          const hotelUrl =
-            button.dataset.url || ''
-
-          if (!hotelUrl) {
-            return
-          }
-
-          currentHotelQrRoom =
-            roomNumber
-
-
-          const modal =
-            document.querySelector<HTMLElement>(
-              '#hotel-room-qr-modal'
+          .forEach((button) => {
+        
+            button.addEventListener(
+              'click',
+              () => {
+        
+                const roomNumber =
+                  button.dataset.room || ''
+        
+                if (!roomNumber) {
+                  return
+                }
+        
+                location.href =
+                  '/merchant-hotel-room-qr?room=' +
+                  encodeURIComponent(
+                    roomNumber
+                  )
+              }
             )
-
-          const title =
-            document.querySelector<HTMLElement>(
-              '#hotel-room-qr-title'
-            )
-
-          const canvas =
-            document.querySelector<HTMLCanvasElement>(
-              '#hotel-room-qr-canvas'
-            )
-
-
-          if (
-            !modal ||
-            !title ||
-            !canvas
-          ) {
-            return
-          }
-
-
-          title.textContent =
-            'ROOM ' +
-            roomNumber
-
-
-          modal.style.display =
-            'flex'
-
-
-          await QRCode.toCanvas(
-            canvas,
-            hotelUrl,
-            {
-              width: 280,
-              margin: 2
-            }
-          )
-        }
-      )
-    }
-  )
-
-
-document
-  .querySelector(
-    '#hotel-room-qr-download'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
-
-      const canvas =
-        document.querySelector<HTMLCanvasElement>(
-          '#hotel-room-qr-canvas'
-        )
-
-      if (!canvas) {
-        return
-      }
-
-
-      const imageUrl =
-        canvas.toDataURL(
-          'image/png'
-        )
-
-      const link =
-        document.createElement(
-          'a'
-        )
-
-      link.href =
-        imageUrl
-
-      link.download =
-        'ROOM-' +
-        currentHotelQrRoom +
-        '-QR.png'
-
-      link.click()
-    }
-  )
-
-
-const closeHotelRoomQrModal =
-  () => {
-
-    const modal =
-      document.querySelector<HTMLElement>(
-        '#hotel-room-qr-modal'
-      )
-
-    if (modal) {
-      modal.style.display =
-        'none'
-    }
-  }
-
-
-document
-  .querySelector(
-    '#hotel-room-qr-close'
-  )
-  ?.addEventListener(
-    'click',
-    closeHotelRoomQrModal
-  )
-
-
-document
-  .querySelector(
-    '#hotel-room-qr-close-x'
-  )
-  ?.addEventListener(
-    'click',
-    closeHotelRoomQrModal
-  )     
-
+          })
+       
         document
           .querySelectorAll<HTMLButtonElement>(
             '.hotel-room-status-button'
@@ -18045,6 +17919,222 @@ document
                 '/merchant-login'
             }
           )
+
+        } else if (path === '/merchant-hotel-room-qr') {
+
+          const merchantId =
+            Number(
+              sessionStorage.getItem(
+                'login_merchant_id'
+              ) || 0
+            )
+        
+          const merchantName =
+            sessionStorage.getItem(
+              'login_merchant_name'
+            ) || ''
+        
+          const merchantType =
+            sessionStorage.getItem(
+              'login_merchant_type'
+            ) || ''
+        
+          const hotelQrParams =
+            new URLSearchParams(
+              window.location.search
+            )
+        
+          const roomNumber =
+            (
+              hotelQrParams.get('room') || ''
+            ).trim()
+        
+        
+          if (!merchantId) {
+            alert('로그인이 필요합니다.')
+            location.href = '/merchant-login'
+        
+          } else if (
+            merchantType !== '호텔'
+          ) {
+            alert(
+              '호텔 가맹점에서만 사용할 수 있습니다.'
+            )
+            location.href = '/merchant-admin'
+        
+          } else if (!roomNumber) {
+            alert(
+              '객실번호를 찾을 수 없습니다.'
+            )
+            location.href =
+              '/merchant-hotel-rooms'
+        
+          } else {
+        
+            const hotelQrUrl =
+              window.location.origin +
+              '/hotel-chrome?merchant_id=' +
+              merchantId +
+              '&room=' +
+              encodeURIComponent(
+                roomNumber
+              )
+        
+        
+            app.innerHTML = `
+              <div class="hotel-poster-admin-page">
+        
+                <div class="hotel-poster-admin-header no-print">
+        
+                  <div>
+                    <h1>
+                      객실 QR 안내문
+                    </h1>
+        
+                    <p>
+                      ${merchantName}
+                      · ROOM ${roomNumber}
+                    </p>
+                  </div>
+        
+                  <button
+                    id="hotel-poster-back"
+                  >
+                    객실관리
+                  </button>
+        
+                </div>
+        
+        
+                <div
+                  id="hotel-poster-print-area"
+                  class="hotel-poster-print-area"
+                >
+        
+                  <img
+                    src="/hotel-qr-guide-poster.png"
+                    class="hotel-poster-image"
+                    alt="호텔 QR 결제 안내"
+                  />
+        
+        
+                  <div
+                    class="hotel-poster-qr"
+                  >
+                    <canvas
+                      id="hotel-poster-qr-canvas"
+                    ></canvas>
+                  </div>
+        
+        
+                  <div
+                    class="hotel-poster-room-number"
+                  >
+                    ROOM ${roomNumber}
+                  </div>
+        
+                </div>
+        
+        
+                <div class="hotel-poster-controls no-print">
+        
+                  <div class="hotel-poster-link">
+        
+                    <span>
+                      ROOM ${roomNumber} 링크주소
+                    </span>
+        
+                    <strong>
+                      ${hotelQrUrl}
+                    </strong>
+        
+                  </div>
+        
+        
+                  <button
+                    id="hotel-poster-copy"
+                  >
+                    📋 링크 복사
+                  </button>
+        
+                  <button
+                    id="hotel-poster-print"
+                  >
+                    🖨️ 인쇄
+                  </button>
+        
+                </div>
+        
+              </div>
+            `
+        
+        
+            const qrCanvas =
+              document.querySelector<HTMLCanvasElement>(
+                '#hotel-poster-qr-canvas'
+              )
+        
+        
+            if (qrCanvas) {
+        
+              await QRCode.toCanvas(
+                qrCanvas,
+                hotelQrUrl,
+                {
+                  width: 320,
+                  margin: 1
+                }
+              )
+            }
+        
+        
+            document
+              .querySelector(
+                '#hotel-poster-copy'
+              )
+              ?.addEventListener(
+                'click',
+                async () => {
+        
+                  await navigator
+                    .clipboard
+                    .writeText(
+                      hotelQrUrl
+                    )
+        
+                  alert(
+                    'ROOM ' +
+                    roomNumber +
+                    ' 링크가 복사되었습니다.'
+                  )
+                }
+              )
+        
+        
+            document
+              .querySelector(
+                '#hotel-poster-print'
+              )
+              ?.addEventListener(
+                'click',
+                () => {
+                  window.print()
+                }
+              )
+        
+        
+            document
+              .querySelector(
+                '#hotel-poster-back'
+              )
+              ?.addEventListener(
+                'click',
+                () => {
+                  location.href =
+                    '/merchant-hotel-rooms'
+                }
+              )
+          }
 
 } else if (path === '/merchant-product') {
 
