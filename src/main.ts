@@ -8163,6 +8163,7 @@ merchantButtons.forEach((button) => {
 '<option value="장례" ' + (merchant.merchant_type === '장례' ? 'selected' : '') + '>장례</option>' +
 '<option value="무선단말기" ' + (merchant.merchant_type === '무선단말기' ? 'selected' : '') + '>무선단말기</option>' +
 '<option value="뷰티" ' + (merchant.merchant_type === '뷰티' ? 'selected' : '') + '>뷰티</option>' +
+'<option value="호텔" ' + (merchant.merchant_type === '호텔' ? 'selected' : '') + '>호텔</option>' +
 '</select>' +
 
     '<label>대표자</label>' +
@@ -23833,6 +23834,734 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
               </div>
             </div>
           `
+
+        } else if (path === '/hotel') {
+
+          const hotelParams =
+            new URLSearchParams(window.location.search)
+        
+          const merchantId =
+            Number(hotelParams.get('merchant_id') || 0)
+        
+          const roomNumber =
+            (hotelParams.get('room') || '').trim()
+        
+          if (!merchantId) {
+            app.innerHTML = `
+              <div class="hotel-shop-page">
+                <div class="hotel-error-card">
+                  호텔 정보를 찾을 수 없습니다.
+                </div>
+              </div>
+            `
+          } else {
+        
+            const {
+              data: hotelMerchant,
+              error: hotelMerchantError
+            } =
+              await supabase
+                .from('merchants')
+                .select(
+                  'id, merchant_name, online_pg_company_1, toss_client_key'
+                )
+                .eq('id', merchantId)
+                .maybeSingle()
+        
+            const {
+              data: hotelProducts,
+              error: hotelProductsError
+            } =
+              await supabase
+                .from('products')
+                .select('*')
+                .eq('merchant_id', merchantId)
+                .eq('status', '판매중')
+                .order('sort_order', { ascending: true })
+                .order('id', { ascending: true })
+        
+            if (
+              hotelMerchantError ||
+              hotelProductsError ||
+              !hotelMerchant
+            ) {
+              app.innerHTML = `
+                <div class="hotel-shop-page">
+                  <div class="hotel-error-card">
+                    호텔 정보를 불러오지 못했습니다.
+                  </div>
+                </div>
+              `
+            } else {
+        
+              const groupedHotelProducts =
+                (hotelProducts || []).reduce(
+                  (groups: any, product: any) => {
+        
+                    const category =
+                      product.category || 'OTHER'
+        
+                    if (!groups[category]) {
+                      groups[category] = []
+                    }
+        
+                    groups[category].push(product)
+        
+                    return groups
+                  },
+                  {}
+                )
+        
+              const hotelCategories =
+                Object.keys(groupedHotelProducts)
+        
+              app.innerHTML = `
+                <div class="hotel-shop-page">
+        
+                  <header class="hotel-shop-header">
+        
+                    <div class="hotel-brand-area">
+                      <div class="hotel-brand-small">
+                        NXG HOTEL SERVICE
+                      </div>
+        
+                      <h1>
+                        ${hotelMerchant.merchant_name || 'HOTEL'}
+                      </h1>
+        
+                      <p>
+                        ROOM SERVICE & AMENITIES
+                      </p>
+                    </div>
+        
+                    ${
+                      roomNumber
+                        ? `
+                          <div class="hotel-room-badge">
+                            <span>ROOM</span>
+                            <strong>${roomNumber}</strong>
+                          </div>
+                        `
+                        : ''
+                    }
+        
+                  </header>
+        
+        
+                  <section class="hotel-welcome-area">
+        
+                    <div class="hotel-welcome-label">
+                      PRIVATE ROOM SERVICE
+                    </div>
+        
+                    <h2>
+                      편안한 시간을 보내고 계신가요?
+                    </h2>
+        
+                    <p>
+                      객실에서 필요한 상품과 서비스를<br>
+                      간편하게 주문하고 결제하실 수 있습니다.
+                    </p>
+        
+                  </section>
+        
+        
+                  ${
+                    hotelCategories.length > 0
+                      ? `
+                        <div class="hotel-category-tabs">
+        
+                          ${hotelCategories.map(
+                            (category, index) => `
+                              <button
+                                type="button"
+                                class="hotel-category-tab ${
+                                  index === 0
+                                    ? 'active'
+                                    : ''
+                                }"
+                                data-category="${category}"
+                              >
+                                ${category}
+                              </button>
+                            `
+                          ).join('')}
+        
+                        </div>
+                      `
+                      : ''
+                  }
+        
+        
+                  <main class="hotel-product-area">
+        
+                    ${hotelCategories.map(
+                      (category, categoryIndex) => `
+        
+                        <section
+                          class="hotel-category-section ${
+                            categoryIndex === 0
+                              ? ''
+                              : 'hotel-category-hidden'
+                          }"
+                          data-hotel-category="${category}"
+                        >
+        
+                          <div class="hotel-product-grid">
+        
+                            ${groupedHotelProducts[category]
+                              .map(
+                                (product: any) => `
+        
+                                  <article class="hotel-product-card">
+        
+                                    <div class="hotel-product-image">
+        
+                                      ${
+                                        product.image_url
+                                          ? `
+                                            <img
+                                              src="${product.image_url}"
+                                              alt="${product.product_name}"
+                                            >
+                                          `
+                                          : `
+                                            <div class="hotel-no-image">
+                                              <span>NXG HOTEL</span>
+                                            </div>
+                                          `
+                                      }
+        
+                                    </div>
+        
+                                    <div class="hotel-product-info">
+        
+                                      <div>
+                                        <h3>
+                                          ${product.product_name}
+                                        </h3>
+        
+                                        <p>
+                                          ${Number(
+                                            product.price
+                                          ).toLocaleString()}원
+                                        </p>
+                                      </div>
+        
+                                      <button
+                                        type="button"
+                                        class="hotel-add-button"
+                                        data-id="${product.id}"
+                                        data-name="${product.product_name}"
+                                        data-price="${product.price}"
+                                      >
+                                        +
+                                      </button>
+        
+                                    </div>
+        
+                                  </article>
+                                `
+                              )
+                              .join('')}
+        
+                          </div>
+        
+                        </section>
+        
+                      `
+                    ).join('')}
+        
+                  </main>
+        
+        
+                  <section class="hotel-pick-card">
+        
+                    <div class="hotel-pick-title">
+        
+                      <div>
+                        <span>YOUR SELECTION</span>
+                        <h2>PICK</h2>
+                      </div>
+        
+                      ${
+                        roomNumber
+                          ? `
+                            <div class="hotel-pick-room">
+                              ROOM ${roomNumber}
+                            </div>
+                          `
+                          : ''
+                      }
+        
+                    </div>
+        
+                    <div id="hotel-cart-items">
+                      <div class="hotel-cart-empty">
+                        상품을 선택해주세요.
+                      </div>
+                    </div>
+        
+                    <div class="hotel-cart-total">
+                      <span>총 결제금액</span>
+        
+                      <strong id="hotel-total-price">
+                        0원
+                      </strong>
+                    </div>
+        
+                    <button
+                      type="button"
+                      id="hotel-pay-button"
+                      class="hotel-pay-button"
+                    >
+                      결제하기
+                    </button>
+        
+                  </section>
+        
+        
+                  <footer class="hotel-shop-footer">
+        
+                    <strong>
+                      NXG HOTEL
+                    </strong>
+        
+                    <span>
+                      Secure Payment Service
+                    </span>
+        
+                  </footer>
+        
+                </div>
+              `
+        
+        
+              type HotelCartItem = {
+                id: number
+                name: string
+                price: number
+                quantity: number
+              }
+        
+              const hotelCart: HotelCartItem[] = []
+        
+        
+              const renderHotelCart = () => {
+        
+                const cartBox =
+                  document.querySelector<HTMLDivElement>(
+                    '#hotel-cart-items'
+                  )
+        
+                const totalBox =
+                  document.querySelector<HTMLElement>(
+                    '#hotel-total-price'
+                  )
+        
+                if (!cartBox || !totalBox) {
+                  return
+                }
+        
+                if (hotelCart.length === 0) {
+        
+                  cartBox.innerHTML = `
+                    <div class="hotel-cart-empty">
+                      상품을 선택해주세요.
+                    </div>
+                  `
+        
+                  totalBox.textContent = '0원'
+        
+                  return
+                }
+        
+        
+                cartBox.innerHTML =
+                  hotelCart.map(
+                    (item) => `
+        
+                      <div
+                        class="hotel-cart-item"
+                        data-id="${item.id}"
+                      >
+        
+                        <div class="hotel-cart-item-name">
+        
+                          <strong>
+                            ${item.name}
+                          </strong>
+        
+                          <span>
+                            ${Number(
+                              item.price
+                            ).toLocaleString()}원
+                          </span>
+        
+                        </div>
+        
+                        <div class="hotel-cart-control">
+        
+                          <button
+                            type="button"
+                            class="hotel-cart-minus"
+                            data-id="${item.id}"
+                          >
+                            −
+                          </button>
+        
+                          <span>
+                            ${item.quantity}
+                          </span>
+        
+                          <button
+                            type="button"
+                            class="hotel-cart-plus"
+                            data-id="${item.id}"
+                          >
+                            +
+                          </button>
+        
+                        </div>
+        
+                      </div>
+                    `
+                  ).join('')
+        
+        
+                const totalPrice =
+                  hotelCart.reduce(
+                    (sum, item) =>
+                      sum +
+                      item.price *
+                      item.quantity,
+                    0
+                  )
+        
+                totalBox.textContent =
+                  totalPrice.toLocaleString() +
+                  '원'
+        
+        
+                document
+                  .querySelectorAll<HTMLButtonElement>(
+                    '.hotel-cart-plus'
+                  )
+                  .forEach((button) => {
+        
+                    button.addEventListener(
+                      'click',
+                      () => {
+        
+                        const id =
+                          Number(button.dataset.id)
+        
+                        const item =
+                          hotelCart.find(
+                            (cartItem) =>
+                              cartItem.id === id
+                          )
+        
+                        if (item) {
+                          item.quantity += 1
+                          renderHotelCart()
+                        }
+                      }
+                    )
+                  })
+        
+        
+                document
+                  .querySelectorAll<HTMLButtonElement>(
+                    '.hotel-cart-minus'
+                  )
+                  .forEach((button) => {
+        
+                    button.addEventListener(
+                      'click',
+                      () => {
+        
+                        const id =
+                          Number(button.dataset.id)
+        
+                        const item =
+                          hotelCart.find(
+                            (cartItem) =>
+                              cartItem.id === id
+                          )
+        
+                        if (!item) {
+                          return
+                        }
+        
+                        item.quantity -= 1
+        
+                        if (item.quantity <= 0) {
+        
+                          const index =
+                            hotelCart.findIndex(
+                              (cartItem) =>
+                                cartItem.id === id
+                            )
+        
+                          if (index >= 0) {
+                            hotelCart.splice(
+                              index,
+                              1
+                            )
+                          }
+                        }
+        
+                        renderHotelCart()
+                      }
+                    )
+                  })
+              }
+        
+        
+              document
+                .querySelectorAll<HTMLButtonElement>(
+                  '.hotel-category-tab'
+                )
+                .forEach((button) => {
+        
+                  button.addEventListener(
+                    'click',
+                    () => {
+        
+                      const category =
+                        button.dataset.category || ''
+        
+                      document
+                        .querySelectorAll(
+                          '.hotel-category-tab'
+                        )
+                        .forEach((tab) => {
+                          tab.classList.remove(
+                            'active'
+                          )
+                        })
+        
+                      button.classList.add(
+                        'active'
+                      )
+        
+                      document
+                        .querySelectorAll<HTMLElement>(
+                          '.hotel-category-section'
+                        )
+                        .forEach((section) => {
+        
+                          section.classList.toggle(
+                            'hotel-category-hidden',
+                            section.dataset
+                              .hotelCategory !==
+                              category
+                          )
+                        })
+                    }
+                  )
+                })
+        
+        
+              document
+                .querySelectorAll<HTMLButtonElement>(
+                  '.hotel-add-button'
+                )
+                .forEach((button) => {
+        
+                  button.addEventListener(
+                    'click',
+                    () => {
+        
+                      const id =
+                        Number(button.dataset.id)
+        
+                      const name =
+                        button.dataset.name || ''
+        
+                      const price =
+                        Number(
+                          button.dataset.price || 0
+                        )
+        
+                      const existing =
+                        hotelCart.find(
+                          (item) =>
+                            item.id === id
+                        )
+        
+                      if (existing) {
+                        existing.quantity += 1
+                      } else {
+        
+                        hotelCart.push({
+                          id,
+                          name,
+                          price,
+                          quantity: 1
+                        })
+                      }
+        
+                      renderHotelCart()
+                    }
+                  )
+                })
+        
+        
+              document
+                .querySelector<HTMLButtonElement>(
+                  '#hotel-pay-button'
+                )
+                ?.addEventListener(
+                  'click',
+                  async () => {
+        
+                    const totalPrice =
+                      hotelCart.reduce(
+                        (sum, item) =>
+                          sum +
+                          item.price *
+                          item.quantity,
+                        0
+                      )
+        
+                    if (
+                      hotelCart.length === 0 ||
+                      totalPrice <= 0
+                    ) {
+                      alert(
+                        '상품을 먼저 선택해주세요.'
+                      )
+                      return
+                    }
+        
+        
+                    if (
+                      hotelMerchant.online_pg_company_1 !==
+                      '토스페이먼츠'
+                    ) {
+                      alert(
+                        '온라인결제 1이 토스페이먼츠로 설정되지 않았습니다.'
+                      )
+                      return
+                    }
+        
+        
+                    const tossClientKey =
+                      String(
+                        hotelMerchant.toss_client_key ||
+                        clientKey
+                      ).trim()
+        
+                    if (!tossClientKey) {
+                      alert(
+                        '토스 Client Key가 등록되지 않았습니다.'
+                      )
+                      return
+                    }
+        
+        
+                    const orderName =
+                      hotelCart
+                        .map(
+                          (item) =>
+                            item.name +
+                            ' x ' +
+                            item.quantity
+                        )
+                        .join(', ')
+        
+        
+                    sessionStorage.setItem(
+                      'merchantId',
+                      String(merchantId)
+                    )
+        
+                    sessionStorage.setItem(
+                      'merchantName',
+                      hotelMerchant.merchant_name ||
+                      ''
+                    )
+        
+                    sessionStorage.setItem(
+                      'hotel_room_number',
+                      roomNumber
+                    )
+        
+                    sessionStorage.setItem(
+                      'hotel_items',
+                      JSON.stringify(hotelCart)
+                    )
+        
+                    sessionStorage.setItem(
+                      'message',
+                      roomNumber
+                        ? '호텔 ' +
+                          roomNumber +
+                          '호 추가결제 / ' +
+                          orderName
+                        : '호텔 추가결제 / ' +
+                          orderName
+                    )
+        
+                    sessionStorage.setItem(
+                      'selected_pg_company',
+                      '토스페이먼츠'
+                    )
+        
+                    sessionStorage.removeItem(
+                      'senderName'
+                    )
+        
+        
+                    const tossPayments =
+                      await loadTossPayments(
+                        tossClientKey
+                      )
+        
+                    await tossPayments.requestPayment(
+                      '카드',
+                      {
+                        amount: totalPrice,
+        
+                        orderId:
+                          'HOTEL' +
+                          merchantId +
+                          Date.now(),
+        
+                        orderName:
+                          roomNumber
+                            ? 'ROOM ' +
+                              roomNumber +
+                              ' 추가결제'
+                            : '호텔 추가결제',
+        
+                        customerName:
+                          hotelMerchant.merchant_name ||
+                          '호텔 고객',
+        
+                        successUrl:
+                          window.location.origin +
+                          '/success?source=hotel' +
+                          '&pg=토스페이먼츠' +
+                          '&merchantId=' +
+                          merchantId +
+                          '&merchantName=' +
+                          encodeURIComponent(
+                            hotelMerchant.merchant_name ||
+                            ''
+                          ),
+        
+                        failUrl:
+                          window.location.origin +
+                          '/fail'
+                      }
+                    )
+                  }
+                )
+            }
+          }
           
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
