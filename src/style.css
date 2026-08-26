@@ -10339,3 +10339,125 @@ and (orientation: landscape) {
     min-width: 620px;
   }
 }
+/* =========================================
+   NXG HOTEL 객실별 QR
+========================================= */
+
+.hotel-room-qr-button {
+  width: 110px !important;
+  min-width: 110px !important;
+  height: 34px !important;
+  margin: 0 !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+}
+
+.hotel-room-qr-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+  box-sizing: border-box;
+
+  background: rgba(7, 17, 31, 0.72);
+}
+
+.hotel-room-qr-box {
+  width: 410px;
+  max-width: 94vw;
+
+  padding: 26px;
+
+  border-radius: 16px;
+  background: #ffffff;
+
+  box-sizing: border-box;
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.28);
+}
+
+.hotel-room-qr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.hotel-room-qr-header span {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #a48850;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.hotel-room-qr-header h2 {
+  margin: 0;
+
+  color: #10233d;
+
+  font-size: 24px;
+}
+
+#hotel-room-qr-close-x {
+  width: 34px !important;
+  min-width: 34px !important;
+  height: 34px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  border-radius: 50% !important;
+
+  background: #eef2f7 !important;
+  color: #334155 !important;
+
+  font-size: 20px !important;
+}
+
+.hotel-room-qr-canvas-box {
+  margin: 26px 0 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#hotel-room-qr-canvas {
+  max-width: 100%;
+}
+
+.hotel-room-qr-guide {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 13px;
+  line-height: 1.7;
+
+  text-align: center;
+}
+
+.hotel-room-qr-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+
+  gap: 10px;
+
+  margin-top: 22px;
+}
+
+.hotel-room-qr-actions button {
+  height: 42px !important;
+  margin: 0 !important;
+
+  font-size: 13px !important;
+}

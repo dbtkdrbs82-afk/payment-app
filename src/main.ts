@@ -17342,13 +17342,14 @@ if (orderRequestError) {
                         <table class="hotel-room-table">
       
                           <thead>
-                            <tr>
-                              <th>객실번호</th>
-                              <th>상태</th>
-                              <th>고객 결제창</th>
-                              <th>관리</th>
-                            </tr>
-                          </thead>
+  <tr>
+    <th>객실번호</th>
+    <th>상태</th>
+    <th>고객 결제창</th>
+    <th>객실 QR</th>
+    <th>관리</th>
+  </tr>
+</thead>
       
                           <tbody>
       
@@ -17389,20 +17390,32 @@ if (orderRequestError) {
                                     </td>
       
                                     <td>
-      
-                                      <button
-                                        class="hotel-room-open-button"
-                                        data-url="${hotelUrl}"
-                                      >
-                                        결제창 열기
-                                      </button>
-      
-                                    </td>
-      
-                                    <td>
-      
-                                      <button
-                                        class="hotel-room-status-button"
+
+  <button
+    class="hotel-room-open-button"
+    data-url="${hotelUrl}"
+  >
+    결제창 열기
+  </button>
+
+</td>
+
+<td>
+
+  <button
+    class="hotel-room-qr-button"
+    data-room="${room.room_number}"
+    data-url="${hotelUrl}"
+  >
+    QR 보기
+  </button>
+
+</td>
+
+<td>
+
+  <button
+    class="hotel-room-status-button"
                                         data-id="${room.id}"
                                         data-status="${room.status}"
                                       >
@@ -17432,6 +17445,70 @@ if (orderRequestError) {
               </section>
       
             </div>
+
+            <div
+  id="hotel-room-qr-modal"
+  class="hotel-room-qr-modal"
+>
+
+  <div class="hotel-room-qr-box">
+
+    <div class="hotel-room-qr-header">
+
+      <div>
+        <span>NXG HOTEL</span>
+
+        <h2 id="hotel-room-qr-title">
+          객실 QR
+        </h2>
+      </div>
+
+      <button
+        id="hotel-room-qr-close-x"
+        type="button"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <div class="hotel-room-qr-canvas-box">
+
+      <canvas
+        id="hotel-room-qr-canvas"
+      ></canvas>
+
+    </div>
+
+
+    <p class="hotel-room-qr-guide">
+      객실에 비치할 전용 QR입니다.<br>
+      고객이 QR을 촬영하면 해당 객실 결제창으로 연결됩니다.
+    </p>
+
+
+    <div class="hotel-room-qr-actions">
+
+      <button
+        id="hotel-room-qr-download"
+        type="button"
+      >
+        QR 이미지 저장
+      </button>
+
+      <button
+        id="hotel-room-qr-close"
+        type="button"
+      >
+        닫기
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
       
           </div>
         `
@@ -17560,8 +17637,157 @@ if (orderRequestError) {
               )
             }
           )
-      
-      
+
+          let currentHotelQrRoom = ''
+
+document
+  .querySelectorAll<HTMLButtonElement>(
+    '.hotel-room-qr-button'
+  )
+  .forEach(
+    (button) => {
+
+      button.addEventListener(
+        'click',
+        async () => {
+
+          const roomNumber =
+            button.dataset.room || ''
+
+          const hotelUrl =
+            button.dataset.url || ''
+
+          if (!hotelUrl) {
+            return
+          }
+
+          currentHotelQrRoom =
+            roomNumber
+
+
+          const modal =
+            document.querySelector<HTMLElement>(
+              '#hotel-room-qr-modal'
+            )
+
+          const title =
+            document.querySelector<HTMLElement>(
+              '#hotel-room-qr-title'
+            )
+
+          const canvas =
+            document.querySelector<HTMLCanvasElement>(
+              '#hotel-room-qr-canvas'
+            )
+
+
+          if (
+            !modal ||
+            !title ||
+            !canvas
+          ) {
+            return
+          }
+
+
+          title.textContent =
+            'ROOM ' +
+            roomNumber
+
+
+          modal.style.display =
+            'flex'
+
+
+          await QRCode.toCanvas(
+            canvas,
+            hotelUrl,
+            {
+              width: 280,
+              margin: 2
+            }
+          )
+        }
+      )
+    }
+  )
+
+
+document
+  .querySelector(
+    '#hotel-room-qr-download'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      const canvas =
+        document.querySelector<HTMLCanvasElement>(
+          '#hotel-room-qr-canvas'
+        )
+
+      if (!canvas) {
+        return
+      }
+
+
+      const imageUrl =
+        canvas.toDataURL(
+          'image/png'
+        )
+
+      const link =
+        document.createElement(
+          'a'
+        )
+
+      link.href =
+        imageUrl
+
+      link.download =
+        'ROOM-' +
+        currentHotelQrRoom +
+        '-QR.png'
+
+      link.click()
+    }
+  )
+
+
+const closeHotelRoomQrModal =
+  () => {
+
+    const modal =
+      document.querySelector<HTMLElement>(
+        '#hotel-room-qr-modal'
+      )
+
+    if (modal) {
+      modal.style.display =
+        'none'
+    }
+  }
+
+
+document
+  .querySelector(
+    '#hotel-room-qr-close'
+  )
+  ?.addEventListener(
+    'click',
+    closeHotelRoomQrModal
+  )
+
+
+document
+  .querySelector(
+    '#hotel-room-qr-close-x'
+  )
+  ?.addEventListener(
+    'click',
+    closeHotelRoomQrModal
+  )     
+    
         document
           .querySelectorAll<HTMLButtonElement>(
             '.hotel-room-status-button'
