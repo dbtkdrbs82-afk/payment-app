@@ -11260,3 +11260,29 @@ body.hotel-mode:has(#merchant-hotel-room-tab)
   color: #111111 !important;
   border: 0 !important;
 }
+/* =========================================
+   HOTEL 상단 메뉴 최종 강제 골드 통일
+========================================= */
+
+body.hotel-mode #merchant-order-tab,
+body.hotel-mode #merchant-product-tab,
+body.hotel-mode #merchant-hotel-room-tab,
+body.hotel-mode #merchant-hotel-preview-tab,
+body.hotel-mode #merchant-card-tab {
+  background: #b7924f !important;
+  background-color: #b7924f !important;
+  color: #ffffff !important;
+  border: 1px solid #b7924f !important;
+  box-shadow: none !important;
+}
+
+body.hotel-mode #merchant-order-tab:hover,
+body.hotel-mode #merchant-product-tab:hover,
+body.hotel-mode #merchant-hotel-room-tab:hover,
+body.hotel-mode #merchant-hotel-preview-tab:hover,
+body.hotel-mode #merchant-card-tab:hover {
+  background: #9d7a3e !important;
+  background-color: #9d7a3e !important;
+  color: #ffffff !important;
+  border-color: #9d7a3e !important;
+}
