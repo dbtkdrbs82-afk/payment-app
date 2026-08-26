@@ -11617,3 +11617,161 @@ body.hotel-mode #merchant-card-tab:hover {
   background-color: #9d7a3e !important;
   border-color: #9d7a3e !important;
 }
+/* =========================================
+   HOTEL 결제완료 영수증 모바일 최적화
+========================================= */
+
+@media (max-width: 768px) {
+
+  .hotel-success-card .receipt-modal {
+    padding: 10px !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow-y: auto !important;
+  }
+
+  .hotel-success-card .receipt-box {
+    width: calc(100vw - 24px) !important;
+    max-width: none !important;
+    max-height: 88vh !important;
+
+    padding: 14px !important;
+
+    box-sizing: border-box !important;
+
+    border: 1px solid #b7924f !important;
+    border-radius: 14px !important;
+
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+  }
+
+
+  /* 영수증 제목 축소 */
+
+  .hotel-success-card .receipt-header {
+    margin-bottom: 14px !important;
+    padding-bottom: 10px !important;
+
+    border-bottom:
+      2px solid #b7924f !important;
+  }
+
+  .hotel-success-card .receipt-header h2 {
+    font-size: 20px !important;
+    color: #b7924f !important;
+  }
+
+  .hotel-success-card .receipt-header h3 {
+    font-size: 14px !important;
+  }
+
+
+  /* 구매정보 / 결제금액정보 2열 → 세로 */
+
+  .hotel-success-card .receipt-grid {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+  }
+
+  .hotel-success-card .receipt-box section {
+    margin-bottom: 12px !important;
+  }
+
+  .hotel-success-card .receipt-box h4 {
+    margin-bottom: 6px !important;
+
+    color: #9d7a3e !important;
+    font-size: 13px !important;
+  }
+
+
+  /* 표를 모바일용 2칸 구조로 변경 */
+
+  .hotel-success-card .receipt-box table {
+    width: 100% !important;
+    table-layout: fixed !important;
+  }
+
+  .hotel-success-card .receipt-box tr {
+    display: grid !important;
+    grid-template-columns:
+      92px minmax(0, 1fr) !important;
+  }
+
+  .hotel-success-card .receipt-box th,
+  .hotel-success-card .receipt-box td {
+    width: auto !important;
+    min-width: 0 !important;
+
+    padding: 7px 8px !important;
+
+    box-sizing: border-box !important;
+
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+
+    word-break: keep-all !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .hotel-success-card .receipt-box th {
+    background: #faf6ee !important;
+    color: #9d7a3e !important;
+
+    font-weight: 800 !important;
+    white-space: nowrap !important;
+  }
+
+
+  /* 결제정보처럼 한 줄에 항목이 2개 있는 경우
+     자동으로 아래줄에 이어서 표시 */
+
+  .hotel-success-card .receipt-box td[colspan="3"] {
+    grid-column: 2 / 3 !important;
+  }
+
+
+  /* 총 결제금액 */
+
+  .hotel-success-card .receipt-total th,
+  .hotel-success-card .receipt-total td {
+    background: #b7924f !important;
+    color: #ffffff !important;
+
+    font-size: 13px !important;
+  }
+
+
+  /* 안내문 */
+
+  .hotel-success-card .receipt-notice {
+    padding: 10px !important;
+
+    font-size: 10px !important;
+    line-height: 1.5 !important;
+  }
+
+
+  /* 하단 버튼 */
+
+  .hotel-success-card .receipt-actions {
+    grid-template-columns: 1fr !important;
+    gap: 7px !important;
+    margin-top: 12px !important;
+  }
+
+  .hotel-success-card .receipt-actions button {
+    width: 100% !important;
+    height: 38px !important;
+
+    margin: 0 !important;
+
+    font-size: 12px !important;
+
+    background: #b7924f !important;
+    color: #ffffff !important;
+  }
+
+}
