@@ -17393,37 +17393,53 @@ if (targetPayment.pg_company === '코페이') {
   return
 }
 
-      /*
-        코페이 취소 성공 후에만
-        가맹점 주문 상태를 취소완료로 변경
-      */
-      const { error: orderCancelError } =
-        await supabase
-          .from('orders')
-          .update({
-            order_status: '취소완료',
-            payment_status: '취소완료',
-            cancel_status: '취소완료',
-            cancel_reason: reason,
-            cancel_requested_at:
-              new Date().toISOString()
-          })
-          .eq('id', orderId)
+      /* =========================================
+   실제 취소된 PG사 표시
+========================================= */
 
-      if (orderCancelError) {
-        alert(
-          '코페이 결제는 취소됐지만 ' +
-          '주문 상태 수정에 실패했습니다.\n' +
-          orderCancelError.message
-        )
-        return
-      }
+const canceledPgName =
+targetPayment.pg_company === '토스페이먼츠'
+  ? '토스페이먼츠'
+  : targetPayment.pg_company === '코페이'
+    ? '코페이'
+    : targetPayment.pg_company || '결제'
 
-      alert(
-        '코페이 결제가 실제 취소되었습니다.\n\n' +
-        '결제관리: 취소\n' +
-        '출금관리: 출금제외'
-      )
+
+/* =========================================
+ 가맹점 주문 상태 취소완료
+========================================= */
+
+const { error: orderCancelError } =
+await supabase
+  .from('orders')
+  .update({
+    order_status: '취소완료',
+    payment_status: '취소완료',
+    cancel_status: '취소완료',
+    cancel_reason: reason,
+    cancel_requested_at:
+      new Date().toISOString()
+  })
+  .eq('id', orderId)
+
+if (orderCancelError) {
+alert(
+  canceledPgName +
+  ' 결제는 취소됐지만 ' +
+  '주문 상태 수정에 실패했습니다.\n' +
+  orderCancelError.message
+)
+return
+}
+
+alert(
+canceledPgName +
+' 결제가 실제 취소되었습니다.\n\n' +
+'결제관리: 취소\n' +
+'출금관리: 출금제외'
+)
+
+location.reload()
 
       location.reload()
     } catch (error) {
