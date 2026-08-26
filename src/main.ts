@@ -14226,6 +14226,7 @@ if (isBeauty) {
   merchantMenu = `
     <button id="merchant-order-tab">주문/결제내역</button>
     <button id="merchant-product-tab">상품관리</button>
+    <button id="merchant-hotel-room-tab">객실관리</button>
     <button id="merchant-hotel-preview-tab">고객 결제창</button>
     <button id="merchant-card-tab">카드결제</button>
   `
@@ -16171,6 +16172,11 @@ document.querySelector('#merchant-product-tab')
     location.href = '/merchant-product'
   })
 
+  document.querySelector('#merchant-hotel-room-tab')
+  ?.addEventListener('click', () => {
+    location.href = '/merchant-hotel-rooms'
+  })
+
   document.querySelector('#merchant-hotel-preview-tab')
   ?.addEventListener('click', () => {
 
@@ -17124,6 +17130,579 @@ if (orderRequestError) {
           sessionStorage.removeItem('login_merchant_code')
           location.href = '/merchant-login'
         })
+
+      } else if (path === '/merchant-hotel-rooms') {
+
+        const merchantId =
+          Number(
+            sessionStorage.getItem(
+              'login_merchant_id'
+            )
+          )
+      
+        const merchantName =
+          sessionStorage.getItem(
+            'login_merchant_name'
+          ) || ''
+      
+        const merchantType =
+          sessionStorage.getItem(
+            'login_merchant_type'
+          ) || ''
+      
+        if (!merchantId) {
+          alert('로그인이 필요합니다.')
+          location.href = '/merchant-login'
+        }
+      
+        if (merchantType !== '호텔') {
+          alert('호텔 가맹점에서만 사용할 수 있습니다.')
+          location.href = '/merchant-admin'
+        }
+      
+      
+        const {
+          data: hotelRooms,
+          error: hotelRoomsError
+        } =
+          await supabase
+            .from('hotel_rooms')
+            .select('*')
+            .eq('merchant_id', merchantId)
+            .order(
+              'sort_order',
+              { ascending: true }
+            )
+            .order(
+              'room_number',
+              { ascending: true }
+            )
+      
+      
+        if (hotelRoomsError) {
+          alert(
+            '객실 목록 조회 실패: ' +
+            hotelRoomsError.message
+          )
+        }
+      
+      
+        const rooms =
+          hotelRooms || []
+      
+      
+        const activeRoomCount =
+          rooms.filter(
+            (room) =>
+              room.status === '사용중'
+          ).length
+      
+      
+        const inactiveRoomCount =
+          rooms.filter(
+            (room) =>
+              room.status === '사용중지'
+          ).length
+      
+      
+        app.innerHTML = `
+          <div class="hotel-room-admin-page">
+      
+            <div class="merchant-pick-header">
+      
+              <div>
+                <h1>호텔 객실관리</h1>
+                <p class="hotel-room-admin-desc">
+                  객실을 등록하고 객실별 고객 결제창을 관리합니다.
+                </p>
+              </div>
+      
+              <div class="merchant-user-box">
+                <strong>
+                  ${merchantName}님
+                </strong>
+      
+                <button id="hotel-room-logout">
+                  로그아웃
+                </button>
+              </div>
+      
+            </div>
+      
+      
+            <div class="merchant-toolbar hotel-room-toolbar">
+      
+              <button id="hotel-room-go-order">
+                주문/결제내역
+              </button>
+      
+              <button id="hotel-room-go-product">
+                상품관리
+              </button>
+      
+              <button
+                id="hotel-room-go-room"
+                class="active"
+              >
+                객실관리
+              </button>
+      
+              <button id="hotel-room-go-card">
+                카드결제
+              </button>
+      
+            </div>
+      
+      
+            <div class="hotel-room-summary">
+      
+              <div>
+                <span>전체 객실</span>
+                <strong>
+                  ${rooms.length}개
+                </strong>
+              </div>
+      
+              <div>
+                <span>사용중</span>
+                <strong>
+                  ${activeRoomCount}개
+                </strong>
+              </div>
+      
+              <div>
+                <span>사용중지</span>
+                <strong>
+                  ${inactiveRoomCount}개
+                </strong>
+              </div>
+      
+            </div>
+      
+      
+            <div class="hotel-room-content">
+      
+              <section class="hotel-room-create-card">
+      
+                <h2>
+                  객실 등록
+                </h2>
+      
+                <p>
+                  호텔에서 사용할 객실번호를 입력해주세요.
+                </p>
+      
+                <label>
+                  객실번호
+                </label>
+      
+                <input
+                  id="hotel-room-number"
+                  type="text"
+                  placeholder="예: 101, 1203, A201"
+                  autocomplete="off"
+                />
+      
+                <button
+                  id="hotel-room-create-button"
+                >
+                  객실 등록
+                </button>
+      
+              </section>
+      
+      
+              <section class="hotel-room-list-card">
+      
+                <div class="hotel-room-list-title">
+      
+                  <div>
+                    <h2>
+                      등록된 객실
+                    </h2>
+      
+                    <p>
+                      객실별 결제창 주소가 자동으로 연결됩니다.
+                    </p>
+                  </div>
+      
+                </div>
+      
+      
+                ${
+                  rooms.length === 0
+                    ? `
+                      <div class="hotel-room-empty">
+                        등록된 객실이 없습니다.
+                      </div>
+                    `
+                    : `
+                      <div class="hotel-room-table-wrap">
+      
+                        <table class="hotel-room-table">
+      
+                          <thead>
+                            <tr>
+                              <th>객실번호</th>
+                              <th>상태</th>
+                              <th>고객 결제창</th>
+                              <th>관리</th>
+                            </tr>
+                          </thead>
+      
+                          <tbody>
+      
+                            ${rooms.map(
+                              (room) => {
+      
+                                const hotelUrl =
+                                  window.location.origin +
+                                  '/hotel?merchant_id=' +
+                                  merchantId +
+                                  '&room=' +
+                                  encodeURIComponent(
+                                    room.room_number
+                                  )
+      
+                                return `
+                                  <tr>
+      
+                                    <td>
+                                      <strong class="hotel-room-number-text">
+                                        ${room.room_number}
+                                      </strong>
+                                    </td>
+      
+                                    <td>
+      
+                                      <span
+                                        class="${
+                                          room.status ===
+                                          '사용중'
+                                            ? 'hotel-room-status-on'
+                                            : 'hotel-room-status-off'
+                                        }"
+                                      >
+                                        ${room.status}
+                                      </span>
+      
+                                    </td>
+      
+                                    <td>
+      
+                                      <button
+                                        class="hotel-room-open-button"
+                                        data-url="${hotelUrl}"
+                                      >
+                                        결제창 열기
+                                      </button>
+      
+                                    </td>
+      
+                                    <td>
+      
+                                      <button
+                                        class="hotel-room-status-button"
+                                        data-id="${room.id}"
+                                        data-status="${room.status}"
+                                      >
+                                        ${
+                                          room.status ===
+                                          '사용중'
+                                            ? '사용중지'
+                                            : '사용하기'
+                                        }
+                                      </button>
+      
+                                    </td>
+      
+                                  </tr>
+                                `
+                              }
+                            ).join('')}
+      
+                          </tbody>
+      
+                        </table>
+      
+                      </div>
+                    `
+                }
+      
+              </section>
+      
+            </div>
+      
+          </div>
+        `
+      
+      
+        document
+          .querySelector(
+            '#hotel-room-create-button'
+          )
+          ?.addEventListener(
+            'click',
+            async () => {
+      
+              const roomInput =
+                document.querySelector<HTMLInputElement>(
+                  '#hotel-room-number'
+                )
+      
+              const roomNumber =
+                (
+                  roomInput?.value || ''
+                )
+                  .trim()
+                  .toUpperCase()
+      
+      
+              if (!roomNumber) {
+                alert(
+                  '객실번호를 입력해주세요.'
+                )
+                return
+              }
+      
+      
+              const duplicateRoom =
+                rooms.find(
+                  (room) =>
+                    String(
+                      room.room_number
+                    ).toUpperCase() ===
+                    roomNumber
+                )
+      
+      
+              if (duplicateRoom) {
+                alert(
+                  '이미 등록된 객실번호입니다.'
+                )
+                return
+              }
+      
+      
+              const maxSortOrder =
+                rooms.reduce(
+                  (max, room) =>
+                    Math.max(
+                      max,
+                      Number(
+                        room.sort_order || 0
+                      )
+                    ),
+                  0
+                )
+      
+      
+              const { error } =
+                await supabase
+                  .from('hotel_rooms')
+                  .insert({
+                    merchant_id:
+                      merchantId,
+      
+                    room_number:
+                      roomNumber,
+      
+                    status:
+                      '사용중',
+      
+                    sort_order:
+                      maxSortOrder + 1
+                  })
+      
+      
+              if (error) {
+                alert(
+                  '객실 등록 실패: ' +
+                  error.message
+                )
+                return
+              }
+      
+      
+              alert(
+                roomNumber +
+                '호가 등록되었습니다.'
+              )
+      
+              location.reload()
+            }
+          )
+      
+      
+        document
+          .querySelectorAll<HTMLButtonElement>(
+            '.hotel-room-open-button'
+          )
+          .forEach(
+            (button) => {
+      
+              button.addEventListener(
+                'click',
+                () => {
+      
+                  const url =
+                    button.dataset.url || ''
+      
+                  if (!url) {
+                    return
+                  }
+      
+                  window.open(
+                    url,
+                    '_blank'
+                  )
+                }
+              )
+            }
+          )
+      
+      
+        document
+          .querySelectorAll<HTMLButtonElement>(
+            '.hotel-room-status-button'
+          )
+          .forEach(
+            (button) => {
+      
+              button.addEventListener(
+                'click',
+                async () => {
+      
+                  const roomId =
+                    Number(
+                      button.dataset.id
+                    )
+      
+                  const currentStatus =
+                    button.dataset.status ||
+                    '사용중'
+      
+      
+                  const nextStatus =
+                    currentStatus ===
+                    '사용중'
+                      ? '사용중지'
+                      : '사용중'
+      
+      
+                  const { error } =
+                    await supabase
+                      .from('hotel_rooms')
+                      .update({
+                        status:
+                          nextStatus
+                      })
+                      .eq(
+                        'id',
+                        roomId
+                      )
+                      .eq(
+                        'merchant_id',
+                        merchantId
+                      )
+      
+      
+                  if (error) {
+                    alert(
+                      '객실 상태 변경 실패: ' +
+                      error.message
+                    )
+                    return
+                  }
+      
+      
+                  location.reload()
+                }
+              )
+            }
+          )
+      
+      
+        document
+          .querySelector(
+            '#hotel-room-go-order'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+              location.href =
+                '/merchant-admin'
+            }
+          )
+      
+      
+        document
+          .querySelector(
+            '#hotel-room-go-product'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+              location.href =
+                '/merchant-product'
+            }
+          )
+      
+      
+        document
+          .querySelector(
+            '#hotel-room-go-room'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+              location.href =
+                '/merchant-hotel-rooms'
+            }
+          )
+      
+      
+        document
+          .querySelector(
+            '#hotel-room-go-card'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+              location.href =
+                '/merchant-card'
+            }
+          )
+      
+      
+        document
+          .querySelector(
+            '#hotel-room-logout'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+      
+              sessionStorage.removeItem(
+                'login_merchant_id'
+              )
+      
+              sessionStorage.removeItem(
+                'login_merchant_name'
+              )
+      
+              sessionStorage.removeItem(
+                'login_merchant_code'
+              )
+      
+              sessionStorage.removeItem(
+                'login_merchant_type'
+              )
+      
+              location.href =
+                '/merchant-login'
+            }
+          )
 
 } else if (path === '/merchant-product') {
 
