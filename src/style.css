@@ -11916,3 +11916,48 @@ body.hotel-mode #merchant-card-tab:hover {
   }
 
 }
+/* =========================================
+   HOTEL 모바일 영수증 세로길이 미세 축소
+========================================= */
+
+@media (max-width: 768px) {
+
+  .hotel-success-card .receipt-box {
+    max-height: 72vh !important;
+    padding: 8px !important;
+  }
+
+  .hotel-success-card .receipt-header {
+    margin-bottom: 6px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .hotel-success-card .receipt-box section {
+    margin-bottom: 5px !important;
+  }
+
+  .hotel-success-card .receipt-box h4 {
+    margin: 0 0 3px !important;
+  }
+
+  .hotel-success-card .receipt-box th,
+  .hotel-success-card .receipt-box td {
+    padding: 3px 5px !important;
+    line-height: 1.15 !important;
+  }
+
+  .hotel-success-card .receipt-notice {
+    padding: 5px 7px !important;
+    margin-top: 3px !important;
+    line-height: 1.25 !important;
+  }
+
+  .hotel-success-card .receipt-actions {
+    margin-top: 6px !important;
+  }
+
+  .hotel-success-card .receipt-actions button {
+    height: 30px !important;
+  }
+
+}
