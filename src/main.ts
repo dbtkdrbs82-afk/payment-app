@@ -18704,7 +18704,11 @@ ${
 }
 </button>
 
-<button id="go-merchant-qr">PICK QR</button>
+${
+  merchantType === '호텔'
+    ? ''
+    : '<button id="go-merchant-qr">PICK QR</button>'
+}
       </div>
 
       <div class="payment-card">
