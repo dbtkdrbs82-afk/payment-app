@@ -9585,5 +9585,5 @@ and (orientation: landscape) {
 /* 일반매장 날짜검색 위치 미세조정 */
 .merchant-sales-filter .sales-filter-date-row {
   position: relative;
-  top: -5px;
+  top: -4px;
 }
