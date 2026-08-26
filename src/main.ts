@@ -680,8 +680,115 @@ app.innerHTML = `
   
       
     }
-  
 
+  } else if (path === '/hotel-chrome') {
+
+    const hotelChromeParams =
+      new URLSearchParams(
+        window.location.search
+      )
+  
+    const merchantId =
+      hotelChromeParams.get(
+        'merchant_id'
+      ) || ''
+  
+    const roomNumber =
+      hotelChromeParams.get(
+        'room'
+      ) || ''
+  
+  
+    if (
+      !merchantId ||
+      !roomNumber
+    ) {
+  
+      app.innerHTML = `
+        <div class="page">
+          <div class="payment-card">
+  
+            <h2>
+              객실 결제정보를 찾을 수 없습니다.
+            </h2>
+  
+          </div>
+        </div>
+      `
+  
+    } else {
+  
+      const targetUrl =
+        window.location.origin +
+        '/hotel?merchant_id=' +
+        encodeURIComponent(
+          merchantId
+        ) +
+        '&room=' +
+        encodeURIComponent(
+          roomNumber
+        )
+  
+  
+      const cleanTarget =
+        targetUrl.replace(
+          /^https?:\/\//,
+          ''
+        )
+  
+  
+      const chromeIntentUrl =
+        'intent://' +
+        cleanTarget +
+        '#Intent;' +
+        'scheme=https;' +
+        'package=com.android.chrome;' +
+        'S.browser_fallback_url=' +
+        encodeURIComponent(
+          targetUrl
+        ) +
+        ';end'
+  
+  
+      app.innerHTML = `
+        <div class="hotel-chrome-page">
+  
+          <div class="hotel-chrome-card">
+  
+            <div class="hotel-chrome-brand">
+              NXG HOTEL
+            </div>
+  
+            <div class="hotel-chrome-room">
+              ROOM ${roomNumber}
+            </div>
+  
+            <h1>
+              안내
+            </h1>
+  
+            <p>
+              안전한 결제를 위해<br>
+              Chrome 브라우저로 연결합니다.
+            </p>
+  
+            <div class="hotel-chrome-icon">
+              <div>Chrome</div>
+            </div>
+  
+            <a
+              href="${chromeIntentUrl}"
+              class="hotel-chrome-button"
+            >
+              크롬으로 연결
+            </a>
+  
+          </div>
+  
+        </div>
+      `
+    }
+  
   } else if (path === '/academy-pay') {
 
     const academyParams =
@@ -17356,14 +17463,23 @@ if (orderRequestError) {
                             ${rooms.map(
                               (room) => {
       
-                                const hotelUrl =
-                                  window.location.origin +
-                                  '/hotel?merchant_id=' +
-                                  merchantId +
-                                  '&room=' +
-                                  encodeURIComponent(
-                                    room.room_number
-                                  )
+                                const hotelDirectUrl =
+  window.location.origin +
+  '/hotel?merchant_id=' +
+  merchantId +
+  '&room=' +
+  encodeURIComponent(
+    room.room_number
+  )
+
+const hotelQrUrl =
+  window.location.origin +
+  '/hotel-chrome?merchant_id=' +
+  merchantId +
+  '&room=' +
+  encodeURIComponent(
+    room.room_number
+  )
       
                                 return `
                                   <tr>
@@ -17392,23 +17508,23 @@ if (orderRequestError) {
                                     <td>
 
   <button
-    class="hotel-room-open-button"
-    data-url="${hotelUrl}"
-  >
-    결제창 열기
-  </button>
+  class="hotel-room-open-button"
+  data-url="${hotelDirectUrl}"
+>
+  결제창 열기
+</button>
 
 </td>
 
 <td>
 
   <button
-    class="hotel-room-qr-button"
-    data-room="${room.room_number}"
-    data-url="${hotelUrl}"
-  >
-    QR 보기
-  </button>
+  class="hotel-room-qr-button"
+  data-room="${room.room_number}"
+  data-url="${hotelQrUrl}"
+>
+  QR 보기
+</button>
 
 </td>
 
@@ -17787,7 +17903,7 @@ document
     'click',
     closeHotelRoomQrModal
   )     
-    
+
         document
           .querySelectorAll<HTMLButtonElement>(
             '.hotel-room-status-button'
