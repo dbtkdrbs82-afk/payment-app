@@ -11037,3 +11037,198 @@ body:has(#merchant-hotel-room-tab)
   background: var(--hotel-gold) !important;
   color: #ffffff !important;
 }
+/* =========================================
+   NXG HOTEL 최종 버튼 컬러 통일
+   객실관리 골드색 기준
+========================================= */
+
+:root {
+  --hotel-main-gold: #b7924f;
+  --hotel-main-gold-hover: #9d7a3e;
+  --hotel-soft-gold: #d8c39a;
+}
+
+
+/* -----------------------------------------
+   호텔 관리자 모든 일반 버튼
+----------------------------------------- */
+
+body.hotel-mode button,
+body.hotel-mode .merchant-toolbar button,
+body.hotel-mode .merchant-sales-filter button,
+body.hotel-mode .order-filter-btn,
+body.hotel-mode .mini-sub-tab,
+body.hotel-mode .product-actions button,
+body.hotel-mode #merchant-logout,
+body.hotel-mode #hotel-room-logout {
+  background: var(--hotel-main-gold) !important;
+  color: #ffffff !important;
+  border-color: var(--hotel-main-gold) !important;
+}
+
+
+/* hover */
+
+body.hotel-mode button:hover,
+body.hotel-mode .merchant-toolbar button:hover,
+body.hotel-mode .merchant-sales-filter button:hover,
+body.hotel-mode .order-filter-btn:hover,
+body.hotel-mode .mini-sub-tab:hover,
+body.hotel-mode .product-actions button:hover {
+  background: var(--hotel-main-gold-hover) !important;
+  color: #ffffff !important;
+}
+
+
+/* -----------------------------------------
+   호텔 상단 메뉴 전부 같은 골드
+----------------------------------------- */
+
+body.hotel-mode #merchant-order-tab,
+body.hotel-mode #merchant-product-tab,
+body.hotel-mode #merchant-hotel-room-tab,
+body.hotel-mode #merchant-hotel-preview-tab,
+body.hotel-mode #merchant-card-tab,
+
+body.hotel-mode #hotel-room-go-order,
+body.hotel-mode #hotel-room-go-product,
+body.hotel-mode #hotel-room-go-room,
+body.hotel-mode #hotel-room-go-card {
+  background: var(--hotel-main-gold) !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+
+/* -----------------------------------------
+   상품관리 버튼
+----------------------------------------- */
+
+body.hotel-mode #product-create-button,
+body.hotel-mode .product-status-button,
+body.hotel-mode .product-delete-button,
+body.hotel-mode .product-edit-button,
+body.hotel-mode .product-sort-row button {
+  background: var(--hotel-main-gold) !important;
+  color: #ffffff !important;
+}
+
+
+/* -----------------------------------------
+   카드결제 선택 카드
+   큰 박스는 흰색 유지 + 파란색만 제거
+----------------------------------------- */
+
+body.hotel-mode .merchant-card-payment-box {
+  background: #ffffff !important;
+  color: #352d26 !important;
+  border-color: var(--hotel-soft-gold) !important;
+}
+
+body.hotel-mode .merchant-card-payment-box strong {
+  color: var(--hotel-main-gold-hover) !important;
+}
+
+body.hotel-mode .merchant-card-payment-box span {
+  color: #6f655b !important;
+}
+
+body.hotel-mode .merchant-card-payment-box:hover {
+  background: #fffdf9 !important;
+  border-color: var(--hotel-main-gold) !important;
+  box-shadow:
+    0 10px 25px rgba(183, 146, 79, 0.18) !important;
+}
+
+
+/* -----------------------------------------
+   객실관리
+----------------------------------------- */
+
+.hotel-room-admin-page button {
+  background: var(--hotel-main-gold) !important;
+  color: #ffffff !important;
+  border-color: var(--hotel-main-gold) !important;
+}
+
+.hotel-room-admin-page button:hover {
+  background: var(--hotel-main-gold-hover) !important;
+}
+
+
+/* QR 보기 역시 같은 색 */
+
+.hotel-room-admin-page .hotel-room-qr-button {
+  background: var(--hotel-main-gold) !important;
+}
+
+
+/* -----------------------------------------
+   QR 포스터 관리
+----------------------------------------- */
+
+.hotel-poster-admin-page button {
+  background: var(--hotel-main-gold) !important;
+  color: #ffffff !important;
+  border-color: var(--hotel-main-gold) !important;
+}
+
+.hotel-poster-admin-page button:hover {
+  background: var(--hotel-main-gold-hover) !important;
+}
+
+
+/* ROOM 101 / ROOM 102 */
+
+.hotel-poster-room-number {
+  color: var(--hotel-main-gold) !important;
+}
+
+
+/* -----------------------------------------
+   호텔 고객 결제창
+----------------------------------------- */
+
+.hotel-shop-page button,
+.hotel-shop-page .hotel-pay-button {
+  background: var(--hotel-main-gold) !important;
+  color: #ffffff !important;
+  border-color: var(--hotel-main-gold) !important;
+}
+
+.hotel-shop-page button:hover,
+.hotel-shop-page .hotel-pay-button:hover {
+  background: var(--hotel-main-gold-hover) !important;
+}
+
+
+/* 상품 담기 + 버튼 */
+
+.hotel-shop-page .hotel-add-button {
+  background: var(--hotel-main-gold) !important;
+  color: #ffffff !important;
+  border-color: var(--hotel-main-gold) !important;
+}
+
+
+/* 수량 +/-만 밝게 */
+
+.hotel-shop-page .hotel-cart-control button {
+  background: #ffffff !important;
+  color: var(--hotel-main-gold-hover) !important;
+  border: 1px solid var(--hotel-soft-gold) !important;
+}
+
+
+/* -----------------------------------------
+   Chrome 연결
+----------------------------------------- */
+
+.hotel-chrome-button {
+  background: var(--hotel-main-gold) !important;
+  color: #ffffff !important;
+}
+
+.hotel-chrome-button:hover {
+  background: var(--hotel-main-gold-hover) !important;
+}

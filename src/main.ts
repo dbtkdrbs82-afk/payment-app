@@ -15,6 +15,14 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
+const loginMerchantType =
+  sessionStorage.getItem('login_merchant_type') || ''
+
+if (loginMerchantType === '호텔') {
+  document.body.classList.add('hotel-mode')
+} else {
+  document.body.classList.remove('hotel-mode')
+}
 const path = window.location.pathname
 
 
