@@ -12048,3 +12048,163 @@ body.hotel-mode .kiosk-category-title {
   }
 
 }
+/* =========================================
+   HOTEL 모바일 고객창 최종 정리
+   카테고리 박스 제거 + 상단 네이비 영역 축소
+========================================= */
+
+@media (max-width: 640px) {
+
+  /* -----------------------------------------
+     상단 네이비 영역 높이 축소
+  ----------------------------------------- */
+
+  .hotel-shop-page {
+    background:
+      linear-gradient(
+        180deg,
+        #0b1420 0,
+        #101c2a 255px,
+        #f4f1eb 255px,
+        #f4f1eb 100%
+      ) !important;
+  }
+
+
+  .hotel-shop-header {
+    padding:
+      18px 18px 8px !important;
+  }
+
+
+  .hotel-brand-small {
+    margin-bottom: 7px !important;
+  }
+
+
+  .hotel-brand-area h1 {
+    font-size: 20px !important;
+  }
+
+
+  .hotel-brand-area p {
+    margin-top: 5px !important;
+  }
+
+
+  .hotel-room-badge {
+    padding: 7px 9px !important;
+  }
+
+
+  .hotel-welcome-area {
+    margin:
+      16px auto 18px !important;
+
+    padding:
+      0 18px !important;
+  }
+
+
+  .hotel-welcome-label {
+    margin-bottom: 8px !important;
+
+    font-size: 9px !important;
+  }
+
+
+  .hotel-welcome-area h2 {
+    margin-bottom: 8px !important;
+
+    font-size: 21px !important;
+    line-height: 1.25 !important;
+  }
+
+
+  .hotel-welcome-area p {
+    font-size: 12px !important;
+    line-height: 1.55 !important;
+  }
+
+
+  /* -----------------------------------------
+     호텔 카테고리
+     금색 네모 버튼 완전히 제거
+  ----------------------------------------- */
+
+  .hotel-shop-page
+  .hotel-category-tabs {
+    margin: 0 !important;
+
+    padding:
+      0 18px !important;
+
+    gap: 28px !important;
+
+    background: #f4f1eb !important;
+  }
+
+
+  .hotel-shop-page
+  .hotel-category-tab,
+  .hotel-shop-page
+  .hotel-category-tab:hover,
+  .hotel-shop-page
+  .hotel-category-tab:focus,
+  .hotel-shop-page
+  .hotel-category-tab:active {
+    width: auto !important;
+    min-width: 0 !important;
+    height: 46px !important;
+
+    margin: 0 !important;
+    padding:
+      0 2px !important;
+
+    background:
+      transparent !important;
+
+    background-color:
+      transparent !important;
+
+    border:
+      0 !important;
+
+    border-radius:
+      0 !important;
+
+    box-shadow:
+      none !important;
+
+    color:
+      #111111 !important;
+
+    font-size:
+      14px !important;
+
+    font-weight:
+      700 !important;
+  }
+
+
+  /* 선택된 카테고리만 골드 밑줄 */
+
+  .hotel-shop-page
+  .hotel-category-tab.active {
+    background:
+      transparent !important;
+
+    background-color:
+      transparent !important;
+
+    color:
+      #111111 !important;
+
+    border-bottom:
+      3px solid #b7924f !important;
+
+    box-shadow:
+      none !important;
+  }
+
+}
