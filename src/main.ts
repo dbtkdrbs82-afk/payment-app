@@ -14226,6 +14226,7 @@ if (isBeauty) {
   merchantMenu = `
     <button id="merchant-order-tab">주문/결제내역</button>
     <button id="merchant-product-tab">상품관리</button>
+    <button id="merchant-hotel-preview-tab">고객 결제창</button>
     <button id="merchant-card-tab">카드결제</button>
   `
 
@@ -16168,6 +16169,21 @@ document.querySelectorAll('.admin-table .customer-call-button')
 document.querySelector('#merchant-product-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-product'
+  })
+
+  document.querySelector('#merchant-hotel-preview-tab')
+  ?.addEventListener('click', () => {
+
+    const hotelPreviewUrl =
+      window.location.origin +
+      '/hotel?merchant_id=' +
+      merchantId +
+      '&room=101'
+
+    window.open(
+      hotelPreviewUrl,
+      '_blank'
+    )
   })
 
   document.querySelector('#merchant-staff-tab')

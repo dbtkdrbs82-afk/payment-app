@@ -10115,3 +10115,30 @@ and (orientation: landscape) {
   }
 
 }
+/* =========================================
+   호텔 관리자 고객결제창 버튼
+========================================= */
+
+@media (max-width: 520px) {
+
+  body:has(#merchantOrderBody):not(:has(.terminal-date-search-box))
+  #merchant-hotel-preview-tab {
+    grid-column: 7 / span 3 !important;
+    grid-row: 1 !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 26px !important;
+
+    margin: 0 !important;
+    padding: 0 2px !important;
+
+    font-size: 9px !important;
+    line-height: 26px !important;
+
+    border-radius: 6px !important;
+    box-sizing: border-box !important;
+    white-space: nowrap !important;
+  }
+
+}
