@@ -9526,3 +9526,47 @@ and (orientation: landscape) {
 .academy-receipt-cancel .receipt-actions button:hover {
   background: var(--cancel-dark-red) !important;
 }
+/* =========================================
+   일반매장 PC 상품카드만 조정
+   모바일 영향 없음
+========================================= */
+
+@media (min-width: 769px) {
+
+  .kiosk-page .kiosk-product-card {
+    min-height: 0;
+    height: auto;
+    overflow: hidden;
+  }
+
+  .kiosk-page .kiosk-product-card > img {
+    width: 100%;
+    height: 240px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .kiosk-page .kiosk-product-card .no-image {
+    height: 240px;
+  }
+
+  .kiosk-page .kiosk-product-info {
+    padding: 12px 14px 8px;
+    min-height: 0;
+  }
+
+  .kiosk-page .kiosk-product-info h3 {
+    margin: 0 0 6px;
+    line-height: 1.25;
+  }
+
+  .kiosk-page .kiosk-product-info p {
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  .kiosk-page .kiosk-product-card .add-cart-button {
+    margin-top: 8px;
+  }
+
+}
