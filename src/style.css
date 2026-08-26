@@ -12012,3 +12012,39 @@ body.hotel-mode .kiosk-category-title {
 
   border-left: 6px solid #111111 !important;
 }
+/* =========================================
+   HOTEL 모바일 카테고리 금색 박스 제거
+========================================= */
+
+@media (max-width: 768px) {
+
+  body.hotel-mode .kiosk-page .kiosk-category-tabs .kiosk-category-tab,
+  body.hotel-mode .kiosk-page .kiosk-category-tabs .kiosk-category-tab.active,
+  body.hotel-mode .kiosk-page .kiosk-category-tabs .kiosk-category-tab:hover,
+  body.hotel-mode .kiosk-page .kiosk-category-tabs .kiosk-category-tab:active,
+  body.hotel-mode .kiosk-page .kiosk-category-tabs .kiosk-category-tab:focus {
+    background: transparent !important;
+    background-color: transparent !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    box-shadow: none !important;
+
+    color: #111111 !important;
+  }
+
+
+  /* 선택된 메뉴만 골드 밑줄 */
+  body.hotel-mode .kiosk-page .kiosk-category-tabs .kiosk-category-tab.active {
+    border-bottom: 3px solid #b7924f !important;
+  }
+
+
+  /* 아래 | 음료 제목도 검정 */
+  body.hotel-mode .kiosk-page .kiosk-category-title {
+    color: #111111 !important;
+    border-left-color: #111111 !important;
+  }
+
+}
