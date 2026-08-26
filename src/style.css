@@ -11286,3 +11286,51 @@ body.hotel-mode #merchant-card-tab:hover {
   color: #ffffff !important;
   border-color: #9d7a3e !important;
 }
+/* =========================================
+   HOTEL 주문관리 객실번호
+========================================= */
+
+.hotel-order-room-number {
+  color: #b7924f;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  white-space: nowrap;
+}
+
+.hotel-order-card-room {
+  margin: 8px 0 10px;
+  padding: 8px 12px;
+
+  border: 1px solid #d8c39a;
+  border-radius: 8px;
+
+  background: #fffaf0;
+  color: #9d7a3e;
+
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.hotel-card-complete-button {
+  width: 100% !important;
+  height: 44px !important;
+  margin: 8px 0 0 !important;
+
+  background: #b7924f !important;
+  color: #ffffff !important;
+  border: 0 !important;
+}
+
+.hotel-card-complete-text {
+  margin-top: 8px;
+  padding: 12px;
+
+  border-radius: 8px;
+  background: #f5f1e8;
+  color: #9d7a3e;
+
+  text-align: center;
+  font-weight: 900;
+}

@@ -3024,10 +3024,23 @@ const eventId = sessionStorage.getItem('currentEventId')
 const currentEventType =
   sessionStorage.getItem('currentEventType')
 
-const senderName = sessionStorage.getItem('senderName')
-const message = sessionStorage.getItem('message')
+  const senderName =
+  sessionStorage.getItem('senderName')
 
-const source = params.get('source')
+const message =
+  sessionStorage.getItem('message')
+
+const source =
+  params.get('source')
+
+const hotelRoomNumber =
+  source === 'hotel'
+    ? (
+        sessionStorage.getItem(
+          'hotel_room_number'
+        ) || ''
+      )
+    : ''
 
 const merchantId =
   params.get('merchantId') || sessionStorage.getItem('merchantId')
@@ -3108,9 +3121,18 @@ if (existingPayment) {
       event_id: eventId ? Number(eventId) : null,
       sender_name: senderName,
       message: message,
-      merchant_id: merchantId ? Number(merchantId) : null,
-      merchant_name: merchantName,
-      pg_company:
+      merchant_id:
+  merchantId
+    ? Number(merchantId)
+    : null,
+
+merchant_name:
+  merchantName,
+
+room_number:
+  hotelRoomNumber || null,
+
+pg_company:
       params.get('pg') ||
       sessionStorage.getItem('selected_pg_company') ||
       '토스페이먼츠',
@@ -3174,6 +3196,85 @@ payment_status: '결제완료',
       sessionStorage.removeItem('kiosk_merchant_id')
       sessionStorage.removeItem('kiosk_items')
       sessionStorage.removeItem('kiosk_total_amount')
+    }
+  }
+
+  if (source === 'hotel') {
+
+    const hotelItemsText =
+      sessionStorage.getItem(
+        'hotel_items'
+      )
+  
+    const hotelRoomNumber =
+      sessionStorage.getItem(
+        'hotel_room_number'
+      ) || ''
+  
+    const hotelItems =
+      hotelItemsText
+        ? JSON.parse(hotelItemsText)
+        : []
+  
+  
+    if (
+      merchantId &&
+      hotelRoomNumber &&
+      hotelItems.length > 0
+    ) {
+  
+      const {
+        error: hotelOrderError
+      } =
+        await supabase
+          .from('orders')
+          .insert({
+            merchant_id:
+              Number(merchantId),
+  
+            order_no:
+              String(nextOrderNumber),
+  
+            pg_order_id:
+              orderId,
+  
+            payment_key:
+              paymentKey,
+  
+            room_number:
+              hotelRoomNumber,
+  
+            items:
+              hotelItems,
+  
+            total_amount:
+              paymentAmount,
+  
+            order_status:
+              '접수',
+  
+            payment_status:
+              '결제완료'
+          })
+  
+  
+      if (hotelOrderError) {
+  
+        alert(
+          '호텔 주문 저장 실패: ' +
+          hotelOrderError.message
+        )
+  
+      } else {
+  
+        sessionStorage.removeItem(
+          'hotel_items'
+        )
+  
+        sessionStorage.removeItem(
+          'hotel_room_number'
+        )
+      }
     }
   }
 }
@@ -15261,9 +15362,9 @@ ${isBeauty ? `
    
           <div class="merchant-order-table-wrap ${isAcademy ? 'academy-hide-order-list' : ''}">
             <table class="admin-table">
-              <thead>
+             <thead>
   ${
-    (sessionStorage.getItem('login_merchant_type') || '') === '뷰티'
+    isBeauty
       ? `
         <tr>
           <th>No</th>
@@ -15276,17 +15377,30 @@ ${isBeauty ? `
           <th>처리</th>
         </tr>
       `
-      : `
-        <tr>
-          <th>No</th>
-          <th>주문번호</th>
-          <th>결제일시</th>
-          <th>주문내용</th>
-          <th>결제금액</th>
-          <th>주문상태</th>
-          <th>고객호출</th>
-        </tr>
-      `
+      : isHotel
+        ? `
+          <tr>
+            <th>No</th>
+            <th>주문번호</th>
+            <th>객실번호</th>
+            <th>결제일시</th>
+            <th>주문내용</th>
+            <th>결제금액</th>
+            <th>주문상태</th>
+            <th>처리</th>
+          </tr>
+        `
+        : `
+          <tr>
+            <th>No</th>
+            <th>주문번호</th>
+            <th>결제일시</th>
+            <th>주문내용</th>
+            <th>결제금액</th>
+            <th>주문상태</th>
+            <th>고객호출</th>
+          </tr>
+        `
   }
 </thead>
               <tbody id="merchantOrderBody"></tbody>
@@ -15641,6 +15755,9 @@ if (merchantOrderCardList) {
         .join(', ')
     : '-'
 
+      const hotelRoomNumber =
+    order.room_number || '-'
+
     const paymentForOrder =
     (merchantReceiptPayments || []).find((payment: any) => {
       const paymentOrderId =
@@ -15706,6 +15823,104 @@ if (merchantOrderCardList) {
     ) ||
     '-'
 
+    if (isHotel) {
+
+      tr.innerHTML =
+        '<td>' + (index + 1) + '</td>' +
+    
+        '<td>' +
+          '<button ' +
+            'class="merchant-receipt-link" ' +
+            'data-id="' + order.id + '" ' +
+            'data-order="' + orderNumber + '" ' +
+            'data-amount="' + (order.total_amount || 0) + '" ' +
+            'data-date="' + (order.created_at || '') + '" ' +
+            'data-status="' + (order.order_status || '') + '" ' +
+            'data-cancel-status="' + (order.cancel_status || '') + '" ' +
+            'data-cancel-date="' + (order.cancel_requested_at || '') + '" ' +
+            'data-items="' + orderItems + '" ' +
+            'data-payment-key="' + receiptPaymentKey + '" ' +
+            'data-approval-number="' + receiptApprovalNumber + '" ' +
+            'data-card-number="' + receiptCardNumber + '" ' +
+            'data-card-company="' + receiptCardCompany + '" ' +
+            'data-pg-company="' + receiptPgCompany + '" ' +
+            'data-pg-mid="' + receiptPgMid + '" ' +
+          '>' +
+            orderNumber + '번' +
+          '</button>' +
+        '</td>' +
+    
+        '<td>' +
+          '<strong class="hotel-order-room-number">' +
+            'ROOM ' + hotelRoomNumber +
+          '</strong>' +
+        '</td>' +
+    
+        '<td>' +
+          '<div>' +
+            new Date(order.created_at).toLocaleString('ko-KR') +
+          '</div>' +
+    
+          '<div class="approval-number cancel-approval-link" ' +
+            'data-id="' + order.id + '" ' +
+            'data-created-at="' + order.created_at + '" ' +
+            'data-amount="' + order.total_amount + '">' +
+            '승인번호 ' + receiptApprovalNumber +
+          '</div>' +
+    
+          (
+            order.cancel_status === '취소완료'
+              ? '<div class="cancel-info">' +
+                  '취소시각: ' +
+                  (
+                    order.cancel_requested_at
+                      ? new Date(
+                          order.cancel_requested_at
+                        ).toLocaleString('ko-KR')
+                      : '-'
+                  ) +
+                  '<br />취소사유: ' +
+                  (order.cancel_reason || '-') +
+                '</div>'
+              : ''
+          ) +
+        '</td>' +
+    
+        '<td>' +
+          orderItems +
+        '</td>' +
+    
+        '<td>' +
+          Number(
+            order.total_amount || 0
+          ).toLocaleString() +
+          '원' +
+        '</td>' +
+    
+        '<td>' +
+          (
+            order.cancel_status === '취소요청'
+              ? '<span class="order-status-cancel-request">취소요청</span>'
+              : order.order_status === '취소완료'
+                ? '<span class="order-status-cancel">취소완료</span>'
+                : order.order_status === '완료'
+                  ? '<span class="order-status-complete">완료</span>'
+                  : '<span class="order-status-received">접수</span>'
+          ) +
+        '</td>' +
+    
+        '<td>' +
+          (
+            order.order_status === '완료'
+              ? '완료'
+              : '<button class="order-complete-button" data-id="' +
+                  order.id +
+                '">완료처리</button>'
+          ) +
+        '</td>'
+    
+    } else {
+
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
     '<td>' +
@@ -15769,7 +15984,7 @@ if (merchantOrderCardList) {
   '고객호출' +
 '</button>'
     '</td>'
-
+    }
     tr.setAttribute('data-status', order.order_status || '접수')
 
     if ((sessionStorage.getItem('login_merchant_type') || '') === '뷰티') {
@@ -15913,6 +16128,14 @@ if (merchantOrderCardList) {
   new Date(order.created_at).toLocaleString('ko-KR') +
 '</div>' +
 
+(
+  isHotel
+    ? '<div class="hotel-order-card-room">' +
+        'ROOM ' + hotelRoomNumber +
+      '</div>'
+    : ''
+) +
+
 '<div class="approval-number cancel-approval-link" ' +
   'data-id="' + order.id + '" ' +
   'data-created-at="' + order.created_at + '" ' +
@@ -15937,11 +16160,24 @@ if (merchantOrderCardList) {
   ) +
 '</div>' +
 
-      '<button class="customer-call-button merchant-card-call-button" ' +
-        'data-id="' + order.id + '" ' +
-        'data-number="' + orderNumber + '">' +
-        '고객호출' +
-      '</button>'
+(
+  isHotel
+    ? (
+        order.order_status === '완료'
+          ? '<div class="hotel-card-complete-text">완료</div>'
+          : '<button class="hotel-card-complete-button" ' +
+              'data-id="' + order.id + '">' +
+              '완료처리' +
+            '</button>'
+      )
+    : (
+        '<button class="customer-call-button merchant-card-call-button" ' +
+          'data-id="' + order.id + '" ' +
+          'data-number="' + orderNumber + '">' +
+          '고객호출' +
+        '</button>'
+      )
+)
 
       card.setAttribute('data-status', order.order_status || '접수')
 
@@ -15949,6 +16185,61 @@ if (merchantOrderCardList) {
 
     const cardCallButton =
     card.querySelector<HTMLButtonElement>('.customer-call-button')
+  
+    const hotelCardCompleteButton =
+  card.querySelector<HTMLButtonElement>(
+    '.hotel-card-complete-button'
+  )
+
+hotelCardCompleteButton
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      const { error } =
+        await supabase
+          .from('orders')
+          .update({
+            order_status: '완료'
+          })
+          .eq(
+            'id',
+            Number(order.id)
+          )
+
+      if (error) {
+        alert(
+          '완료 처리 실패: ' +
+          error.message
+        )
+        return
+      }
+
+
+      const statusBox =
+        card.querySelector(
+          '.merchant-order-card-status'
+        )
+
+      if (statusBox) {
+        statusBox.innerHTML =
+          '<span class="order-status-complete">완료</span>'
+      }
+
+
+      card.setAttribute(
+        'data-status',
+        '완료'
+      )
+
+      hotelCardCompleteButton
+        .replaceWith(
+          document.createTextNode(
+            '완료'
+          )
+        )
+    }
+  )
   
     const receiptButtons =
   document.querySelectorAll('.merchant-receipt-link')
