@@ -11762,7 +11762,7 @@ function renderMerchantOrderPage() {
               String(order.merchant_id || 1).padStart(4, '0') +
             '</td>' +
 
-            '<td>' + orderItems + '</td>' +
+           '<td>' + orderItems + '</td>' +
 
             '<td>' +
               Number(order.total_amount || 0).toLocaleString() +
@@ -16015,8 +16015,24 @@ const hotelCustomerRequestHtml =
         '</td>' +
     
         '<td>' +
-          orderItems +
-        '</td>' +
+  '<div>' + orderItems + '</div>' +
+  (
+    String(order.customer_request || '').trim()
+      ? '<div class="hotel-order-request">' +
+          '<strong>요청사항</strong>' +
+          '<div>' +
+            String(order.customer_request || '')
+              .replace(/&/g, '&amp;')
+              .replace(/</g, '&lt;')
+              .replace(/>/g, '&gt;')
+              .replace(/"/g, '&quot;')
+              .replace(/'/g, '&#039;')
+              .replace(/\n/g, '<br>') +
+          '</div>' +
+        '</div>'
+      : ''
+  ) +
+'</td>' +
     
         '<td>' +
           Number(
