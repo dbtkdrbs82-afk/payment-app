@@ -12208,3 +12208,50 @@ body.hotel-mode .kiosk-category-title {
   }
 
 }
+/* =========================================
+   HOTEL 카테고리 탭 최종 수정
+   선택/비선택 모두 금색 박스 제거
+========================================= */
+
+body.hotel-mode
+.hotel-shop-page
+button.hotel-category-tab,
+body.hotel-mode
+.hotel-shop-page
+button.hotel-category-tab:hover,
+body.hotel-mode
+.hotel-shop-page
+button.hotel-category-tab:focus,
+body.hotel-mode
+.hotel-shop-page
+button.hotel-category-tab:active {
+  width: auto !important;
+  min-width: 0 !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: #111111 !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  box-shadow: none !important;
+}
+
+
+/* 선택된 카테고리만 골드 밑줄 */
+
+body.hotel-mode
+.hotel-shop-page
+button.hotel-category-tab.active {
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: #111111 !important;
+
+  border: 0 !important;
+  border-bottom: 3px solid #b7924f !important;
+
+  box-shadow: none !important;
+}
