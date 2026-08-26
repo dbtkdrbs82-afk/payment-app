@@ -16282,6 +16282,47 @@ document.querySelectorAll('.admin-table .customer-call-button')
     })
   })
 
+  if (isHotel) {
+    const hotelTopMenuIds = [
+      'merchant-order-tab',
+      'merchant-product-tab',
+      'merchant-hotel-room-tab',
+      'merchant-hotel-preview-tab',
+      'merchant-card-tab'
+    ]
+  
+    hotelTopMenuIds.forEach((id) => {
+      const button =
+        document.getElementById(id)
+  
+      if (!button) return
+  
+      button.style.setProperty(
+        'background',
+        '#b7924f',
+        'important'
+      )
+  
+      button.style.setProperty(
+        'background-color',
+        '#b7924f',
+        'important'
+      )
+  
+      button.style.setProperty(
+        'border-color',
+        '#b7924f',
+        'important'
+      )
+  
+      button.style.setProperty(
+        'color',
+        '#ffffff',
+        'important'
+      )
+    })
+  }
+
 document.querySelector('#merchant-product-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-product'
