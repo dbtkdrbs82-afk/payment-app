@@ -13067,9 +13067,30 @@ visiblePayments.forEach((payment, index) => {
   '</button>' +
 '</td>' +
     '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
-    '<td>-<br/>' + (payment.sender_name || '-') + '</td>' +
-    '<td>' + (payment.message || '-') + '</td>' +
-    '<td>-<br/>일시불</td>' +
+    '<td>' +
+  (payment.card_company || '-') +
+  '<br/>' +
+  (
+    payment.buyer_phone ||
+    payment.phone ||
+    '-'
+  ) +
+'</td>' +
+
+'<td>' +
+  (payment.message || '-') +
+'</td>' +
+
+'<td>' +
+  (payment.card_number || '-') +
+  '<br/>' +
+  (
+    payment.installment_months &&
+    payment.installment_months !== '00'
+      ? payment.installment_months + '개월'
+      : '일시불'
+  ) +
+'</td>' +
     '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
     '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
     '<td>' +
