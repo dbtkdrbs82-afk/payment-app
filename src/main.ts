@@ -13075,6 +13075,18 @@ visiblePayments.forEach((payment, index) => {
     payment.phone ||
     '-'
   ) +
+  '<br/>' +
+  (
+    payment.order_name ||
+    payment.product_name ||
+    '-'
+  ) +
+  '<br/>' +
+  (
+    payment.sender_name ||
+    payment.buyer_name ||
+    '-'
+  ) +
 '</td>' +
 
 '<td>' +
