@@ -9592,3 +9592,526 @@ and (orientation: landscape) {
   position: relative;
   top: 2px;
 }
+/* =========================================
+   NXG HOTEL 고객용 결제창
+   기존 일반매장 / 뷰티 영향 없음
+========================================= */
+
+.hotel-shop-page {
+  width: 100%;
+  min-height: 100vh;
+  padding-bottom: 70px;
+  box-sizing: border-box;
+  background:
+    linear-gradient(
+      180deg,
+      #0b1420 0,
+      #101c2a 360px,
+      #f4f1eb 360px,
+      #f4f1eb 100%
+    );
+  color: #17202b;
+  font-family:
+    Arial,
+    "Noto Sans KR",
+    sans-serif;
+}
+
+.hotel-shop-header {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 38px 28px 20px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  color: #ffffff;
+}
+
+.hotel-brand-small {
+  margin-bottom: 12px;
+  color: #bfa66b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+
+.hotel-brand-area h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.hotel-brand-area p {
+  margin: 8px 0 0;
+  color: #9ba8b7;
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.hotel-room-badge {
+  min-width: 110px;
+  padding: 12px 20px;
+  border: 1px solid rgba(191, 166, 107, 0.5);
+  border-radius: 4px;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.hotel-room-badge span {
+  display: block;
+  margin-bottom: 4px;
+  color: #bfa66b;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.hotel-room-badge strong {
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 2px;
+}
+
+.hotel-welcome-area {
+  max-width: 1180px;
+  margin: 32px auto 36px;
+  padding: 0 28px;
+  box-sizing: border-box;
+  color: #ffffff;
+}
+
+.hotel-welcome-label {
+  margin-bottom: 14px;
+  color: #bfa66b;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.hotel-welcome-area h2 {
+  margin: 0 0 14px;
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -1px;
+}
+
+.hotel-welcome-area p {
+  margin: 0;
+  color: #c2cad3;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.hotel-category-tabs {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  gap: 34px;
+  box-sizing: border-box;
+  overflow-x: auto;
+  background: transparent;
+}
+
+.hotel-category-tab {
+  width: auto !important;
+  min-width: auto !important;
+  margin: 0 !important;
+  padding: 18px 2px 14px !important;
+  border: 0 !important;
+  border-bottom: 2px solid transparent !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: #676d73 !important;
+  box-shadow: none !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  white-space: nowrap;
+}
+
+.hotel-category-tab:hover {
+  background: transparent !important;
+  color: #17202b !important;
+}
+
+.hotel-category-tab.active {
+  border-bottom-color: #aa8d52 !important;
+  background: transparent !important;
+  color: #17202b !important;
+}
+
+.hotel-product-area {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 26px 28px 10px;
+  box-sizing: border-box;
+}
+
+.hotel-category-hidden {
+  display: none !important;
+}
+
+.hotel-product-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.hotel-product-card {
+  overflow: hidden;
+  border: 1px solid #e0ddd6;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow:
+    0 10px 30px rgba(25, 31, 38, 0.06);
+}
+
+.hotel-product-image {
+  width: 100%;
+  height: 210px;
+  overflow: hidden;
+  background: #e8e4dc;
+}
+
+.hotel-product-image img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.hotel-no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #9c8b67;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+
+.hotel-product-info {
+  min-height: 80px;
+  padding: 15px 14px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hotel-product-info h3 {
+  margin: 0 0 7px;
+  color: #1c2631;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.hotel-product-info p {
+  margin: 0;
+  color: #8d7442;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.hotel-add-button {
+  width: 38px !important;
+  min-width: 38px !important;
+  max-width: 38px !important;
+  height: 38px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid #1b2938 !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  color: #172331 !important;
+  font-size: 24px !important;
+  font-weight: 300 !important;
+  line-height: 36px !important;
+}
+
+.hotel-add-button:hover {
+  background: #172331 !important;
+  color: #ffffff !important;
+}
+
+.hotel-pick-card {
+  max-width: 1124px;
+  margin: 28px auto 0;
+  padding: 26px 30px 30px;
+  box-sizing: border-box;
+  border: 1px solid #dedbd4;
+  border-radius: 6px;
+  background: #ffffff;
+  box-shadow:
+    0 16px 40px rgba(27, 34, 41, 0.07);
+}
+
+.hotel-pick-title {
+  padding-bottom: 18px;
+  border-bottom: 1px solid #ece9e3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hotel-pick-title span {
+  display: block;
+  margin-bottom: 3px;
+  color: #a58b56;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 2px;
+}
+
+.hotel-pick-title h2 {
+  margin: 0;
+  color: #182430;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.hotel-pick-room {
+  color: #6d7379;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.hotel-cart-empty {
+  padding: 36px 0;
+  color: #99948c;
+  text-align: center;
+  font-size: 13px;
+}
+
+.hotel-cart-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #efede8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hotel-cart-item-name strong {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.hotel-cart-item-name span {
+  color: #8d7442;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.hotel-cart-control {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.hotel-cart-control button {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 1px solid #d7d3cb !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  color: #242e37 !important;
+  font-size: 16px !important;
+}
+
+.hotel-cart-control button:hover {
+  background: #f4f1eb !important;
+  color: #242e37 !important;
+}
+
+.hotel-cart-total {
+  margin-top: 22px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.hotel-cart-total span {
+  color: #696e73;
+  font-size: 13px;
+}
+
+.hotel-cart-total strong {
+  color: #172331;
+  font-size: 26px;
+  font-weight: 600;
+}
+
+.hotel-pay-button {
+  width: 100% !important;
+  height: 56px !important;
+  margin: 24px 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 4px !important;
+  background: #172331 !important;
+  color: #ffffff !important;
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+}
+
+.hotel-pay-button:hover {
+  background: #27394a !important;
+}
+
+.hotel-shop-footer {
+  margin-top: 40px;
+  color: #8d8b86;
+  text-align: center;
+}
+
+.hotel-shop-footer strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #5f5d59;
+  font-size: 12px;
+  letter-spacing: 2px;
+}
+
+.hotel-shop-footer span {
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+
+.hotel-error-card {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 80px 20px;
+  color: #ffffff;
+  text-align: center;
+}
+
+
+/* 태블릿 */
+
+@media (max-width: 900px) {
+
+  .hotel-product-grid {
+    grid-template-columns:
+      repeat(3, minmax(0, 1fr));
+  }
+
+}
+
+
+/* 모바일 */
+
+@media (max-width: 640px) {
+
+  .hotel-shop-page {
+    background:
+      linear-gradient(
+        180deg,
+        #0b1420 0,
+        #101c2a 310px,
+        #f4f1eb 310px,
+        #f4f1eb 100%
+      );
+  }
+
+  .hotel-shop-header {
+    padding: 26px 18px 12px;
+  }
+
+  .hotel-brand-small {
+    font-size: 9px;
+    letter-spacing: 3px;
+  }
+
+  .hotel-brand-area h1 {
+    max-width: 210px;
+    font-size: 21px;
+  }
+
+  .hotel-brand-area p {
+    font-size: 8px;
+  }
+
+  .hotel-room-badge {
+    min-width: 80px;
+    padding: 9px 10px;
+  }
+
+  .hotel-room-badge strong {
+    font-size: 17px;
+  }
+
+  .hotel-welcome-area {
+    margin: 28px auto 30px;
+    padding: 0 18px;
+  }
+
+  .hotel-welcome-area h2 {
+    font-size: 24px;
+  }
+
+  .hotel-welcome-area p {
+    font-size: 13px;
+  }
+
+  .hotel-category-tabs {
+    padding: 0 18px;
+    gap: 26px;
+  }
+
+  .hotel-product-area {
+    padding: 20px 12px 8px;
+  }
+
+  .hotel-product-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .hotel-product-image {
+    height: 150px;
+  }
+
+  .hotel-product-info {
+    min-height: 72px;
+    padding: 11px 10px;
+  }
+
+  .hotel-product-info h3 {
+    font-size: 13px;
+  }
+
+  .hotel-product-info p {
+    font-size: 12px;
+  }
+
+  .hotel-add-button {
+    width: 32px !important;
+    min-width: 32px !important;
+    max-width: 32px !important;
+    height: 32px !important;
+    font-size: 20px !important;
+  }
+
+  .hotel-pick-card {
+    margin: 20px 12px 0;
+    padding: 20px 16px 22px;
+  }
+
+  .hotel-cart-total strong {
+    font-size: 22px;
+  }
+
+}
