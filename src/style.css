@@ -11961,3 +11961,54 @@ body.hotel-mode #merchant-card-tab:hover {
   }
 
 }
+/* =========================================
+   HOTEL 고객 메뉴 카테고리 정리
+========================================= */
+
+/* 금색 버튼 박스 제거 */
+body.hotel-mode .kiosk-category-tab {
+  min-width: auto !important;
+  height: 42px !important;
+
+  padding: 0 20px !important;
+
+  background: transparent !important;
+  background-color: transparent !important;
+
+  border: 0 !important;
+  border-radius: 0 !important;
+
+  color: #222222 !important;
+
+  box-shadow: none !important;
+
+  font-weight: 700 !important;
+}
+
+
+/* 선택된 카테고리도 박스 없이 밑줄만 */
+body.hotel-mode .kiosk-category-tab.active {
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: #222222 !important;
+
+  border-bottom: 3px solid #b7924f !important;
+}
+
+
+/* 터치/마우스 올렸을 때도 금색 박스 금지 */
+body.hotel-mode .kiosk-category-tab:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+
+  color: #9d7a3e !important;
+}
+
+
+/* 아래 ㅣ음료 제목 검은색 */
+body.hotel-mode .kiosk-category-title {
+  color: #111111 !important;
+
+  border-left: 6px solid #111111 !important;
+}
