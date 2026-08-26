@@ -12255,3 +12255,117 @@ button.hotel-category-tab.active {
 
   box-shadow: none !important;
 }
+/* =========================================
+   HOTEL 고객 요청사항
+========================================= */
+
+.hotel-customer-request {
+  margin: 18px 0 16px;
+}
+
+.hotel-customer-request label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+
+  color: #172231;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.hotel-customer-request label span {
+  color: #9b8d76;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.hotel-customer-request textarea {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 14px;
+
+  box-sizing: border-box;
+  resize: vertical;
+
+  border: 1px solid #ded8ce;
+  border-radius: 6px;
+  outline: none;
+
+  background: #faf9f6;
+  color: #172231;
+
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.hotel-customer-request textarea:focus {
+  border-color: #b7924f;
+  box-shadow: 0 0 0 2px rgba(183, 146, 79, 0.10);
+}
+
+@media (max-width: 640px) {
+  .hotel-customer-request {
+    margin: 14px 0 12px;
+  }
+
+  .hotel-customer-request textarea {
+    min-height: 64px;
+    font-size: 13px;
+  }
+}
+/* =========================================
+   HOTEL 주문 요청사항
+========================================= */
+
+.hotel-order-request {
+  margin-top: 8px;
+  padding: 8px 10px;
+  background: #faf7f0;
+  border-left: 3px solid #b7924f;
+  border-radius: 4px;
+  text-align: left;
+  line-height: 1.45;
+}
+
+.hotel-order-request strong {
+  display: block;
+  margin-bottom: 3px;
+  color: #9d7a3e;
+  font-size: 11px;
+}
+
+.hotel-order-request div {
+  color: #222;
+  font-size: 12px;
+  font-weight: 600;
+}
+/* HOTEL 모바일 주문 요청사항 */
+
+.hotel-mobile-order-request {
+  margin-top: 8px;
+  padding: 9px 10px;
+
+  background: #faf7f0;
+  border-left: 3px solid #b7924f;
+  border-radius: 4px;
+
+  line-height: 1.45;
+}
+
+.hotel-mobile-order-request strong {
+  display: block;
+  margin-bottom: 3px;
+
+  color: #9d7a3e;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.hotel-mobile-order-request div {
+  color: #222;
+  font-size: 12px;
+  font-weight: 600;
+}

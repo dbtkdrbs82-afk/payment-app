@@ -3042,6 +3042,11 @@ const hotelRoomNumber =
       )
     : ''
 
+    const hotelCustomerRequest =
+  source === 'hotel'
+    ? (sessionStorage.getItem('hotel_customer_request') || '')
+    : ''
+
 const merchantId =
   params.get('merchantId') || sessionStorage.getItem('merchantId')
 
@@ -3276,6 +3281,9 @@ payment_status: '결제완료',
   
             room_number:
               hotelRoomNumber,
+
+              customer_request:
+  hotelCustomerRequest || null,
   
             items:
               hotelItems,
@@ -3307,6 +3315,8 @@ payment_status: '결제완료',
         sessionStorage.removeItem(
           'hotel_room_number'
         )
+          sessionStorage.removeItem('hotel_customer_request')
+      
       }
     }
   }
@@ -15864,6 +15874,18 @@ if (merchantOrderCardList) {
       const hotelRoomNumber =
     order.room_number || '-'
 
+    const hotelCustomerRequest =
+  String(order.customer_request || '').trim()
+
+const hotelCustomerRequestHtml =
+  hotelCustomerRequest
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+    .replace(/\n/g, '<br>')
+
     const paymentForOrder =
     (merchantReceiptPayments || []).find((payment: any) => {
       const paymentOrderId =
@@ -16071,7 +16093,17 @@ if (merchantOrderCardList) {
     : ''
 ) +
 '</td>' +
-    '<td>' + orderItems + '</td>' +
+    '<td>' +
+  '<div>' + orderItems + '</div>' +
+  (
+    hotelCustomerRequestHtml
+      ? '<div class="hotel-order-request">' +
+          '<strong>요청사항</strong>' +
+          '<div>' + hotelCustomerRequestHtml + '</div>' +
+        '</div>'
+      : ''
+  ) +
+'</td>' +
     '<td>' + Number(order.total_amount || 0).toLocaleString() + '원</td>' +
     '<td>' +
   (
@@ -16251,10 +16283,19 @@ if (merchantOrderCardList) {
       
 
     '<div class="merchant-order-card-items">' +
-      orderItems +
-    '</div>' +
+  orderItems +
+'</div>' +
 
-    '<div class="merchant-order-card-status">' +
+(
+  isHotel && hotelCustomerRequestHtml
+    ? '<div class="hotel-mobile-order-request">' +
+        '<strong>요청사항</strong>' +
+        '<div>' + hotelCustomerRequestHtml + '</div>' +
+      '</div>'
+    : ''
+) +
+
+'<div class="merchant-order-card-status">' +
   (
     order.cancel_status === '취소요청'
   ? '<span class="order-status-cancel-request">취소요청</span>'
@@ -25614,6 +25655,19 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
                         0원
                       </strong>
                     </div>
+
+                    <div class="hotel-customer-request">
+  <label for="hotel-customer-request">
+    요청사항
+    <span>선택</span>
+  </label>
+
+  <textarea
+    id="hotel-customer-request"
+    maxlength="200"
+    placeholder="예: 수건 2개 더 부탁드립니다. / 문 앞에 놓아주세요."
+  ></textarea>
+</div>
         
                     <button
                       type="button"
@@ -25998,6 +26052,15 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
                       'hotel_items',
                       JSON.stringify(hotelCart)
                     )
+
+                    const hotelCustomerRequest =
+  document.querySelector<HTMLTextAreaElement>('#hotel-customer-request')
+    ?.value.trim() || ''
+
+sessionStorage.setItem(
+  'hotel_customer_request',
+  hotelCustomerRequest
+)
         
                     sessionStorage.setItem(
                       'message',
