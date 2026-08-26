@@ -11334,3 +11334,127 @@ body.hotel-mode #merchant-card-tab:hover {
   text-align: center;
   font-weight: 900;
 }
+/* =========================================
+   HOTEL 결제완료 화면
+========================================= */
+
+.hotel-success-page {
+  min-height: 100vh !important;
+
+  background:
+    linear-gradient(
+      rgba(20, 24, 30, 0.38),
+      rgba(20, 24, 30, 0.38)
+    ),
+    url('/hotel-success-bg.jpg') center center / cover no-repeat !important;
+}
+
+.hotel-success-card {
+  max-width: 430px !important;
+
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 1px solid #dcc89d !important;
+  border-radius: 24px !important;
+
+  box-shadow:
+    0 28px 70px rgba(0, 0, 0, 0.22) !important;
+
+  backdrop-filter: blur(4px);
+}
+
+.hotel-success-card h1 {
+  color: #15263d !important;
+}
+
+.hotel-success-room {
+  margin: 4px 0 22px !important;
+
+  color: #b7924f !important;
+
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  letter-spacing: 3px !important;
+
+  text-align: center !important;
+}
+
+.hotel-success-card .order-number-title {
+  color: #5e6774 !important;
+}
+
+.hotel-success-card .order-number-box {
+  color: #b7924f !important;
+}
+
+.hotel-success-message {
+  color: #6a7280 !important;
+  line-height: 1.8 !important;
+}
+
+.hotel-success-receipt-button {
+  background: #3a3027 !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.hotel-success-receipt-button:hover {
+  background: #4a3d32 !important;
+}
+
+.hotel-success-home-button {
+  background: #b7924f !important;
+  color: #ffffff !important;
+  border: none !important;
+}
+
+.hotel-success-home-button:hover {
+  background: #9d7a3e !important;
+}
+/* =========================================
+   HOTEL 결제완료 화면 위치 조정
+   PC : 왼쪽 배치 / 바다 전망 노출
+========================================= */
+
+.hotel-success-page {
+  justify-content: flex-start !important;
+  align-items: center !important;
+
+  padding-left: 7vw !important;
+  padding-right: 30px !important;
+
+  box-sizing: border-box !important;
+
+  background-position: center center !important;
+}
+
+.hotel-success-card {
+  width: 360px !important;
+  max-width: 360px !important;
+
+  margin: 0 !important;
+
+  background: rgba(255, 255, 255, 0.94) !important;
+
+  box-shadow:
+    0 24px 70px rgba(0, 0, 0, 0.25) !important;
+}
+
+
+/* 모바일에서는 다시 중앙 */
+
+@media (max-width: 768px) {
+
+  .hotel-success-page {
+    justify-content: center !important;
+
+    padding: 20px !important;
+
+    background-position: center center !important;
+  }
+
+  .hotel-success-card {
+    width: calc(100% - 20px) !important;
+    max-width: 390px !important;
+  }
+
+}

@@ -3280,35 +3280,76 @@ payment_status: '결제완료',
 }
 window.history.replaceState({}, '', '/success')
 
+const isHotelSuccess =
+  source === 'hotel'
+
+const successTitleHtml =
+  isHotelSuccess
+    ? '<span style="display:block;">결제가</span><span style="display:block;">완료되었습니다</span>'
+    : currentEventType === 'funeral'
+      ? '<span style="display:block;">명복을 빌어 주셔서</span><span style="display:block;">감사합니다.</span>'
+      : '<span style="display:block;">주문이</span><span style="display:block;">접수되었습니다</span>'
+
+const successRoomHtml =
+  isHotelSuccess
+    ? `
+      <p class="hotel-success-room">
+        ROOM ${hotelRoomNumber || '-'}
+      </p>
+    `
+    : ''
+
+const successGuideHtml =
+  isHotelSuccess
+    ? `
+      <p class="order-wait-message hotel-success-message">
+        객실 추가결제가 정상 접수되었습니다.<br>
+        요청하신 상품은 객실로 전달됩니다.
+      </p>
+    `
+    : `
+      <p class="order-wait-message">
+        고객 호출 시까지<br>
+        잠시만 기다려주세요.
+      </p>
+    `
+
   app.innerHTML = `
-    <div class="page">
-      <div class="payment-card">
-    
-      <h1>
-  ${
-    currentEventType === 'funeral'
-    ? '<span style="display:block;">명복을 빌어 주셔서</span><span style="display:block;">감사합니다.</span>'
-    : '<span style="display:block;">주문이</span><span style="display:block;">접수되었습니다</span>'
-  }
-</h1>
-        <p class="order-number-title">주문번호</p>
+    <div class="page ${isHotelSuccess ? 'hotel-success-page' : ''}">
+  <div class="payment-card ${isHotelSuccess ? 'hotel-success-card' : ''}">
 
-<div class="order-number-box">
-  ${nextOrderNumber}번
-</div>
+  <h1>
+    ${successTitleHtml}
+  </h1>
 
-<p class="order-wait-message">
-  고객 호출 시까지<br>
-  잠시만 기다려주세요.
-</p>
-<button id="receipt-view-btn" class="receipt-view-btn">
-  영수증 확인
-</button>
+  ${successRoomHtml}
+
+  <p class="order-number-title">
+    주문번호
+  </p>
+
+  <div class="order-number-box">
+    ${nextOrderNumber}번
+  </div>
+
+  ${successGuideHtml}
+
+  <button
+    id="receipt-view-btn"
+    class="receipt-view-btn ${isHotelSuccess ? 'hotel-success-receipt-button' : ''}"
+  >
+    영수증 확인
+  </button>
 
 <p class="payment-amount">
   결제금액 : ${Number(amount).toLocaleString()}원
 </p>
-        <button id="home-button">확인</button>
+        <button
+  id="home-button"
+  class="${isHotelSuccess ? 'hotel-success-home-button' : ''}"
+>
+  확인
+</button>
         
        <div id="receipt-modal" class="receipt-modal">
   <div class="receipt-box receipt-approve">
@@ -16240,7 +16281,7 @@ hotelCardCompleteButton
         )
     }
   )
-  
+
     const receiptButtons =
   document.querySelectorAll('.merchant-receipt-link')
 
