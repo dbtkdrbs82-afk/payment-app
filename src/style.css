@@ -11458,3 +11458,162 @@ body.hotel-mode #merchant-card-tab:hover {
   }
 
 }
+/* =========================================
+   HOTEL 결제완료 화면 카드 축소
+========================================= */
+
+/* PC */
+.hotel-success-card {
+  width: 350px !important;
+  max-width: 350px !important;
+
+  padding: 34px 26px 28px !important;
+  border-radius: 22px !important;
+}
+
+.hotel-success-card h1 {
+  margin: 0 0 18px !important;
+  font-size: 32px !important;
+  line-height: 1.25 !important;
+}
+
+.hotel-success-room {
+  margin: 0 0 18px !important;
+
+  font-size: 18px !important;
+  letter-spacing: 3px !important;
+}
+
+.hotel-success-card .order-number-title {
+  margin: 0 0 10px !important;
+  font-size: 14px !important;
+}
+
+.hotel-success-card .order-number-box {
+  margin: 0 0 18px !important;
+
+  font-size: 66px !important;
+  line-height: 1 !important;
+}
+
+.hotel-success-message {
+  margin: 0 0 22px !important;
+
+  font-size: 14px !important;
+  line-height: 1.7 !important;
+}
+
+.hotel-success-card .receipt-view-btn,
+.hotel-success-card #receipt-view-btn {
+  height: 52px !important;
+  margin: 0 0 18px !important;
+
+  font-size: 16px !important;
+  border-radius: 14px !important;
+}
+
+.hotel-success-card .payment-amount-text,
+.hotel-success-card .payment-amount {
+  margin: 0 0 20px !important;
+
+  font-size: 19px !important;
+  line-height: 1.4 !important;
+}
+
+.hotel-success-card #home-button,
+.hotel-success-home-button {
+  height: 50px !important;
+  font-size: 16px !important;
+  border-radius: 14px !important;
+}
+
+
+/* 모바일 */
+@media (max-width: 768px) {
+
+  .hotel-success-page {
+    padding: 16px !important;
+  }
+
+  .hotel-success-card {
+    width: 100% !important;
+    max-width: 320px !important;
+
+    padding: 28px 22px 24px !important;
+    border-radius: 20px !important;
+  }
+
+  .hotel-success-card h1 {
+    margin: 0 0 16px !important;
+    font-size: 28px !important;
+    line-height: 1.25 !important;
+  }
+
+  .hotel-success-room {
+    margin: 0 0 16px !important;
+
+    font-size: 16px !important;
+    letter-spacing: 3px !important;
+  }
+
+  .hotel-success-card .order-number-title {
+    margin: 0 0 8px !important;
+    font-size: 13px !important;
+  }
+
+  .hotel-success-card .order-number-box {
+    margin: 0 0 16px !important;
+
+    font-size: 58px !important;
+    line-height: 1 !important;
+  }
+
+  .hotel-success-message {
+    margin: 0 0 18px !important;
+
+    font-size: 13px !important;
+    line-height: 1.8 !important;
+  }
+
+  .hotel-success-card .receipt-view-btn,
+  .hotel-success-card #receipt-view-btn {
+    height: 50px !important;
+    margin: 0 0 16px !important;
+
+    font-size: 15px !important;
+    border-radius: 12px !important;
+  }
+
+  .hotel-success-card .payment-amount-text,
+  .hotel-success-card .payment-amount {
+    margin: 0 0 18px !important;
+
+    font-size: 17px !important;
+    line-height: 1.4 !important;
+  }
+
+  .hotel-success-card #home-button,
+  .hotel-success-home-button {
+    height: 48px !important;
+    font-size: 15px !important;
+    border-radius: 12px !important;
+  }
+}
+/* HOTEL 결제완료 영수증 버튼 골드 통일 */
+
+.hotel-success-card #receipt-view-btn,
+.hotel-success-card .receipt-view-btn,
+.hotel-success-receipt-button {
+  background: #b7924f !important;
+  background-color: #b7924f !important;
+  color: #ffffff !important;
+  border: 1px solid #b7924f !important;
+}
+
+.hotel-success-card #receipt-view-btn:hover,
+.hotel-success-card .receipt-view-btn:hover,
+.hotel-success-receipt-button:hover {
+  background: #9d7a3e !important;
+  background-color: #9d7a3e !important;
+  border-color: #9d7a3e !important;
+}
