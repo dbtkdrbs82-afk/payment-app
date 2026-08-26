@@ -12665,7 +12665,7 @@ if (tableHead) {
       '<th>승인일<br/>승인번호</th>' +
       '<th>취소일<br/>거래번호</th>' +
       '<th>가맹점아이디/구분<br/>가맹점상호/가맹점명</th>' +
-      '<th>매입사/구매자연락처<br/>구매상품/구매자 성함</th>' +
+      '<th>매입사</th>' +
       '<th>메모</th>' +
       '<th>카드번호<br/>할부구분</th>' +
       '<th>결제수단<br/>결제금액</th>' +
@@ -13069,25 +13069,6 @@ visiblePayments.forEach((payment, index) => {
     '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
     '<td>' +
   (payment.card_company || '-') +
-  ' / ' +
-  (
-    payment.buyer_phone ||
-    payment.phone ||
-    '-'
-  ) +
-  '<br/>' +
-  (
-    payment.order_name ||
-    payment.product_name ||
-    payment.message ||
-    '-'
-  ) +
-  ' / ' +
-  (
-    payment.sender_name ||
-    payment.buyer_name ||
-    '-'
-  ) +
 '</td>' +
 
 '<td>' +

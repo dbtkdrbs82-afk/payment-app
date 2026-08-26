@@ -252,8 +252,6 @@ if (
           sender_name:
   String(buyerName).trim(),
 
-buyer_phone:
-  ordHp || null,
 
 message:
   '아카데미 정기결제 / 청구ID ' +
