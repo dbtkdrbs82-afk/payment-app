@@ -9570,3 +9570,46 @@ and (orientation: landscape) {
   }
 
 }
+/* 일반매장 주문관리 상단 날짜검색 정렬 */
+.merchant-order-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.merchant-order-filter input[type="date"],
+.merchant-order-filter button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+/* 일반매장 상단 매출 필터 한 줄 정렬 */
+.merchant-sales-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+.merchant-sales-filter .sales-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.merchant-sales-filter .sales-filter-date-row {
+  margin: 0;
+}
+
+.merchant-sales-filter .date-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.merchant-sales-filter input[type="date"] {
+  margin: 0;
+}
+
+.merchant-sales-filter .quick-btn {
+  margin: 0;
+}
