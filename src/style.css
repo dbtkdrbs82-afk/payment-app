@@ -11232,3 +11232,31 @@ body.hotel-mode .merchant-card-payment-box:hover {
 .hotel-chrome-button:hover {
   background: var(--hotel-main-gold-hover) !important;
 }
+/* =========================================
+   HOTEL 주문관리 최종 골드 통일
+========================================= */
+
+body.hotel-mode:has(#merchant-hotel-room-tab)
+button:not(.merchant-setting-button) {
+  background: #b7924f !important;
+  color: #ffffff !important;
+  border-color: #b7924f !important;
+}
+
+body.hotel-mode:has(#merchant-hotel-room-tab)
+button:not(.merchant-setting-button):hover {
+  background: #9d7a3e !important;
+  color: #ffffff !important;
+  border-color: #9d7a3e !important;
+}
+
+
+/* 설정 톱니바퀴는 기존처럼 유지 */
+body.hotel-mode:has(#merchant-hotel-room-tab)
+.merchant-setting-button,
+body.hotel-mode:has(#merchant-hotel-room-tab)
+.merchant-setting-button:hover {
+  background: transparent !important;
+  color: #111111 !important;
+  border: 0 !important;
+}
