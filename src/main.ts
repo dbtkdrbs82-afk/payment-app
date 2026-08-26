@@ -3491,15 +3491,45 @@ const successGuideHtml =
 
   document.querySelector<HTMLButtonElement>('#home-button')!
   .addEventListener('click', () => {
+
     const merchantId =
       sessionStorage.getItem('merchantId') ||
       sessionStorage.getItem('kiosk_merchant_id')
 
-    if (merchantId) {
-      window.location.href = '/kiosk?merchant_id=' + merchantId
-    } else {
-      window.location.href = '/merchant-login'
+
+    /* 호텔 결제 후에는
+       해당 객실의 호텔 결제창으로 돌아가기 */
+    if (
+      source === 'hotel' &&
+      merchantId &&
+      hotelRoomNumber
+    ) {
+
+      window.location.href =
+        '/hotel?merchant_id=' +
+        merchantId +
+        '&room=' +
+        encodeURIComponent(
+          hotelRoomNumber
+        )
+
+      return
     }
+
+
+    /* 기존 일반매장 PICK */
+    if (merchantId) {
+
+      window.location.href =
+        '/kiosk?merchant_id=' +
+        merchantId
+
+      return
+    }
+
+
+    window.location.href =
+      '/merchant-login'
   })
   document.querySelector('#receipt-view-btn')
   ?.addEventListener('click', () => {
