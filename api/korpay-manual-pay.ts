@@ -250,11 +250,14 @@ if (
           payment_method: '수기결제',
 
           sender_name:
-            String(buyerName).trim(),
+  String(buyerName).trim(),
 
-          message:
-            '아카데미 정기결제 / 청구ID ' +
-            normalizedBillingIds.join(','),
+buyer_phone:
+  ordHp || null,
+
+message:
+  '아카데미 정기결제 / 청구ID ' +
+  normalizedBillingIds.join(','),
 
           approval_number:
             korpayData.APP_NO || null,
