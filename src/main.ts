@@ -14160,6 +14160,9 @@ const isAcademy =
 const isWirelessTerminal =
   merchantType === '무선단말기'
 
+  const isHotel =
+  merchantType === '호텔'
+
  
   let terminalPayments: any[] = []
 
@@ -14214,6 +14217,15 @@ if (isBeauty) {
     <button id="merchant-order-tab">주문관리</button>
     <button id="merchant-product-tab">상품관리</button>
     <button id="merchant-qr-tab">PICK QR</button>
+    <button id="merchant-card-tab">카드결제</button>
+  `
+
+  merchantContent = ''
+
+} else if (isHotel) {
+  merchantMenu = `
+    <button id="merchant-order-tab">주문/결제내역</button>
+    <button id="merchant-product-tab">상품관리</button>
     <button id="merchant-card-tab">카드결제</button>
   `
 
@@ -14984,7 +14996,7 @@ const channel = supabase
 <div class="merchant-toolbar">
   ${merchantMenu}
 
-  ${(isNormalStore || isBeauty) ? `
+  ${(isNormalStore || isBeauty || isHotel) ? `
     <span class="toolbar-divider"></span>
     <button class="order-filter-btn" data-status="전체">전체</button>
     <button class="order-filter-btn" data-status="준비중">준비중</button>
@@ -14995,7 +15007,7 @@ const channel = supabase
 
 ${merchantContent}
 
-<div class="merchant-sales-filter ${(isNormalStore || isBeauty) ? '' : 'hide-for-type'}">
+<div class="merchant-sales-filter ${(isNormalStore || isBeauty || isHotel) ? '' : 'hide-for-type'}">
   <div class="sales-filter-row sales-filter-button-row">
     <button id="sales-today" class="quick-btn">오늘</button>
     <button id="sales-month" class="quick-btn">이번달</button>
@@ -15016,7 +15028,7 @@ ${merchantContent}
 </div>
 
 
-  <div class="merchant-sales-summary ${(isNormalStore || isBeauty) ? '' : 'hide-for-type'}">
+  <div class="merchant-sales-summary ${(isNormalStore || isBeauty || isHotel) ? '' : 'hide-for-type'}">
   <div>
     <strong>주문수</strong>
     <span>${(orders || []).length}건</span>
@@ -15106,7 +15118,7 @@ ${isBeauty ? `
   </div>
 ` : ''}
 
-  <div class="order-bottom-toolbar ${(isNormalStore || isBeauty) && !isAcademy ? '' : 'hide-for-type'}">
+  <div class="order-bottom-toolbar ${(isNormalStore || isBeauty || isHotel) && !isAcademy ? '' : 'hide-for-type'}">
 
    <select id="merchant-page-size">
     <option value="10">10개씩 보기</option>
