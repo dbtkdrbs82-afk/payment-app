@@ -13069,7 +13069,7 @@ visiblePayments.forEach((payment, index) => {
     '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
     '<td>' +
   (payment.card_company || '-') +
-  '<br/>' +
+  ' / ' +
   (
     payment.buyer_phone ||
     payment.phone ||
@@ -13079,9 +13079,10 @@ visiblePayments.forEach((payment, index) => {
   (
     payment.order_name ||
     payment.product_name ||
+    payment.message ||
     '-'
   ) +
-  '<br/>' +
+  ' / ' +
   (
     payment.sender_name ||
     payment.buyer_name ||
