@@ -1982,6 +1982,8 @@ branch_admin_id: matchedBranch?.id || null,
 branch_admin_name: matchedBranch?.admin_name || '',
     owner_name: (document.getElementById('apply-owner-name') as HTMLInputElement)?.value || '',
     phone: (document.getElementById('apply-phone') as HTMLInputElement)?.value || '',
+    company_type:
+  (document.getElementById('apply-business-type') as HTMLSelectElement)?.value || '',
 
     business_number: (document.getElementById('apply-business-number') as HTMLInputElement)?.value || '',
     resident_number: (document.getElementById('apply-resident-number') as HTMLInputElement)?.value || '',
@@ -2024,14 +2026,217 @@ memo: (document.getElementById('apply-memo') as HTMLTextAreaElement)?.value || '
     status: '신청'
   }
 
-  const { error } = await supabase
+  const {
+    data: createdMerchant,
+    error
+  } = await supabase
     .from('merchants')
     .insert([insertData])
-
-  if (error) {
-    alert('신청 실패 : ' + error.message)
+    .select(`
+      id,
+      merchant_name,
+      owner_name,
+      phone,
+      email,
+      company_type,
+      business_number,
+      bank_name,
+      account_number,
+      account_holder
+    `)
+    .single()
+  
+  if (error || !createdMerchant) {
+    alert(
+      '신청 실패 : ' +
+      (error?.message || '가맹점 정보를 확인할 수 없습니다.')
+    )
     return
   }
+  
+  const tossRefSellerId =
+    'MER' +
+    String(createdMerchant.id).padStart(4, '0')
+
+    const tossBusinessType =
+  createdMerchant.company_type === '일반(비사업자)'
+    ? 'INDIVIDUAL'
+    : createdMerchant.company_type === '개인사업자'
+      ? 'INDIVIDUAL_BUSINESS'
+      : createdMerchant.company_type === '법인사업자'
+        ? 'CORPORATE'
+        : ''
+
+const normalizedBankName =
+  String(createdMerchant.bank_name || '')
+    .replace(/\s/g, '')
+    .replace(/은행/g, '')
+
+const tossBankCodeMap: Record<string, string> = {
+  경남: '39',
+  광주: '34',
+  단위농협: '12',
+  지역농협: '12',
+  부산: '32',
+  새마을금고: '45',
+  산림조합: '64',
+  신한: '88',
+  신협: '48',
+  씨티: '27',
+  우리: '20',
+  우체국: '71',
+  저축: '50',
+  전북: '37',
+  제주: '35',
+  카카오뱅크: '90',
+  카카오: '90',
+  케이뱅크: '89',
+  케이: '89',
+  토스뱅크: '92',
+  토스: '92',
+  하나: '81',
+  기업: '03',
+  IBK기업: '03',
+  국민: '06',
+  KB국민: '06',
+  대구: '31',
+  iM뱅크: '31',
+  산업: '02',
+  농협: '11',
+  NH농협: '11',
+  SC제일: '23',
+  수협: '07'
+}
+
+const tossBankCode =
+  tossBankCodeMap[normalizedBankName] || ''
+
+if (!tossBusinessType) {
+  alert('토스 셀러 등록용 사업자유형을 확인해주세요.')
+  return
+}
+
+if (!tossBankCode) {
+  alert(
+    '토스 셀러 등록용 은행코드를 확인할 수 없습니다.\n' +
+    '입력은행: ' +
+    createdMerchant.bank_name
+  )
+  return
+}
+
+const cleanPhone =
+  String(createdMerchant.phone || '')
+    .replace(/\D/g, '')
+
+const cleanBusinessNumber =
+  String(createdMerchant.business_number || '')
+    .replace(/\D/g, '')
+
+const cleanAccountNumber =
+  String(createdMerchant.account_number || '')
+    .replace(/\D/g, '')
+
+const tossSellerBody: any = {
+  refSellerId: tossRefSellerId,
+
+  businessType:
+    tossBusinessType,
+
+  account: {
+    bankCode:
+      tossBankCode,
+
+    accountNumber:
+      cleanAccountNumber,
+
+    holderName:
+      createdMerchant.account_holder
+  },
+
+  metadata: {
+    nxgMerchantId:
+      String(createdMerchant.id)
+  }
+}
+
+if (tossBusinessType === 'INDIVIDUAL') {
+
+  tossSellerBody.individual = {
+    name:
+      createdMerchant.owner_name,
+
+    email:
+      createdMerchant.email,
+
+    phone:
+      cleanPhone
+  }
+
+} else {
+
+  tossSellerBody.company = {
+    name:
+      createdMerchant.merchant_name,
+
+    representativeName:
+      createdMerchant.owner_name,
+
+    businessRegistrationNumber:
+      cleanBusinessNumber,
+
+    email:
+      createdMerchant.email,
+
+    phone:
+      cleanPhone
+  }
+}
+
+const tossSellerResponse =
+  await fetch(
+    '/api/toss-seller-create',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type':
+          'application/json'
+      },
+      body:
+        JSON.stringify(
+          tossSellerBody
+        )
+    }
+  )
+
+const tossSellerResult =
+  await tossSellerResponse.json()
+
+if (
+  !tossSellerResponse.ok ||
+  !tossSellerResult.success
+) {
+  alert(
+    'NXG 가입신청은 저장되었습니다.\n\n' +
+    '다만 토스 셀러 등록에 실패했습니다.\n' +
+    (
+      tossSellerResult?.data?.message ||
+      tossSellerResult?.message ||
+      '토스 셀러 등록정보를 확인해주세요.'
+    )
+  )
+
+  return
+}
+
+alert(
+  '가입신청이 완료되었습니다.\n\n' +
+  '토스 본인인증 안내가 발송됩니다.\n' +
+  '휴대폰에서 본인인증을 완료해주세요.'
+)
+
+location.href =
+  '/merchant-login'
 
   alert('가입신청이 완료되었습니다.')
 
