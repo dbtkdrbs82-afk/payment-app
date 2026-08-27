@@ -25407,12 +25407,94 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
         
           const roomNumber =
             (hotelParams.get('room') || '').trim()
+
+            const browserLanguage =
+            (
+              navigator.languages?.[0] ||
+              navigator.language ||
+              'ko'
+            ).toLowerCase()
+          
+          const testLanguage =
+            (hotelParams.get('lang') || '').toLowerCase()
+          
+          const hotelLanguage =
+            testLanguage === 'en' ||
+            testLanguage === 'ja' ||
+            testLanguage === 'zh' ||
+            testLanguage === 'ko'
+              ? testLanguage
+              : browserLanguage.startsWith('ja')
+                ? 'ja'
+                : browserLanguage.startsWith('zh')
+                  ? 'zh'
+                  : browserLanguage.startsWith('en')
+                    ? 'en'
+                    : 'ko'
+
+const hotelText = {
+  ko: {
+    hotelNotFound: '호텔 정보를 찾을 수 없습니다.',
+    welcomeTitle: '${hotelText.welcomeTitle}',
+    welcomeMessage:
+      '${hotelText.welcomeMessage}',
+    pick: 'PICK',
+    totalAmount: '${hotelText.totalAmount}',
+    request: '요청사항',
+    optional: '선택',
+    requestPlaceholder:
+      '예: 수건 2개 더 부탁드립니다. / 문 앞에 놓아주세요.',
+    pay: '${hotelText.pay}'
+  },
+
+  en: {
+    hotelNotFound: 'Hotel information could not be found.',
+    welcomeTitle: 'Enjoying your stay?',
+    welcomeMessage:
+      'Order and pay for the items and services you need.',
+    pick: 'PICK',
+    totalAmount: 'Total',
+    request: 'Request',
+    optional: 'Optional',
+    requestPlaceholder:
+      'e.g. Please bring two extra towels. / Please leave it at the door.',
+    pay: 'Pay Now'
+  },
+
+  ja: {
+    hotelNotFound: 'ホテル情報が見つかりません。',
+    welcomeTitle: '快適にお過ごしでしょうか？',
+    welcomeMessage:
+      '必要な商品やサービスを簡単に注文・決済できます。',
+    pick: 'PICK',
+    totalAmount: 'お支払い金額',
+    request: 'ご要望',
+    optional: '任意',
+    requestPlaceholder:
+      '例：タオルを2枚追加してください。 / ドアの前に置いてください。',
+    pay: 'お支払い'
+  },
+
+  zh: {
+    hotelNotFound: '找不到酒店信息。',
+    welcomeTitle: '祝您入住愉快',
+    welcomeMessage:
+      '您可以轻松订购并支付所需的商品和服务。',
+    pick: 'PICK',
+    totalAmount: '支付金额',
+    request: '备注',
+    optional: '选填',
+    requestPlaceholder:
+      '例如：请再送两条毛巾。/ 请放在门口。',
+    pay: '立即支付'
+  }
+}[hotelLanguage]
         
           if (!merchantId) {
             app.innerHTML = `
               <div class="hotel-shop-page">
                 <div class="hotel-error-card">
-                  호텔 정보를 찾을 수 없습니다.
+                ${hotelText.hotelNotFound}
                 </div>
               </div>
             `
@@ -25674,15 +25756,15 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
 
                     <div class="hotel-customer-request">
   <label for="hotel-customer-request">
-    요청사항
-    <span>선택</span>
-  </label>
+  ${hotelText.request}
+  <span>${hotelText.optional}</span>
+</label>
 
-  <textarea
-    id="hotel-customer-request"
-    maxlength="200"
-    placeholder="예: 수건 2개 더 부탁드립니다. / 문 앞에 놓아주세요."
-  ></textarea>
+<textarea
+  id="hotel-customer-request"
+  maxlength="200"
+  placeholder="${hotelText.requestPlaceholder}"
+></textarea>
 </div>
         
                     <button
