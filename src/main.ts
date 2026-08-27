@@ -25432,63 +25432,67 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
                     ? 'en'
                     : 'ko'
 
-const hotelText = {
-  ko: {
-    hotelNotFound: '호텔 정보를 찾을 수 없습니다.',
-    welcomeTitle: '${hotelText.welcomeTitle}',
-    welcomeMessage:
-      '${hotelText.welcomeMessage}',
-    pick: 'PICK',
-    totalAmount: '${hotelText.totalAmount}',
-    request: '요청사항',
-    optional: '선택',
-    requestPlaceholder:
-      '예: 수건 2개 더 부탁드립니다. / 문 앞에 놓아주세요.',
-    pay: '${hotelText.pay}'
-  },
-
-  en: {
-    hotelNotFound: 'Hotel information could not be found.',
-    welcomeTitle: 'Enjoying your stay?',
-    welcomeMessage:
-      'Order and pay for the items and services you need.',
-    pick: 'PICK',
-    totalAmount: 'Total',
-    request: 'Request',
-    optional: 'Optional',
-    requestPlaceholder:
-      'e.g. Please bring two extra towels. / Please leave it at the door.',
-    pay: 'Pay Now'
-  },
-
-  ja: {
-    hotelNotFound: 'ホテル情報が見つかりません。',
-    welcomeTitle: '快適にお過ごしでしょうか？',
-    welcomeMessage:
-      '必要な商品やサービスを簡単に注文・決済できます。',
-    pick: 'PICK',
-    totalAmount: 'お支払い金額',
-    request: 'ご要望',
-    optional: '任意',
-    requestPlaceholder:
-      '例：タオルを2枚追加してください。 / ドアの前に置いてください。',
-    pay: 'お支払い'
-  },
-
-  zh: {
-    hotelNotFound: '找不到酒店信息。',
-    welcomeTitle: '祝您入住愉快',
-    welcomeMessage:
-      '您可以轻松订购并支付所需的商品和服务。',
-    pick: 'PICK',
-    totalAmount: '支付金额',
-    request: '备注',
-    optional: '选填',
-    requestPlaceholder:
-      '例如：请再送两条毛巾。/ 请放在门口。',
-    pay: '立即支付'
-  }
-}[hotelLanguage]
+                    const hotelText = {
+                      ko: {
+                        hotelNotFound: '호텔 정보를 찾을 수 없습니다.',
+                        welcomeTitle: '편안한 시간을 보내고 계신가요?',
+                        welcomeMessage:
+                          '객실에서 필요한 상품과 서비스를 간편하게 주문하고 결제하실 수 있습니다.',
+                        pick: 'PICK',
+                        cartEmpty: '상품을 선택해주세요.',
+                        totalAmount: '총 결제금액',
+                        request: '요청사항',
+                        optional: '선택',
+                        requestPlaceholder:
+                          '예: 수건 2개 더 부탁드립니다. / 문 앞에 놓아주세요.',
+                        pay: '결제하기'
+                      },
+                    
+                      en: {
+                        hotelNotFound: 'Hotel information could not be found.',
+                        welcomeTitle: 'Enjoying your stay?',
+                        welcomeMessage:
+                          'Order and pay for the items and services you need.',
+                        pick: 'PICK',
+                        cartEmpty: 'Please select an item.',
+                        totalAmount: 'Total',
+                        request: 'Request',
+                        optional: 'Optional',
+                        requestPlaceholder:
+                          'e.g. Please bring two extra towels. / Please leave it at the door.',
+                        pay: 'Pay Now'
+                      },
+                    
+                      ja: {
+                        hotelNotFound: 'ホテル情報が見つかりません。',
+                        welcomeTitle: '快適にお過ごしでしょうか？',
+                        welcomeMessage:
+                          '必要な商品やサービスを簡単に注文・決済できます。',
+                        pick: 'PICK',
+                        cartEmpty: '商品を選択してください。',
+                        totalAmount: 'お支払い金額',
+                        request: 'ご要望',
+                        optional: '任意',
+                        requestPlaceholder:
+                          '例：タオルを2枚追加してください。 / ドアの前に置いてください。',
+                        pay: 'お支払い'
+                      },
+                    
+                      zh: {
+                        hotelNotFound: '找不到酒店信息。',
+                        welcomeTitle: '祝您入住愉快',
+                        welcomeMessage:
+                          '您可以轻松订购并支付所需的商品和服务。',
+                        pick: 'PICK',
+                        cartEmpty: '请选择商品。',
+                        totalAmount: '支付金额',
+                        request: '备注',
+                        optional: '选填',
+                        requestPlaceholder:
+                          '例如：请再送两条毛巾。/ 请放在门口。',
+                        pay: '立即支付'
+                      }
+                    }[hotelLanguage]
         
           if (!merchantId) {
             app.innerHTML = `
@@ -25599,12 +25603,11 @@ const hotelText = {
                     </div>
         
                     <h2>
-                      편안한 시간을 보내고 계신가요?
+                    ${hotelText.welcomeTitle}
                     </h2>
         
                     <p>
-                      객실에서 필요한 상품과 서비스를<br>
-                      간편하게 주문하고 결제하실 수 있습니다.
+                    ${hotelText.welcomeMessage}
                     </p>
         
                   </section>
@@ -25741,13 +25744,13 @@ const hotelText = {
                     </div>
         
                     <div id="hotel-cart-items">
-                      <div class="hotel-cart-empty">
-                        상품을 선택해주세요.
-                      </div>
-                    </div>
+  <div class="hotel-cart-empty">
+    ${hotelText.cartEmpty}
+  </div>
+</div>
         
                     <div class="hotel-cart-total">
-                      <span>총 결제금액</span>
+                      <span>${hotelText.totalAmount}</span>
         
                       <strong id="hotel-total-price">
                         0원
@@ -25772,7 +25775,7 @@ const hotelText = {
                       id="hotel-pay-button"
                       class="hotel-pay-button"
                     >
-                      결제하기
+                    ${hotelText.pay}
                     </button>
         
                   </section>
