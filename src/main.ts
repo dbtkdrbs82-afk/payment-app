@@ -13657,11 +13657,11 @@ document.querySelectorAll('.payment-cancel-link')
 
       isPaymentCancelProcessing = true
 
-document.querySelectorAll<HTMLElement>('.payment-cancel-link')
-  .forEach((cancelButton) => {
-    cancelButton.style.pointerEvents = 'none'
-    cancelButton.style.opacity = '0.5'
-  })
+const currentCancelButton =
+  button as HTMLElement
+
+currentCancelButton.style.pointerEvents = 'none'
+currentCancelButton.style.opacity = '0.5'
 
       const { data: payment, error: paymentError } = await supabase
         .from('payments')
