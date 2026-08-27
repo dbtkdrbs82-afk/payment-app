@@ -16153,14 +16153,17 @@ const hotelCustomerRequestHtml =
         '</td>' +
     
         '<td>' +
-          (
-            order.order_status === '완료'
-              ? '완료'
-              : '<button class="order-complete-button" data-id="' +
-                  order.id +
-                '">완료처리</button>'
-          ) +
-        '</td>'
+  (
+    order.cancel_status === '취소완료' ||
+    order.order_status === '취소완료'
+      ? '취소완료'
+      : order.order_status === '완료'
+        ? '완료'
+        : '<button class="order-complete-button" data-id="' +
+            order.id +
+          '">완료처리</button>'
+  ) +
+'</td>'
     
     } else {
 
