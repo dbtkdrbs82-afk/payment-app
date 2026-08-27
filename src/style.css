@@ -9606,8 +9606,8 @@ and (orientation: landscape) {
     linear-gradient(
       180deg,
       #0b1420 0,
-      #101c2a 360px,
-      #f4f1eb 360px,
+      #101c2a 315px,
+      #f4f1eb 315px,
       #f4f1eb 100%
     );
   color: #17202b;
