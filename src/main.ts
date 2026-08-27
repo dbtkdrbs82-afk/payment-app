@@ -13636,7 +13636,6 @@ if (payment.status === 'cancel') {
 paymentTableBody.appendChild(tr)
 })
 
-let isPaymentCancelProcessing = false
 
 document.querySelectorAll('.payment-cancel-link')
   .forEach((button) => {
@@ -13644,10 +13643,7 @@ document.querySelectorAll('.payment-cancel-link')
       event.preventDefault()
       event.stopPropagation()
 
-      if (isPaymentCancelProcessing) {
-        alert('취소 처리가 진행 중입니다. 잠시 후 다시 시도해주세요.')
-        return
-      }
+      
 
       const paymentId = Number((button as HTMLElement).dataset.id)
 
@@ -13655,7 +13651,7 @@ document.querySelectorAll('.payment-cancel-link')
         return
       }
 
-      isPaymentCancelProcessing = true
+      
 
 const currentCancelButton =
   button as HTMLElement
