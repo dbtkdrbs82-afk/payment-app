@@ -12369,3 +12369,157 @@ button.hotel-category-tab.active {
   font-size: 12px;
   font-weight: 600;
 }
+/* =========================================
+   HOTEL 크롬 연결 안내 화면
+========================================= */
+
+.hotel-chrome-page {
+  width: 100% !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+
+  margin: 0 !important;
+  padding: 24px !important;
+  box-sizing: border-box !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  background: #f4f1eb !important;
+
+  transform: none !important;
+  zoom: 1 !important;
+}
+
+.hotel-chrome-card {
+  width: 360px !important;
+  max-width: calc(100vw - 40px) !important;
+
+  margin: 0 auto !important;
+  padding: 30px 24px 24px !important;
+  box-sizing: border-box !important;
+
+  background: #ffffff !important;
+  border: 1px solid #ded8ce !important;
+  border-radius: 12px !important;
+
+  box-shadow: 0 16px 45px rgba(20, 28, 38, 0.12) !important;
+
+  text-align: center !important;
+
+  transform: none !important;
+  zoom: 1 !important;
+}
+
+.hotel-chrome-brand {
+  margin-bottom: 8px !important;
+
+  color: #b7924f !important;
+
+  font-size: 11px !important;
+  font-weight: 800 !important;
+  letter-spacing: 3px !important;
+}
+
+.hotel-chrome-room {
+  margin-bottom: 24px !important;
+
+  color: #172331 !important;
+
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: 2px !important;
+}
+
+.hotel-chrome-card h1 {
+  margin: 0 0 14px !important;
+
+  color: #172331 !important;
+
+  font-size: 26px !important;
+  font-weight: 800 !important;
+}
+
+.hotel-chrome-card p {
+  margin: 0 0 24px !important;
+
+  color: #5f6770 !important;
+
+  font-size: 15px !important;
+  line-height: 1.7 !important;
+}
+
+.hotel-chrome-icon {
+  width: 82px !important;
+  height: 82px !important;
+
+  margin: 0 auto 26px !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  border: 2px solid #d8c39a !important;
+  border-radius: 50% !important;
+
+  color: #172331 !important;
+
+  font-size: 13px !important;
+  font-weight: 800 !important;
+}
+
+.hotel-chrome-button {
+  width: 100% !important;
+  height: 52px !important;
+
+  margin: 0 !important;
+  padding: 0 !important;
+
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  box-sizing: border-box !important;
+
+  border: 0 !important;
+  border-radius: 6px !important;
+
+  background: #b7924f !important;
+  color: #ffffff !important;
+
+  font-size: 16px !important;
+  font-weight: 800 !important;
+
+  text-decoration: none !important;
+}
+
+
+/* 모바일 */
+
+@media (max-width: 640px) {
+
+  .hotel-chrome-page {
+    padding: 20px !important;
+  }
+
+  .hotel-chrome-card {
+    width: 100% !important;
+    max-width: 360px !important;
+
+    padding: 28px 22px 22px !important;
+  }
+
+  .hotel-chrome-card h1 {
+    font-size: 25px !important;
+  }
+
+  .hotel-chrome-card p {
+    font-size: 14px !important;
+  }
+
+  .hotel-chrome-button {
+    height: 52px !important;
+    font-size: 15px !important;
+  }
+}
