@@ -8375,6 +8375,52 @@ and (orientation: landscape) {
   box-sizing: border-box;
 }
 
+/* 정산 카드 2개 */
+
+.academy-settlement-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 14px;
+
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.academy-settlement-grid .academy-card {
+  min-width: 0;
+
+  padding: 24px 18px;
+
+  border: 1px solid #dfe6ef;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.academy-settlement-grid .academy-card span {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #526173;
+
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.academy-settlement-grid .academy-card strong {
+  display: block;
+
+  color: #173f73;
+
+  font-size: 28px;
+  font-weight: 800;
+}
 
 /* 6개 카드 */
 .batch-dashboard-grid {

@@ -15024,7 +15024,89 @@ const terminalPagedPayments =
       memberDashboardBillingError
     )
   }
+  
+  /* =========================
+   아카데미 정산 조회
+========================= */
 
+const {
+  data: memberDashboardPayments,
+  error: memberDashboardPaymentError
+} = await supabase
+  .from('payments')
+  .select(
+    'id, merchant_id, status, created_at, settlement_amount, payout_status'
+  )
+  .eq('merchant_id', merchantId)
+
+if (memberDashboardPaymentError) {
+  console.error(
+    '아카데미 정산 현황 조회 실패:',
+    memberDashboardPaymentError
+  )
+}
+
+const allAcademyPayments =
+  memberDashboardPayments || []
+
+const filteredAcademyPayments =
+  allAcademyPayments.filter((payment) => {
+
+    const paymentDate =
+      String(payment.created_at || '').slice(0, 10)
+
+    if (!paymentDate) {
+      return false
+    }
+
+    if (
+      paymentDate < selectedStartDate ||
+      paymentDate > selectedEndDate
+    ) {
+      return false
+    }
+
+    if (payment.status === 'cancel') {
+      return false
+    }
+
+    return true
+  })
+
+const settlementPendingAmount =
+  filteredAcademyPayments.reduce(
+    (sum, payment) => {
+
+      if (
+        payment.payout_status === '출금완료' ||
+        payment.payout_status === '지급정지'
+      ) {
+        return sum
+      }
+
+      return (
+        sum +
+        Number(payment.settlement_amount || 0)
+      )
+    },
+    0
+  )
+
+const settlementCompletedAmount =
+  filteredAcademyPayments.reduce(
+    (sum, payment) => {
+
+      if (payment.payout_status !== '출금완료') {
+        return sum
+      }
+
+      return (
+        sum +
+        Number(payment.settlement_amount || 0)
+      )
+    },
+    0
+  )
 
   const allMembers =
     memberDashboardMembers || []
@@ -15131,6 +15213,24 @@ const newMemberCount =
 
   merchantContent = `
     <div class="merchant-type-ready-box batch-home-dashboard">
+
+    <div class="academy-settlement-grid">
+
+  <div class="academy-card academy-settlement-card">
+    <span>정산 예정 금액</span>
+    <strong>
+      ${settlementPendingAmount.toLocaleString()}원
+    </strong>
+  </div>
+
+  <div class="academy-card academy-settlement-card">
+    <span>정산 완료 금액</span>
+    <strong>
+      ${settlementCompletedAmount.toLocaleString()}원
+    </strong>
+  </div>
+
+</div>
 
       <div class="academy-dashboard batch-dashboard-grid">
 
