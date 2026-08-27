@@ -11220,12 +11220,12 @@ const merchantId = rawMerchantId.startsWith('MER')
         }
 
         const { error: updateError } = await supabase
-          .from('payments')
-          .update({
-            payout_status: '출금처리중',
-            payout_time: new Date().toISOString()
-          })
-          .in('id', paymentIds)
+  .from('payments')
+  .update({
+    payout_status: '출금완료',
+    payout_time: new Date().toISOString()
+  })
+  .in('id', paymentIds)
 
         if (updateError) {
           alert(
@@ -11236,14 +11236,13 @@ const merchantId = rawMerchantId.startsWith('MER')
         }
 
         alert(
-          '토스 지급 요청이 전송되었습니다.\n\n' +
+          '출금완료 처리되었습니다.\n\n' +
             '가맹점: ' +
             merchantName +
             '\n' +
             '지급금액: ' +
             payoutAmount.toLocaleString() +
-            '원\n\n' +
-            '실제 입금 완료까지 시간이 걸릴 수 있습니다.'
+            '원'
         )
 
         location.reload()
