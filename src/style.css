@@ -12495,31 +12495,66 @@ button.hotel-category-tab.active {
 }
 
 
-/* 모바일 */
+/* =========================================
+   HOTEL 크롬 연결 모바일 강제 확대
+   QR 스캔 브라우저의 PC형 viewport 대응
+========================================= */
 
-@media (max-width: 640px) {
+@media (hover: none) and (pointer: coarse) {
 
   .hotel-chrome-page {
-    padding: 20px !important;
+    width: 100vw !important;
+    min-height: 100vh !important;
+    padding: 5vw !important;
+    box-sizing: border-box !important;
   }
 
   .hotel-chrome-card {
-    width: 100% !important;
-    max-width: 360px !important;
+    width: 88vw !important;
+    max-width: none !important;
 
-    padding: 28px 22px 22px !important;
+    margin: 0 auto !important;
+    padding: 8vw 6vw 6vw !important;
+
+    border-radius: 4vw !important;
+  }
+
+  .hotel-chrome-brand {
+    margin-bottom: 2vw !important;
+    font-size: 3vw !important;
+    letter-spacing: 1vw !important;
+  }
+
+  .hotel-chrome-room {
+    margin-bottom: 6vw !important;
+    font-size: 4vw !important;
   }
 
   .hotel-chrome-card h1 {
-    font-size: 25px !important;
+    margin-bottom: 4vw !important;
+    font-size: 7vw !important;
   }
 
   .hotel-chrome-card p {
-    font-size: 14px !important;
+    margin-bottom: 6vw !important;
+    font-size: 4vw !important;
+    line-height: 1.65 !important;
+  }
+
+  .hotel-chrome-icon {
+    width: 22vw !important;
+    height: 22vw !important;
+
+    margin: 0 auto 7vw !important;
+
+    font-size: 3.5vw !important;
   }
 
   .hotel-chrome-button {
-    height: 52px !important;
-    font-size: 15px !important;
+    width: 100% !important;
+    height: 14vw !important;
+
+    font-size: 4vw !important;
+    border-radius: 2vw !important;
   }
 }
