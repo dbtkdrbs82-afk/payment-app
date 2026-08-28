@@ -14735,46 +14735,240 @@ const averageAmount =
     ? Math.floor(totalSales / (orders || []).length)
     : 0
 
-    let settlementQuery = supabase
-  .from('payments')
-  .select('settlement_amount,payout_status,created_at')
-  .eq('merchant_id', merchantId)
-
-if (startDate && endDate) {
-  settlementQuery = settlementQuery
-    .gte('created_at', startDate + 'T00:00:00')
-    .lte('created_at', endDate + 'T23:59:59')
-}
-
-const {
-  data: settlementPayments,
-  error: settlementError
-} = await settlementQuery
-
-if (settlementError) {
-  console.error(
-    '정산예정금액 조회 실패:',
-    settlementError
-  )
-}
-
-const settlementAmount =
-  (settlementPayments || []).reduce(
-    (sum, payment) => {
-      return (
-        sum +
-        Number(payment.settlement_amount || 0)
+    const {
+      data: settlementMerchant,
+      error: settlementMerchantError
+    } = await supabase
+      .from('merchants')
+      .select('settlement_cycle')
+      .eq('id', merchantId)
+      .single()
+    
+    if (settlementMerchantError) {
+      console.error(
+        '정산주기 조회 실패:',
+        settlementMerchantError
       )
-    },
-    0
-  )
-
-const settlementComplete =
-  (settlementPayments || []).length > 0 &&
-  (settlementPayments || []).every(
-    (payment) =>
-      payment.payout_status === '출금완료'
-  )
+    }
+    
+    const settlementCycle =
+      String(
+        settlementMerchant?.settlement_cycle ||
+        '1일'
+      )
+    
+    const {
+      data: settlementHolidayData,
+      error: settlementHolidayError
+    } = await supabase
+      .from('holidays')
+      .select('holiday_date')
+    
+    if (settlementHolidayError) {
+      console.error(
+        '공휴일 조회 실패:',
+        settlementHolidayError
+      )
+    }
+    
+    const settlementHolidaySet =
+      new Set(
+        (settlementHolidayData || [])
+          .map((holiday: any) =>
+            String(holiday.holiday_date)
+          )
+      )
+    
+    const formatSettlementDate =
+      (date: Date) => {
+    
+        const year =
+          date.getFullYear()
+    
+        const month =
+          String(
+            date.getMonth() + 1
+          ).padStart(2, '0')
+    
+        const day =
+          String(
+            date.getDate()
+          ).padStart(2, '0')
+    
+        return `${year}-${month}-${day}`
+      }
+    
+    const getSettlementPayoutDate =
+      (createdAt: string) => {
+    
+        const payoutDate =
+          new Date(createdAt)
+    
+        const cycleNumberMatch =
+          settlementCycle.match(/\d+/)
+    
+        const cycleDays =
+          cycleNumberMatch
+            ? Number(cycleNumberMatch[0])
+            : 1
+    
+        /* 0일 정산 */
+        if (cycleDays === 0) {
+    
+          while (true) {
+    
+            const dateText =
+              formatSettlementDate(
+                payoutDate
+              )
+    
+            const dayOfWeek =
+              payoutDate.getDay()
+    
+            const isWeekend =
+              dayOfWeek === 0 ||
+              dayOfWeek === 6
+    
+            const isHoliday =
+              settlementHolidaySet.has(
+                dateText
+              )
+    
+            if (
+              !isWeekend &&
+              !isHoliday
+            ) {
+              return dateText
+            }
+    
+            payoutDate.setDate(
+              payoutDate.getDate() + 1
+            )
+          }
+        }
+    
+        /* 영업일 기준 정산 */
+        let addedBusinessDays = 0
+    
+        while (
+          addedBusinessDays <
+          cycleDays
+        ) {
+    
+          payoutDate.setDate(
+            payoutDate.getDate() + 1
+          )
+    
+          const dateText =
+            formatSettlementDate(
+              payoutDate
+            )
+    
+          const dayOfWeek =
+            payoutDate.getDay()
+    
+          const isWeekend =
+            dayOfWeek === 0 ||
+            dayOfWeek === 6
+    
+          const isHoliday =
+            settlementHolidaySet.has(
+              dateText
+            )
+    
+          if (
+            isWeekend ||
+            isHoliday
+          ) {
+            continue
+          }
+    
+          addedBusinessDays += 1
+        }
+    
+        return formatSettlementDate(
+          payoutDate
+        )
+      }
+    
+    
+    const {
+      data: settlementPayments,
+      error: settlementError
+    } = await supabase
+      .from('payments')
+      .select(`
+        settlement_amount,
+        payout_status,
+        created_at,
+        status
+      `)
+      .eq('merchant_id', merchantId)
+    
+    if (settlementError) {
+      console.error(
+        '정산예정금액 조회 실패:',
+        settlementError
+      )
+    }
+    
+    
+    const settlementTargetPayments =
+      (settlementPayments || [])
+        .filter((payment: any) => {
+    
+          if (
+            payment.status !== 'paid'
+          ) {
+            return false
+          }
+    
+          if (!payment.created_at) {
+            return false
+          }
+    
+          const payoutDate =
+            getSettlementPayoutDate(
+              payment.created_at
+            )
+    
+          if (
+            startDate &&
+            endDate
+          ) {
+            return (
+              payoutDate >= startDate &&
+              payoutDate <= endDate
+            )
+          }
+    
+          return true
+        })
+    
+    
+    const settlementAmount =
+      settlementTargetPayments.reduce(
+        (sum, payment) => {
+    
+          return (
+            sum +
+            Number(
+              payment.settlement_amount ||
+              0
+            )
+          )
+        },
+        0
+      )
+    
+    
+    const settlementComplete =
+      settlementTargetPayments.length > 0 &&
+      settlementTargetPayments.every(
+        (payment) =>
+          payment.payout_status ===
+          '출금완료'
+      )
 
   const { data: merchantReceiptPayments } =
   await supabase
