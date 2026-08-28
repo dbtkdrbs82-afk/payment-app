@@ -14913,6 +14913,105 @@ if (isBeauty) {
   const selectedEndDate =
     terminalDateParams.get('terminal_end_date') ||
     todayDateValue
+
+    /* =========================================
+   무선단말기 정산일 계산
+========================================= */
+
+const { data: terminalMerchantSettlement } =
+await supabase
+  .from('merchants')
+  .select('settlement_cycle')
+  .eq('id', merchantId)
+  .single()
+
+const terminalSettlementCycle =
+String(
+  terminalMerchantSettlement?.settlement_cycle ||
+  '1일'
+)
+
+const { data: terminalHolidayData } =
+await supabase
+  .from('holidays')
+  .select('holiday_date')
+
+const terminalHolidaySet =
+new Set(
+  (terminalHolidayData || [])
+    .map((holiday: any) =>
+      String(holiday.holiday_date)
+    )
+)
+
+const getTerminalPayoutDate = (
+createdAt: string
+) => {
+const payoutDate =
+  new Date(createdAt)
+
+const cycleNumberMatch =
+  terminalSettlementCycle.match(/\d+/)
+
+const cycleDays =
+  cycleNumberMatch
+    ? Number(cycleNumberMatch[0])
+    : 1
+
+if (cycleDays === 0) {
+  while (true) {
+    const dateText =
+      getLocalDateValue(payoutDate)
+
+    const dayOfWeek =
+      payoutDate.getDay()
+
+    const isWeekend =
+      dayOfWeek === 0 ||
+      dayOfWeek === 6
+
+    const isHoliday =
+      terminalHolidaySet.has(dateText)
+
+    if (!isWeekend && !isHoliday) {
+      return dateText
+    }
+
+    payoutDate.setDate(
+      payoutDate.getDate() + 1
+    )
+  }
+}
+
+let addedBusinessDays = 0
+
+while (addedBusinessDays < cycleDays) {
+  payoutDate.setDate(
+    payoutDate.getDate() + 1
+  )
+
+  const dateText =
+    getLocalDateValue(payoutDate)
+
+  const dayOfWeek =
+    payoutDate.getDay()
+
+  const isWeekend =
+    dayOfWeek === 0 ||
+    dayOfWeek === 6
+
+  const isHoliday =
+    terminalHolidaySet.has(dateText)
+
+  if (isWeekend || isHoliday) {
+    continue
+  }
+
+  addedBusinessDays += 1
+}
+
+return getLocalDateValue(payoutDate)
+}
   
   const selectedDatePayments =
     terminalPayments.filter((payment) => {
@@ -15010,8 +15109,35 @@ const terminalPagedPayments =
     selectedApprovedAmount -
     selectedCanceledAmount
   
+    const settlementTargetPayments =
+    terminalPayments.filter((payment: any) => {
+  
+      if (payment.status !== 'paid') {
+        return false
+      }
+  
+      const paymentDateText =
+        payment.approved_at ||
+        payment.created_at
+  
+      if (!paymentDateText) {
+        return false
+      }
+  
+      const payoutDate =
+        getTerminalPayoutDate(
+          paymentDateText
+        )
+  
+      return (
+        payoutDate >= selectedStartDate &&
+        payoutDate <= selectedEndDate
+      )
+    })
+  
+  
   const selectedSettlementAmount =
-    selectedPaidPayments.reduce(
+    settlementTargetPayments.reduce(
       (sum, payment) =>
         sum +
         Number(
@@ -15019,6 +15145,69 @@ const terminalPagedPayments =
         ),
       0
     )
+  
+  
+  const selectedSettlementCount =
+    settlementTargetPayments.length
+  
+  
+  const settlementPaymentDates =
+    settlementTargetPayments
+      .map((payment: any) => {
+  
+        const paymentDateText =
+          payment.approved_at ||
+          payment.created_at
+  
+        if (!paymentDateText) {
+          return ''
+        }
+  
+        return getLocalDateValue(
+          new Date(paymentDateText)
+        )
+      })
+      .filter(Boolean)
+      .sort()
+  
+  
+  let settlementPaymentDateLabel = ''
+  
+  if (settlementPaymentDates.length > 0) {
+  
+    const firstDate =
+      settlementPaymentDates[0]
+  
+    const lastDate =
+      settlementPaymentDates[
+        settlementPaymentDates.length - 1
+      ]
+  
+    const formatShortDate =
+      (dateText: string) => {
+  
+        const [
+          year,
+          month,
+          day
+        ] = dateText.split('-')
+  
+        return (
+          year.slice(-2) +
+          '.' +
+          month +
+          '.' +
+          day
+        )
+      }
+  
+    settlementPaymentDateLabel =
+      firstDate === lastDate
+        ? formatShortDate(firstDate)
+        : formatShortDate(firstDate) +
+          '~' +
+          formatShortDate(lastDate)
+  }
   
   const selectedTotalCount =
     selectedDatePayments.length
@@ -15149,9 +15338,23 @@ const terminalPagedPayments =
       ${selectedSettlementAmount.toLocaleString()}원
     </strong>
 
-    <small>
-      정산대상 ${selectedApprovedCount.toLocaleString()}건
-    </small>
+    <small
+  style="
+    display:block;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    font-size:11px;
+  "
+>
+  정산대상 ${selectedSettlementCount.toLocaleString()}건${
+    settlementPaymentDateLabel
+      ? ' · ' +
+        settlementPaymentDateLabel +
+        ' 결제건'
+      : ''
+  }
+</small>
   </div>
 
 </div> 
