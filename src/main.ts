@@ -16032,6 +16032,66 @@ const settlementCompletedAmount =
     0
   )
 
+  const academyPendingSettlementPayments =
+  filteredAcademyPayments.filter(
+    (payment) =>
+      payment.payout_status !== '출금완료' &&
+      payment.payout_status !== '지급정지'
+  )
+
+const academySettlementPaymentDates =
+  academyPendingSettlementPayments
+    .map((payment: any) => {
+
+      if (!payment.created_at) {
+        return ''
+      }
+
+      return formatAcademySettlementDate(
+        new Date(payment.created_at)
+      )
+    })
+    .filter(Boolean)
+    .sort()
+
+let academySettlementPaymentDateLabel = ''
+
+if (academySettlementPaymentDates.length > 0) {
+
+  const firstDate =
+    academySettlementPaymentDates[0]
+
+  const lastDate =
+    academySettlementPaymentDates[
+      academySettlementPaymentDates.length - 1
+    ]
+
+  const formatShortAcademyDate =
+    (dateText: string) => {
+
+      const [
+        year,
+        month,
+        day
+      ] = dateText.split('-')
+
+      return (
+        year.slice(-2) +
+        '.' +
+        month +
+        '.' +
+        day
+      )
+    }
+
+  academySettlementPaymentDateLabel =
+    firstDate === lastDate
+      ? formatShortAcademyDate(firstDate)
+      : formatShortAcademyDate(firstDate) +
+        '~' +
+        formatShortAcademyDate(lastDate)
+}
+
   const allMembers =
     memberDashboardMembers || []
 
@@ -16141,11 +16201,33 @@ const newMemberCount =
     <div class="academy-settlement-grid">
 
   <div class="academy-card academy-settlement-card">
-    <span>정산 예정 금액</span>
-    <strong>
-      ${settlementPendingAmount.toLocaleString()}원
-    </strong>
-  </div>
+  <span>정산 예정 금액</span>
+
+  <strong>
+    ${settlementPendingAmount.toLocaleString()}원
+  </strong>
+
+  ${
+    academyPendingSettlementPayments.length > 0
+      ? `
+        <small
+          style="
+            display:block;
+            margin-top:2px;
+            white-space:nowrap;
+            font-size:11px;
+            line-height:1.1;
+            color:#d93025;
+            font-weight:700;
+          "
+        >
+          정산대상 ${academyPendingSettlementPayments.length.toLocaleString()}건 ·
+          ${academySettlementPaymentDateLabel} 결제건
+        </small>
+      `
+      : ''
+  }
+</div>
 
   <div class="academy-card academy-settlement-card">
     <span>정산 완료 금액</span>
