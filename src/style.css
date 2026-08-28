@@ -12544,23 +12544,23 @@ button.hotel-category-tab.active {
 ========================================= */
 
 body.beauty-mode button {
-  background: #7fa8c4 !important;
-  color: #ffffff !important;
-  border-color: #739bb6 !important;
+  background: #f2cf7b !important;
+  color: #5b4314 !important;
+  border-color: #e3bc5f !important;
 }
 
 body.beauty-mode button:hover {
-  background: #6f99b6 !important;
-  color: #ffffff !important;
+  background: #e7bf5e !important;
+  color: #4b370f !important;
 }
 
 body.beauty-mode button.active {
-  background: #5f8eae !important;
+  background: #dcae3f !important;
   color: #ffffff !important;
 }
 
 body.beauty-mode button:disabled {
-  background: #d9e5ed !important;
-  color: #8aa0af !important;
+  background: #f7e9bf !important;
+  color: #aa9360 !important;
   cursor: not-allowed;
 }
