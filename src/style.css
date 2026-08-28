@@ -12539,5 +12539,28 @@ button.hotel-category-tab.active {
 
   text-decoration: none !important;
 }
+/* =========================================
+   뷰티 전체 버튼 파스텔 하늘색
+========================================= */
 
+body.beauty-mode button {
+  background: #9fcff5 !important;
+  color: #173b5f !important;
+  border-color: #8bc1ec !important;
+}
 
+body.beauty-mode button:hover {
+  background: #89c3ef !important;
+  color: #123554 !important;
+}
+
+body.beauty-mode button.active {
+  background: #72b5e8 !important;
+  color: #ffffff !important;
+}
+
+body.beauty-mode button:disabled {
+  background: #dbeefa !important;
+  color: #7a94a8 !important;
+  cursor: not-allowed;
+}

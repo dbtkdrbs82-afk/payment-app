@@ -51,11 +51,17 @@ if (!sessionStorage.getItem('login_merchant_id')) {
 const loginMerchantType =
   sessionStorage.getItem('login_merchant_type') || ''
 
-if (loginMerchantType === '호텔') {
-  document.body.classList.add('hotel-mode')
-} else {
-  document.body.classList.remove('hotel-mode')
-}
+  if (loginMerchantType === '호텔') {
+    document.body.classList.add('hotel-mode')
+  } else {
+    document.body.classList.remove('hotel-mode')
+  }
+  
+  if (loginMerchantType === '뷰티') {
+    document.body.classList.add('beauty-mode')
+  } else {
+    document.body.classList.remove('beauty-mode')
+  }
 
 
 /* =========================================
@@ -21056,7 +21062,7 @@ document.querySelector('#merchant-product-image-file')
   class="payment-card"
   style="
     width:100%;
-    max-width:950px;
+    max-width:1500px;
   "
 >
   
@@ -21104,12 +21110,72 @@ document.querySelector('#merchant-product-image-file')
             />
   
           </div>
-  
-  
+   
+          <div
+  style="
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    gap:8px;
+    margin-bottom:12px;
+  "
+>
+  <button
+    id="beauty-schedule-reset-button"
+    type="button"
+    style="
+      height:36px;
+      padding:0 18px;
+      border:0;
+      border-radius:8px;
+      background:#64748b;
+      color:#ffffff;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    리셋
+  </button>
+
+  <button
+    id="beauty-schedule-on-button"
+    type="button"
+    style="
+      height:36px;
+      padding:0 18px;
+      border:0;
+      border-radius:8px;
+      background:#16a34a;
+      color:#ffffff;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    ON
+  </button>
+
+  <button
+    id="beauty-schedule-off-button"
+    type="button"
+    style="
+      height:36px;
+      padding:0 18px;
+      border:0;
+      border-radius:8px;
+      background:#dc2626;
+      color:#ffffff;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    OFF
+  </button>
+</div>
+
           <div
   style="
     display:grid;
-    grid-template-columns:repeat(4, minmax(130px, 1fr));
+    grid-template-columns:repeat(8, minmax(100px, 1fr));
     gap:8px;
   "
 >
@@ -21342,6 +21408,172 @@ document.querySelector('#merchant-product-image-file')
           }
         )
       })
+
+      /* =========================
+   전체 ON / OFF
+========================= */
+
+const setBeautyScheduleAll =
+async (
+  status: '예약가능' | '예약불가'
+) => {
+
+  const selects =
+    Array.from(
+      document.querySelectorAll<HTMLSelectElement>(
+        '.beauty-schedule-status'
+      )
+    )
+
+  /* 예약완료 시간은 제외 */
+  const editableSelects =
+    selects.filter(
+      (select) => !select.disabled
+    )
+
+  const scheduleRows =
+    editableSelects.map(
+      (select) => ({
+        merchant_id: merchantId,
+        staff_id: staffId,
+        schedule_date:
+          selectedScheduleDate,
+        schedule_time:
+          select.dataset.time || '',
+        status: status
+      })
+    )
+
+  if (scheduleRows.length === 0) {
+    return
+  }
+
+  const {
+    error: bulkScheduleError
+  } = await supabase
+    .from('beauty_staff_schedule')
+    .upsert(
+      scheduleRows,
+      {
+        onConflict:
+          'staff_id,schedule_date,schedule_time'
+      }
+    )
+
+  if (bulkScheduleError) {
+    alert(
+      '전체 스케줄 저장 실패: ' +
+      bulkScheduleError.message
+    )
+    return
+  }
+
+  editableSelects.forEach(
+    (select) => {
+      select.value = status
+    }
+  )
+}
+
+
+document
+.querySelector(
+  '#beauty-schedule-on-button'
+)
+?.addEventListener(
+  'click',
+  async () => {
+
+    await setBeautyScheduleAll(
+      '예약가능'
+    )
+  }
+)
+
+
+document
+.querySelector(
+  '#beauty-schedule-off-button'
+)
+?.addEventListener(
+  'click',
+  async () => {
+
+    await setBeautyScheduleAll(
+      '예약불가'
+    )
+  }
+)
+
+
+/* =========================
+ 스케줄 리셋
+========================= */
+
+document
+.querySelector(
+  '#beauty-schedule-reset-button'
+)
+?.addEventListener(
+  'click',
+  async () => {
+
+    const resetConfirm =
+      confirm(
+        '이 직원의 선택한 날짜 스케줄을 초기화할까요?\n예약완료 시간은 유지됩니다.'
+      )
+
+    if (!resetConfirm) {
+      return
+    }
+
+    const {
+      error: resetScheduleError
+    } = await supabase
+      .from('beauty_staff_schedule')
+      .delete()
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .eq(
+        'staff_id',
+        staffId
+      )
+      .eq(
+        'schedule_date',
+        selectedScheduleDate
+      )
+      .is(
+        'order_id',
+        null
+      )
+
+    if (resetScheduleError) {
+      alert(
+        '스케줄 초기화 실패: ' +
+        resetScheduleError.message
+      )
+      return
+    }
+
+    document
+      .querySelectorAll<HTMLSelectElement>(
+        '.beauty-schedule-status'
+      )
+      .forEach((select) => {
+
+        if (!select.disabled) {
+          select.value =
+            '예약가능'
+        }
+      })
+
+    alert(
+      '스케줄이 초기화되었습니다.'
+    )
+  }
+)
   
   
   } else if (path === '/merchant-qr') {
