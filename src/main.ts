@@ -14970,6 +14970,57 @@ const averageAmount =
           '출금완료'
       )
 
+      const settlementPaymentDates =
+  settlementTargetPayments
+    .map((payment: any) => {
+      if (!payment.created_at) {
+        return ''
+      }
+
+      return formatSettlementDate(
+        new Date(payment.created_at)
+      )
+    })
+    .filter(Boolean)
+    .sort()
+
+let settlementPaymentDateLabel = ''
+
+if (settlementPaymentDates.length > 0) {
+  const firstDate =
+    settlementPaymentDates[0]
+
+  const lastDate =
+    settlementPaymentDates[
+      settlementPaymentDates.length - 1
+    ]
+
+  const formatShortSettlementDate =
+    (dateText: string) => {
+
+      const [
+        year,
+        month,
+        day
+      ] = dateText.split('-')
+
+      return (
+        year.slice(-2) +
+        '.' +
+        month +
+        '.' +
+        day
+      )
+    }
+
+  settlementPaymentDateLabel =
+    firstDate === lastDate
+      ? formatShortSettlementDate(firstDate)
+      : formatShortSettlementDate(firstDate) +
+        '~' +
+        formatShortSettlementDate(lastDate)
+}
+
   const { data: merchantReceiptPayments } =
   await supabase
     .from('payments')
@@ -16362,26 +16413,47 @@ ${merchantContent}
   </div>
 
   <div>
-    <strong>정산예정금액</strong>
+  <strong>정산예정금액</strong>
 
-    <span class="merchant-settlement-value">
-  ${settlementAmount.toLocaleString()}원
+  <span class="merchant-settlement-value">
+    ${settlementAmount.toLocaleString()}원
 
-  <span
-    class="${
-      settlementComplete
-        ? 'order-status-complete'
-        : 'order-status-received'
-    }"
-  >
-    ${
-      settlementComplete
-        ? '완료'
-        : '대기'
-    }
+    <span
+      class="${
+        settlementComplete
+          ? 'order-status-complete'
+          : 'order-status-received'
+      }"
+    >
+      ${
+        settlementComplete
+          ? '완료'
+          : '대기'
+      }
+    </span>
   </span>
-</span>
-  </div>
+
+  ${
+    settlementTargetPayments.length > 0
+      ? `
+        <small
+          style="
+            display:block;
+            margin-top:2px;
+            white-space:nowrap;
+            font-size:11px;
+            line-height:1.1;
+            color:#d93025;
+            font-weight:700;
+          "
+        >
+          정산대상 ${settlementTargetPayments.length.toLocaleString()}건 ·
+          ${settlementPaymentDateLabel} 결제건
+        </small>
+      `
+      : ''
+  }
+</div>
 </div>
 
 ${isBeauty ? `
