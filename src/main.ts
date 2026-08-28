@@ -9917,11 +9917,39 @@ try {
               ? Number(cycleNumberMatch[0])
               : 1
         
-          payoutDate.setDate(
-            payoutDate.getDate() + cycleDays
-          )
+          /* 0일 정산인 경우
+             결제일이 영업일이면 당일,
+             주말/공휴일이면 다음 영업일 */
+          if (cycleDays === 0) {
+            while (true) {
+              const dayOfWeek = payoutDate.getDay()
+              const dateText = formatPayoutDate(payoutDate)
         
-          while (true) {
+              const isWeekend =
+                dayOfWeek === 0 ||
+                dayOfWeek === 6
+        
+              const isHoliday =
+                holidaySet.has(dateText)
+        
+              if (!isWeekend && !isHoliday) {
+                return dateText
+              }
+        
+              payoutDate.setDate(
+                payoutDate.getDate() + 1
+              )
+            }
+          }
+        
+          /* 정산주기는 영업일 기준으로 계산 */
+          let addedBusinessDays = 0
+        
+          while (addedBusinessDays < cycleDays) {
+            payoutDate.setDate(
+              payoutDate.getDate() + 1
+            )
+        
             const dayOfWeek = payoutDate.getDay()
             const dateText = formatPayoutDate(payoutDate)
         
@@ -9932,15 +9960,15 @@ try {
             const isHoliday =
               holidaySet.has(dateText)
         
-            if (!isWeekend && !isHoliday) {
-              return dateText
+            if (isWeekend || isHoliday) {
+              continue
             }
         
-            payoutDate.setDate(
-              payoutDate.getDate() + 1
-            )
+            addedBusinessDays += 1
           }
-        }     
+        
+          return formatPayoutDate(payoutDate)
+        }
            
         type PayoutGroup = {
           id: number
