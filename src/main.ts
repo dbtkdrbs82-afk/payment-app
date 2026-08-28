@@ -15766,29 +15766,185 @@ if (memberDashboardPaymentError) {
 const allAcademyPayments =
   memberDashboardPayments || []
 
-const filteredAcademyPayments =
-  allAcademyPayments.filter((payment) => {
-
-    const paymentDate =
-      String(payment.created_at || '').slice(0, 10)
-
-    if (!paymentDate) {
-      return false
+  const {
+    data: academySettlementMerchant,
+    error: academySettlementMerchantError
+  } = await supabase
+    .from('merchants')
+    .select('settlement_cycle')
+    .eq('id', merchantId)
+    .single()
+  
+  if (academySettlementMerchantError) {
+    console.error(
+      '아카데미 정산주기 조회 실패:',
+      academySettlementMerchantError
+    )
+  }
+  
+  const academySettlementCycle =
+    String(
+      academySettlementMerchant?.settlement_cycle ||
+      '1일'
+    )
+  
+  const {
+    data: academyHolidayData,
+    error: academyHolidayError
+  } = await supabase
+    .from('holidays')
+    .select('holiday_date')
+  
+  if (academyHolidayError) {
+    console.error(
+      '아카데미 공휴일 조회 실패:',
+      academyHolidayError
+    )
+  }
+  
+  const academyHolidaySet =
+    new Set(
+      (academyHolidayData || [])
+        .map((holiday: any) =>
+          String(holiday.holiday_date)
+        )
+    )
+  
+  const formatAcademySettlementDate =
+    (date: Date) => {
+  
+      const year = date.getFullYear()
+  
+      const month =
+        String(
+          date.getMonth() + 1
+        ).padStart(2, '0')
+  
+      const day =
+        String(
+          date.getDate()
+        ).padStart(2, '0')
+  
+      return `${year}-${month}-${day}`
     }
-
-    if (
-      paymentDate < selectedStartDate ||
-      paymentDate > selectedEndDate
-    ) {
-      return false
+  
+  const getAcademySettlementDate =
+    (createdAt: string) => {
+  
+      const payoutDate =
+        new Date(createdAt)
+  
+      const cycleNumberMatch =
+        academySettlementCycle.match(/\d+/)
+  
+      const cycleDays =
+        cycleNumberMatch
+          ? Number(cycleNumberMatch[0])
+          : 1
+  
+      if (cycleDays === 0) {
+  
+        while (true) {
+  
+          const dateText =
+            formatAcademySettlementDate(
+              payoutDate
+            )
+  
+          const dayOfWeek =
+            payoutDate.getDay()
+  
+          const isWeekend =
+            dayOfWeek === 0 ||
+            dayOfWeek === 6
+  
+          const isHoliday =
+            academyHolidaySet.has(
+              dateText
+            )
+  
+          if (
+            !isWeekend &&
+            !isHoliday
+          ) {
+            return dateText
+          }
+  
+          payoutDate.setDate(
+            payoutDate.getDate() + 1
+          )
+        }
+      }
+  
+      let addedBusinessDays = 0
+  
+      while (
+        addedBusinessDays <
+        cycleDays
+      ) {
+  
+        payoutDate.setDate(
+          payoutDate.getDate() + 1
+        )
+  
+        const dateText =
+          formatAcademySettlementDate(
+            payoutDate
+          )
+  
+        const dayOfWeek =
+          payoutDate.getDay()
+  
+        const isWeekend =
+          dayOfWeek === 0 ||
+          dayOfWeek === 6
+  
+        const isHoliday =
+          academyHolidaySet.has(
+            dateText
+          )
+  
+        if (
+          isWeekend ||
+          isHoliday
+        ) {
+          continue
+        }
+  
+        addedBusinessDays += 1
+      }
+  
+      return formatAcademySettlementDate(
+        payoutDate
+      )
     }
-
-    if (payment.status === 'cancel') {
-      return false
-    }
-
-    return true
-  })
+  
+  
+  const filteredAcademyPayments =
+    allAcademyPayments.filter((payment) => {
+  
+      if (payment.status === 'cancel') {
+        return false
+      }
+  
+      if (!payment.created_at) {
+        return false
+      }
+  
+      const settlementDate =
+        getAcademySettlementDate(
+          payment.created_at
+        )
+  
+      if (
+        settlementDate < selectedStartDate ||
+        settlementDate > selectedEndDate
+      ) {
+        return false
+      }
+  
+      return true
+    })
 
 const settlementPendingAmount =
   filteredAcademyPayments.reduce(
