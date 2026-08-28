@@ -21052,7 +21052,13 @@ document.querySelector('#merchant-product-image-file')
         </div>
   
   
-        <div class="payment-card">
+        <div
+  class="payment-card"
+  style="
+    width:100%;
+    max-width:950px;
+  "
+>
   
           <div
             style="
@@ -21101,16 +21107,12 @@ document.querySelector('#merchant-product-image-file')
   
   
           <div
-            style="
-              display:grid;
-              grid-template-columns:
-                repeat(
-                  auto-fit,
-                  minmax(150px, 1fr)
-                );
-              gap:10px;
-            "
-          >
+  style="
+    display:grid;
+    grid-template-columns:repeat(4, minmax(130px, 1fr));
+    gap:8px;
+  "
+>
   
             ${beautyScheduleTimes
               .map((time) => {
@@ -21128,11 +21130,11 @@ document.querySelector('#merchant-product-image-file')
                 return `
                   <div
                     style="
-                      border:1px solid #e2e8f0;
-                      border-radius:10px;
-                      padding:12px;
-                      background:#ffffff;
-                    "
+  border:1px solid #e2e8f0;
+  border-radius:8px;
+  padding:8px;
+  background:#ffffff;
+"
                   >
   
                     <strong
@@ -21155,7 +21157,7 @@ document.querySelector('#merchant-product-image-file')
                       }
                       style="
                         width:100%;
-                        height:36px;
+                        height:30px;
                         border:1px solid #cbd5e1;
                         border-radius:7px;
                         padding:0 8px;
