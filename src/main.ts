@@ -15340,12 +15340,14 @@ const terminalPagedPayments =
 
     <small
   style="
-    display:block;
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    font-size:11px;
-  "
+  display:block;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:11px;
+  color:#d93025;
+  font-weight:700;
+"
 >
   정산대상 ${selectedSettlementCount.toLocaleString()}건${
     settlementPaymentDateLabel
