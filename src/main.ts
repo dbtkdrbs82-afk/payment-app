@@ -21006,8 +21006,8 @@ document.querySelector('#merchant-product-image-file')
     const beautyScheduleTimes: string[] = []
   
     for (
-      let minutes = 9 * 60;
-      minutes <= 20 * 60;
+      let minutes = 0;
+      minutes < 24 * 60;
       minutes += 30
     ) {
   
