@@ -123,11 +123,56 @@ export function renderBeautyStaffList(
                 </p>
   
                 <span class="${statusClass}">
-                  ${status}
-                </span>
-              </div>
-            </div>
+  ${status}
+</span>
+</div>
+
+<button
+  type="button"
+  class="beauty-staff-schedule-button"
+  data-staff-id="${staff.id}"
+  style="
+    margin-left:auto;
+    padding:10px 16px;
+    border:0;
+    border-radius:8px;
+    background:#1d4ed8;
+    color:#ffffff;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+  "
+>
+  스케줄관리
+</button>
+
+</div>
           `
         })
         .join('')
+
+        cardList
+  .querySelectorAll<HTMLButtonElement>(
+    '.beauty-staff-schedule-button'
+  )
+  .forEach((button) => {
+
+    button.addEventListener(
+      'click',
+      () => {
+
+        const staffId =
+          button.dataset.staffId
+
+        if (!staffId) {
+          return
+        }
+
+        location.href =
+          '/merchant-beauty-schedule?staff_id=' +
+          encodeURIComponent(staffId)
+      }
+    )
+  })
   }

@@ -20849,7 +20849,499 @@ document.querySelector('#merchant-product-image-file')
 
     await renderBeautyStaff(app, supabase)
   
-
+  
+  } else if (path === '/merchant-beauty-schedule') {
+  
+    const merchantId =
+      Number(
+        sessionStorage.getItem(
+          'login_merchant_id'
+        )
+      )
+  
+    const merchantName =
+      sessionStorage.getItem(
+        'login_merchant_name'
+      ) || ''
+  
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
+  
+    const staffId =
+      Number(
+        params.get('staff_id')
+      )
+  
+    if (!merchantId) {
+      alert('로그인이 필요합니다.')
+      location.href = '/merchant-login'
+    }
+  
+    if (!staffId) {
+      alert('직원 정보가 없습니다.')
+      location.href = '/merchant-staff'
+    }
+  
+  
+    /* =========================
+       직원정보
+    ========================= */
+  
+    const {
+      data: beautyScheduleStaff,
+      error: beautyScheduleStaffError
+    } = await supabase
+      .from('beauty_staff')
+      .select(`
+        id,
+        staff_name,
+        position,
+        photo_url,
+        status
+      `)
+      .eq('id', staffId)
+      .eq('merchant_id', merchantId)
+      .maybeSingle()
+  
+    if (
+      beautyScheduleStaffError ||
+      !beautyScheduleStaff
+    ) {
+      alert('직원 정보를 찾을 수 없습니다.')
+      location.href = '/merchant-staff'
+    }
+  
+  
+    /* =========================
+       날짜
+    ========================= */
+  
+    const getBeautyScheduleDate =
+      (date: Date) => {
+  
+        const year =
+          date.getFullYear()
+  
+        const month =
+          String(
+            date.getMonth() + 1
+          ).padStart(2, '0')
+  
+        const day =
+          String(
+            date.getDate()
+          ).padStart(2, '0')
+  
+        return `${year}-${month}-${day}`
+      }
+  
+    const selectedScheduleDate =
+      params.get('date') ||
+      getBeautyScheduleDate(
+        new Date()
+      )
+  
+  
+    /* =========================
+       저장된 스케줄 조회
+    ========================= */
+  
+    const {
+      data: beautyScheduleRows,
+      error: beautyScheduleError
+    } = await supabase
+      .from('beauty_staff_schedule')
+      .select(`
+        id,
+        schedule_time,
+        status,
+        order_id
+      `)
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .eq(
+        'staff_id',
+        staffId
+      )
+      .eq(
+        'schedule_date',
+        selectedScheduleDate
+      )
+  
+    if (beautyScheduleError) {
+      alert(
+        '스케줄 조회 실패: ' +
+        beautyScheduleError.message
+      )
+    }
+  
+  
+    const beautyScheduleMap =
+      new Map<string, any>()
+  
+    ;(beautyScheduleRows || [])
+      .forEach((row: any) => {
+  
+        const time =
+          String(
+            row.schedule_time || ''
+          ).slice(0, 5)
+  
+        beautyScheduleMap.set(
+          time,
+          row
+        )
+      })
+  
+  
+    /* =========================
+       09:00 ~ 20:00
+       30분 간격 자동 생성
+    ========================= */
+  
+    const beautyScheduleTimes: string[] = []
+  
+    for (
+      let minutes = 9 * 60;
+      minutes <= 20 * 60;
+      minutes += 30
+    ) {
+  
+      const hour =
+        String(
+          Math.floor(minutes / 60)
+        ).padStart(2, '0')
+  
+      const minute =
+        String(
+          minutes % 60
+        ).padStart(2, '0')
+  
+      beautyScheduleTimes.push(
+        `${hour}:${minute}`
+      )
+    }
+  
+  
+    /* =========================
+       화면
+    ========================= */
+  
+    app.innerHTML = `
+      <div class="pg-admin-page">
+  
+        <div class="merchant-pick-header">
+  
+          <h1>직원 스케줄관리</h1>
+  
+          <div class="merchant-user-box">
+            <strong>${merchantName}님</strong>
+  
+            <button
+              id="beauty-schedule-back"
+              type="button"
+            >
+              직원관리
+            </button>
+          </div>
+  
+        </div>
+  
+  
+        <div class="payment-card">
+  
+          <div
+            style="
+              display:flex;
+              align-items:center;
+              justify-content:space-between;
+              gap:20px;
+              margin-bottom:20px;
+            "
+          >
+  
+            <div>
+              <strong
+                style="
+                  display:block;
+                  font-size:20px;
+                  margin-bottom:5px;
+                "
+              >
+              ${beautyScheduleStaff?.staff_name || '-'}
+              </strong>
+  
+              <span
+                style="
+                  color:#64748b;
+                "
+              >
+              ${beautyScheduleStaff?.position || ''}
+              </span>
+            </div>
+  
+  
+            <input
+              id="beauty-schedule-date"
+              type="date"
+              value="${selectedScheduleDate}"
+              style="
+                height:40px;
+                padding:0 12px;
+                border:1px solid #cbd5e1;
+                border-radius:8px;
+              "
+            />
+  
+          </div>
+  
+  
+          <div
+            style="
+              display:grid;
+              grid-template-columns:
+                repeat(
+                  auto-fit,
+                  minmax(150px, 1fr)
+                );
+              gap:10px;
+            "
+          >
+  
+            ${beautyScheduleTimes
+              .map((time) => {
+  
+                const savedRow =
+                  beautyScheduleMap.get(time)
+  
+                const status =
+                  savedRow?.status ||
+                  '예약가능'
+  
+                const isReservation =
+                  status === '예약완료'
+  
+                return `
+                  <div
+                    style="
+                      border:1px solid #e2e8f0;
+                      border-radius:10px;
+                      padding:12px;
+                      background:#ffffff;
+                    "
+                  >
+  
+                    <strong
+                      style="
+                        display:block;
+                        margin-bottom:8px;
+                        font-size:16px;
+                      "
+                    >
+                      ${time}
+                    </strong>
+  
+                    <select
+                      class="beauty-schedule-status"
+                      data-time="${time}"
+                      ${
+                        isReservation
+                          ? 'disabled'
+                          : ''
+                      }
+                      style="
+                        width:100%;
+                        height:36px;
+                        border:1px solid #cbd5e1;
+                        border-radius:7px;
+                        padding:0 8px;
+                      "
+                    >
+  
+                      <option
+                        value="예약가능"
+                        ${
+                          status === '예약가능'
+                            ? 'selected'
+                            : ''
+                        }
+                      >
+                        예약가능
+                      </option>
+  
+                      <option
+                        value="예약불가"
+                        ${
+                          status === '예약불가'
+                            ? 'selected'
+                            : ''
+                        }
+                      >
+                        예약불가
+                      </option>
+  
+                      <option
+                        value="휴게"
+                        ${
+                          status === '휴게'
+                            ? 'selected'
+                            : ''
+                        }
+                      >
+                        휴게
+                      </option>
+  
+                      ${
+                        isReservation
+                          ? `
+                            <option
+                              value="예약완료"
+                              selected
+                            >
+                              예약완료
+                            </option>
+                          `
+                          : ''
+                      }
+  
+                    </select>
+  
+                  </div>
+                `
+              })
+              .join('')}
+  
+          </div>
+  
+        </div>
+  
+      </div>
+    `
+  
+  
+    /* =========================
+       직원관리로 돌아가기
+    ========================= */
+  
+    document
+      .querySelector(
+        '#beauty-schedule-back'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-staff'
+        }
+      )
+  
+  
+    /* =========================
+       날짜 변경
+    ========================= */
+  
+    document
+      .querySelector<HTMLInputElement>(
+        '#beauty-schedule-date'
+      )
+      ?.addEventListener(
+        'change',
+        (event) => {
+  
+          const input =
+            event.target as HTMLInputElement
+  
+          location.href =
+            '/merchant-beauty-schedule' +
+            '?staff_id=' +
+            encodeURIComponent(
+              String(staffId)
+            ) +
+            '&date=' +
+            encodeURIComponent(
+              input.value
+            )
+        }
+      )
+  
+  
+    /* =========================
+       시간 상태 변경 즉시 저장
+    ========================= */
+  
+    document
+      .querySelectorAll<HTMLSelectElement>(
+        '.beauty-schedule-status'
+      )
+      .forEach((select) => {
+  
+        select.addEventListener(
+          'change',
+          async () => {
+  
+            const scheduleTime =
+              select.dataset.time || ''
+  
+            const status =
+              select.value
+  
+            if (!scheduleTime) {
+              return
+            }
+  
+            select.disabled = true
+  
+            const {
+              error: saveScheduleError
+            } = await supabase
+              .from(
+                'beauty_staff_schedule'
+              )
+              .upsert(
+                {
+                  merchant_id:
+                    merchantId,
+  
+                  staff_id:
+                    staffId,
+  
+                  schedule_date:
+                    selectedScheduleDate,
+  
+                  schedule_time:
+                    scheduleTime,
+  
+                  status:
+                    status
+                },
+                {
+                  onConflict:
+                    'staff_id,schedule_date,schedule_time'
+                }
+              )
+  
+            if (saveScheduleError) {
+  
+              alert(
+                '스케줄 저장 실패: ' +
+                saveScheduleError.message
+              )
+  
+              select.disabled = false
+              return
+            }
+  
+            select.disabled = false
+          }
+        )
+      })
+  
+  
   } else if (path === '/merchant-qr') {
 
     const merchantId =
