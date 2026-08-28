@@ -15,6 +15,39 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
+const path = window.location.pathname
+
+/* =========================================
+   가맹점 로그인 상태 복구
+========================================= */
+
+const merchantLoginKeys = [
+  'login_merchant_id',
+  'login_merchant_code',
+  'login_merchant_name',
+  'login_merchant_type'
+]
+
+if (!sessionStorage.getItem('login_merchant_id')) {
+  const savedMerchantId =
+    localStorage.getItem('login_merchant_id')
+
+  if (savedMerchantId) {
+    merchantLoginKeys.forEach((key) => {
+      const value = localStorage.getItem(key)
+
+      if (value !== null) {
+        sessionStorage.setItem(key, value)
+      }
+    })
+  }
+}
+
+
+/* =========================================
+   가맹점 유형 확인
+========================================= */
+
 const loginMerchantType =
   sessionStorage.getItem('login_merchant_type') || ''
 
@@ -23,9 +56,46 @@ if (loginMerchantType === '호텔') {
 } else {
   document.body.classList.remove('hotel-mode')
 }
-const path = window.location.pathname
 
 
+/* =========================================
+   로그인 상태면 로그인 화면 건너뛰기
+========================================= */
+
+if (
+  path === '/merchant-login' &&
+  sessionStorage.getItem('login_merchant_id')
+) {
+  location.replace('/merchant-admin')
+}
+
+/* =========================================
+   모든 가맹점 로그아웃 공통 처리
+========================================= */
+
+document.addEventListener(
+  'click',
+  (event) => {
+    const target =
+      event.target as HTMLElement | null
+
+    const logoutButton =
+      target?.closest<HTMLElement>('[id$="-logout"]')
+
+    if (
+      !logoutButton ||
+      !logoutButton.id.startsWith('merchant-')
+    ) {
+      return
+    }
+
+    merchantLoginKeys.forEach((key) => {
+      sessionStorage.removeItem(key)
+      localStorage.removeItem(key)
+    })
+  },
+  true
+)
 
 function getMemberMenuHtml(activeMenu: string) {
   return `
@@ -14341,6 +14411,26 @@ const orderIdValue =
     sessionStorage.setItem('login_merchant_code', merchant.merchant_login_id || '')
     sessionStorage.setItem('login_merchant_name', merchant.merchant_name || '')
     sessionStorage.setItem('login_merchant_type', merchant.merchant_type || '일반매장')
+
+    localStorage.setItem(
+      'login_merchant_id',
+      String(merchant.id)
+    )
+    
+    localStorage.setItem(
+      'login_merchant_code',
+      merchant.merchant_login_id || ''
+    )
+    
+    localStorage.setItem(
+      'login_merchant_name',
+      merchant.merchant_name || ''
+    )
+    
+    localStorage.setItem(
+      'login_merchant_type',
+      merchant.merchant_type || '일반매장'
+    )
 
     alert((merchant.merchant_name || '가맹점') + '님 로그인되었습니다.')
     window.location.href = '/merchant-admin'
