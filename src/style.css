@@ -12847,8 +12847,8 @@ height: 150px !important;
     left: 50% !important;
     top: 66% !important;
 
-    width: 230px !important;
-    height: 230px !important;
+    width: 250px !important;
+    height: 250px !important;
 
     transform: translate(-50%, -50%) !important;
 
@@ -12859,8 +12859,8 @@ height: 150px !important;
   #merchant-qr-box canvas,
   #qr-print-area[data-qr-template="qr-design-08"]
   #merchant-qr-box img {
-    width: 230px !important;
-    height: 230px !important;
+    width: 250px !important;
+    height: 250px !important;
   }
 
 }
