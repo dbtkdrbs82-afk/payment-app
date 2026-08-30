@@ -12586,23 +12586,23 @@ body.beauty-mode button:disabled {
 
   /* 디자인 1 흰색 QR 영역 중앙 */
   #qr-print-area[data-qr-template="qr-design-01"]
-  #merchant-qr-box {
-    left: 70.5% !important;
-    top: 53.5% !important;
+#merchant-qr-box {
+  left: 70.5% !important;
+  top: 53.5% !important;
 
-    width: 240px !important;
-    height: 240px !important;
+  width: 280px !important;
+  height: 280px !important;
 
-    transform: translate(-50%, -50%) !important;
+  transform: translate(-50%, -50%) !important;
 
-    background: #ffffff !important;
-  }
+  background: #ffffff !important;
+}
 
-  #qr-print-area[data-qr-template="qr-design-01"]
-  #merchant-qr-box canvas,
-  #qr-print-area[data-qr-template="qr-design-01"]
-  #merchant-qr-box img {
-    width: 240px !important;
-    height: 240px !important;
-  }
+#qr-print-area[data-qr-template="qr-design-01"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-01"]
+#merchant-qr-box img {
+  width: 280px !important;
+  height: 280px !important;
+}
 }
