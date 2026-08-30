@@ -12811,8 +12811,8 @@ height: 175px !important;
   #qr-print-area[data-qr-template="qr-design-07"] #merchant-qr-box {
     left: 48.5% !important;
     top: 67% !important;
-    width: 170px !important;
-    height: 170px !important;
+    width: 150px !important;
+height: 150px !important;
     transform: translate(-50%, -50%) rotate(-18deg) !important;
     transform-origin: center center !important;
     background: #ffffff !important;
@@ -12820,8 +12820,8 @@ height: 175px !important;
 
   #qr-print-area[data-qr-template="qr-design-07"] #merchant-qr-box canvas,
   #qr-print-area[data-qr-template="qr-design-07"] #merchant-qr-box img {
-    width: 170px !important;
-    height: 170px !important;
+    width: 150px !important;
+height: 150px !important;
     transform: rotate(0deg) !important;
   }
 }
