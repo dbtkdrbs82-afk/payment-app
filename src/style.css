@@ -12625,11 +12625,11 @@ body.beauty-mode button:disabled {
 
   #qr-print-area[data-qr-template="qr-design-02"]
   #merchant-qr-box {
-    left: 46% !important;
-    top: 67% !important;
+    left: 48.5% !important;
+top: 67% !important;
 
-    width: 280px !important;
-    height: 280px !important;
+width: 250px !important;
+height: 250px !important;
 
     transform: translate(-50%, -50%) !important;
 
@@ -12640,8 +12640,8 @@ body.beauty-mode button:disabled {
   #merchant-qr-box canvas,
   #qr-print-area[data-qr-template="qr-design-02"]
   #merchant-qr-box img {
-    width: 280px !important;
-    height: 280px !important;
+    width: 250px !important;
+height: 250px !important;
   }
 
 }
