@@ -12723,3 +12723,10 @@ height: 220px !important;
   }
 
 }
+.qr-template-design-05 .qr-template-live-code {
+  width: 17.5%;
+  max-width: none;
+  top: 24.5%;
+  left: 78%;
+  transform: translate(-50%, -50%);
+}
