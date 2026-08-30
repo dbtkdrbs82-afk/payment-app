@@ -12564,3 +12564,45 @@ body.beauty-mode button:disabled {
   color: #b89aa1 !important;
   cursor: not-allowed;
 }
+/* =========================================
+   QR 추가 디자인별 실제 QR 위치
+   기본형에는 영향 없음
+========================================= */
+
+@media screen {
+
+  /* 디자인 1은 세로형 이미지이므로
+     QR 좌표 기준 영역을 포스터 전체 높이에 맞춤 */
+  #qr-print-area[data-qr-template="qr-design-01"]
+  .qr-print-main {
+    left: 10px !important;
+    top: 10px !important;
+
+    width: calc(100% - 20px) !important;
+    height: calc(100% - 20px) !important;
+
+    aspect-ratio: auto !important;
+  }
+
+  /* 디자인 1 흰색 QR 영역 중앙 */
+  #qr-print-area[data-qr-template="qr-design-01"]
+  #merchant-qr-box {
+    left: 70.5% !important;
+    top: 53.5% !important;
+
+    width: 240px !important;
+    height: 240px !important;
+
+    transform: translate(-50%, -50%) !important;
+
+    background: #ffffff !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-01"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-01"]
+  #merchant-qr-box img {
+    width: 240px !important;
+    height: 240px !important;
+  }
+}

@@ -22307,7 +22307,11 @@ document
 
     <div class="qr-management-wrap">
 
-      <div id="qr-print-area" class="qr-print-area">
+      <div
+  id="qr-print-area"
+  class="qr-print-area"
+  data-qr-template="${selectedQrTemplateKey}"
+>
 
       <div class="qr-guide-poster-wrap">
   <img
