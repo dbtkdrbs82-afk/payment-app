@@ -22147,7 +22147,54 @@ document
         merchantId
       )
 
-   
+      const {
+        data: qrTemplateMerchant,
+        error: qrTemplateError
+      } = await supabase
+        .from('merchants')
+        .select('qr_template_key')
+        .eq('id', merchantId)
+        .maybeSingle()
+      
+      if (qrTemplateError) {
+        console.error(
+          'QR 디자인 조회 실패:',
+          qrTemplateError
+        )
+      }
+      
+      const selectedQrTemplateKey =
+        qrTemplateMerchant?.qr_template_key ||
+        'default'
+      
+      const selectedQrPosterSrc =
+        selectedQrTemplateKey === 'default'
+          ? '/qr-guide-poster.png'
+          : `/qr-templates/${selectedQrTemplateKey}.png`
+      
+      const qrTemplateList = [
+        {
+          key: 'default',
+          name: '기본형',
+          image: '/qr-guide-poster.png'
+        },
+        ...Array.from(
+          { length: 11 },
+          (_, index) => {
+      
+            const number =
+              String(index + 1)
+                .padStart(2, '0')
+      
+            return {
+              key: `qr-design-${number}`,
+              name: `디자인 ${index + 1}`,
+              image:
+                `/qr-templates/qr-design-${number}.png`
+            }
+          }
+        )
+      ]
   
   app.innerHTML = `
   <div class="pg-admin-page">
@@ -22183,16 +22230,91 @@ document
         `
     }
 
+    <div
+  class="no-print"
+  style="
+    max-width:1200px;
+    margin:0 auto 24px;
+  "
+>
+  <h2
+    style="
+      margin:0 0 14px;
+      font-size:20px;
+    "
+  >
+    QR 디자인 선택
+  </h2>
+
+  <div
+    style="
+      display:grid;
+      grid-template-columns:
+        repeat(6, minmax(120px, 1fr));
+      gap:12px;
+    "
+  >
+    ${qrTemplateList
+      .map((template) => {
+
+        const isSelected =
+          template.key ===
+          selectedQrTemplateKey
+
+        return `
+          <button
+            type="button"
+            class="qr-template-select-button"
+            data-template-key="${template.key}"
+            style="
+              padding:8px;
+              border:
+                ${isSelected
+                  ? '3px solid #17457f'
+                  : '1px solid #d7dee8'};
+              border-radius:12px;
+              background:#ffffff;
+              cursor:pointer;
+            "
+          >
+            <img
+              src="${template.image}"
+              alt="${template.name}"
+              style="
+                width:100%;
+                height:150px;
+                object-fit:cover;
+                border-radius:8px;
+                display:block;
+              "
+            />
+
+            <strong
+              style="
+                display:block;
+                margin-top:8px;
+              "
+            >
+              ${template.name}
+              ${isSelected ? ' ✓' : ''}
+            </strong>
+          </button>
+        `
+      })
+      .join('')}
+  </div>
+</div>
+
     <div class="qr-management-wrap">
 
       <div id="qr-print-area" class="qr-print-area">
 
       <div class="qr-guide-poster-wrap">
   <img
-    class="qr-guide-poster"
-    src="/qr-guide-poster.png"
-    alt="QR코드 결제 방법 안내"
-  />
+  class="qr-guide-poster"
+  src="${selectedQrPosterSrc}"
+  alt="QR코드 결제 안내"
+/>
 </div>
 
           <div class="qr-print-main">
@@ -22253,6 +22375,46 @@ document
       qrBox.innerHTML = ''
       qrBox.appendChild(canvas)
     })
+
+    document
+  .querySelectorAll<HTMLButtonElement>(
+    '.qr-template-select-button'
+  )
+  .forEach((button) => {
+
+    button.addEventListener(
+      'click',
+      async () => {
+
+        const templateKey =
+          button.dataset.templateKey
+
+        if (!templateKey) {
+          return
+        }
+
+        const {
+          error: saveTemplateError
+        } = await supabase
+          .from('merchants')
+          .update({
+            qr_template_key:
+              templateKey
+          })
+          .eq('id', merchantId)
+
+        if (saveTemplateError) {
+          alert(
+            'QR 디자인 저장 실패: ' +
+            saveTemplateError.message
+          )
+          return
+        }
+
+        location.reload()
+      }
+    )
+  })
   
     document.querySelector('#copy-kiosk-url')
       ?.addEventListener('click', async () => {
