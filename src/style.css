@@ -13778,3 +13778,21 @@ height: 150px !important;
     padding: 0 !important;
   }
 }
+/* 기본 QR 인쇄 위치 최종 */
+@media print {
+  #qr-print-area[data-qr-template="default"] #merchant-qr-box {
+    left: 86.8% !important;
+    top: 59% !important;
+
+    width: 60mm !important;
+    height: 60mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="default"] #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="default"] #merchant-qr-box img {
+    width: 60mm !important;
+    height: 60mm !important;
+  }
+}
