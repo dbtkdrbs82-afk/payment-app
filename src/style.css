@@ -11080,6 +11080,331 @@ and (orientation: landscape) {
   margin: 0 0 8px !important;
 }
 
+/* =========================================
+   QR 디자인 1~11 인쇄 최종 보정
+   세로형 포스터 780 x 975
+   A4 가로 안에서 160mm x 200mm 사용
+========================================= */
+
+@media print {
+
+  /* 디자인 1~11 포스터 자체 */
+  #qr-print-area:not([data-qr-template="default"])
+  .qr-guide-poster-wrap {
+    position: absolute !important;
+
+    left: 68.5mm !important;
+    top: 5mm !important;
+
+    width: 160mm !important;
+    height: 200mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #qr-print-area:not([data-qr-template="default"])
+  .qr-guide-poster {
+    display: block !important;
+
+    width: 160mm !important;
+    height: 200mm !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    object-fit: fill !important;
+  }
+
+  /* QR 위치를 잡는 투명 레이어도 포스터와 정확히 동일 */
+  #qr-print-area:not([data-qr-template="default"])
+  .qr-print-main {
+    position: absolute !important;
+
+    left: 68.5mm !important;
+    top: 5mm !important;
+
+    width: 160mm !important;
+    height: 200mm !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    aspect-ratio: auto !important;
+  }
+
+
+  /* =========================================
+     디자인 1
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-01"]
+  #merchant-qr-box {
+    left: 70.5% !important;
+    top: 53.5% !important;
+
+    width: 57.4mm !important;
+    height: 57.4mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-01"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-01"]
+  #merchant-qr-box img {
+    width: 57.4mm !important;
+    height: 57.4mm !important;
+  }
+
+
+  /* =========================================
+     디자인 2
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-02"]
+  #merchant-qr-box {
+    left: 47% !important;
+    top: 67% !important;
+
+    width: 51.3mm !important;
+    height: 51.3mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-02"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-02"]
+  #merchant-qr-box img {
+    width: 51.3mm !important;
+    height: 51.3mm !important;
+  }
+
+
+  /* =========================================
+     디자인 3
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-03"]
+  #merchant-qr-box {
+    left: 49% !important;
+    top: 68.5% !important;
+
+    width: 47.2mm !important;
+    height: 47.2mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-03"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-03"]
+  #merchant-qr-box img {
+    width: 47.2mm !important;
+    height: 47.2mm !important;
+  }
+
+
+  /* =========================================
+     디자인 4
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-04"]
+  #merchant-qr-box {
+    left: 49% !important;
+    top: 61% !important;
+
+    width: 45.1mm !important;
+    height: 45.1mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-04"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-04"]
+  #merchant-qr-box img {
+    width: 45.1mm !important;
+    height: 45.1mm !important;
+  }
+
+
+  /* =========================================
+     디자인 5
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-05"]
+  #merchant-qr-box {
+    left: 50% !important;
+    top: 61% !important;
+
+    width: 45.1mm !important;
+    height: 45.1mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-05"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-05"]
+  #merchant-qr-box img {
+    width: 45.1mm !important;
+    height: 45.1mm !important;
+  }
+
+
+  /* =========================================
+     디자인 6
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-06"]
+  #merchant-qr-box {
+    left: 50% !important;
+    top: 49% !important;
+
+    width: 35.9mm !important;
+    height: 35.9mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-06"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-06"]
+  #merchant-qr-box img {
+    width: 35.9mm !important;
+    height: 35.9mm !important;
+  }
+
+
+  /* =========================================
+     디자인 7
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-07"]
+  #merchant-qr-box {
+    left: 59% !important;
+    top: 69% !important;
+
+    width: 30.8mm !important;
+    height: 30.8mm !important;
+
+    transform:
+      translate(-50%, -50%)
+      rotate(-18deg) !important;
+
+    transform-origin: center center !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-07"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-07"]
+  #merchant-qr-box img {
+    width: 30.8mm !important;
+    height: 30.8mm !important;
+  }
+
+
+  /* =========================================
+     디자인 8
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-08"]
+  #merchant-qr-box {
+    left: 50% !important;
+    top: 68% !important;
+
+    width: 69.7mm !important;
+    height: 69.7mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-08"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-08"]
+  #merchant-qr-box img {
+    width: 69.7mm !important;
+    height: 69.7mm !important;
+  }
+
+
+  /* =========================================
+     디자인 9
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-09"]
+  #merchant-qr-box {
+    left: 50% !important;
+    top: 72% !important;
+
+    width: 69.7mm !important;
+    height: 69.7mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-09"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-09"]
+  #merchant-qr-box img {
+    width: 69.7mm !important;
+    height: 69.7mm !important;
+  }
+
+
+  /* =========================================
+     디자인 10
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-10"]
+  #merchant-qr-box {
+    left: 50% !important;
+    top: 70% !important;
+
+    width: 69.7mm !important;
+    height: 69.7mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-10"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-10"]
+  #merchant-qr-box img {
+    width: 69.7mm !important;
+    height: 69.7mm !important;
+  }
+
+
+  /* =========================================
+     디자인 11
+  ========================================= */
+
+  #qr-print-area[data-qr-template="qr-design-11"]
+  #merchant-qr-box {
+    left: 50% !important;
+    top: 53% !important;
+
+    width: 36.9mm !important;
+    height: 36.9mm !important;
+
+    transform: translate(-50%, -50%) !important;
+  }
+
+  #qr-print-area[data-qr-template="qr-design-11"]
+  #merchant-qr-box canvas,
+  #qr-print-area[data-qr-template="qr-design-11"]
+  #merchant-qr-box img {
+    width: 36.9mm !important;
+    height: 36.9mm !important;
+  }
+
+}
 
 /* =========================================
    호텔 QR A4 가로 인쇄
