@@ -13655,10 +13655,6 @@ height: 150px !important;
     margin: 0;
   }
 
-  #qr-print-area[data-qr-template="default"] {
-    page: defaultQr !important;
-  }
-
   #qr-print-area[data-qr-template="default"] .qr-guide-poster-wrap {
     position: absolute !important;
     left: 5mm !important;
@@ -13693,6 +13689,67 @@ height: 150px !important;
     aspect-ratio: auto !important;
   }
 
+  #qr-print-area[data-qr-template="default"] #merchant-qr-box {
+    position: absolute !important;
+    left: 220mm !important;
+    top: 79mm !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
+/* =========================================================
+   기본 QR 가이드 이미지(default) 인쇄 전용
+   A4 가로 고정
+========================================================= */
+
+@page basicQrGuide {
+  size: A4 landscape;
+  margin: 0;
+}
+
+@media print {
+
+  /* 기본 이미지(default)만 가로 페이지 사용 */
+  #qr-print-area[data-qr-template="default"] {
+    page: basicQrGuide !important;
+  }
+
+  /* 기본 포스터 전체 크기 */
+  #qr-print-area[data-qr-template="default"] .qr-guide-poster-wrap {
+    position: absolute !important;
+    left: 5mm !important;
+    top: 5mm !important;
+    width: 287mm !important;
+    height: 200mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  #qr-print-area[data-qr-template="default"] .qr-guide-poster {
+    display: block !important;
+    width: 287mm !important;
+    height: 200mm !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: fill !important;
+  }
+
+  /* QR 올리는 레이어도 포스터와 동일 크기 */
+  #qr-print-area[data-qr-template="default"] .qr-print-main {
+    position: absolute !important;
+    left: 5mm !important;
+    top: 5mm !important;
+    width: 287mm !important;
+    height: 200mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    aspect-ratio: auto !important;
+  }
+
+  /* 기본 이미지용 QR 위치 */
   #qr-print-area[data-qr-template="default"] #merchant-qr-box {
     position: absolute !important;
     left: 220mm !important;
