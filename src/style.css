@@ -13644,3 +13644,59 @@ height: 150px !important;
     transform-origin: center center !important;
   }
 }
+/* =========================================================
+   기본 QR 가이드(default) 인쇄 복구
+   - 1~11 세로형 영향 없음
+   - 기본 이미지만 A4 가로로 복구
+========================================================= */
+@media print {
+  @page defaultQr {
+    size: A4 landscape;
+    margin: 0;
+  }
+
+  #qr-print-area[data-qr-template="default"] {
+    page: defaultQr !important;
+  }
+
+  #qr-print-area[data-qr-template="default"] .qr-guide-poster-wrap {
+    position: absolute !important;
+    left: 5mm !important;
+    top: 5mm !important;
+    width: 287mm !important;
+    height: 200mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+  }
+
+  #qr-print-area[data-qr-template="default"] .qr-guide-poster {
+    display: block !important;
+    width: 287mm !important;
+    height: 200mm !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    object-fit: fill !important;
+  }
+
+  #qr-print-area[data-qr-template="default"] .qr-print-main {
+    position: absolute !important;
+    left: 5mm !important;
+    top: 5mm !important;
+    width: 287mm !important;
+    height: 200mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    aspect-ratio: auto !important;
+  }
+
+  #qr-print-area[data-qr-template="default"] #merchant-qr-box {
+    position: absolute !important;
+    left: 220mm !important;
+    top: 79mm !important;
+    transform: translate(-50%, -50%) !important;
+  }
+}
