@@ -13578,101 +13578,69 @@ height: 150px !important;
 }
 /* =========================================================
    QR 디자인 1~11 인쇄 최종 마무리
-   A4 세로 확대 + 디자인 7 QR 위치 수정
-   화면용 영향 없음
+   A4 세로 고정 + 직접 크기 지정 + 디자인7 위치 보정
 ========================================================= */
-
 @media print {
 
-  /* 일반 QR 디자인 1~11은 A4 세로 */
+  /* 일반 QR 디자인 1~11 */
   @page {
     size: A4 portrait;
     margin: 0;
   }
 
-  /* 기존 태블릿 zoom 영향 제거 */
-  #qr-print-area,
-  .qr-management-wrap,
-  .pg-admin-page,
-  .page {
-    zoom: 1 !important;
+  /* 호텔 인쇄는 기존 named page 유지 */
+  #qr-print-area[data-qr-template="default"] {
+    page: auto !important;
   }
 
-  /* -----------------------------------------------------
-     포스터 원본 비율 160 x 200 유지
-     전체를 1.25배 확대
-     실제 출력 크기 = 200 x 250mm
-     A4 세로 가운데 배치
-  ----------------------------------------------------- */
-
-  #qr-print-area:not([data-qr-template="default"])
-  .qr-guide-poster-wrap {
+  /* 확대 transform 방식 제거 */
+  #qr-print-area:not([data-qr-template="default"]) .qr-guide-poster-wrap {
     position: absolute !important;
-
     left: 5mm !important;
     top: 23.5mm !important;
-
-    width: 160mm !important;
-    height: 200mm !important;
-
+    width: 200mm !important;
+    height: 250mm !important;
     margin: 0 !important;
     padding: 0 !important;
-
-    transform: scale(1.25) !important;
+    transform: none !important;
     transform-origin: top left !important;
   }
 
-  #qr-print-area:not([data-qr-template="default"])
-  .qr-guide-poster {
+  #qr-print-area:not([data-qr-template="default"]) .qr-guide-poster {
     display: block !important;
-
-    width: 160mm !important;
-    height: 200mm !important;
-
+    width: 200mm !important;
+    height: 250mm !important;
     max-width: none !important;
     max-height: none !important;
-
     margin: 0 !important;
     padding: 0 !important;
-
     object-fit: fill !important;
   }
 
-  /* QR 레이어도 포스터와 똑같이 확대 */
-  #qr-print-area:not([data-qr-template="default"])
-  .qr-print-main {
+  /* QR 올리는 메인 레이어도 같은 크기 */
+  #qr-print-area:not([data-qr-template="default"]) .qr-print-main {
     position: absolute !important;
-
     left: 5mm !important;
     top: 23.5mm !important;
-
-    width: 160mm !important;
-    height: 200mm !important;
-
+    width: 200mm !important;
+    height: 250mm !important;
     margin: 0 !important;
     padding: 0 !important;
-
-    transform: scale(1.25) !important;
+    transform: none !important;
     transform-origin: top left !important;
-
     aspect-ratio: auto !important;
   }
 
-  /* -----------------------------------------------------
-     디자인 7
-     화면용 위치와 동일하게 맞춤
-     기존 59% → 49%
-  ----------------------------------------------------- */
+  /* QR 박스 자체 */
+  #qr-print-area:not([data-qr-template="default"]) #merchant-qr-box {
+    position: absolute !important;
+  }
 
-  #qr-print-area[data-qr-template="qr-design-07"]
-  #merchant-qr-box {
+  /* 디자인 7만 별도 보정 */
+  #qr-print-area[data-qr-template="qr-design-07"] #merchant-qr-box {
     left: 49% !important;
     top: 69% !important;
-
-    transform:
-      translate(-50%, -50%)
-      rotate(-18deg) !important;
-
+    transform: translate(-50%, -50%) rotate(-18deg) !important;
     transform-origin: center center !important;
   }
 }
