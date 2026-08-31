@@ -8243,7 +8243,7 @@ and (orientation: landscape) {
 }
 @media print {
   @page {
-    size: A4 landscape;
+    size: A4 portrait;
     margin: 0;
   }
 
@@ -11412,7 +11412,7 @@ and (orientation: landscape) {
 
 @media print {
 
-  @page {
+  @page hotelQr {
     size: A4 landscape;
     margin: 5mm;
   }
@@ -11438,6 +11438,7 @@ and (orientation: landscape) {
   }
 
   #hotel-poster-print-area {
+    page: hotelQr;
     position: absolute !important;
 
     left: 5mm !important;
