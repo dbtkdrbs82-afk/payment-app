@@ -8363,6 +8363,273 @@ and (orientation: landscape) {
     border: none !important;
     box-shadow: none !important;
   }
+
+  /* =========================================
+   QR 디자인 1 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-01"]
+#merchant-qr-box {
+  left: 207.3mm !important;
+  top: 112mm !important;
+
+  width: 103mm !important;
+  height: 103mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-01"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-01"]
+#merchant-qr-box img {
+  width: 103mm !important;
+  height: 103mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 2 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-02"]
+#merchant-qr-box {
+  left: 139.9mm !important;
+  top: 139mm !important;
+
+  width: 92mm !important;
+  height: 92mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-02"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-02"]
+#merchant-qr-box img {
+  width: 92mm !important;
+  height: 92mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 3 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-03"]
+#merchant-qr-box {
+  left: 145.6mm !important;
+  top: 142mm !important;
+
+  width: 84.6mm !important;
+  height: 84.6mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-03"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-03"]
+#merchant-qr-box img {
+  width: 84.6mm !important;
+  height: 84.6mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 4 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-04"]
+#merchant-qr-box {
+  left: 145.6mm !important;
+  top: 127mm !important;
+
+  width: 80.9mm !important;
+  height: 80.9mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-04"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-04"]
+#merchant-qr-box img {
+  width: 80.9mm !important;
+  height: 80.9mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 5 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-05"]
+#merchant-qr-box {
+  left: 148.5mm !important;
+  top: 127mm !important;
+
+  width: 80.9mm !important;
+  height: 80.9mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-05"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-05"]
+#merchant-qr-box img {
+  width: 80.9mm !important;
+  height: 80.9mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 6 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-06"]
+#merchant-qr-box {
+  left: 148.5mm !important;
+  top: 103mm !important;
+
+  width: 64.4mm !important;
+  height: 64.4mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-06"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-06"]
+#merchant-qr-box img {
+  width: 64.4mm !important;
+  height: 64.4mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 7 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-07"]
+#merchant-qr-box {
+  left: 174.3mm !important;
+  top: 143mm !important;
+
+  width: 55.2mm !important;
+  height: 55.2mm !important;
+
+  transform:
+    translate(-50%, -50%)
+    rotate(-18deg) !important;
+
+  transform-origin: center center !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-07"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-07"]
+#merchant-qr-box img {
+  width: 55.2mm !important;
+  height: 55.2mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 8 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-08"]
+#merchant-qr-box {
+  left: 148.5mm !important;
+  top: 141mm !important;
+
+  width: 125.1mm !important;
+  height: 125.1mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-08"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-08"]
+#merchant-qr-box img {
+  width: 125.1mm !important;
+  height: 125.1mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 9 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-09"]
+#merchant-qr-box {
+  left: 148.5mm !important;
+  top: 149mm !important;
+
+  width: 125.1mm !important;
+  height: 125.1mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-09"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-09"]
+#merchant-qr-box img {
+  width: 125.1mm !important;
+  height: 125.1mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 10 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-10"]
+#merchant-qr-box {
+  left: 148.5mm !important;
+  top: 145mm !important;
+
+  width: 125.1mm !important;
+  height: 125.1mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-10"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-10"]
+#merchant-qr-box img {
+  width: 125.1mm !important;
+  height: 125.1mm !important;
+}
+
+
+/* =========================================
+   QR 디자인 11 인쇄
+========================================= */
+
+#qr-print-area[data-qr-template="qr-design-11"]
+#merchant-qr-box {
+  left: 148.5mm !important;
+  top: 111mm !important;
+
+  width: 66.2mm !important;
+  height: 66.2mm !important;
+
+  transform: translate(-50%, -50%) !important;
+}
+
+#qr-print-area[data-qr-template="qr-design-11"]
+#merchant-qr-box canvas,
+#qr-print-area[data-qr-template="qr-design-11"]
+#merchant-qr-box img {
+  width: 66.2mm !important;
+  height: 66.2mm !important;
+}
 }
 /* =========================================
    아카데미 메인홈
