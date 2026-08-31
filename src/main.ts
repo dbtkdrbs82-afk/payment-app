@@ -10093,6 +10093,160 @@ branch_admin_name: row.branch_admin_name || '',
         
         const payoutRows: PayoutGroup[] =
           Object.values(payoutGroupMap)
+
+          const { data: payoutOrgMerchants, error: payoutOrgMerchantError } =
+  await supabase
+    .from('merchants')
+    .select(`
+      id,
+      merchant_name,
+      branch_admin_id,
+      agency_admin_id,
+      manager_admin_id
+    `)
+
+if (payoutOrgMerchantError) {
+  alert(
+    '출금 조직 가맹점 조회 실패: ' +
+    payoutOrgMerchantError.message
+  )
+  return
+}
+
+const { data: payoutOrgAdmins, error: payoutOrgAdminError } =
+  await supabase
+    .from('admin_users')
+    .select(`
+      id,
+      admin_name,
+      company_name,
+      role,
+      parent_admin_id
+    `)
+
+if (payoutOrgAdminError) {
+  alert(
+    '출금 조직정보 조회 실패: ' +
+    payoutOrgAdminError.message
+  )
+  return
+}
+
+const payoutMerchantMap =
+  new Map<number, any>()
+
+;(payoutOrgMerchants || []).forEach((merchant: any) => {
+  payoutMerchantMap.set(
+    Number(merchant.id),
+    merchant
+  )
+})
+
+const payoutAdminMap =
+  new Map<number, any>()
+
+;(payoutOrgAdmins || []).forEach((admin: any) => {
+  payoutAdminMap.set(
+    Number(admin.id),
+    admin
+  )
+})
+
+const getPayoutAdminSearchText = (admin: any) => {
+  if (!admin) return ''
+
+  const companyName =
+    String(admin.company_name || '').trim()
+
+  const adminName =
+    String(admin.admin_name || '').trim()
+
+  return [
+    companyName,
+    adminName,
+    companyName && adminName
+      ? companyName + '(' + adminName + ')'
+      : ''
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
+}
+
+const getPayoutMerchantOrganization = (
+  merchantId: number
+) => {
+  const merchant =
+    payoutMerchantMap.get(merchantId)
+
+  if (!merchant) {
+    return {
+      merchant: '',
+      manager: '',
+      agency: '',
+      branch: ''
+    }
+  }
+
+  const manager =
+    merchant.manager_admin_id
+      ? payoutAdminMap.get(
+          Number(merchant.manager_admin_id)
+        )
+      : null
+
+  let agency =
+    merchant.agency_admin_id
+      ? payoutAdminMap.get(
+          Number(merchant.agency_admin_id)
+        )
+      : null
+
+  let branch =
+    merchant.branch_admin_id
+      ? payoutAdminMap.get(
+          Number(merchant.branch_admin_id)
+        )
+      : null
+
+  if (!agency && manager) {
+    const parent =
+      payoutAdminMap.get(
+        Number(manager.parent_admin_id)
+      )
+
+    if (parent?.role === 'AGENCY') {
+      agency = parent
+    }
+
+    if (parent?.role === 'BRANCH') {
+      branch = parent
+    }
+  }
+
+  if (!branch && agency) {
+    branch =
+      payoutAdminMap.get(
+        Number(agency.parent_admin_id)
+      )
+  }
+
+  return {
+    merchant:
+      String(
+        merchant.merchant_name || ''
+      ).toLowerCase(),
+
+    manager:
+      getPayoutAdminSearchText(manager),
+
+    agency:
+      getPayoutAdminSearchText(agency),
+
+    branch:
+      getPayoutAdminSearchText(branch)
+  }
+}
           
           const getFilteredPayoutRows = () => {
             const pgFilter =
@@ -10136,33 +10290,51 @@ branch_admin_name: row.branch_admin_name || '',
                 return false
               }
 
-              if (targetFilter !== '전체' && keyword) {
-                let targetText = ''
-              
-                if (targetFilter === '가맹점') {
-                  targetText = String(row.merchant_name || '')
-                } else if (targetFilter === '담당자') {
-                  targetText = String(row.manager_admin_name || '')
-                } else if (targetFilter === '대리점') {
-                  targetText = String(row.agency_admin_name || '')
-                } else if (targetFilter === '지사') {
-                  targetText = String(row.branch_admin_name || '')
-                }
-              
-                if (!targetText.includes(keyword)) {
-                  return false
-                }
-              }
-          
               if (keyword) {
-                const searchText =
-                  String(row.merchant_id || '') + ' ' +
-                  String(row.merchant_name || '') + ' ' +
-                  String(row.pg_company || '') + ' ' +
-                  String(row.order_id || '') + ' ' +
-                  String(row.payment_key || '')
-          
-                if (!searchText.includes(keyword)) {
+                const normalizedKeyword =
+                  keyword.toLowerCase()
+              
+                const organization =
+                  getPayoutMerchantOrganization(
+                    Number(row.merchant_id)
+                  )
+              
+                const targetMap: Record<string, string> = {
+                  전체: [
+                    organization.merchant,
+                    organization.manager,
+                    organization.agency,
+                    organization.branch,
+                    String(row.merchant_id || ''),
+                    String(row.pg_company || ''),
+                    String(row.order_id || ''),
+                    String(row.payment_key || '')
+                  ]
+                    .join(' ')
+                    .toLowerCase(),
+              
+                  가맹점:
+                    organization.merchant,
+              
+                  담당자:
+                    organization.manager,
+              
+                  대리점:
+                    organization.agency,
+              
+                  지사:
+                    organization.branch
+                }
+              
+                const targetText =
+                  targetMap[targetFilter] ||
+                  targetMap['전체']
+              
+                if (
+                  !targetText.includes(
+                    normalizedKeyword
+                  )
+                ) {
                   return false
                 }
               }
@@ -13110,11 +13282,22 @@ const paymentAdminMap =
 const getPaymentOrgName = (admin: any) => {
   if (!admin) return ''
 
-  return String(
-    admin.company_name ||
-    admin.admin_name ||
-    ''
-  ).toLowerCase()
+  const companyName =
+    String(admin.company_name || '').trim()
+
+  const adminName =
+    String(admin.admin_name || '').trim()
+
+  return [
+    companyName,
+    adminName,
+    companyName && adminName
+      ? companyName + '(' + adminName + ')'
+      : ''
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase()
 }
 
 const getPaymentMerchantOrganization = (
