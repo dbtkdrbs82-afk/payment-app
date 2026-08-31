@@ -29876,6 +29876,7 @@ reservationDateInput?.addEventListener(
 beauty_staff_name?: string
 reservation_date?: string
 reservation_time?: string
+beauty_schedule_status?: Record<string, string>
   }[] = []
 
         const renderCart = () => {
@@ -29958,14 +29959,29 @@ reservation_time?: string
                           <option value="">예약시간 선택</option>
                           ${getBeautyBusinessTimes(
                             item.reservation_date || ''
-                          ).map((time) => `
-                            <option
-                              value="${time}"
-                              ${item.reservation_time === time ? 'selected' : ''}
-                            >
-                              ${time}
-                            </option>
-                          `).join('')}
+                          ).map((time) => {
+                          
+                            const scheduleStatus =
+                              item.beauty_schedule_status?.[time] ||
+                              '예약가능'
+                          
+                            const isUnavailable =
+                              scheduleStatus !== '예약가능'
+                          
+                            return `
+                              <option
+                                value="${time}"
+                                ${isUnavailable ? 'disabled' : ''}
+                                ${
+                                  item.reservation_time === time
+                                    ? 'selected'
+                                    : ''
+                                }
+                              >
+                                ${time}${isUnavailable ? ' 예약불가' : ''}
+                              </option>
+                            `
+                          }).join('')}
                         </select>
                       </div>
                     `
@@ -30000,7 +30016,7 @@ const item = cart.find(
     '.beauty-cart-date-input'
   )
   .forEach((input) => {
-    input.addEventListener('change', () => {
+    input.addEventListener('change', async () => {
       const key = input.dataset.key || ''
 
       const item = cart.find(
@@ -30008,8 +30024,71 @@ const item = cart.find(
       )
 
       if (item) {
-        item.reservation_date = input.value
+        item.reservation_date =
+          input.value
+      
         item.reservation_time = ''
+      
+        item.beauty_schedule_status = {}
+      
+        if (
+          item.beauty_staff_id &&
+          input.value
+        ) {
+          const {
+            data: staffScheduleRows,
+            error: staffScheduleError
+          } =
+            await supabase
+              .from('beauty_staff_schedule')
+              .select(`
+                schedule_time,
+                status
+              `)
+              .eq(
+                'merchant_id',
+                merchantId
+              )
+              .eq(
+                'staff_id',
+                item.beauty_staff_id
+              )
+              .eq(
+                'schedule_date',
+                input.value
+              )
+      
+          if (staffScheduleError) {
+            alert(
+              '직원 스케줄 조회 실패: ' +
+              staffScheduleError.message
+            )
+            return
+          }
+      
+          const scheduleStatusMap:
+            Record<string, string> = {}
+      
+          ;(staffScheduleRows || [])
+            .forEach((row: any) => {
+      
+              const time =
+                String(
+                  row.schedule_time || ''
+                ).slice(0, 5)
+      
+              if (!time) return
+      
+              scheduleStatusMap[time] =
+                String(
+                  row.status || '예약가능'
+                )
+            })
+      
+          item.beauty_schedule_status =
+            scheduleStatusMap
+        }
+      
         renderCart()
       }
     })
