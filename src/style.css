@@ -13757,3 +13757,24 @@ height: 150px !important;
     transform: translate(-50%, -50%) !important;
   }
 }
+/* =========================================================
+   기본 QR 가이드 잘림 최종 복구
+   디자인 1~11 / 호텔 영향 없음
+========================================================= */
+@media print {
+
+  #qr-print-area[data-qr-template="default"] {
+    page: basicQrGuide !important;
+
+    width: 297mm !important;
+    height: 210mm !important;
+
+    max-width: none !important;
+    max-height: none !important;
+
+    overflow: visible !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
