@@ -8274,8 +8274,8 @@ and (orientation: landscape) {
     left: 0 !important;
     top: 0 !important;
 
-    width: 297mm !important;
-    height: 210mm !important;
+    width: 210mm !important;
+height: 297mm !important;
 
     margin: 0 !important;
     padding: 0 !important;
@@ -11093,8 +11093,8 @@ and (orientation: landscape) {
   .qr-guide-poster-wrap {
     position: absolute !important;
 
-    left: 68.5mm !important;
-    top: 5mm !important;
+    left: 25mm !important;
+top: 48.5mm !important;
 
     width: 160mm !important;
     height: 200mm !important;
@@ -11124,8 +11124,8 @@ and (orientation: landscape) {
   .qr-print-main {
     position: absolute !important;
 
-    left: 68.5mm !important;
-    top: 5mm !important;
+    left: 25mm !important;
+top: 48.5mm !important;
 
     width: 160mm !important;
     height: 200mm !important;
@@ -11418,9 +11418,9 @@ and (orientation: landscape) {
   }
 
   html,
-  body {
-    width: 297mm !important;
-    height: 210mm !important;
+body {
+  width: 210mm !important;
+  height: 297mm !important;
 
     margin: 0 !important;
     padding: 0 !important;
