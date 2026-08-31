@@ -29148,6 +29148,7 @@ const isBeautyKiosk =
 
 let beautyKioskStaff: any[] = []
 let beautyKioskStaffServices: any[] = []
+let beautyKioskBusinessHours: any[] = []
 
 if (isBeautyKiosk) {
   const { data: staffData, error: staffError } =
@@ -29170,16 +29171,41 @@ if (isBeautyKiosk) {
       .select('staff_id, service_id')
       .eq('merchant_id', merchantId)
 
-  if (connectionError) {
-    alert(
-      '직원 서비스 조회 실패: ' +
-      connectionError.message
-    )
-  } else {
-    beautyKioskStaffServices =
-      connectionData || []
-  }
-}
+      if (connectionError) {
+        alert(
+          '직원 서비스 조회 실패: ' +
+          connectionError.message
+        )
+      } else {
+        beautyKioskStaffServices =
+          connectionData || []
+      }
+      
+      const {
+        data: businessHoursData,
+        error: businessHoursError
+      } =
+        await supabase
+          .from('beauty_business_hours')
+          .select(`
+            weekday,
+            open_time,
+            close_time,
+            is_closed,
+            is_24_hours
+          `)
+          .eq('merchant_id', merchantId)
+      
+      if (businessHoursError) {
+        alert(
+          '영업시간 조회 실패: ' +
+          businessHoursError.message
+        )
+      } else {
+        beautyKioskBusinessHours =
+          businessHoursData || []
+      }
+      }
 
       const { data: products, error } = await supabase
         .from('products')
@@ -29592,6 +29618,70 @@ ${
       `${hour}:${minute}`
     )
   }
+
+  const getBeautyBusinessTimes = (
+    reservationDate: string
+  ) => {
+    if (
+      !isBeautyKiosk ||
+      !reservationDate
+    ) {
+      return []
+    }
+  
+    const date =
+      new Date(
+        reservationDate + 'T00:00:00'
+      )
+  
+    const weekday =
+      date.getDay()
+  
+    const businessHour =
+      beautyKioskBusinessHours.find(
+        (row: any) =>
+          Number(row.weekday) === weekday
+      )
+  
+    if (!businessHour) {
+      return []
+    }
+  
+    if (
+      businessHour.is_closed === true
+    ) {
+      return []
+    }
+  
+    if (
+      businessHour.is_24_hours === true
+    ) {
+      return [...beautyReservationTimes]
+    }
+  
+    const openTime =
+      String(
+        businessHour.open_time || ''
+      ).slice(0, 5)
+  
+    const closeTime =
+      String(
+        businessHour.close_time || ''
+      ).slice(0, 5)
+  
+    if (
+      !openTime ||
+      !closeTime
+    ) {
+      return []
+    }
+  
+    return beautyReservationTimes.filter(
+      (time) =>
+        time >= openTime &&
+        time < closeTime
+    )
+  }
         
         function updateBeautyReservationTimes(
           reservedOrders: any[]
@@ -29866,7 +29956,9 @@ reservation_time?: string
                           "
                         >
                           <option value="">예약시간 선택</option>
-                          ${beautyReservationTimes.map((time) => `
+                          ${getBeautyBusinessTimes(
+                            item.reservation_date || ''
+                          ).map((time) => `
                             <option
                               value="${time}"
                               ${item.reservation_time === time ? 'selected' : ''}
@@ -29917,6 +30009,8 @@ const item = cart.find(
 
       if (item) {
         item.reservation_date = input.value
+        item.reservation_time = ''
+        renderCart()
       }
     })
   })
