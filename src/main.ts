@@ -17,6 +17,124 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
 
+type MerchantOrganizationSearch = {
+  merchant: string
+  manager: string
+  agency: string
+  branch: string
+}
+
+async function loadMerchantOrganizationSearchMap():
+  Promise<Map<number, MerchantOrganizationSearch>> {
+
+  const { data: merchants, error: merchantError } =
+    await supabase
+      .from('merchants')
+      .select('id, merchant_name, manager_admin_id')
+
+  if (merchantError) {
+    throw new Error(
+      '가맹점 조직정보 조회 실패: ' +
+      merchantError.message
+    )
+  }
+
+  const { data: admins, error: adminError } =
+    await supabase
+      .from('admin_users')
+      .select('id, admin_name, role, parent_admin_id')
+
+  if (adminError) {
+    throw new Error(
+      '조직정보 조회 실패: ' +
+      adminError.message
+    )
+  }
+
+  const adminMap = new Map<number, any>()
+
+  ;(admins || []).forEach((admin: any) => {
+    adminMap.set(
+      Number(admin.id),
+      admin
+    )
+  })
+
+  const organizationMap =
+    new Map<number, MerchantOrganizationSearch>()
+
+  ;(merchants || []).forEach((merchant: any) => {
+
+    const manager =
+      merchant.manager_admin_id
+        ? adminMap.get(
+            Number(merchant.manager_admin_id)
+          )
+        : null
+
+    let agency: any = null
+    let branch: any = null
+
+    if (manager) {
+
+      const parent =
+        manager.parent_admin_id
+          ? adminMap.get(
+              Number(manager.parent_admin_id)
+            )
+          : null
+
+      if (
+        String(parent?.role || '').toUpperCase() ===
+        'AGENCY'
+      ) {
+        agency = parent
+
+        branch =
+          agency.parent_admin_id
+            ? adminMap.get(
+                Number(agency.parent_admin_id)
+              )
+            : null
+      }
+
+      if (
+        String(parent?.role || '').toUpperCase() ===
+        'BRANCH'
+      ) {
+        branch = parent
+      }
+    }
+
+    organizationMap.set(
+      Number(merchant.id),
+      {
+        merchant:
+          String(
+            merchant.merchant_name || ''
+          ).trim().toLowerCase(),
+
+        manager:
+          String(
+            manager?.admin_name || ''
+          ).trim().toLowerCase(),
+
+        agency:
+          String(
+            agency?.admin_name || ''
+          ).trim().toLowerCase(),
+
+        branch:
+          String(
+            branch?.admin_name || ''
+          ).trim().toLowerCase()
+      }
+    )
+  })
+
+  return organizationMap
+}
+
 /* =========================================
    가맹점 로그인 상태 복구
 ========================================= */
