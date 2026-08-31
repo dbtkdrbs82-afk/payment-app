@@ -5861,9 +5861,9 @@ const getManagerMerchantCount = (managerId: number) =>
   const getMerchantPaymentAmount = (merchantId: number) => {
     const now = new Date()
   
-    const previousMonthStart = new Date(
+    const currentMonthStart = new Date(
       now.getFullYear(),
-      now.getMonth() - 1,
+      now.getMonth(),
       1,
       0,
       0,
@@ -5871,9 +5871,9 @@ const getManagerMerchantCount = (managerId: number) =>
       0
     )
   
-    const currentMonthStart = new Date(
+    const nextMonthStart = new Date(
       now.getFullYear(),
-      now.getMonth(),
+      now.getMonth() + 1,
       1,
       0,
       0,
@@ -5892,8 +5892,8 @@ const getManagerMerchantCount = (managerId: number) =>
         )
   
         return (
-          paymentDate >= previousMonthStart &&
-          paymentDate < currentMonthStart
+          paymentDate >= currentMonthStart &&
+          paymentDate < nextMonthStart
         )
       })
       .reduce(
@@ -13047,6 +13047,138 @@ if (result.error) {
 
 let payments = result.data || []
 
+const { data: paymentOrgMerchants, error: paymentOrgMerchantError } =
+  await supabase
+    .from('merchants')
+    .select(`
+      id,
+      merchant_name,
+      branch_admin_id,
+      agency_admin_id,
+      manager_admin_id
+    `)
+
+if (paymentOrgMerchantError) {
+  alert(
+    '가맹점 조직정보 조회 실패: ' +
+    paymentOrgMerchantError.message
+  )
+  return
+}
+
+const { data: paymentOrgAdmins, error: paymentOrgAdminError } =
+  await supabase
+    .from('admin_users')
+    .select(`
+      id,
+      admin_name,
+      company_name,
+      role,
+      parent_admin_id
+    `)
+
+if (paymentOrgAdminError) {
+  alert(
+    '조직정보 조회 실패: ' +
+    paymentOrgAdminError.message
+  )
+  return
+}
+
+const paymentMerchantMap =
+  new Map<number, any>()
+
+;(paymentOrgMerchants || []).forEach((merchant: any) => {
+  paymentMerchantMap.set(
+    Number(merchant.id),
+    merchant
+  )
+})
+
+const paymentAdminMap =
+  new Map<number, any>()
+
+;(paymentOrgAdmins || []).forEach((admin: any) => {
+  paymentAdminMap.set(
+    Number(admin.id),
+    admin
+  )
+})
+
+const getPaymentOrgName = (admin: any) => {
+  if (!admin) return ''
+
+  return String(
+    admin.company_name ||
+    admin.admin_name ||
+    ''
+  ).toLowerCase()
+}
+
+const getPaymentMerchantOrganization = (
+  merchantId: number
+) => {
+  const merchant =
+    paymentMerchantMap.get(merchantId)
+
+  if (!merchant) {
+    return {
+      manager: '',
+      agency: '',
+      branch: ''
+    }
+  }
+
+  const manager =
+    merchant.manager_admin_id
+      ? paymentAdminMap.get(
+          Number(merchant.manager_admin_id)
+        )
+      : null
+
+  let agency =
+    merchant.agency_admin_id
+      ? paymentAdminMap.get(
+          Number(merchant.agency_admin_id)
+        )
+      : null
+
+  let branch =
+    merchant.branch_admin_id
+      ? paymentAdminMap.get(
+          Number(merchant.branch_admin_id)
+        )
+      : null
+
+  if (!agency && manager) {
+    const parent =
+      paymentAdminMap.get(
+        Number(manager.parent_admin_id)
+      )
+
+    if (parent?.role === 'AGENCY') {
+      agency = parent
+    }
+
+    if (parent?.role === 'BRANCH') {
+      branch = parent
+    }
+  }
+
+  if (!branch && agency) {
+    branch =
+      paymentAdminMap.get(
+        Number(agency.parent_admin_id)
+      )
+  }
+
+  return {
+    manager: getPaymentOrgName(manager),
+    agency: getPaymentOrgName(agency),
+    branch: getPaymentOrgName(branch)
+  }
+}
+
 if (adminRole === 'MANAGER') {
   const { data: currentManager, error: managerPaymentError } = await supabase
     .from('admin_users')
@@ -13160,20 +13292,39 @@ if (paymentFilters) {
 
   if (keyword) {
     payments = payments.filter((payment) => {
+      const organization =
+        getPaymentMerchantOrganization(
+          Number(payment.merchant_id)
+        )
+  
       const targetMap: Record<string, string> = {
-        name: String(payment.merchant_name || '').toLowerCase(),
-        manager: String(payment.merchant_name || '').toLowerCase(),
-        agency: String(payment.merchant_name || '').toLowerCase(),
-        branch: String(payment.merchant_name || '').toLowerCase(),
-        order_id: String(payment.order_id || '').toLowerCase(),
-        payment_key: String(payment.payment_key || '').toLowerCase()
+        name: String(
+          payment.merchant_name || ''
+        ).toLowerCase(),
+  
+        manager: organization.manager,
+        agency: organization.agency,
+        branch: organization.branch,
+  
+        order_id: String(
+          payment.order_id || ''
+        ).toLowerCase(),
+  
+        payment_key: String(
+          payment.payment_key || ''
+        ).toLowerCase()
       }
-
+  
       if (searchType === 'all') {
-        return Object.values(targetMap).some((value) => value.includes(keyword))
+        return Object.values(targetMap).some((value) =>
+          value.includes(keyword)
+        )
       }
-
-      return targetMap[searchType]?.includes(keyword) || false
+  
+      return (
+        targetMap[searchType]?.includes(keyword) ||
+        false
+      )
     })
   }
 }
