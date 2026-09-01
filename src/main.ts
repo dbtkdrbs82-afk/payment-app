@@ -21070,6 +21070,17 @@ document.querySelector('#merchant-product-image-file')
       const price =
         Number((document.getElementById('merchant-product-price') as HTMLInputElement)?.value || 0)
 
+        const durationMinutes =
+        isBeauty
+          ? Number(
+              (
+                document.getElementById(
+                  'merchant-product-duration'
+                ) as HTMLSelectElement
+              )?.value || 30
+            )
+          : null 
+
         const category =
   isBeauty
     ? '뷰티서비스'
@@ -21118,15 +21129,19 @@ document.querySelector('#merchant-product-image-file')
       }
 
       const { error } = await supabase
-        .from('products')
-        .insert({
-          merchant_id: merchantId,
-          product_name: productName,
-          price: price,
-          category: category,
-          image_url: imageUrl,
-          status: '판매중'
-        })
+  .from('products')
+  .insert({
+    merchant_id: merchantId,
+    product_name: productName,
+    price: price,
+    category: category,
+    image_url: imageUrl,
+    duration_minutes:
+      isBeauty
+        ? durationMinutes
+        : null,
+    status: '판매중'
+  })
 
       if (error) {
         alert('상품 등록 실패: ' + error.message)
