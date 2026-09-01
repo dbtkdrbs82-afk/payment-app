@@ -13974,3 +13974,46 @@ height: 150px !important;
   }
 
 }
+/* =========================================
+   뷰티 직원관리 배치 최종 보정
+========================================= */
+
+.beauty-staff-work-area {
+  grid-template-columns:
+    minmax(360px, 380px)
+    minmax(720px, 1fr);
+
+  column-gap: 36px;
+}
+
+
+/* 직원목록 가로 스크롤 제거 */
+.beauty-staff-work-area
+#beauty-staff-list-area {
+  min-width: 0;
+  overflow: visible;
+}
+
+.beauty-staff-work-area
+#beauty-staff-list-area
+.product-list-card {
+  width: 100%;
+  min-width: 0 !important;
+  overflow: visible;
+}
+
+
+/* 주간 근무표를 실제 7일 폭에 맞춤 */
+.beauty-staff-weekly-card {
+  width: 100%;
+  min-width: 720px;
+}
+
+.beauty-staff-weekly-grid {
+  grid-template-columns:
+    105px
+    repeat(7, minmax(72px, 1fr));
+
+  width: 100%;
+  min-width: 0;
+}
