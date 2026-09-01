@@ -29965,9 +29965,16 @@ beauty_schedule_status?: Record<string, string>
                               item.beauty_schedule_status?.[time] ||
                               '예약가능'
                           
-                            const isUnavailable =
+                              const isUnavailable =
                               scheduleStatus !== '예약가능'
-                          
+                            
+                            const statusText =
+                              scheduleStatus === '예약완료'
+                                ? '예약완료'
+                                : isUnavailable
+                                  ? '예약불가'
+                                  : ''
+                            
                             return `
                               <option
                                 value="${time}"
@@ -29978,7 +29985,11 @@ beauty_schedule_status?: Record<string, string>
                                     : ''
                                 }
                               >
-                                ${time}${isUnavailable ? ' 예약불가' : ''}
+                                ${time}${
+                                  statusText
+                                    ? ' ' + statusText
+                                    : ''
+                                }
                               </option>
                             `
                           }).join('')}
@@ -30084,6 +30095,110 @@ const item = cart.find(
                   row.status || '예약가능'
                 )
             })
+
+            const {
+              data: reservedOrders,
+              error: reservedOrdersError
+            } =
+              await supabase
+                .from('orders')
+                .select(`
+                  id,
+                  items,
+                  order_status,
+                  payment_status
+                `)
+                .eq(
+                  'merchant_id',
+                  Number(merchantId)
+                )
+                .contains(
+                  'items',
+                  [
+                    {
+                      beauty_staff_id:
+                        Number(
+                          item.beauty_staff_id
+                        ),
+            
+                      reservation_date:
+                        input.value
+                    }
+                  ]
+                )
+            
+            if (reservedOrdersError) {
+              alert(
+                '기존 예약 조회 실패: ' +
+                reservedOrdersError.message
+              )
+              return
+            }
+            
+            ;(reservedOrders || [])
+              .forEach((order: any) => {
+            
+                const orderStatus =
+                  String(
+                    order.order_status || ''
+                  )
+            
+                const paymentStatus =
+                  String(
+                    order.payment_status || ''
+                  )
+            
+                if (
+                  orderStatus.includes('취소') ||
+                  paymentStatus.includes('취소')
+                ) {
+                  return
+                }
+            
+                const orderItems =
+                  Array.isArray(order.items)
+                    ? order.items
+                    : []
+            
+                orderItems.forEach(
+                  (orderItem: any) => {
+            
+                    if (
+                      Number(
+                        orderItem.beauty_staff_id
+                      ) !==
+                      Number(
+                        item.beauty_staff_id
+                      )
+                    ) {
+                      return
+                    }
+            
+                    if (
+                      String(
+                        orderItem.reservation_date ||
+                        ''
+                      ) !== input.value
+                    ) {
+                      return
+                    }
+            
+                    const reservedTime =
+                      String(
+                        orderItem.reservation_time ||
+                        ''
+                      ).slice(0, 5)
+            
+                    if (!reservedTime) {
+                      return
+                    }
+            
+                    scheduleStatusMap[
+                      reservedTime
+                    ] = '예약완료'
+                  }
+                )
+              })
       
           item.beauty_schedule_status =
             scheduleStatusMap
