@@ -30069,6 +30069,37 @@ const durationMinutes =
     Number(item.quantity || 1)
   )
 
+  if (time === '15:30') {
+    console.log(
+      '뷰티시간확인',
+      {
+        상품명:
+          item.name,
+  
+        소요시간저장값:
+          item.duration_minutes,
+  
+        실제계산분:
+          durationMinutes,
+  
+        상태1530:
+          item.beauty_schedule_status?.[
+            '15:30'
+          ],
+  
+        상태1600:
+          item.beauty_schedule_status?.[
+            '16:00'
+          ],
+  
+        상태1630:
+          item.beauty_schedule_status?.[
+            '16:30'
+          ]
+      }
+    )
+  }
+
   const businessTimes =
   getBeautyBusinessTimes(
     item.reservation_date || ''
