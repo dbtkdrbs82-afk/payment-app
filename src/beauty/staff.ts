@@ -22,6 +22,85 @@ export async function renderBeautyStaff(
   .select('*')
   .eq('merchant_id', merchantId)
   .order('id', { ascending: false })
+
+  const today =
+  new Date()
+
+const monday =
+  new Date(today)
+
+const currentDay =
+  today.getDay()
+
+const mondayOffset =
+  currentDay === 0
+    ? -6
+    : 1 - currentDay
+
+monday.setDate(
+  today.getDate() + mondayOffset
+)
+
+monday.setHours(
+  0,
+  0,
+  0,
+  0
+)
+
+const beautyWeekDates =
+  Array.from(
+    { length: 7 },
+    (_, index) => {
+
+      const date =
+        new Date(monday)
+
+      date.setDate(
+        monday.getDate() + index
+      )
+
+      const dateValue =
+        date.getFullYear() +
+        '-' +
+        String(
+          date.getMonth() + 1
+        ).padStart(2, '0') +
+        '-' +
+        String(
+          date.getDate()
+        ).padStart(2, '0')
+
+      return {
+        dateValue,
+
+        dayLabel:
+          [
+            '월',
+            '화',
+            '수',
+            '목',
+            '금',
+            '토',
+            '일'
+          ][index],
+
+        dateLabel:
+          String(
+            date.getMonth() + 1
+          ) +
+          '/' +
+          String(
+            date.getDate()
+          )
+      }
+    }
+  )
+
+const beautyWeekRangeText =
+  beautyWeekDates[0].dateLabel +
+  ' ~ ' +
+  beautyWeekDates[6].dateLabel
   
     if (error) {
       alert('직원 목록 조회 실패: ' + error.message)
@@ -47,13 +126,131 @@ export async function renderBeautyStaff(
         </div>
   
         <div class="payment-card">
-  <div class="merchant-product-layout">
 
-    <div id="beauty-staff-register-area"></div>
+  <div
+    class="
+      merchant-product-layout
+      beauty-staff-main-layout
+    "
+  >
 
-    <div id="beauty-staff-list-area"></div>
+    <div
+      id="beauty-staff-register-area"
+    ></div>
+
+
+    <div class="beauty-staff-work-area">
+
+      <div
+        id="beauty-staff-list-area"
+      ></div>
+
+
+      <div
+        id="beauty-staff-weekly-area"
+      >
+
+        <div class="beauty-staff-weekly-card">
+
+          <div class="beauty-staff-weekly-head">
+
+            <div>
+              <h2>주간 근무표</h2>
+
+              <p>
+                ${beautyWeekRangeText}
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="beauty-staff-weekly-scroll">
+
+            <div class="beauty-staff-weekly-grid">
+
+              <div
+                class="
+                  beauty-staff-weekly-header
+                  beauty-staff-weekly-name-header
+                "
+              >
+                직원
+              </div>
+
+
+              ${beautyWeekDates
+                .map((date) => `
+                  <div
+                    class="beauty-staff-weekly-header"
+                  >
+                    <strong>
+                      ${date.dayLabel}
+                    </strong>
+
+                    <span>
+                      ${date.dateLabel}
+                    </span>
+                  </div>
+                `)
+                .join('')}
+
+
+              ${(staffList || [])
+  .map((staff: any) => `
+
+                  <div
+                    class="beauty-staff-weekly-staff"
+                  >
+                    <strong>
+                      ${staff.staff_name || '이름 없음'}
+                    </strong>
+
+                    <span>
+                      ${staff.position || ''}
+                    </span>
+                  </div>
+
+
+                  ${beautyWeekDates
+                    .map((date) => `
+                      <button
+                        type="button"
+                        class="beauty-staff-weekly-work-button"
+                        data-staff-id="${staff.id}"
+                        data-date="${date.dateValue}"
+                      >
+                        근무
+                      </button>
+                    `)
+                    .join('')}
+
+                `)
+                .join('')}
+
+            </div>
+
+          </div>
+
+
+          ${
+            (staffList || []).length === 0
+              ? `
+                <div class="beauty-staff-weekly-empty">
+                  등록된 직원이 없습니다.
+                </div>
+              `
+              : ''
+          }
+
+        </div>
+
+      </div>
+
+    </div>
 
   </div>
+
 </div>
   
       </div>

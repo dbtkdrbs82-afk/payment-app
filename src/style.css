@@ -13796,3 +13796,180 @@ height: 150px !important;
     height: 60mm !important;
   }
 }
+/* =========================================
+   뷰티 직원관리 주간 근무표
+========================================= */
+
+.beauty-staff-work-area {
+  flex: 1;
+  min-width: 0;
+
+  display: grid;
+  grid-template-columns:
+    minmax(430px, 0.85fr)
+    minmax(620px, 1.15fr);
+
+  gap: 20px;
+  align-items: start;
+}
+
+
+/* 직원목록 공통 700px 최소폭 해제 */
+.beauty-staff-work-area
+#beauty-staff-list-area
+.product-list-card {
+  width: 100%;
+  min-width: 0 !important;
+}
+
+
+/* 주간 근무표 카드 */
+.beauty-staff-weekly-card {
+  width: 100%;
+  box-sizing: border-box;
+
+  padding: 20px;
+
+  border: 1px solid #f0d1da;
+  border-radius: 16px;
+
+  background: #ffffff;
+}
+
+
+/* 제목 */
+.beauty-staff-weekly-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+.beauty-staff-weekly-head h2 {
+  margin: 0 0 5px;
+
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.beauty-staff-weekly-head p {
+  margin: 0;
+
+  font-size: 13px;
+  color: #64748b;
+}
+
+
+/* 표 가로 스크롤 */
+.beauty-staff-weekly-scroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+
+/* 직원 + 월~일 */
+.beauty-staff-weekly-grid {
+  display: grid;
+
+  grid-template-columns:
+    120px
+    repeat(7, minmax(82px, 1fr));
+
+  gap: 7px;
+
+  min-width: 760px;
+}
+
+
+/* 요일 제목 */
+.beauty-staff-weekly-header {
+  min-height: 52px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #fff1f5;
+
+  font-size: 13px;
+}
+
+.beauty-staff-weekly-header strong {
+  font-size: 14px;
+}
+
+.beauty-staff-weekly-header span {
+  margin-top: 3px;
+
+  font-size: 11px;
+  color: #64748b;
+}
+
+
+/* 직원 이름 */
+.beauty-staff-weekly-staff {
+  min-height: 52px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  padding: 0 10px;
+
+  border: 1px solid #eadce1;
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+.beauty-staff-weekly-staff strong {
+  font-size: 13px;
+}
+
+.beauty-staff-weekly-staff span {
+  margin-top: 2px;
+
+  font-size: 11px;
+  color: #64748b;
+}
+
+
+/* 근무 버튼 */
+.beauty-staff-weekly-work-button {
+  min-height: 52px;
+
+  border: 1px solid #e9b7c5;
+  border-radius: 10px;
+
+  background: #f8dce4;
+  color: #7a3348;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+
+/* 직원 없음 */
+.beauty-staff-weekly-empty {
+  padding: 30px 10px;
+
+  text-align: center;
+
+  color: #64748b;
+}
+
+
+/* 화면이 좁아지면 직원목록 아래로 근무표 이동 */
+@media (max-width: 1100px) {
+
+  .beauty-staff-work-area {
+    grid-template-columns: 1fr;
+  }
+
+}
