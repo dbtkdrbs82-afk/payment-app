@@ -14205,3 +14205,9 @@ height: 150px !important;
     min-width: 620px !important;
   }
 }
+/* 직원 휴무 */
+.beauty-staff-weekly-work-button.beauty-staff-weekly-off {
+  background: #8f96a3 !important;
+  border-color: #8f96a3 !important;
+  color: #ffffff !important;
+}

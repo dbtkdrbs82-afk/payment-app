@@ -105,6 +105,103 @@ const beautyWeekRangeText =
     if (error) {
       alert('직원 목록 조회 실패: ' + error.message)
     }
+
+    const weekStartDate =
+  beautyWeekDates[0].dateValue
+
+const weekEndDate =
+  beautyWeekDates[6].dateValue
+
+
+const {
+  data: weeklyScheduleRows,
+  error: weeklyScheduleError
+} =
+  await supabase
+    .from('beauty_staff_schedule')
+    .select(`
+      staff_id,
+      schedule_date,
+      schedule_time,
+      status,
+      order_id
+    `)
+    .eq(
+      'merchant_id',
+      merchantId
+    )
+    .gte(
+      'schedule_date',
+      weekStartDate
+    )
+    .lte(
+      'schedule_date',
+      weekEndDate
+    )
+
+
+if (weeklyScheduleError) {
+  alert(
+    '주간 스케줄 조회 실패: ' +
+    weeklyScheduleError.message
+  )
+}
+
+
+const beautyStaffDayTimes: string[] = []
+
+for (
+  let minutes = 0;
+  minutes < 24 * 60;
+  minutes += 30
+) {
+  const hour =
+    String(
+      Math.floor(minutes / 60)
+    ).padStart(2, '0')
+
+  const minute =
+    String(
+      minutes % 60
+    ).padStart(2, '0')
+
+  beautyStaffDayTimes.push(
+    `${hour}:${minute}`
+  )
+}
+
+
+const isBeautyStaffDayOff = (
+  staffId: number,
+  dateValue: string
+) => {
+
+  return beautyStaffDayTimes.every(
+    (time) => {
+
+      const row =
+        (weeklyScheduleRows || [])
+          .find((item: any) =>
+            Number(item.staff_id) === staffId &&
+            String(item.schedule_date) === dateValue &&
+            String(
+              item.schedule_time || ''
+            ).slice(0, 5) === time
+          )
+
+      if (
+        row?.order_id ||
+        row?.status === '예약완료'
+      ) {
+        return true
+      }
+
+      return (
+        row?.status === '예약불가'
+      )
+    }
+  )
+}
   
     app.innerHTML = `
       <div class="pg-admin-page">
@@ -213,16 +310,41 @@ const beautyWeekRangeText =
 
 
                   ${beautyWeekDates
-                    .map((date) => `
-                      <button
-                        type="button"
-                        class="beauty-staff-weekly-work-button"
-                        data-staff-id="${staff.id}"
-                        data-date="${date.dateValue}"
-                      >
-                        근무
-                      </button>
-                    `)
+                    .map((date) => {
+                  
+                      const isDayOff =
+                        isBeautyStaffDayOff(
+                          Number(staff.id),
+                          date.dateValue
+                        )
+                  
+                      return `
+                        <button
+                          type="button"
+                          class="
+                            beauty-staff-weekly-work-button
+                            ${
+                              isDayOff
+                                ? 'beauty-staff-weekly-off'
+                                : ''
+                            }
+                          "
+                          data-staff-id="${staff.id}"
+                          data-date="${date.dateValue}"
+                          data-current-status="${
+                            isDayOff
+                              ? 'OFF'
+                              : 'WORK'
+                          }"
+                        >
+                          ${
+                            isDayOff
+                              ? 'OFF'
+                              : '근무'
+                          }
+                        </button>
+                      `
+                    })
                     .join('')}
 
                 `)
@@ -279,6 +401,226 @@ if (staffListArea) {
     staffList || []
   )
 }
+
+document
+  .querySelectorAll<HTMLButtonElement>(
+    '.beauty-staff-weekly-work-button'
+  )
+  .forEach((button) => {
+
+    button.addEventListener(
+      'click',
+      async () => {
+
+        const staffId =
+          Number(
+            button.dataset.staffId || 0
+          )
+
+        const scheduleDate =
+          button.dataset.date || ''
+
+        const currentStatus =
+          button.dataset.currentStatus ||
+          'WORK'
+
+        if (
+          !staffId ||
+          !scheduleDate
+        ) {
+          return
+        }
+
+
+        button.disabled = true
+
+
+        /* =========================
+           OFF → 근무
+           예약완료는 남기고
+           일반 스케줄만 초기화
+        ========================= */
+
+        if (currentStatus === 'OFF') {
+
+          const {
+            error: workError
+          } =
+            await supabase
+              .from(
+                'beauty_staff_schedule'
+              )
+              .delete()
+              .eq(
+                'merchant_id',
+                merchantId
+              )
+              .eq(
+                'staff_id',
+                staffId
+              )
+              .eq(
+                'schedule_date',
+                scheduleDate
+              )
+              .is(
+                'order_id',
+                null
+              )
+
+          if (workError) {
+            alert(
+              '근무 전환 실패: ' +
+              workError.message
+            )
+
+            button.disabled = false
+            return
+          }
+
+
+          button.dataset.currentStatus =
+            'WORK'
+
+          button.textContent =
+            '근무'
+
+          button.classList.remove(
+            'beauty-staff-weekly-off'
+          )
+
+          button.disabled = false
+
+          return
+        }
+
+
+        /* =========================
+           근무 → OFF
+        ========================= */
+
+        const {
+          data: dayScheduleRows,
+          error: dayScheduleError
+        } =
+          await supabase
+            .from(
+              'beauty_staff_schedule'
+            )
+            .select(`
+              schedule_time,
+              status,
+              order_id
+            `)
+            .eq(
+              'merchant_id',
+              merchantId
+            )
+            .eq(
+              'staff_id',
+              staffId
+            )
+            .eq(
+              'schedule_date',
+              scheduleDate
+            )
+
+
+        if (dayScheduleError) {
+          alert(
+            '직원 스케줄 조회 실패: ' +
+            dayScheduleError.message
+          )
+
+          button.disabled = false
+          return
+        }
+
+
+        const reservationTimes =
+          new Set<string>()
+
+        ;(dayScheduleRows || [])
+          .forEach((row: any) => {
+
+            if (
+              row.order_id ||
+              row.status === '예약완료'
+            ) {
+              reservationTimes.add(
+                String(
+                  row.schedule_time || ''
+                ).slice(0, 5)
+              )
+            }
+          })
+
+
+        const offRows =
+          beautyStaffDayTimes
+            .filter(
+              (time) =>
+                !reservationTimes.has(time)
+            )
+            .map((time) => ({
+              merchant_id:
+                merchantId,
+
+              staff_id:
+                staffId,
+
+              schedule_date:
+                scheduleDate,
+
+              schedule_time:
+                time,
+
+              status:
+                '예약불가'
+            }))
+
+
+        const {
+          error: offError
+        } =
+          await supabase
+            .from(
+              'beauty_staff_schedule'
+            )
+            .upsert(
+              offRows,
+              {
+                onConflict:
+                  'staff_id,schedule_date,schedule_time'
+              }
+            )
+
+
+        if (offError) {
+          alert(
+            'OFF 설정 실패: ' +
+            offError.message
+          )
+
+          button.disabled = false
+          return
+        }
+
+
+        button.dataset.currentStatus =
+          'OFF'
+
+        button.textContent =
+          'OFF'
+
+        button.classList.add(
+          'beauty-staff-weekly-off'
+        )
+
+        button.disabled = false
+      }
+    )
+  })
 
     document.querySelector('#staff-go-admin')
       ?.addEventListener('click', () => {
