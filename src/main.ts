@@ -20994,19 +20994,67 @@ document.querySelectorAll('.product-edit-button')
       }
 
       const newPrice =
-        prompt('가격', String(product.price))
+  prompt(
+    '가격',
+    String(product.price)
+  )
 
-      if (!newPrice) {
-        return
-      }
+if (!newPrice) {
+  return
+}
 
-      const { error } = await supabase
-        .from('products')
-        .update({
-          product_name: newName,
-          price: Number(newPrice)
-        })
-        .eq('id', productId)
+let newDurationMinutes =
+  Number(
+    product.duration_minutes || 30
+  )
+
+if (isBeauty) {
+  const durationInput =
+    prompt(
+      '소요시간(분)',
+      String(
+        product.duration_minutes || 30
+      )
+    )
+
+  if (!durationInput) {
+    return
+  }
+
+  newDurationMinutes =
+    Number(durationInput)
+
+  if (
+    !Number.isFinite(
+      newDurationMinutes
+    ) ||
+    newDurationMinutes <= 0
+  ) {
+    alert(
+      '소요시간을 정확히 입력해주세요.'
+    )
+    return
+  }
+}
+
+const { error } = await supabase
+  .from('products')
+  .update({
+    product_name:
+      newName,
+
+    price:
+      Number(newPrice),
+
+    duration_minutes:
+      isBeauty
+        ? newDurationMinutes
+        : product.duration_minutes
+  })
+  .eq(
+    'id',
+    productId
+  )
 
       if (error) {
         alert('수정 실패 : ' + error.message)
