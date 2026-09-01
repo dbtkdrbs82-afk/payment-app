@@ -14047,3 +14047,139 @@ height: 150px !important;
   padding: 9px 11px !important;
   font-size: 12px !important;
 }
+/* =========================================
+   뷰티 직원관리 전용 레이아웃 보정
+========================================= */
+
+.beauty-staff-page-card {
+  width: 100% !important;
+  max-width: none !important;
+  box-sizing: border-box !important;
+}
+
+
+/* 전체: 직원등록 + 오른쪽 영역 */
+.beauty-staff-main-layout {
+  display: grid !important;
+
+  grid-template-columns:
+    300px
+    minmax(0, 1fr) !important;
+
+  gap: 20px !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+
+/* 직원등록 영역 */
+#beauty-staff-register-area {
+  width: 300px !important;
+  min-width: 0 !important;
+}
+
+#beauty-staff-register-area
+.product-create-card {
+  width: 300px !important;
+  min-width: 0 !important;
+}
+
+
+/* 직원목록 + 주간근무표 */
+.beauty-staff-work-area {
+  display: grid !important;
+
+  grid-template-columns:
+    300px
+    minmax(0, 1fr) !important;
+
+  gap: 20px !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+
+/* 등록된 직원 카드 폭 */
+#beauty-staff-list-area {
+  width: 300px !important;
+  min-width: 0 !important;
+}
+
+#beauty-staff-list-area
+.product-list-card {
+  width: 300px !important;
+  min-width: 0 !important;
+
+  overflow-x: hidden !important;
+}
+
+
+/* 직원수 요약 줄 */
+#beauty-staff-list-area
+.product-summary-row {
+  flex-wrap: wrap !important;
+
+  gap: 5px 10px !important;
+
+  font-size: 12px !important;
+}
+
+
+/* 직원 한 명 카드 */
+#beauty-staff-card-list
+.product-item-card {
+  display: grid !important;
+
+  grid-template-columns:
+    82px
+    minmax(80px, 1fr)
+    82px !important;
+
+  gap: 8px !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+
+  padding: 9px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* 직원 이미지 축소 */
+#beauty-staff-card-list
+.product-item-card img {
+  width: 82px !important;
+  height: 82px !important;
+}
+
+
+/* 사진없음 영역도 동일 */
+#beauty-staff-card-list
+.product-item-card > div[style*="width:120px"] {
+  width: 82px !important;
+  height: 82px !important;
+}
+
+
+/* 직원명/직급 영역 */
+#beauty-staff-card-list
+.product-info {
+  min-width: 0 !important;
+}
+
+
+/* 스케줄관리 버튼 */
+#beauty-staff-card-list
+.beauty-staff-schedule-button {
+  width: 82px !important;
+  min-width: 82px !important;
+
+  margin-left: 0 !important;
+
+  padding: 8px 4px !important;
+
+  font-size: 11px !important;
+}
