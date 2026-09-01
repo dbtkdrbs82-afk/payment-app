@@ -26,6 +26,13 @@ export async function renderBeautyStaff(
   const today =
   new Date()
 
+const beautyWeekOffset =
+  Number(
+    sessionStorage.getItem(
+      'beauty_staff_week_offset'
+    ) || '0'
+  )
+
 const monday =
   new Date(today)
 
@@ -38,7 +45,9 @@ const mondayOffset =
     : 1 - currentDay
 
 monday.setDate(
-  today.getDate() + mondayOffset
+  today.getDate() +
+  mondayOffset +
+  beautyWeekOffset * 7
 )
 
 monday.setHours(
@@ -251,15 +260,35 @@ const isBeautyStaffDayOff = (
 
           <div class="beauty-staff-weekly-head">
 
-            <div>
-              <h2>주간 근무표</h2>
+  <div>
+    <h2>주간 근무표</h2>
+  </div>
 
-              <p>
-                ${beautyWeekRangeText}
-              </p>
-            </div>
+  <div
+    class="beauty-staff-week-navigation"
+  >
 
-          </div>
+    <button
+      type="button"
+      id="beauty-staff-prev-week"
+    >
+      ◀ 이전주
+    </button>
+
+    <strong>
+      ${beautyWeekRangeText}
+    </strong>
+
+    <button
+      type="button"
+      id="beauty-staff-next-week"
+    >
+      다음주 ▶
+    </button>
+
+  </div>
+
+</div>
 
 
           <div class="beauty-staff-weekly-scroll">
@@ -401,6 +430,44 @@ if (staffListArea) {
     staffList || []
   )
 }
+
+document
+  .querySelector(
+    '#beauty-staff-prev-week'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      sessionStorage.setItem(
+        'beauty_staff_week_offset',
+        String(
+          beautyWeekOffset - 1
+        )
+      )
+
+      location.reload()
+    }
+  )
+
+document
+  .querySelector(
+    '#beauty-staff-next-week'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      sessionStorage.setItem(
+        'beauty_staff_week_offset',
+        String(
+          beautyWeekOffset + 1
+        )
+      )
+
+      location.reload()
+    }
+  )
 
 document
   .querySelectorAll<HTMLButtonElement>(

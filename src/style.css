@@ -14165,7 +14165,32 @@ height: 150px !important;
 
   color: #64748b;
 }
+.beauty-staff-week-navigation {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
 
+.beauty-staff-week-navigation strong {
+  min-width: 90px;
+  text-align: center;
+  font-size: 13px;
+}
+
+.beauty-staff-week-navigation button {
+  padding: 7px 10px;
+
+  border: 1px solid #e9b7c5;
+  border-radius: 8px;
+
+  background: #fff1f5;
+  color: #7a3348;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
 
 /* =========================================
    좁은 화면
