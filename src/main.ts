@@ -29697,6 +29697,37 @@ ${
         time < closeTime
     )
   }
+
+  const getBeautyRequiredTimes = (
+    startTime: string,
+    durationMinutes: number
+  ) => {
+  
+    const startIndex =
+      beautyReservationTimes.indexOf(
+        startTime
+      )
+  
+    if (startIndex < 0) {
+      return []
+    }
+  
+    const slotCount =
+      Math.max(
+        1,
+        Math.ceil(
+          (
+            Number(durationMinutes) ||
+            30
+          ) / 30
+        )
+      )
+  
+    return beautyReservationTimes.slice(
+      startIndex,
+      startIndex + slotCount
+    )
+  }
         
         function updateBeautyReservationTimes(
           reservedOrders: any[]
@@ -29891,6 +29922,7 @@ reservationDateInput?.addEventListener(
 beauty_staff_name?: string
 reservation_date?: string
 reservation_time?: string
+duration_minutes?: number
 beauty_schedule_status?: Record<string, string>
   }[] = []
 
@@ -29977,18 +30009,73 @@ beauty_schedule_status?: Record<string, string>
                           ).map((time) => {
                           
                             const scheduleStatus =
-                              item.beauty_schedule_status?.[time] ||
-                              '예약가능'
-                          
-                              const isUnavailable =
-                              scheduleStatus !== '예약가능'
-                            
-                            const statusText =
-                              scheduleStatus === '예약완료'
-                                ? '예약완료'
-                                : isUnavailable
-                                  ? '예약불가'
-                                  : ''
+  item.beauty_schedule_status?.[time] ||
+  '예약가능'
+
+const durationMinutes =
+  Number(
+    item.duration_minutes || 30
+  ) *
+  Math.max(
+    1,
+    Number(item.quantity || 1)
+  )
+
+const requiredTimes =
+  getBeautyRequiredTimes(
+    time,
+    durationMinutes
+  )
+
+const requiredSlotCount =
+  Math.max(
+    1,
+    Math.ceil(
+      durationMinutes / 30
+    )
+  )
+
+const businessTimes =
+  getBeautyBusinessTimes(
+    item.reservation_date || ''
+  )
+
+const hasBlockedTime =
+  requiredTimes.length !==
+    requiredSlotCount ||
+  requiredTimes.some(
+    (requiredTime) => {
+
+      if (
+        !businessTimes.includes(
+          requiredTime
+        )
+      ) {
+        return true
+      }
+
+      const requiredStatus =
+        item.beauty_schedule_status?.[
+          requiredTime
+        ] || '예약가능'
+
+      return (
+        requiredStatus !==
+        '예약가능'
+      )
+    }
+  )
+
+const isUnavailable =
+  scheduleStatus !== '예약가능' ||
+  hasBlockedTime
+
+const statusText =
+  scheduleStatus === '예약완료'
+    ? '예약완료'
+    : isUnavailable
+      ? '예약불가'
+      : ''
                             
                             return `
                               <option
@@ -30194,9 +30281,32 @@ const item = cart.find(
                       return
                     }
             
-                    scheduleStatusMap[
-                      reservedTime
-                    ] = '예약완료'
+                    const reservedDurationMinutes =
+  Number(
+    orderItem.duration_minutes ||
+    30
+  ) *
+  Math.max(
+    1,
+    Number(
+      orderItem.quantity || 1
+    )
+  )
+
+const reservedTimes =
+  getBeautyRequiredTimes(
+    reservedTime,
+    reservedDurationMinutes
+  )
+
+reservedTimes.forEach(
+  (reservedSlotTime) => {
+
+    scheduleStatusMap[
+      reservedSlotTime
+    ] = '예약완료'
+  }
+)
                   }
                 )
               })
@@ -30264,6 +30374,20 @@ const item = cart.find(
             const name = button.dataset.name || ''
             const price = Number(button.dataset.price)
 
+            const selectedProduct =
+  (products || []).find(
+    (product: any) =>
+      Number(product.id) === id
+  )
+
+const durationMinutes =
+  isBeautyKiosk
+    ? Number(
+        selectedProduct?.duration_minutes ||
+        30
+      )
+    : 30
+
             const beautyStaffIdForCart =
   isBeautyKiosk
     ? selectedBeautyStaffId
@@ -30304,7 +30428,12 @@ beauty_staff_name:
       : undefined,
 
       reservation_date: '',
-      reservation_time: ''
+reservation_time: '',
+
+duration_minutes:
+  isBeautyKiosk
+    ? durationMinutes
+    : undefined
               })
             }
 
