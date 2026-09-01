@@ -30112,20 +30112,6 @@ const item = cart.find(
                   'merchant_id',
                   Number(merchantId)
                 )
-                .contains(
-                  'items',
-                  [
-                    {
-                      beauty_staff_id:
-                        Number(
-                          item.beauty_staff_id
-                        ),
-            
-                      reservation_date:
-                        input.value
-                    }
-                  ]
-                )
             
             if (reservedOrdersError) {
               alert(
