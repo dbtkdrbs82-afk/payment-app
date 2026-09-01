@@ -14018,19 +14018,19 @@ height: 150px !important;
 
 /* 제목 */
 .beauty-staff-weekly-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  display: block;
 
   margin-bottom: 18px;
 }
 
 
 .beauty-staff-weekly-head h2 {
-  margin: 0 0 5px;
+  margin: 0 0 12px;
 
   font-size: 20px;
   font-weight: 800;
+
+  white-space: nowrap;
 }
 
 
@@ -14176,11 +14176,11 @@ height: 150px !important;
   align-items: center;
   justify-content: center;
 
-  column-gap: 14px;
+  column-gap: 18px;
 
   width: 100%;
 
-  margin-top: 8px;
+  margin: 0;
 }
 
 .beauty-staff-week-navigation strong {
