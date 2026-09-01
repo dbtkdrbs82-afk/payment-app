@@ -13975,45 +13975,75 @@ height: 150px !important;
 
 }
 /* =========================================
-   뷰티 직원관리 배치 최종 보정
+   뷰티 직원관리 주간근무표 폭 보정
 ========================================= */
 
 .beauty-staff-work-area {
   grid-template-columns:
-    minmax(360px, 380px)
-    minmax(720px, 1fr);
+    minmax(330px, 360px)
+    minmax(600px, 650px);
 
-  column-gap: 36px;
+  column-gap: 24px;
 }
 
 
-/* 직원목록 가로 스크롤 제거 */
+/* 근무표 자체는 부모 폭 안에서만 사용 */
+.beauty-staff-weekly-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+
+/* 가로 스크롤 없이 월~일 전부 표시 */
+.beauty-staff-weekly-scroll {
+  width: 100%;
+  overflow: hidden;
+}
+
+
+.beauty-staff-weekly-grid {
+  display: grid;
+
+  grid-template-columns:
+    92px
+    repeat(7, minmax(58px, 1fr));
+
+  gap: 6px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+
+/* 직원목록은 강제로 넓히지 않음 */
 .beauty-staff-work-area
 #beauty-staff-list-area {
   min-width: 0;
-  overflow: visible;
 }
+
 
 .beauty-staff-work-area
 #beauty-staff-list-area
 .product-list-card {
   width: 100%;
   min-width: 0 !important;
-  overflow: visible;
 }
 
 
-/* 주간 근무표를 실제 7일 폭에 맞춤 */
-.beauty-staff-weekly-card {
-  width: 100%;
-  min-width: 720px;
-}
-
-.beauty-staff-weekly-grid {
-  grid-template-columns:
-    105px
-    repeat(7, minmax(72px, 1fr));
-
+/* 직원 카드가 옆으로 튀어나가지 않게 */
+.beauty-staff-work-area
+#beauty-staff-list-area
+.product-item-card {
   width: 100%;
   min-width: 0;
+  box-sizing: border-box;
+}
+
+
+/* 스케줄관리 버튼 조금 축소 */
+.beauty-staff-work-area
+.beauty-staff-schedule-button {
+  padding: 9px 11px !important;
+  font-size: 12px !important;
 }
