@@ -14166,25 +14166,45 @@ height: 150px !important;
   color: #64748b;
 }
 .beauty-staff-week-navigation {
-  display: flex;
+  display: grid;
+
+  grid-template-columns:
+    90px
+    120px
+    90px;
+
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+
+  column-gap: 14px;
+
+  width: 100%;
+
+  margin-top: 8px;
 }
 
 .beauty-staff-week-navigation strong {
-  min-width: 90px;
+  width: 120px;
+
   text-align: center;
-  font-size: 13px;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  white-space: nowrap;
 }
 
 .beauty-staff-week-navigation button {
-  padding: 7px 10px;
+  width: 90px;
+  height: 34px;
+
+  padding: 0;
 
   border: 1px solid #e9b7c5;
   border-radius: 8px;
 
-  background: #fff1f5;
-  color: #7a3348;
+  background: #e8b2c1;
+  color: #ffffff;
 
   font-size: 12px;
   font-weight: 700;
