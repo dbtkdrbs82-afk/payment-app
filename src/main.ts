@@ -30069,10 +30069,14 @@ const durationMinutes =
     Number(item.quantity || 1)
   )
 
-const requiredTimes =
-  getBeautyRequiredTimes(
-    time,
-    durationMinutes
+  const businessTimes =
+  getBeautyBusinessTimes(
+    item.reservation_date || ''
+  )
+
+const startIndex =
+  beautyReservationTimes.indexOf(
+    time
   )
 
 const requiredSlotCount =
@@ -30083,36 +30087,46 @@ const requiredSlotCount =
     )
   )
 
-const businessTimes =
-  getBeautyBusinessTimes(
-    item.reservation_date || ''
-  )
+let hasBlockedTime = false
 
-const hasBlockedTime =
-  requiredTimes.length !==
-    requiredSlotCount ||
-  requiredTimes.some(
-    (requiredTime) => {
+for (
+  let slotIndex = 0;
+  slotIndex < requiredSlotCount;
+  slotIndex++
+) {
 
-      if (
-        !businessTimes.includes(
-          requiredTime
-        )
-      ) {
-        return true
-      }
+  const requiredTime =
+    beautyReservationTimes[
+      startIndex + slotIndex
+    ]
 
-      const requiredStatus =
-        item.beauty_schedule_status?.[
-          requiredTime
-        ] || '예약가능'
+  if (!requiredTime) {
+    hasBlockedTime = true
+    break
+  }
 
-      return (
-        requiredStatus !==
-        '예약가능'
-      )
-    }
-  )
+  if (
+    !businessTimes.includes(
+      requiredTime
+    )
+  ) {
+    hasBlockedTime = true
+    break
+  }
+
+  const requiredStatus =
+    item.beauty_schedule_status?.[
+      requiredTime
+    ] || '예약가능'
+
+  if (
+    requiredStatus !==
+    '예약가능'
+  ) {
+    hasBlockedTime = true
+    break
+  }
+}
 
 const isUnavailable =
   scheduleStatus !== '예약가능' ||
