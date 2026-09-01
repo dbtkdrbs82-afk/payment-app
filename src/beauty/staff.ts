@@ -125,7 +125,7 @@ const beautyWeekRangeText =
           <button id="staff-go-qr">PICK QR</button>
         </div>
   
-        <div class="payment-card">
+        <div class="payment-card beauty-staff-page-card">
 
   <div
     class="
