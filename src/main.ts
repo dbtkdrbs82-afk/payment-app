@@ -30128,6 +30128,24 @@ for (
   }
 }
 
+const endTime =
+  beautyReservationTimes[
+    startIndex + requiredSlotCount
+  ]
+
+if (endTime) {
+  const endStatus =
+    item.beauty_schedule_status?.[
+      endTime
+    ] || '예약가능'
+
+  if (
+    endStatus !== '예약가능'
+  ) {
+    hasBlockedTime = true
+  }
+}
+
 const isUnavailable =
   scheduleStatus !== '예약가능' ||
   hasBlockedTime
