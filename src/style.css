@@ -14264,3 +14264,11 @@ height: 150px !important;
 #payment-month-btn {
   transform: translateY(-10px);
 }
+/* 출금관리 날짜/조회 버튼 위로 */
+#payout-prev-btn,
+#payout-today-btn,
+#payout-next-btn,
+#payout-month-btn,
+#payout-search-btn {
+  transform: translateY(-12px);
+}
