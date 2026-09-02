@@ -17004,11 +17004,12 @@ ${merchantContent}
 
 <div class="merchant-sales-filter ${(isNormalStore || isBeauty || isHotel) ? '' : 'hide-for-type'}">
   <div class="sales-filter-row sales-filter-button-row">
-    <button id="sales-today" class="quick-btn">오늘</button>
-    <button id="sales-month" class="quick-btn">이번달</button>
-    <button id="sales-year" class="quick-btn">올해</button>
-    <button id="excel-download" class="quick-btn">엑셀 다운로드</button>
-  </div>
+  <button id="sales-prev" class="quick-btn">이전</button>
+  <button id="sales-today" class="quick-btn">오늘</button>
+  <button id="sales-next" class="quick-btn">다음</button>
+  <button id="sales-month" class="quick-btn">당월</button>
+  <button id="excel-download" class="quick-btn">엑셀 다운로드</button>
+</div>
 
   <div class="sales-filter-row sales-filter-date-row">
     <span class="date-wrap">
@@ -17018,7 +17019,7 @@ ${merchantContent}
     <span class="date-wrap">
       <input id="sales-end-date" type="date" />
     </span>
-    <button id="sales-search" class="quick-btn">검색</button>
+    <button id="sales-search" class="quick-btn">조회</button>
   </div>
 </div>
 
@@ -18966,59 +18967,135 @@ const getLocalDateTextForMerchant = (date: Date) => {
   return year + '-' + month + '-' + day
 }
 
-const moveMerchantDate = (start: string, end: string) => {
-  if (isBeauty) {
-    const nextParams =
-      new URLSearchParams(window.location.search)
+const moveMerchantDate = (
+  start: string,
+  end: string
+) => {
+  const nextParams =
+    new URLSearchParams(
+      window.location.search
+    )
 
-    nextParams.set('start', start)
-    nextParams.set('end', end)
+  nextParams.set(
+    'start',
+    start
+  )
 
-    location.href =
-      '/merchant-admin?' + nextParams.toString()
-
-    return
-  }
+  nextParams.set(
+    'end',
+    end
+  )
 
   location.href =
-    '/merchant-admin?start=' + start + '&end=' + end
+    '/merchant-admin?' +
+    nextParams.toString()
 }
 
-document.querySelector('#sales-today')
-  ?.addEventListener('click', () => {
+
+const changeMerchantSalesDate = (
+  moveDays: number
+) => {
+  const startInput =
+    document.querySelector<HTMLInputElement>(
+      '#sales-start-date'
+    )
+
+  const baseDateText =
+    startInput?.value ||
+    startDate ||
+    getLocalDateTextForMerchant(
+      new Date()
+    )
+
+  const baseDate =
+    new Date(
+      baseDateText +
+      'T00:00:00'
+    )
+
+  baseDate.setDate(
+    baseDate.getDate() +
+    moveDays
+  )
+
+  const changedDate =
+    getLocalDateTextForMerchant(
+      baseDate
+    )
+
+  moveMerchantDate(
+    changedDate,
+    changedDate
+  )
+}
+
+
+document.querySelector(
+  '#sales-prev'
+)?.addEventListener(
+  'click',
+  () => {
+    changeMerchantSalesDate(-1)
+  }
+)
+
+
+document.querySelector(
+  '#sales-today'
+)?.addEventListener(
+  'click',
+  () => {
     const today =
-      getLocalDateTextForMerchant(new Date())
+      getLocalDateTextForMerchant(
+        new Date()
+      )
 
-    moveMerchantDate(today, today)
-  })
+    moveMerchantDate(
+      today,
+      today
+    )
+  }
+)
 
-document.querySelector('#sales-month')
-  ?.addEventListener('click', () => {
-    const now = new Date()
+
+document.querySelector(
+  '#sales-next'
+)?.addEventListener(
+  'click',
+  () => {
+    changeMerchantSalesDate(1)
+  }
+)
+
+
+document.querySelector(
+  '#sales-month'
+)?.addEventListener(
+  'click',
+  () => {
+    const now =
+      new Date()
 
     const start =
       getLocalDateTextForMerchant(
-        new Date(now.getFullYear(), now.getMonth(), 1)
+        new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          1
+        )
       )
 
     const end =
-      getLocalDateTextForMerchant(new Date())
+      getLocalDateTextForMerchant(
+        now
+      )
 
-    moveMerchantDate(start, end)
-  })
-
-document.querySelector('#sales-year')
-  ?.addEventListener('click', () => {
-    const now = new Date()
-
-    const start =
-      now.getFullYear() + '-01-01'
-
-    const end =
-      getLocalDateTextForMerchant(new Date())
-
-    moveMerchantDate(start, end)
-  })
+    moveMerchantDate(
+      start,
+      end
+    )
+  }
+)
 
 document.querySelector('#sales-search')
   ?.addEventListener('click', () => {
