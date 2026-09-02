@@ -9701,9 +9701,10 @@ rows.forEach((row) => {
               <span>~</span>
               <input id="payout-end-date" type="date">
     
-              <button id="payout-today-btn" class="payout-small-btn">오늘</button>
-              <button id="payout-yesterday-btn" class="payout-small-btn">어제</button>
-              <button id="payout-month-btn" class="payout-small-btn">당월</button>
+              <button id="payout-prev-btn" class="payout-small-btn">이전</button>
+<button id="payout-today-btn" class="payout-small-btn">오늘</button>
+<button id="payout-next-btn" class="payout-small-btn">다음</button>
+<button id="payout-month-btn" class="payout-small-btn">당월</button>
             </div>
     
             <div class="payout-search-row">
@@ -11984,30 +11985,74 @@ payoutStartDate.value =
 payoutEndDate.value =
   initialPayoutToday
 
-document.querySelector('#payout-today-btn')
-?.addEventListener('click', () => {
-  const today = formatDate(new Date())
-
-  payoutStartDate.value = today
-  payoutEndDate.value = today
-
-  payoutPage = 1
-  renderPayoutTable()
-})
-
-document.querySelector('#payout-yesterday-btn')
-?.addEventListener('click', () => {
-  const date = new Date()
-  date.setDate(date.getDate() - 1)
-
-  const yesterday = formatDate(date)
-
-  payoutStartDate.value = yesterday
-  payoutEndDate.value = yesterday
-
-  payoutPage = 1
-  renderPayoutTable()
-})
+  const changePayoutDate = (
+    moveDays: number
+  ) => {
+    const baseDateText =
+      payoutStartDate.value ||
+      formatDate(new Date())
+  
+    const baseDate =
+      new Date(
+        baseDateText + 'T00:00:00'
+      )
+  
+    baseDate.setDate(
+      baseDate.getDate() + moveDays
+    )
+  
+    const changedDate =
+      formatDate(baseDate)
+  
+    payoutStartDate.value =
+      changedDate
+  
+    payoutEndDate.value =
+      changedDate
+  
+    payoutPage = 1
+    renderPayoutTable()
+  }
+  
+  
+  document.querySelector(
+    '#payout-prev-btn'
+  )?.addEventListener(
+    'click',
+    () => {
+      changePayoutDate(-1)
+    }
+  )
+  
+  
+  document.querySelector(
+    '#payout-today-btn'
+  )?.addEventListener(
+    'click',
+    () => {
+      const today =
+        formatDate(new Date())
+  
+      payoutStartDate.value =
+        today
+  
+      payoutEndDate.value =
+        today
+  
+      payoutPage = 1
+      renderPayoutTable()
+    }
+  )
+  
+  
+  document.querySelector(
+    '#payout-next-btn'
+  )?.addEventListener(
+    'click',
+    () => {
+      changePayoutDate(1)
+    }
+  )
 
 document.querySelector('#payout-month-btn')
 ?.addEventListener('click', () => {
@@ -13138,9 +13183,10 @@ if (searchBox) {
     '<span>~</span>' +
     '<input id="payment-end-date" type="date" />' +
 
-    '<button class="quick-btn" id="payment-today-btn">오늘</button>' +
-    '<button class="quick-btn" id="payment-yesterday-btn">어제</button>' +
-    '<button class="quick-btn" id="payment-month-btn">당월</button>' +
+    '<button class="quick-btn" id="payment-prev-btn">이전</button>' +
+'<button class="quick-btn" id="payment-today-btn">오늘</button>' +
+'<button class="quick-btn" id="payment-next-btn">다음</button>' +
+'<button class="quick-btn" id="payment-month-btn">당월</button>' +
 
     '<select id="payment-search-type">' +
   '<option value="all">전체검색</option>' +
@@ -13159,35 +13205,124 @@ if (searchBox) {
 '</div>'
 }
 
-document.querySelector('#payment-today-btn')
-  ?.addEventListener('click', () => {
-    const today = new Date()
-    const todayText = today.toISOString().slice(0, 10)
+const changePaymentDate = (
+  moveDays: number
+) => {
+  const startInput =
+    document.querySelector<HTMLInputElement>(
+      '#payment-start-date'
+    )
 
-    const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
-    const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
+  const endInput =
+    document.querySelector<HTMLInputElement>(
+      '#payment-end-date'
+    )
 
-    if (startInput) startInput.value = todayText
-    if (endInput) endInput.value = todayText
+  if (!startInput || !endInput) {
+    return
+  }
 
-    document.querySelector<HTMLButtonElement>('#payment-search-btn')?.click()
-  })
+  const baseDateText =
+    startInput.value ||
+    new Date().toLocaleDateString(
+      'en-CA',
+      {
+        timeZone: 'Asia/Seoul'
+      }
+    )
 
-document.querySelector('#payment-yesterday-btn')
-  ?.addEventListener('click', () => {
-    const yesterday = new Date()
-    yesterday.setDate(yesterday.getDate() - 1)
+  const baseDate =
+    new Date(
+      baseDateText + 'T00:00:00'
+    )
 
-    const yesterdayText = yesterday.toISOString().slice(0, 10)
+  baseDate.setDate(
+    baseDate.getDate() + moveDays
+  )
 
-    const startInput = document.querySelector<HTMLInputElement>('#payment-start-date')
-    const endInput = document.querySelector<HTMLInputElement>('#payment-end-date')
+  const changedDate =
+    [
+      baseDate.getFullYear(),
+      String(
+        baseDate.getMonth() + 1
+      ).padStart(2, '0'),
+      String(
+        baseDate.getDate()
+      ).padStart(2, '0')
+    ].join('-')
 
-    if (startInput) startInput.value = yesterdayText
-    if (endInput) endInput.value = yesterdayText
+  startInput.value =
+    changedDate
 
-    document.querySelector<HTMLButtonElement>('#payment-search-btn')?.click()
-  })
+  endInput.value =
+    changedDate
+
+  document
+    .querySelector<HTMLButtonElement>(
+      '#payment-search-btn'
+    )
+    ?.click()
+}
+
+
+document.querySelector(
+  '#payment-prev-btn'
+)?.addEventListener(
+  'click',
+  () => {
+    changePaymentDate(-1)
+  }
+)
+
+
+document.querySelector(
+  '#payment-today-btn'
+)?.addEventListener(
+  'click',
+  () => {
+    const today =
+      new Date().toLocaleDateString(
+        'en-CA',
+        {
+          timeZone: 'Asia/Seoul'
+        }
+      )
+
+    const startInput =
+      document.querySelector<HTMLInputElement>(
+        '#payment-start-date'
+      )
+
+    const endInput =
+      document.querySelector<HTMLInputElement>(
+        '#payment-end-date'
+      )
+
+    if (startInput) {
+      startInput.value = today
+    }
+
+    if (endInput) {
+      endInput.value = today
+    }
+
+    document
+      .querySelector<HTMLButtonElement>(
+        '#payment-search-btn'
+      )
+      ?.click()
+  }
+)
+
+
+document.querySelector(
+  '#payment-next-btn'
+)?.addEventListener(
+  'click',
+  () => {
+    changePaymentDate(1)
+  }
+)
 
 document.querySelector('#payment-month-btn')
   ?.addEventListener('click', () => {
