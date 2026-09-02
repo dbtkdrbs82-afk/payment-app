@@ -22397,6 +22397,13 @@ if (beautyReservedOrdersError) {
             if (!scheduleTime) {
               return
             }
+
+            const linkedOrderId =
+  Number(
+    beautyScheduleMap.get(
+      scheduleTime
+    )?.order_id || 0
+  )
   
             select.disabled = true
   
@@ -22417,11 +22424,14 @@ if (beautyReservedOrdersError) {
                   schedule_date:
                     selectedScheduleDate,
   
-                  schedule_time:
+                    schedule_time:
                     scheduleTime,
-  
+                  
                   status:
-                    status
+                    status,
+                  
+                  order_id:
+                    linkedOrderId || null
                 },
                 {
                   onConflict:
