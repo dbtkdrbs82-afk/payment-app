@@ -14488,3 +14488,10 @@ height: 150px !important;
     min-width: 0 !important;
   }
 }
+/* 무선단말기 모바일 10개씩보기 위치 아래로 */
+@media (max-width: 520px) and (orientation: portrait) {
+  body:has(.terminal-date-search-box)
+  #terminal-page-size {
+    transform: translateY(10px) !important;
+  }
+}
