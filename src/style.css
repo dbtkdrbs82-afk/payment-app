@@ -14387,28 +14387,16 @@ height: 150px !important;
 @media (max-width: 520px) and (orientation: portrait) {
 
   body:has(.terminal-date-search-box)
-  .terminal-date-search-box {
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box !important;
-  }
-
-  body:has(.terminal-date-search-box)
   .terminal-date-search-row {
     display: grid !important;
-
     grid-template-columns:
       minmax(0, 1fr)
       18px
       minmax(0, 1fr) !important;
 
-    gap: 6px !important;
-
+    gap: 8px !important;
     width: 100% !important;
     max-width: 100% !important;
-
-    align-items: center !important;
-    box-sizing: border-box !important;
   }
 
   body:has(.terminal-date-search-box)
@@ -14417,20 +14405,9 @@ height: 150px !important;
   #terminal-end-date-input {
     width: 100% !important;
     min-width: 0 !important;
-
-    height: 40px !important;
-
-    padding: 0 6px !important;
-    margin: 0 !important;
-
-    font-size: 11px !important;
+    height: 44px !important;
+    padding: 0 10px !important;
     box-sizing: border-box !important;
-  }
-
-  body:has(.terminal-date-search-box)
-  .terminal-date-wave {
-    width: 18px !important;
-    text-align: center !important;
   }
 
   body:has(.terminal-date-search-box)
@@ -14438,19 +14415,13 @@ height: 150px !important;
     grid-column: 1 / -1 !important;
 
     display: grid !important;
-
     grid-template-columns:
       repeat(5, minmax(0, 1fr)) !important;
 
-    gap: 6px !important;
+    gap: 8px !important;
 
     width: 100% !important;
     max-width: 100% !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-
-    box-sizing: border-box !important;
   }
 
   body:has(.terminal-date-search-box)
@@ -14463,23 +14434,11 @@ height: 150px !important;
   #terminal-date-month-button,
   body:has(.terminal-date-search-box)
   #terminal-date-search-button {
-
-    grid-column: auto !important;
-    grid-row: auto !important;
-
     width: 100% !important;
     min-width: 0 !important;
-    max-width: none !important;
-
-    height: 40px !important;
-    min-height: 40px !important;
-
-    margin: 0 !important;
-    padding: 0 2px !important;
-
-    font-size: 12px !important;
-
-    transform: none !important;
+    height: 44px !important;
+    padding: 0 !important;
+    font-size: 13px !important;
     box-sizing: border-box !important;
   }
 }
