@@ -3337,15 +3337,32 @@ let merchantName =
   params.get('merchantName') || sessionStorage.getItem('merchantName') || ''
 
   let feeRate = 0
-
-if (merchantId) {
-  const { data: merchantFeeData } = await supabase
-    .from('merchants')
-    .select('fee_rate, merchant_name')
+  let merchantType = ''
+  let tossMid = ''
+  
+  if (merchantId) {
+    const { data: merchantFeeData } = await supabase
+      .from('merchants')
+      .select(`
+        fee_rate,
+        merchant_name,
+        merchant_type,
+        toss_mid
+      `)
     .eq('id', Number(merchantId))
     .maybeSingle()
 
   feeRate = Number(merchantFeeData?.fee_rate || 0)
+
+  merchantType =
+  String(
+    merchantFeeData?.merchant_type || ''
+  )
+
+tossMid =
+  String(
+    merchantFeeData?.toss_mid || ''
+  )
 
   if (!merchantName) {
     merchantName = merchantFeeData?.merchant_name || ''
@@ -3628,6 +3645,9 @@ window.history.replaceState({}, '', '/success')
 const isHotelSuccess =
   source === 'hotel'
 
+  const isBeautySuccess =
+  merchantType === '뷰티'
+
 const successTitleHtml =
   isHotelSuccess
     ? '<span style="display:block;">결제가</span><span style="display:block;">완료되었습니다</span>'
@@ -3681,7 +3701,13 @@ const successGuideHtml =
 
   <button
     id="receipt-view-btn"
-    class="receipt-view-btn ${isHotelSuccess ? 'hotel-success-receipt-button' : ''}"
+    class="receipt-view-btn ${
+  isHotelSuccess
+    ? 'hotel-success-receipt-button'
+    : isBeautySuccess
+      ? 'beauty-success-receipt-button'
+      : ''
+}"
   >
     영수증 확인
   </button>
@@ -3795,28 +3821,56 @@ const successGuideHtml =
     </section>
 
     <section>
-      <h4>결제서비스업체(PG)정보</h4>
-      <table>
-        <tr>
-          <tr>
-  <th style="width:180px">카드사 가맹점명</th>
-  <td>토스페이먼츠</td>
-  <th style="width:140px">사업자번호</th>
-  <td style="width:180px">-</td>
-</tr>
+  <h4>결제서비스업체(PG)정보</h4>
 
-<tr>
-  <th>대표자명</th>
-  <td>-</td>
-  <th>가맹점번호</th>
-  <td style="width:180px">-</td>
-</tr>
-        <tr>
-          <th>주소</th>
-          <td colspan="3">-</td>
-        </tr>
-      </table>
-    </section>
+  <table>
+    <tr>
+      <th style="width:180px">
+        카드사 가맹점명
+      </th>
+
+      <td>
+        토스페이먼츠
+      </td>
+
+      <th style="width:140px">
+        사업자번호
+      </th>
+
+      <td style="width:180px">
+        411-86-01799
+      </td>
+    </tr>
+
+    <tr>
+      <th>
+        대표자명
+      </th>
+
+      <td>
+        임한욱
+      </td>
+
+      <th>
+        가맹점번호
+      </th>
+
+      <td style="width:180px">
+        ${tossMid || '-'}
+      </td>
+    </tr>
+
+    <tr>
+      <th>
+        주소
+      </th>
+
+      <td colspan="3">
+        서울특별시 강남구 테헤란로 131, 14층
+      </td>
+    </tr>
+  </table>
+</section>
 
     <div class="receipt-notice">
       * 신용카드 청구서에는 실제 결제 PG사명으로 표시됩니다.<br>

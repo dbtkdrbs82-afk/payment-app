@@ -14546,3 +14546,16 @@ height: 150px !important;
     margin-right: 10px !important;
   }
 }
+/* 뷰티 결제완료 영수증 버튼 */
+.beauty-success-receipt-button {
+  background: #e8b4c2 !important;
+  background-color: #e8b4c2 !important;
+  border-color: #e8b4c2 !important;
+  color: #ffffff !important;
+}
+
+.beauty-success-receipt-button:hover {
+  background: #d99aaa !important;
+  background-color: #d99aaa !important;
+  border-color: #d99aaa !important;
+}
