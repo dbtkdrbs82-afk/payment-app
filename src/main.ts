@@ -21842,6 +21842,183 @@ document.querySelector('#merchant-product-image-file')
         )
       })
   
+      /* =========================
+   실제 고객 예약 조회
+========================= */
+
+const {
+  data: beautyReservedOrders,
+  error: beautyReservedOrdersError
+} = await supabase
+  .from('orders')
+  .select(`
+    id,
+    items,
+    order_status,
+    payment_status
+  `)
+  .eq(
+    'merchant_id',
+    merchantId
+  )
+
+if (beautyReservedOrdersError) {
+  alert(
+    '예약내역 조회 실패: ' +
+    beautyReservedOrdersError.message
+  )
+}
+
+
+/* 실제 예약을 직원 스케줄에 반영 */
+;(beautyReservedOrders || [])
+  .forEach((order: any) => {
+
+    const orderStatus =
+      String(
+        order.order_status || ''
+      )
+
+    const paymentStatus =
+      String(
+        order.payment_status || ''
+      )
+
+    if (
+      orderStatus.includes('취소') ||
+      paymentStatus.includes('취소')
+    ) {
+      return
+    }
+
+    const orderItems =
+      Array.isArray(order.items)
+        ? order.items
+        : []
+
+    orderItems.forEach(
+      (orderItem: any) => {
+
+        if (
+          Number(
+            orderItem.beauty_staff_id
+          ) !== staffId
+        ) {
+          return
+        }
+
+        if (
+          String(
+            orderItem.reservation_date ||
+            ''
+          ) !== selectedScheduleDate
+        ) {
+          return
+        }
+
+        const reservationTime =
+          String(
+            orderItem.reservation_time ||
+            ''
+          ).slice(0, 5)
+
+        if (!reservationTime) {
+          return
+        }
+
+        const durationMinutes =
+          Number(
+            orderItem.duration_minutes ||
+            30
+          ) *
+          Math.max(
+            1,
+            Number(
+              orderItem.quantity || 1
+            )
+          )
+
+        const startMinutes =
+          Number(
+            reservationTime.slice(
+              0,
+              2
+            )
+          ) * 60 +
+          Number(
+            reservationTime.slice(
+              3,
+              5
+            )
+          )
+
+        const slotCount =
+          Math.max(
+            1,
+            Math.ceil(
+              durationMinutes / 30
+            )
+          )
+
+        for (
+          let slotIndex = 0;
+          slotIndex < slotCount;
+          slotIndex++
+        ) {
+          const slotMinutes =
+            startMinutes +
+            slotIndex * 30
+
+          const slotHour =
+            String(
+              Math.floor(
+                slotMinutes / 60
+              )
+            ).padStart(
+              2,
+              '0'
+            )
+
+          const slotMinute =
+            String(
+              slotMinutes % 60
+            ).padStart(
+              2,
+              '0'
+            )
+
+          const slotTime =
+            `${slotHour}:${slotMinute}`
+
+          const existingRow =
+            beautyScheduleMap.get(
+              slotTime
+            )
+
+          const isManualAvailable =
+            existingRow?.order_id &&
+            Number(
+              existingRow.order_id
+            ) === Number(order.id) &&
+            existingRow.status ===
+              '예약가능'
+
+          if (isManualAvailable) {
+            continue
+          }
+
+          beautyScheduleMap.set(
+            slotTime,
+            {
+              ...(existingRow || {}),
+              status: '예약완료',
+              order_id: order.id
+            }
+          )
+        }
+      }
+    )
+  })
   
     /* =========================
        09:00 ~ 20:00
@@ -22031,6 +22208,15 @@ document.querySelector('#merchant-product-image-file')
   
                 const isReservation =
                   status === '예약완료'
+
+                  const statusColor =
+  status === '예약가능'
+    ? '#15803d'
+    : status === '예약불가'
+      ? '#dc2626'
+      : status === '예약완료'
+        ? '#2563eb'
+        : '#b45309'
   
                 return `
                   <div
@@ -22061,12 +22247,14 @@ document.querySelector('#merchant-product-image-file')
       : 'false'
   }"
   style="
-    width:100%;
-    height:30px;
-    border:1px solid #cbd5e1;
-    border-radius:7px;
-    padding:0 8px;
-  "
+  width:100%;
+  height:30px;
+  border:1px solid #cbd5e1;
+  border-radius:7px;
+  padding:0 8px;
+  color:${statusColor};
+  font-weight:700;
+"
 >
   
                       <option
@@ -22196,6 +22384,15 @@ document.querySelector('#merchant-product-image-file')
   
             const status =
               select.value
+
+              select.style.color =
+  status === '예약가능'
+    ? '#15803d'
+    : status === '예약불가'
+      ? '#dc2626'
+      : status === '예약완료'
+        ? '#2563eb'
+        : '#b45309'
   
             if (!scheduleTime) {
               return
@@ -22312,6 +22509,11 @@ async (
   editableSelects.forEach(
     (select) => {
       select.value = status
+  
+      select.style.color =
+        status === '예약가능'
+          ? '#15803d'
+          : '#dc2626'
     }
   )
 }
@@ -22410,6 +22612,9 @@ document
         ) {
           select.value =
             '예약가능'
+        
+          select.style.color =
+            '#15803d'
         }
       })
 
