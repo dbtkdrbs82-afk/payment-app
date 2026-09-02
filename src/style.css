@@ -14257,3 +14257,10 @@ height: 150px !important;
   border-color: #8f96a3 !important;
   color: #ffffff !important;
 }
+/* 결제관리 날짜 이동 버튼 위로 */
+#payment-prev-btn,
+#payment-today-btn,
+#payment-next-btn,
+#payment-month-btn {
+  transform: translateY(-10px);
+}
