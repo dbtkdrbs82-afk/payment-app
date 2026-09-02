@@ -14442,3 +14442,49 @@ height: 150px !important;
     box-sizing: border-box !important;
   }
 }
+/* 무선단말기 모바일 날짜영역 폭/5버튼 최종 보정 */
+@media (max-width: 520px) and (orientation: portrait) {
+
+  body:has(.terminal-date-search-box)
+  .terminal-date-search-box {
+    display: block !important;
+    grid-template-columns: none !important;
+
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body:has(.terminal-date-search-box)
+  .terminal-date-search-row {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  body:has(.terminal-date-search-box)
+  .terminal-date-button-row {
+    width: 100% !important;
+
+    display: grid !important;
+    grid-template-columns:
+      repeat(5, minmax(0, 1fr)) !important;
+
+    gap: 6px !important;
+  }
+
+  body:has(.terminal-date-search-box)
+  #terminal-date-prev-button,
+  body:has(.terminal-date-search-box)
+  #terminal-date-today-button,
+  body:has(.terminal-date-search-box)
+  #terminal-date-next-button,
+  body:has(.terminal-date-search-box)
+  #terminal-date-month-button,
+  body:has(.terminal-date-search-box)
+  #terminal-date-search-button {
+    grid-column: auto !important;
+    grid-row: auto !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
