@@ -17208,9 +17208,9 @@ ${isBeauty ? `
           <div class="merchant-order-table-wrap ${isAcademy ? 'academy-hide-order-list' : ''}">
             <table class="admin-table">
              <thead>
-  ${
-    isBeauty
-  ? `
+             ${
+              isBeauty && !isBeautySalesView
+                ? `
     <tr>
       <th>No</th>
       <th>주문번호</th>
@@ -18003,7 +18003,10 @@ const hotelCustomerRequestHtml =
     }
     tr.setAttribute('data-status', order.order_status || '접수')
 
-    if ((sessionStorage.getItem('login_merchant_type') || '') === '뷰티') {
+    if (
+      (sessionStorage.getItem('login_merchant_type') || '') === '뷰티' &&
+      !isBeautySalesView
+    ) {
       const beautyTableItems = Array.isArray(order.items)
   ? order.items
       .map((item: any) =>
