@@ -22146,17 +22146,77 @@ if (beautyReservedOrdersError) {
             </div>
   
   
-            <input
-              id="beauty-schedule-date"
-              type="date"
-              value="${selectedScheduleDate}"
-              style="
-                height:40px;
-                padding:0 12px;
-                border:1px solid #cbd5e1;
-                border-radius:8px;
-              "
-            />
+            <div
+  style="
+    display:flex;
+    align-items:center;
+    gap:6px;
+  "
+>
+  <button
+    id="beauty-schedule-prev"
+    type="button"
+    style="
+      height:40px;
+      padding:0 16px;
+      border:0;
+      border-radius:8px;
+      background:#e8b4c2;
+      color:#ffffff;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    이전
+  </button>
+
+  <button
+    id="beauty-schedule-today"
+    type="button"
+    style="
+      height:40px;
+      padding:0 16px;
+      border:0;
+      border-radius:8px;
+      background:#e8b4c2;
+      color:#ffffff;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    오늘
+  </button>
+
+  <button
+    id="beauty-schedule-next"
+    type="button"
+    style="
+      height:40px;
+      padding:0 16px;
+      border:0;
+      border-radius:8px;
+      background:#e8b4c2;
+      color:#ffffff;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    다음
+  </button>
+
+  <input
+    id="beauty-schedule-date"
+    type="date"
+    value="${selectedScheduleDate}"
+    style="
+      height:40px;
+      padding:0 12px;
+      border:1px solid #cbd5e1;
+      border-radius:8px;
+      box-sizing:border-box;
+    "
+  />
+</div>
   
           </div>
    
@@ -22397,6 +22457,115 @@ if (beautyReservedOrdersError) {
         }
       )
   
+      /* =========================
+   이전 / 오늘 / 다음
+========================= */
+
+const moveBeautyScheduleDate = (
+  moveDays: number
+) => {
+  const baseDate =
+    new Date(
+      selectedScheduleDate +
+      'T00:00:00'
+    )
+
+  baseDate.setDate(
+    baseDate.getDate() +
+    moveDays
+  )
+
+  const year =
+    baseDate.getFullYear()
+
+  const month =
+    String(
+      baseDate.getMonth() + 1
+    ).padStart(2, '0')
+
+  const day =
+    String(
+      baseDate.getDate()
+    ).padStart(2, '0')
+
+  const dateValue =
+    `${year}-${month}-${day}`
+
+  location.href =
+    '/merchant-beauty-schedule' +
+    '?staff_id=' +
+    encodeURIComponent(
+      String(staffId)
+    ) +
+    '&date=' +
+    encodeURIComponent(
+      dateValue
+    )
+}
+
+
+document
+  .querySelector(
+    '#beauty-schedule-prev'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+      moveBeautyScheduleDate(-1)
+    }
+  )
+
+
+document
+  .querySelector(
+    '#beauty-schedule-today'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+      const now =
+        new Date()
+
+      const year =
+        now.getFullYear()
+
+      const month =
+        String(
+          now.getMonth() + 1
+        ).padStart(2, '0')
+
+      const day =
+        String(
+          now.getDate()
+        ).padStart(2, '0')
+
+      const todayValue =
+        `${year}-${month}-${day}`
+
+      location.href =
+        '/merchant-beauty-schedule' +
+        '?staff_id=' +
+        encodeURIComponent(
+          String(staffId)
+        ) +
+        '&date=' +
+        encodeURIComponent(
+          todayValue
+        )
+    }
+  )
+
+
+document
+  .querySelector(
+    '#beauty-schedule-next'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+      moveBeautyScheduleDate(1)
+    }
+  )
   
     /* =========================
        시간 상태 변경 즉시 저장
