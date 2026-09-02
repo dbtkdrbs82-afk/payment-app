@@ -17191,18 +17191,20 @@ ${isBeauty ? `
              <thead>
   ${
     isBeauty
-      ? `
-        <tr>
-          <th>No</th>
-          <th>주문번호</th>
-          <th>예약일</th>
-          <th>예약시간</th>
-          <th>서비스 / 직원</th>
-          <th>결제금액</th>
-          <th>상태</th>
-          <th>처리</th>
-        </tr>
-      `
+  ? `
+    <tr>
+      <th>No</th>
+      <th>주문번호</th>
+      <th>예약자</th>
+      <th>연락처</th>
+      <th>예약일</th>
+      <th>예약시간</th>
+      <th>서비스 / 직원</th>
+      <th>결제금액</th>
+      <th>상태</th>
+      <th>처리</th>
+    </tr>
+  `
       : isHotel
         ? `
           <tr>
@@ -18014,18 +18016,20 @@ const hotelCustomerRequestHtml =
             'data-amount="' + (order.total_amount || 0) + '" ' +
             'data-date="' + (order.created_at || '') + '" ' +
             'data-items="' + beautyTableItems + '"' +
-          '>' +
-  (
-    order.customer_name || order.customer_phone
-      ? (order.customer_name || '-') +
-        '<br>' +
-        (order.customer_phone || '-')
-      : orderNumber + '번'
-  ) +
+         '>' +
+  orderNumber + '번' +
 '</button>' +
-        '</td>' +
-    
-       '<td>' +
+'</td>' +
+
+'<td>' +
+  (order.customer_name || '-') +
+'</td>' +
+
+'<td>' +
+  (order.customer_phone || '-') +
+'</td>' +
+
+'<td>' +
 (
   Array.isArray(order.items)
   ? Array.from(
