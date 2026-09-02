@@ -11196,10 +11196,27 @@ if (!confirm(confirmMessage)) {
               <div>
                 <strong>${payment.merchant_name || '-'}</strong>
                 <span>
-                  ${payment.merchant_id
-                    ? 'MER' + String(payment.merchant_id).padStart(4, '0')
-                    : '-'}
-                </span>
+  ${payment.merchant_id
+    ? 'MER' + String(payment.merchant_id).padStart(4, '0')
+    : '-'}
+</span>
+
+<span>
+  결제일 :
+  ${String(payment.created_at || '').slice(0, 10)}
+</span>
+
+<span>
+  출금예정일 :
+  ${
+    getPayoutDate(
+      payment.created_at,
+      settlementCycleMap.get(
+        Number(payment.merchant_id)
+      ) || '1일'
+    )
+  }
+</span>
               </div>
 
               <div>
