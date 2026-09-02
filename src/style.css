@@ -14272,11 +14272,13 @@ height: 150px !important;
 #payout-search-btn {
   transform: translateY(-10px);
 }
-/* 무선단말기 날짜 이동 버튼 */
+/* 무선단말기 날짜 이동 버튼 최종 정렬 */
 .terminal-date-button-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 #terminal-date-prev-button,
@@ -14284,7 +14286,26 @@ height: 150px !important;
 #terminal-date-next-button,
 #terminal-date-month-button,
 #terminal-date-search-button {
-  height: 40px;
-  padding: 0 16px;
-  white-space: nowrap;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+
+  height: 40px !important;
+  min-height: 40px !important;
+
+  margin: 0 !important;
+  padding: 0 16px !important;
+
+  transform: none !important;
+  line-height: 1 !important;
+  box-sizing: border-box !important;
+
+  white-space: nowrap !important;
+  vertical-align: middle !important;
+}
+#terminal-start-date-input,
+#terminal-end-date-input {
+  height: 40px !important;
+  box-sizing: border-box !important;
+  margin: 0 !important;
 }
