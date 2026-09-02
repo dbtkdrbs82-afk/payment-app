@@ -22166,7 +22166,7 @@ if (beautyReservedOrdersError) {
       color:#ffffff;
       font-weight:700;
       cursor:pointer;
-      transform:translateY(-12px);
+      transform:translateY(-10px);
     "
   >
     이전
@@ -22184,7 +22184,7 @@ if (beautyReservedOrdersError) {
       color:#ffffff;
       font-weight:700;
       cursor:pointer;
-      transform:translateY(-12px);
+      transform:translateY(-10px);
     "
   >
     오늘
@@ -22202,7 +22202,7 @@ if (beautyReservedOrdersError) {
       color:#ffffff;
       font-weight:700;
       cursor:pointer;
-      transform:translateY(-12px);
+      transform:translateY(-10px);
     "
   >
     다음
