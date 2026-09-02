@@ -24,39 +24,141 @@ function getPayoutDate(
   settlementCycle: string,
   holidaySet: Set<string>
 ) {
-  const payoutDate = new Date(createdAt)
+  /*
+   * 결제일을 한국시간 날짜 기준으로 변환
+   * Vercel 서버 UTC 시간 때문에
+   * 결제일이 하루 밀리는 문제도 방지
+   */
+  const createdDate =
+    new Date(createdAt)
+
+  const koreaDate =
+    new Date(
+      createdDate.getTime() +
+      9 * 60 * 60 * 1000
+    )
+
+  const payoutDate =
+    new Date(
+      Date.UTC(
+        koreaDate.getUTCFullYear(),
+        koreaDate.getUTCMonth(),
+        koreaDate.getUTCDate()
+      )
+    )
+
+  const formatPayoutDate = (
+    date: Date
+  ) => {
+    const year =
+      date.getUTCFullYear()
+
+    const month =
+      String(
+        date.getUTCMonth() + 1
+      ).padStart(2, '0')
+
+    const day =
+      String(
+        date.getUTCDate()
+      ).padStart(2, '0')
+
+    return `${year}-${month}-${day}`
+  }
 
   const cycleText =
-    String(settlementCycle || '1일').trim()
+    String(
+      settlementCycle || '1일'
+    ).trim()
 
-  const cycleNumberMatch = cycleText.match(/\d+/)
+  const cycleNumberMatch =
+    cycleText.match(/\d+/)
 
-  const cycleDays = cycleNumberMatch
-    ? Number(cycleNumberMatch[0])
-    : 1
+  const cycleDays =
+    cycleNumberMatch
+      ? Number(cycleNumberMatch[0])
+      : 1
 
-  payoutDate.setDate(
-    payoutDate.getDate() + cycleDays
-  )
+  /*
+   * 0일 정산
+   * 결제일이 영업일이면 당일
+   * 주말/공휴일이면 다음 영업일
+   */
+  if (cycleDays === 0) {
+    while (true) {
+      const dayOfWeek =
+        payoutDate.getUTCDay()
 
-  while (true) {
-    const dayOfWeek = payoutDate.getDay()
-    const dateText = formatDate(payoutDate)
+      const dateText =
+        formatPayoutDate(
+          payoutDate
+        )
+
+      const isWeekend =
+        dayOfWeek === 0 ||
+        dayOfWeek === 6
+
+      const isHoliday =
+        holidaySet.has(
+          dateText
+        )
+
+      if (
+        !isWeekend &&
+        !isHoliday
+      ) {
+        return dateText
+      }
+
+      payoutDate.setUTCDate(
+        payoutDate.getUTCDate() + 1
+      )
+    }
+  }
+
+  /*
+   * 정산주기는 영업일 기준으로 계산
+   */
+  let addedBusinessDays = 0
+
+  while (
+    addedBusinessDays <
+    cycleDays
+  ) {
+    payoutDate.setUTCDate(
+      payoutDate.getUTCDate() + 1
+    )
+
+    const dayOfWeek =
+      payoutDate.getUTCDay()
+
+    const dateText =
+      formatPayoutDate(
+        payoutDate
+      )
 
     const isWeekend =
-      dayOfWeek === 0 || dayOfWeek === 6
+      dayOfWeek === 0 ||
+      dayOfWeek === 6
 
     const isHoliday =
-      holidaySet.has(dateText)
+      holidaySet.has(
+        dateText
+      )
 
-    if (!isWeekend && !isHoliday) {
-      return dateText
+    if (
+      isWeekend ||
+      isHoliday
+    ) {
+      continue
     }
 
-    payoutDate.setDate(
-      payoutDate.getDate() + 1
-    )
+    addedBusinessDays += 1
   }
+
+  return formatPayoutDate(
+    payoutDate
+  )
 }
 
 export default async function handler(
