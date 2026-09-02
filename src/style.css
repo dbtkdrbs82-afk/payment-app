@@ -14495,3 +14495,43 @@ height: 150px !important;
     transform: translateY(9px) !important;
   }
 }
+/* 무선단말기 모바일 결제내역 테이블 폭 보정 */
+@media (max-width: 520px) and (orientation: portrait) {
+
+  .terminal-payment-table {
+    width: calc(100% - 12px) !important;
+    max-width: calc(100% - 12px) !important;
+    margin: 0 auto !important;
+    table-layout: fixed !important;
+  }
+
+  .terminal-payment-table th:nth-child(1),
+  .terminal-payment-table td:nth-child(1) {
+    width: 20% !important;
+  }
+
+  .terminal-payment-table th:nth-child(2),
+  .terminal-payment-table td:nth-child(2) {
+    width: 15% !important;
+  }
+
+  .terminal-payment-table th:nth-child(3),
+  .terminal-payment-table td:nth-child(3) {
+    width: 19% !important;
+  }
+
+  .terminal-payment-table th:nth-child(4),
+  .terminal-payment-table td:nth-child(4) {
+    width: 13% !important;
+  }
+
+  .terminal-payment-table th:nth-child(5),
+  .terminal-payment-table td:nth-child(5) {
+    width: 12% !important;
+  }
+
+  .terminal-payment-table th:nth-child(6),
+  .terminal-payment-table td:nth-child(6) {
+    width: 21% !important;
+  }
+}
