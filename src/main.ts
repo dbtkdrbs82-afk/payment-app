@@ -11975,6 +11975,15 @@ const formatDate = (date: Date) => {
   return `${y}-${m}-${d}`
 }
 
+const initialPayoutToday =
+  formatDate(new Date())
+
+payoutStartDate.value =
+  initialPayoutToday
+
+payoutEndDate.value =
+  initialPayoutToday
+
 document.querySelector('#payout-today-btn')
 ?.addEventListener('click', () => {
   const today = formatDate(new Date())
@@ -13214,6 +13223,25 @@ document.querySelector('#payment-month-btn')
       .querySelector<HTMLElement>('.admin-tab[data-page="payment"]')
       ?.click()
   })
+
+  if (!(window as any).paymentFilters) {
+    const todayText =
+      new Date().toLocaleDateString(
+        'en-CA',
+        {
+          timeZone: 'Asia/Seoul'
+        }
+      )
+  
+    ;(window as any).paymentFilters = {
+      pg: 'all',
+      dateType: 'created_at',
+      startDate: todayText,
+      endDate: todayText,
+      searchType: 'all',
+      keyword: ''
+    }
+  }
 
 const savedPaymentFilters = (window as any).paymentFilters
 
