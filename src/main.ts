@@ -3501,16 +3501,35 @@ approved_at:
       
         // 고객 화면에 표시할 주문 대기번호
         order_no: callNumber || '-',
-        call_number: callNumber ? Number(callNumber) : null,
+        call_number:
+          callNumber
+            ? Number(callNumber)
+            : null,
       
         // PG 결제 연결용 주문번호
         pg_order_id:
-          orderNo.replace(/[^a-zA-Z0-9]/g, ''),
+          orderNo.replace(
+            /[^a-zA-Z0-9]/g,
+            ''
+          ),
       
-          items,
-total_amount: Number(totalAmount),
-order_status: '접수',
-payment_status: '결제완료',
+        customer_name:
+          sessionStorage.getItem(
+            'beauty_customer_name'
+          ) || null,
+      
+        customer_phone:
+          sessionStorage.getItem(
+            'beauty_customer_phone'
+          ) || null,
+      
+        items,
+      
+        total_amount:
+          Number(totalAmount),
+      
+        order_status: '접수',
+        payment_status: '결제완료',
       })
   
       sessionStorage.removeItem('kiosk_order_no')
