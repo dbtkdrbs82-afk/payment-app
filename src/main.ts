@@ -22151,6 +22151,7 @@ if (beautyReservedOrdersError) {
     display:flex;
     align-items:center;
     gap:6px;
+    transform:translateY(-12px);
   "
 >
   <button
