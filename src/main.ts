@@ -15168,9 +15168,26 @@ const orderIdValue =
           location.href = '/merchant-login'
         }
 
-        const params = new URLSearchParams(location.search)
-const startDate = params.get('start')
-const endDate = params.get('end')
+        const params =
+  new URLSearchParams(
+    location.search
+  )
+
+const merchantToday =
+  new Date().toLocaleDateString(
+    'en-CA',
+    {
+      timeZone: 'Asia/Seoul'
+    }
+  )
+
+const startDate =
+  params.get('start') ||
+  merchantToday
+
+const endDate =
+  params.get('end') ||
+  merchantToday
 
 const merchantTypeForOrderQuery =
   sessionStorage.getItem('login_merchant_type') || '일반매장'
