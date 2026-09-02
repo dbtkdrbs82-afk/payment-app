@@ -12165,13 +12165,15 @@ if (tableHead) {
       ? (
           '<tr>' +
             '<th>No</th>' +
-            '<th>주문번호</th>' +
-            '<th>예약일</th>' +
-            '<th>예약시간</th>' +
-            '<th>서비스 / 직원</th>' +
-            '<th>결제금액</th>' +
-            '<th>상태</th>' +
-            '<th>처리</th>' +
+'<th>주문번호</th>' +
+'<th>예약자</th>' +
+'<th>연락처</th>' +
+'<th>예약일</th>' +
+'<th>예약시간</th>' +
+'<th>서비스 / 직원</th>' +
+'<th>결제금액</th>' +
+'<th>상태</th>' +
+'<th>처리</th>' +
           '</tr>'
         )
       : (
@@ -12256,6 +12258,14 @@ function renderMerchantOrderPage() {
                 orderNumber + '번' +
               '</button>' +
             '</td>' +
+
+            '<td>' +
+  (order.customer_name || '-') +
+'</td>' +
+
+'<td>' +
+  (order.customer_phone || '-') +
+'</td>' +
 
             '<td>' +
   (order.reservation_date || '-') +
