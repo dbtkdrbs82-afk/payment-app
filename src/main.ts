@@ -11203,7 +11203,14 @@ if (!confirm(confirmMessage)) {
 
 <span>
   결제일 :
-  ${String(payment.created_at || '').slice(0, 10)}
+  ${new Date(
+    payment.created_at
+  ).toLocaleDateString(
+    'en-CA',
+    {
+      timeZone: 'Asia/Seoul'
+    }
+  )}
 </span>
 
 <span>
