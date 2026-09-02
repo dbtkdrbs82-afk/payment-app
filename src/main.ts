@@ -22052,22 +22052,22 @@ document.querySelector('#merchant-product-image-file')
                       ${time}
                     </strong>
   
-                    <select
-                      class="beauty-schedule-status"
-                      data-time="${time}"
-                      ${
-                        isReservation
-                          ? 'disabled'
-                          : ''
-                      }
-                      style="
-                        width:100%;
-                        height:30px;
-                        border:1px solid #cbd5e1;
-                        border-radius:7px;
-                        padding:0 8px;
-                      "
-                    >
+     <select
+  class="beauty-schedule-status"
+  data-time="${time}"
+  data-order-linked="${
+    savedRow?.order_id
+      ? 'true'
+      : 'false'
+  }"
+  style="
+    width:100%;
+    height:30px;
+    border:1px solid #cbd5e1;
+    border-radius:7px;
+    padding:0 8px;
+  "
+>
   
                       <option
                         value="예약가능"
@@ -22266,9 +22266,11 @@ async (
 
   /* 예약완료 시간은 제외 */
   const editableSelects =
-    selects.filter(
-      (select) => !select.disabled
-    )
+  selects.filter(
+    (select) =>
+      select.dataset.orderLinked !==
+      'true'
+  )
 
   const scheduleRows =
     editableSelects.map(
@@ -22402,7 +22404,10 @@ document
       )
       .forEach((select) => {
 
-        if (!select.disabled) {
+        if (
+          select.dataset.orderLinked !==
+          'true'
+        ) {
           select.value =
             '예약가능'
         }
@@ -30685,7 +30690,8 @@ const item = cart.find(
               .from('beauty_staff_schedule')
               .select(`
                 schedule_time,
-                status
+                status,
+                order_id
               `)
               .eq(
                 'merchant_id',
@@ -30709,23 +30715,38 @@ const item = cart.find(
           }
       
           const scheduleStatusMap:
-            Record<string, string> = {}
-      
-          ;(staffScheduleRows || [])
-            .forEach((row: any) => {
-      
-              const time =
-                String(
-                  row.schedule_time || ''
-                ).slice(0, 5)
-      
-              if (!time) return
-      
-              scheduleStatusMap[time] =
-                String(
-                  row.status || '예약가능'
-                )
-            })
+  Record<string, string> = {}
+
+const manualAvailableTimes =
+  new Set<string>()
+
+;(staffScheduleRows || [])
+  .forEach((row: any) => {
+
+    const time =
+      String(
+        row.schedule_time || ''
+      ).slice(0, 5)
+
+    if (!time) return
+
+    const rowStatus =
+      String(
+        row.status || '예약가능'
+      )
+
+    scheduleStatusMap[time] =
+      rowStatus
+
+    if (
+      row.order_id &&
+      rowStatus === '예약가능'
+    ) {
+      manualAvailableTimes.add(
+        time
+      )
+    }
+  })
 
             const {
               data: reservedOrders,
@@ -30828,14 +30849,22 @@ const reservedTimes =
     reservedDurationMinutes
   )
 
-reservedTimes.forEach(
-  (reservedSlotTime) => {
-
-    scheduleStatusMap[
-      reservedSlotTime
-    ] = '예약완료'
-  }
-)
+  reservedTimes.forEach(
+    (reservedSlotTime) => {
+  
+      if (
+        manualAvailableTimes.has(
+          reservedSlotTime
+        )
+      ) {
+        return
+      }
+  
+      scheduleStatusMap[
+        reservedSlotTime
+      ] = '예약완료'
+    }
+  )
                   }
                 )
               })
