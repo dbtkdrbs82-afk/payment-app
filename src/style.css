@@ -14492,6 +14492,6 @@ height: 150px !important;
 @media (max-width: 520px) and (orientation: portrait) {
   body:has(.terminal-date-search-box)
   #terminal-page-size {
-    transform: translateY(10px) !important;
+    transform: translateY(9px) !important;
   }
 }
