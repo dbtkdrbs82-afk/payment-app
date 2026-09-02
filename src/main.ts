@@ -16050,19 +16050,44 @@ const terminalPagedPayments =
       value="${selectedEndDate}"
     />
 
-    <button
-      type="button"
-      id="terminal-date-search-button"
-    >
-      조회
-    </button>
+    <div class="terminal-date-button-row">
 
-    <button
-      type="button"
-      id="terminal-date-today-button"
-    >
-      오늘
-    </button>
+  <button
+    type="button"
+    id="terminal-date-prev-button"
+  >
+    이전
+  </button>
+
+  <button
+    type="button"
+    id="terminal-date-today-button"
+  >
+    오늘
+  </button>
+
+  <button
+    type="button"
+    id="terminal-date-next-button"
+  >
+    다음
+  </button>
+
+  <button
+    type="button"
+    id="terminal-date-month-button"
+  >
+    당월
+  </button>
+
+  <button
+    type="button"
+    id="terminal-date-search-button"
+  >
+    조회
+  </button>
+
+</div>
 
   </div>
 
@@ -17322,6 +17347,86 @@ document
       params.toString()
   })
 
+  const moveTerminalDate = (
+    moveDays: number
+  ) => {
+    const startDateInput =
+      document.querySelector<HTMLInputElement>(
+        '#terminal-start-date-input'
+      )
+  
+    if (!startDateInput) {
+      return
+    }
+  
+    const baseDateText =
+      startDateInput.value
+  
+    if (!baseDateText) {
+      return
+    }
+  
+    const baseDate =
+      new Date(
+        baseDateText + 'T00:00:00'
+      )
+  
+    baseDate.setDate(
+      baseDate.getDate() + moveDays
+    )
+  
+    const year =
+      baseDate.getFullYear()
+  
+    const month =
+      String(
+        baseDate.getMonth() + 1
+      ).padStart(2, '0')
+  
+    const day =
+      String(
+        baseDate.getDate()
+      ).padStart(2, '0')
+  
+    const dateValue =
+      `${year}-${month}-${day}`
+  
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
+  
+    params.delete('terminal_date')
+    params.delete('terminal_page')
+  
+    params.set(
+      'terminal_start_date',
+      dateValue
+    )
+  
+    params.set(
+      'terminal_end_date',
+      dateValue
+    )
+  
+    window.location.search =
+      params.toString()
+  }
+  
+  
+  document
+    .querySelector('#terminal-date-prev-button')
+    ?.addEventListener('click', () => {
+      moveTerminalDate(-1)
+    })
+  
+  
+  document
+    .querySelector('#terminal-date-next-button')
+    ?.addEventListener('click', () => {
+      moveTerminalDate(1)
+    })
+
 document
   .querySelector('#terminal-date-today-button')
   ?.addEventListener('click', () => {
@@ -17351,6 +17456,54 @@ document
     params.set(
       'terminal_start_date',
       todayValue
+    )
+
+    params.set(
+      'terminal_end_date',
+      todayValue
+    )
+
+    window.location.search =
+      params.toString()
+  })
+
+  document
+  .querySelector('#terminal-date-month-button')
+  ?.addEventListener('click', () => {
+
+    const now =
+      new Date()
+
+    const year =
+      now.getFullYear()
+
+    const month =
+      String(
+        now.getMonth() + 1
+      ).padStart(2, '0')
+
+    const day =
+      String(
+        now.getDate()
+      ).padStart(2, '0')
+
+    const monthStart =
+      `${year}-${month}-01`
+
+    const todayValue =
+      `${year}-${month}-${day}`
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
+
+    params.delete('terminal_date')
+    params.delete('terminal_page')
+
+    params.set(
+      'terminal_start_date',
+      monthStart
     )
 
     params.set(
