@@ -10506,6 +10506,11 @@ const endDate =
 
         const payoutCount = filteredRows.length
 
+        const selectedPayoutPg =
+  document.querySelector<HTMLSelectElement>(
+    '#payout-pg-filter'
+  )?.value || '전체'
+
         const incomingExpectedAmount =
   (payments || []).reduce((sum, row: any) => {
 
@@ -10519,6 +10524,13 @@ const endDate =
 
     const pgCompany =
       String(row.pg_company || '').trim()
+
+      if (
+        selectedPayoutPg !== '전체' &&
+        pgCompany !== selectedPayoutPg
+      ) {
+        return sum
+      }
 
     let depositDate = ''
 
