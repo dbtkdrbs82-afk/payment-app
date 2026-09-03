@@ -16980,6 +16980,16 @@ const newMemberCount =
   `
 }
 
+const { data: merchantVoiceSetting } =
+  await supabase
+    .from('merchants')
+    .select('voice_enabled')
+    .eq('id', merchantId)
+    .maybeSingle()
+
+const merchantVoiceEnabled =
+  merchantVoiceSetting?.voice_enabled === true
+
 let lastCheckedOrderId =
 Number(
   sessionStorage.getItem(
@@ -17029,6 +17039,8 @@ setInterval(async () => {
       String(latestOrderId)
     )
 
+    if (merchantVoiceEnabled) {
+
     const audioContext = new AudioContext()
 const oscillator = audioContext.createOscillator()
 const gainNode = audioContext.createGain()
@@ -17055,7 +17067,7 @@ setTimeout(() => {
 
       window.speechSynthesis.speak(message)
     }, 1000)
-
+  }
     setTimeout(() => {
       location.reload()
     }, 5000)
@@ -17077,6 +17089,15 @@ const channel = supabase
       filter: 'merchant_id=eq.' + merchantId
     },
     () => {
+
+      if (!merchantVoiceEnabled) {
+        setTimeout(() => {
+          location.reload()
+        }, 1000)
+    
+        return
+      }
+    
       const audio = new Audio(
         'https://actions.google.com/sounds/v1/alarms/dingdong.ogg'
       )
@@ -17350,6 +17371,26 @@ ${isBeauty ? `
 
           <div class="merchant-setting-box">
             <h3>⚙️ 매장 설정</h3>
+
+            <label style="
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:10px 0 22px 0;
+  font-weight:700;
+  cursor:pointer;
+">
+  <input
+    id="merchant-voice-enabled"
+    type="checkbox"
+    style="
+      width:18px;
+      height:18px;
+      margin:0;
+    "
+  />
+  음성 호출 사용
+</label>
 
             <label>호출 기본 문구</label>
 
@@ -17730,9 +17771,10 @@ document
       const { data: merchantSetting } = await supabase
   .from('merchants')
   .select(`
+    voice_enabled,
     call_message,
     order_message,
-    merchant_name,
+    merchant_name,    
     owner_name,
     corporate_number,
     business_number,
@@ -17746,6 +17788,17 @@ korpay_mid
   .single()
 
 if (merchantSetting) {
+
+  const voiceEnabledInput =
+  document.querySelector<HTMLInputElement>(
+    '#merchant-voice-enabled'
+  )
+
+if (voiceEnabledInput) {
+  voiceEnabledInput.checked =
+    merchantSetting.voice_enabled === true
+}
+
   const callInput =
     document.querySelector('#merchant-call-message') as HTMLInputElement | null
 
@@ -18594,6 +18647,15 @@ receiptButtons.forEach((button) => {
 })
 
   cardCallButton?.addEventListener('click', async () => {
+
+    if (!merchantVoiceEnabled) {
+      alert(
+        '음성 호출 사용이 꺼져 있습니다.\n' +
+        '매장 설정에서 음성 호출 사용을 체크해주세요.'
+      )
+      return
+    }
+
     const savedCallMessage =
       (
         document.querySelector(
@@ -18639,6 +18701,15 @@ if (statusBox) {
 document.querySelectorAll('.admin-table .customer-call-button')
   .forEach((button) => {
     button.addEventListener('click', async () => {
+
+      if (!merchantVoiceEnabled) {
+        alert(
+          '음성 호출 사용이 꺼져 있습니다.\n' +
+          '매장 설정에서 음성 호출 사용을 체크해주세요.'
+        )
+        return
+      }
+      
       const number =
         (button as HTMLElement).getAttribute('data-number') || '0'
 
@@ -19066,6 +19137,11 @@ document.querySelector('#preview-order-message')
 document.querySelector('#save-call-message')
   ?.addEventListener('click', async () => {
 
+    const voiceEnabled =
+  document.querySelector<HTMLInputElement>(
+    '#merchant-voice-enabled'
+  )?.checked === true
+
     const callMessage =
       (
         document.querySelector(
@@ -19083,6 +19159,7 @@ document.querySelector('#save-call-message')
       const { error } = await supabase
       .from('merchants')
       .update({
+        voice_enabled: voiceEnabled,
         call_message: callMessage,
         order_message: orderMessage
       })
