@@ -10489,9 +10489,18 @@ const endDate =
         const canManagePayoutHold = adminId === 'NXGMASTER16'
     
         const totalPayoutAmount = filteredRows.reduce((sum, row) => {
+          if (row.payout_status === '출금완료') {
+            return sum
+          }
+        
           const amount = Number(row.amount || 0)
           const feeAmount = Number(row.fee_amount || 0)
-          const payoutAmount = Number(row.settlement_amount || amount - feeAmount)
+        
+          const payoutAmount = Number(
+            row.settlement_amount ||
+            amount - feeAmount
+          )
+        
           return sum + payoutAmount
         }, 0)
 
