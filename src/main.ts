@@ -16987,8 +16987,8 @@ const { data: merchantVoiceSetting } =
     .eq('id', merchantId)
     .maybeSingle()
 
-const merchantVoiceEnabled =
-  merchantVoiceSetting?.voice_enabled === true
+    let merchantVoiceEnabled =
+    merchantVoiceSetting?.voice_enabled === true
 
 let lastCheckedOrderId =
 Number(
@@ -18709,7 +18709,7 @@ document.querySelectorAll('.admin-table .customer-call-button')
         )
         return
       }
-      
+
       const number =
         (button as HTMLElement).getAttribute('data-number') || '0'
 
@@ -19165,12 +19165,14 @@ document.querySelector('#save-call-message')
       })
       .eq('id', merchantId)
     
-    if (error) {
-      alert('설정 저장 실패: ' + error.message)
-      return
-    }
-    
-    alert('설정이 저장되었습니다.')
+      if (error) {
+        alert('설정 저장 실패: ' + error.message)
+        return
+      }
+      
+      merchantVoiceEnabled = voiceEnabled
+      
+      alert('설정이 저장되었습니다.')
 })
 
 const getLocalDateTextForMerchant = (date: Date) => {
