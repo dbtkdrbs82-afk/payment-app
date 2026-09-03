@@ -11728,7 +11728,10 @@ const merchantId = rawMerchantId.startsWith('MER')
           return
         }
 
-        if (seller.status !== 'APPROVED') {
+        if (
+          seller.status !== 'PARTIALLY_APPROVED' &&
+          seller.status !== 'APPROVED'
+        ) {
           alert(
             '토스 셀러가 지급가능 상태가 아닙니다.\n현재 상태: ' +
               seller.status

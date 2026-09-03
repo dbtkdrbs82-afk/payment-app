@@ -172,7 +172,18 @@ export default async function handler(
     })
   }
 
-  
+  const targetPg =
+  String(req.query.pg || '').trim()
+
+if (
+  targetPg !== '토스페이먼츠' &&
+  targetPg !== '코페이'
+) {
+  return res.status(400).json({
+    success: false,
+    message: '정산 PG를 확인할 수 없습니다.',
+  })
+}
 
   const cronSecret =
   process.env.CRON_SECRET?.trim()
@@ -311,6 +322,14 @@ if (
 
     ;(paymentsResult.data || []).forEach(
       (payment: any) => {
+
+        const paymentPgCompany =
+  String(payment.pg_company || '').trim()
+
+if (paymentPgCompany !== targetPg) {
+  return
+}
+
         if (
           !payment.merchant_id ||
           payment.status === 'cancel' ||
@@ -344,16 +363,20 @@ if (
         const merchantId =
           String(payment.merchant_id)
 
-        const groupKey =
-          merchantId + '_' + payoutDate
+          const groupKey =
+          merchantId +
+          '_' +
+          paymentPgCompany +
+          '_' +
+          payoutDate
 
         if (!payoutGroupMap[groupKey]) {
           payoutGroupMap[groupKey] = {
             merchantId,
             merchantName:
               payment.merchant_name || '-',
-            pgCompany:
-              payment.pg_company || '-',
+              pgCompany:
+              paymentPgCompany,
             payoutDate,
             paymentCount: 0,
             settlementAmount: 0,
@@ -446,7 +469,10 @@ for (const group of payoutGroups) {
     continue
   }
 
-  if (seller.status !== 'APPROVED') {
+  if (
+    seller.status !== 'PARTIALLY_APPROVED' &&
+    seller.status !== 'APPROVED'
+  ) {
     await supabase
       .from('payments')
       .update({
