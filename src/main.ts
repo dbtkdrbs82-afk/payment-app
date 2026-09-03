@@ -97,10 +97,25 @@ document.addEventListener(
       return
     }
 
-    merchantLoginKeys.forEach((key) => {
-      sessionStorage.removeItem(key)
-      localStorage.removeItem(key)
-    })
+    const logoutMerchantId =
+  sessionStorage.getItem('login_merchant_id')
+
+if (logoutMerchantId) {
+  sessionStorage.removeItem(
+    'last_checked_order_id_' + logoutMerchantId
+  )
+
+  sessionStorage.removeItem(
+    'order_voice_initialized_' + logoutMerchantId
+  )
+}
+
+merchantLoginKeys.forEach((key) => {
+  sessionStorage.removeItem(key)
+  localStorage.removeItem(key)
+})
+
+    
   },
   true
 )
@@ -16965,18 +16980,37 @@ const newMemberCount =
   `
 }
 
-  let lastCheckedOrderId =
-  Number(sessionStorage.getItem('last_checked_order_id_' + merchantId) || 0)
+let lastCheckedOrderId =
+Number(
+  sessionStorage.getItem(
+    'last_checked_order_id_' + merchantId
+  ) || 0
+)
 
 const newestOrderId =
-  (orders || [])[0]?.id || 0
+Number((orders || [])[0]?.id || 0)
 
-if (!lastCheckedOrderId && newestOrderId) {
-  sessionStorage.setItem(
-    'last_checked_order_id_' + merchantId,
-    String(newestOrderId)
-  )
-  lastCheckedOrderId = newestOrderId
+const orderVoiceInitializedKey =
+'order_voice_initialized_' + merchantId
+
+const isOrderVoiceInitialized =
+sessionStorage.getItem(
+  orderVoiceInitializedKey
+) === 'true'
+
+if (!isOrderVoiceInitialized) {
+lastCheckedOrderId =
+  newestOrderId
+
+sessionStorage.setItem(
+  'last_checked_order_id_' + merchantId,
+  String(newestOrderId)
+)
+
+sessionStorage.setItem(
+  orderVoiceInitializedKey,
+  'true'
+)
 }
 
 setInterval(async () => {
