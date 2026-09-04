@@ -6,13 +6,13 @@
     }
   ],
   "crons": [
-  {
-    "path": "/api/auto-payout-toss",
-    "schedule": "30 1 * * *"
-  },
-  {
-    "path": "/api/auto-payout-korpay",
-    "schedule": "35 1 * * *"
-  }
-]
+    {
+      "path": "/api/auto-payout-toss",
+      "schedule": "5 2 * * *"
+    },
+    {
+      "path": "/api/auto-payout-korpay",
+      "schedule": "7 2 * * *"
+    }
+  ]
 }

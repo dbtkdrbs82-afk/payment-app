@@ -1,5 +1,5 @@
 ﻿import type { VercelRequest, VercelResponse } from '@vercel/node'
-import autoPayoutHandler from './auto-payout'
+import autoPayoutHandler from './auto-payout.js'
 
 export default async function handler(
   req: VercelRequest,
