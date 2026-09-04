@@ -10639,10 +10639,18 @@ const endDate =
               </div>
             </div>
 
-            <div class="payout-summary-card incoming">
+           <div
+  id="incoming-expected-card"
+  class="payout-summary-card incoming"
+  style="cursor:pointer;"
+>
   <div class="payout-summary-icon">🏦</div>
+
   <div class="payout-summary-info">
-    <div class="payout-summary-title">입금예정금액</div>
+    <div class="payout-summary-title">
+      입금예정금액
+    </div>
+
     <div class="payout-summary-value">
       ${incomingExpectedAmount.toLocaleString()}원
     </div>
@@ -10665,7 +10673,11 @@ ${canViewPayoutBalance ? `
   </button>
 ` : ''}
         
-            <div class="payout-summary-card amount">
+            <div
+  id="payout-expected-card"
+  class="payout-summary-card amount"
+  style="cursor:pointer;"
+>
               <div class="payout-summary-icon">💳</div>
               <div class="payout-summary-info">
                 <div class="payout-summary-title">출금예정금액</div>
@@ -10673,7 +10685,11 @@ ${canViewPayoutBalance ? `
               </div>
             </div>
 
-            <div class="payout-summary-card completed">
+            <div
+  id="payout-completed-card"
+  class="payout-summary-card completed"
+  style="cursor:pointer;"
+>
   <div class="payout-summary-icon">✅</div>
   <div class="payout-summary-info">
     <div class="payout-summary-title">출금완료</div>
@@ -10719,6 +10735,627 @@ ${canViewPayoutBalance ? `
           </div>
         `
         }
+
+        document.querySelector('#incoming-expected-card')
+  ?.addEventListener('click', () => {
+
+    const today =
+      new Date().toLocaleDateString(
+        'en-CA',
+        {
+          timeZone: 'Asia/Seoul'
+        }
+      )
+
+    const selectedPg =
+      document.querySelector<HTMLSelectElement>(
+        '#payout-pg-filter'
+      )?.value || '전체'
+
+
+    const todayIncomingPayments =
+      (payments || []).filter((row: any) => {
+
+        if (
+          row.status === 'cancel' ||
+          row.payout_status === '출금제외' ||
+          row.settlement_status === '취소'
+        ) {
+          return false
+        }
+
+        const pgCompany =
+          String(row.pg_company || '').trim()
+
+        if (
+          selectedPg !== '전체' &&
+          pgCompany !== selectedPg
+        ) {
+          return false
+        }
+
+
+        let incomingDate = ''
+
+        if (pgCompany === '토스페이먼츠') {
+
+          incomingDate =
+            getTossDepositDate(
+              row.created_at
+            )
+
+        } else if (pgCompany === '코페이') {
+
+          const settlementCycle =
+            settlementCycleMap.get(
+              Number(row.merchant_id)
+            ) || '1일'
+
+          incomingDate =
+            getPayoutDate(
+              row.created_at,
+              settlementCycle
+            )
+
+        } else {
+          return false
+        }
+
+
+        return incomingDate === today
+      })
+
+
+    if (todayIncomingPayments.length === 0) {
+      alert('오늘 입금예정 결제건이 없습니다.')
+      return
+    }
+
+
+    document
+      .querySelector('#incoming-payment-modal')
+      ?.remove()
+
+
+    const modal =
+      document.createElement('div')
+
+    modal.id =
+      'incoming-payment-modal'
+
+    modal.className =
+      'payout-error-modal'
+
+
+    modal.innerHTML = `
+      <div class="payout-error-modal-card">
+
+        <div class="payout-error-modal-header">
+
+          <h3>
+            오늘 입금예정 결제건
+          </h3>
+
+          <button
+            type="button"
+            id="incoming-payment-modal-close"
+            class="payout-error-modal-close"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="payout-error-modal-body">
+
+          <table
+            style="
+              width:100%;
+              border-collapse:collapse;
+            "
+          >
+
+            <thead>
+              <tr>
+                <th>가맹점</th>
+                <th>PG사</th>
+                <th>결제금액</th>
+                <th>입금예정금액</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              ${todayIncomingPayments.map(
+                (payment: any) => {
+
+                  const amount =
+                    Number(
+                      payment.amount || 0
+                    )
+
+                  const pgCompany =
+                    String(
+                      payment.pg_company || ''
+                    ).trim()
+
+
+                  let incomingAmount =
+                    Number(
+                      payment.settlement_amount ??
+                      amount
+                    )
+
+
+                  if (
+                    pgCompany ===
+                    '토스페이먼츠'
+                  ) {
+
+                    const pgFee =
+                      Math.floor(
+                        amount *
+                        1.375 /
+                        100
+                      )
+
+                    const pgVat =
+                      Math.floor(
+                        pgFee * 0.1
+                      )
+
+                    incomingAmount =
+                      amount -
+                      pgFee -
+                      pgVat
+                  }
+
+
+                  return `
+                    <tr>
+
+                      <td>
+                        ${payment.merchant_name || '-'}
+                      </td>
+
+                      <td>
+                        ${pgCompany || '-'}
+                      </td>
+
+                      <td>
+                        ${amount.toLocaleString()}원
+                      </td>
+
+                      <td>
+                        ${incomingAmount.toLocaleString()}원
+                      </td>
+
+                    </tr>
+                  `
+                }
+              ).join('')}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+    `
+
+
+    document.body.appendChild(modal)
+
+
+    document
+      .querySelector(
+        '#incoming-payment-modal-close'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+          modal.remove()
+        }
+      )
+
+
+    modal.addEventListener(
+      'click',
+      (event) => {
+
+        if (event.target === modal) {
+          modal.remove()
+        }
+
+      }
+    )
+
+  })
+
+  document.querySelector('#payout-expected-card')
+  ?.addEventListener('click', () => {
+
+    const today =
+      new Date().toLocaleDateString(
+        'en-CA',
+        {
+          timeZone: 'Asia/Seoul'
+        }
+      )
+
+    const selectedPg =
+      document.querySelector<HTMLSelectElement>(
+        '#payout-pg-filter'
+      )?.value || '전체'
+
+
+    const todayPayoutRows =
+      payoutRows.filter((row: any) => {
+
+        if (row.payout_date !== today) {
+          return false
+        }
+
+        if (
+          row.payout_status === '출금완료' ||
+          row.payout_status === '출금제외'
+        ) {
+          return false
+        }
+
+        if (
+          selectedPg !== '전체' &&
+          row.pg_company !== selectedPg
+        ) {
+          return false
+        }
+
+        return true
+      })
+
+
+    if (todayPayoutRows.length === 0) {
+      alert('오늘 출금예정 결제건이 없습니다.')
+      return
+    }
+
+
+    document
+      .querySelector('#payout-expected-modal')
+      ?.remove()
+
+
+    const modal =
+      document.createElement('div')
+
+    modal.id =
+      'payout-expected-modal'
+
+    modal.className =
+      'payout-error-modal'
+
+
+    modal.innerHTML = `
+      <div class="payout-error-modal-card">
+
+        <div class="payout-error-modal-header">
+
+          <h3>
+            오늘 출금예정 결제건
+          </h3>
+
+          <button
+            type="button"
+            id="payout-expected-modal-close"
+            class="payout-error-modal-close"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="payout-error-modal-body">
+
+          <table
+            style="
+              width:100%;
+              border-collapse:collapse;
+            "
+          >
+
+            <thead>
+              <tr>
+                <th>가맹점</th>
+                <th>PG사</th>
+                <th>결제건수</th>
+                <th>출금예정금액</th>
+                <th>상태</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              ${todayPayoutRows.map(
+                (row: any) => `
+                  <tr>
+
+                    <td>
+                      ${row.merchant_name || '-'}
+                    </td>
+
+                    <td>
+                      ${row.pg_company || '-'}
+                    </td>
+
+                    <td>
+                      ${Number(
+                        row.payment_count || 1
+                      ).toLocaleString()}건
+                    </td>
+
+                    <td>
+                      ${Number(
+                        row.settlement_amount || 0
+                      ).toLocaleString()}원
+                    </td>
+
+                    <td>
+                      ${row.payout_status || '출금대기'}
+                    </td>
+
+                  </tr>
+                `
+              ).join('')}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+    `
+
+
+    document.body.appendChild(modal)
+
+
+    document
+      .querySelector(
+        '#payout-expected-modal-close'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+          modal.remove()
+        }
+      )
+
+
+    modal.addEventListener(
+      'click',
+      (event) => {
+
+        if (event.target === modal) {
+          modal.remove()
+        }
+
+      }
+    )
+
+  })
+
+  document.querySelector('#payout-completed-card')
+  ?.addEventListener('click', () => {
+
+    const today =
+      new Date().toLocaleDateString(
+        'en-CA',
+        {
+          timeZone: 'Asia/Seoul'
+        }
+      )
+
+    const selectedPg =
+      document.querySelector<HTMLSelectElement>(
+        '#payout-pg-filter'
+      )?.value || '전체'
+
+
+    const todayCompletedPayments =
+      (payments || []).filter((payment: any) => {
+
+        if (
+          payment.payout_status !== '출금완료' ||
+          !payment.payout_time
+        ) {
+          return false
+        }
+
+
+        const payoutCompletedDate =
+          new Date(
+            payment.payout_time
+          ).toLocaleDateString(
+            'en-CA',
+            {
+              timeZone: 'Asia/Seoul'
+            }
+          )
+
+
+        if (payoutCompletedDate !== today) {
+          return false
+        }
+
+
+        const pgCompany =
+          String(
+            payment.pg_company || ''
+          ).trim()
+
+
+        if (
+          selectedPg !== '전체' &&
+          pgCompany !== selectedPg
+        ) {
+          return false
+        }
+
+
+        return true
+      })
+
+
+    if (todayCompletedPayments.length === 0) {
+      alert('오늘 출금완료 처리된 결제건이 없습니다.')
+      return
+    }
+
+
+    document
+      .querySelector('#payout-completed-modal')
+      ?.remove()
+
+
+    const modal =
+      document.createElement('div')
+
+    modal.id =
+      'payout-completed-modal'
+
+    modal.className =
+      'payout-error-modal'
+
+
+    modal.innerHTML = `
+      <div class="payout-error-modal-card">
+
+        <div class="payout-error-modal-header">
+
+          <h3>
+            오늘 출금완료 결제건
+          </h3>
+
+          <button
+            type="button"
+            id="payout-completed-modal-close"
+            class="payout-error-modal-close"
+          >
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="payout-error-modal-body">
+
+          <table
+            style="
+              width:100%;
+              border-collapse:collapse;
+            "
+          >
+
+            <thead>
+              <tr>
+                <th>가맹점</th>
+                <th>PG사</th>
+                <th>결제금액</th>
+                <th>출금완료금액</th>
+                <th>완료시간</th>
+              </tr>
+            </thead>
+
+            <tbody>
+
+              ${todayCompletedPayments.map(
+                (payment: any) => {
+
+                  const completedTime =
+                    new Date(
+                      payment.payout_time
+                    ).toLocaleTimeString(
+                      'ko-KR',
+                      {
+                        timeZone: 'Asia/Seoul',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      }
+                    )
+
+                  return `
+                    <tr>
+
+                      <td>
+                        ${payment.merchant_name || '-'}
+                      </td>
+
+                      <td>
+                        ${payment.pg_company || '-'}
+                      </td>
+
+                      <td>
+                        ${Number(
+                          payment.amount || 0
+                        ).toLocaleString()}원
+                      </td>
+
+                      <td>
+                        ${Number(
+                          payment.settlement_amount || 0
+                        ).toLocaleString()}원
+                      </td>
+
+                      <td>
+                        ${completedTime}
+                      </td>
+
+                    </tr>
+                  `
+                }
+              ).join('')}
+
+            </tbody>
+
+          </table>
+
+        </div>
+
+      </div>
+    `
+
+
+    document.body.appendChild(modal)
+
+
+    document
+      .querySelector(
+        '#payout-completed-modal-close'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+          modal.remove()
+        }
+      )
+
+
+    modal.addEventListener(
+      'click',
+      (event) => {
+
+        if (event.target === modal) {
+          modal.remove()
+        }
+
+      }
+    )
+
+  })
 
         document.querySelector('#payout-balance-button')
   ?.addEventListener('click', async () => {
