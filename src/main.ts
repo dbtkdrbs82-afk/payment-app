@@ -9528,16 +9528,52 @@ if (page === 'payout') {
         }
       
         if (summaryBox) {
-          summaryBox.innerHTML = ''
+          summaryBox.innerHTML = `
+            <div style="
+              width:100%;
+              padding:18px;
+              text-align:center;
+              box-sizing:border-box;
+              font-size:14px;
+              color:#666;
+            ">
+              출금관리 데이터를 불러오는 중입니다.
+            </div>
+          `
+        }
         
-        }
-      
         if (tableHead) {
-          tableHead.innerHTML = ''
+          tableHead.innerHTML =
+            '<tr>' +
+              '<th>No</th>' +
+              '<th>가맹점ID</th>' +
+              '<th>가맹점명</th>' +
+              '<th>PG사</th>' +
+              '<th>결제금액</th>' +
+              '<th>수수료</th>' +
+              '<th>출금예정금액</th>' +
+              '<th>결제일</th>' +
+              '<th>출금예정일</th>' +
+              '<th>출금상태</th>' +
+              '<th>처리</th>' +
+            '</tr>'
         }
-      
+        
         if (paymentTableBody) {
-          paymentTableBody.innerHTML = ''
+          paymentTableBody.innerHTML = `
+            <tr>
+              <td
+                colspan="11"
+                style="
+                  padding:35px;
+                  text-align:center;
+                  color:#777;
+                "
+              >
+                데이터를 불러오는 중입니다.
+              </td>
+            </tr>
+          `
         }
 
         if (tableTop) {
