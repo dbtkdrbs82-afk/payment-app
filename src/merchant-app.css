@@ -1784,3 +1784,111 @@
   #mobile-manual-submit:disabled {
     opacity: 0.6;
   }
+  .merchant-mobile-menu-product-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  
+  .merchant-mobile-menu-product {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+  }
+  
+  .merchant-mobile-menu-product-image {
+    width: 82px;
+    min-width: 82px;
+    height: 82px;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .merchant-mobile-menu-product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .merchant-mobile-menu-product-image span {
+    font-size: 11px;
+    color: #9ca3af;
+  }
+  
+  .merchant-mobile-menu-product-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .merchant-mobile-menu-product-info > strong {
+    font-size: 16px;
+    color: #111827;
+  }
+  
+  .merchant-mobile-menu-product-info > span {
+    margin-top: 5px;
+    font-size: 14px;
+    color: #374151;
+  }
+  
+  .merchant-mobile-menu-quantity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+  }
+  
+  .merchant-mobile-menu-quantity button {
+    width: 34px;
+    height: 30px;
+    border: 0;
+    border-radius: 8px;
+    background: #eef2f7;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  
+  .merchant-mobile-menu-quantity strong {
+    min-width: 22px;
+    text-align: center;
+  }
+  
+  .merchant-mobile-menu-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+    padding: 16px;
+    background: #111827;
+    border-radius: 14px;
+    color: #ffffff;
+  }
+  
+  .merchant-mobile-menu-total strong {
+    font-size: 20px;
+  }
+  
+  #mobile-menu-payment-submit {
+    width: 100%;
+    height: 48px;
+    margin-top: 22px;
+    border: 0;
+    border-radius: 11px;
+    background: #111827;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  
+  #mobile-menu-payment-submit:disabled {
+    opacity: 0.6;
+  }

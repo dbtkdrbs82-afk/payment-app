@@ -5262,6 +5262,25 @@ function renderMerchantCard() {
   
             </button>
   
+            <button
+  type="button"
+  class="merchant-mobile-card-menu-item"
+  data-card-menu="sms"
+>
+
+  <span>
+    📩
+  </span>
+
+  <strong>
+    SMS결제
+  </strong>
+
+  <small>
+    결제링크 문자 발송
+  </small>
+
+</button>
   
             <button
               type="button"
@@ -5327,17 +5346,18 @@ function renderMerchantCard() {
       )
   
   
-    document
+      document
       .querySelector(
         '[data-card-menu="ocr"]'
       )
       ?.addEventListener(
         'click',
         () => {
-  
-          location.href =
-            '/merchant-app/card/ocr'
-  
+    
+          alert(
+            'OCR 카드결제는 준비중입니다.'
+          )
+    
         }
       )
   
@@ -5356,6 +5376,19 @@ function renderMerchantCard() {
         }
       )
   
+      document
+  .querySelector(
+    '[data-card-menu="sms"]'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      location.href =
+        '/merchant-app/card/sms'
+
+    }
+  )
   
     document
       .querySelector(
@@ -6125,6 +6158,1138 @@ alert(
       )
   }
 
+  /* =========================================
+   모바일 SMS 결제
+========================================= */
+
+function renderMerchantSmsCard() {
+
+    const merchantId =
+      sessionStorage.getItem(
+        'login_merchant_id'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_id'
+      )
+  
+  
+    if (!merchantId) {
+  
+      location.replace(
+        '/merchant-app'
+      )
+  
+      return
+    }
+  
+  
+    const merchantName =
+      sessionStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      '가맹점'
+  
+  
+    app.innerHTML = `
+      <div class="merchant-mobile-home">
+  
+        <header class="merchant-mobile-header">
+  
+          <div>
+  
+            <div class="merchant-mobile-brand">
+              NXG PICK
+            </div>
+  
+            <div class="merchant-mobile-store">
+              ${merchantName}
+            </div>
+  
+          </div>
+  
+          <button
+            id="mobile-sms-card-back"
+            class="merchant-mobile-logout"
+            type="button"
+          >
+            이전
+          </button>
+  
+        </header>
+  
+  
+        <main class="merchant-mobile-content">
+  
+          <div class="merchant-mobile-page-title">
+  
+            <h1>
+              SMS결제
+            </h1>
+  
+            <span>
+              결제링크 문자 발송
+            </span>
+  
+          </div>
+  
+  
+          <div
+            class="merchant-mobile-manual-card"
+          >
+  
+            <div
+              style="
+                padding:30px 10px;
+                text-align:center;
+                color:#6b7280;
+                font-weight:700;
+              "
+            >
+              SMS 결제 기능 연결 예정
+            </div>
+  
+          </div>
+  
+        </main>
+  
+      </div>
+    `
+  
+  
+    document
+      .querySelector(
+        '#mobile-sms-card-back'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/card'
+  
+        }
+      )
+  }
+
+  /* =========================================
+   모바일 메뉴 카드결제
+========================================= */
+
+async function renderMerchantMenuCard() {
+
+    const merchantIdText =
+      sessionStorage.getItem(
+        'login_merchant_id'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_id'
+      )
+  
+  
+    if (!merchantIdText) {
+  
+      location.replace(
+        '/merchant-app'
+      )
+  
+      return
+    }
+  
+  
+    const merchantId =
+      Number(
+        merchantIdText
+      )
+  
+  
+    const merchantName =
+      sessionStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      '가맹점'
+  
+  
+    app.innerHTML = `
+      <div class="merchant-mobile-home">
+  
+        <header class="merchant-mobile-header">
+  
+          <div>
+  
+            <div class="merchant-mobile-brand">
+              NXG PICK
+            </div>
+  
+            <div class="merchant-mobile-store">
+              ${merchantName}
+            </div>
+  
+          </div>
+  
+          <button
+            id="mobile-menu-card-back"
+            class="merchant-mobile-logout"
+            type="button"
+          >
+            이전
+          </button>
+  
+        </header>
+  
+  
+        <main class="merchant-mobile-content">
+  
+          <div class="merchant-mobile-page-title">
+  
+            <h1>
+              메뉴결제
+            </h1>
+  
+            <span>
+              상품 선택 후 카드결제
+            </span>
+  
+          </div>
+  
+  
+          <div
+            id="mobile-menu-product-list"
+            class="merchant-mobile-menu-product-list"
+          >
+            상품을 불러오는 중입니다.
+          </div>
+  
+  
+          <div
+            class="merchant-mobile-menu-total"
+          >
+            <span>
+              결제금액
+            </span>
+  
+            <strong
+              id="mobile-menu-total-amount"
+            >
+              0원
+            </strong>
+          </div>
+  
+  
+          <div
+            class="merchant-mobile-manual-card"
+          >
+  
+            <label>
+              카드번호
+            </label>
+  
+            <input
+              id="mobile-menu-card-number"
+              type="text"
+              inputmode="numeric"
+              maxlength="19"
+              autocomplete="off"
+              placeholder="0000-0000-0000-0000"
+            >
+  
+  
+            <label>
+              유효기간
+            </label>
+  
+            <input
+              id="mobile-menu-expiry"
+              type="text"
+              inputmode="numeric"
+              maxlength="5"
+              autocomplete="off"
+              placeholder="MM/YY"
+            >
+  
+  
+            <label>
+              할부개월
+            </label>
+  
+            <select
+              id="mobile-menu-installment"
+            >
+  
+              <option value="0">
+                일시불
+              </option>
+  
+              <option value="2">
+                2개월
+              </option>
+  
+              <option value="3">
+                3개월
+              </option>
+  
+              <option value="4">
+                4개월
+              </option>
+  
+              <option value="5">
+                5개월
+              </option>
+  
+              <option value="6">
+                6개월
+              </option>
+  
+              <option value="12">
+                12개월
+              </option>
+  
+            </select>
+  
+  
+            <label>
+              구매자명
+            </label>
+  
+            <input
+              id="mobile-menu-buyer-name"
+              type="text"
+              placeholder="선택 입력"
+            >
+  
+  
+            <label>
+              구매자 연락처
+            </label>
+  
+            <input
+              id="mobile-menu-phone"
+              type="tel"
+              inputmode="numeric"
+              maxlength="13"
+              placeholder="선택 입력"
+            >
+  
+  
+            <button
+              id="mobile-menu-payment-submit"
+              type="button"
+            >
+              결제 요청
+            </button>
+  
+          </div>
+  
+        </main>
+  
+      </div>
+    `
+  
+  
+    document
+      .querySelector(
+        '#mobile-menu-card-back'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/card'
+  
+        }
+      )
+  
+  
+    const {
+      data,
+      error
+    } =
+      await supabase
+        .from('products')
+        .select('*')
+        .eq(
+          'merchant_id',
+          merchantId
+        )
+        .eq(
+          'status',
+          '판매중'
+        )
+        .order(
+          'sort_order',
+          {
+            ascending: true
+          }
+        )
+        .order(
+          'id',
+          {
+            ascending: true
+          }
+        )
+  
+  
+    const productList =
+      document.querySelector<HTMLDivElement>(
+        '#mobile-menu-product-list'
+      )
+  
+  
+    if (!productList) {
+      return
+    }
+  
+  
+    if (error) {
+  
+      productList.innerHTML =
+        '상품 조회 실패: ' +
+        error.message
+  
+      return
+    }
+  
+  
+    const products =
+      data || []
+  
+  
+    if (
+      products.length === 0
+    ) {
+  
+      productList.innerHTML = `
+        <div class="merchant-mobile-order-empty">
+          판매중인 상품이 없습니다.
+        </div>
+      `
+  
+      return
+    }
+  
+  
+    const cart =
+      new Map<number, number>()
+  
+  
+    const updateTotal = () => {
+  
+      let total = 0
+  
+  
+      products.forEach(
+        (product: any) => {
+  
+          const quantity =
+            cart.get(
+              Number(product.id)
+            ) || 0
+  
+  
+          total +=
+            Number(
+              product.price || 0
+            ) *
+            quantity
+  
+        }
+      )
+  
+  
+      const totalElement =
+        document.querySelector<HTMLElement>(
+          '#mobile-menu-total-amount'
+        )
+  
+  
+      if (totalElement) {
+  
+        totalElement.textContent =
+          total.toLocaleString() +
+          '원'
+  
+      }
+  
+  
+      return total
+    }
+  
+  
+    productList.innerHTML =
+      products
+        .map(
+          (product: any) => `
+            <div
+              class="merchant-mobile-menu-product"
+            >
+  
+              <div
+                class="merchant-mobile-menu-product-image"
+              >
+  
+                ${
+                  product.image_url
+                    ? `
+                      <img
+                        src="${product.image_url}"
+                        alt=""
+                      >
+                    `
+                    : `
+                      <span>
+                        이미지 없음
+                      </span>
+                    `
+                }
+  
+              </div>
+  
+  
+              <div
+                class="merchant-mobile-menu-product-info"
+              >
+  
+                <strong>
+                  ${product.product_name || '-'}
+                </strong>
+  
+                <span>
+                  ${Number(
+                    product.price || 0
+                  ).toLocaleString()}원
+                </span>
+  
+  
+                <div
+                  class="merchant-mobile-menu-quantity"
+                >
+  
+                  <button
+                    type="button"
+                    data-menu-minus="${product.id}"
+                  >
+                    −
+                  </button>
+  
+                  <strong
+                    id="mobile-menu-quantity-${product.id}"
+                  >
+                    0
+                  </strong>
+  
+                  <button
+                    type="button"
+                    data-menu-plus="${product.id}"
+                  >
+                    +
+                  </button>
+  
+                </div>
+  
+              </div>
+  
+            </div>
+          `
+        )
+        .join('')
+  
+  
+    document
+      .querySelectorAll<HTMLButtonElement>(
+        '[data-menu-plus]'
+      )
+      .forEach(
+        (button) => {
+  
+          button.addEventListener(
+            'click',
+            () => {
+  
+              const productId =
+                Number(
+                  button.dataset.menuPlus || 0
+                )
+  
+  
+              const quantity =
+                (
+                  cart.get(
+                    productId
+                  ) || 0
+                ) + 1
+  
+  
+              cart.set(
+                productId,
+                quantity
+              )
+  
+  
+              const quantityElement =
+                document.querySelector(
+                  '#mobile-menu-quantity-' +
+                  productId
+                )
+  
+  
+              if (quantityElement) {
+  
+                quantityElement.textContent =
+                  String(
+                    quantity
+                  )
+  
+              }
+  
+  
+              updateTotal()
+  
+            }
+          )
+  
+        }
+      )
+  
+  
+    document
+      .querySelectorAll<HTMLButtonElement>(
+        '[data-menu-minus]'
+      )
+      .forEach(
+        (button) => {
+  
+          button.addEventListener(
+            'click',
+            () => {
+  
+              const productId =
+                Number(
+                  button.dataset.menuMinus || 0
+                )
+  
+  
+              const currentQuantity =
+                cart.get(
+                  productId
+                ) || 0
+  
+  
+              const quantity =
+                Math.max(
+                  0,
+                  currentQuantity - 1
+                )
+  
+  
+              cart.set(
+                productId,
+                quantity
+              )
+  
+  
+              const quantityElement =
+                document.querySelector(
+                  '#mobile-menu-quantity-' +
+                  productId
+                )
+  
+  
+              if (quantityElement) {
+  
+                quantityElement.textContent =
+                  String(
+                    quantity
+                  )
+  
+              }
+  
+  
+              updateTotal()
+  
+            }
+          )
+  
+        }
+      )
+  
+  
+    const cardNumberInput =
+      document.querySelector<HTMLInputElement>(
+        '#mobile-menu-card-number'
+      )
+  
+  
+    cardNumberInput
+      ?.addEventListener(
+        'input',
+        () => {
+  
+          const value =
+            cardNumberInput.value
+              .replace(
+                /[^0-9]/g,
+                ''
+              )
+              .slice(
+                0,
+                16
+              )
+  
+  
+          cardNumberInput.value =
+            value.replace(
+              /(\d{4})(?=\d)/g,
+              '$1-'
+            )
+  
+        }
+      )
+  
+  
+    const expiryInput =
+      document.querySelector<HTMLInputElement>(
+        '#mobile-menu-expiry'
+      )
+  
+  
+    expiryInput
+      ?.addEventListener(
+        'input',
+        () => {
+  
+          const value =
+            expiryInput.value
+              .replace(
+                /[^0-9]/g,
+                ''
+              )
+              .slice(
+                0,
+                4
+              )
+  
+  
+          expiryInput.value =
+            value.length > 2
+              ? (
+                  value.slice(
+                    0,
+                    2
+                  ) +
+                  '/' +
+                  value.slice(
+                    2
+                  )
+                )
+              : value
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '#mobile-menu-payment-submit'
+      )
+      ?.addEventListener(
+        'click',
+        async () => {
+  
+          const selectedItems =
+            products
+              .map(
+                (product: any) => {
+  
+                  const quantity =
+                    cart.get(
+                      Number(
+                        product.id
+                      )
+                    ) || 0
+  
+  
+                  return {
+                    id:
+                      product.id,
+  
+                    name:
+                      product.product_name,
+  
+                    product_name:
+                      product.product_name,
+  
+                    price:
+                      Number(
+                        product.price || 0
+                      ),
+  
+                    quantity
+                  }
+  
+                }
+              )
+              .filter(
+                (item: any) =>
+                  item.quantity > 0
+              )
+  
+  
+          if (
+            selectedItems.length === 0
+          ) {
+  
+            alert(
+              '결제할 상품을 선택해주세요.'
+            )
+  
+            return
+          }
+  
+  
+          const amount =
+            updateTotal()
+  
+  
+          const cardNumber =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-menu-card-number'
+              )?.value || ''
+            ).replace(
+              /[^0-9]/g,
+              ''
+            )
+  
+  
+          const expiryText =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-menu-expiry'
+              )?.value || ''
+            ).replace(
+              /[^0-9]/g,
+              ''
+            )
+  
+  
+          if (
+            cardNumber.length < 13
+          ) {
+  
+            alert(
+              '카드번호를 확인해주세요.'
+            )
+  
+            return
+          }
+  
+  
+          if (
+            expiryText.length !== 4
+          ) {
+  
+            alert(
+              '유효기간을 확인해주세요.'
+            )
+  
+            return
+          }
+  
+  
+          const expiryMonth =
+            expiryText.slice(
+              0,
+              2
+            )
+  
+  
+          const expiryYear =
+            expiryText.slice(
+              2,
+              4
+            )
+  
+  
+          const expiryYymm =
+            expiryYear +
+            expiryMonth
+  
+  
+          const installment =
+            document.querySelector<HTMLSelectElement>(
+              '#mobile-menu-installment'
+            )?.value ||
+            '0'
+  
+  
+          const buyerName =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-menu-buyer-name'
+              )?.value ||
+              '구매자'
+            ).trim()
+  
+  
+          const customerPhone =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-menu-phone'
+              )?.value || ''
+            ).replace(
+              /[^0-9]/g,
+              ''
+            )
+  
+  
+          const goodsName =
+            selectedItems.length === 1
+              ? selectedItems[0].name
+              : (
+                  selectedItems[0].name +
+                  ' 외 ' +
+                  (
+                    selectedItems.length - 1
+                  ) +
+                  '건'
+                )
+  
+  
+          if (
+            !confirm(
+              goodsName +
+              '\n' +
+              amount.toLocaleString() +
+              '원을 결제할까요?'
+            )
+          ) {
+            return
+          }
+  
+  
+          const submitButton =
+            document.querySelector<HTMLButtonElement>(
+              '#mobile-menu-payment-submit'
+            )
+  
+  
+          if (submitButton) {
+  
+            submitButton.disabled =
+              true
+  
+            submitButton.textContent =
+              '결제 처리 중...'
+  
+          }
+  
+  
+          try {
+  
+            const response =
+              await fetch(
+                '/api/korpay-manual-pay',
+                {
+                  method:
+                    'POST',
+  
+                  headers: {
+                    'Content-Type':
+                      'application/json'
+                  },
+  
+                  body:
+                    JSON.stringify({
+                      merchantId,
+                      amount,
+                      cardNumber,
+                      expiryYymm,
+                      installment,
+                      buyerName,
+                      billingIds: [],
+                      goodsName,
+                      customerPhone
+                    })
+                }
+              )
+  
+  
+            const result =
+              await response.json()
+  
+  
+            if (
+              !response.ok ||
+              !result.success
+            ) {
+  
+              alert(
+                '결제 실패\n\n' +
+                (
+                  result.message ||
+                  '카드결제가 승인되지 않았습니다.'
+                )
+              )
+  
+              return
+            }
+  
+  
+            const pgOrderId =
+              String(
+                result.orderId || ''
+              ).trim()
+  
+  
+            const {
+              data: nextCallNumber,
+              error: callNumberError
+            } =
+              await supabase.rpc(
+                'get_next_call_number',
+                {
+                  target_merchant_id:
+                    merchantId
+                }
+              )
+  
+  
+            if (
+              callNumberError ||
+              !nextCallNumber
+            ) {
+  
+              alert(
+                '결제는 승인됐지만 주문번호 생성에 실패했습니다.'
+              )
+  
+              return
+            }
+  
+  
+            const callNumber =
+              Number(
+                nextCallNumber
+              )
+  
+  
+            const rawApprovalNumber =
+              String(
+                result.approvalNumber || ''
+              ).trim()
+  
+  
+            const approvalNumber =
+              /^\d{8}$/.test(
+                rawApprovalNumber
+              )
+                ? rawApprovalNumber
+                : null
+  
+  
+            const {
+              error: orderError
+            } =
+              await supabase
+                .from('orders')
+                .insert({
+                  merchant_id:
+                    merchantId,
+  
+                  order_no:
+                    String(
+                      callNumber
+                    ),
+  
+                  call_number:
+                    callNumber,
+  
+                  pg_order_id:
+                    pgOrderId,
+  
+                  payment_key:
+                    result.tid || null,
+  
+                  approval_number:
+                    approvalNumber,
+  
+                  items:
+                    selectedItems,
+  
+                  total_amount:
+                    amount,
+  
+                  order_status:
+                    '접수',
+  
+                  payment_status:
+                    '결제완료'
+                })
+  
+  
+            if (orderError) {
+  
+              alert(
+                '결제는 승인됐지만 주문 저장에 실패했습니다.\n' +
+                orderError.message
+              )
+  
+              return
+            }
+  
+  
+            alert(
+              '결제가 승인되었습니다.\n\n' +
+              '주문번호: ' +
+              callNumber +
+              '번\n' +
+              '승인번호: ' +
+              (
+                result.approvalNumber ||
+                '-'
+              )
+            )
+  
+  
+            location.href =
+              '/merchant-app/orders'
+  
+          } catch (error) {
+  
+            console.error(
+              '메뉴결제 오류:',
+              error
+            )
+  
+            alert(
+              '결제 처리 중 오류가 발생했습니다.'
+            )
+  
+  
+          } finally {
+  
+            if (submitButton) {
+  
+              submitButton.disabled =
+                false
+  
+              submitButton.textContent =
+                '결제 요청'
+  
+            }
+  
+          }
+  
+        }
+      )
+  }
+
 /* =========================================
    모바일 로그인
 ========================================= */
@@ -6417,11 +7582,23 @@ if (
   
     renderMerchantCard()
   
-  } else if (
+} else if (
     path === '/merchant-app/card/manual'
   ) {
   
     renderMerchantManualCard()
+  
+  } else if (
+    path === '/merchant-app/card/sms'
+  ) {
+  
+    renderMerchantSmsCard()
+  
+  } else if (
+    path === '/merchant-app/card/menu'
+  ) {
+  
+    void renderMerchantMenuCard()
   
   } else {
   
