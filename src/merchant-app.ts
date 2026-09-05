@@ -3904,99 +3904,59 @@ const isBeauty =
         : currentIndex + 1
   
   
-    if (targetIndex < 0) {
-  
-      alert(
-        '이미 맨 위 상품입니다.'
-      )
-  
+    if (
+      targetIndex < 0 ||
+      targetIndex >= products.length
+    ) {
       return
     }
   
   
-    if (
-      targetIndex >=
-      products.length
+    const reordered =
+      [...products]
+  
+  
+    const temp =
+      reordered[currentIndex]
+  
+    reordered[currentIndex] =
+      reordered[targetIndex]
+  
+    reordered[targetIndex] =
+      temp
+  
+  
+    for (
+      let i = 0;
+      i < reordered.length;
+      i++
     ) {
   
-      alert(
-        '이미 맨 아래 상품입니다.'
-      )
-  
-      return
-    }
-  
-  
-    const currentProduct =
-      products[currentIndex]
-  
-    const targetProduct =
-      products[targetIndex]
-  
-  
-    const currentSort =
-      Number(
-        currentProduct.sort_order ??
-        currentIndex + 1
-      )
+      const {
+        error
+      } =
+        await supabase
+          .from('products')
+          .update({
+            sort_order:
+              i + 1
+          })
+          .eq(
+            'id',
+            reordered[i].id
+          )
   
   
-    const targetSort =
-      Number(
-        targetProduct.sort_order ??
-        targetIndex + 1
-      )
+      if (error) {
   
-  
-    const {
-      error: currentError
-    } =
-      await supabase
-        .from('products')
-        .update({
-          sort_order:
-            targetSort
-        })
-        .eq(
-          'id',
-          currentProduct.id
+        alert(
+          '상품 순서 변경 실패: ' +
+          error.message
         )
   
+        return
+      }
   
-    if (currentError) {
-  
-      alert(
-        '상품 순서 변경 실패: ' +
-        currentError.message
-      )
-  
-      return
-    }
-  
-  
-    const {
-      error: targetError
-    } =
-      await supabase
-        .from('products')
-        .update({
-          sort_order:
-            currentSort
-        })
-        .eq(
-          'id',
-          targetProduct.id
-        )
-  
-  
-    if (targetError) {
-  
-      alert(
-        '상품 순서 변경 실패: ' +
-        targetError.message
-      )
-  
-      return
     }
   
   
