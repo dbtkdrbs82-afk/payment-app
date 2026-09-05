@@ -2382,18 +2382,21 @@ receiptButton?.addEventListener(
       
       
             button.addEventListener(
-              'click',
-              () => {
-      
-                changeOrderParams({
-                  status:
-                    status,
-      
-                  page:
-                    '1'
-                })
-              }
-            )
+                'click',
+                (event) => {
+              
+                  const target =
+                    event.currentTarget as HTMLButtonElement
+              
+                  changeOrderParams({
+                    status:
+                      target.dataset.status || '전체',
+              
+                    page:
+                      '1'
+                  })
+                }
+              )
           }
         )
       
