@@ -480,11 +480,12 @@ async function renderMerchantOrders() {
       )
   
   
-    const [
-      orderResult,
-      merchantResult
-    ] =
-      await Promise.all([
+      const [
+        orderResult,
+        merchantResult,
+        paymentResult
+      ] =
+        await Promise.all([
   
         supabase
           .from('orders')
@@ -508,17 +509,54 @@ async function renderMerchantOrders() {
             }
           ),
   
-        supabase
+          supabase
           .from('merchants')
           .select(`
             voice_enabled,
-            call_message
+            call_message,
+            merchant_name,
+            owner_name,
+            business_number,
+            corporate_number,
+            phone,
+            address,
+            address_detail,
+            toss_mid,
+            korpay_mid
           `)
           .eq(
             'id',
             merchantId
           )
-          .maybeSingle()
+          .maybeSingle(),
+        
+        supabase
+          .from('payments')
+          .select(`
+            order_id,
+            payment_key,
+            amount,
+            approval_number,
+            card_number,
+            card_company,
+            pg_company,
+            approved_at,
+            created_at,
+            status,
+            canceled_at
+          `)
+          .eq(
+            'merchant_id',
+            merchantId
+          )
+          .gte(
+            'created_at',
+            startIso
+          )
+          .lte(
+            'created_at',
+            endIso
+          )
   
       ])
   
@@ -558,8 +596,10 @@ async function renderMerchantOrders() {
   
     const merchantSetting =
       merchantResult.data
-  
-  
+
+      const payments =
+  paymentResult.data || []
+   
     summary.textContent =
       '주문수 : ' +
       orders.length +
@@ -606,6 +646,75 @@ async function renderMerchantOrders() {
                 .join(', ')
             : '-'
   
+            const paymentForOrder =
+            payments.find(
+              (payment: any) => {
+          
+                const paymentOrderId =
+                  String(
+                    payment.order_id || ''
+                  ).replace(
+                    /[^a-zA-Z0-9]/g,
+                    ''
+                  )
+          
+                  
+
+                const orderPgId =
+                  String(
+                    order.pg_order_id || ''
+                  ).replace(
+                    /[^a-zA-Z0-9]/g,
+                    ''
+                  )
+          
+                const sameOrderId =
+                  paymentOrderId &&
+                  orderPgId &&
+                  paymentOrderId ===
+                    orderPgId
+          
+                const samePaymentKey =
+                  order.payment_key &&
+                  payment.payment_key &&
+                  String(
+                    order.payment_key
+                  ) ===
+                  String(
+                    payment.payment_key
+                  )
+          
+                const sameAmount =
+                  Number(
+                    payment.amount || 0
+                  ) ===
+                  Number(
+                    order.total_amount || 0
+                  )
+          
+                const timeGap =
+                  Math.abs(
+                    new Date(
+                      payment.created_at
+                    ).getTime() -
+                    new Date(
+                      order.created_at
+                    ).getTime()
+                  )
+          
+                return (
+                  sameOrderId ||
+                  samePaymentKey ||
+                  (
+                    sameAmount &&
+                    timeGap <
+                      1000 * 60 * 5
+                  )
+                )
+              }
+            ) 
+            
+           
   
         const statusText =
           order.cancel_status ===
@@ -633,9 +742,13 @@ async function renderMerchantOrders() {
   
           <div class="merchant-mobile-order-card-top">
   
-            <strong>
-              ${orderNumber}번
-            </strong>
+            <button
+  type="button"
+  class="merchant-mobile-receipt-button"
+  data-order-id="${order.id}"
+>
+  ${orderNumber}번
+</button>
   
             <span>
               ${Number(
@@ -701,6 +814,462 @@ async function renderMerchantOrders() {
         orderList.appendChild(
           card
         )
+
+        const receiptButton =
+  card.querySelector<HTMLButtonElement>(
+    '.merchant-mobile-receipt-button'
+  )
+
+receiptButton?.addEventListener(
+  'click',
+  () => {
+
+    const paymentDate =
+      paymentForOrder?.approved_at ||
+      paymentForOrder?.created_at ||
+      order.created_at
+
+    const approvalNumber =
+      paymentForOrder?.approval_number ||
+      '-'
+
+    const paymentKey =
+      paymentForOrder?.payment_key ||
+      '-'
+
+    const cardNumber =
+      paymentForOrder?.card_number ||
+      '-'
+
+    const cardCompany =
+      paymentForOrder?.card_company ||
+      '신용카드'
+
+    const pgCompany =
+      paymentForOrder?.pg_company ||
+      '-'
+
+    const isCanceled =
+      order.cancel_status ===
+        '취소완료' ||
+      order.order_status ===
+        '취소완료' ||
+      paymentForOrder?.status ===
+        'cancel'
+
+    const canceledAt =
+      paymentForOrder?.canceled_at ||
+      order.cancel_requested_at ||
+      ''
+
+    const amount =
+      Number(
+        order.total_amount || 0
+      )
+
+    const taxableAmount =
+      Math.floor(
+        amount / 1.1
+      )
+
+    const vatAmount =
+      amount -
+      taxableAmount
+
+
+    document
+      .querySelector(
+        '#merchant-mobile-receipt-modal'
+      )
+      ?.remove()
+
+
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
+        <div
+          id="merchant-mobile-receipt-modal"
+          class="merchant-mobile-receipt-modal"
+        >
+
+          <div
+            class="merchant-mobile-receipt-box"
+          >
+
+            <div
+              class="merchant-mobile-receipt-header"
+            >
+
+              <strong>
+                NXG PICK
+              </strong>
+
+              <h2>
+                신용카드 매출전표
+                ${
+                  isCanceled
+                    ? '(취소)'
+                    : '(승인)'
+                }
+              </h2>
+
+            </div>
+
+
+            <section
+              class="merchant-mobile-receipt-section"
+            >
+
+              <h3>
+                결제정보
+              </h3>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>카드사</span>
+                <strong>
+                  ${cardCompany}
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>카드번호</span>
+                <strong>
+                  ${cardNumber}
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>승인번호</span>
+                <strong>
+                  ${approvalNumber}
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>PG사</span>
+                <strong>
+                  ${pgCompany}
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>결제일시</span>
+                <strong>
+                  ${
+                    paymentDate
+                      ? new Date(
+                          paymentDate
+                        ).toLocaleString(
+                          'ko-KR'
+                        )
+                      : '-'
+                  }
+                </strong>
+              </div>
+
+              ${
+                isCanceled
+                  ? `
+                    <div
+                      class="merchant-mobile-receipt-row"
+                    >
+                      <span>취소일시</span>
+
+                      <strong>
+                        ${
+                          canceledAt
+                            ? new Date(
+                                canceledAt
+                              ).toLocaleString(
+                                'ko-KR'
+                              )
+                            : '-'
+                        }
+                      </strong>
+                    </div>
+                  `
+                  : ''
+              }
+
+            </section>
+
+
+            <section
+              class="merchant-mobile-receipt-section"
+            >
+
+              <h3>
+                주문정보
+              </h3>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>주문번호</span>
+                <strong>
+                  ${orderNumber}번
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>상품</span>
+                <strong>
+                  ${orderItems}
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>거래번호</span>
+                <strong>
+                  ${paymentKey}
+                </strong>
+              </div>
+
+            </section>
+
+
+            <section
+              class="merchant-mobile-receipt-section"
+            >
+
+              <h3>
+                결제금액
+              </h3>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>과세금액</span>
+                <strong>
+                  ${taxableAmount.toLocaleString()}원
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>부가세</span>
+                <strong>
+                  ${vatAmount.toLocaleString()}원
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-total"
+              >
+                <span>
+                  총 결제금액
+                </span>
+
+                <strong>
+                  ${
+                    isCanceled
+                      ? '-'
+                      : ''
+                  }${amount.toLocaleString()}원
+                </strong>
+              </div>
+
+            </section>
+
+
+            <section
+              class="merchant-mobile-receipt-section"
+            >
+
+              <h3>
+                상점정보
+              </h3>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>상점명</span>
+                <strong>
+                  ${
+                    merchantSetting
+                      ?.merchant_name ||
+                    merchantName
+                  }
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>대표자</span>
+                <strong>
+                  ${
+                    merchantSetting
+                      ?.owner_name ||
+                    '-'
+                  }
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>사업자번호</span>
+                <strong>
+                  ${
+                    merchantSetting
+                      ?.business_number ||
+                    merchantSetting
+                      ?.corporate_number ||
+                    '-'
+                  }
+                </strong>
+              </div>
+
+              <div
+                class="merchant-mobile-receipt-row"
+              >
+                <span>문의</span>
+                <strong>
+                  ${
+                    merchantSetting
+                      ?.phone ||
+                    '-'
+                  }
+                </strong>
+              </div>
+
+            </section>
+
+
+            <div
+              class="merchant-mobile-receipt-actions"
+            >
+
+              <button
+                id="merchant-mobile-receipt-share"
+                type="button"
+              >
+                공유
+              </button>
+
+              <button
+                id="merchant-mobile-receipt-print"
+                type="button"
+              >
+                인쇄
+              </button>
+
+              <button
+                id="merchant-mobile-receipt-close"
+                type="button"
+              >
+                닫기
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      `
+    )
+
+
+    document
+      .querySelector(
+        '#merchant-mobile-receipt-close'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+
+          document
+            .querySelector(
+              '#merchant-mobile-receipt-modal'
+            )
+            ?.remove()
+
+        }
+      )
+
+
+    document
+      .querySelector(
+        '#merchant-mobile-receipt-print'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+          window.print()
+        }
+      )
+
+
+    document
+      .querySelector(
+        '#merchant-mobile-receipt-share'
+      )
+      ?.addEventListener(
+        'click',
+        async () => {
+
+          const shareText =
+            '[NXG PICK 영수증]\n' +
+            '상점명: ' +
+            (
+              merchantSetting
+                ?.merchant_name ||
+              merchantName
+            ) +
+            '\n주문번호: ' +
+            orderNumber +
+            '번\n승인번호: ' +
+            approvalNumber +
+            '\n상품: ' +
+            orderItems +
+            '\n결제금액: ' +
+            amount.toLocaleString() +
+            '원'
+
+
+          if (navigator.share) {
+
+            await navigator.share({
+              title:
+                'NXG PICK 영수증',
+              text:
+                shareText
+            })
+
+            return
+          }
+
+
+          await navigator.clipboard
+            .writeText(
+              shareText
+            )
+
+          alert(
+            '영수증 내용이 복사되었습니다.'
+          )
+
+        }
+      )
+
+  }
+)
       }
     )
   

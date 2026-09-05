@@ -603,3 +603,179 @@
   
     color: #7a8595;
   }
+  .merchant-mobile-receipt-button {
+    padding: 0;
+  
+    border: 0;
+    background: transparent;
+  
+    color: #174f8c;
+  
+    font-size: 20px;
+    font-weight: 900;
+  
+    text-decoration: underline;
+  
+    cursor: pointer;
+  }
+  /* =========================================
+   모바일 영수증
+========================================= */
+
+.merchant-mobile-receipt-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+  
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  
+    padding:
+      max(24px, env(safe-area-inset-top))
+      16px
+      30px;
+  
+    overflow-y: auto;
+  
+    background:
+      rgba(0, 0, 0, 0.55);
+  }
+  
+  
+  .merchant-mobile-receipt-box {
+    width: 100%;
+    max-width: 500px;
+  
+    padding: 22px;
+  
+    border-radius: 18px;
+  
+    background: #ffffff;
+  }
+  
+  
+  .merchant-mobile-receipt-header {
+    padding-bottom: 18px;
+  
+    border-bottom:
+      2px solid #174f8c;
+  
+    text-align: center;
+  }
+  
+  
+  .merchant-mobile-receipt-header strong {
+    color: #174f8c;
+  
+    font-size: 22px;
+    font-weight: 900;
+  }
+  
+  
+  .merchant-mobile-receipt-header h2 {
+    margin:
+      7px 0 0;
+  
+    color: #172033;
+  
+    font-size: 18px;
+  }
+  
+  
+  .merchant-mobile-receipt-section {
+    padding:
+      18px 0;
+  
+    border-bottom:
+      1px solid #e7ebf0;
+  }
+  
+  
+  .merchant-mobile-receipt-section h3 {
+    margin:
+      0 0 12px;
+  
+    color: #174f8c;
+  
+    font-size: 15px;
+  }
+  
+  
+  .merchant-mobile-receipt-row {
+    display: flex;
+  
+    justify-content:
+      space-between;
+  
+    gap: 15px;
+  
+    padding:
+      6px 0;
+  
+    font-size: 13px;
+  }
+  
+  
+  .merchant-mobile-receipt-row span {
+    flex-shrink: 0;
+  
+    color: #7a8595;
+  }
+  
+  
+  .merchant-mobile-receipt-row strong {
+    text-align: right;
+  
+    color: #263244;
+  
+    word-break: break-all;
+  }
+  
+  
+  .merchant-mobile-receipt-total {
+    display: flex;
+  
+    align-items: center;
+    justify-content: space-between;
+  
+    margin-top: 10px;
+    padding: 13px;
+  
+    border-radius: 10px;
+  
+    background: #f1f5f9;
+  }
+  
+  
+  .merchant-mobile-receipt-total strong {
+    color: #174f8c;
+  
+    font-size: 19px;
+  }
+  
+  
+  .merchant-mobile-receipt-actions {
+    display: grid;
+  
+    grid-template-columns:
+      repeat(3, 1fr);
+  
+    gap: 8px;
+  
+    margin-top: 20px;
+  }
+  
+  
+  .merchant-mobile-receipt-actions button {
+    height: 44px;
+  
+    border: 0;
+    border-radius: 9px;
+  
+    background: #1d5797;
+  
+    color: #ffffff;
+  
+    font-weight: 800;
+  }
