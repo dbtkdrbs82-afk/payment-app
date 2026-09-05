@@ -7008,7 +7008,7 @@ async function renderMerchantMenuCard() {
     
                 successUrl:
                   window.location.origin +
-                  '/success?source=kiosk' +
+                  '/merchant-app/success?source=kiosk' +
                   '&pg=토스페이먼츠' +
                   '&merchantId=' +
                   merchantId +
@@ -7029,7 +7029,688 @@ async function renderMerchantMenuCard() {
       )
         
     }
-          
+      
+    /* =========================================
+   모바일 메뉴결제 성공
+========================================= */
+
+async function renderMerchantPaymentSuccess() {
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      )
+  
+  
+    const orderId =
+      params.get('orderId') || ''
+  
+    const paymentKey =
+      params.get('paymentKey') || ''
+  
+    const amountText =
+      params.get('amount') || ''
+  
+    const merchantIdText =
+      params.get('merchantId') ||
+      sessionStorage.getItem(
+        'kiosk_merchant_id'
+      ) ||
+      sessionStorage.getItem(
+        'login_merchant_id'
+      ) ||
+      ''
+  
+  
+    const merchantName =
+      params.get('merchantName') ||
+      sessionStorage.getItem(
+        'merchantName'
+      ) ||
+      sessionStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      '가맹점'
+  
+  
+    if (
+      !orderId ||
+      !paymentKey ||
+      !amountText ||
+      !merchantIdText
+    ) {
+  
+      app.innerHTML = `
+        <div class="merchant-mobile-home">
+  
+          <main class="merchant-mobile-content">
+  
+            <div class="merchant-mobile-manual-card">
+  
+              <h2>
+                결제정보를 확인할 수 없습니다.
+              </h2>
+  
+              <button
+                id="mobile-success-orders"
+                type="button"
+                class="merchant-mobile-menu-pay-button"
+              >
+                주문관리로 이동
+              </button>
+  
+            </div>
+  
+          </main>
+  
+        </div>
+      `
+  
+  
+      document
+        .querySelector(
+          '#mobile-success-orders'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+  
+            location.href =
+              '/merchant-app/orders'
+  
+          }
+        )
+  
+      return
+    }
+  
+  
+    const merchantId =
+      Number(
+        merchantIdText
+      )
+  
+  
+    const paymentAmount =
+      Number(
+        amountText
+      )
+  
+  
+    app.innerHTML = `
+      <div class="merchant-mobile-home">
+  
+        <main class="merchant-mobile-content">
+  
+          <div class="merchant-mobile-manual-card">
+  
+            <h2>
+              결제 처리 중입니다.
+            </h2>
+  
+            <p>
+              잠시만 기다려주세요.
+            </p>
+  
+          </div>
+  
+        </main>
+  
+      </div>
+    `
+  
+  
+    try {
+  
+      const {
+        data: merchantData,
+        error: merchantError
+      } =
+        await supabase
+          .from('merchants')
+          .select(`
+            merchant_name,
+            fee_rate
+          `)
+          .eq(
+            'id',
+            merchantId
+          )
+          .maybeSingle()
+  
+  
+      if (
+        merchantError ||
+        !merchantData
+      ) {
+  
+        throw new Error(
+          '가맹점 정보를 불러오지 못했습니다.'
+        )
+  
+      }
+  
+  
+      const feeRate =
+        Number(
+          merchantData.fee_rate || 0
+        )
+  
+  
+      const feeAmount =
+        Math.floor(
+          paymentAmount *
+          feeRate /
+          100
+        )
+  
+  
+      const settlementAmount =
+        paymentAmount -
+        feeAmount
+  
+  
+      const {
+        data: existingPayment
+      } =
+        await supabase
+          .from('payments')
+          .select('id')
+          .eq(
+            'order_id',
+            orderId
+          )
+          .maybeSingle()
+  
+  
+      let confirmResult: any =
+        null
+  
+  
+      if (!existingPayment) {
+  
+        const confirmResponse =
+          await fetch(
+            '/api/toss-confirm',
+            {
+              method:
+                'POST',
+  
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+  
+              body:
+                JSON.stringify({
+                  paymentKey,
+                  orderId,
+                  amount:
+                    amountText
+                })
+            }
+          )
+  
+  
+        if (!confirmResponse.ok) {
+  
+          const confirmError =
+            await confirmResponse.json()
+  
+          throw new Error(
+            confirmError.message ||
+            '토스 결제 승인에 실패했습니다.'
+          )
+  
+        }
+  
+  
+        confirmResult =
+          await confirmResponse.json()
+  
+  
+        const tossCardCompanyMap:
+          Record<string, string> = {
+  
+            '3K': '기업비씨',
+            '46': '광주',
+            '71': '롯데',
+            '30': '산업',
+            '31': 'BC',
+            '51': '삼성',
+            '38': '새마을',
+            '41': '신한',
+            '62': '신협',
+            '36': '씨티',
+            '33': '우리',
+            'W1': '우리',
+            '37': '우체국',
+            '39': '저축',
+            '35': '전북',
+            '42': '제주',
+            '15': '카카오뱅크',
+            '3A': '케이뱅크',
+            '24': '토스뱅크',
+            '21': '하나',
+            '61': '현대',
+            '11': '국민',
+            '91': '농협',
+            '34': '수협'
+          }
+  
+  
+        const tossCardCompanyCode =
+          confirmResult.card?.acquirerCode ||
+          confirmResult.card?.issuerCode ||
+          ''
+  
+  
+        const tossCardCompany =
+          tossCardCompanyMap[
+            tossCardCompanyCode
+          ] ||
+          tossCardCompanyCode
+  
+  
+        const {
+          count
+        } =
+          await supabase
+            .from('payments')
+            .select(
+              '*',
+              {
+                count:
+                  'exact',
+  
+                head:
+                  true
+              }
+            )
+  
+  
+        const nextOrderNumber =
+          (count || 0) + 1
+  
+  
+        const {
+          error: paymentSaveError
+        } =
+          await supabase
+            .from('payments')
+            .insert({
+              order_number:
+                nextOrderNumber,
+  
+              order_id:
+                orderId,
+  
+              payment_key:
+                paymentKey,
+  
+              amount:
+                paymentAmount,
+  
+              fee_rate:
+                feeRate,
+  
+              fee_amount:
+                feeAmount,
+  
+              settlement_amount:
+                settlementAmount,
+  
+              status:
+                'paid',
+  
+              message:
+                sessionStorage.getItem(
+                  'message'
+                ) ||
+                '모바일 메뉴결제',
+  
+              merchant_id:
+                merchantId,
+  
+              merchant_name:
+                merchantData
+                  .merchant_name ||
+                merchantName,
+  
+              pg_company:
+                '토스페이먼츠',
+  
+              payment_method:
+                confirmResult.method ||
+                '카드',
+  
+              approval_number:
+                confirmResult.card?.approveNo ||
+                '',
+  
+              card_company:
+                tossCardCompany,
+  
+              card_number:
+                confirmResult.card?.number ||
+                '',
+  
+              installment_months:
+                confirmResult.card
+                  ?.installmentPlanMonths
+                  ? String(
+                      confirmResult.card
+                        .installmentPlanMonths
+                    )
+                  : '일시불',
+  
+              approved_at:
+                confirmResult.approvedAt ||
+                new Date()
+                  .toISOString()
+            })
+  
+  
+        if (paymentSaveError) {
+  
+          throw new Error(
+            '결제내역 저장 실패: ' +
+            paymentSaveError.message
+          )
+  
+        }
+  
+      }
+  
+  
+      const kioskOrderNo =
+        sessionStorage.getItem(
+          'kiosk_order_no'
+        ) || ''
+  
+  
+      const kioskItemsText =
+        sessionStorage.getItem(
+          'kiosk_items'
+        )
+  
+  
+      const kioskTotalAmount =
+        sessionStorage.getItem(
+          'kiosk_total_amount'
+        )
+  
+  
+      const callNumber =
+        sessionStorage.getItem(
+          'kiosk_call_number'
+        )
+  
+  
+      const pgOrderId =
+        kioskOrderNo
+          ? kioskOrderNo.replace(
+              /[^a-zA-Z0-9]/g,
+              ''
+            )
+          : orderId
+  
+  
+      const {
+        data: existingOrder
+      } =
+        await supabase
+          .from('orders')
+          .select('id')
+          .eq(
+            'merchant_id',
+            merchantId
+          )
+          .eq(
+            'pg_order_id',
+            pgOrderId
+          )
+          .maybeSingle()
+  
+  
+      if (
+        !existingOrder &&
+        kioskItemsText &&
+        kioskTotalAmount
+      ) {
+  
+        const items =
+          JSON.parse(
+            kioskItemsText
+          )
+  
+  
+        const {
+          error: orderSaveError
+        } =
+          await supabase
+            .from('orders')
+            .insert({
+              merchant_id:
+                merchantId,
+  
+              order_no:
+                callNumber ||
+                '-',
+  
+              call_number:
+                callNumber
+                  ? Number(
+                      callNumber
+                    )
+                  : null,
+  
+              pg_order_id:
+                pgOrderId,
+  
+              payment_key:
+                paymentKey,
+  
+              items:
+                items,
+  
+              total_amount:
+                Number(
+                  kioskTotalAmount
+                ),
+  
+              order_status:
+                '접수',
+  
+              payment_status:
+                '결제완료'
+            })
+  
+  
+        if (orderSaveError) {
+  
+          throw new Error(
+            '주문 저장 실패: ' +
+            orderSaveError.message
+          )
+  
+        }
+  
+      }
+  
+  
+      sessionStorage.removeItem(
+        'kiosk_order_no'
+      )
+  
+      sessionStorage.removeItem(
+        'kiosk_merchant_id'
+      )
+  
+      sessionStorage.removeItem(
+        'kiosk_items'
+      )
+  
+      sessionStorage.removeItem(
+        'kiosk_total_amount'
+      )
+  
+      sessionStorage.removeItem(
+        'kiosk_call_number'
+      )
+  
+  
+      window.history.replaceState(
+        {},
+        '',
+        '/merchant-app/success'
+      )
+  
+  
+      app.innerHTML = `
+        <div class="merchant-mobile-home">
+  
+          <header class="merchant-mobile-header">
+  
+            <div>
+  
+              <div class="merchant-mobile-brand">
+                NXG PICK
+              </div>
+  
+              <div class="merchant-mobile-store">
+                ${merchantName}
+              </div>
+  
+            </div>
+  
+          </header>
+  
+  
+          <main class="merchant-mobile-content">
+  
+            <div class="merchant-mobile-manual-card">
+  
+              <h2>
+                결제가 완료되었습니다.
+              </h2>
+  
+              <p>
+                ${paymentAmount.toLocaleString()}원
+              </p>
+  
+              <button
+                id="mobile-success-orders"
+                type="button"
+                class="merchant-mobile-menu-pay-button"
+              >
+                주문관리 확인
+              </button>
+  
+              <button
+                id="mobile-success-card"
+                type="button"
+                class="merchant-mobile-menu-pay-button"
+              >
+                카드결제로 돌아가기
+              </button>
+  
+            </div>
+  
+          </main>
+  
+        </div>
+      `
+  
+  
+      document
+        .querySelector(
+          '#mobile-success-orders'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+  
+            location.href =
+              '/merchant-app/orders'
+  
+          }
+        )
+  
+  
+      document
+        .querySelector(
+          '#mobile-success-card'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+  
+            location.href =
+              '/merchant-app/card'
+  
+          }
+        )
+  
+  
+    } catch (error: any) {
+  
+      console.error(
+        '모바일 결제 완료 처리 오류:',
+        error
+      )
+  
+  
+      app.innerHTML = `
+        <div class="merchant-mobile-home">
+  
+          <main class="merchant-mobile-content">
+  
+            <div class="merchant-mobile-manual-card">
+  
+              <h2>
+                결제 처리 오류
+              </h2>
+  
+              <p>
+                ${
+                  error?.message ||
+                  '결제 처리 중 오류가 발생했습니다.'
+                }
+              </p>
+  
+              <button
+                id="mobile-success-orders"
+                type="button"
+                class="merchant-mobile-menu-pay-button"
+              >
+                주문관리로 이동
+              </button>
+  
+            </div>
+  
+          </main>
+  
+        </div>
+      `
+  
+  
+      document
+        .querySelector(
+          '#mobile-success-orders'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+  
+            location.href =
+              '/merchant-app/orders'
+  
+          }
+        )
+  
+    }
+  }
 
 /* =========================================
    모바일 로그인
@@ -7335,11 +8016,17 @@ if (
   
     renderMerchantSmsCard()
   
-  } else if (
+} else if (
     path === '/merchant-app/card/menu'
   ) {
   
     void renderMerchantMenuCard()
+  
+  } else if (
+    path === '/merchant-app/success'
+  ) {
+  
+    void renderMerchantPaymentSuccess()
   
   } else {
   
