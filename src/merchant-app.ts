@@ -301,22 +301,29 @@ async function renderMerchantOrders() {
     }
   
   
-    const selectedDate =
-      params.get('date') ||
-      getKoreaDate(new Date())
+    const todayDate =
+  getKoreaDate(new Date())
+
+const startDate =
+  params.get('start') ||
+  todayDate
+
+const endDate =
+  params.get('end') ||
+  todayDate
   
   
-    const startIso =
-      new Date(
-        selectedDate +
-        'T00:00:00+09:00'
-      ).toISOString()
-  
-    const endIso =
-      new Date(
-        selectedDate +
-        'T23:59:59.999+09:00'
-      ).toISOString()
+  const startIso =
+  new Date(
+    startDate +
+    'T00:00:00+09:00'
+  ).toISOString()
+
+const endIso =
+  new Date(
+    endDate +
+    'T23:59:59.999+09:00'
+  ).toISOString()
   
   
     app.innerHTML = `
@@ -365,26 +372,67 @@ async function renderMerchantOrders() {
               이전
             </button>
   
-            <button
-              id="mobile-order-today"
-              type="button"
-            >
-              오늘
-            </button>
-  
-            <button
-              id="mobile-order-next"
-              type="button"
-            >
-              다음
-            </button>
-  
-          </div>
-  
-  
-          <div class="merchant-mobile-selected-date">
-            ${selectedDate}
-          </div>
+            <div class="merchant-mobile-date-nav">
+
+  <button
+    id="mobile-order-prev"
+    type="button"
+  >
+    이전
+  </button>
+
+  <button
+    id="mobile-order-today"
+    type="button"
+  >
+    오늘
+  </button>
+
+  <button
+    id="mobile-order-next"
+    type="button"
+  >
+    다음
+  </button>
+
+  <button
+    id="mobile-order-month"
+    type="button"
+  >
+    당월
+  </button>
+
+</div>
+
+
+<div class="merchant-mobile-date-range">
+
+  <div>
+    <label>
+      시작일
+    </label>
+
+    <input
+      id="mobile-order-start-date"
+      type="date"
+      value="${startDate}"
+    >
+  </div>
+
+
+  <div>
+    <label>
+      종료일
+    </label>
+
+    <input
+      id="mobile-order-end-date"
+      type="date"
+      value="${endDate}"
+    >
+  </div>
+
+</div>
   
   
           <div
@@ -419,73 +467,175 @@ async function renderMerchantOrders() {
       )
   
   
-    const changeDate = (
-      amount: number
-    ) => {
-  
-      const date =
-        new Date(
-          selectedDate +
-          'T00:00:00+09:00'
+      const moveDateRange = (
+        amount: number
+      ) => {
+      
+        const start =
+          new Date(
+            startDate +
+            'T00:00:00+09:00'
+          )
+      
+        const end =
+          new Date(
+            endDate +
+            'T00:00:00+09:00'
+          )
+      
+        start.setDate(
+          start.getDate() + amount
         )
-  
-      date.setDate(
-        date.getDate() + amount
-      )
-  
-      location.href =
-        '/merchant-app/orders?date=' +
-        getKoreaDate(date)
-    }
-  
-  
-    document
-      .querySelector(
-        '#mobile-order-prev'
-      )
-      ?.addEventListener(
-        'click',
-        () => {
-          changeDate(-1)
+      
+        end.setDate(
+          end.getDate() + amount
+        )
+      
+        location.href =
+          '/merchant-app/orders?start=' +
+          getKoreaDate(start) +
+          '&end=' +
+          getKoreaDate(end)
+      }
+      
+      
+      document
+        .querySelector(
+          '#mobile-order-prev'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+            moveDateRange(-1)
+          }
+        )
+      
+      
+      document
+        .querySelector(
+          '#mobile-order-today'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+      
+            const today =
+              getKoreaDate(
+                new Date()
+              )
+      
+            location.href =
+              '/merchant-app/orders?start=' +
+              today +
+              '&end=' +
+              today
+          }
+        )
+      
+      
+      document
+        .querySelector(
+          '#mobile-order-next'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+            moveDateRange(1)
+          }
+        )
+      
+      
+      document
+        .querySelector(
+          '#mobile-order-month'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+      
+            const today =
+              getKoreaDate(
+                new Date()
+              )
+      
+            const monthStart =
+              today.slice(0, 7) +
+              '-01'
+      
+            location.href =
+              '/merchant-app/orders?start=' +
+              monthStart +
+              '&end=' +
+              today
+          }
+        )
+      
+      
+      const autoSearchOrderDate = () => {
+      
+        const startInput =
+          document.querySelector<HTMLInputElement>(
+            '#mobile-order-start-date'
+          )
+      
+        const endInput =
+          document.querySelector<HTMLInputElement>(
+            '#mobile-order-end-date'
+          )
+      
+        const selectedStart =
+          startInput?.value || ''
+      
+        const selectedEnd =
+          endInput?.value || ''
+      
+        if (
+          !selectedStart ||
+          !selectedEnd
+        ) {
+          return
         }
-      )
-  
-  
-    document
-      .querySelector(
-        '#mobile-order-next'
-      )
-      ?.addEventListener(
-        'click',
-        () => {
-          changeDate(1)
+      
+        if (
+          selectedStart >
+          selectedEnd
+        ) {
+          return
         }
-      )
-  
-  
-    document
-      .querySelector(
-        '#mobile-order-today'
-      )
-      ?.addEventListener(
-        'click',
-        () => {
-  
-          location.href =
-            '/merchant-app/orders?date=' +
-            getKoreaDate(
-              new Date()
-            )
-        }
-      )
-  
-  
-      const [
-        orderResult,
-        merchantResult,
-        paymentResult
-      ] =
-        await Promise.all([
+      
+        location.href =
+          '/merchant-app/orders?start=' +
+          selectedStart +
+          '&end=' +
+          selectedEnd
+      }
+      
+      
+      document
+        .querySelector(
+          '#mobile-order-start-date'
+        )
+        ?.addEventListener(
+          'change',
+          autoSearchOrderDate
+        )
+      
+      
+        document
+        .querySelector(
+          '#mobile-order-end-date'
+        )
+        ?.addEventListener(
+          'change',
+          autoSearchOrderDate
+        )
+
+        const [
+            orderResult,
+            merchantResult,
+            paymentResult
+          ] =
+            await Promise.all([
   
         supabase
           .from('orders')
