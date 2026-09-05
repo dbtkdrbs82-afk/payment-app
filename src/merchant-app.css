@@ -1357,3 +1357,29 @@
     background: #e5e7eb;
     color: #374151;
   }
+  .merchant-mobile-product-order-actions {
+    width: 100%;
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  
+  .merchant-mobile-product-order-actions button {
+    flex: 1;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+  
+  .merchant-mobile-product-up,
+  .merchant-mobile-product-down {
+    background: #eef2f7;
+    color: #374151;
+  }
+  
+  .merchant-mobile-product-delete {
+    background: #feecec;
+    color: #d63333;
+  }

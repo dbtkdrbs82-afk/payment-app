@@ -3325,7 +3325,7 @@ const isBeauty =
               </strong>
 
 
-              <div
+      <div
   class="merchant-mobile-product-actions"
 >
 
@@ -3351,6 +3351,37 @@ const isBeauty =
     data-status="${status}"
   >
     ${status}
+  </button>
+
+</div>
+
+
+<div
+  class="merchant-mobile-product-order-actions"
+>
+
+  <button
+    type="button"
+    class="merchant-mobile-product-up"
+    data-id="${product.id}"
+  >
+    ▲ 위
+  </button>
+
+  <button
+    type="button"
+    class="merchant-mobile-product-down"
+    data-id="${product.id}"
+  >
+    ▼ 아래
+  </button>
+
+  <button
+    type="button"
+    class="merchant-mobile-product-delete"
+    data-id="${product.id}"
+  >
+    삭제
   </button>
 
 </div>
@@ -3849,6 +3880,241 @@ const isBeauty =
 
     }
   )
+  const moveMobileProduct = async (
+    productId: number,
+    direction: 'up' | 'down'
+  ) => {
+  
+    const currentIndex =
+      products.findIndex(
+        (product: any) =>
+          Number(product.id) ===
+          productId
+      )
+  
+  
+    if (currentIndex < 0) {
+      return
+    }
+  
+  
+    const targetIndex =
+      direction === 'up'
+        ? currentIndex - 1
+        : currentIndex + 1
+  
+  
+    if (targetIndex < 0) {
+  
+      alert(
+        '이미 맨 위 상품입니다.'
+      )
+  
+      return
+    }
+  
+  
+    if (
+      targetIndex >=
+      products.length
+    ) {
+  
+      alert(
+        '이미 맨 아래 상품입니다.'
+      )
+  
+      return
+    }
+  
+  
+    const currentProduct =
+      products[currentIndex]
+  
+    const targetProduct =
+      products[targetIndex]
+  
+  
+    const currentSort =
+      Number(
+        currentProduct.sort_order ??
+        currentIndex + 1
+      )
+  
+  
+    const targetSort =
+      Number(
+        targetProduct.sort_order ??
+        targetIndex + 1
+      )
+  
+  
+    const {
+      error: currentError
+    } =
+      await supabase
+        .from('products')
+        .update({
+          sort_order:
+            targetSort
+        })
+        .eq(
+          'id',
+          currentProduct.id
+        )
+  
+  
+    if (currentError) {
+  
+      alert(
+        '상품 순서 변경 실패: ' +
+        currentError.message
+      )
+  
+      return
+    }
+  
+  
+    const {
+      error: targetError
+    } =
+      await supabase
+        .from('products')
+        .update({
+          sort_order:
+            currentSort
+        })
+        .eq(
+          'id',
+          targetProduct.id
+        )
+  
+  
+    if (targetError) {
+  
+      alert(
+        '상품 순서 변경 실패: ' +
+        targetError.message
+      )
+  
+      return
+    }
+  
+  
+    void renderMerchantProducts()
+  }
+  
+  
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '.merchant-mobile-product-up'
+    )
+    .forEach(
+      (button) => {
+  
+        button.addEventListener(
+          'click',
+          async () => {
+  
+            await moveMobileProduct(
+              Number(
+                button.dataset.id || 0
+              ),
+              'up'
+            )
+  
+          }
+        )
+  
+      }
+    )
+  
+  
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '.merchant-mobile-product-down'
+    )
+    .forEach(
+      (button) => {
+  
+        button.addEventListener(
+          'click',
+          async () => {
+  
+            await moveMobileProduct(
+              Number(
+                button.dataset.id || 0
+              ),
+              'down'
+            )
+  
+          }
+        )
+  
+      }
+    )
+  
+  
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '.merchant-mobile-product-delete'
+    )
+    .forEach(
+      (button) => {
+  
+        button.addEventListener(
+          'click',
+          async () => {
+  
+            const productId =
+              Number(
+                button.dataset.id || 0
+              )
+  
+  
+            if (
+              !confirm(
+                '정말 이 상품을 삭제할까요?'
+              )
+            ) {
+              return
+            }
+  
+  
+            const {
+              error
+            } =
+              await supabase
+                .from('products')
+                .delete()
+                .eq(
+                  'id',
+                  productId
+                )
+  
+  
+            if (error) {
+  
+              alert(
+                '상품 삭제 실패: ' +
+                error.message
+              )
+  
+              return
+            }
+  
+  
+            alert(
+              '상품이 삭제되었습니다.'
+            )
+  
+  
+            void renderMerchantProducts()
+  
+          }
+        )
+  
+      }
+    )
   }
 
 /* =========================================
