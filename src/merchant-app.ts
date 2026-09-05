@@ -1,245 +1,501 @@
 import './merchant-app.css'
 
 const app =
-  document.querySelector<HTMLDivElement>('#app')
+  document.querySelector<HTMLDivElement>('#app')!
 
-if (!app) {
-  throw new Error('앱 영역을 찾을 수 없습니다.')
-}
+const path =
+  window.location.pathname
 
-app.innerHTML = `
-  <div class="merchant-app-login-page">
-
-    <section class="merchant-app-login-card">
-
-      <div class="merchant-app-login-badge">
-        NXG PICK ADMIN
-      </div>
-
-      <h1 class="merchant-app-login-title">
-        가맹점 로그인
-      </h1>
-
-      <form id="mobile-merchant-login">
-
-        <input
-          id="mobile-login-id"
-          class="merchant-app-login-input"
-          type="text"
-          autocomplete="username"
-          placeholder="아이디"
-        />
-
-        <input
-          id="mobile-login-password"
-          class="merchant-app-login-input"
-          type="password"
-          autocomplete="current-password"
-          placeholder="비밀번호"
-        />
-
-        <button
-          type="submit"
-          class="merchant-app-login-button"
-        >
-          로그인
-        </button>
-
-        <div
-          id="mobile-login-message"
-          class="merchant-app-login-message"
-        ></div>
-
-      </form>
-
-      <div class="merchant-app-login-footer">
-        NXG PICK Merchant System
-      </div>
-
-    </section>
-
-  </div>
-`
-
-document
-  .querySelector('#mobile-merchant-login')
-  ?.addEventListener(
-    'submit',
-    async (event) => {
-
-      event.preventDefault()
+const merchantLoginKeys = [
+  'login_merchant_id',
+  'login_merchant_code',
+  'login_merchant_name',
+  'login_merchant_type'
+]
 
 
-      const loginIdInput =
-        document.querySelector<HTMLInputElement>(
-          '#mobile-login-id'
-        )
+/* =========================================
+   모바일 홈
+========================================= */
 
-      const passwordInput =
-        document.querySelector<HTMLInputElement>(
-          '#mobile-login-password'
-        )
+function renderMerchantHome() {
 
-      const message =
-        document.querySelector<HTMLDivElement>(
-          '#mobile-login-message'
-        )
+  const merchantId =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
 
-      const submitButton =
-        document.querySelector<HTMLButtonElement>(
-          '.merchant-app-login-button'
-        )
-
-
-      const loginId =
-        loginIdInput?.value.trim() || ''
-
-      const password =
-        passwordInput?.value.trim() || ''
+  if (!merchantId) {
+    location.replace(
+      '/merchant-app'
+    )
+    return
+  }
 
 
-      if (!loginId || !password) {
+  merchantLoginKeys.forEach(
+    (key) => {
 
-        if (message) {
-          message.textContent =
-            '아이디와 비밀번호를 입력해주세요.'
-        }
+      if (
+        !sessionStorage.getItem(key)
+      ) {
 
-        return
-      }
+        const savedValue =
+          localStorage.getItem(key)
 
-
-      if (submitButton) {
-        submitButton.disabled = true
-        submitButton.textContent =
-          '로그인 중...'
-      }
-
-
-      if (message) {
-        message.textContent = ''
-      }
-
-
-      try {
-
-        const response =
-          await fetch(
-            '/api/merchant-app-login',
-            {
-              method: 'POST',
-
-              headers: {
-                'Content-Type':
-                  'application/json'
-              },
-
-              body: JSON.stringify({
-                loginId,
-                password
-              })
-            }
+        if (savedValue !== null) {
+          sessionStorage.setItem(
+            key,
+            savedValue
           )
-
-
-        const result =
-          await response.json()
-
-
-        if (
-          !response.ok ||
-          !result.success
-        ) {
-
-          if (message) {
-            message.textContent =
-              result.message ||
-              '로그인에 실패했습니다.'
-          }
-
-          return
-        }
-
-
-        const merchant =
-          result.merchant
-
-
-        const merchantLoginData: Record<
-          string,
-          string
-        > = {
-
-          login_merchant_id:
-            String(
-              merchant.id || ''
-            ),
-
-          login_merchant_code:
-            String(
-              merchant.loginId || ''
-            ),
-
-          login_merchant_name:
-            String(
-              merchant.name || ''
-            ),
-
-          login_merchant_type:
-            String(
-              merchant.type || ''
-            )
-        }
-
-
-        Object.entries(
-          merchantLoginData
-        ).forEach(
-          ([key, value]) => {
-
-            sessionStorage.setItem(
-              key,
-              value
-            )
-
-            localStorage.setItem(
-              key,
-              value
-            )
-
-          }
-        )
-
-
-        if (message) {
-          message.textContent =
-            merchant.name +
-            ' 로그인 성공'
-        }
-
-
-      } catch (error) {
-
-        console.error(
-          '모바일 로그인 오류:',
-          error
-        )
-
-        if (message) {
-          message.textContent =
-            '로그인 중 오류가 발생했습니다.'
-        }
-
-
-      } finally {
-
-        if (submitButton) {
-          submitButton.disabled = false
-          submitButton.textContent =
-            '로그인'
         }
 
       }
 
     }
   )
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) || '가맹점'
+
+  const merchantType =
+    sessionStorage.getItem(
+      'login_merchant_type'
+    ) || '일반매장'
+
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+        </div>
+
+        <button
+          id="merchant-mobile-logout"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          로그아웃
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <section class="merchant-mobile-welcome">
+
+          <div class="merchant-mobile-welcome-label">
+            가맹점 모바일
+          </div>
+
+          <h1>
+            ${merchantName}
+          </h1>
+
+          <div class="merchant-mobile-type">
+            ${merchantType}
+          </div>
+
+        </section>
+
+
+        <section class="merchant-mobile-menu">
+
+          <button
+            type="button"
+            class="merchant-mobile-menu-card"
+            data-menu="orders"
+          >
+            <span class="merchant-mobile-menu-icon">
+              📋
+            </span>
+
+            <strong>
+              주문관리
+            </strong>
+
+            <small>
+              주문 및 처리상태 확인
+            </small>
+          </button>
+
+
+          <button
+            type="button"
+            class="merchant-mobile-menu-card"
+            data-menu="products"
+          >
+            <span class="merchant-mobile-menu-icon">
+              🛍️
+            </span>
+
+            <strong>
+              상품관리
+            </strong>
+
+            <small>
+              상품 및 판매정보 관리
+            </small>
+          </button>
+
+
+          <button
+            type="button"
+            class="merchant-mobile-menu-card"
+            data-menu="payments"
+          >
+            <span class="merchant-mobile-menu-icon">
+              💳
+            </span>
+
+            <strong>
+              결제내역
+            </strong>
+
+            <small>
+              결제 및 취소내역 확인
+            </small>
+          </button>
+
+
+          <button
+            type="button"
+            class="merchant-mobile-menu-card"
+            data-menu="payout"
+          >
+            <span class="merchant-mobile-menu-icon">
+              💰
+            </span>
+
+            <strong>
+              출금관리
+            </strong>
+
+            <small>
+              정산 및 출금상태 확인
+            </small>
+          </button>
+
+        </section>
+
+      </main>
+
+    </div>
+  `
+
+
+  document
+    .querySelector(
+      '#merchant-mobile-logout'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        merchantLoginKeys.forEach(
+          (key) => {
+
+            sessionStorage.removeItem(key)
+            localStorage.removeItem(key)
+
+          }
+        )
+
+        location.replace(
+          '/merchant-app'
+        )
+
+      }
+    )
+}
+
+
+/* =========================================
+   모바일 로그인
+========================================= */
+
+function renderMerchantLogin() {
+
+  const savedMerchantId =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+  if (savedMerchantId) {
+    location.replace(
+      '/merchant-app/home'
+    )
+    return
+  }
+
+
+  app.innerHTML = `
+    <div class="merchant-app-login-page">
+
+      <section class="merchant-app-login-card">
+
+        <div class="merchant-app-login-badge">
+          NXG PICK ADMIN
+        </div>
+
+        <h1 class="merchant-app-login-title">
+          가맹점 로그인
+        </h1>
+
+        <form id="mobile-merchant-login">
+
+          <input
+            id="mobile-login-id"
+            class="merchant-app-login-input"
+            type="text"
+            autocomplete="username"
+            placeholder="아이디"
+          />
+
+          <input
+            id="mobile-login-password"
+            class="merchant-app-login-input"
+            type="password"
+            autocomplete="current-password"
+            placeholder="비밀번호"
+          />
+
+          <button
+            type="submit"
+            class="merchant-app-login-button"
+          >
+            로그인
+          </button>
+
+          <div
+            id="mobile-login-message"
+            class="merchant-app-login-message"
+          ></div>
+
+        </form>
+
+        <div class="merchant-app-login-footer">
+          NXG PICK Merchant System
+        </div>
+
+      </section>
+
+    </div>
+  `
+
+
+  document
+    .querySelector(
+      '#mobile-merchant-login'
+    )
+    ?.addEventListener(
+      'submit',
+      async (event) => {
+
+        event.preventDefault()
+
+
+        const loginIdInput =
+          document.querySelector<HTMLInputElement>(
+            '#mobile-login-id'
+          )
+
+        const passwordInput =
+          document.querySelector<HTMLInputElement>(
+            '#mobile-login-password'
+          )
+
+        const message =
+          document.querySelector<HTMLDivElement>(
+            '#mobile-login-message'
+          )
+
+        const submitButton =
+          document.querySelector<HTMLButtonElement>(
+            '.merchant-app-login-button'
+          )
+
+
+        const loginId =
+          loginIdInput?.value.trim() || ''
+
+        const password =
+          passwordInput?.value.trim() || ''
+
+
+        if (!loginId || !password) {
+
+          if (message) {
+            message.textContent =
+              '아이디와 비밀번호를 입력해주세요.'
+          }
+
+          return
+        }
+
+
+        if (submitButton) {
+          submitButton.disabled = true
+          submitButton.textContent =
+            '로그인 중...'
+        }
+
+        if (message) {
+          message.textContent = ''
+        }
+
+
+        try {
+
+          const response =
+            await fetch(
+              '/api/merchant-app-login',
+              {
+                method: 'POST',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body: JSON.stringify({
+                  loginId,
+                  password
+                })
+              }
+            )
+
+
+          const result =
+            await response.json()
+
+
+          if (
+            !response.ok ||
+            !result.success
+          ) {
+
+            if (message) {
+              message.textContent =
+                result.message ||
+                '로그인에 실패했습니다.'
+            }
+
+            return
+          }
+
+
+          const merchant =
+            result.merchant
+
+
+          const merchantLoginData:
+            Record<string, string> = {
+
+              login_merchant_id:
+                String(
+                  merchant.id || ''
+                ),
+
+              login_merchant_code:
+                String(
+                  merchant.loginId || ''
+                ),
+
+              login_merchant_name:
+                String(
+                  merchant.name || ''
+                ),
+
+              login_merchant_type:
+                String(
+                  merchant.type || ''
+                )
+            }
+
+
+          Object.entries(
+            merchantLoginData
+          ).forEach(
+            ([key, value]) => {
+
+              sessionStorage.setItem(
+                key,
+                value
+              )
+
+              localStorage.setItem(
+                key,
+                value
+              )
+
+            }
+          )
+
+
+          location.href =
+            '/merchant-app/home'
+
+
+        } catch (error) {
+
+          console.error(
+            '모바일 로그인 오류:',
+            error
+          )
+
+          if (message) {
+            message.textContent =
+              '로그인 중 오류가 발생했습니다.'
+          }
+
+
+        } finally {
+
+          if (submitButton) {
+            submitButton.disabled = false
+            submitButton.textContent =
+              '로그인'
+          }
+
+        }
+
+      }
+    )
+}
+
+
+/* =========================================
+   모바일 앱 경로
+========================================= */
+
+if (
+  path === '/merchant-app/home'
+) {
+
+  renderMerchantHome()
+
+} else {
+
+  renderMerchantLogin()
+
+}

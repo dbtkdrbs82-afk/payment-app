@@ -208,3 +208,208 @@
     }
   
   }
+  /* =========================================
+   모바일 가맹점 홈
+========================================= */
+
+.merchant-mobile-home {
+    width: 100%;
+    min-height: 100dvh;
+  
+    background: #f3f6fa;
+  }
+  
+  
+  .merchant-mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    padding:
+      max(18px, env(safe-area-inset-top))
+      20px
+      18px;
+  
+    background: #071a33;
+  
+    color: #ffffff;
+  }
+  
+  
+  .merchant-mobile-brand {
+    color: #52aaff;
+  
+    font-size: 13px;
+    font-weight: 900;
+  
+    letter-spacing: 1px;
+  }
+  
+  
+  .merchant-mobile-store {
+    margin-top: 5px;
+  
+    font-size: 18px;
+    font-weight: 800;
+  }
+  
+  
+  .merchant-mobile-logout {
+    height: 38px;
+  
+    padding: 0 14px;
+  
+    border: 1px solid #31547c;
+    border-radius: 9px;
+  
+    background: #123d70;
+  
+    color: #ffffff;
+  
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  
+  .merchant-mobile-content {
+    width: 100%;
+    max-width: 520px;
+  
+    margin: 0 auto;
+  
+    padding: 20px;
+  }
+  
+  
+  .merchant-mobile-welcome {
+    padding: 24px 22px;
+  
+    background:
+      linear-gradient(
+        135deg,
+        #123d70,
+        #1e5da3
+      );
+  
+    border-radius: 18px;
+  
+    color: #ffffff;
+  }
+  
+  
+  .merchant-mobile-welcome-label {
+    margin-bottom: 8px;
+  
+    color: #b9d8f5;
+  
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  
+  .merchant-mobile-welcome h1 {
+    margin: 0;
+  
+    font-size: 25px;
+    font-weight: 900;
+  }
+  
+  
+  .merchant-mobile-type {
+    display: inline-flex;
+  
+    margin-top: 12px;
+    padding: 6px 11px;
+  
+    border-radius: 20px;
+  
+    background:
+      rgba(255, 255, 255, 0.14);
+  
+    font-size: 12px;
+    font-weight: 700;
+  }
+  
+  
+  .merchant-mobile-menu {
+    display: grid;
+  
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  
+    gap: 12px;
+  
+    margin-top: 18px;
+  }
+  
+  
+  .merchant-mobile-menu-card {
+    min-height: 145px;
+  
+    padding: 20px 16px;
+  
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  
+    border: 1px solid #e0e6ef;
+    border-radius: 16px;
+  
+    background: #ffffff;
+  
+    text-align: left;
+  
+    box-shadow:
+      0 5px 16px
+      rgba(15, 23, 42, 0.05);
+  }
+  
+  
+  .merchant-mobile-menu-icon {
+    display: block;
+  
+    margin-bottom: 16px;
+  
+    font-size: 28px;
+  }
+  
+  
+  .merchant-mobile-menu-card strong {
+    color: #172033;
+  
+    font-size: 17px;
+    font-weight: 800;
+  }
+  
+  
+  .merchant-mobile-menu-card small {
+    margin-top: 6px;
+  
+    color: #7a8595;
+  
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  
+  
+  .merchant-mobile-menu-card:active {
+    transform: scale(0.98);
+  }
+  
+  
+  @media (max-width: 360px) {
+  
+    .merchant-mobile-content {
+      padding: 16px;
+    }
+  
+    .merchant-mobile-menu {
+      gap: 9px;
+    }
+  
+    .merchant-mobile-menu-card {
+      min-height: 135px;
+      padding: 17px 13px;
+    }
+  
+  }
