@@ -1427,7 +1427,287 @@ cancelOpenButton
             }
       
           }
-        )         
+        )   
+        
+        document
+  .querySelector(
+    '#merchant-mobile-request-cancel'
+  )
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      const modal =
+        document.querySelector<HTMLElement>(
+          '#merchant-mobile-cancel-modal'
+        )
+
+      if (!modal) {
+        return
+      }
+
+
+      const paymentId =
+        Number(
+          modal.dataset.paymentId || 0
+        )
+
+      const orderId =
+        Number(
+          modal.dataset.orderId || 0
+        )
+
+
+      const reason =
+        (
+          document.querySelector<HTMLTextAreaElement>(
+            '#merchant-mobile-cancel-reason'
+          )?.value || ''
+        ).trim()
+
+
+      if (!paymentId) {
+        alert(
+          '취소할 결제정보를 찾을 수 없습니다.'
+        )
+        return
+      }
+
+
+      if (!reason) {
+        alert(
+          '취소 사유를 입력해주세요.'
+        )
+        return
+      }
+
+
+      const requestButton =
+        document.querySelector<HTMLButtonElement>(
+          '#merchant-mobile-request-cancel'
+        )
+
+
+      if (requestButton) {
+        requestButton.disabled = true
+        requestButton.textContent =
+          '요청 처리 중...'
+      }
+
+
+      try {
+
+        const {
+          data: payment,
+          error: paymentError
+        } =
+          await supabase
+            .from('payments')
+            .select(`
+              id,
+              merchant_id,
+              merchant_name,
+              amount,
+              settlement_amount,
+              manager_admin_id,
+              manager_admin_name,
+              status
+            `)
+            .eq(
+              'id',
+              paymentId
+            )
+            .single()
+
+
+        if (
+          paymentError ||
+          !payment
+        ) {
+
+          alert(
+            '결제정보를 불러오지 못했습니다.'
+          )
+
+          return
+        }
+
+
+        if (
+          payment.status === 'cancel'
+        ) {
+
+          alert(
+            '이미 취소된 결제입니다.'
+          )
+
+          return
+        }
+
+
+        const {
+          data: existingRequest
+        } =
+          await supabase
+            .from('cancel_requests')
+            .select('id')
+            .eq(
+              'payment_id',
+              paymentId
+            )
+            .eq(
+              'status',
+              '요청중'
+            )
+            .maybeSingle()
+
+
+        if (existingRequest) {
+
+          alert(
+            '이미 본사 승인요청이 접수된 거래입니다.'
+          )
+
+          return
+        }
+
+
+        const {
+          error: requestError
+        } =
+          await supabase
+            .from('cancel_requests')
+            .insert({
+              payment_id:
+                paymentId,
+
+              merchant_id:
+                Number(
+                  payment.merchant_id
+                ),
+
+              manager_admin_id:
+                payment.manager_admin_id ||
+                null,
+
+              manager_admin_name:
+                payment.manager_admin_name ||
+                null,
+
+              reason:
+                reason,
+
+              status:
+                '요청중'
+            })
+
+
+        if (requestError) {
+
+          alert(
+            '본사 승인요청 저장에 실패했습니다.\n' +
+            requestError.message
+          )
+
+          return
+        }
+
+
+        const {
+          error: holdError
+        } =
+          await supabase
+            .from('payments')
+            .update({
+              payout_hold:
+                true,
+
+              payout_hold_reason:
+                '익일 취소 본사 승인요청: ' +
+                reason,
+
+              payout_hold_at:
+                new Date()
+                  .toISOString(),
+
+              payout_status:
+                '지급정지'
+            })
+            .eq(
+              'id',
+              paymentId
+            )
+
+
+        if (holdError) {
+
+          alert(
+            '취소요청은 접수됐지만 지급정지 처리에 실패했습니다.\n' +
+            holdError.message
+          )
+
+          return
+        }
+
+
+        const {
+          error: orderError
+        } =
+          await supabase
+            .from('orders')
+            .update({
+              cancel_status:
+                '취소요청',
+
+              cancel_reason:
+                reason,
+
+              cancel_requested_at:
+                new Date()
+                  .toISOString()
+            })
+            .eq(
+              'id',
+              orderId
+            )
+
+
+        if (orderError) {
+
+          alert(
+            '본사 승인요청은 접수됐지만 주문상태 변경에 실패했습니다.\n' +
+            orderError.message
+          )
+
+          return
+        }
+
+
+        alert(
+          '본사 승인요청이 접수되었습니다.'
+        )
+
+        location.reload()
+
+      } catch (error) {
+
+        console.error(error)
+
+        alert(
+          '본사 승인요청 중 오류가 발생했습니다.'
+        )
+
+      } finally {
+
+        if (requestButton) {
+          requestButton.disabled = false
+          requestButton.textContent =
+            '본사 승인요청'
+        }
+      }
+
+    }
+  )
     }
   )
 
