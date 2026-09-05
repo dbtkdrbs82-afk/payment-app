@@ -671,6 +671,7 @@ const endIso =
             order_id,
             payment_key,
             amount,
+            settlement_amount,
             approval_number,
             card_number,
             card_company,
@@ -734,11 +735,65 @@ const endIso =
 
       const payments =
   paymentResult.data || []
-   
-    summary.textContent =
-      '주문수 : ' +
-      orders.length +
-      '건'
+
+
+const paidPayments =
+  payments.filter(
+    (payment: any) =>
+      payment.status === 'paid'
+  )
+
+
+const salesTotal =
+  paidPayments.reduce(
+    (
+      sum: number,
+      payment: any
+    ) =>
+      sum +
+      Number(
+        payment.amount || 0
+      ),
+    0
+  )
+
+
+const settlementTotal =
+  paidPayments.reduce(
+    (
+      sum: number,
+      payment: any
+    ) =>
+      sum +
+      Number(
+        payment.settlement_amount || 0
+      ),
+    0
+  )
+
+
+summary.innerHTML = `
+  <span>
+    주문수 :
+    <strong>
+      ${orders.length}건
+    </strong>
+  </span>
+
+  <span>
+    매출합계 :
+    <strong>
+      ${salesTotal.toLocaleString()}원
+    </strong>
+  </span>
+
+  <span>
+    정산예정금액 :
+    <strong>
+      ${settlementTotal.toLocaleString()}원
+    </strong>
+  </span>
+`
   
   
     if (orders.length === 0) {

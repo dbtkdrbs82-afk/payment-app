@@ -1003,3 +1003,25 @@
     .merchant-mobile-order-status[data-status="취소완료"] {
     color: #d93025;
   }
+  .merchant-mobile-order-summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  
+    flex-wrap: wrap;
+  }
+  
+  .merchant-mobile-order-summary span {
+    color: #687386;
+  
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  .merchant-mobile-order-summary strong {
+    margin-left: 3px;
+  
+    color: #173c68;
+  
+    font-weight: 900;
+  }
