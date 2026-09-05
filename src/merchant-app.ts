@@ -426,11 +426,39 @@ const endIso =
             주문을 불러오는 중입니다.
           </div>
   
+          <div class="merchant-mobile-order-filter">
+
+  <button type="button" data-status="전체">
+    전체
+  </button>
+
+  <button type="button" data-status="접수">
+    접수
+  </button>
+
+  <button type="button" data-status="완료">
+    완료
+  </button>
+
+  <button type="button" data-status="취소요청">
+    취소요청
+  </button>
+
+  <button type="button" data-status="취소완료">
+    취소완료
+  </button>
+
+</div>
   
           <div
             id="mobile-order-list"
             class="merchant-mobile-order-list"
           ></div>
+
+          <div
+  id="mobile-order-pagination"
+  class="merchant-mobile-order-pagination"
+></div>
   
         </main>
   
@@ -728,10 +756,102 @@ const endIso =
   
   
     const orders =
-      orderResult.data || []
-  
-    const merchantSetting =
-      merchantResult.data
+  orderResult.data || []
+
+
+const selectedStatus =
+  params.get('status') ||
+  '전체'
+
+
+const requestedPage =
+  Math.max(
+    1,
+    Number(
+      params.get('page') || 1
+    )
+  )
+
+
+const pageSize =
+  Math.max(
+    1,
+    Number(
+      params.get('size') || 10
+    )
+  )
+
+
+const getOrderStatus = (
+  order: any
+) => {
+
+  if (
+    order.cancel_status ===
+    '취소요청'
+  ) {
+    return '취소요청'
+  }
+
+  if (
+    order.order_status ===
+    '취소완료' ||
+    order.cancel_status ===
+    '취소완료'
+  ) {
+    return '취소완료'
+  }
+
+  if (
+    order.order_status ===
+    '완료'
+  ) {
+    return '완료'
+  }
+
+  return '접수'
+}
+
+
+const filteredOrders =
+  selectedStatus === '전체'
+    ? orders
+    : orders.filter(
+        (order: any) =>
+          getOrderStatus(order) ===
+          selectedStatus
+      )
+
+
+const totalPages =
+  Math.max(
+    1,
+    Math.ceil(
+      filteredOrders.length /
+      pageSize
+    )
+  )
+
+
+const currentPage =
+  Math.min(
+    requestedPage,
+    totalPages
+  )
+
+
+const pageOrders =
+  filteredOrders.slice(
+    (currentPage - 1) *
+      pageSize,
+
+    currentPage *
+      pageSize
+  )
+
+
+const merchantSetting =
+  merchantResult.data
 
       const payments =
   paymentResult.data || []
@@ -796,7 +916,7 @@ summary.innerHTML = `
 `
   
   
-    if (orders.length === 0) {
+if (filteredOrders.length === 0) {
   
       orderList.innerHTML = `
         <div class="merchant-mobile-order-empty">
@@ -808,7 +928,7 @@ summary.innerHTML = `
     }
   
   
-    orders.forEach(
+    pageOrders.forEach(
       (order: any, index: number) => {
   
         const orderNumber =
@@ -906,17 +1026,8 @@ summary.innerHTML = `
             
            
   
-        const statusText =
-          order.cancel_status ===
-          '취소요청'
-            ? '취소요청'
-            : order.order_status ===
-              '취소완료'
-              ? '취소완료'
-              : order.order_status ===
-                '완료'
-                ? '완료'
-                : '접수'
+            const statusText =
+            getOrderStatus(order)
   
   
         const card =
@@ -2225,6 +2336,225 @@ receiptButton?.addEventListener(
       }
     )
   
+    const changeOrderParams = (
+        values: Record<string, string>
+      ) => {
+      
+        const newParams =
+          new URLSearchParams(
+            location.search
+          )
+      
+        Object.entries(values)
+          .forEach(
+            ([key, value]) => {
+              newParams.set(
+                key,
+                value
+              )
+            }
+          )
+      
+        location.href =
+          '/merchant-app/orders?' +
+          newParams.toString()
+      }
+      
+      
+      document
+        .querySelectorAll<HTMLButtonElement>(
+          '.merchant-mobile-order-filter button'
+        )
+        .forEach(
+          (button) => {
+      
+            const status =
+              button.dataset.status ||
+              '전체'
+      
+            if (
+              status === selectedStatus
+            ) {
+              button.classList.add(
+                'active'
+              )
+            }
+      
+      
+            button.addEventListener(
+              'click',
+              () => {
+      
+                changeOrderParams({
+                  status:
+                    status,
+      
+                  page:
+                    '1'
+                })
+              }
+            )
+          }
+        )
+      
+      
+      const pagination =
+        document.querySelector<HTMLDivElement>(
+          '#mobile-order-pagination'
+        )
+      
+      
+      if (pagination) {
+      
+        pagination.innerHTML = `
+      
+          <select
+            id="mobile-order-page-size"
+          >
+      
+            <option
+              value="10"
+              ${
+                pageSize === 10
+                  ? 'selected'
+                  : ''
+              }
+            >
+              10개씩 보기
+            </option>
+      
+            <option
+              value="20"
+              ${
+                pageSize === 20
+                  ? 'selected'
+                  : ''
+              }
+            >
+              20개씩 보기
+            </option>
+      
+            <option
+              value="30"
+              ${
+                pageSize === 30
+                  ? 'selected'
+                  : ''
+              }
+            >
+              30개씩 보기
+            </option>
+      
+          </select>
+      
+      
+          <div
+            class="merchant-mobile-order-page-buttons"
+          >
+      
+            <button
+              id="mobile-order-page-prev"
+              type="button"
+              ${
+                currentPage <= 1
+                  ? 'disabled'
+                  : ''
+              }
+            >
+              이전
+            </button>
+      
+      
+            <strong>
+              ${currentPage} / ${totalPages}
+            </strong>
+      
+      
+            <button
+              id="mobile-order-page-next"
+              type="button"
+              ${
+                currentPage >= totalPages
+                  ? 'disabled'
+                  : ''
+              }
+            >
+              다음
+            </button>
+      
+          </div>
+        `
+      
+      
+        document
+          .querySelector<HTMLSelectElement>(
+            '#mobile-order-page-size'
+          )
+          ?.addEventListener(
+            'change',
+            (event) => {
+      
+              changeOrderParams({
+                size:
+                  (
+                    event.target as HTMLSelectElement
+                  ).value,
+      
+                page:
+                  '1'
+              })
+            }
+          )
+      
+      
+        document
+          .querySelector(
+            '#mobile-order-page-prev'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+      
+              if (
+                currentPage <= 1
+              ) {
+                return
+              }
+      
+              changeOrderParams({
+                page:
+                  String(
+                    currentPage - 1
+                  )
+              })
+            }
+          )
+      
+      
+        document
+          .querySelector(
+            '#mobile-order-page-next'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+      
+              if (
+                currentPage >=
+                totalPages
+              ) {
+                return
+              }
+      
+              changeOrderParams({
+                page:
+                  String(
+                    currentPage + 1
+                  )
+              })
+            }
+          )
+      }
   
     document
       .querySelectorAll<HTMLButtonElement>(
