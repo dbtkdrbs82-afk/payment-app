@@ -1703,3 +1703,37 @@
   background: #17457f;
   color: #ffffff;
 }
+.merchant-mobile-card-menu {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  
+  .merchant-mobile-card-menu-item {
+    min-height: 150px;
+    padding: 18px 12px;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .merchant-mobile-card-menu-item span {
+    font-size: 32px;
+    margin-bottom: 10px;
+  }
+  
+  .merchant-mobile-card-menu-item strong {
+    font-size: 16px;
+    color: #111827;
+  }
+  
+  .merchant-mobile-card-menu-item small {
+    margin-top: 7px;
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+  }

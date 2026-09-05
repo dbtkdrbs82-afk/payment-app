@@ -268,6 +268,19 @@ function renderMerchantHome() {
         '/merchant-app/qr'
     }
   )
+  document
+  .querySelector(
+    '[data-menu="card"]'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      location.href =
+        '/merchant-app/card'
+
+    }
+  )
 }
 
 /* =========================================
@@ -5123,6 +5136,257 @@ document
   )
   }
 
+  /* =========================================
+   모바일 카드결제
+========================================= */
+
+function renderMerchantCard() {
+
+    const merchantId =
+      sessionStorage.getItem(
+        'login_merchant_id'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_id'
+      )
+  
+  
+    if (!merchantId) {
+  
+      location.replace(
+        '/merchant-app'
+      )
+  
+      return
+    }
+  
+  
+    const merchantName =
+      sessionStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      '가맹점'
+  
+  
+    app.innerHTML = `
+      <div class="merchant-mobile-home">
+  
+        <header class="merchant-mobile-header">
+  
+          <div>
+  
+            <div class="merchant-mobile-brand">
+              NXG PICK
+            </div>
+  
+            <div class="merchant-mobile-store">
+              ${merchantName}
+            </div>
+  
+          </div>
+  
+  
+          <button
+            id="mobile-card-home"
+            class="merchant-mobile-logout"
+            type="button"
+          >
+            홈
+          </button>
+  
+        </header>
+  
+  
+        <main class="merchant-mobile-content">
+  
+          <div
+            class="merchant-mobile-page-title"
+          >
+  
+            <h1>
+              카드결제
+            </h1>
+  
+            <span>
+              결제방식 선택
+            </span>
+  
+          </div>
+  
+  
+          <div
+            class="merchant-mobile-card-menu"
+          >
+  
+            <button
+              type="button"
+              class="merchant-mobile-card-menu-item"
+              data-card-menu="ocr"
+            >
+  
+              <span>
+                📷
+              </span>
+  
+              <strong>
+                OCR 카드결제
+              </strong>
+  
+              <small>
+                카드 촬영 후 결제
+              </small>
+  
+            </button>
+  
+  
+            <button
+              type="button"
+              class="merchant-mobile-card-menu-item"
+              data-card-menu="manual"
+            >
+  
+              <span>
+                💳
+              </span>
+  
+              <strong>
+                수기 카드결제
+              </strong>
+  
+              <small>
+                카드정보 직접 입력
+              </small>
+  
+            </button>
+  
+  
+            <button
+              type="button"
+              class="merchant-mobile-card-menu-item"
+              data-card-menu="menu"
+            >
+  
+              <span>
+                🛒
+              </span>
+  
+              <strong>
+                메뉴결제
+              </strong>
+  
+              <small>
+                상품 선택 후 카드결제
+              </small>
+  
+            </button>
+  
+  
+            <button
+              type="button"
+              class="merchant-mobile-card-menu-item"
+              data-card-menu="cash"
+            >
+  
+              <span>
+                🧾
+              </span>
+  
+              <strong>
+                현금영수증
+              </strong>
+  
+              <small>
+                현금영수증 발급
+              </small>
+  
+            </button>
+  
+          </div>
+  
+        </main>
+  
+      </div>
+    `
+  
+  
+    document
+      .querySelector(
+        '#mobile-card-home'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/home'
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '[data-card-menu="ocr"]'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/card/ocr'
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '[data-card-menu="manual"]'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/card/manual'
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '[data-card-menu="menu"]'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/card/menu'
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '[data-card-menu="cash"]'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/card/cash'
+  
+        }
+      )
+  }
+
 /* =========================================
    모바일 로그인
 ========================================= */
@@ -5391,13 +5655,13 @@ if (
   
     renderMerchantHome()
   
-} else if (
+  } else if (
     path === '/merchant-app/orders'
   ) {
   
     void renderMerchantOrders()
   
-} else if (
+  } else if (
     path === '/merchant-app/products'
   ) {
   
@@ -5408,6 +5672,12 @@ if (
   ) {
   
     void renderMerchantQr()
+  
+  } else if (
+    path === '/merchant-app/card'
+  ) {
+  
+    renderMerchantCard()
   
   } else {
   
