@@ -3,6 +3,9 @@ import './merchant-app.css'
 import {
     createClient
   } from '@supabase/supabase-js'
+  import {
+    loadTossPayments
+  } from '@tosspayments/payment-sdk'
   import QRCode from 'qrcode'
 
   const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
@@ -5399,8 +5402,7 @@ function renderMerchantCard() {
     () => {
 
       location.href =
-        '/kiosk?merchant_id=' +
-        merchantId
+        '/merchant-app/card/menu'
 
     }
   )
@@ -6386,103 +6388,13 @@ async function renderMerchantMenuCard() {
             class="merchant-mobile-manual-card"
           >
   
-            <label>
-              카드번호
-            </label>
-  
-            <input
-              id="mobile-menu-card-number"
-              type="text"
-              inputmode="numeric"
-              maxlength="19"
-              autocomplete="off"
-              placeholder="0000-0000-0000-0000"
-            >
-  
-  
-            <label>
-              유효기간
-            </label>
-  
-            <input
-              id="mobile-menu-expiry"
-              type="text"
-              inputmode="numeric"
-              maxlength="5"
-              autocomplete="off"
-              placeholder="MM/YY"
-            >
-  
-  
-            <label>
-              할부개월
-            </label>
-  
-            <select
-              id="mobile-menu-installment"
-            >
-  
-              <option value="0">
-                일시불
-              </option>
-  
-              <option value="2">
-                2개월
-              </option>
-  
-              <option value="3">
-                3개월
-              </option>
-  
-              <option value="4">
-                4개월
-              </option>
-  
-              <option value="5">
-                5개월
-              </option>
-  
-              <option value="6">
-                6개월
-              </option>
-  
-              <option value="12">
-                12개월
-              </option>
-  
-            </select>
-  
-  
-            <label>
-              구매자명
-            </label>
-  
-            <input
-              id="mobile-menu-buyer-name"
-              type="text"
-              placeholder="선택 입력"
-            >
-  
-  
-            <label>
-              구매자 연락처
-            </label>
-  
-            <input
-              id="mobile-menu-phone"
-              type="tel"
-              inputmode="numeric"
-              maxlength="13"
-              placeholder="선택 입력"
-            >
-  
-  
-            <button
-              id="mobile-menu-payment-submit"
-              type="button"
-            >
-              결제 요청
-            </button>
+           <button
+  id="mobile-menu-payment-submit"
+  type="button"
+  class="merchant-mobile-menu-pay-button"
+>
+  카드 결제
+</button>
   
           </div>
   
@@ -6820,476 +6732,304 @@ async function renderMerchantMenuCard() {
       )
   
   
-    const cardNumberInput =
-      document.querySelector<HTMLInputElement>(
-        '#mobile-menu-card-number'
-      )
+    
   
   
-    cardNumberInput
-      ?.addEventListener(
-        'input',
-        () => {
-  
-          const value =
-            cardNumberInput.value
-              .replace(
-                /[^0-9]/g,
-                ''
-              )
-              .slice(
-                0,
-                16
-              )
-  
-  
-          cardNumberInput.value =
-            value.replace(
-              /(\d{4})(?=\d)/g,
-              '$1-'
-            )
-  
-        }
-      )
-  
-  
-    const expiryInput =
-      document.querySelector<HTMLInputElement>(
-        '#mobile-menu-expiry'
-      )
-  
-  
-    expiryInput
-      ?.addEventListener(
-        'input',
-        () => {
-  
-          const value =
-            expiryInput.value
-              .replace(
-                /[^0-9]/g,
-                ''
-              )
-              .slice(
-                0,
-                4
-              )
-  
-  
-          expiryInput.value =
-            value.length > 2
-              ? (
-                  value.slice(
-                    0,
-                    2
-                  ) +
-                  '/' +
-                  value.slice(
-                    2
-                  )
-                )
-              : value
-  
-        }
-      )
-  
-  
-    document
+      document
       .querySelector(
         '#mobile-menu-payment-submit'
       )
       ?.addEventListener(
         'click',
         async () => {
-  
+    
           const selectedItems =
             products
               .map(
                 (product: any) => {
-  
+    
                   const quantity =
                     cart.get(
                       Number(
                         product.id
                       )
                     ) || 0
-  
-  
+    
                   return {
                     id:
                       product.id,
-  
+    
                     name:
                       product.product_name,
-  
+    
                     product_name:
                       product.product_name,
-  
+    
                     price:
                       Number(
                         product.price || 0
                       ),
-  
-                    quantity
+    
+                    quantity:
+                      quantity
                   }
-  
+    
                 }
               )
               .filter(
                 (item: any) =>
                   item.quantity > 0
               )
-  
-  
+    
+    
+          const totalPrice =
+            selectedItems.reduce(
+              (
+                sum: number,
+                item: any
+              ) =>
+                sum +
+                (
+                  Number(item.price) *
+                  Number(item.quantity)
+                ),
+              0
+            )
+    
+    
           if (
-            selectedItems.length === 0
+            selectedItems.length === 0 ||
+            totalPrice <= 0
           ) {
-  
+    
             alert(
               '결제할 상품을 선택해주세요.'
             )
-  
+    
             return
           }
-  
-  
-          const amount =
-            updateTotal()
-  
-  
-          const cardNumber =
-            (
-              document.querySelector<HTMLInputElement>(
-                '#mobile-menu-card-number'
-              )?.value || ''
-            ).replace(
-              /[^0-9]/g,
-              ''
-            )
-  
-  
-          const expiryText =
-            (
-              document.querySelector<HTMLInputElement>(
-                '#mobile-menu-expiry'
-              )?.value || ''
-            ).replace(
-              /[^0-9]/g,
-              ''
-            )
-  
-  
+    
+    
+          const {
+            data: tossMerchant,
+            error: tossMerchantError
+          } =
+            await supabase
+              .from('merchants')
+              .select(`
+                merchant_name,
+                online_pg_company_1,
+                toss_client_key
+              `)
+              .eq(
+                'id',
+                merchantId
+              )
+              .single()
+    
+    
           if (
-            cardNumber.length < 13
+            tossMerchantError ||
+            !tossMerchant
           ) {
-  
+    
             alert(
-              '카드번호를 확인해주세요.'
+              '가맹점 결제정보를 불러오지 못했습니다.'
             )
-  
+    
             return
           }
-  
-  
+    
+    
           if (
-            expiryText.length !== 4
+            tossMerchant
+              .online_pg_company_1 !==
+            '토스페이먼츠'
           ) {
-  
+    
             alert(
-              '유효기간을 확인해주세요.'
+              '온라인결제 PG가 토스페이먼츠로 설정되지 않았습니다.'
             )
-  
+    
             return
           }
-  
-  
-          const expiryMonth =
-            expiryText.slice(
-              0,
-              2
-            )
-  
-  
-          const expiryYear =
-            expiryText.slice(
-              2,
-              4
-            )
-  
-  
-          const expiryYymm =
-            expiryYear +
-            expiryMonth
-  
-  
-          const installment =
-            document.querySelector<HTMLSelectElement>(
-              '#mobile-menu-installment'
-            )?.value ||
-            '0'
-  
-  
-          const buyerName =
-            (
-              document.querySelector<HTMLInputElement>(
-                '#mobile-menu-buyer-name'
-              )?.value ||
-              '구매자'
+    
+    
+          const tossClientKey =
+            String(
+              tossMerchant
+                .toss_client_key || ''
             ).trim()
-  
-  
-          const customerPhone =
-            (
-              document.querySelector<HTMLInputElement>(
-                '#mobile-menu-phone'
-              )?.value || ''
-            ).replace(
-              /[^0-9]/g,
-              ''
+    
+    
+          if (!tossClientKey) {
+    
+            alert(
+              '토스 Client Key가 등록되지 않았습니다.'
             )
-  
-  
-          const goodsName =
-            selectedItems.length === 1
-              ? selectedItems[0].name
-              : (
-                  selectedItems[0].name +
-                  ' 외 ' +
-                  (
-                    selectedItems.length - 1
-                  ) +
-                  '건'
-                )
-  
-  
-          if (
-            !confirm(
-              goodsName +
-              '\n' +
-              amount.toLocaleString() +
-              '원을 결제할까요?'
-            )
-          ) {
+    
             return
           }
-  
-  
-          const submitButton =
-            document.querySelector<HTMLButtonElement>(
-              '#mobile-menu-payment-submit'
+    
+    
+          const {
+            data: nextCallNumber,
+            error: callNumberError
+          } =
+            await supabase.rpc(
+              'get_next_call_number',
+              {
+                target_merchant_id:
+                  merchantId
+              }
             )
-  
-  
-          if (submitButton) {
-  
-            submitButton.disabled =
-              true
-  
-            submitButton.textContent =
-              '결제 처리 중...'
-  
-          }
-  
-  
-          try {
-  
-            const response =
-              await fetch(
-                '/api/korpay-manual-pay',
-                {
-                  method:
-                    'POST',
-  
-                  headers: {
-                    'Content-Type':
-                      'application/json'
-                  },
-  
-                  body:
-                    JSON.stringify({
-                      merchantId,
-                      amount,
-                      cardNumber,
-                      expiryYymm,
-                      installment,
-                      buyerName,
-                      billingIds: [],
-                      goodsName,
-                      customerPhone
-                    })
-                }
-              )
-  
-  
-            const result =
-              await response.json()
-  
-  
-            if (
-              !response.ok ||
-              !result.success
-            ) {
-  
-              alert(
-                '결제 실패\n\n' +
-                (
-                  result.message ||
-                  '카드결제가 승인되지 않았습니다.'
-                )
-              )
-  
-              return
-            }
-  
-  
-            const pgOrderId =
-              String(
-                result.orderId || ''
-              ).trim()
-  
-  
-            const {
-              data: nextCallNumber,
-              error: callNumberError
-            } =
-              await supabase.rpc(
-                'get_next_call_number',
-                {
-                  target_merchant_id:
-                    merchantId
-                }
-              )
-  
-  
-            if (
-              callNumberError ||
-              !nextCallNumber
-            ) {
-  
-              alert(
-                '결제는 승인됐지만 주문번호 생성에 실패했습니다.'
-              )
-  
-              return
-            }
-  
-  
-            const callNumber =
-              Number(
-                nextCallNumber
-              )
-  
-  
-            const rawApprovalNumber =
-              String(
-                result.approvalNumber || ''
-              ).trim()
-  
-  
-            const approvalNumber =
-              /^\d{8}$/.test(
-                rawApprovalNumber
-              )
-                ? rawApprovalNumber
-                : null
-  
-  
-            const {
-              error: orderError
-            } =
-              await supabase
-                .from('orders')
-                .insert({
-                  merchant_id:
-                    merchantId,
-  
-                  order_no:
-                    String(
-                      callNumber
-                    ),
-  
-                  call_number:
-                    callNumber,
-  
-                  pg_order_id:
-                    pgOrderId,
-  
-                  payment_key:
-                    result.tid || null,
-  
-                  approval_number:
-                    approvalNumber,
-  
-                  items:
-                    selectedItems,
-  
-                  total_amount:
-                    amount,
-  
-                  order_status:
-                    '접수',
-  
-                  payment_status:
-                    '결제완료'
-                })
-  
-  
-            if (orderError) {
-  
-              alert(
-                '결제는 승인됐지만 주문 저장에 실패했습니다.\n' +
-                orderError.message
-              )
-  
-              return
-            }
-  
-  
+    
+    
+          if (
+            callNumberError ||
+            !nextCallNumber
+          ) {
+    
             alert(
-              '결제가 승인되었습니다.\n\n' +
-              '주문번호: ' +
-              callNumber +
-              '번\n' +
-              '승인번호: ' +
-              (
-                result.approvalNumber ||
-                '-'
-              )
+              '주문번호 생성에 실패했습니다.'
             )
-  
-  
-            location.href =
-              '/merchant-app/orders'
-  
-          } catch (error) {
-  
-            console.error(
-              '메뉴결제 오류:',
-              error
-            )
-  
-            alert(
-              '결제 처리 중 오류가 발생했습니다.'
-            )
-  
-  
-          } finally {
-  
-            if (submitButton) {
-  
-              submitButton.disabled =
-                false
-  
-              submitButton.textContent =
-                '결제 요청'
-  
-            }
-  
+    
+            return
           }
-  
+    
+    
+          const callNumber =
+            Number(
+              nextCallNumber
+            )
+    
+    
+          const orderNo =
+            'TOSS-' +
+            callNumber +
+            '-' +
+            Date.now()
+    
+    
+          sessionStorage.setItem(
+            'kiosk_call_number',
+            String(
+              callNumber
+            )
+          )
+    
+          sessionStorage.setItem(
+            'kiosk_order_no',
+            orderNo
+          )
+    
+          sessionStorage.setItem(
+            'kiosk_merchant_id',
+            String(
+              merchantId
+            )
+          )
+    
+          sessionStorage.setItem(
+            'kiosk_items',
+            JSON.stringify(
+              selectedItems
+            )
+          )
+    
+          sessionStorage.setItem(
+            'kiosk_total_amount',
+            String(
+              totalPrice
+            )
+          )
+    
+          sessionStorage.setItem(
+            'merchantId',
+            String(
+              merchantId
+            )
+          )
+    
+          sessionStorage.setItem(
+            'merchantName',
+            tossMerchant
+              .merchant_name ||
+              merchantName
+          )
+    
+          sessionStorage.setItem(
+            'message',
+            '모바일 메뉴결제'
+          )
+    
+          sessionStorage.setItem(
+            'selected_pg_company',
+            '토스페이먼츠'
+          )
+    
+    
+          const tossPayments =
+            await loadTossPayments(
+              tossClientKey
+            )
+    
+    
+          await tossPayments
+            .requestPayment(
+              '카드',
+              {
+                amount:
+                  totalPrice,
+    
+                orderId:
+                  orderNo.replace(
+                    /[^a-zA-Z0-9]/g,
+                    ''
+                  ),
+    
+                orderName:
+                  selectedItems.length === 1
+                    ? selectedItems[0].name
+                    : (
+                        selectedItems[0].name +
+                        ' 외 ' +
+                        (
+                          selectedItems.length -
+                          1
+                        ) +
+                        '건'
+                      ),
+    
+                customerName:
+                  tossMerchant
+                    .merchant_name ||
+                  merchantName,
+    
+                successUrl:
+                  window.location.origin +
+                  '/success?source=kiosk' +
+                  '&pg=토스페이먼츠' +
+                  '&merchantId=' +
+                  merchantId +
+                  '&merchantName=' +
+                  encodeURIComponent(
+                    tossMerchant
+                      .merchant_name ||
+                    merchantName
+                  ),
+    
+                failUrl:
+                  window.location.origin +
+                  '/fail'
+              }
+            )
+    
         }
       )
-  }
+        
+    }
+          
 
 /* =========================================
    모바일 로그인

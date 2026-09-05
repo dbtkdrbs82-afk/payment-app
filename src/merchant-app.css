@@ -1892,3 +1892,14 @@
   #mobile-menu-payment-submit:disabled {
     opacity: 0.6;
   }
+  .merchant-mobile-menu-pay-button {
+    width: 100%;
+    height: 52px;
+    margin-top: 14px;
+    border: 0;
+    border-radius: 12px;
+    background: #111827;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 700;
+  }
