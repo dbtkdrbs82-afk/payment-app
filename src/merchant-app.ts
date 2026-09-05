@@ -4393,6 +4393,27 @@ async function renderMerchantQr() {
               >
                 결제창 열기
               </button>
+
+              <button
+  id="mobile-qr-save"
+  type="button"
+>
+  이미지 저장
+</button>
+
+<button
+  id="mobile-qr-share"
+  type="button"
+>
+  공유
+</button>
+
+<button
+  id="mobile-qr-print"
+  type="button"
+>
+  인쇄
+</button>
   
             </div>
   
@@ -4511,6 +4532,243 @@ async function renderMerchantQr() {
 
     }
   )
+
+  const createMobileQrPosterCanvas =
+  async () => {
+
+    const placementMap:
+      Record<
+        string,
+        {
+          left: number
+          top: number
+          width: number
+          rotate?: number
+        }
+      > = {
+
+        default: {
+          left: 86,
+          top: 59,
+          width: 22
+        },
+
+        'qr-design-01': {
+          left: 70.5,
+          top: 53.5,
+          width: 35.9
+        },
+
+        'qr-design-02': {
+          left: 47,
+          top: 67,
+          width: 32.1
+        },
+
+        'qr-design-03': {
+          left: 49,
+          top: 68.5,
+          width: 29.5
+        },
+
+        'qr-design-04': {
+          left: 49,
+          top: 61,
+          width: 28.2
+        },
+
+        'qr-design-05': {
+          left: 50,
+          top: 61,
+          width: 28.2
+        },
+
+        'qr-design-06': {
+          left: 50,
+          top: 49,
+          width: 22.4
+        },
+
+        'qr-design-07': {
+          left: 49,
+          top: 69,
+          width: 19.2,
+          rotate: -18
+        },
+
+        'qr-design-08': {
+          left: 50,
+          top: 68,
+          width: 43.6
+        },
+
+        'qr-design-09': {
+          left: 50,
+          top: 72,
+          width: 43.6
+        },
+
+        'qr-design-10': {
+          left: 50,
+          top: 70,
+          width: 43.6
+        },
+
+        'qr-design-11': {
+          left: 50,
+          top: 53,
+          width: 19.2
+        }
+
+      }
+
+
+    const posterImage =
+      new Image()
+
+
+    await new Promise<void>(
+      (
+        resolve,
+        reject
+      ) => {
+
+        posterImage.onload =
+          () => resolve()
+
+        posterImage.onerror =
+          () => reject(
+            new Error(
+              'QR 디자인 이미지를 불러오지 못했습니다.'
+            )
+          )
+
+        posterImage.src =
+          selectedQrPosterSrc
+
+      }
+    )
+
+
+    const canvas =
+      document.createElement(
+        'canvas'
+      )
+
+
+    canvas.width =
+      posterImage.naturalWidth
+
+    canvas.height =
+      posterImage.naturalHeight
+
+
+    const ctx =
+      canvas.getContext(
+        '2d'
+      )
+
+
+    if (!ctx) {
+
+      throw new Error(
+        '이미지 생성에 실패했습니다.'
+      )
+
+    }
+
+
+    ctx.drawImage(
+      posterImage,
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    )
+
+
+    const qrCanvas =
+      document.createElement(
+        'canvas'
+      )
+
+
+    await QRCode.toCanvas(
+      qrCanvas,
+      kioskUrl,
+      {
+        width: 900,
+        margin: 1
+      }
+    )
+
+
+    const placement =
+      placementMap[
+        selectedQrTemplateKey
+      ] ||
+      placementMap.default
+
+
+    const qrSize =
+      canvas.width *
+      (
+        placement.width /
+        100
+      )
+
+
+    const qrCenterX =
+      canvas.width *
+      (
+        placement.left /
+        100
+      )
+
+
+    const qrCenterY =
+      canvas.height *
+      (
+        placement.top /
+        100
+      )
+
+
+    ctx.save()
+
+
+    ctx.translate(
+      qrCenterX,
+      qrCenterY
+    )
+
+
+    if (placement.rotate) {
+
+      ctx.rotate(
+        placement.rotate *
+        Math.PI /
+        180
+      )
+
+    }
+
+
+    ctx.drawImage(
+      qrCanvas,
+      -qrSize / 2,
+      -qrSize / 2,
+      qrSize,
+      qrSize
+    )
+
+
+    ctx.restore()
+
+
+    return canvas
+
+  }
   
     document
       .querySelector(
@@ -4548,6 +4806,321 @@ async function renderMerchantQr() {
   
         }
       )
+
+      document
+  .querySelector(
+    '#mobile-qr-save'
+  )
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      try {
+
+        const canvas =
+          await createMobileQrPosterCanvas()
+
+
+        const blob =
+          await new Promise<Blob | null>(
+            (resolve) => {
+
+              canvas.toBlob(
+                resolve,
+                'image/png'
+              )
+
+            }
+          )
+
+
+        if (!blob) {
+
+          alert(
+            '이미지 생성에 실패했습니다.'
+          )
+
+          return
+        }
+
+
+        const url =
+          URL.createObjectURL(
+            blob
+          )
+
+
+        const link =
+          document.createElement(
+            'a'
+          )
+
+
+        const safeMerchantName =
+          merchantName.replace(
+            /[\\/:*?"<>|]/g,
+            '_'
+          )
+
+
+        link.href =
+          url
+
+        link.download =
+          safeMerchantName +
+          '_PICK_QR.png'
+
+
+        document.body.appendChild(
+          link
+        )
+
+        link.click()
+
+        link.remove()
+
+
+        URL.revokeObjectURL(
+          url
+        )
+
+      } catch (error) {
+
+        console.error(error)
+
+        alert(
+          'QR 이미지 저장에 실패했습니다.'
+        )
+
+      }
+
+    }
+  )
+
+
+document
+  .querySelector(
+    '#mobile-qr-share'
+  )
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      try {
+
+        const canvas =
+          await createMobileQrPosterCanvas()
+
+
+        const blob =
+          await new Promise<Blob | null>(
+            (resolve) => {
+
+              canvas.toBlob(
+                resolve,
+                'image/png'
+              )
+
+            }
+          )
+
+
+        if (!blob) {
+          return
+        }
+
+
+        const file =
+          new File(
+            [
+              blob
+            ],
+            'NXG_PICK_QR.png',
+            {
+              type:
+                'image/png'
+            }
+          )
+
+
+        if (
+          navigator.share &&
+          (
+            !navigator.canShare ||
+            navigator.canShare({
+              files: [
+                file
+              ]
+            })
+          )
+        ) {
+
+          await navigator.share({
+            title:
+              merchantName +
+              ' PICK QR',
+
+            text:
+              merchantName +
+              ' 주문 QR',
+
+            files: [
+              file
+            ]
+          })
+
+          return
+        }
+
+
+        alert(
+          '이 기기에서는 이미지 공유를 지원하지 않습니다.'
+        )
+
+      } catch (error: any) {
+
+        if (
+          error?.name ===
+          'AbortError'
+        ) {
+          return
+        }
+
+
+        console.error(error)
+
+        alert(
+          'QR 공유에 실패했습니다.'
+        )
+
+      }
+
+    }
+  )
+
+
+document
+  .querySelector(
+    '#mobile-qr-print'
+  )
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      const printWindow =
+        window.open(
+          '',
+          '_blank'
+        )
+
+
+      if (!printWindow) {
+
+        alert(
+          '인쇄창을 열 수 없습니다.'
+        )
+
+        return
+      }
+
+
+      try {
+
+        const canvas =
+          await createMobileQrPosterCanvas()
+
+
+        const imageUrl =
+          canvas.toDataURL(
+            'image/png'
+          )
+
+
+        const orientation =
+          selectedQrTemplateKey ===
+          'default'
+            ? 'landscape'
+            : 'portrait'
+
+
+        printWindow.document.write(`
+          <!doctype html>
+
+          <html>
+
+            <head>
+
+              <title>
+                ${merchantName} PICK QR
+              </title>
+
+              <style>
+
+                @page {
+                  size: A4 ${orientation};
+                  margin: 0;
+                }
+
+                html,
+                body {
+                  margin: 0;
+                  padding: 0;
+                  width: 100%;
+                  height: 100%;
+                }
+
+                body {
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  background: #ffffff;
+                }
+
+                img {
+                  display: block;
+                  max-width: 100%;
+                  max-height: 100vh;
+                  object-fit: contain;
+                }
+
+              </style>
+
+            </head>
+
+            <body>
+
+              <img
+                src="${imageUrl}"
+                onload="
+                  window.print();
+                  window.onafterprint = function () {
+                    window.close();
+                  };
+                "
+              >
+
+            </body>
+
+          </html>
+        `)
+
+
+        printWindow.document.close()
+
+      } catch (error) {
+
+        printWindow.close()
+
+        console.error(error)
+
+        alert(
+          'QR 인쇄 준비에 실패했습니다.'
+        )
+
+      }
+
+    }
+  )
   }
 
 /* =========================================
