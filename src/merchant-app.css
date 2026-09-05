@@ -1500,3 +1500,180 @@
     font-size: 13px;
     color: #111827;
   }
+  /* =========================================
+   모바일 QR 실제 디자인 미리보기
+========================================= */
+
+.merchant-mobile-qr-poster {
+    position: relative;
+    width: 100%;
+    margin: 0 auto 18px;
+    overflow: hidden;
+    background: #ffffff;
+  }
+  
+  .merchant-mobile-qr-poster.default {
+    aspect-ratio: 287 / 200;
+  }
+  
+  .merchant-mobile-qr-poster.design {
+    aspect-ratio: 780 / 975;
+  }
+  
+  .merchant-mobile-qr-poster > img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+  }
+  
+  .merchant-mobile-qr-poster .merchant-mobile-qr-box {
+    position: absolute;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: #ffffff;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+  
+  .merchant-mobile-qr-poster .merchant-mobile-qr-box canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  
+  /* 기본형 */
+  
+  .merchant-mobile-qr-poster[data-template="default"]
+  .merchant-mobile-qr-box {
+    left: 76.7%;
+    top: 44%;
+    width: 20.9%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 1 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-01"]
+  .merchant-mobile-qr-box {
+    left: 70.5%;
+    top: 53.5%;
+    width: 35.9%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 2 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-02"]
+  .merchant-mobile-qr-box {
+    left: 47%;
+    top: 67%;
+    width: 32.1%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 3 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-03"]
+  .merchant-mobile-qr-box {
+    left: 49%;
+    top: 68.5%;
+    width: 29.5%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 4 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-04"]
+  .merchant-mobile-qr-box {
+    left: 49%;
+    top: 61%;
+    width: 28.2%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 5 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-05"]
+  .merchant-mobile-qr-box {
+    left: 50%;
+    top: 61%;
+    width: 28.2%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 6 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-06"]
+  .merchant-mobile-qr-box {
+    left: 50%;
+    top: 49%;
+    width: 22.4%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 7 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-07"]
+  .merchant-mobile-qr-box {
+    left: 49%;
+    top: 69%;
+    width: 19.2%;
+    transform:
+      translate(-50%, -50%)
+      rotate(-18deg);
+  }
+  
+  
+  /* 디자인 8 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-08"]
+  .merchant-mobile-qr-box {
+    left: 50%;
+    top: 68%;
+    width: 43.6%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 9 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-09"]
+  .merchant-mobile-qr-box {
+    left: 50%;
+    top: 72%;
+    width: 43.6%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 10 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-10"]
+  .merchant-mobile-qr-box {
+    left: 50%;
+    top: 70%;
+    width: 43.6%;
+    transform: translate(-50%, -50%);
+  }
+  
+  
+  /* 디자인 11 */
+  
+  .merchant-mobile-qr-poster[data-template="qr-design-11"]
+  .merchant-mobile-qr-box {
+    left: 50%;
+    top: 53%;
+    width: 19.2%;
+    transform: translate(-50%, -50%);
+  }

@@ -4180,6 +4180,11 @@ async function renderMerchantQr() {
           const selectedQrTemplateKey =
             qrTemplateMerchant?.qr_template_key ||
             'default'
+
+            const selectedQrPosterSrc =
+  selectedQrTemplateKey === 'default'
+    ? '/qr-guide-poster.png'
+    : `/qr-templates/${selectedQrTemplateKey}.png`
           
           
           const qrTemplateList = [
@@ -4333,9 +4338,28 @@ async function renderMerchantQr() {
   
   
             <div
-              id="mobile-merchant-qr-box"
-              class="merchant-mobile-qr-box"
-            ></div>
+  class="
+    merchant-mobile-qr-poster
+    ${
+      selectedQrTemplateKey === 'default'
+        ? 'default'
+        : 'design'
+    }
+  "
+  data-template="${selectedQrTemplateKey}"
+>
+
+  <img
+    src="${selectedQrPosterSrc}"
+    alt="QR 안내 디자인"
+  >
+
+  <div
+    id="mobile-merchant-qr-box"
+    class="merchant-mobile-qr-box"
+  ></div>
+
+</div>
   
   
             <div
@@ -4403,12 +4427,12 @@ async function renderMerchantQr() {
   
     if (qrBox) {
   
-      QRCode.toCanvas(
-        kioskUrl,
-        {
-          width: 250,
-          margin: 1
-        },
+        QRCode.toCanvas(
+            kioskUrl,
+            {
+              width: 600,
+              margin: 1
+            },
         (
           error,
           canvas
