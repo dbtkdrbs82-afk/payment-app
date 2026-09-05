@@ -1677,3 +1677,15 @@
     width: 19.2%;
     transform: translate(-50%, -50%);
   }
+  /* QR 디자인 안 실제 QR 크기 보정 */
+.merchant-mobile-qr-poster .merchant-mobile-qr-box {
+    height: auto !important;
+    min-height: 0;
+    aspect-ratio: 1 / 1;
+  }
+  
+  .merchant-mobile-qr-poster .merchant-mobile-qr-box canvas {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: 1 / 1;
+  }
