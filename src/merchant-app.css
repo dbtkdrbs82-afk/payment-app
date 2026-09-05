@@ -990,3 +990,16 @@
     font-size: 12px;
     font-weight: 800;
   }
+  .merchant-mobile-order-status {
+    color: #245d96;
+  }
+  
+  .merchant-mobile-order-card
+    .merchant-mobile-order-status {
+    font-weight: 900;
+  }
+  
+  .merchant-mobile-order-card
+    .merchant-mobile-order-status[data-status="취소완료"] {
+    color: #d93025;
+  }

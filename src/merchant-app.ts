@@ -925,11 +925,12 @@ const endIso =
   
           <div class="merchant-mobile-order-bottom">
   
-            <span
-              class="merchant-mobile-order-status"
-            >
-              ${statusText}
-            </span>
+           <span
+  class="merchant-mobile-order-status"
+  data-status="${statusText}"
+>
+  ${statusText}
+</span>
   
   
             ${
