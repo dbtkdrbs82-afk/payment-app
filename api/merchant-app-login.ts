@@ -84,13 +84,13 @@ import type {
       } = await supabase
         .from('merchants')
         .select(`
-          id,
-          merchant_name,
-          merchant_login_id,
-          merchant_login_password,
-          register_type,
-          status
-        `)
+            id,
+            merchant_name,
+            merchant_login_id,
+            merchant_password,
+            merchant_type,
+            status
+          `)
         .eq(
           'merchant_login_id',
           loginId
@@ -114,7 +114,7 @@ import type {
   
       if (
         String(
-          merchant.merchant_login_password ||
+            merchant.merchant_password ||
           ''
         ) !== password
       ) {
@@ -135,8 +135,8 @@ import type {
             merchant.merchant_name || '',
           loginId:
             merchant.merchant_login_id || '',
-          type:
-            merchant.register_type || '',
+            type:
+            merchant.merchant_type || '',
           status:
             merchant.status || ''
         }
