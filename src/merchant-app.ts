@@ -417,6 +417,7 @@ const endIso =
       value="${endDate}"
     >
   </div>
+</div>
 
           <div
             id="mobile-order-summary"
@@ -666,6 +667,7 @@ const endIso =
         supabase
           .from('payments')
           .select(`
+            id,
             order_id,
             payment_key,
             amount,
@@ -901,6 +903,17 @@ const endIso =
             )}
   
           </div>
+
+          <button
+  type="button"
+  class="merchant-mobile-cancel-open"
+  data-order-id="${order.id}"
+>
+  승인번호 ${
+    paymentForOrder?.approval_number ||
+    '-'
+  }
+</button>
   
   
           <div class="merchant-mobile-order-items">
@@ -947,6 +960,122 @@ const endIso =
         orderList.appendChild(
           card
         )
+
+        const cancelOpenButton =
+  card.querySelector<HTMLButtonElement>(
+    '.merchant-mobile-cancel-open'
+  )
+
+cancelOpenButton
+  ?.addEventListener(
+    'click',
+    () => {
+
+      document
+        .querySelector(
+          '#merchant-mobile-cancel-modal'
+        )
+        ?.remove()
+
+
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        `
+          <div
+            id="merchant-mobile-cancel-modal"
+            class="merchant-mobile-cancel-modal"
+            data-order-id="${order.id}"
+            data-created-at="${order.created_at || ''}"
+            data-payment-id="${paymentForOrder?.id || ''}"
+          >
+
+            <div
+              class="merchant-mobile-cancel-box"
+            >
+
+              <h2>
+                결제 취소
+              </h2>
+
+              <p>
+                주문번호
+                <strong>
+                  ${orderNumber}번
+                </strong>
+              </p>
+
+              <p>
+                결제금액
+                <strong>
+                  ${Number(
+                    order.total_amount || 0
+                  ).toLocaleString()}원
+                </strong>
+              </p>
+
+              <input
+                id="merchant-mobile-cancel-password"
+                type="password"
+                placeholder="취소 비밀번호 입력"
+              >
+
+              <textarea
+                id="merchant-mobile-cancel-reason"
+                placeholder="취소 사유 입력"
+              ></textarea>
+
+
+              <div
+                class="merchant-mobile-cancel-actions"
+              >
+
+                <button
+                  id="merchant-mobile-direct-cancel"
+                  type="button"
+                >
+                  직접 취소
+                </button>
+
+                <button
+                  id="merchant-mobile-request-cancel"
+                  type="button"
+                >
+                  본사 승인요청
+                </button>
+
+                <button
+                  id="merchant-mobile-close-cancel"
+                  type="button"
+                >
+                  닫기
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        `
+      )
+
+
+      document
+        .querySelector(
+          '#merchant-mobile-close-cancel'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            document
+              .querySelector(
+                '#merchant-mobile-cancel-modal'
+              )
+              ?.remove()
+          }
+        )
+    }
+  )
 
         const receiptButton =
   card.querySelector<HTMLButtonElement>(

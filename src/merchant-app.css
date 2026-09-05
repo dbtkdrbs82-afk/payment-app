@@ -880,3 +880,113 @@
   
     font-size: 13px;
   }
+  /* =========================================
+   모바일 결제취소
+========================================= */
+
+.merchant-mobile-cancel-open {
+    margin-top: 8px;
+    padding: 0;
+  
+    border: 0;
+    background: transparent;
+  
+    color: #245d96;
+  
+    font-size: 12px;
+    font-weight: 800;
+  
+    text-decoration: underline;
+  }
+  
+  .merchant-mobile-cancel-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    padding: 18px;
+  
+    background:
+      rgba(0, 0, 0, 0.55);
+  }
+  
+  .merchant-mobile-cancel-box {
+    width: 100%;
+    max-width: 400px;
+  
+    padding: 22px;
+  
+    border-radius: 16px;
+  
+    background: #ffffff;
+  }
+  
+  .merchant-mobile-cancel-box h2 {
+    margin: 0 0 18px;
+  
+    color: #172033;
+  
+    font-size: 21px;
+  }
+  
+  .merchant-mobile-cancel-box p {
+    display: flex;
+    justify-content: space-between;
+  
+    margin: 8px 0;
+  
+    color: #687386;
+  
+    font-size: 13px;
+  }
+  
+  .merchant-mobile-cancel-box p strong {
+    color: #172033;
+  }
+  
+  .merchant-mobile-cancel-box input,
+  .merchant-mobile-cancel-box textarea {
+    width: 100%;
+  
+    margin-top: 12px;
+    padding: 12px;
+  
+    border: 1px solid #d7e0eb;
+    border-radius: 9px;
+  
+    font: inherit;
+  }
+  
+  .merchant-mobile-cancel-box textarea {
+    min-height: 85px;
+    resize: none;
+  }
+  
+  .merchant-mobile-cancel-actions {
+    display: grid;
+  
+    grid-template-columns:
+      1fr 1.4fr 0.8fr;
+  
+    gap: 7px;
+  
+    margin-top: 16px;
+  }
+  
+  .merchant-mobile-cancel-actions button {
+    height: 42px;
+  
+    border: 0;
+    border-radius: 9px;
+  
+    background: #1d5797;
+  
+    color: #ffffff;
+  
+    font-size: 12px;
+    font-weight: 800;
+  }
