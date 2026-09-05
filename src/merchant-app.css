@@ -413,3 +413,193 @@
     }
   
   }
+  /* =========================================
+   모바일 주문관리
+========================================= */
+
+.merchant-mobile-page-title {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  
+    margin-bottom: 18px;
+  }
+  
+  .merchant-mobile-page-title h1 {
+    margin: 0;
+  
+    color: #172033;
+  
+    font-size: 25px;
+    font-weight: 900;
+  }
+  
+  .merchant-mobile-page-title span {
+    color: #7a8595;
+  
+    font-size: 13px;
+  }
+  
+  
+  .merchant-mobile-date-nav {
+    display: grid;
+  
+    grid-template-columns:
+      repeat(3, 1fr);
+  
+    gap: 8px;
+  }
+  
+  .merchant-mobile-date-nav button {
+    height: 42px;
+  
+    border: 1px solid #d7e0eb;
+    border-radius: 10px;
+  
+    background: #ffffff;
+  
+    color: #173c68;
+  
+    font-weight: 800;
+  }
+  
+  
+  .merchant-mobile-selected-date {
+    padding: 14px 0 5px;
+  
+    text-align: center;
+  
+    color: #172033;
+  
+    font-size: 17px;
+    font-weight: 800;
+  }
+  
+  
+  .merchant-mobile-order-summary {
+    margin: 12px 0;
+  
+    color: #687386;
+  
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  
+  .merchant-mobile-order-list {
+    display: flex;
+  
+    flex-direction: column;
+  
+    gap: 12px;
+  }
+  
+  
+  .merchant-mobile-order-card {
+    padding: 17px;
+  
+    border: 1px solid #e0e6ef;
+    border-radius: 15px;
+  
+    background: #ffffff;
+  
+    box-shadow:
+      0 4px 14px
+      rgba(15, 23, 42, 0.05);
+  }
+  
+  
+  .merchant-mobile-order-card-top {
+    display: flex;
+  
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  
+  .merchant-mobile-order-card-top strong {
+    color: #174f8c;
+  
+    font-size: 20px;
+    font-weight: 900;
+  }
+  
+  
+  .merchant-mobile-order-card-top span {
+    color: #172033;
+  
+    font-size: 17px;
+    font-weight: 900;
+  }
+  
+  
+  .merchant-mobile-order-date {
+    margin-top: 7px;
+  
+    color: #8a94a3;
+  
+    font-size: 12px;
+  }
+  
+  
+  .merchant-mobile-order-items {
+    margin-top: 15px;
+    padding: 13px;
+  
+    border-radius: 10px;
+  
+    background: #f5f7fa;
+  
+    color: #263244;
+  
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  
+  .merchant-mobile-order-bottom {
+    display: flex;
+  
+    align-items: center;
+    justify-content: space-between;
+  
+    margin-top: 15px;
+  }
+  
+  
+  .merchant-mobile-order-status {
+    color: #245d96;
+  
+    font-size: 14px;
+    font-weight: 900;
+  }
+  
+  
+  .merchant-mobile-call-button {
+    min-width: 94px;
+    height: 40px;
+  
+    border: 0;
+    border-radius: 9px;
+  
+    background: #1d5797;
+  
+    color: #ffffff;
+  
+    font-size: 14px;
+    font-weight: 800;
+  }
+  
+  
+  .merchant-mobile-order-empty {
+    padding: 45px 15px;
+  
+    border: 1px solid #e0e6ef;
+    border-radius: 15px;
+  
+    background: #ffffff;
+  
+    text-align: center;
+  
+    color: #7a8595;
+  }
