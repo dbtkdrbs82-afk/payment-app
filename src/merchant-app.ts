@@ -1074,6 +1074,360 @@ cancelOpenButton
               ?.remove()
           }
         )
+
+        document
+        .querySelector(
+          '#merchant-mobile-direct-cancel'
+        )
+        ?.addEventListener(
+          'click',
+          async () => {
+      
+            const modal =
+              document.querySelector<HTMLElement>(
+                '#merchant-mobile-cancel-modal'
+              )
+      
+            if (!modal) {
+              return
+            }
+      
+      
+            const paymentId =
+              Number(
+                modal.dataset.paymentId || 0
+              )
+      
+            const orderId =
+              Number(
+                modal.dataset.orderId || 0
+              )
+      
+      
+            const password =
+              (
+                document.querySelector<HTMLInputElement>(
+                  '#merchant-mobile-cancel-password'
+                )?.value || ''
+              ).trim()
+      
+      
+            const reason =
+              (
+                document.querySelector<HTMLTextAreaElement>(
+                  '#merchant-mobile-cancel-reason'
+                )?.value || ''
+              ).trim()
+      
+      
+            if (!paymentId) {
+              alert(
+                '취소할 결제정보를 찾을 수 없습니다.'
+              )
+              return
+            }
+      
+      
+            if (password !== '1234') {
+              alert(
+                '취소 비밀번호가 일치하지 않습니다.'
+              )
+              return
+            }
+      
+      
+            if (!reason) {
+              alert(
+                '취소 사유를 입력해주세요.'
+              )
+              return
+            }
+      
+      
+            const paymentDateSource =
+              paymentForOrder?.approved_at ||
+              paymentForOrder?.created_at ||
+              order.created_at
+      
+      
+            const paymentDate =
+              getKoreaDate(
+                new Date(
+                  paymentDateSource
+                )
+              )
+      
+            const today =
+              getKoreaDate(
+                new Date()
+              )
+      
+      
+            if (
+              paymentDate !== today
+            ) {
+      
+              alert(
+                '당일 결제건만 직접 취소할 수 있습니다.\n' +
+                '본사 승인요청을 이용해주세요.'
+              )
+      
+              return
+            }
+      
+      
+            const {
+              data: payment,
+              error: paymentError
+            } =
+              await supabase
+                .from('payments')
+                .select(`
+                  id,
+                  pg_company,
+                  payment_key,
+                  status
+                `)
+                .eq(
+                  'id',
+                  paymentId
+                )
+                .single()
+      
+      
+            if (
+              paymentError ||
+              !payment
+            ) {
+      
+              alert(
+                '결제정보를 불러오지 못했습니다.'
+              )
+      
+              return
+            }
+      
+      
+            if (
+              payment.status === 'cancel'
+            ) {
+      
+              alert(
+                '이미 취소된 결제입니다.'
+              )
+      
+              return
+            }
+      
+      
+            const directButton =
+              document.querySelector<HTMLButtonElement>(
+                '#merchant-mobile-direct-cancel'
+              )
+      
+      
+            if (directButton) {
+      
+              directButton.disabled =
+                true
+      
+              directButton.textContent =
+                '취소 중...'
+            }
+      
+      
+            try {
+      
+              if (
+                payment.pg_company ===
+                '코페이'
+              ) {
+      
+                const response =
+                  await fetch(
+                    '/api/korpay-cancel',
+                    {
+                      method: 'POST',
+      
+                      headers: {
+                        'Content-Type':
+                          'application/json'
+                      },
+      
+                      body:
+                        JSON.stringify({
+                          paymentId:
+                            payment.id,
+      
+                          cancelName:
+                            merchantName,
+      
+                          cancelMessage:
+                            reason
+                        })
+                    }
+                  )
+      
+      
+                const data =
+                  await response.json()
+      
+      
+                if (
+                  !response.ok ||
+                  !data.success
+                ) {
+      
+                  alert(
+                    '코페이 실제 취소에 실패했습니다.\n\n' +
+                    (
+                      data.message ||
+                      '알 수 없는 오류'
+                    )
+                  )
+      
+                  return
+                }
+      
+              } else if (
+                payment.pg_company ===
+                '토스페이먼츠'
+              ) {
+      
+                if (
+                  !payment.payment_key
+                ) {
+      
+                  alert(
+                    '토스 paymentKey가 없습니다.'
+                  )
+      
+                  return
+                }
+      
+      
+                const response =
+                  await fetch(
+                    '/api/toss-cancel',
+                    {
+                      method: 'POST',
+      
+                      headers: {
+                        'Content-Type':
+                          'application/json'
+                      },
+      
+                      body:
+                        JSON.stringify({
+                          paymentKey:
+                            payment.payment_key,
+      
+                          cancelReason:
+                            reason
+                        })
+                    }
+                  )
+      
+      
+                const data =
+                  await response.json()
+      
+      
+                if (
+                  !response.ok ||
+                  !data.success
+                ) {
+      
+                  alert(
+                    '토스 실제 취소에 실패했습니다.\n\n' +
+                    (
+                      data.message ||
+                      '알 수 없는 오류'
+                    )
+                  )
+      
+                  return
+                }
+      
+              } else {
+      
+                alert(
+                  '직접 취소를 지원하지 않는 PG사입니다.\n' +
+                  'PG사: ' +
+                  (
+                    payment.pg_company ||
+                    '-'
+                  )
+                )
+      
+                return
+              }
+      
+      
+              const {
+                error: orderUpdateError
+              } =
+                await supabase
+                  .from('orders')
+                  .update({
+                    order_status:
+                      '취소완료',
+      
+                    cancel_status:
+                      '취소완료',
+      
+                    cancel_reason:
+                      reason,
+      
+                    cancel_requested_at:
+                      new Date()
+                        .toISOString()
+                  })
+                  .eq(
+                    'id',
+                    orderId
+                  )
+      
+      
+              if (orderUpdateError) {
+      
+                alert(
+                  '결제 취소는 성공했지만 주문상태 변경에 실패했습니다.\n' +
+                  orderUpdateError.message
+                )
+      
+                return
+              }
+      
+      
+              alert(
+                '결제가 취소되었습니다.'
+              )
+      
+              location.reload()
+      
+            } catch (error) {
+      
+              console.error(error)
+      
+              alert(
+                '취소 처리 중 오류가 발생했습니다.'
+              )
+      
+            } finally {
+      
+              if (directButton) {
+      
+                directButton.disabled =
+                  false
+      
+                directButton.textContent =
+                  '직접 취소'
+              }
+            }
+      
+          }
+        )         
     }
   )
 
