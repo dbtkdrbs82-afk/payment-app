@@ -917,15 +917,14 @@ summary.innerHTML = `
   
   
 if (filteredOrders.length === 0) {
+
+    orderList.innerHTML = `
+      <div class="merchant-mobile-order-empty">
+        주문내역이 없습니다.
+      </div>
+    `
   
-      orderList.innerHTML = `
-        <div class="merchant-mobile-order-empty">
-          주문내역이 없습니다.
-        </div>
-      `
-  
-      return
-    }
+  }
   
   
     pageOrders.forEach(
