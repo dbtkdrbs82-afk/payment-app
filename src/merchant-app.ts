@@ -418,36 +418,6 @@ const endIso =
     >
   </div>
 
-</div>
-
-  <div>
-    <label>
-      시작일
-    </label>
-
-    <input
-      id="mobile-order-start-date"
-      type="date"
-      value="${startDate}"
-    >
-  </div>
-
-
-  <div>
-    <label>
-      종료일
-    </label>
-
-    <input
-      id="mobile-order-end-date"
-      type="date"
-      value="${endDate}"
-    >
-  </div>
-
-</div>
-  
-  
           <div
             id="mobile-order-summary"
             class="merchant-mobile-order-summary"
