@@ -5929,14 +5929,150 @@ function renderMerchantManualCard() {
             }
   
   
-            alert(
-              '결제가 승인되었습니다.\n\n' +
-              '승인번호: ' +
-              (
-                data.approvalNumber ||
-                '-'
-              )
-            )
+            const manualOrderNo =
+  String(
+    data.orderId || ''
+  ).trim()
+
+
+if (!manualOrderNo) {
+
+  alert(
+    '결제는 승인됐지만 주문번호를 받지 못했습니다.\n' +
+    '승인번호: ' +
+    (
+      data.approvalNumber ||
+      '-'
+    )
+  )
+
+  return
+}
+
+
+const {
+  data: nextManualCallNumber,
+  error: manualCallNumberError
+} =
+  await supabase.rpc(
+    'get_next_call_number',
+    {
+      target_merchant_id:
+        merchantId
+    }
+  )
+
+
+if (
+  manualCallNumberError ||
+  !nextManualCallNumber
+) {
+
+  alert(
+    '결제는 승인됐지만 주문 대기번호 생성에 실패했습니다.\n' +
+    (
+      manualCallNumberError?.message ||
+      '번호를 받지 못했습니다.'
+    )
+  )
+
+  return
+}
+
+
+const manualCallNumber =
+  Number(
+    nextManualCallNumber
+  )
+
+
+const rawApprovalNumber =
+  String(
+    data.approvalNumber || ''
+  ).trim()
+
+
+const approvalNumber =
+  /^\d{8}$/.test(
+    rawApprovalNumber
+  )
+    ? rawApprovalNumber
+    : null
+
+
+const {
+  error: orderSaveError
+} =
+  await supabase
+    .from('orders')
+    .insert({
+      merchant_id:
+        merchantId,
+
+      order_no:
+        String(
+          manualCallNumber
+        ),
+
+      call_number:
+        manualCallNumber,
+
+      pg_order_id:
+        manualOrderNo,
+
+      payment_key:
+        data.tid || null,
+
+      approval_number:
+        approvalNumber,
+
+      items: [
+        {
+          name:
+            goodsName ||
+            '수기결제',
+
+          price:
+            Number(amount),
+
+          quantity:
+            1
+        }
+      ],
+
+      total_amount:
+        Number(amount),
+
+      order_status:
+        '접수',
+
+      payment_status:
+        '결제완료'
+    })
+
+
+if (orderSaveError) {
+
+  alert(
+    '결제는 승인됐지만 주문 저장에 실패했습니다.\n' +
+    orderSaveError.message
+  )
+
+  return
+}
+
+
+alert(
+  '결제가 승인되었습니다.\n\n' +
+  '주문번호: ' +
+  manualCallNumber +
+  '번\n' +
+  '승인번호: ' +
+  (
+    data.approvalNumber ||
+    '-'
+  )
+)
   
   
             const cardInput =
