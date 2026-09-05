@@ -4152,6 +4152,71 @@ async function renderMerchantQr() {
             'https://nxgsoft.co.kr/pay/?merchant_id=' +
             merchantId
           )
+
+          const {
+            data: qrTemplateMerchant,
+            error: qrTemplateError
+          } =
+            await supabase
+              .from('merchants')
+              .select('qr_template_key')
+              .eq(
+                'id',
+                merchantId
+              )
+              .maybeSingle()
+          
+          
+          if (qrTemplateError) {
+          
+            console.error(
+              'QR 디자인 조회 실패:',
+              qrTemplateError
+            )
+          
+          }
+          
+          
+          const selectedQrTemplateKey =
+            qrTemplateMerchant?.qr_template_key ||
+            'default'
+          
+          
+          const qrTemplateList = [
+            {
+              key: 'default',
+              name: '기본형',
+              image: '/qr-guide-poster.png'
+            },
+          
+            ...Array.from(
+              {
+                length: 11
+              },
+              (_, index) => {
+          
+                const number =
+                  String(
+                    index + 1
+                  ).padStart(
+                    2,
+                    '0'
+                  )
+          
+                return {
+                  key:
+                    `qr-design-${number}`,
+          
+                  name:
+                    `디자인 ${index + 1}`,
+          
+                  image:
+                    `/qr-templates/qr-design-${number}.png`
+                }
+          
+              }
+            )
+          ]
   
   
     app.innerHTML = `
@@ -4196,6 +4261,65 @@ async function renderMerchantQr() {
   
           </div>
   
+          <div
+  class="merchant-mobile-qr-template-section"
+>
+
+  <h2>
+    QR 디자인 선택
+  </h2>
+
+  <div
+    class="merchant-mobile-qr-template-grid"
+  >
+
+    ${
+      qrTemplateList
+        .map(
+          (template) => {
+
+            const isSelected =
+              template.key ===
+              selectedQrTemplateKey
+
+            return `
+              <button
+                type="button"
+                class="
+                  merchant-mobile-qr-template
+                  ${
+                    isSelected
+                      ? 'active'
+                      : ''
+                  }
+                "
+                data-template-key="${template.key}"
+              >
+
+                <img
+                  src="${template.image}"
+                  alt="${template.name}"
+                >
+
+                <strong>
+                  ${template.name}
+                  ${
+                    isSelected
+                      ? ' ✓'
+                      : ''
+                  }
+                </strong>
+
+              </button>
+            `
+          }
+        )
+        .join('')
+    }
+
+  </div>
+
+</div>
   
           <div
             class="merchant-mobile-qr-card"
@@ -4311,6 +4435,58 @@ async function renderMerchantQr() {
   
     }
   
+    document
+  .querySelectorAll<HTMLButtonElement>(
+    '.merchant-mobile-qr-template'
+  )
+  .forEach(
+    (button) => {
+
+      button.addEventListener(
+        'click',
+        async () => {
+
+          const templateKey =
+            button.dataset.templateKey
+
+          if (!templateKey) {
+            return
+          }
+
+
+          const {
+            error
+          } =
+            await supabase
+              .from('merchants')
+              .update({
+                qr_template_key:
+                  templateKey
+              })
+              .eq(
+                'id',
+                merchantId
+              )
+
+
+          if (error) {
+
+            alert(
+              'QR 디자인 저장 실패: ' +
+              error.message
+            )
+
+            return
+          }
+
+
+          void renderMerchantQr()
+
+        }
+      )
+
+    }
+  )
   
     document
       .querySelector(
