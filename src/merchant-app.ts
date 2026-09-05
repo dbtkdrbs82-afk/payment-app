@@ -243,6 +243,18 @@ function renderMerchantHome() {
         '/merchant-app/orders'
     }
   )
+
+  document
+  .querySelector(
+    '[data-menu="products"]'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+      location.href =
+        '/merchant-app/products'
+    }
+  )
 }
 
 /* =========================================
@@ -2690,6 +2702,747 @@ receiptButton?.addEventListener(
       )
   }
 
+  /* =========================================
+   모바일 상품관리
+========================================= */
+
+async function renderMerchantProducts() {
+
+    const merchantIdText =
+      sessionStorage.getItem(
+        'login_merchant_id'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_id'
+      )
+  
+    if (!merchantIdText) {
+      location.replace(
+        '/merchant-app'
+      )
+      return
+    }
+  
+  
+    const merchantId =
+      Number(
+        merchantIdText
+      )
+  
+  
+    const merchantName =
+      sessionStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      '가맹점'
+      const merchantType =
+  sessionStorage.getItem(
+    'login_merchant_type'
+  ) ||
+  localStorage.getItem(
+    'login_merchant_type'
+  ) ||
+  '일반매장'
+
+const isBeauty =
+  merchantType === '뷰티'
+  
+  
+    app.innerHTML = `
+      <div class="merchant-mobile-home">
+  
+        <header class="merchant-mobile-header">
+  
+          <div>
+  
+            <div class="merchant-mobile-brand">
+              NXG PICK
+            </div>
+  
+            <div class="merchant-mobile-store">
+              ${merchantName}
+            </div>
+  
+          </div>
+  
+          <button
+            id="mobile-product-home"
+            class="merchant-mobile-logout"
+            type="button"
+          >
+            홈
+          </button>
+  
+        </header>
+  
+  
+        <main class="merchant-mobile-content">
+  
+          <div class="merchant-mobile-page-title">
+  
+            <h1>
+              상품관리
+            </h1>
+  
+            <span>
+              상품 등록 및 수정
+            </span>
+  
+          </div>
+  
+          <button
+  id="mobile-product-create-open"
+  type="button"
+  class="merchant-mobile-product-create-open"
+>
+  + 상품 등록
+</button>
+
+          <div
+            id="mobile-product-list"
+          >
+            상품을 불러오는 중입니다.
+          </div>
+  
+        </main>
+  
+      </div>
+    `
+  
+  
+    document
+      .querySelector(
+        '#mobile-product-home'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+          location.href =
+            '/merchant-app/home'
+        }
+      )
+  
+      document
+  .querySelector(
+    '#mobile-product-create-open'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      document
+        .querySelector(
+          '#merchant-mobile-product-modal'
+        )
+        ?.remove()
+
+
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        `
+          <div
+            id="merchant-mobile-product-modal"
+            class="merchant-mobile-product-modal"
+          >
+
+            <div
+              class="merchant-mobile-product-modal-box"
+            >
+
+              <h2>
+                상품 등록
+              </h2>
+
+
+              <label>
+                상품명
+              </label>
+
+              <input
+                id="mobile-product-name"
+                type="text"
+                placeholder="상품명"
+              >
+
+
+              <label>
+                가격
+              </label>
+
+              <input
+                id="mobile-product-price"
+                type="number"
+                placeholder="가격"
+              >
+
+
+              ${
+                isBeauty
+                  ? ''
+                  : `
+                    <label>
+                      카테고리
+                    </label>
+
+                    <select
+                      id="mobile-product-category"
+                    >
+                      <option value="기타">
+                        기타
+                      </option>
+
+                      <option value="음료">
+                        음료
+                      </option>
+
+                      <option value="식품">
+                        식품
+                      </option>
+
+                      <option value="상품">
+                        상품
+                      </option>
+
+                      <option value="서비스">
+                        서비스
+                      </option>
+                    </select>
+                  `
+              }
+
+
+              <label>
+                상품 이미지
+              </label>
+
+              <input
+                id="mobile-product-image-file"
+                type="file"
+                accept="image/*"
+              >
+
+
+              <div
+                class="merchant-mobile-product-preview"
+              >
+                <span
+                  id="mobile-product-preview-text"
+                >
+                  이미지 미리보기
+                </span>
+
+                <img
+                  id="mobile-product-preview"
+                  alt=""
+                  style="display:none;"
+                >
+              </div>
+
+
+              <div
+                class="merchant-mobile-product-modal-actions"
+              >
+
+                <button
+                  id="mobile-product-create"
+                  type="button"
+                >
+                  등록
+                </button>
+
+                <button
+                  id="mobile-product-create-close"
+                  type="button"
+                >
+                  닫기
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        `
+      )
+
+
+      const imageInput =
+        document.querySelector<HTMLInputElement>(
+          '#mobile-product-image-file'
+        )
+
+
+      imageInput
+        ?.addEventListener(
+          'change',
+          () => {
+
+            const file =
+              imageInput.files?.[0]
+
+            if (!file) {
+              return
+            }
+
+
+            const preview =
+              document.querySelector<HTMLImageElement>(
+                '#mobile-product-preview'
+              )
+
+            const previewText =
+              document.querySelector<HTMLElement>(
+                '#mobile-product-preview-text'
+              )
+
+
+            if (preview) {
+
+              preview.src =
+                URL.createObjectURL(
+                  file
+                )
+
+              preview.style.display =
+                'block'
+
+            }
+
+
+            if (previewText) {
+
+              previewText.style.display =
+                'none'
+
+            }
+
+          }
+        )
+
+
+      document
+        .querySelector(
+          '#mobile-product-create-close'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            document
+              .querySelector(
+                '#merchant-mobile-product-modal'
+              )
+              ?.remove()
+
+          }
+        )
+
+
+      document
+        .querySelector(
+          '#mobile-product-create'
+        )
+        ?.addEventListener(
+          'click',
+          async () => {
+
+            const productName =
+              (
+                document.querySelector<HTMLInputElement>(
+                  '#mobile-product-name'
+                )?.value || ''
+              ).trim()
+
+
+            const price =
+              Number(
+                document.querySelector<HTMLInputElement>(
+                  '#mobile-product-price'
+                )?.value || 0
+              )
+
+
+            const category =
+              isBeauty
+                ? '뷰티서비스'
+                : (
+                    document.querySelector<HTMLSelectElement>(
+                      '#mobile-product-category'
+                    )?.value ||
+                    '기타'
+                  )
+
+
+            const imageFile =
+              document.querySelector<HTMLInputElement>(
+                '#mobile-product-image-file'
+              )?.files?.[0]
+
+
+            if (
+              !productName ||
+              !price
+            ) {
+
+              alert(
+                '상품명과 가격을 입력해주세요.'
+              )
+
+              return
+            }
+
+
+            let imageUrl = ''
+
+
+            if (imageFile) {
+
+              const fileExt =
+                imageFile.name
+                  .split('.')
+                  .pop() ||
+                'png'
+
+
+              const fileName =
+                Date.now() +
+                '_product.' +
+                fileExt
+
+
+              const {
+                error: uploadError
+              } =
+                await supabase.storage
+                  .from(
+                    'merchant-files'
+                  )
+                  .upload(
+                    fileName,
+                    imageFile
+                  )
+
+
+              if (uploadError) {
+
+                alert(
+                  '상품 이미지 업로드 실패: ' +
+                  uploadError.message
+                )
+
+                return
+              }
+
+
+              const {
+                data
+              } =
+                supabase.storage
+                  .from(
+                    'merchant-files'
+                  )
+                  .getPublicUrl(
+                    fileName
+                  )
+
+
+              imageUrl =
+                data.publicUrl
+
+            }
+
+
+            const {
+              error
+            } =
+              await supabase
+                .from(
+                  'products'
+                )
+                .insert({
+                  merchant_id:
+                    merchantId,
+
+                  product_name:
+                    productName,
+
+                  price:
+                    price,
+
+                  category:
+                    category,
+
+                  image_url:
+                    imageUrl,
+
+                  status:
+                    '판매중'
+                })
+
+
+            if (error) {
+
+              alert(
+                '상품 등록 실패: ' +
+                error.message
+              )
+
+              return
+            }
+
+
+            alert(
+              '상품이 등록되었습니다.'
+            )
+
+            document
+              .querySelector(
+                '#merchant-mobile-product-modal'
+              )
+              ?.remove()
+
+
+            void renderMerchantProducts()
+
+          }
+        )
+
+    }
+  )
+  
+    const {
+      data,
+      error
+    } =
+      await supabase
+        .from('products')
+        .select('*')
+        .eq(
+          'merchant_id',
+          merchantId
+        )
+        .order(
+          'sort_order',
+          {
+            ascending: true
+          }
+        )
+        .order(
+          'id',
+          {
+            ascending: true
+          }
+        )
+  
+  
+    const productList =
+      document.querySelector<HTMLDivElement>(
+        '#mobile-product-list'
+      )
+  
+  
+    if (!productList) {
+      return
+    }
+  
+  
+    if (error) {
+  
+      productList.innerHTML = `
+        상품 조회 실패 :
+        ${error.message}
+      `
+  
+      return
+    }
+  
+  
+    const products =
+      data || []
+  
+  
+    if (
+      products.length === 0
+    ) {
+  
+      productList.innerHTML = `
+        등록된 상품이 없습니다.
+      `
+  
+      return
+    }
+  
+  
+    productList.innerHTML =
+  products
+    .map(
+      (product: any) => {
+
+        const status =
+          product.status ||
+          '판매중'
+
+        return `
+          <div
+            class="merchant-mobile-product-card"
+          >
+
+            <div
+              class="merchant-mobile-product-image"
+            >
+              ${
+                product.image_url
+                  ? `
+                    <img
+                      src="${product.image_url}"
+                      alt="${product.product_name || ''}"
+                    >
+                  `
+                  : `
+                    <span>
+                      이미지 없음
+                    </span>
+                  `
+              }
+            </div>
+
+
+            <div
+              class="merchant-mobile-product-info"
+            >
+
+              <strong
+                class="merchant-mobile-product-name"
+              >
+                ${
+                  product.product_name ||
+                  '-'
+                }
+              </strong>
+
+              <span
+                class="merchant-mobile-product-category"
+              >
+                ${
+                  product.category ||
+                  '기타'
+                }
+              </span>
+
+              <strong
+                class="merchant-mobile-product-price"
+              >
+                ${
+                  Number(
+                    product.price || 0
+                  ).toLocaleString()
+                }원
+              </strong>
+
+
+              <button
+                type="button"
+                class="
+                  merchant-mobile-product-status
+                  ${
+                    status === '판매중'
+                      ? 'active'
+                      : 'stop'
+                  }
+                "
+                data-id="${product.id}"
+                data-status="${status}"
+              >
+                ${status}
+              </button>
+
+            </div>
+
+          </div>
+        `
+      }
+    )
+    .join('')
+
+    document
+  .querySelectorAll<HTMLButtonElement>(
+    '.merchant-mobile-product-status'
+  )
+  .forEach(
+    (button) => {
+
+      button.addEventListener(
+        'click',
+        async () => {
+
+          const productId =
+            Number(
+              button.dataset.id || 0
+            )
+
+          const currentStatus =
+            button.dataset.status ||
+            '판매중'
+
+          const nextStatus =
+            currentStatus ===
+            '판매중'
+              ? '판매중지'
+              : '판매중'
+
+
+          const {
+            error
+          } =
+            await supabase
+              .from('products')
+              .update({
+                status:
+                  nextStatus
+              })
+              .eq(
+                'id',
+                productId
+              )
+
+
+          if (error) {
+
+            alert(
+              '상태 변경 실패: ' +
+              error.message
+            )
+
+            return
+          }
+
+
+          button.dataset.status =
+            nextStatus
+
+          button.textContent =
+            nextStatus
+
+          button.classList.toggle(
+            'active',
+            nextStatus === '판매중'
+          )
+
+          button.classList.toggle(
+            'stop',
+            nextStatus === '판매중지'
+          )
+
+        }
+      )
+
+    }
+  )
+  }
+
 /* =========================================
    모바일 로그인
 ========================================= */
@@ -2958,11 +3711,17 @@ if (
   
     renderMerchantHome()
   
-  } else if (
+} else if (
     path === '/merchant-app/orders'
   ) {
   
     void renderMerchantOrders()
+  
+  } else if (
+    path === '/merchant-app/products'
+  ) {
+  
+    void renderMerchantProducts()
   
   } else {
   
