@@ -117,82 +117,82 @@ function renderMerchantHome() {
 
         <section class="merchant-mobile-menu">
 
-          <button
-            type="button"
-            class="merchant-mobile-menu-card"
-            data-menu="orders"
-          >
-            <span class="merchant-mobile-menu-icon">
-              📋
-            </span>
+  <button
+    type="button"
+    class="merchant-mobile-menu-card"
+    data-menu="orders"
+  >
+    <span class="merchant-mobile-menu-icon">
+      📋
+    </span>
 
-            <strong>
-              주문관리
-            </strong>
+    <strong>
+      주문관리
+    </strong>
 
-            <small>
-              주문 및 처리상태 확인
-            </small>
-          </button>
-
-
-          <button
-            type="button"
-            class="merchant-mobile-menu-card"
-            data-menu="products"
-          >
-            <span class="merchant-mobile-menu-icon">
-              🛍️
-            </span>
-
-            <strong>
-              상품관리
-            </strong>
-
-            <small>
-              상품 및 판매정보 관리
-            </small>
-          </button>
+    <small>
+      주문 및 결제내역 관리
+    </small>
+  </button>
 
 
-          <button
-            type="button"
-            class="merchant-mobile-menu-card"
-            data-menu="payments"
-          >
-            <span class="merchant-mobile-menu-icon">
-              💳
-            </span>
+  <button
+    type="button"
+    class="merchant-mobile-menu-card"
+    data-menu="products"
+  >
+    <span class="merchant-mobile-menu-icon">
+      🛍️
+    </span>
 
-            <strong>
-              결제내역
-            </strong>
+    <strong>
+      상품관리
+    </strong>
 
-            <small>
-              결제 및 취소내역 확인
-            </small>
-          </button>
+    <small>
+      상품 등록 및 수정
+    </small>
+  </button>
 
 
-          <button
-            type="button"
-            class="merchant-mobile-menu-card"
-            data-menu="payout"
-          >
-            <span class="merchant-mobile-menu-icon">
-              💰
-            </span>
+  <button
+    type="button"
+    class="merchant-mobile-menu-card"
+    data-menu="qr"
+  >
+    <span class="merchant-mobile-menu-icon">
+      📱
+    </span>
 
-            <strong>
-              출금관리
-            </strong>
+    <strong>
+      PICK QR
+    </strong>
 
-            <small>
-              정산 및 출금상태 확인
-            </small>
-          </button>
+    <small>
+      가맹점 QR 확인 및 관리
+    </small>
+  </button>
 
-        </section>
+
+  <button
+    type="button"
+    class="merchant-mobile-menu-card"
+    data-menu="card"
+  >
+    <span class="merchant-mobile-menu-icon">
+      💳
+    </span>
+
+    <strong>
+      카드결제
+    </strong>
+
+    <small>
+      OCR · 수기 · 메뉴결제 · 현금영수증
+    </small>
+  </button>
+
+</section>
 
       </main>
 
