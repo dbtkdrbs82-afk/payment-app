@@ -1548,12 +1548,13 @@
   /* 기본형 */
   
   .merchant-mobile-qr-poster[data-template="default"]
-  .merchant-mobile-qr-box {
-    left: 76.7%;
-    top: 44%;
-    width: 20.9%;
-    transform: translate(-50%, -50%);
-  }
+.merchant-mobile-qr-box {
+  left: 86%;
+  top: 63%;
+  width: 22%;
+  transform: translate(-50%, -50%);
+}
+  
   
   
   /* 디자인 1 */
