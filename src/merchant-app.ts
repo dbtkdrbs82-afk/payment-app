@@ -5387,6 +5387,608 @@ function renderMerchantCard() {
       )
   }
 
+  /* =========================================
+   모바일 수기 카드결제
+========================================= */
+
+function renderMerchantManualCard() {
+
+    const merchantIdText =
+      sessionStorage.getItem(
+        'login_merchant_id'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_id'
+      )
+  
+  
+    if (!merchantIdText) {
+  
+      location.replace(
+        '/merchant-app'
+      )
+  
+      return
+    }
+  
+  
+    const merchantId =
+      Number(
+        merchantIdText
+      )
+  
+  
+    const merchantName =
+      sessionStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      '가맹점'
+  
+  
+    app.innerHTML = `
+      <div class="merchant-mobile-home">
+  
+        <header class="merchant-mobile-header">
+  
+          <div>
+  
+            <div class="merchant-mobile-brand">
+              NXG PICK
+            </div>
+  
+            <div class="merchant-mobile-store">
+              ${merchantName}
+            </div>
+  
+          </div>
+  
+          <button
+            id="mobile-manual-card-back"
+            class="merchant-mobile-logout"
+            type="button"
+          >
+            이전
+          </button>
+  
+        </header>
+  
+  
+        <main class="merchant-mobile-content">
+  
+          <div class="merchant-mobile-page-title">
+  
+            <h1>
+              수기 카드결제
+            </h1>
+  
+            <span>
+              카드정보 직접 입력
+            </span>
+  
+          </div>
+  
+  
+          <div
+            class="merchant-mobile-manual-card"
+          >
+  
+            <label>
+              결제금액
+            </label>
+  
+            <input
+              id="mobile-manual-amount"
+              type="number"
+              inputmode="numeric"
+              min="100"
+              placeholder="결제금액"
+            >
+  
+  
+            <label>
+              상품명
+            </label>
+  
+            <input
+              id="mobile-manual-goods-name"
+              type="text"
+              placeholder="상품명"
+            >
+  
+  
+            <label>
+              카드번호
+            </label>
+  
+            <input
+              id="mobile-manual-card-number"
+              type="text"
+              inputmode="numeric"
+              maxlength="19"
+              autocomplete="off"
+              placeholder="0000-0000-0000-0000"
+            >
+  
+  
+            <label>
+              유효기간
+            </label>
+  
+            <input
+              id="mobile-manual-expiry"
+              type="text"
+              inputmode="numeric"
+              maxlength="5"
+              autocomplete="off"
+              placeholder="MM/YY"
+            >
+  
+  
+            <label>
+              할부개월
+            </label>
+  
+            <select
+              id="mobile-manual-installment"
+            >
+  
+              <option value="0">
+                일시불
+              </option>
+  
+              <option value="2">
+                2개월
+              </option>
+  
+              <option value="3">
+                3개월
+              </option>
+  
+              <option value="4">
+                4개월
+              </option>
+  
+              <option value="5">
+                5개월
+              </option>
+  
+              <option value="6">
+                6개월
+              </option>
+  
+              <option value="12">
+                12개월
+              </option>
+  
+            </select>
+  
+  
+            <label>
+              구매자명
+            </label>
+  
+            <input
+              id="mobile-manual-buyer-name"
+              type="text"
+              placeholder="선택 입력"
+            >
+  
+  
+            <label>
+              구매자 연락처
+            </label>
+  
+            <input
+              id="mobile-manual-phone"
+              type="tel"
+              inputmode="numeric"
+              maxlength="13"
+              placeholder="선택 입력"
+            >
+  
+  
+            <button
+              id="mobile-manual-submit"
+              type="button"
+            >
+              결제 요청
+            </button>
+  
+          </div>
+  
+        </main>
+  
+      </div>
+    `
+  
+  
+    document
+      .querySelector(
+        '#mobile-manual-card-back'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/card'
+  
+        }
+      )
+  
+  
+    const cardNumberInput =
+      document.querySelector<HTMLInputElement>(
+        '#mobile-manual-card-number'
+      )
+  
+  
+    cardNumberInput
+      ?.addEventListener(
+        'input',
+        () => {
+  
+          const value =
+            cardNumberInput.value
+              .replace(
+                /[^0-9]/g,
+                ''
+              )
+              .slice(
+                0,
+                16
+              )
+  
+  
+          cardNumberInput.value =
+            value
+              .replace(
+                /(\d{4})(?=\d)/g,
+                '$1-'
+              )
+  
+        }
+      )
+  
+  
+    const expiryInput =
+      document.querySelector<HTMLInputElement>(
+        '#mobile-manual-expiry'
+      )
+  
+  
+    expiryInput
+      ?.addEventListener(
+        'input',
+        () => {
+  
+          const value =
+            expiryInput.value
+              .replace(
+                /[^0-9]/g,
+                ''
+              )
+              .slice(
+                0,
+                4
+              )
+  
+  
+          if (
+            value.length > 2
+          ) {
+  
+            expiryInput.value =
+              value.slice(
+                0,
+                2
+              ) +
+              '/' +
+              value.slice(
+                2
+              )
+  
+          } else {
+  
+            expiryInput.value =
+              value
+  
+          }
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '#mobile-manual-submit'
+      )
+      ?.addEventListener(
+        'click',
+        async () => {
+  
+          const amount =
+            Number(
+              document.querySelector<HTMLInputElement>(
+                '#mobile-manual-amount'
+              )?.value || 0
+            )
+  
+  
+          const goodsName =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-manual-goods-name'
+              )?.value ||
+              '일반 카드결제'
+            ).trim()
+  
+  
+          const cardNumber =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-manual-card-number'
+              )?.value || ''
+            )
+              .replace(
+                /[^0-9]/g,
+                ''
+              )
+  
+  
+          const expiryText =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-manual-expiry'
+              )?.value || ''
+            )
+              .replace(
+                /[^0-9]/g,
+                ''
+              )
+  
+  
+          const installment =
+            document.querySelector<HTMLSelectElement>(
+              '#mobile-manual-installment'
+            )?.value ||
+            '0'
+  
+  
+          const buyerName =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-manual-buyer-name'
+              )?.value ||
+              '구매자'
+            ).trim()
+  
+  
+          const customerPhone =
+            (
+              document.querySelector<HTMLInputElement>(
+                '#mobile-manual-phone'
+              )?.value || ''
+            )
+              .replace(
+                /[^0-9]/g,
+                ''
+              )
+  
+  
+          if (
+            !amount ||
+            amount < 100
+          ) {
+  
+            alert(
+              '결제금액을 확인해주세요.'
+            )
+  
+            return
+          }
+  
+  
+          if (
+            cardNumber.length < 13 ||
+            cardNumber.length > 19
+          ) {
+  
+            alert(
+              '카드번호를 확인해주세요.'
+            )
+  
+            return
+          }
+  
+  
+          if (
+            expiryText.length !== 4
+          ) {
+  
+            alert(
+              '유효기간을 MM/YY 형식으로 입력해주세요.'
+            )
+  
+            return
+          }
+  
+  
+          const expiryMonth =
+            expiryText.slice(
+              0,
+              2
+            )
+  
+  
+          const expiryYear =
+            expiryText.slice(
+              2,
+              4
+            )
+  
+  
+          if (
+            Number(expiryMonth) < 1 ||
+            Number(expiryMonth) > 12
+          ) {
+  
+            alert(
+              '유효기간 월을 확인해주세요.'
+            )
+  
+            return
+          }
+  
+  
+          const expiryYymm =
+            expiryYear +
+            expiryMonth
+  
+  
+          if (
+            !confirm(
+              goodsName +
+              '\n' +
+              amount.toLocaleString() +
+              '원을 결제할까요?'
+            )
+          ) {
+            return
+          }
+  
+  
+          const submitButton =
+            document.querySelector<HTMLButtonElement>(
+              '#mobile-manual-submit'
+            )
+  
+  
+          if (submitButton) {
+  
+            submitButton.disabled =
+              true
+  
+            submitButton.textContent =
+              '결제 처리 중...'
+  
+          }
+  
+  
+          try {
+  
+            const response =
+              await fetch(
+                '/api/korpay-manual-pay',
+                {
+                  method:
+                    'POST',
+  
+                  headers: {
+                    'Content-Type':
+                      'application/json'
+                  },
+  
+                  body:
+                    JSON.stringify({
+                      merchantId,
+                      amount,
+                      cardNumber,
+                      expiryYymm,
+                      installment,
+                      buyerName,
+                      billingIds: [],
+                      goodsName,
+                      customerPhone
+                    })
+                }
+              )
+  
+  
+            const data =
+              await response.json()
+  
+  
+            if (
+              !response.ok ||
+              !data.success
+            ) {
+  
+              alert(
+                '결제 실패\n\n' +
+                (
+                  data.message ||
+                  '카드결제가 승인되지 않았습니다.'
+                )
+              )
+  
+              return
+            }
+  
+  
+            alert(
+              '결제가 승인되었습니다.\n\n' +
+              '승인번호: ' +
+              (
+                data.approvalNumber ||
+                '-'
+              )
+            )
+  
+  
+            const cardInput =
+              document.querySelector<HTMLInputElement>(
+                '#mobile-manual-card-number'
+              )
+  
+            const expiryField =
+              document.querySelector<HTMLInputElement>(
+                '#mobile-manual-expiry'
+              )
+  
+  
+            if (cardInput) {
+              cardInput.value = ''
+            }
+  
+            if (expiryField) {
+              expiryField.value = ''
+            }
+  
+  
+          } catch (error) {
+  
+            console.error(
+              '모바일 수기결제 오류:',
+              error
+            )
+  
+            alert(
+              '결제 요청 중 오류가 발생했습니다.'
+            )
+  
+  
+          } finally {
+  
+            if (submitButton) {
+  
+              submitButton.disabled =
+                false
+  
+              submitButton.textContent =
+                '결제 요청'
+  
+            }
+  
+          }
+  
+        }
+      )
+  }
+
 /* =========================================
    모바일 로그인
 ========================================= */
@@ -5678,6 +6280,12 @@ if (
   ) {
   
     renderMerchantCard()
+  
+  } else if (
+    path === '/merchant-app/card/manual'
+  ) {
+  
+    renderMerchantManualCard()
   
   } else {
   

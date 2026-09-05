@@ -1737,3 +1737,50 @@
     color: #6b7280;
     text-align: center;
   }
+  .merchant-mobile-manual-card {
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+  }
+  
+  .merchant-mobile-manual-card label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #374151;
+  }
+  
+  .merchant-mobile-manual-card label:first-child {
+    margin-top: 0;
+  }
+  
+  .merchant-mobile-manual-card input,
+  .merchant-mobile-manual-card select {
+    width: 100%;
+    height: 46px;
+    padding: 0 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #ffffff;
+    font-size: 15px;
+    box-sizing: border-box;
+  }
+  
+  #mobile-manual-submit {
+    width: 100%;
+    height: 48px;
+    margin-top: 22px;
+    border: 0;
+    border-radius: 11px;
+    background: #111827;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  
+  #mobile-manual-submit:disabled {
+    opacity: 0.6;
+  }
