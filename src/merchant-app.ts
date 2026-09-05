@@ -2879,39 +2879,7 @@ const isBeauty =
               >
 
 
-              ${
-                isBeauty
-                  ? ''
-                  : `
-                    <label>
-                      카테고리
-                    </label>
-
-                    <select
-                      id="mobile-product-category"
-                    >
-                      <option value="기타">
-                        기타
-                      </option>
-
-                      <option value="음료">
-                        음료
-                      </option>
-
-                      <option value="식품">
-                        식품
-                      </option>
-
-                      <option value="상품">
-                        상품
-                      </option>
-
-                      <option value="서비스">
-                        서비스
-                      </option>
-                    </select>
-                  `
-              }
+              placeholder="카테고리 직접 입력"
 
 
               <label>
@@ -3065,13 +3033,13 @@ const isBeauty =
               )
 
 
-            const category =
+              const category =
               isBeauty
                 ? '뷰티서비스'
                 : (
-                    document.querySelector<HTMLSelectElement>(
+                    document.querySelector<HTMLInputElement>(
                       '#mobile-product-category'
-                    )?.value ||
+                    )?.value.trim() ||
                     '기타'
                   )
 
