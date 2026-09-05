@@ -2347,16 +2347,29 @@ receiptButton?.addEventListener(
         Object.entries(values)
           .forEach(
             ([key, value]) => {
+      
               newParams.set(
                 key,
                 value
               )
+      
             }
           )
       
-        location.href =
+      
+        const nextUrl =
           '/merchant-app/orders?' +
           newParams.toString()
+      
+      
+        window.history.replaceState(
+          null,
+          '',
+          nextUrl
+        )
+      
+      
+        void renderMerchantOrders()
       }
       
       
