@@ -5390,19 +5390,20 @@ function renderMerchantCard() {
     }
   )
   
-    document
-      .querySelector(
-        '[data-card-menu="menu"]'
-      )
-      ?.addEventListener(
-        'click',
-        () => {
-  
-          location.href =
-            '/merchant-app/card/menu'
-  
-        }
-      )
+  document
+  .querySelector(
+    '[data-card-menu="menu"]'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      location.href =
+        '/kiosk?merchant_id=' +
+        merchantId
+
+    }
+  )
   
   
     document
