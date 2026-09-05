@@ -1383,3 +1383,78 @@
     background: #feecec;
     color: #d63333;
   }
+  .merchant-mobile-qr-card {
+    padding: 22px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 18px;
+    text-align: center;
+  }
+  
+  .merchant-mobile-qr-store {
+    display: block;
+    margin-bottom: 18px;
+    font-size: 19px;
+    color: #111827;
+  }
+  
+  .merchant-mobile-qr-box {
+    width: 270px;
+    height: 270px;
+    max-width: 100%;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  
+  .merchant-mobile-qr-box canvas {
+    max-width: 100%;
+    height: auto;
+  }
+  
+  .merchant-mobile-qr-message {
+    margin-top: 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+  }
+  
+  .merchant-mobile-qr-url {
+    margin-top: 14px;
+    padding: 12px;
+    background: #f3f4f6;
+    border-radius: 10px;
+    font-size: 12px;
+    color: #6b7280;
+    word-break: break-all;
+  }
+  
+  .merchant-mobile-qr-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  
+  .merchant-mobile-qr-actions button {
+    flex: 1;
+    height: 44px;
+    border: 0;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  
+  #mobile-qr-copy {
+    background: #111827;
+    color: #ffffff;
+  }
+  
+  #mobile-qr-open {
+    background: #e5e7eb;
+    color: #374151;
+  }

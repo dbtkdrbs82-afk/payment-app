@@ -3,6 +3,7 @@ import './merchant-app.css'
 import {
     createClient
   } from '@supabase/supabase-js'
+  import QRCode from 'qrcode'
 
   const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
@@ -253,6 +254,18 @@ function renderMerchantHome() {
     () => {
       location.href =
         '/merchant-app/products'
+    }
+  )
+
+  document
+  .querySelector(
+    '[data-menu="qr"]'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+      location.href =
+        '/merchant-app/qr'
     }
   )
 }
@@ -4077,6 +4090,266 @@ const isBeauty =
     )
   }
 
+  /* =========================================
+   모바일 PICK QR
+========================================= */
+
+async function renderMerchantQr() {
+
+    const merchantIdText =
+      sessionStorage.getItem(
+        'login_merchant_id'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_id'
+      )
+  
+  
+    if (!merchantIdText) {
+  
+      location.replace(
+        '/merchant-app'
+      )
+  
+      return
+    }
+  
+  
+    const merchantId =
+      Number(
+        merchantIdText
+      )
+  
+  
+    const merchantName =
+      sessionStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_name'
+      ) ||
+      '가맹점'
+  
+  
+    const merchantType =
+      sessionStorage.getItem(
+        'login_merchant_type'
+      ) ||
+      localStorage.getItem(
+        'login_merchant_type'
+      ) ||
+      '일반매장'
+  
+  
+    const kioskUrl =
+      merchantType === '아카데미'
+        ? (
+            window.location.origin +
+            '/academy-chrome?merchant_id=' +
+            merchantId
+          )
+        : (
+            'https://nxgsoft.co.kr/pay/?merchant_id=' +
+            merchantId
+          )
+  
+  
+    app.innerHTML = `
+      <div class="merchant-mobile-home">
+  
+        <header class="merchant-mobile-header">
+  
+          <div>
+  
+            <div class="merchant-mobile-brand">
+              NXG PICK
+            </div>
+  
+            <div class="merchant-mobile-store">
+              ${merchantName}
+            </div>
+  
+          </div>
+  
+          <button
+            id="mobile-qr-home"
+            class="merchant-mobile-logout"
+            type="button"
+          >
+            홈
+          </button>
+  
+        </header>
+  
+  
+        <main class="merchant-mobile-content">
+  
+          <div class="merchant-mobile-page-title">
+  
+            <h1>
+              PICK QR
+            </h1>
+  
+            <span>
+              가맹점 주문 QR
+            </span>
+  
+          </div>
+  
+  
+          <div
+            class="merchant-mobile-qr-card"
+          >
+  
+            <strong
+              class="merchant-mobile-qr-store"
+            >
+              ${merchantName}
+            </strong>
+  
+  
+            <div
+              id="mobile-merchant-qr-box"
+              class="merchant-mobile-qr-box"
+            ></div>
+  
+  
+            <div
+              class="merchant-mobile-qr-message"
+            >
+              QR코드를 스캔해 주문해주세요
+            </div>
+  
+  
+            <div
+              class="merchant-mobile-qr-url"
+            >
+              ${kioskUrl}
+            </div>
+  
+  
+            <div
+              class="merchant-mobile-qr-actions"
+            >
+  
+              <button
+                id="mobile-qr-copy"
+                type="button"
+              >
+                주소 복사
+              </button>
+  
+              <button
+                id="mobile-qr-open"
+                type="button"
+              >
+                결제창 열기
+              </button>
+  
+            </div>
+  
+          </div>
+  
+        </main>
+  
+      </div>
+    `
+  
+  
+    document
+      .querySelector(
+        '#mobile-qr-home'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/home'
+  
+        }
+      )
+  
+  
+    const qrBox =
+      document.querySelector<HTMLDivElement>(
+        '#mobile-merchant-qr-box'
+      )
+  
+  
+    if (qrBox) {
+  
+      QRCode.toCanvas(
+        kioskUrl,
+        {
+          width: 250,
+          margin: 1
+        },
+        (
+          error,
+          canvas
+        ) => {
+  
+          if (error) {
+  
+            alert(
+              'QR 생성 실패'
+            )
+  
+            return
+          }
+  
+  
+          qrBox.innerHTML = ''
+  
+          qrBox.appendChild(
+            canvas
+          )
+  
+        }
+      )
+  
+    }
+  
+  
+    document
+      .querySelector(
+        '#mobile-qr-copy'
+      )
+      ?.addEventListener(
+        'click',
+        async () => {
+  
+          await navigator.clipboard
+            .writeText(
+              kioskUrl
+            )
+  
+          alert(
+            '주소가 복사되었습니다.'
+          )
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '#mobile-qr-open'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          window.open(
+            kioskUrl,
+            '_blank'
+          )
+  
+        }
+      )
+  }
+
 /* =========================================
    모바일 로그인
 ========================================= */
@@ -4351,11 +4624,17 @@ if (
   
     void renderMerchantOrders()
   
-  } else if (
+} else if (
     path === '/merchant-app/products'
   ) {
   
     void renderMerchantProducts()
+  
+  } else if (
+    path === '/merchant-app/qr'
+  ) {
+  
+    void renderMerchantQr()
   
   } else {
   
