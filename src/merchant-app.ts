@@ -2879,7 +2879,21 @@ const isBeauty =
               >
 
 
-              placeholder="카테고리 직접 입력"
+              ${
+                isBeauty
+                  ? ''
+                  : `
+                    <label>
+                      카테고리
+                    </label>
+              
+                    <input
+                      id="mobile-product-category"
+                      type="text"
+                      placeholder="카테고리 직접 입력"
+                    >
+                  `
+              }
 
 
               <label>
@@ -3311,21 +3325,35 @@ const isBeauty =
               </strong>
 
 
-              <button
-                type="button"
-                class="
-                  merchant-mobile-product-status
-                  ${
-                    status === '판매중'
-                      ? 'active'
-                      : 'stop'
-                  }
-                "
-                data-id="${product.id}"
-                data-status="${status}"
-              >
-                ${status}
-              </button>
+              <div
+  class="merchant-mobile-product-actions"
+>
+
+  <button
+    type="button"
+    class="merchant-mobile-product-edit"
+    data-id="${product.id}"
+  >
+    수정
+  </button>
+
+  <button
+    type="button"
+    class="
+      merchant-mobile-product-status
+      ${
+        status === '판매중'
+          ? 'active'
+          : 'stop'
+      }
+    "
+    data-id="${product.id}"
+    data-status="${status}"
+  >
+    ${status}
+  </button>
+
+</div>
 
             </div>
 
@@ -3403,6 +3431,418 @@ const isBeauty =
             'stop',
             nextStatus === '판매중지'
           )
+
+        }
+      )
+
+    }
+  )
+  document
+  .querySelectorAll<HTMLButtonElement>(
+    '.merchant-mobile-product-edit'
+  )
+  .forEach(
+    (button) => {
+
+      button.addEventListener(
+        'click',
+        () => {
+
+          const productId =
+            Number(
+              button.dataset.id || 0
+            )
+
+          const product =
+            products.find(
+              (item: any) =>
+                Number(item.id) ===
+                productId
+            )
+
+
+          if (!product) {
+            return
+          }
+
+
+          document
+            .querySelector(
+              '#merchant-mobile-product-edit-modal'
+            )
+            ?.remove()
+
+
+          document.body.insertAdjacentHTML(
+            'beforeend',
+            `
+              <div
+                id="merchant-mobile-product-edit-modal"
+                class="merchant-mobile-product-modal"
+              >
+
+                <div
+                  class="merchant-mobile-product-modal-box"
+                >
+
+                  <h2>
+                    상품 수정
+                  </h2>
+
+
+                  <label>
+                    상품명
+                  </label>
+
+                  <input
+                    id="mobile-product-edit-name"
+                    type="text"
+                    value="${product.product_name || ''}"
+                  >
+
+
+                  <label>
+                    가격
+                  </label>
+
+                  <input
+                    id="mobile-product-edit-price"
+                    type="number"
+                    value="${Number(
+                      product.price || 0
+                    )}"
+                  >
+
+
+                  ${
+                    isBeauty
+                      ? ''
+                      : `
+                        <label>
+                          카테고리
+                        </label>
+
+                        <input
+                          id="mobile-product-edit-category"
+                          type="text"
+                          value="${product.category || ''}"
+                        >
+                      `
+                  }
+
+
+                  <label>
+                    상품 이미지
+                  </label>
+
+                  <input
+                    id="mobile-product-edit-image-file"
+                    type="file"
+                    accept="image/*"
+                  >
+
+
+                  <div
+                    class="merchant-mobile-product-preview"
+                  >
+
+                    ${
+                      product.image_url
+                        ? `
+                          <img
+                            id="mobile-product-edit-preview"
+                            src="${product.image_url}"
+                            alt=""
+                          >
+                        `
+                        : `
+                          <span
+                            id="mobile-product-edit-preview-text"
+                          >
+                            이미지 미리보기
+                          </span>
+
+                          <img
+                            id="mobile-product-edit-preview"
+                            alt=""
+                            style="display:none;"
+                          >
+                        `
+                    }
+
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-product-modal-actions"
+                  >
+
+                    <button
+                      id="mobile-product-edit-save"
+                      type="button"
+                    >
+                      저장
+                    </button>
+
+                    <button
+                      id="mobile-product-edit-close"
+                      type="button"
+                    >
+                      닫기
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+            `
+          )
+
+
+          const imageInput =
+            document.querySelector<HTMLInputElement>(
+              '#mobile-product-edit-image-file'
+            )
+
+
+          imageInput
+            ?.addEventListener(
+              'change',
+              () => {
+
+                const file =
+                  imageInput.files?.[0]
+
+                if (!file) {
+                  return
+                }
+
+
+                const preview =
+                  document.querySelector<HTMLImageElement>(
+                    '#mobile-product-edit-preview'
+                  )
+
+                const previewText =
+                  document.querySelector<HTMLElement>(
+                    '#mobile-product-edit-preview-text'
+                  )
+
+
+                if (preview) {
+
+                  preview.src =
+                    URL.createObjectURL(
+                      file
+                    )
+
+                  preview.style.display =
+                    'block'
+
+                }
+
+
+                if (previewText) {
+
+                  previewText.style.display =
+                    'none'
+
+                }
+
+              }
+            )
+
+
+          document
+            .querySelector(
+              '#mobile-product-edit-close'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+
+                document
+                  .querySelector(
+                    '#merchant-mobile-product-edit-modal'
+                  )
+                  ?.remove()
+
+              }
+            )
+
+
+          document
+            .querySelector(
+              '#mobile-product-edit-save'
+            )
+            ?.addEventListener(
+              'click',
+              async () => {
+
+                const productName =
+                  (
+                    document.querySelector<HTMLInputElement>(
+                      '#mobile-product-edit-name'
+                    )?.value || ''
+                  ).trim()
+
+
+                const price =
+                  Number(
+                    document.querySelector<HTMLInputElement>(
+                      '#mobile-product-edit-price'
+                    )?.value || 0
+                  )
+
+
+                const category =
+                  isBeauty
+                    ? (
+                        product.category ||
+                        '뷰티서비스'
+                      )
+                    : (
+                        document.querySelector<HTMLInputElement>(
+                          '#mobile-product-edit-category'
+                        )?.value.trim() ||
+                        '기타'
+                      )
+
+
+                if (
+                  !productName ||
+                  !price
+                ) {
+
+                  alert(
+                    '상품명과 가격을 입력해주세요.'
+                  )
+
+                  return
+                }
+
+
+                let imageUrl =
+                  product.image_url || ''
+
+
+                const newImageFile =
+                  document.querySelector<HTMLInputElement>(
+                    '#mobile-product-edit-image-file'
+                  )?.files?.[0]
+
+
+                if (newImageFile) {
+
+                  const fileExt =
+                    newImageFile.name
+                      .split('.')
+                      .pop() ||
+                    'png'
+
+
+                  const fileName =
+                    Date.now() +
+                    '_product_edit.' +
+                    fileExt
+
+
+                  const {
+                    error: uploadError
+                  } =
+                    await supabase.storage
+                      .from(
+                        'merchant-files'
+                      )
+                      .upload(
+                        fileName,
+                        newImageFile
+                      )
+
+
+                  if (uploadError) {
+
+                    alert(
+                      '이미지 업로드 실패: ' +
+                      uploadError.message
+                    )
+
+                    return
+                  }
+
+
+                  const {
+                    data
+                  } =
+                    supabase.storage
+                      .from(
+                        'merchant-files'
+                      )
+                      .getPublicUrl(
+                        fileName
+                      )
+
+
+                  imageUrl =
+                    data.publicUrl
+
+                }
+
+
+                const {
+                  error
+                } =
+                  await supabase
+                    .from(
+                      'products'
+                    )
+                    .update({
+                      product_name:
+                        productName,
+
+                      price:
+                        price,
+
+                      category:
+                        category,
+
+                      image_url:
+                        imageUrl
+                    })
+                    .eq(
+                      'id',
+                      productId
+                    )
+
+
+                if (error) {
+
+                  alert(
+                    '상품 수정 실패: ' +
+                    error.message
+                  )
+
+                  return
+                }
+
+
+                alert(
+                  '상품이 수정되었습니다.'
+                )
+
+
+                document
+                  .querySelector(
+                    '#merchant-mobile-product-edit-modal'
+                  )
+                  ?.remove()
+
+
+                void renderMerchantProducts()
+
+              }
+            )
 
         }
       )

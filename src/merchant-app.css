@@ -1328,3 +1328,32 @@
     background: #e5e7eb;
     color: #374151;
   }
+  .merchant-mobile-product-actions {
+    width: 100%;
+    margin-top: auto;
+    display: flex;
+    gap: 8px;
+  }
+  
+  .merchant-mobile-product-actions button {
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    font-weight: 700;
+  }
+  
+  .merchant-mobile-product-edit {
+    min-width: 62px;
+    background: #eef2f7;
+    color: #374151;
+  }
+  
+  #mobile-product-edit-save {
+    background: #111827;
+    color: #ffffff;
+  }
+  
+  #mobile-product-edit-close {
+    background: #e5e7eb;
+    color: #374151;
+  }
