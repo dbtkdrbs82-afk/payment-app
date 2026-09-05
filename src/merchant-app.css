@@ -779,3 +779,65 @@
   
     font-weight: 800;
   }
+  /* =========================================
+   모바일 영수증 크기 축소
+========================================= */
+
+.merchant-mobile-receipt-modal {
+    padding:
+      max(12px, env(safe-area-inset-top))
+      12px
+      20px;
+  }
+  
+  .merchant-mobile-receipt-box {
+    max-width: 420px;
+    padding: 16px;
+    border-radius: 14px;
+  }
+  
+  .merchant-mobile-receipt-header {
+    padding-bottom: 12px;
+  }
+  
+  .merchant-mobile-receipt-header strong {
+    font-size: 19px;
+  }
+  
+  .merchant-mobile-receipt-header h2 {
+    margin-top: 4px;
+    font-size: 16px;
+  }
+  
+  .merchant-mobile-receipt-section {
+    padding: 12px 0;
+  }
+  
+  .merchant-mobile-receipt-section h3 {
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  
+  .merchant-mobile-receipt-row {
+    padding: 4px 0;
+    font-size: 12px;
+  }
+  
+  .merchant-mobile-receipt-total {
+    margin-top: 7px;
+    padding: 10px;
+  }
+  
+  .merchant-mobile-receipt-total strong {
+    font-size: 17px;
+  }
+  
+  .merchant-mobile-receipt-actions {
+    gap: 6px;
+    margin-top: 14px;
+  }
+  
+  .merchant-mobile-receipt-actions button {
+    height: 38px;
+    font-size: 13px;
+  }
