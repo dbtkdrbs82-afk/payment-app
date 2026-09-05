@@ -1,0 +1,210 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+  }
+  
+  body {
+    font-family:
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      "Noto Sans KR",
+      sans-serif;
+  
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  
+  button,
+  input {
+    font: inherit;
+  }
+  
+  
+  /* =========================================
+     모바일 가맹점 로그인
+  ========================================= */
+  
+  .merchant-app-login-page {
+    width: 100%;
+    min-height: 100dvh;
+  
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  
+    padding: 24px;
+  
+    background:
+      linear-gradient(
+        180deg,
+        #123766 0%,
+        #082344 100%
+      );
+  }
+  
+  
+  .merchant-app-login-card {
+    width: 100%;
+    max-width: 460px;
+  
+    padding: 40px 40px 36px;
+  
+    background: #06172e;
+  
+    border: 1px solid #355274;
+    border-radius: 24px;
+  
+    box-shadow:
+      0 18px 50px
+      rgba(0, 0, 0, 0.18);
+  }
+  
+  
+  .merchant-app-login-badge {
+    display: inline-flex;
+  
+    align-items: center;
+    justify-content: center;
+  
+    height: 34px;
+  
+    padding: 0 16px;
+  
+    margin-bottom: 46px;
+  
+    border-radius: 20px;
+  
+    background: #082b5c;
+  
+    color: #5bb5ff;
+  
+    font-size: 13px;
+    font-weight: 800;
+  
+    letter-spacing: 1px;
+  }
+  
+  
+  .merchant-app-login-title {
+    margin: 0 0 22px;
+  
+    color: #ffffff;
+  
+    font-size: 32px;
+    font-weight: 900;
+  
+    letter-spacing: -1px;
+  }
+  
+  
+  .merchant-app-login-input {
+    width: 100%;
+    height: 50px;
+  
+    margin-bottom: 14px;
+  
+    padding: 0 16px;
+  
+    border: 1px solid #2c5685;
+    border-radius: 10px;
+  
+    background: #102d52;
+  
+    color: #ffffff;
+  
+    font-size: 16px;
+  
+    outline: none;
+  }
+  
+  
+  .merchant-app-login-input::placeholder {
+    color: #74a7d7;
+  }
+  
+  
+  .merchant-app-login-input:focus {
+    border-color: #5ba9ef;
+  
+    box-shadow:
+      0 0 0 2px
+      rgba(91, 169, 239, 0.12);
+  }
+  
+  
+  .merchant-app-login-button {
+    width: 100%;
+    height: 52px;
+  
+    margin-top: 12px;
+  
+    border: 0;
+    border-radius: 8px;
+  
+    background: #1e5797;
+  
+    color: #ffffff;
+  
+    font-size: 18px;
+    font-weight: 800;
+  
+    cursor: pointer;
+  }
+  
+  
+  .merchant-app-login-button:active {
+    transform: translateY(1px);
+  }
+  
+  
+  .merchant-app-login-message {
+    min-height: 18px;
+  
+    margin-top: 12px;
+  
+    text-align: center;
+  
+    color: #7fb7e8;
+  
+    font-size: 13px;
+  }
+  
+  
+  .merchant-app-login-footer {
+    margin-top: 24px;
+  
+    text-align: center;
+  
+    color: #5f97c8;
+  
+    font-size: 13px;
+  }
+  
+  
+  /* =========================================
+     작은 휴대폰 대응
+  ========================================= */
+  
+  @media (max-width: 480px) {
+  
+    .merchant-app-login-page {
+      padding: 20px;
+    }
+  
+    .merchant-app-login-card {
+      padding: 36px 28px 32px;
+    }
+  
+    .merchant-app-login-title {
+      font-size: 30px;
+    }
+  
+  }
