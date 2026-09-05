@@ -364,15 +364,6 @@ const endIso =
   
   
           <div class="merchant-mobile-date-nav">
-  
-            <button
-              id="mobile-order-prev"
-              type="button"
-            >
-              이전
-            </button>
-  
-            <div class="merchant-mobile-date-nav">
 
   <button
     id="mobile-order-prev"
@@ -406,6 +397,28 @@ const endIso =
 
 
 <div class="merchant-mobile-date-range">
+
+  <div>
+    <label>시작일</label>
+
+    <input
+      id="mobile-order-start-date"
+      type="date"
+      value="${startDate}"
+    >
+  </div>
+
+  <div>
+    <label>종료일</label>
+
+    <input
+      id="mobile-order-end-date"
+      type="date"
+      value="${endDate}"
+    >
+  </div>
+
+</div>
 
   <div>
     <label>
