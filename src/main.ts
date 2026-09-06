@@ -13998,6 +13998,11 @@ const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
   const tableTop = document.querySelector('.admin-table-top')
 
+  const paymentSubPage =
+  sessionStorage.getItem(
+    'payment_sub_page'
+  ) || 'approval'
+
 if (tableTop) {
   tableTop.innerHTML =
     '<button id="payment-excel-download">엑셀 다운로드</button>' +
@@ -14009,8 +14014,747 @@ if (tableTop) {
 }
 
 if (subMenu) {
-  subMenu.innerHTML =
-    '승인내역조회 | 현금영수증 발급 | 고액 동일카드 조회'
+
+  subMenu.innerHTML = `
+    <span
+      id="payment-sub-approval"
+      style="
+        cursor:pointer;
+        ${
+          paymentSubPage === 'approval'
+            ? 'font-weight:700;color:#174981;'
+            : ''
+        }
+      "
+    >
+      승인내역조회
+    </span>
+
+    |
+
+    <span
+      id="payment-sub-cash"
+      style="
+        cursor:pointer;
+        ${
+          paymentSubPage === 'cash'
+            ? 'font-weight:700;color:#174981;'
+            : ''
+        }
+      "
+    >
+      현금영수증 발급
+    </span>
+
+    |
+
+    <span>
+      고액 동일카드 조회
+    </span>
+  `
+}
+
+
+document
+  .querySelector(
+    '#payment-sub-approval'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      sessionStorage.setItem(
+        'payment_sub_page',
+        'approval'
+      )
+
+      document
+        .querySelector<HTMLElement>(
+          '.admin-tab[data-page="payment"]'
+        )
+        ?.click()
+
+    }
+  )
+
+
+document
+  .querySelector(
+    '#payment-sub-cash'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      sessionStorage.setItem(
+        'payment_sub_page',
+        'cash'
+      )
+
+      document
+        .querySelector<HTMLElement>(
+          '.admin-tab[data-page="payment"]'
+        )
+        ?.click()
+
+    }
+  )
+
+
+if (
+  paymentSubPage === 'cash'
+) {
+
+  if (titleBox) {
+    titleBox.innerHTML =
+      '▶ 결제관리 > 현금영수증 발급'
+  }
+
+
+  const today =
+    new Date()
+      .toLocaleDateString(
+        'en-CA',
+        {
+          timeZone:
+            'Asia/Seoul'
+        }
+      )
+
+
+  const savedStartDate =
+    sessionStorage.getItem(
+      'cash_receipt_start_date'
+    ) || today
+
+
+  const savedEndDate =
+    sessionStorage.getItem(
+      'cash_receipt_end_date'
+    ) || today
+
+
+  const savedType =
+    sessionStorage.getItem(
+      'cash_receipt_type'
+    ) || 'all'
+
+
+  const savedKeyword =
+    sessionStorage.getItem(
+      'cash_receipt_keyword'
+    ) || ''
+
+
+  if (searchBox) {
+
+    searchBox.innerHTML = `
+      <div class="payment-search-line">
+
+        <input
+          id="cash-admin-start-date"
+          type="date"
+          value="${savedStartDate}"
+        />
+
+        <span>~</span>
+
+        <input
+          id="cash-admin-end-date"
+          type="date"
+          value="${savedEndDate}"
+        />
+
+        <select
+          id="cash-admin-type"
+        >
+          <option
+            value="all"
+            ${
+              savedType === 'all'
+                ? 'selected'
+                : ''
+            }
+          >
+            전체구분
+          </option>
+
+          <option
+            value="소득공제"
+            ${
+              savedType === '소득공제'
+                ? 'selected'
+                : ''
+            }
+          >
+            소득공제
+          </option>
+
+          <option
+            value="지출증빙"
+            ${
+              savedType === '지출증빙'
+                ? 'selected'
+                : ''
+            }
+          >
+            지출증빙
+          </option>
+        </select>
+
+        <input
+          id="cash-admin-keyword"
+          type="text"
+          value="${savedKeyword}"
+          placeholder="가맹점명 / 승인번호 / 증빙번호"
+        />
+
+        <button
+          id="cash-admin-search"
+          class="search-btn"
+          type="button"
+        >
+          🔍 검색
+        </button>
+
+      </div>
+    `
+  }
+
+
+  if (tableTop) {
+
+    tableTop.innerHTML = `
+      <button
+        id="cash-receipt-excel-download"
+        type="button"
+      >
+        엑셀 다운로드
+      </button>
+    `
+  }
+
+
+  const startIso =
+    new Date(
+      savedStartDate +
+      'T00:00:00+09:00'
+    )
+      .toISOString()
+
+
+  const endIso =
+    new Date(
+      savedEndDate +
+      'T23:59:59.999+09:00'
+    )
+      .toISOString()
+
+
+  let cashQuery =
+    supabase
+      .from('cash_receipts')
+      .select('*')
+      .gte(
+        'issued_at',
+        startIso
+      )
+      .lte(
+        'issued_at',
+        endIso
+      )
+      .order(
+        'issued_at',
+        {
+          ascending:
+            false
+        }
+      )
+
+
+  if (
+    savedType !== 'all'
+  ) {
+
+    cashQuery =
+      cashQuery.eq(
+        'receipt_type',
+        savedType
+      )
+
+  }
+
+
+  const {
+    data: cashReceiptData,
+    error: cashReceiptError
+  } =
+    await cashQuery
+
+
+  if (cashReceiptError) {
+
+    alert(
+      '현금영수증 조회 실패: ' +
+      cashReceiptError.message
+    )
+
+    return
+  }
+
+
+  let cashReceipts =
+    cashReceiptData || []
+
+
+  if (savedKeyword) {
+
+    const keyword =
+      savedKeyword
+        .trim()
+        .toLowerCase()
+
+
+    cashReceipts =
+      cashReceipts.filter(
+        (item: any) => {
+
+          return (
+            String(
+              item.merchant_name || ''
+            )
+              .toLowerCase()
+              .includes(keyword) ||
+
+            String(
+              item.approval_number || ''
+            )
+              .toLowerCase()
+              .includes(keyword) ||
+
+            String(
+              item.identity_number_masked || ''
+            )
+              .toLowerCase()
+              .includes(keyword) ||
+
+            String(
+              item.order_id || ''
+            )
+              .toLowerCase()
+              .includes(keyword)
+          )
+
+        }
+      )
+
+  }
+
+
+  const totalAmount =
+    cashReceipts.reduce(
+      (
+        sum: number,
+        item: any
+      ) =>
+        sum +
+        Number(
+          item.amount || 0
+        ),
+      0
+    )
+
+
+  const merchantCount =
+    new Set(
+      cashReceipts.map(
+        (item: any) =>
+          Number(
+            item.merchant_id
+          )
+      )
+    ).size
+
+
+  if (summaryBox) {
+
+    summaryBox.innerHTML = `
+      <div class="payment-mini-summary">
+
+        <div
+          class="payment-mini-summary-card"
+        >
+          <strong>
+            검색 데이터
+          </strong>
+
+          <span>
+            ${cashReceipts.length.toLocaleString()}건
+          </span>
+        </div>
+
+        <div
+          class="payment-mini-summary-card"
+        >
+          <strong>
+            가맹점
+          </strong>
+
+          <span>
+            ${merchantCount.toLocaleString()}곳
+          </span>
+        </div>
+
+        <div
+          class="payment-mini-summary-card"
+        >
+          <strong>
+            승인금액
+          </strong>
+
+          <span>
+            ${totalAmount.toLocaleString()}원
+          </span>
+        </div>
+
+      </div>
+    `
+  }
+
+
+  if (tableHead) {
+
+    tableHead.innerHTML = `
+      <tr>
+        <th>No</th>
+        <th>거래일시</th>
+        <th>승인번호</th>
+        <th>가맹점</th>
+        <th>승인구분</th>
+        <th>증빙번호</th>
+        <th>품목명</th>
+        <th>물품가액</th>
+        <th>부가세</th>
+        <th>승인금액</th>
+        <th>상태</th>
+        <th>PG사</th>
+      </tr>
+    `
+  }
+
+
+  paymentTableBody.innerHTML =
+    ''
+
+
+  cashReceipts.forEach(
+    (
+      receipt: any,
+      index: number
+    ) => {
+
+      const tr =
+        document.createElement(
+          'tr'
+        )
+
+
+      const merchantCode =
+        'MER' +
+        String(
+          receipt.merchant_id || 0
+        ).padStart(
+          4,
+          '0'
+        )
+
+
+      const issuedAt =
+        receipt.issued_at
+          ? new Date(
+              receipt.issued_at
+            )
+              .toLocaleString(
+                'ko-KR',
+                {
+                  timeZone:
+                    'Asia/Seoul'
+                }
+              )
+          : '-'
+
+
+      tr.innerHTML = `
+        <td>
+          ${index + 1}
+        </td>
+
+        <td>
+          ${issuedAt}
+        </td>
+
+        <td>
+          ${
+            receipt.approval_number ||
+            '-'
+          }
+        </td>
+
+        <td>
+          ${merchantCode}<br>
+          ${
+            receipt.merchant_name ||
+            '-'
+          }
+        </td>
+
+        <td>
+          ${
+            receipt.receipt_type ||
+            '-'
+          }
+        </td>
+
+        <td>
+          ${
+            receipt.identity_number_masked ||
+            '-'
+          }
+        </td>
+
+        <td>
+          ${
+            receipt.order_name ||
+            '-'
+          }
+        </td>
+
+        <td>
+          ${Number(
+            receipt.supply_amount || 0
+          ).toLocaleString()}원
+        </td>
+
+        <td>
+          ${Number(
+            receipt.vat_amount || 0
+          ).toLocaleString()}원
+        </td>
+
+        <td>
+          <strong>
+            ${Number(
+              receipt.amount || 0
+            ).toLocaleString()}원
+          </strong>
+        </td>
+
+        <td>
+          ${
+            receipt.status ||
+            '-'
+          }
+        </td>
+
+        <td>
+          ${
+            receipt.pg_company ||
+            '-'
+          }
+        </td>
+      `
+
+
+      paymentTableBody
+        .appendChild(
+          tr
+        )
+
+    }
+  )
+
+
+  document
+    .querySelector(
+      '#cash-admin-search'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const startDate =
+          document
+            .querySelector<HTMLInputElement>(
+              '#cash-admin-start-date'
+            )
+            ?.value || today
+
+
+        const endDate =
+          document
+            .querySelector<HTMLInputElement>(
+              '#cash-admin-end-date'
+            )
+            ?.value || today
+
+
+        const type =
+          document
+            .querySelector<HTMLSelectElement>(
+              '#cash-admin-type'
+            )
+            ?.value || 'all'
+
+
+        const keyword =
+          document
+            .querySelector<HTMLInputElement>(
+              '#cash-admin-keyword'
+            )
+            ?.value || ''
+
+
+        sessionStorage.setItem(
+          'cash_receipt_start_date',
+          startDate
+        )
+
+        sessionStorage.setItem(
+          'cash_receipt_end_date',
+          endDate
+        )
+
+        sessionStorage.setItem(
+          'cash_receipt_type',
+          type
+        )
+
+        sessionStorage.setItem(
+          'cash_receipt_keyword',
+          keyword
+        )
+
+
+        document
+          .querySelector<HTMLElement>(
+            '.admin-tab[data-page="payment"]'
+          )
+          ?.click()
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#cash-receipt-excel-download'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        if (
+          cashReceipts.length === 0
+        ) {
+
+          alert(
+            '다운로드할 현금영수증 내역이 없습니다.'
+          )
+
+          return
+        }
+
+
+        const rows =
+          cashReceipts.map(
+            (
+              receipt: any,
+              index: number
+            ) => ({
+              No:
+                index + 1,
+
+              거래일시:
+                receipt.issued_at || '',
+
+              승인번호:
+                receipt.approval_number || '',
+
+              가맹점ID:
+                'MER' +
+                String(
+                  receipt.merchant_id || 0
+                ).padStart(
+                  4,
+                  '0'
+                ),
+
+              가맹점명:
+                receipt.merchant_name || '',
+
+              승인구분:
+                receipt.receipt_type || '',
+
+              증빙번호:
+                receipt.identity_number_masked || '',
+
+              품목명:
+                receipt.order_name || '',
+
+              물품가액:
+                Number(
+                  receipt.supply_amount || 0
+                ),
+
+              부가세:
+                Number(
+                  receipt.vat_amount || 0
+                ),
+
+              승인금액:
+                Number(
+                  receipt.amount || 0
+                ),
+
+              상태:
+                receipt.status || '',
+
+              PG사:
+                receipt.pg_company || ''
+            })
+          )
+
+
+        const worksheet =
+          XLSX.utils
+            .json_to_sheet(
+              rows
+            )
+
+
+        const workbook =
+          XLSX.utils
+            .book_new()
+
+
+        XLSX.utils
+          .book_append_sheet(
+            workbook,
+            worksheet,
+            '현금영수증'
+          )
+
+
+        XLSX.writeFile(
+          workbook,
+          '현금영수증내역.xlsx'
+        )
+
+      }
+    )
+
+
+  return
 }
 
 if (titleBox) {
