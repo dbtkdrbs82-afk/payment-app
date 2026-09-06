@@ -30347,7 +30347,7 @@ if (cashReceiptSaveError) {
       font-size:14px;
       font-weight:700;
       position:relative;
-top:-5px;
+top:-8px;
     "
   >
     조회
