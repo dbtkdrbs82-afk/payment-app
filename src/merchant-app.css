@@ -1914,7 +1914,7 @@
   margin: 10px 0 16px;
   border: none;
   border-radius: 10px;
-  background: #174981;
+  background: #0b1730;
   color: #ffffff;
   font-size: 15px;
   font-weight: 800;
@@ -1940,8 +1940,8 @@
 /* 승인영수증 */
 .mobile-cash-approval-receipt {
   background: #ffffff;
-  color: #174981;
-  border: 1px solid #174981;
+  color: #0b1730;
+  border: 1px solid #0b1730;
 }
 
 
@@ -1955,9 +1955,9 @@
 
 /* 취소처리 */
 .mobile-cash-cancel {
-  background: #174981;
+  background: #0b1730;
   color: #ffffff;
-  border: 1px solid #174981;
+  border: 1px solid #0b1730;
 }
 
 
