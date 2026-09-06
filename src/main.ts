@@ -30353,34 +30353,6 @@ if (cashReceiptSaveError) {
 
 </div>
 
-          <input
-            id="cash-history-start"
-            type="date"
-            value="${startDate}"
-          />
-
-          <span>~</span>
-
-          <input
-            id="cash-history-end"
-            type="date"
-            value="${endDate}"
-          />
-
-          <button
-  id="cash-history-search"
-  type="button"
-  style="
-    width:90px;
-    flex:none;
-  "
->
-  조회
-</button>
-
-        </div>
-
-
         <div
           style="
             margin-bottom:20px;
