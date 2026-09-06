@@ -5325,6 +5325,26 @@ function renderMerchantCard() {
               </small>
   
             </button>
+
+            <button
+  type="button"
+  class="merchant-mobile-card-menu-item"
+  data-card-menu="cash-history"
+>
+
+  <span>
+    📄
+  </span>
+
+  <strong>
+    현금영수증 내역
+  </strong>
+
+  <small>
+    승인내역 · 취소 · 영수증
+  </small>
+
+</button>
   
           </div>
   
@@ -5421,6 +5441,20 @@ function renderMerchantCard() {
   
         }
       )
+
+      document
+  .querySelector(
+    '[data-card-menu="cash-history"]'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      location.href =
+        '/merchant-app/card/cash-history'
+
+    }
+  )
   }
 
   /* =========================================
@@ -7032,6 +7066,1228 @@ if (cashReceiptSaveError) {
           }
 
         }
+
+      }
+    )
+
+}
+
+/* =========================================
+   모바일 현금영수증 내역
+========================================= */
+
+async function renderMerchantCashReceiptHistory() {
+
+  const merchantIdText =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+
+  if (!merchantIdText) {
+
+    location.replace(
+      '/merchant-app'
+    )
+
+    return
+  }
+
+
+  const merchantId =
+    Number(
+      merchantIdText
+    )
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '가맹점'
+
+
+  const params =
+    new URLSearchParams(
+      location.search
+    )
+
+
+  const getKoreaDate = (
+    date: Date
+  ) => {
+
+    return new Intl.DateTimeFormat(
+      'en-CA',
+      {
+        timeZone:
+          'Asia/Seoul',
+
+        year:
+          'numeric',
+
+        month:
+          '2-digit',
+
+        day:
+          '2-digit'
+      }
+    ).format(date)
+  }
+
+
+  const today =
+    getKoreaDate(
+      new Date()
+    )
+
+
+  const startDate =
+    params.get('start') ||
+    today
+
+
+  const endDate =
+    params.get('end') ||
+    today
+
+
+  const startIso =
+    new Date(
+      startDate +
+      'T00:00:00+09:00'
+    ).toISOString()
+
+
+  const endIso =
+    new Date(
+      endDate +
+      'T23:59:59.999+09:00'
+    ).toISOString()
+
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from(
+        'cash_receipts'
+      )
+      .select('*')
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .gte(
+        'issued_at',
+        startIso
+      )
+      .lte(
+        'issued_at',
+        endIso
+      )
+      .order(
+        'issued_at',
+        {
+          ascending:
+            false
+        }
+      )
+
+
+  if (error) {
+
+    alert(
+      '현금영수증 내역 조회 실패: ' +
+      error.message
+    )
+
+    return
+  }
+
+
+  const receipts =
+    data || []
+
+
+  const normalReceipts =
+    receipts.filter(
+      (receipt: any) =>
+        receipt.status !==
+        '취소완료'
+    )
+
+
+  const normalAmount =
+    normalReceipts.reduce(
+      (
+        sum: number,
+        receipt: any
+      ) =>
+        sum +
+        Number(
+          receipt.amount || 0
+        ),
+      0
+    )
+
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+
+        <button
+          id="mobile-cash-history-back"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          이전
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <div class="merchant-mobile-page-title">
+
+          <h1>
+            현금영수증 내역
+          </h1>
+
+          <span>
+            승인 · 취소 · 영수증
+          </span>
+
+        </div>
+
+
+        <div class="merchant-mobile-date-range">
+
+          <div>
+
+            <label>
+              시작일
+            </label>
+
+            <input
+              id="mobile-cash-history-start"
+              type="date"
+              value="${startDate}"
+            >
+
+          </div>
+
+
+          <div>
+
+            <label>
+              종료일
+            </label>
+
+            <input
+              id="mobile-cash-history-end"
+              type="date"
+              value="${endDate}"
+            >
+
+          </div>
+
+        </div>
+
+
+        <button
+          id="mobile-cash-history-search"
+          type="button"
+          style="
+            width:100%;
+            margin:10px 0 16px;
+          "
+        >
+          조회
+        </button>
+
+
+        <div
+          class="merchant-mobile-order-summary"
+        >
+
+          <span>
+            정상 승인 :
+            <strong>
+              ${normalReceipts.length}건
+            </strong>
+          </span>
+
+          <span>
+            승인금액 :
+            <strong>
+              ${normalAmount.toLocaleString()}원
+            </strong>
+          </span>
+
+        </div>
+
+
+        <div
+          id="mobile-cash-history-list"
+          class="merchant-mobile-order-list"
+        >
+
+          ${
+            receipts.length === 0
+
+              ? `
+                <div
+                  class="merchant-mobile-order-empty"
+                >
+                  현금영수증 내역이 없습니다.
+                </div>
+              `
+
+              :
+
+              receipts
+                .map(
+                  (
+                    receipt: any
+                  ) => {
+
+                    const issuedAt =
+                      receipt.issued_at
+                        ? new Date(
+                            receipt.issued_at
+                          )
+                            .toLocaleString(
+                              'ko-KR',
+                              {
+                                timeZone:
+                                  'Asia/Seoul'
+                              }
+                            )
+                        : '-'
+
+
+                    return `
+                      <div
+                        class="merchant-mobile-order-card"
+                      >
+
+                        <div
+                          class="merchant-mobile-order-card-top"
+                        >
+
+                          <strong>
+                            ${
+                              receipt.order_name ||
+                              '현금결제'
+                            }
+                          </strong>
+
+                          <span>
+                            ${Number(
+                              receipt.amount || 0
+                            ).toLocaleString()}원
+                          </span>
+
+                        </div>
+
+
+                        <div
+                          class="merchant-mobile-order-date"
+                        >
+                          ${issuedAt}
+                        </div>
+
+
+                        <div
+                          style="
+                            margin-top:10px;
+                            line-height:1.8;
+                            font-size:14px;
+                          "
+                        >
+
+                          <div>
+                            승인번호 :
+                            <strong>
+                              ${
+                                receipt.approval_number ||
+                                '-'
+                              }
+                            </strong>
+                          </div>
+
+                          <div>
+                            승인구분 :
+                            ${
+                              receipt.receipt_type ||
+                              '-'
+                            }
+                          </div>
+
+                          <div>
+                            증빙번호 :
+                            ${
+                              receipt.identity_number_masked ||
+                              '-'
+                            }
+                          </div>
+
+                          <div>
+                            물품가액 :
+                            ${Number(
+                              receipt.supply_amount || 0
+                            ).toLocaleString()}원
+                          </div>
+
+                          <div>
+                            부가세 :
+                            ${Number(
+                              receipt.vat_amount || 0
+                            ).toLocaleString()}원
+                          </div>
+
+                        </div>
+
+
+                        <div
+                          class="merchant-mobile-order-bottom"
+                          style="
+                            margin-top:14px;
+                          "
+                        >
+
+                          <span
+                            class="merchant-mobile-order-status"
+                          >
+                            ${
+                              receipt.status ||
+                              '-'
+                            }
+                          </span>
+
+                        </div>
+
+
+                        <div
+                          style="
+                            display:flex;
+                            flex-wrap:wrap;
+                            gap:8px;
+                            margin-top:10px;
+                          "
+                        >
+
+                          <button
+                            type="button"
+                            class="mobile-cash-approval-receipt"
+                            data-id="${receipt.id}"
+                          >
+                            승인영수증
+                          </button>
+
+
+                          ${
+                            receipt.status ===
+                            '취소완료'
+
+                              ? `
+                                <button
+                                  type="button"
+                                  class="mobile-cash-cancel-receipt"
+                                  data-id="${receipt.id}"
+                                >
+                                  취소영수증
+                                </button>
+                              `
+
+                              : ''
+                          }
+
+
+                          ${
+                            receipt.status !==
+                              '취소완료' &&
+                            receipt.receipt_key
+
+                              ? `
+                                <button
+                                  type="button"
+                                  class="mobile-cash-cancel"
+                                  data-id="${receipt.id}"
+                                >
+                                  취소처리
+                                </button>
+                              `
+
+                              : ''
+                          }
+
+                        </div>
+
+                      </div>
+                    `
+                  }
+                )
+                .join('')
+          }
+
+        </div>
+
+      </main>
+
+    </div>
+  `
+
+
+  document
+    .querySelector(
+      '#mobile-cash-history-back'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/card'
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#mobile-cash-history-search'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const start =
+          document
+            .querySelector<HTMLInputElement>(
+              '#mobile-cash-history-start'
+            )
+            ?.value || today
+
+
+        const end =
+          document
+            .querySelector<HTMLInputElement>(
+              '#mobile-cash-history-end'
+            )
+            ?.value || today
+
+
+        location.href =
+          '/merchant-app/card/cash-history' +
+          '?start=' +
+          encodeURIComponent(
+            start
+          ) +
+          '&end=' +
+          encodeURIComponent(
+            end
+          )
+
+      }
+    )
+
+
+  const openReceipt =
+    (
+      receipt: any,
+      cancelMode:
+        boolean
+    ) => {
+
+      document
+        .querySelector(
+          '#merchant-mobile-receipt-modal'
+        )
+        ?.remove()
+
+
+      const transactionDate =
+        cancelMode
+          ? receipt.canceled_at
+          : receipt.issued_at
+
+
+      const transactionDateText =
+        transactionDate
+          ? new Date(
+              transactionDate
+            )
+              .toLocaleString(
+                'ko-KR',
+                {
+                  timeZone:
+                    'Asia/Seoul'
+                }
+              )
+          : '-'
+
+
+      const cancelData =
+        receipt
+          .cancel_response
+          ?.data
+          ?.entityBody ||
+
+        receipt
+          .cancel_response
+          ?.data
+          ?.cashReceipt ||
+
+        receipt
+          .cancel_response
+          ?.data ||
+
+        {}
+
+
+      const cancelNumber =
+        cancelData
+          ?.issueNumber ||
+
+        cancelData
+          ?.approvalNumber ||
+
+        receipt
+          .cancel_receipt_key ||
+
+        '-'
+
+
+      document.body
+        .insertAdjacentHTML(
+          'beforeend',
+          `
+            <div
+              id="merchant-mobile-receipt-modal"
+              class="merchant-mobile-receipt-modal"
+            >
+
+              <div
+                class="merchant-mobile-receipt-box"
+              >
+
+                <div
+                  class="merchant-mobile-receipt-header"
+                >
+
+                  <strong>
+                    NXG PICK
+                  </strong>
+
+                  <h2>
+                    현금영수증
+                    ${
+                      cancelMode
+                        ? '(취소)'
+                        : '(승인)'
+                    }
+                  </h2>
+
+                </div>
+
+
+                <section
+                  class="merchant-mobile-receipt-section"
+                >
+
+                  <h3>
+                    ${
+                      cancelMode
+                        ? '취소정보'
+                        : '승인정보'
+                    }
+                  </h3>
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+                    <span>
+                      가맹점
+                    </span>
+
+                    <strong>
+                      ${merchantName}
+                    </strong>
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+                    <span>
+                      거래일시
+                    </span>
+
+                    <strong>
+                      ${transactionDateText}
+                    </strong>
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+                    <span>
+                      ${
+                        cancelMode
+                          ? '취소처리번호'
+                          : '승인번호'
+                      }
+                    </span>
+
+                    <strong>
+                      ${
+                        cancelMode
+                          ? cancelNumber
+                          : (
+                              receipt.approval_number ||
+                              '-'
+                            )
+                      }
+                    </strong>
+                  </div>
+
+
+                  ${
+                    cancelMode
+                      ? `
+                        <div
+                          class="merchant-mobile-receipt-row"
+                        >
+
+                          <span>
+                            원승인번호
+                          </span>
+
+                          <strong>
+                            ${
+                              receipt.approval_number ||
+                              '-'
+                            }
+                          </strong>
+
+                        </div>
+                      `
+                      : ''
+                  }
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+
+                    <span>
+                      승인구분
+                    </span>
+
+                    <strong>
+                      ${
+                        receipt.receipt_type ||
+                        '-'
+                      }
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+
+                    <span>
+                      증빙번호
+                    </span>
+
+                    <strong>
+                      ${
+                        receipt.identity_number_masked ||
+                        '-'
+                      }
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+
+                    <span>
+                      품목명
+                    </span>
+
+                    <strong>
+                      ${
+                        receipt.order_name ||
+                        '-'
+                      }
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+
+                    <span>
+                      물품가액
+                    </span>
+
+                    <strong>
+                      ${Number(
+                        receipt.supply_amount || 0
+                      ).toLocaleString()}원
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+
+                    <span>
+                      부가세
+                    </span>
+
+                    <strong>
+                      ${Number(
+                        receipt.vat_amount || 0
+                      ).toLocaleString()}원
+                    </strong>
+
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-receipt-row"
+                  >
+
+                    <span>
+                      ${
+                        cancelMode
+                          ? '취소금액'
+                          : '승인금액'
+                      }
+                    </span>
+
+                    <strong>
+                      ${Number(
+                        cancelMode
+                          ? (
+                              receipt.cancel_amount ||
+                              receipt.amount ||
+                              0
+                            )
+                          : (
+                              receipt.amount ||
+                              0
+                            )
+                      ).toLocaleString()}원
+                    </strong>
+
+                  </div>
+
+                </section>
+
+
+                <div
+                  class="merchant-mobile-receipt-actions"
+                >
+
+                  <button
+                    id="mobile-cash-receipt-print"
+                    type="button"
+                  >
+                    인쇄
+                  </button>
+
+                  <button
+                    id="mobile-cash-receipt-close"
+                    type="button"
+                  >
+                    닫기
+                  </button>
+
+                </div>
+
+              </div>
+
+            </div>
+          `
+        )
+
+
+      document
+        .querySelector(
+          '#mobile-cash-receipt-close'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            document
+              .querySelector(
+                '#merchant-mobile-receipt-modal'
+              )
+              ?.remove()
+
+          }
+        )
+
+
+      document
+        .querySelector(
+          '#mobile-cash-receipt-print'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            window.print()
+
+          }
+        )
+
+    }
+
+
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '.mobile-cash-approval-receipt'
+    )
+    .forEach(
+      (
+        button
+      ) => {
+
+        button
+          .addEventListener(
+            'click',
+            () => {
+
+              const id =
+                Number(
+                  button.dataset.id ||
+                  0
+                )
+
+
+              const receipt =
+                receipts.find(
+                  (
+                    item: any
+                  ) =>
+                    Number(
+                      item.id
+                    ) === id
+                )
+
+
+              if (receipt) {
+
+                openReceipt(
+                  receipt,
+                  false
+                )
+
+              }
+
+            }
+          )
+
+      }
+    )
+
+
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '.mobile-cash-cancel-receipt'
+    )
+    .forEach(
+      (
+        button
+      ) => {
+
+        button
+          .addEventListener(
+            'click',
+            () => {
+
+              const id =
+                Number(
+                  button.dataset.id ||
+                  0
+                )
+
+
+              const receipt =
+                receipts.find(
+                  (
+                    item: any
+                  ) =>
+                    Number(
+                      item.id
+                    ) === id
+                )
+
+
+              if (receipt) {
+
+                openReceipt(
+                  receipt,
+                  true
+                )
+
+              }
+
+            }
+          )
+
+      }
+    )
+
+
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '.mobile-cash-cancel'
+    )
+    .forEach(
+      (
+        button
+      ) => {
+
+        button
+          .addEventListener(
+            'click',
+            async () => {
+
+              const id =
+                Number(
+                  button.dataset.id ||
+                  0
+                )
+
+
+              const receipt =
+                receipts.find(
+                  (
+                    item: any
+                  ) =>
+                    Number(
+                      item.id
+                    ) === id
+                )
+
+
+              if (
+                !receipt ||
+                !receipt.receipt_key
+              ) {
+
+                alert(
+                  '취소할 현금영수증 정보가 없습니다.'
+                )
+
+                return
+              }
+
+
+              const amount =
+                Number(
+                  receipt.amount ||
+                  0
+                )
+
+
+              if (
+                !confirm(
+                  `현금영수증 ${amount.toLocaleString()}원을 취소하시겠습니까?`
+                )
+              ) {
+
+                return
+              }
+
+
+              button.disabled =
+                true
+
+              button.textContent =
+                '취소 중...'
+
+
+              try {
+
+                const response =
+                  await fetch(
+                    '/api/toss-cash-receipt-cancel',
+                    {
+                      method:
+                        'POST',
+
+                      headers: {
+                        'Content-Type':
+                          'application/json'
+                      },
+
+                      body:
+                        JSON.stringify({
+                          receiptKey:
+                            receipt.receipt_key
+                        })
+                    }
+                  )
+
+
+                const result =
+                  await response.json()
+
+
+                if (
+                  !response.ok ||
+                  !result.success
+                ) {
+
+                  alert(
+                    '현금영수증 취소 실패: ' +
+                    (
+                      result.message ||
+                      '알 수 없는 오류'
+                    )
+                  )
+
+                  return
+                }
+
+
+                const cancelData =
+                  result
+                    ?.data
+                    ?.entityBody ||
+
+                  result
+                    ?.data
+                    ?.cashReceipt ||
+
+                  result
+                    ?.data ||
+
+                  result
+
+
+                const {
+                  error:
+                    updateError
+                } =
+                  await supabase
+                    .from(
+                      'cash_receipts'
+                    )
+                    .update({
+                      status:
+                        '취소완료',
+
+                      canceled_at:
+                        new Date()
+                          .toISOString(),
+
+                      cancel_amount:
+                        amount,
+
+                      cancel_receipt_key:
+                        cancelData
+                          ?.receiptKey ||
+                        null,
+
+                      cancel_response:
+                        result
+                    })
+                    .eq(
+                      'id',
+                      id
+                    )
+                    .eq(
+                      'merchant_id',
+                      merchantId
+                    )
+
+
+                if (updateError) {
+
+                  alert(
+                    '현금영수증은 취소됐지만 내역 저장에 실패했습니다.\n' +
+                    updateError.message
+                  )
+
+                  return
+                }
+
+
+                alert(
+                  '현금영수증 취소가 완료되었습니다.'
+                )
+
+
+                location.reload()
+
+
+              } catch (error) {
+
+                console.error(
+                  '모바일 현금영수증 취소 오류:',
+                  error
+                )
+
+
+                alert(
+                  '현금영수증 취소 중 오류가 발생했습니다.'
+                )
+
+
+              } finally {
+
+                button.disabled =
+                  false
+
+                button.textContent =
+                  '취소처리'
+
+              }
+
+            }
+          )
 
       }
     )
@@ -8782,6 +10038,13 @@ if (
   ) {
   
     renderMerchantCashReceipt()
+
+  } else if (
+    path === '/merchant-app/card/cash-history'
+  ) {
+  
+    void renderMerchantCashReceiptHistory()
+  
     
   
 } else if (
