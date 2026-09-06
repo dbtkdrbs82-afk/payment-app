@@ -6313,20 +6313,25 @@ function renderMerchantSmsCard() {
   >
 
 
+  <div class="merchant-mobile-btn-row">
+
   <button
     id="mobile-sms-send"
     type="button"
+    class="merchant-mobile-btn-primary"
   >
     결제링크 문자 발송
   </button>
 
-
   <button
     id="mobile-sms-copy"
     type="button"
+    class="merchant-mobile-btn-secondary"
   >
     결제링크 복사
   </button>
+
+</div>
 
 </div>
   
@@ -6658,11 +6663,12 @@ function renderMerchantCashReceipt() {
 
 
           <button
-            id="mobile-cash-submit"
-            type="button"
-          >
-            현금영수증 발급
-          </button>
+  id="mobile-cash-receipt-submit"
+  type="button"
+  class="merchant-mobile-btn-block"
+>
+  현금영수증 발급
+</button>
 
         </div>
 
