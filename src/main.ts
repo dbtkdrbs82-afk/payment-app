@@ -14438,6 +14438,7 @@ if (
         <th>승인금액</th>
         <th>상태</th>
         <th>PG사</th>
+        <th>처리</th>
       </tr>
     `
   }
@@ -14562,6 +14563,27 @@ if (
             '-'
           }
         </td>
+
+        <td>
+  ${
+    receipt.status === '취소완료'
+      ? '취소완료'
+      : receipt.receipt_key
+        ? `
+          <button
+            type="button"
+            class="cash-receipt-cancel-btn"
+            data-id="${receipt.id}"
+            data-receipt-key="${receipt.receipt_key}"
+            data-amount="${receipt.amount || 0}"
+          >
+            취소처리
+          </button>
+        `
+        : '-'
+  }
+</td>
+
       `
 
 
@@ -14573,6 +14595,197 @@ if (
     }
   )
 
+  document
+  .querySelectorAll<HTMLButtonElement>(
+    '.cash-receipt-cancel-btn'
+  )
+  .forEach(
+    (button) => {
+
+      button.addEventListener(
+        'click',
+        async () => {
+
+          const id =
+            Number(
+              button.dataset.id || 0
+            )
+
+
+          const receiptKey =
+            String(
+              button.dataset.receiptKey || ''
+            )
+
+
+          const amount =
+            Number(
+              button.dataset.amount || 0
+            )
+
+
+          if (
+            !id ||
+            !receiptKey
+          ) {
+
+            alert(
+              '취소할 현금영수증 정보가 없습니다.'
+            )
+
+            return
+          }
+
+
+          const confirmCancel =
+            confirm(
+              `현금영수증 ${amount.toLocaleString()}원을 취소하시겠습니까?`
+            )
+
+
+          if (!confirmCancel) {
+            return
+          }
+
+
+          button.disabled =
+            true
+
+          button.textContent =
+            '취소 중...'
+
+
+          try {
+
+            const response =
+              await fetch(
+                '/api/toss-cash-receipt-cancel',
+                {
+                  method:
+                    'POST',
+
+                  headers: {
+                    'Content-Type':
+                      'application/json'
+                  },
+
+                  body:
+                    JSON.stringify({
+                      receiptKey
+                    })
+                }
+              )
+
+
+            const result =
+              await response.json()
+
+
+            if (
+              !response.ok ||
+              !result.success
+            ) {
+
+              alert(
+                '현금영수증 취소 실패: ' +
+                (
+                  result.message ||
+                  '알 수 없는 오류'
+                )
+              )
+
+              return
+            }
+
+
+            const cancelData =
+              result?.data?.entityBody ||
+              result?.data?.cashReceipt ||
+              result?.data ||
+              result
+
+
+            const {
+              error: updateError
+            } =
+              await supabase
+                .from(
+                  'cash_receipts'
+                )
+                .update({
+                  status:
+                    '취소완료',
+
+                  canceled_at:
+                    new Date()
+                      .toISOString(),
+
+                  cancel_amount:
+                    amount,
+
+                  cancel_receipt_key:
+                    cancelData?.receiptKey ||
+                    null,
+
+                  cancel_response:
+                    result
+                })
+                .eq(
+                  'id',
+                  id
+                )
+
+
+            if (updateError) {
+
+              alert(
+                '현금영수증은 취소됐지만 내역 저장에 실패했습니다.\n' +
+                updateError.message
+              )
+
+              return
+            }
+
+
+            alert(
+              '현금영수증 취소가 완료되었습니다.'
+            )
+
+
+            document
+              .querySelector<HTMLElement>(
+                '.admin-tab[data-page="payment"]'
+              )
+              ?.click()
+
+
+          } catch (error) {
+
+            console.error(
+              '현금영수증 취소 오류:',
+              error
+            )
+
+            alert(
+              '현금영수증 취소 중 오류가 발생했습니다.'
+            )
+
+
+          } finally {
+
+            button.disabled =
+              false
+
+            button.textContent =
+              '취소처리'
+
+          }
+
+        }
+      )
+
+    }
+  )
 
   document
     .querySelector(
@@ -29725,9 +29938,9 @@ document.querySelector('#close-payment-method-modal')
   result
 
 
-const supplyAmount =
+  const supplyAmount =
   Math.floor(
-    amount / 1.1
+    (amount * 10) / 11
   )
 
 
@@ -30221,9 +30434,9 @@ if (cashReceiptSaveError) {
   result
 
 
-const supplyAmount =
+  const supplyAmount =
   Math.floor(
-    amount / 1.1
+    (amount * 10) / 11
   )
 
 
