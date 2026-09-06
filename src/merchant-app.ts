@@ -6480,6 +6480,444 @@ function renderMerchantSmsCard() {
   }
 
   /* =========================================
+   모바일 현금영수증
+========================================= */
+
+function renderMerchantCashReceipt() {
+
+  const merchantIdText =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+
+  if (!merchantIdText) {
+
+    location.replace(
+      '/merchant-app'
+    )
+
+    return
+  }
+
+
+  const merchantId =
+    Number(
+      merchantIdText
+    )
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '가맹점'
+
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+
+        <button
+          id="mobile-cash-back"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          이전
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <div class="merchant-mobile-page-title">
+
+          <h1>
+            현금영수증
+          </h1>
+
+          <span>
+            현금영수증 발급
+          </span>
+
+        </div>
+
+
+        <div
+          class="merchant-mobile-manual-card"
+        >
+
+          <label>
+            구분
+          </label>
+
+          <select
+            id="mobile-cash-type"
+          >
+            <option value="소득공제">
+              소득공제
+            </option>
+
+            <option value="지출증빙">
+              지출증빙
+            </option>
+          </select>
+
+
+          <label>
+            결제금액
+          </label>
+
+          <input
+            id="mobile-cash-amount"
+            type="number"
+            inputmode="numeric"
+            min="1"
+            placeholder="결제금액"
+          >
+
+
+          <label>
+            상품명
+          </label>
+
+          <input
+            id="mobile-cash-order-name"
+            type="text"
+            placeholder="현금결제"
+          >
+
+
+          <label
+            id="mobile-cash-number-label"
+          >
+            휴대폰번호
+          </label>
+
+          <input
+            id="mobile-cash-number"
+            type="text"
+            inputmode="numeric"
+            placeholder="휴대폰번호 또는 현금영수증 카드번호"
+          >
+
+
+          <button
+            id="mobile-cash-submit"
+            type="button"
+          >
+            현금영수증 발급
+          </button>
+
+        </div>
+
+      </main>
+
+    </div>
+  `
+
+
+  document
+    .querySelector(
+      '#mobile-cash-back'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/card'
+
+      }
+    )
+
+
+  const typeSelect =
+    document.querySelector<HTMLSelectElement>(
+      '#mobile-cash-type'
+    )
+
+
+  const numberInput =
+    document.querySelector<HTMLInputElement>(
+      '#mobile-cash-number'
+    )
+
+
+  const numberLabel =
+    document.querySelector<HTMLElement>(
+      '#mobile-cash-number-label'
+    )
+
+
+  typeSelect
+    ?.addEventListener(
+      'change',
+      () => {
+
+        if (
+          typeSelect.value ===
+          '지출증빙'
+        ) {
+
+          if (numberLabel) {
+            numberLabel.textContent =
+              '사업자번호'
+          }
+
+          if (numberInput) {
+            numberInput.placeholder =
+              '사업자번호 10자리'
+          }
+
+        } else {
+
+          if (numberLabel) {
+            numberLabel.textContent =
+              '휴대폰번호'
+          }
+
+          if (numberInput) {
+            numberInput.placeholder =
+              '휴대폰번호 또는 현금영수증 카드번호'
+          }
+
+        }
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#mobile-cash-submit'
+    )
+    ?.addEventListener(
+      'click',
+      async () => {
+
+        const type =
+          (
+            document.querySelector<HTMLSelectElement>(
+              '#mobile-cash-type'
+            )?.value || ''
+          )
+
+
+        const amount =
+          Number(
+            document.querySelector<HTMLInputElement>(
+              '#mobile-cash-amount'
+            )?.value || 0
+          )
+
+
+        const orderName =
+          (
+            document.querySelector<HTMLInputElement>(
+              '#mobile-cash-order-name'
+            )?.value ||
+            '현금결제'
+          ).trim()
+
+
+        const customerIdentityNumber =
+          (
+            document.querySelector<HTMLInputElement>(
+              '#mobile-cash-number'
+            )?.value || ''
+          )
+            .replace(
+              /[^0-9]/g,
+              ''
+            )
+
+
+        if (
+          !amount ||
+          amount <= 0
+        ) {
+
+          alert(
+            '결제금액을 입력해주세요.'
+          )
+
+          return
+        }
+
+
+        if (!customerIdentityNumber) {
+
+          alert(
+            type === '지출증빙'
+              ? '사업자번호를 입력해주세요.'
+              : '휴대폰번호를 입력해주세요.'
+          )
+
+          return
+        }
+
+
+        const orderId =
+          'CASH-' +
+          merchantId +
+          '-' +
+          Date.now()
+
+
+        const submitButton =
+          document.querySelector<HTMLButtonElement>(
+            '#mobile-cash-submit'
+          )
+
+
+        if (submitButton) {
+
+          submitButton.disabled =
+            true
+
+          submitButton.textContent =
+            '발급 중...'
+
+        }
+
+
+        try {
+
+          const response =
+            await fetch(
+              '/api/toss-cash-receipt',
+              {
+                method:
+                  'POST',
+
+                headers: {
+                  'Content-Type':
+                    'application/json'
+                },
+
+                body:
+                  JSON.stringify({
+                    amount,
+                    orderId,
+                    orderName,
+                    type,
+                    customerIdentityNumber,
+                    taxFreeAmount:
+                      0
+                  })
+              }
+            )
+
+
+          const result =
+            await response.json()
+
+
+          if (
+            !response.ok ||
+            !result.success
+          ) {
+
+            alert(
+              '현금영수증 발급 실패: ' +
+              (
+                result.message ||
+                '알 수 없는 오류'
+              )
+            )
+
+            return
+          }
+
+
+          alert(
+            '현금영수증 발급이 완료되었습니다.'
+          )
+
+
+          const amountInput =
+            document.querySelector<HTMLInputElement>(
+              '#mobile-cash-amount'
+            )
+
+          const nameInput =
+            document.querySelector<HTMLInputElement>(
+              '#mobile-cash-order-name'
+            )
+
+          const identityInput =
+            document.querySelector<HTMLInputElement>(
+              '#mobile-cash-number'
+            )
+
+
+          if (amountInput) {
+            amountInput.value = ''
+          }
+
+          if (nameInput) {
+            nameInput.value = ''
+          }
+
+          if (identityInput) {
+            identityInput.value = ''
+          }
+
+
+        } catch (error) {
+
+          console.error(
+            '모바일 현금영수증 오류:',
+            error
+          )
+
+          alert(
+            '현금영수증 발급 중 오류가 발생했습니다.'
+          )
+
+
+        } finally {
+
+          if (submitButton) {
+
+            submitButton.disabled =
+              false
+
+            submitButton.textContent =
+              '현금영수증 발급'
+
+          }
+
+        }
+
+      }
+    )
+
+}
+
+  /* =========================================
    모바일 메뉴 카드결제
 ========================================= */
 
@@ -8217,6 +8655,13 @@ if (
   ) {
   
     renderMerchantSmsCard()
+
+  } else if (
+    path === '/merchant-app/card/cash'
+  ) {
+  
+    renderMerchantCashReceipt()
+    
   
 } else if (
     path === '/merchant-app/card/menu'
