@@ -662,48 +662,453 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 })
 
 } else if (path === '/pay') {
-  const params = new URLSearchParams(window.location.search)
 
-  const merchantId = params.get('merchantId') || ''
-  const merchantName = params.get('merchantName') || ''
-  const productName = params.get('productName') || ''
-  const amount = params.get('amount') || ''
+  const params =
+    new URLSearchParams(
+      window.location.search
+    )
 
-  app.innerHTML = `
-    <div class="page">
-      <div class="payment-card">
-        <h1>결제하기</h1>
+  const merchantId =
+    Number(
+      params.get('merchantId') || 0
+    )
 
-        <p><strong>가맹점:</strong> ${merchantName}</p>
-        <p><strong>상품명:</strong> ${productName}</p>
-        <p><strong>결제금액:</strong> ${Number(amount).toLocaleString()}원</p>
+  const merchantNameParam =
+    params.get('merchantName') || ''
 
-        <button id="pay-button">결제하기</button>
+  const productName =
+    params.get('productName') || ''
+
+  const amount =
+    Number(
+      params.get('amount') || 0
+    )
+
+
+  if (
+    !merchantId ||
+    !productName ||
+    !amount
+  ) {
+
+    app.innerHTML = `
+      <div class="page">
+
+        <div class="payment-card">
+
+          <h1>
+            결제정보를 확인할 수 없습니다.
+          </h1>
+
+        </div>
+
       </div>
-    </div>
-  `
+    `
 
-  document.querySelector<HTMLButtonElement>('#pay-button')!
-    .addEventListener('click', async () => {
-      const tossPayments = await loadTossPayments(clientKey)
+  } else {
 
-      sessionStorage.setItem('merchantId', merchantId)
-      sessionStorage.setItem('merchantName', merchantName)
+    const {
+      data: paymentMerchant,
+      error: paymentMerchantError
+    } =
+      await supabase
+        .from('merchants')
+        .select(`
+          merchant_name,
+          online_pg_company_1,
+          toss_client_key,
+          korpay_pg_mid,
+          korpay_pg_mkey
+        `)
+        .eq(
+          'id',
+          merchantId
+        )
+        .single()
 
-      await tossPayments.requestPayment('카드', {
-        amount: Number(amount),
-        orderId: 'order-' + Date.now(),
-        orderName: productName,
-        customerName: merchantName,
-        successUrl:
-  window.location.origin +
-  '/success?merchantId=' +
-  merchantId +
-  '&merchantName=' +
-  encodeURIComponent(merchantName),
-        failUrl: window.location.origin + '/fail',
-      })
-    })
+
+    if (
+      paymentMerchantError ||
+      !paymentMerchant
+    ) {
+
+      app.innerHTML = `
+        <div class="page">
+
+          <div class="payment-card">
+
+            <h1>
+              가맹점 정보를 찾을 수 없습니다.
+            </h1>
+
+          </div>
+
+        </div>
+      `
+
+    } else {
+
+      const merchantName =
+        paymentMerchant
+          .merchant_name ||
+        merchantNameParam ||
+        '가맹점'
+
+
+      const selectedOnlinePg =
+        String(
+          paymentMerchant
+            .online_pg_company_1 || ''
+        ).trim()
+
+
+      app.innerHTML = `
+        <div class="page">
+
+          <div class="payment-card">
+
+            <h1>
+              결제하기
+            </h1>
+
+            <p>
+              <strong>
+                가맹점:
+              </strong>
+
+              ${merchantName}
+            </p>
+
+            <p>
+              <strong>
+                상품명:
+              </strong>
+
+              ${productName}
+            </p>
+
+            <p>
+              <strong>
+                결제금액:
+              </strong>
+
+              ${amount.toLocaleString()}원
+            </p>
+
+
+            <button
+              id="pay-button"
+              type="button"
+            >
+              결제하기
+            </button>
+
+          </div>
+
+        </div>
+      `
+
+
+      document
+        .querySelector<HTMLButtonElement>(
+          '#pay-button'
+        )
+        ?.addEventListener(
+          'click',
+          async () => {
+
+            sessionStorage.setItem(
+              'merchantId',
+              String(
+                merchantId
+              )
+            )
+
+            sessionStorage.setItem(
+              'merchantName',
+              merchantName
+            )
+
+            sessionStorage.setItem(
+              'message',
+              'SMS결제 / ' +
+              productName
+            )
+
+            sessionStorage.setItem(
+              'selected_pg_company',
+              selectedOnlinePg
+            )
+
+
+            if (
+              selectedOnlinePg ===
+              '토스페이먼츠'
+            ) {
+
+              const tossClientKey =
+                String(
+                  paymentMerchant
+                    .toss_client_key ||
+                  clientKey
+                ).trim()
+
+
+              if (!tossClientKey) {
+
+                alert(
+                  '토스 Client Key가 등록되지 않았습니다.'
+                )
+
+                return
+              }
+
+
+              const tossPayments =
+                await loadTossPayments(
+                  tossClientKey
+                )
+
+
+              await tossPayments
+                .requestPayment(
+                  '카드',
+                  {
+
+                    amount:
+                      amount,
+
+                    orderId:
+                      (
+                        'SMS-TOSS-' +
+                        Date.now()
+                      ).replace(
+                        /[^a-zA-Z0-9]/g,
+                        ''
+                      ),
+
+                    orderName:
+                      productName,
+
+                    customerName:
+                      merchantName,
+
+                    successUrl:
+                      window.location.origin +
+                      '/success?source=sms' +
+                      '&pg=토스페이먼츠' +
+                      '&merchantId=' +
+                      merchantId +
+                      '&merchantName=' +
+                      encodeURIComponent(
+                        merchantName
+                      ),
+
+                    failUrl:
+                      window.location.origin +
+                      '/fail'
+                  }
+                )
+
+              return
+            }
+
+
+            if (
+              selectedOnlinePg ===
+              '코페이'
+            ) {
+
+              if (
+                !paymentMerchant
+                  .korpay_pg_mid ||
+                !paymentMerchant
+                  .korpay_pg_mkey
+              ) {
+
+                alert(
+                  '코페이 PG MID 또는 MKEY가 등록되지 않았습니다.'
+                )
+
+                return
+              }
+
+
+              const ediDate =
+                getKorpayEdiDate()
+
+
+              const orderNo =
+                (
+                  'SMS-KORPAY-' +
+                  Date.now()
+                ).replace(
+                  /[^a-zA-Z0-9]/g,
+                  ''
+                )
+
+
+              const hashKey =
+                await createKorpayHash(
+                  String(
+                    paymentMerchant
+                      .korpay_pg_mid
+                  ),
+                  ediDate,
+                  amount,
+                  String(
+                    paymentMerchant
+                      .korpay_pg_mkey
+                  )
+                )
+
+
+              const paymentData = {
+
+                merchantId:
+                  paymentMerchant
+                    .korpay_pg_mid,
+
+                productName:
+                  productName,
+
+                orderNumber:
+                  orderNo,
+
+                amount:
+                  amount,
+
+                payMethod:
+                  'card',
+
+                returnUrl:
+                  window.location.origin +
+                  '/api/korpay-return',
+
+                ediDate:
+                  ediDate,
+
+                hashKey:
+                  hashKey,
+
+                customerName:
+                  merchantName,
+
+                reserved:
+                  String(
+                    merchantId
+                  ),
+
+                language:
+                  'ko'
+
+              }
+
+
+              const korpay =
+                (window as any)
+                  .KorpaySdk
+
+
+              if (!korpay) {
+
+                alert(
+                  'Korpay SDK를 찾을 수 없습니다.'
+                )
+
+                return
+              }
+
+
+              korpay.paymentTimeout =
+                30000
+
+
+              korpay.payment(
+                'https://staging-payments.korpay.com/v1',
+                paymentData,
+                {
+
+                  onStart: () => {
+
+                    const payButton =
+                      document.querySelector<HTMLButtonElement>(
+                        '#pay-button'
+                      )
+
+                    if (payButton) {
+
+                      payButton.disabled =
+                        true
+
+                      payButton.innerText =
+                        '결제창 호출 중...'
+                    }
+
+                  },
+
+
+                  onError: (
+                    error: any
+                  ) => {
+
+                    alert(
+                      String(error)
+                    )
+
+
+                    const payButton =
+                      document.querySelector<HTMLButtonElement>(
+                        '#pay-button'
+                      )
+
+                    if (payButton) {
+
+                      payButton.disabled =
+                        false
+
+                      payButton.innerText =
+                        '결제하기'
+                    }
+
+                  },
+
+
+                  onClose: () => {
+
+                    const payButton =
+                      document.querySelector<HTMLButtonElement>(
+                        '#pay-button'
+                      )
+
+                    if (payButton) {
+
+                      payButton.disabled =
+                        false
+
+                      payButton.innerText =
+                        '결제하기'
+                    }
+
+                  }
+
+                }
+              )
+
+              return
+            }
+
+
+            alert(
+              '온라인결제 1 PG사가 설정되지 않았습니다.'
+            )
+
+          }
+        )
+
+    }
+
+  }
 
   } else if (path === '/academy-chrome') {
 
