@@ -31022,12 +31022,6 @@ ${
   </button>
 
   <button
-  class="kiosk-card-pay-button"
-  id="kiosk-korpay-test-button">
-  코페이 온라인 테스트
-</button>
-
-  <button
     class="kiosk-card-pay-button"
     id="kiosk-card-pay-button">
     수기 결제
@@ -31960,31 +31954,55 @@ duration_minutes:
     }
 
     const { data: tossMerchant, error: tossMerchantError } =
-      await supabase
-        .from('merchants')
-        .select(
-          'merchant_name, online_pg_company_1, toss_client_key'
-        )
-        .eq('id', Number(merchantId))
-        .single()
+  await supabase
+    .from('merchants')
+    .select(`
+      merchant_name,
+      online_pg_company_1,
+      toss_client_key,
+      korpay_pg_mid,
+      korpay_pg_mkey
+    `)
+    .eq(
+      'id',
+      Number(merchantId)
+    )
+    .single()
 
-    if (tossMerchantError || !tossMerchant) {
-      alert('가맹점 토스 결제정보를 불러오지 못했습니다.')
-      return
-    }
 
-    if (tossMerchant.online_pg_company_1 !== '토스페이먼츠') {
-      alert('온라인결제 1이 토스페이먼츠로 설정되지 않았습니다.')
-      return
-    }
+if (
+  tossMerchantError ||
+  !tossMerchant
+) {
 
-    const tossClientKey =
-      String(tossMerchant.toss_client_key || clientKey).trim()
+  alert(
+    '가맹점 온라인 결제정보를 불러오지 못했습니다.'
+  )
 
-    if (!tossClientKey) {
-      alert('토스 Client Key가 등록되지 않았습니다.')
-      return
-    }
+  return
+}
+
+
+const selectedOnlinePg =
+  String(
+    tossMerchant
+      .online_pg_company_1 || ''
+  ).trim()
+
+
+if (
+  selectedOnlinePg !==
+    '토스페이먼츠' &&
+  selectedOnlinePg !==
+    '코페이'
+) {
+
+  alert(
+    '온라인결제 1 PG사를 확인해주세요.'
+  )
+
+  return
+}
 
     const { data: nextCallNumber, error: callNumberError } =
   await supabase.rpc('get_next_call_number', {
@@ -32002,7 +32020,14 @@ if (callNumberError || !nextCallNumber) {
 const callNumber = Number(nextCallNumber)
 
 const orderNo =
-  'TOSS-' + callNumber + '-' + Date.now()
+  (
+    selectedOnlinePg === '코페이'
+      ? 'KORPAY-'
+      : 'TOSS-'
+  ) +
+  callNumber +
+  '-' +
+  Date.now()
 
     sessionStorage.setItem(
       'kiosk_call_number',
@@ -32138,258 +32163,250 @@ sessionStorage.setItem(
 
     sessionStorage.setItem(
       'selected_pg_company',
-      '토스페이먼츠'
+      selectedOnlinePg
     )
 
-    const tossPayments =
-      await loadTossPayments(tossClientKey)
-
-    await tossPayments.requestPayment('카드', {
-      amount: totalPrice,
-
-      orderId:
-        orderNo.replace(/[^a-zA-Z0-9]/g, ''),
-
-      orderName: '키오스 PICK 주문',
-
-      customerName:
-        tossMerchant.merchant_name || '키오스 고객',
-
-      successUrl:
-        window.location.origin +
-        '/success?source=kiosk' +
-        '&pg=토스페이먼츠' +
-        '&merchantId=' +
-        merchantId +
-        '&merchantName=' +
-        encodeURIComponent(
-          tossMerchant.merchant_name || ''
-        ),
-
-      failUrl:
-        window.location.origin + '/fail'
-    })
-  })
-
-  document
-  .querySelector<HTMLButtonElement>(
-    '#kiosk-korpay-test-button'
-  )
-  ?.addEventListener(
-    'click',
-    async () => {
-
-      const totalPrice =
-        cart.reduce(
-          (sum, item) =>
-            sum +
-            item.price *
-            item.quantity,
-          0
-        )
-
+    if (
+      selectedOnlinePg ===
+      '코페이'
+    ) {
+    
       if (
-        cart.length === 0 ||
-        totalPrice <= 0
+        !tossMerchant.korpay_pg_mid ||
+        !tossMerchant.korpay_pg_mkey
       ) {
-        alert(
-          '상품을 먼저 선택해주세요.'
-        )
-        return
-      }
-
-
-      const {
-        data: korpayMerchant,
-        error: korpayMerchantError
-      } =
-        await supabase
-          .from('merchants')
-          .select(`
-            merchant_name,
-            korpay_pg_mid,
-            korpay_pg_mkey
-          `)
-          .eq(
-            'id',
-            Number(merchantId)
-          )
-          .single()
-
-
-      if (
-        korpayMerchantError ||
-        !korpayMerchant
-      ) {
-        alert(
-          '코페이 결제정보를 불러오지 못했습니다.'
-        )
-        return
-      }
-
-
-      if (
-        !korpayMerchant.korpay_pg_mid ||
-        !korpayMerchant.korpay_pg_mkey
-      ) {
+    
         alert(
           '코페이 PG MID 또는 MKEY가 등록되지 않았습니다.'
         )
+    
         return
       }
-
-
-      const korpay =
-        (window as any).KorpaySdk
-
-
-      if (!korpay) {
-        alert(
-          'Korpay SDK를 찾을 수 없습니다.'
-        )
-        return
-      }
-
-
+    
+    
       const ediDate =
         getKorpayEdiDate()
-
-
-      const orderNo =
-        'KORPAYTEST' +
-        Date.now()
-
-
+    
+    
       const hashKey =
         await createKorpayHash(
           String(
-            korpayMerchant
-              .korpay_pg_mid
+            tossMerchant.korpay_pg_mid
           ),
           ediDate,
           totalPrice,
           String(
-            korpayMerchant
-              .korpay_pg_mkey
+            tossMerchant.korpay_pg_mkey
           )
         )
-
-
+    
+    
       const paymentData = {
-
+    
         merchantId:
-          korpayMerchant
-            .korpay_pg_mid,
-
+          tossMerchant.korpay_pg_mid,
+    
         productName:
-          'NXG 코페이 테스트',
-
+          '키오스 PICK 주문',
+    
         orderNumber:
-          orderNo,
-
+          orderNo.replace(
+            /[^a-zA-Z0-9]/g,
+            ''
+          ),
+    
         amount:
           totalPrice,
-
+    
         payMethod:
           'card',
-
+    
         returnUrl:
           window.location.origin +
           '/api/korpay-return',
-
+    
         ediDate:
           ediDate,
-
+    
         hashKey:
           hashKey,
-
+    
         customerName:
-          'NXG 테스트',
-
+          tossMerchant
+            .merchant_name ||
+          '키오스 고객',
+    
         reserved:
-          String(
-            merchantId
-          ),
-
+          String(merchantId),
+    
         language:
           'ko'
-
       }
-
-
+    
+    
+      const korpay =
+        (window as any).KorpaySdk
+    
+    
+      if (!korpay) {
+    
+        alert(
+          'Korpay SDK를 찾을 수 없습니다.'
+        )
+    
+        return
+      }
+    
+    
       korpay.paymentTimeout =
         30000
-
-
+    
+    
       korpay.payment(
         'https://staging-payments.korpay.com/v1',
         paymentData,
         {
-
+    
           onStart: () => {
-
-            const button =
+    
+            const payButton =
               document.querySelector<HTMLButtonElement>(
-                '#kiosk-korpay-test-button'
+                '#kiosk-toss-pay-button'
               )
-
-            if (button) {
-              button.disabled =
+    
+            if (payButton) {
+    
+              payButton.disabled =
                 true
-
-              button.innerText =
+    
+              payButton.innerText =
                 '결제창 호출 중...'
             }
-
           },
-
-
+    
+    
           onError: (
             error: any
           ) => {
-
+    
             alert(
               String(error)
             )
-
-            const button =
+    
+    
+            const payButton =
               document.querySelector<HTMLButtonElement>(
-                '#kiosk-korpay-test-button'
+                '#kiosk-toss-pay-button'
               )
-
-            if (button) {
-              button.disabled =
+    
+            if (payButton) {
+    
+              payButton.disabled =
                 false
-
-              button.innerText =
-                '코페이 온라인 테스트'
+    
+              payButton.innerText =
+                '모바일 결제'
             }
-
           },
-
-
+    
+    
           onClose: () => {
-
-            const button =
+    
+            const payButton =
               document.querySelector<HTMLButtonElement>(
-                '#kiosk-korpay-test-button'
+                '#kiosk-toss-pay-button'
               )
-
-            if (button) {
-              button.disabled =
+    
+            if (payButton) {
+    
+              payButton.disabled =
                 false
-
-              button.innerText =
-                '코페이 온라인 테스트'
+    
+              payButton.innerText =
+                '모바일 결제'
             }
-
           }
-
+    
         }
       )
-
+    
+      return
     }
-  )
+    
+    
+    if (
+      selectedOnlinePg ===
+      '토스페이먼츠'
+    ) {
+    
+      const tossClientKey =
+        String(
+          tossMerchant
+            .toss_client_key ||
+          clientKey
+        ).trim()
+    
+    
+      if (!tossClientKey) {
+    
+        alert(
+          '토스 Client Key가 등록되지 않았습니다.'
+        )
+    
+        return
+      }
+    
+    
+      const tossPayments =
+        await loadTossPayments(
+          tossClientKey
+        )
+    
+    
+      await tossPayments
+        .requestPayment(
+          '카드',
+          {
+    
+            amount:
+              totalPrice,
+    
+            orderId:
+              orderNo.replace(
+                /[^a-zA-Z0-9]/g,
+                ''
+              ),
+    
+            orderName:
+              '키오스 PICK 주문',
+    
+            customerName:
+              tossMerchant
+                .merchant_name ||
+              '키오스 고객',
+    
+            successUrl:
+              window.location.origin +
+              '/success?source=kiosk' +
+              '&pg=토스페이먼츠' +
+              '&merchantId=' +
+              merchantId +
+              '&merchantName=' +
+              encodeURIComponent(
+                tossMerchant
+                  .merchant_name ||
+                ''
+              ),
+    
+            failUrl:
+              window.location.origin +
+              '/fail'
+          }
+        )
+    
+      return
+    }
+  })
 
 document.querySelector('#kiosk-card-pay-button')
   ?.addEventListener('click', () => {
