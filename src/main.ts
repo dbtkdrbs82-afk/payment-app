@@ -30288,16 +30288,70 @@ if (cashReceiptSaveError) {
 
         </div>
 
-
-        <div
+<div
   style="
     display:flex;
     gap:10px;
     align-items:center;
     margin:20px 0;
-    max-width:650px;
+    max-width:460px;
   "
 >
+
+  <input
+    id="cash-history-start"
+    type="date"
+    value="${startDate}"
+    style="
+      width:140px;
+      height:44px;
+      box-sizing:border-box;
+      padding:0 12px;
+      font-size:14px;
+    "
+  />
+
+  <span
+    style="
+      height:44px;
+      display:flex;
+      align-items:center;
+      font-weight:700;
+    "
+  >
+    ~
+  </span>
+
+  <input
+    id="cash-history-end"
+    type="date"
+    value="${endDate}"
+    style="
+      width:140px;
+      height:44px;
+      box-sizing:border-box;
+      padding:0 12px;
+      font-size:14px;
+    "
+  />
+
+  <button
+    id="cash-history-search"
+    type="button"
+    style="
+      width:90px;
+      height:44px;
+      flex:none;
+      padding:0;
+      box-sizing:border-box;
+      font-size:14px;
+      font-weight:700;
+    "
+  >
+    조회
+  </button>
+
+</div>
 
           <input
             id="cash-history-start"
