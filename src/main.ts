@@ -29338,9 +29338,141 @@ document.querySelector('#close-payment-method-modal')
         return
       }
 
-      alert(
-        '현금영수증 발급 요청이 완료되었습니다.'
+      const receiptData =
+  result?.data?.entityBody ||
+  result?.data?.cashReceipt ||
+  result?.cashReceipt ||
+  result?.data ||
+  result
+
+
+const supplyAmount =
+  Math.floor(
+    amount / 1.1
+  )
+
+
+const vatAmount =
+  amount -
+  supplyAmount
+
+
+const identityDigits =
+  customerIdentityNumber.replace(
+    /[^0-9]/g,
+    ''
+  )
+
+
+const maskedIdentity =
+  identityDigits.length >= 7
+    ? (
+        identityDigits.slice(0, 3) +
+        '****' +
+        identityDigits.slice(-4)
       )
+    : identityDigits
+
+
+const issueStatus =
+  String(
+    receiptData?.issueStatus ||
+    ''
+  )
+
+
+const cashReceiptStatus =
+  receiptData?.issueNumber ||
+  receiptData?.approvalNumber
+    ? '발급완료'
+    : issueStatus === 'FAILED'
+      ? '발급실패'
+      : '발급요청'
+
+
+const merchantName =
+  sessionStorage.getItem(
+    'login_merchant_name'
+  ) ||
+  localStorage.getItem(
+    'login_merchant_name'
+  ) ||
+  ''
+
+
+const {
+  error: cashReceiptSaveError
+} =
+  await supabase
+    .from('cash_receipts')
+    .insert({
+      merchant_id:
+        merchantId,
+
+      merchant_name:
+        merchantName,
+
+      order_id:
+        orderId,
+
+      order_name:
+        orderName,
+
+      receipt_type:
+        type,
+
+      identity_number_masked:
+        maskedIdentity,
+
+      amount:
+        amount,
+
+      supply_amount:
+        supplyAmount,
+
+      vat_amount:
+        vatAmount,
+
+      tax_free_amount:
+        0,
+
+      approval_number:
+        receiptData?.issueNumber ||
+        receiptData?.approvalNumber ||
+        null,
+
+      receipt_key:
+        receiptData?.receiptKey ||
+        null,
+
+      pg_company:
+        '토스페이먼츠',
+
+      status:
+        cashReceiptStatus,
+
+      issued_at:
+        new Date()
+          .toISOString(),
+
+      raw_response:
+        result
+    })
+
+
+if (cashReceiptSaveError) {
+
+  alert(
+    '현금영수증은 발급됐지만 내역 저장에 실패했습니다.\n' +
+    cashReceiptSaveError.message
+  )
+
+  return
+}
+
+alert(
+  '현금영수증 발급이 완료되었습니다.'
+)
 
       document.querySelector('#cash-receipt-modal')?.remove()
     } catch (error) {
