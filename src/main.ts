@@ -27892,8 +27892,10 @@ document
         const amount =
           Number(payment.amount || 0)
 
-        const supplyAmount =
-          Math.floor(amount / 1.1)
+          const supplyAmount =
+          Math.floor(
+            (amount * 10) / 11
+          )
 
         const vatAmount =
           amount - supplyAmount
@@ -30274,23 +30276,28 @@ if (cashReceiptSaveError) {
         <div class="merchant-toolbar">
 
           <button
-            id="cash-history-back"
-            type="button"
-          >
-            카드결제
-          </button>
+  id="cash-history-back"
+  type="button"
+  style="
+    width:auto;
+    min-width:90px;
+  "
+>
+  카드결제
+</button>
 
         </div>
 
 
         <div
-          style="
-            display:flex;
-            gap:10px;
-            align-items:center;
-            margin:20px 0;
-          "
-        >
+  style="
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin:20px 0;
+    max-width:650px;
+  "
+>
 
           <input
             id="cash-history-start"
@@ -30307,11 +30314,15 @@ if (cashReceiptSaveError) {
           />
 
           <button
-            id="cash-history-search"
-            type="button"
-          >
-            조회
-          </button>
+  id="cash-history-search"
+  type="button"
+  style="
+    width:90px;
+    flex:none;
+  "
+>
+  조회
+</button>
 
         </div>
 
