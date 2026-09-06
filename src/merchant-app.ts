@@ -6240,21 +6240,61 @@ function renderMerchantSmsCard() {
   
   
           <div
-            class="merchant-mobile-manual-card"
-          >
-  
-            <div
-              style="
-                padding:30px 10px;
-                text-align:center;
-                color:#6b7280;
-                font-weight:700;
-              "
-            >
-              SMS 결제 기능 연결 예정
-            </div>
-  
-          </div>
+  class="merchant-mobile-manual-card"
+>
+
+  <label>
+    상품명
+  </label>
+
+  <input
+    id="mobile-sms-product-name"
+    type="text"
+    placeholder="상품명"
+  >
+
+
+  <label>
+    결제금액
+  </label>
+
+  <input
+    id="mobile-sms-amount"
+    type="number"
+    inputmode="numeric"
+    min="100"
+    placeholder="결제금액"
+  >
+
+
+  <label>
+    고객 휴대폰번호
+  </label>
+
+  <input
+    id="mobile-sms-phone"
+    type="tel"
+    inputmode="numeric"
+    placeholder="01012345678"
+  >
+
+
+  <button
+    id="mobile-sms-send"
+    type="button"
+  >
+    결제링크 문자 발송
+  </button>
+
+
+  <button
+    id="mobile-sms-copy"
+    type="button"
+  >
+    결제링크 복사
+  </button>
+
+</div>
   
         </main>
   
@@ -6275,6 +6315,168 @@ function renderMerchantSmsCard() {
   
         }
       )
+
+      const createSmsPaymentLink = () => {
+
+        const productName =
+          (
+            document.querySelector<HTMLInputElement>(
+              '#mobile-sms-product-name'
+            )?.value || ''
+          ).trim()
+      
+      
+        const amount =
+          Number(
+            document.querySelector<HTMLInputElement>(
+              '#mobile-sms-amount'
+            )?.value || 0
+          )
+      
+      
+        if (!productName) {
+      
+          alert(
+            '상품명을 입력해주세요.'
+          )
+      
+          return ''
+        }
+      
+      
+        if (
+          !amount ||
+          amount < 100
+        ) {
+      
+          alert(
+            '결제금액을 확인해주세요.'
+          )
+      
+          return ''
+        }
+      
+      
+        return (
+          window.location.origin +
+          '/pay' +
+          '?merchantId=' +
+          encodeURIComponent(
+            String(merchantId)
+          ) +
+          '&merchantName=' +
+          encodeURIComponent(
+            merchantName
+          ) +
+          '&productName=' +
+          encodeURIComponent(
+            productName
+          ) +
+          '&amount=' +
+          amount
+        )
+      
+      }
+      
+      
+      document
+        .querySelector(
+          '#mobile-sms-send'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+      
+            const phone =
+              (
+                document.querySelector<HTMLInputElement>(
+                  '#mobile-sms-phone'
+                )?.value || ''
+              )
+                .replace(
+                  /[^0-9]/g,
+                  ''
+                )
+      
+      
+            if (!phone) {
+      
+              alert(
+                '고객 휴대폰번호를 입력해주세요.'
+              )
+      
+              return
+            }
+      
+      
+            const paymentLink =
+              createSmsPaymentLink()
+      
+      
+            if (!paymentLink) {
+              return
+            }
+      
+      
+            const amount =
+              Number(
+                document.querySelector<HTMLInputElement>(
+                  '#mobile-sms-amount'
+                )?.value || 0
+              )
+      
+      
+            const message =
+              '[NXG PICK]\n' +
+              merchantName +
+              ' 결제요청\n' +
+              '결제금액: ' +
+              amount.toLocaleString() +
+              '원\n\n' +
+              paymentLink
+      
+      
+            window.location.href =
+              'sms:' +
+              phone +
+              '?body=' +
+              encodeURIComponent(
+                message
+              )
+      
+          }
+        )
+      
+      
+      document
+        .querySelector(
+          '#mobile-sms-copy'
+        )
+        ?.addEventListener(
+          'click',
+          async () => {
+      
+            const paymentLink =
+              createSmsPaymentLink()
+      
+      
+            if (!paymentLink) {
+              return
+            }
+      
+      
+            await navigator.clipboard
+              .writeText(
+                paymentLink
+              )
+      
+      
+            alert(
+              '결제링크가 복사되었습니다.'
+            )
+      
+          }
+        )
   }
 
   /* =========================================
