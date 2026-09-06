@@ -31021,7 +31021,11 @@ ${
     모바일 결제
   </button>
 
-  
+  <button
+  class="kiosk-card-pay-button"
+  id="kiosk-korpay-test-button">
+  코페이 온라인 테스트
+</button>
 
   <button
     class="kiosk-card-pay-button"
@@ -32167,7 +32171,225 @@ sessionStorage.setItem(
     })
   })
 
-        
+  document
+  .querySelector<HTMLButtonElement>(
+    '#kiosk-korpay-test-button'
+  )
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      const totalPrice =
+        cart.reduce(
+          (sum, item) =>
+            sum +
+            item.price *
+            item.quantity,
+          0
+        )
+
+      if (
+        cart.length === 0 ||
+        totalPrice <= 0
+      ) {
+        alert(
+          '상품을 먼저 선택해주세요.'
+        )
+        return
+      }
+
+
+      const {
+        data: korpayMerchant,
+        error: korpayMerchantError
+      } =
+        await supabase
+          .from('merchants')
+          .select(`
+            merchant_name,
+            korpay_pg_mid,
+            korpay_pg_mkey
+          `)
+          .eq(
+            'id',
+            Number(merchantId)
+          )
+          .single()
+
+
+      if (
+        korpayMerchantError ||
+        !korpayMerchant
+      ) {
+        alert(
+          '코페이 결제정보를 불러오지 못했습니다.'
+        )
+        return
+      }
+
+
+      if (
+        !korpayMerchant.korpay_pg_mid ||
+        !korpayMerchant.korpay_pg_mkey
+      ) {
+        alert(
+          '코페이 PG MID 또는 MKEY가 등록되지 않았습니다.'
+        )
+        return
+      }
+
+
+      const korpay =
+        (window as any).KorpaySdk
+
+
+      if (!korpay) {
+        alert(
+          'Korpay SDK를 찾을 수 없습니다.'
+        )
+        return
+      }
+
+
+      const ediDate =
+        getKorpayEdiDate()
+
+
+      const orderNo =
+        'KORPAYTEST' +
+        Date.now()
+
+
+      const hashKey =
+        await createKorpayHash(
+          String(
+            korpayMerchant
+              .korpay_pg_mid
+          ),
+          ediDate,
+          totalPrice,
+          String(
+            korpayMerchant
+              .korpay_pg_mkey
+          )
+        )
+
+
+      const paymentData = {
+
+        merchantId:
+          korpayMerchant
+            .korpay_pg_mid,
+
+        productName:
+          'NXG 코페이 테스트',
+
+        orderNumber:
+          orderNo,
+
+        amount:
+          totalPrice,
+
+        payMethod:
+          'card',
+
+        returnUrl:
+          window.location.origin +
+          '/api/korpay-return',
+
+        ediDate:
+          ediDate,
+
+        hashKey:
+          hashKey,
+
+        customerName:
+          'NXG 테스트',
+
+        reserved:
+          String(
+            merchantId
+          ),
+
+        language:
+          'ko'
+
+      }
+
+
+      korpay.paymentTimeout =
+        30000
+
+
+      korpay.payment(
+        'https://staging-payments.korpay.com/v1',
+        paymentData,
+        {
+
+          onStart: () => {
+
+            const button =
+              document.querySelector<HTMLButtonElement>(
+                '#kiosk-korpay-test-button'
+              )
+
+            if (button) {
+              button.disabled =
+                true
+
+              button.innerText =
+                '결제창 호출 중...'
+            }
+
+          },
+
+
+          onError: (
+            error: any
+          ) => {
+
+            alert(
+              String(error)
+            )
+
+            const button =
+              document.querySelector<HTMLButtonElement>(
+                '#kiosk-korpay-test-button'
+              )
+
+            if (button) {
+              button.disabled =
+                false
+
+              button.innerText =
+                '코페이 온라인 테스트'
+            }
+
+          },
+
+
+          onClose: () => {
+
+            const button =
+              document.querySelector<HTMLButtonElement>(
+                '#kiosk-korpay-test-button'
+              )
+
+            if (button) {
+              button.disabled =
+                false
+
+              button.innerText =
+                '코페이 온라인 테스트'
+            }
+
+          }
+
+        }
+      )
+
+    }
+  )    
 
 document.querySelector('#kiosk-card-pay-button')
   ?.addEventListener('click', () => {
