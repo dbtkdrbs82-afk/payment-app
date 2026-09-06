@@ -1972,7 +1972,7 @@ receiptButton?.addEventListener(
 
     const taxableAmount =
       Math.floor(
-        amount / 1.1
+        (amount * 10) / 11
       )
 
     const vatAmount =
@@ -6859,9 +6859,9 @@ function renderMerchantCashReceipt() {
   result
 
 
-const supplyAmount =
+  const supplyAmount =
   Math.floor(
-    amount / 1.1
+    (amount * 10) / 11
   )
 
 
