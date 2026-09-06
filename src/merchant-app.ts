@@ -6894,8 +6894,9 @@ const issueStatus =
   )
 
 
-const cashReceiptStatus =
-  issueStatus === 'COMPLETED'
+  const cashReceiptStatus =
+  receiptData?.issueNumber ||
+  receiptData?.approvalNumber
     ? '발급완료'
     : issueStatus === 'FAILED'
       ? '발급실패'
