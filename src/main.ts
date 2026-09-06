@@ -29078,6 +29078,14 @@ document.querySelector('#close-payment-method-modal')
   <span>현금 결제 건의 소득공제 또는 지출증빙 영수증을 발급합니다.</span>
 </button>
 
+<button
+  class="merchant-card-payment-box"
+  id="sms-card-payment"
+>
+  <strong>SMS결제</strong>
+  <span>고객에게 온라인 카드결제 링크를 문자로 발송합니다.</span>
+</button>
+
       </div>
     </div>
   </div>
@@ -29125,6 +29133,11 @@ document.querySelector('#close-payment-method-modal')
         ?.addEventListener('click', () => {
           location.href = '/kiosk?merchant_id=' + merchantId
         })
+        document.querySelector('#sms-card-payment')
+  ?.addEventListener('click', () => {
+    location.href =
+      '/merchant-card-sms'
+  })
         document.querySelector('#cash-receipt-payment')
   ?.addEventListener('click', () => {
     
@@ -29493,7 +29506,292 @@ document.querySelector('#close-payment-method-modal')
           })
       
 
-      } else if (path === '/merchant-card-ocr') {
+        } else if (path === '/merchant-card-sms') {
+
+          const merchantId =
+            sessionStorage.getItem(
+              'login_merchant_id'
+            ) || ''
+        
+          const merchantName =
+            sessionStorage.getItem(
+              'login_merchant_name'
+            ) || '가맹점'
+        
+        
+          if (!merchantId) {
+        
+            alert(
+              '로그인이 필요합니다.'
+            )
+        
+            location.href =
+              '/merchant-login'
+        
+          } else {
+        
+            app.innerHTML = `
+              <div class="merchant-card-ocr-page">
+        
+                <h1>
+                  SMS결제
+                </h1>
+        
+                <p>
+                  고객에게 온라인 카드결제 링크를 발송합니다.
+                </p>
+        
+        
+                <div class="ocr-payment-form">
+        
+                  <label>
+                    상품명
+                  </label>
+        
+                  <input
+                    id="pc-sms-product-name"
+                    type="text"
+                    placeholder="상품명"
+                  />
+        
+        
+                  <label>
+                    결제금액
+                  </label>
+        
+                  <input
+                    id="pc-sms-amount"
+                    type="number"
+                    inputmode="numeric"
+                    min="100"
+                    placeholder="결제금액"
+                  />
+        
+        
+                  <label>
+                    고객 휴대폰번호
+                  </label>
+        
+                  <input
+                    id="pc-sms-phone"
+                    type="tel"
+                    inputmode="numeric"
+                    placeholder="01012345678"
+                  />
+        
+        
+                  <button
+                    id="pc-sms-send"
+                    type="button"
+                    class="merchant-save-btn"
+                  >
+                    결제링크 문자 발송
+                  </button>
+        
+        
+                  <button
+                    id="pc-sms-copy"
+                    type="button"
+                    class="merchant-save-btn"
+                  >
+                    결제링크 복사
+                  </button>
+        
+        
+                  <button
+                    id="pc-sms-back"
+                    type="button"
+                    class="merchant-close-btn"
+                  >
+                    이전
+                  </button>
+        
+                </div>
+        
+              </div>
+            `
+        
+        
+            const createPcSmsPaymentLink =
+              () => {
+        
+                const productName =
+                  (
+                    document.querySelector<HTMLInputElement>(
+                      '#pc-sms-product-name'
+                    )?.value || ''
+                  ).trim()
+        
+        
+                const amount =
+                  Number(
+                    document.querySelector<HTMLInputElement>(
+                      '#pc-sms-amount'
+                    )?.value || 0
+                  )
+        
+        
+                if (!productName) {
+        
+                  alert(
+                    '상품명을 입력해주세요.'
+                  )
+        
+                  return ''
+                }
+        
+        
+                if (
+                  !amount ||
+                  amount < 100
+                ) {
+        
+                  alert(
+                    '결제금액을 확인해주세요.'
+                  )
+        
+                  return ''
+                }
+        
+        
+                return (
+                  window.location.origin +
+                  '/pay' +
+                  '?merchantId=' +
+                  encodeURIComponent(
+                    merchantId
+                  ) +
+                  '&merchantName=' +
+                  encodeURIComponent(
+                    merchantName
+                  ) +
+                  '&productName=' +
+                  encodeURIComponent(
+                    productName
+                  ) +
+                  '&amount=' +
+                  amount
+                )
+              }
+        
+        
+            document
+              .querySelector(
+                '#pc-sms-back'
+              )
+              ?.addEventListener(
+                'click',
+                () => {
+        
+                  location.href =
+                    '/merchant-card'
+        
+                }
+              )
+        
+        
+            document
+              .querySelector(
+                '#pc-sms-send'
+              )
+              ?.addEventListener(
+                'click',
+                () => {
+        
+                  const phone =
+                    (
+                      document.querySelector<HTMLInputElement>(
+                        '#pc-sms-phone'
+                      )?.value || ''
+                    )
+                      .replace(
+                        /[^0-9]/g,
+                        ''
+                      )
+        
+        
+                  if (!phone) {
+        
+                    alert(
+                      '고객 휴대폰번호를 입력해주세요.'
+                    )
+        
+                    return
+                  }
+        
+        
+                  const paymentLink =
+                    createPcSmsPaymentLink()
+        
+        
+                  if (!paymentLink) {
+                    return
+                  }
+        
+        
+                  const amount =
+                    Number(
+                      document.querySelector<HTMLInputElement>(
+                        '#pc-sms-amount'
+                      )?.value || 0
+                    )
+        
+        
+                  const message =
+                    '[NXG PICK]\n' +
+                    merchantName +
+                    ' 결제요청\n' +
+                    '결제금액: ' +
+                    amount.toLocaleString() +
+                    '원\n\n' +
+                    paymentLink
+        
+        
+                  window.location.href =
+                    'sms:' +
+                    phone +
+                    '?body=' +
+                    encodeURIComponent(
+                      message
+                    )
+        
+                }
+              )
+        
+        
+            document
+              .querySelector(
+                '#pc-sms-copy'
+              )
+              ?.addEventListener(
+                'click',
+                async () => {
+        
+                  const paymentLink =
+                    createPcSmsPaymentLink()
+        
+        
+                  if (!paymentLink) {
+                    return
+                  }
+        
+        
+                  await navigator.clipboard
+                    .writeText(
+                      paymentLink
+                    )
+        
+        
+                  alert(
+                    '결제링크가 복사되었습니다.'
+                  )
+        
+                }
+              )
+        
+          }
+        
+        } else if (path === '/merchant-card-ocr') {
         const mode =
   new URLSearchParams(location.search).get('mode') || 'ocr'
 
