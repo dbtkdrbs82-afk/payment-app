@@ -206,7 +206,14 @@ if (
     message: '자동정산 실행 권한이 없습니다.',
   })
 }
-
+if (
+  authorization !== `Bearer ${cronSecret}`
+) {
+  return res.status(401).json({
+    success: false,
+    message: '자동정산 실행 권한이 없습니다.',
+  })
+}
   try {
     const supabaseUrl =
       process.env.SUPABASE_URL?.trim() ||
