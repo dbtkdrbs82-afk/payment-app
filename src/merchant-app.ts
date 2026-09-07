@@ -6662,8 +6662,8 @@ function renderMerchantCashReceipt() {
           >
 
 
-          <button
-  id="mobile-cash-receipt-submit"
+   <button
+  id="mobile-cash-submit"
   type="button"
   class="merchant-mobile-btn-block"
 >
