@@ -2031,3 +2031,15 @@
 .merchant-mobile-btn-secondary:active {
   transform: translateY(1px);
 }
+/* =========================================
+   Android 태블릿 대응
+========================================= */
+
+@media (min-width: 700px) {
+
+  .merchant-mobile-content {
+    max-width: 900px;
+    padding: 24px 32px;
+  }
+
+}
