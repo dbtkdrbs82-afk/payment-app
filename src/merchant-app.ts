@@ -311,7 +311,7 @@ function renderMerchantHome() {
     </strong>
 
     <small>
-      OCR · 수기 · 메뉴결제 · 현금영수증
+      OCR · 수기 · 현금영수증
     </small>
   </button>
 
@@ -5395,25 +5395,7 @@ function renderMerchantCard() {
 
 </button>
   
-            <button
-              type="button"
-              class="merchant-mobile-card-menu-item"
-              data-card-menu="menu"
-            >
-  
-              <span>
-                🛒
-              </span>
-  
-              <strong>
-                메뉴결제
-              </strong>
-  
-              <small>
-                상품 선택 후 카드결제
-              </small>
-  
-            </button>
+            
   
   
             <button
