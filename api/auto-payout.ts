@@ -406,17 +406,36 @@ const sellerResponse = await fetch(
 const sellerResponseText =
   await sellerResponse.text()
 
+console.log('TOSS_SELLER_LOOKUP_HTTP', {
+  requestUrl: `${baseUrl}/api/toss-seller-get`,
+  status: sellerResponse.status,
+  ok: sellerResponse.ok,
+})
+
 let sellerResult: any
 
 try {
-  sellerResult = JSON.parse(sellerResponseText)
-} catch {
+  sellerResult = JSON.parse(
+    sellerResponseText
+  )
+} catch (error) {
+  console.error(
+    'TOSS_SELLER_LOOKUP_JSON_ERROR',
+    {
+      status: sellerResponse.status,
+      responsePreview:
+        sellerResponseText.slice(0, 200),
+    }
+  )
+
   return res.status(500).json({
     success: false,
-    message: '토스 셀러 조회 API가 JSON이 아닌 응답을 반환했습니다.',
-    requestUrl: `${baseUrl}/api/toss-seller-get`,
-    status: sellerResponse.status,
-    responsePreview: sellerResponseText.slice(0, 300),
+    message:
+      '토스 셀러 조회 API가 JSON이 아닌 응답을 반환했습니다.',
+    requestUrl:
+      `${baseUrl}/api/toss-seller-get`,
+    status:
+      sellerResponse.status,
   })
 }
 
@@ -424,15 +443,36 @@ if (
   !sellerResponse.ok ||
   !sellerResult.success
 ) {
+  console.error(
+    'TOSS_SELLER_LOOKUP_FAILED',
+    {
+      status: sellerResponse.status,
+      success: sellerResult?.success,
+      message: sellerResult?.message,
+      errorCode:
+        sellerResult?.data?.error?.code,
+      errorMessage:
+        sellerResult?.data?.error?.message,
+    }
+  )
+
   return res.status(500).json({
     success: false,
-    message: '토스 셀러 목록 조회에 실패했습니다.',
+    message:
+      '토스 셀러 목록 조회에 실패했습니다.',
     data: sellerResult,
   })
 }
 
 const sellers =
   sellerResult?.data?.entityBody?.items || []
+
+console.log(
+  'TOSS_SELLER_LOOKUP_OK',
+  {
+    sellerCount: sellers.length,
+  }
+)
 
 const results: any[] = []
 
