@@ -9875,92 +9875,101 @@ function renderMerchantLogin() {
 
         try {
 
-          const response =
-            await fetch(
-              '/api/merchant-app-login',
-              {
-                method: 'POST',
-
-                headers: {
-                  'Content-Type':
-                    'application/json'
-                },
-
-                body: JSON.stringify({
-                  loginId,
-                  password
-                })
-              }
-            )
-
-
-          const result =
-            await response.json()
-
-
-          if (
-            !response.ok ||
-            !result.success
-          ) {
-
+          const {
+            data: merchants,
+            error
+          } =
+            await supabase
+              .from('merchants')
+              .select(`
+                id,
+                merchant_login_id,
+                merchant_password,
+                merchant_name,
+                merchant_type
+              `)
+              .eq(
+                'merchant_login_id',
+                loginId
+              )
+        
+        
+          if (error) {
+        
             if (message) {
               message.textContent =
-                result.message ||
-                '로그인에 실패했습니다.'
+                '로그인 조회 실패: ' +
+                error.message
             }
-
+        
             return
           }
-
-
+        
+        
           const merchant =
-            result.merchant
-
-
+            (merchants || []).find(
+              (item: any) =>
+                String(
+                  item.merchant_password || ''
+                ).trim() === password
+            )
+        
+        
+          if (!merchant) {
+        
+            if (message) {
+              message.textContent =
+                '아이디 또는 비밀번호가 올바르지 않습니다.'
+            }
+        
+            return
+          }
+        
+        
           const merchantLoginData:
             Record<string, string> = {
-
+        
               login_merchant_id:
                 String(
                   merchant.id || ''
                 ),
-
+        
               login_merchant_code:
                 String(
-                  merchant.loginId || ''
+                  merchant.merchant_login_id || ''
                 ),
-
+        
               login_merchant_name:
                 String(
-                  merchant.name || ''
+                  merchant.merchant_name || ''
                 ),
-
+        
               login_merchant_type:
                 String(
-                  merchant.type || ''
+                  merchant.merchant_type ||
+                  '일반매장'
                 )
             }
-
-
+        
+        
           Object.entries(
             merchantLoginData
           ).forEach(
             ([key, value]) => {
-
+        
               sessionStorage.setItem(
                 key,
                 value
               )
-
+        
               localStorage.setItem(
                 key,
                 value
               )
-
             }
           )
-
-
+        
+        
           location.href =
             '/merchant-app/home'
 

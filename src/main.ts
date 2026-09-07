@@ -5,6 +5,7 @@ import Tesseract from 'tesseract.js'
 import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
 import { renderBeautyStaff } from './beauty/staff'
+import { Capacitor } from '@capacitor/core'
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 const adminPassword = '1234'
@@ -15,7 +16,22 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
-const path = window.location.pathname
+
+let path = window.location.pathname
+
+/* =========================================
+   Android NXG PICK → 모바일 전용 화면
+========================================= */
+
+if (
+  Capacitor.isNativePlatform() &&
+  (
+    path === '/' ||
+    path === '/index.html'
+  )
+) {
+  location.replace('/merchant-app')
+}
 
 
 
