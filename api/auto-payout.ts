@@ -206,12 +206,11 @@ if (
     message: '자동정산 실행 권한이 없습니다.',
   })
 }
-if (
-  authorization !== `Bearer ${cronSecret}`
-) {
-  return res.status(401).json({
-    success: false,
-    message: '자동정산 실행 권한이 없습니다.',
+if (process.env.PAYOUT_CRON_ENABLED !== 'true') {
+  return res.status(200).json({
+    success: true,
+    skipped: true,
+    message: '이 프로젝트에서는 자동출금을 실행하지 않습니다.',
   })
 }
   try {
