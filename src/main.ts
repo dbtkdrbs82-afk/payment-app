@@ -14564,7 +14564,7 @@ const {
   await supabase
     .from('merchants')
     .select(
-      'id, settlement_cycle'
+      'id, settlement_cycle, branch_admin_id, agency_admin_id, manager_admin_id'
     )
     .in(
       'id',
@@ -14589,22 +14589,82 @@ const headOfficeMerchantCycleMap =
   new Map<number, string>()
 
 
+const headOfficeMerchantOrgMap =
+  new Map<number, any>()
+
+
 ;(headOfficeMerchants || [])
   .forEach(
     (merchant: any) => {
 
-      headOfficeMerchantCycleMap.set(
+      const merchantId =
         Number(
           merchant.id
-        ),
+        )
+
+
+      headOfficeMerchantCycleMap.set(
+        merchantId,
         String(
           merchant.settlement_cycle ||
           '3일'
         )
       )
 
+
+      headOfficeMerchantOrgMap.set(
+        merchantId,
+        merchant
+      )
+
     }
   )
+
+  const {
+    data: headOfficeOrgAdmins,
+    error: headOfficeOrgAdminError
+  } =
+    await supabase
+      .from('admin_users')
+      .select(`
+        id,
+        role,
+        parent_admin_id,
+        commission_rate_1day,
+        commission_rate_3day,
+        commission_rate_4day,
+        commission_rate_7day
+      `)
+  
+  
+  if (headOfficeOrgAdminError) {
+  
+    alert(
+      '조직 수수료 정보 조회 실패: ' +
+      headOfficeOrgAdminError.message
+    )
+  
+    return
+  }
+  
+  
+  const headOfficeOrgAdminMap =
+    new Map<number, any>()
+  
+  
+  ;(headOfficeOrgAdmins || [])
+    .forEach(
+      (admin: any) => {
+  
+        headOfficeOrgAdminMap.set(
+          Number(
+            admin.id
+          ),
+          admin
+        )
+  
+      }
+    )
   
     const headOfficeRows =
       (headOfficePayments || [])
@@ -14634,92 +14694,271 @@ const headOfficeMerchantCycleMap =
                   )
   
   
-            const branchRate =
-              payment.branch_admin_id
-                ? Number(
-                    payment.branch_fee_rate || 0
+                  const settlementCycle =
+                  headOfficeMerchantCycleMap.get(
+                    Number(
+                      payment.merchant_id || 0
+                    )
+                  ) || '4일'
+                
+                
+                const merchantOrg =
+                  headOfficeMerchantOrgMap.get(
+                    Number(
+                      payment.merchant_id || 0
+                    )
                   )
-                : 0
-  
-  
-            const agencyRate =
-              payment.agency_admin_id
-                ? Number(
-                    payment.agency_fee_rate || 0
+                
+                
+                let managerId =
+                  Number(
+                    merchantOrg?.manager_admin_id ||
+                    payment.manager_admin_id ||
+                    0
                   )
-                : 0
-  
-  
-            const managerRate =
-              payment.manager_admin_id
-                ? Number(
-                    payment.manager_fee_rate || 0
+                
+                
+                let agencyId =
+                  Number(
+                    merchantOrg?.agency_admin_id ||
+                    payment.agency_admin_id ||
+                    0
                   )
-                : 0
-  
-  
-            const branchActualRate =
-              Math.max(
-                branchRate -
-                agencyRate,
-                0
-              )
-  
-  
-            const agencyActualRate =
-              Math.max(
-                agencyRate -
-                managerRate,
-                0
-              )
-  
-  
-            const managerActualRate =
-              Math.max(
-                managerRate,
-                0
-              )
-  
-  
-            const branchCommission =
-              Math.floor(
-                amount *
-                branchActualRate /
-                100
-              )
-  
-  
-            const agencyCommission =
-              Math.floor(
-                amount *
-                agencyActualRate /
-                100
-              )
-  
-  
-            const managerCommission =
-              Math.floor(
-                amount *
-                managerActualRate /
-                100
-              )
-  
-  
-            const organizationCommission =
-              branchCommission +
-              agencyCommission +
-              managerCommission
-  
-              const settlementCycle =
-              headOfficeMerchantCycleMap.get(
-                Number(
-                  payment.merchant_id || 0
-                )
-              ) || '3일'
-            
-            
-            const isOneDay =
-              settlementCycle === '1일'
+                
+                
+                let branchId =
+                  Number(
+                    merchantOrg?.branch_admin_id ||
+                    payment.branch_admin_id ||
+                    0
+                  )
+                
+                
+                const managerAdmin =
+                  managerId
+                    ? headOfficeOrgAdminMap.get(
+                        managerId
+                      )
+                    : null
+                
+                
+                if (
+                  !agencyId &&
+                  managerAdmin?.parent_admin_id
+                ) {
+                
+                  const parentAdmin =
+                    headOfficeOrgAdminMap.get(
+                      Number(
+                        managerAdmin.parent_admin_id
+                      )
+                    )
+                
+                
+                  if (
+                    parentAdmin?.role === 'AGENCY'
+                  ) {
+                
+                    agencyId =
+                      Number(
+                        parentAdmin.id
+                      )
+                
+                  } else if (
+                    parentAdmin?.role === 'BRANCH'
+                  ) {
+                
+                    branchId =
+                      Number(
+                        parentAdmin.id
+                      )
+                  }
+                }
+                
+                
+                const agencyAdmin =
+                  agencyId
+                    ? headOfficeOrgAdminMap.get(
+                        agencyId
+                      )
+                    : null
+                
+                
+                if (
+                  !branchId &&
+                  agencyAdmin?.parent_admin_id
+                ) {
+                
+                  branchId =
+                    Number(
+                      agencyAdmin.parent_admin_id
+                    )
+                }
+                
+                
+                const branchAdmin =
+                  branchId
+                    ? headOfficeOrgAdminMap.get(
+                        branchId
+                      )
+                    : null
+                
+                
+                const getHeadOfficeOrgRate =
+                  (
+                    admin: any
+                  ) => {
+                
+                    if (!admin) {
+                      return 0
+                    }
+                
+                
+                    if (
+                      settlementCycle === '1일'
+                    ) {
+                
+                      return Number(
+                        admin.commission_rate_1day ||
+                        0
+                      )
+                    }
+                
+                
+                    if (
+                      settlementCycle === '3일'
+                    ) {
+                
+                      return Number(
+                        admin.commission_rate_3day ||
+                        0
+                      )
+                    }
+                
+                
+                    if (
+                      settlementCycle === '7일'
+                    ) {
+                
+                      return Number(
+                        admin.commission_rate_7day ||
+                        0
+                      )
+                    }
+                
+                
+                    return Number(
+                      admin.commission_rate_4day ||
+                      0
+                    )
+                  }
+                
+                
+                const branchRate =
+                  branchAdmin
+                    ? getHeadOfficeOrgRate(
+                        branchAdmin
+                      )
+                    : Number(
+                        payment.branch_fee_rate ||
+                        0
+                      )
+                
+                
+                const agencyRate =
+                  agencyAdmin
+                    ? getHeadOfficeOrgRate(
+                        agencyAdmin
+                      )
+                    : Number(
+                        payment.agency_fee_rate ||
+                        0
+                      )
+                
+                
+                const managerRate =
+                  managerAdmin
+                    ? getHeadOfficeOrgRate(
+                        managerAdmin
+                      )
+                    : Number(
+                        payment.manager_fee_rate ||
+                        0
+                      )
+                
+                
+                const branchActualRate =
+                  branchId
+                    ? (
+                        agencyId
+                          ? Math.max(
+                              branchRate -
+                              agencyRate,
+                              0
+                            )
+                          : managerId
+                            ? Math.max(
+                                branchRate -
+                                managerRate,
+                                0
+                              )
+                            : branchRate
+                      )
+                    : 0
+                
+                
+                const agencyActualRate =
+                  agencyId
+                    ? (
+                        managerId
+                          ? Math.max(
+                              agencyRate -
+                              managerRate,
+                              0
+                            )
+                          : agencyRate
+                      )
+                    : 0
+                
+                
+                const managerActualRate =
+                  managerId
+                    ? managerRate
+                    : 0
+                
+                
+                const branchCommission =
+                  Math.floor(
+                    amount *
+                    branchActualRate /
+                    100
+                  )
+                
+                
+                const agencyCommission =
+                  Math.floor(
+                    amount *
+                    agencyActualRate /
+                    100
+                  )
+                
+                
+                const managerCommission =
+                  Math.floor(
+                    amount *
+                    managerActualRate /
+                    100
+                  )
+                
+                
+                const organizationCommission =
+                  branchCommission +
+                  agencyCommission +
+                  managerCommission
+                
+                
+                const isOneDay =
+                  settlementCycle === '1일'
             
             
             const pgCompany =
