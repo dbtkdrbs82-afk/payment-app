@@ -14452,36 +14452,168 @@ const savedHeadOfficeKeyword =
   ) || ''
   
   
-      if (searchBox) {
+  if (searchBox) {
 
-        searchBox.innerHTML = `
-            <div class="payment-search-line">
-      
-              <input
-                id="head-office-fee-start"
-                type="date"
-                value="${savedStartDate}"
-              />
-      
-              <span>~</span>
-      
-              <input
-                id="head-office-fee-end"
-                type="date"
-                value="${savedEndDate}"
-              />
-      
-              <button
-                id="head-office-fee-search"
-                class="search-btn"
-                type="button"
-              >
-                🔍 조회
-              </button>
-      
-            </div>
-          `
-      }
+    searchBox.innerHTML = `
+      <div class="payment-search-line">
+  
+        <strong>
+          기간
+        </strong>
+  
+        <input
+          id="head-office-fee-start"
+          type="date"
+          value="${savedStartDate}"
+        />
+  
+        <span>
+          ~
+        </span>
+  
+        <input
+          id="head-office-fee-end"
+          type="date"
+          value="${savedEndDate}"
+        />
+  
+  
+        <button
+          class="quick-btn"
+          id="head-office-fee-prev"
+          type="button"
+        >
+          이전
+        </button>
+  
+        <button
+          class="quick-btn"
+          id="head-office-fee-today"
+          type="button"
+        >
+          오늘
+        </button>
+  
+        <button
+          class="quick-btn"
+          id="head-office-fee-next"
+          type="button"
+        >
+          다음
+        </button>
+  
+        <button
+          class="quick-btn"
+          id="head-office-fee-month"
+          type="button"
+        >
+          당월
+        </button>
+  
+  
+        <strong>
+          PG
+        </strong>
+  
+        <select
+          id="head-office-fee-pg"
+        >
+          <option
+            value="all"
+            ${
+              savedHeadOfficePg === 'all'
+                ? 'selected'
+                : ''
+            }
+          >
+            전체
+          </option>
+  
+          <option
+            value="toss"
+            ${
+              savedHeadOfficePg === 'toss'
+                ? 'selected'
+                : ''
+            }
+          >
+            토스
+          </option>
+  
+          <option
+            value="korpay"
+            ${
+              savedHeadOfficePg === 'korpay'
+                ? 'selected'
+                : ''
+            }
+          >
+            코페이
+          </option>
+        </select>
+  
+  
+        <strong>
+          조회대상
+        </strong>
+  
+        <select
+          id="head-office-fee-target"
+        >
+          <option
+            value="all"
+            ${
+              savedHeadOfficeTarget === 'all'
+                ? 'selected'
+                : ''
+            }
+          >
+            전체
+          </option>
+  
+          <option
+            value="merchant_id"
+            ${
+              savedHeadOfficeTarget === 'merchant_id'
+                ? 'selected'
+                : ''
+            }
+          >
+            가맹점ID
+          </option>
+  
+          <option
+            value="merchant_name"
+            ${
+              savedHeadOfficeTarget === 'merchant_name'
+                ? 'selected'
+                : ''
+            }
+          >
+            가맹점명
+          </option>
+        </select>
+  
+  
+        <input
+          id="head-office-fee-keyword"
+          type="text"
+          value="${savedHeadOfficeKeyword}"
+          placeholder="검색어"
+        />
+  
+  
+        <button
+          id="head-office-fee-search"
+          class="search-btn"
+          type="button"
+        >
+          조회
+        </button>
+  
+      </div>
+    `
+  }
   
   
       if (tableTop) {
@@ -15264,91 +15396,99 @@ const headOfficeMerchantOrgMap =
       )
   
   
-    if (summaryBox) {
-  
-      summaryBox.innerHTML = `
-        <div class="payment-mini-summary">
-  
-          <div
-            class="payment-mini-summary-card"
-          >
-            <strong>
-              승인건수
-            </strong>
-  
-            <span>
-              ${headOfficeRows.length.toLocaleString()}건
-            </span>
-          </div>
-  
-  
-          <div
-            class="payment-mini-summary-card"
-          >
-            <strong>
-              총 승인금액
-            </strong>
-  
-            <span>
-              ${totalPaymentAmount.toLocaleString()}원
-            </span>
-          </div>
-  
-  
-          <div
-            class="payment-mini-summary-card"
-          >
-            <strong>
-              가맹점 수수료 합계
-            </strong>
-  
-            <span>
-              ${totalMerchantFee.toLocaleString()}원
-            </span>
-          </div>
-  
-  
-          <div
-            class="payment-mini-summary-card"
-          >
+      if (summaryBox) {
 
+        summaryBox.innerHTML = `
           <div
-  class="payment-mini-summary-card"
->
-  <strong>
-    PG 원가
-  </strong>
-
-  <span>
-    ${totalPgCost.toLocaleString()}원
-  </span>
-</div>
-
-            <strong>
-              조직 수수료 합계
-            </strong>
-  
-            <span>
-              ${totalOrganizationFee.toLocaleString()}원
-            </span>
-          </div>
-  
-  
-          <div
-            class="payment-mini-summary-card"
+            class="payment-mini-summary"
+            style="
+              display:grid;
+              grid-template-columns:repeat(6, minmax(0, 1fr));
+              gap:10px;
+              width:100%;
+            "
           >
-            <strong>
-  본사 실제 수익
-</strong>
-  
-            <span>
-              ${totalHeadOfficeFee.toLocaleString()}원
-            </span>
+      
+            <div
+              class="payment-mini-summary-card"
+            >
+              <strong>
+                승인건수
+              </strong>
+      
+              <span>
+                ${headOfficeRows.length.toLocaleString()}건
+              </span>
+            </div>
+      
+      
+            <div
+              class="payment-mini-summary-card"
+            >
+              <strong>
+                총 승인금액
+              </strong>
+      
+              <span>
+                ${totalPaymentAmount.toLocaleString()}원
+              </span>
+            </div>
+      
+      
+            <div
+              class="payment-mini-summary-card"
+            >
+              <strong>
+                가맹점 수수료 합계
+              </strong>
+      
+              <span>
+                ${totalMerchantFee.toLocaleString()}원
+              </span>
+            </div>
+      
+      
+            <div
+              class="payment-mini-summary-card"
+            >
+              <strong>
+                PG 원가
+              </strong>
+      
+              <span>
+                ${totalPgCost.toLocaleString()}원
+              </span>
+            </div>
+      
+      
+            <div
+              class="payment-mini-summary-card"
+            >
+              <strong>
+                조직 수수료 합계
+              </strong>
+      
+              <span>
+                ${totalOrganizationFee.toLocaleString()}원
+              </span>
+            </div>
+      
+      
+            <div
+              class="payment-mini-summary-card"
+            >
+              <strong>
+                본사 실제 수익
+              </strong>
+      
+              <span>
+                ${totalHeadOfficeFee.toLocaleString()}원
+              </span>
+            </div>
+      
           </div>
-  
-        </div>
-      `
-    }
+        `
+      }
   
   
     const merchantSummaryMap =
