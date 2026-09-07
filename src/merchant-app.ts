@@ -13,6 +13,8 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
+const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
+
 const app =
   document.querySelector<HTMLDivElement>('#app')!
 
@@ -8879,10 +8881,11 @@ async function renderMerchantMenuCard() {
     
     
           const tossClientKey =
-            String(
-              tossMerchant
-                .toss_client_key || ''
-            ).trim()
+  String(
+    tossMerchant
+      .toss_client_key ||
+    clientKey
+  ).trim()
     
     
           if (!tossClientKey) {
