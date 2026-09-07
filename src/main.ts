@@ -5709,6 +5709,44 @@ taxTextDownloadButton.onclick = async () => {
     .gte('created_at', startIso)
     .lte('created_at', endIso)
 
+    const {
+      data: cashReceipts,
+      error: cashReceiptError
+    } = await supabase
+      .from('cash_receipts')
+      .select(
+        [
+          'merchant_id',
+          'amount',
+          'status',
+          'issued_at'
+        ].join(',')
+      )
+      .eq(
+        'status',
+        '발급완료'
+      )
+      
+      .gte(
+        'issued_at',
+        startIso
+      )
+      .lte(
+        'issued_at',
+        endIso
+      )
+    
+    
+    if (cashReceiptError) {
+    
+      alert(
+        'TXT 현금영수증 조회 실패: ' +
+        cashReceiptError.message
+      )
+    
+      return
+    }
+
   if (paymentError) {
     alert(
       'TXT 결제내역 조회 실패: ' +
@@ -5717,19 +5755,38 @@ taxTextDownloadButton.onclick = async () => {
     return
   }
 
-  if (!payments || payments.length === 0) {
+  if (
+    (!payments || payments.length === 0) &&
+    (!cashReceipts || cashReceipts.length === 0)
+  ) {
+  
     alert(
-      '선택한 신고기간에 승인된 결제내역이 없습니다.'
+      '선택한 신고기간에 승인된 카드결제 또는 현금영수증 내역이 없습니다.'
     )
+  
     return
   }
-
+  
+  
   const merchantIds = [
     ...new Set(
-      payments
-        .map((payment: any) =>
-          Number(payment.merchant_id || 0)
-        )
+      [
+        ...(payments || [])
+          .map(
+            (payment: any) =>
+              Number(
+                payment.merchant_id || 0
+              )
+          ),
+  
+        ...(cashReceipts || [])
+          .map(
+            (receipt: any) =>
+              Number(
+                receipt.merchant_id || 0
+              )
+          )
+      ]
         .filter(
           (merchantId) =>
             merchantId > 0
@@ -5840,12 +5897,122 @@ taxTextDownloadButton.onclick = async () => {
     }
   })
 
-  if (merchantMonthlyMap.size === 0) {
-    alert(
-      'TXT에 작성할 가맹점 매출자료가 없습니다.'
-    )
-    return
+  const cashReceiptMonthlyMap =
+  new Map<
+    string,
+    {
+      merchant: any
+      paymentMonth: string
+      paymentCount: number
+      paymentAmount: number
+    }
+  >()
+
+
+;(cashReceipts || []).forEach(
+  (receipt: any) => {
+
+    const merchantId =
+      Number(
+        receipt.merchant_id || 0
+      )
+
+    const merchant =
+      merchantMap.get(
+        merchantId
+      )
+
+
+    if (
+      !merchantId ||
+      !merchant
+    ) {
+
+      excludedPaymentCount += 1
+      return
+    }
+
+
+    const receiptDate =
+      String(
+        receipt.issued_at || ''
+      )
+
+
+    const paymentMonth =
+      receiptDate
+        .slice(0, 7)
+        .replace(
+          /-/g,
+          ''
+        )
+
+
+    if (
+      paymentMonth.length !== 6
+    ) {
+
+      excludedPaymentCount += 1
+      return
+    }
+
+
+    const summaryKey =
+      String(
+        merchantId
+      ) +
+      '-' +
+      paymentMonth
+
+
+    const currentSummary =
+      cashReceiptMonthlyMap.get(
+        summaryKey
+      )
+
+
+    if (currentSummary) {
+
+      currentSummary.paymentCount +=
+        1
+
+      currentSummary.paymentAmount +=
+        Number(
+          receipt.amount || 0
+        )
+
+    } else {
+
+      cashReceiptMonthlyMap.set(
+        summaryKey,
+        {
+          merchant,
+          paymentMonth,
+          paymentCount:
+            1,
+          paymentAmount:
+            Number(
+              receipt.amount || 0
+            )
+        }
+      )
+
+    }
+
   }
+)
+
+if (
+  merchantMonthlyMap.size === 0 &&
+  cashReceiptMonthlyMap.size === 0
+) {
+
+  alert(
+    'TXT에 작성할 카드 또는 현금영수증 매출자료가 없습니다.'
+  )
+
+  return
+}
 
   /*
    * 실제 신고파일 HD 구조
@@ -5888,35 +6055,91 @@ taxTextDownloadButton.onclick = async () => {
     return
   }
 
-  const rows =
-    Array.from(
-      merchantMonthlyMap.values()
-    ).sort((a, b) => {
-      const firstNumber =
-        cleanNumber(
-          a.merchant.business_number ||
-          a.merchant.resident_number
-        )
-
-      const secondNumber =
-        cleanNumber(
-          b.merchant.business_number ||
-          b.merchant.resident_number
-        )
-
-      const numberResult =
-        firstNumber.localeCompare(
-          secondNumber
-        )
-
-      if (numberResult !== 0) {
-        return numberResult
-      }
-
-      return a.paymentMonth.localeCompare(
-        b.paymentMonth
+  const rows = [
+    ...Array
+      .from(
+        merchantMonthlyMap.values()
       )
-    })
+      .map(
+        (row) => ({
+          ...row,
+          recordType:
+            'C'
+        })
+      ),
+  
+    ...Array
+      .from(
+        cashReceiptMonthlyMap.values()
+      )
+      .map(
+        (row) => ({
+          ...row,
+          recordType:
+            '6'
+        })
+      )
+  ]
+    .sort(
+      (a, b) => {
+  
+        const firstNumber =
+          cleanNumber(
+            a.merchant.business_number ||
+            a.merchant.resident_number
+          )
+  
+  
+        const secondNumber =
+          cleanNumber(
+            b.merchant.business_number ||
+            b.merchant.resident_number
+          )
+  
+  
+        const numberResult =
+          firstNumber.localeCompare(
+            secondNumber
+          )
+  
+  
+        if (
+          numberResult !== 0
+        ) {
+  
+          return numberResult
+        }
+  
+  
+        const monthResult =
+          a.paymentMonth.localeCompare(
+            b.paymentMonth
+          )
+  
+  
+        if (
+          monthResult !== 0
+        ) {
+  
+          return monthResult
+        }
+  
+  
+        if (
+          a.recordType ===
+          b.recordType
+        ) {
+  
+          return 0
+        }
+  
+  
+        return a.recordType ===
+          'C'
+            ? -1
+            : 1
+      }
+    )
 
   const lines: string[] = [
     headerLine
@@ -6034,8 +6257,8 @@ taxTextDownloadButton.onclick = async () => {
       '  ' +
       fitNumber(companyMobile, 11) +
       fitByteText(companyEmail, 40) +
-      'C' +
-      ' '.repeat(5)
+row.recordType +
+' '.repeat(5)
 
     const rdLength =
       byteLength(rdLine)
