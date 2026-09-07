@@ -14398,7 +14398,7 @@ document
   
     const getKoreaDate = (
       date: Date
-    ) => {
+    ): string => {
   
       return new Intl.DateTimeFormat(
         'en-CA',
@@ -14433,43 +14433,98 @@ document
       sessionStorage.getItem(
         'head_office_fee_end'
       ) || today
+
+      const savedHeadOfficePg =
+  sessionStorage.getItem(
+    'head_office_fee_pg'
+  ) || 'all'
+
+
+const savedHeadOfficeTarget =
+  sessionStorage.getItem(
+    'head_office_fee_target'
+  ) || 'all'
+
+
+const savedHeadOfficeKeyword =
+  sessionStorage.getItem(
+    'head_office_fee_keyword'
+  ) || ''
   
   
-    if (searchBox) {
+      if (searchBox) {
+
+        searchBox.innerHTML = `
+            <div class="payment-search-line">
+      
+              <input
+                id="head-office-fee-start"
+                type="date"
+                value="${savedStartDate}"
+              />
+      
+              <span>~</span>
+      
+              <input
+                id="head-office-fee-end"
+                type="date"
+                value="${savedEndDate}"
+              />
+      
+              <button
+                id="head-office-fee-search"
+                class="search-btn"
+                type="button"
+              >
+                🔍 조회
+              </button>
+      
+            </div>
+          `
+      }
   
-      searchBox.innerHTML = `
-        <div class="payment-search-line">
   
-          <input
-            id="head-office-fee-start"
-            type="date"
-            value="${savedStartDate}"
-          />
-  
-          <span>~</span>
-  
-          <input
-            id="head-office-fee-end"
-            type="date"
-            value="${savedEndDate}"
-          />
-  
-          <button
-            id="head-office-fee-search"
-            class="search-btn"
-            type="button"
+      if (tableTop) {
+
+        tableTop.innerHTML = `
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              align-items:center;
+              width:100%;
+              gap:12px;
+            "
           >
-            🔍 조회
-          </button>
-  
-        </div>
-      `
-    }
-  
-  
-    if (tableTop) {
-      tableTop.innerHTML = ''
-    }
+      
+            <div
+              id="head-office-pagination"
+              class="merchant-pagination"
+            ></div>
+      
+            <select
+              id="head-office-page-size"
+              style="
+                width:120px;
+                height:38px;
+              "
+            >
+              <option value="10">
+                10개씩 보기
+              </option>
+      
+              <option value="20">
+                20개씩 보기
+              </option>
+      
+              <option value="50">
+                50개씩 보기
+              </option>
+            </select>
+      
+          </div>
+        `
+      }
   
   
     const startIso =
@@ -14666,7 +14721,7 @@ const headOfficeMerchantOrgMap =
       }
     )
   
-    const headOfficeRows =
+    const headOfficeRowsAll =
       (headOfficePayments || [])
         .map(
           (payment: any) => {
@@ -15064,6 +15119,90 @@ const headOfficeMerchantOrgMap =
           }
         )
   
+        const headOfficeRows =
+  headOfficeRowsAll.filter(
+    (row: any) => {
+
+      const pgCompany =
+        String(
+          row.pg_company || ''
+        )
+
+
+      if (
+        savedHeadOfficePg === 'toss' &&
+        !pgCompany.includes('토스')
+      ) {
+        return false
+      }
+
+
+      if (
+        savedHeadOfficePg === 'korpay' &&
+        !pgCompany.includes('코페이')
+      ) {
+        return false
+      }
+
+
+      const keyword =
+        savedHeadOfficeKeyword
+          .trim()
+          .toLowerCase()
+
+
+      if (!keyword) {
+        return true
+      }
+
+
+      const merchantIdText =
+        'MER' +
+        String(
+          row.merchant_id || 0
+        ).padStart(
+          4,
+          '0'
+        )
+
+
+      const merchantNameText =
+        String(
+          row.merchant_name || ''
+        ).toLowerCase()
+
+
+      if (
+        savedHeadOfficeTarget ===
+        'merchant_id'
+      ) {
+
+        return merchantIdText
+          .toLowerCase()
+          .includes(keyword)
+      }
+
+
+      if (
+        savedHeadOfficeTarget ===
+        'merchant_name'
+      ) {
+
+        return merchantNameText
+          .includes(keyword)
+      }
+
+
+      return (
+        merchantIdText
+          .toLowerCase()
+          .includes(keyword) ||
+
+        merchantNameText
+          .includes(keyword)
+      )
+    }
+  )
   
     const totalPaymentAmount =
       headOfficeRows.reduce(
@@ -15304,14 +15443,74 @@ headOfficeFee: number
   
   
     const merchantSummaries =
-      Array.from(
-        merchantSummaryMap.values()
-      )
-        .sort(
-          (a, b) =>
-            b.headOfficeFee -
-            a.headOfficeFee
-        )
+  Array.from(
+    merchantSummaryMap.values()
+  )
+    .sort(
+      (a, b) =>
+        b.headOfficeFee -
+        a.headOfficeFee
+    )
+
+
+const savedHeadOfficePageSize =
+  Number(
+    sessionStorage.getItem(
+      'head_office_fee_page_size'
+    ) || '10'
+  )
+
+
+const headOfficePageSize =
+  [10, 20, 50].includes(
+    savedHeadOfficePageSize
+  )
+    ? savedHeadOfficePageSize
+    : 10
+
+
+const requestedHeadOfficePage =
+  Number(
+    sessionStorage.getItem(
+      'head_office_fee_page'
+    ) || '1'
+  )
+
+
+const totalHeadOfficePages =
+  Math.max(
+    1,
+    Math.ceil(
+      merchantSummaries.length /
+      headOfficePageSize
+    )
+  )
+
+
+const currentHeadOfficePage =
+  Math.min(
+    Math.max(
+      requestedHeadOfficePage,
+      1
+    ),
+    totalHeadOfficePages
+  )
+
+
+const headOfficePageStart =
+  (
+    currentHeadOfficePage -
+    1
+  ) *
+  headOfficePageSize
+
+
+const pagedMerchantSummaries =
+  merchantSummaries.slice(
+    headOfficePageStart,
+    headOfficePageStart +
+    headOfficePageSize
+  )
   
   
     if (tableHead) {
@@ -15350,8 +15549,8 @@ headOfficeFee: number
   
         :
   
-        merchantSummaries
-          .map(
+        pagedMerchantSummaries
+  .map(
             (
               row,
               index
@@ -15371,8 +15570,8 @@ headOfficeFee: number
                 <tr>
   
                   <td>
-                    ${index + 1}
-                  </td>
+  ${headOfficePageStart + index + 1}
+</td>
   
                   <td>
                     ${merchantCode}<br>
@@ -15411,65 +15610,355 @@ headOfficeFee: number
           )
           .join('')
   
-  
-    document
-      .querySelector(
-        '#head-office-fee-search'
+          const headOfficePageSizeSelect =
+  document.querySelector<HTMLSelectElement>(
+    '#head-office-page-size'
+  )
+
+
+if (headOfficePageSizeSelect) {
+
+  headOfficePageSizeSelect.value =
+    String(
+      headOfficePageSize
+    )
+
+
+  headOfficePageSizeSelect
+    .addEventListener(
+      'change',
+      () => {
+
+        sessionStorage.setItem(
+          'head_office_fee_page_size',
+          headOfficePageSizeSelect.value
+        )
+
+        sessionStorage.setItem(
+          'head_office_fee_page',
+          '1'
+        )
+
+
+        document
+          .querySelector<HTMLElement>(
+            '.admin-tab[data-page="payment"]'
+          )
+          ?.click()
+
+      }
+    )
+}
+
+
+const headOfficePagination =
+  document.querySelector<HTMLElement>(
+    '#head-office-pagination'
+  )
+
+
+if (headOfficePagination) {
+
+  headOfficePagination.innerHTML =
+    ''
+
+
+  for (
+    let pageNumber = 1;
+    pageNumber <= totalHeadOfficePages;
+    pageNumber += 1
+  ) {
+
+    const pageButton =
+      document.createElement(
+        'button'
       )
-      ?.addEventListener(
-        'click',
-        () => {
-  
-          const start =
-            document
-              .querySelector<HTMLInputElement>(
-                '#head-office-fee-start'
-              )
-              ?.value ||
-            monthStart
-  
-  
-          const end =
-            document
-              .querySelector<HTMLInputElement>(
-                '#head-office-fee-end'
-              )
-              ?.value ||
-            today
-  
-  
-          if (
-            start >
-            end
-          ) {
-  
-            alert(
-              '시작일이 종료일보다 늦을 수 없습니다.'
-            )
-  
-            return
-          }
-  
-  
-          sessionStorage.setItem(
-            'head_office_fee_start',
-            start
+
+
+    pageButton.type =
+      'button'
+
+
+    pageButton.textContent =
+      String(
+        pageNumber
+      )
+
+
+    if (
+      pageNumber ===
+      currentHeadOfficePage
+    ) {
+
+      pageButton.classList.add(
+        'active'
+      )
+    }
+
+
+    pageButton.addEventListener(
+      'click',
+      () => {
+
+        sessionStorage.setItem(
+          'head_office_fee_page',
+          String(
+            pageNumber
           )
-  
-          sessionStorage.setItem(
-            'head_office_fee_end',
-            end
+        )
+
+
+        document
+          .querySelector<HTMLElement>(
+            '.admin-tab[data-page="payment"]'
           )
-  
+          ?.click()
+
+      }
+    )
+
+
+    headOfficePagination.appendChild(
+      pageButton
+    )
+  }
+}
   
           document
-            .querySelector<HTMLElement>(
-              '.admin-tab[data-page="payment"]'
+          .querySelector(
+            '#head-office-fee-search'
+          )
+          ?.addEventListener(
+            'click',
+            () => {
+        
+              const start =
+                document
+                  .querySelector<HTMLInputElement>(
+                    '#head-office-fee-start'
+                  )
+                  ?.value ||
+                monthStart
+        
+        
+              const end =
+                document
+                  .querySelector<HTMLInputElement>(
+                    '#head-office-fee-end'
+                  )
+                  ?.value ||
+                today
+        
+        
+              const pg =
+                document
+                  .querySelector<HTMLSelectElement>(
+                    '#head-office-fee-pg'
+                  )
+                  ?.value ||
+                'all'
+        
+        
+              const target =
+                document
+                  .querySelector<HTMLSelectElement>(
+                    '#head-office-fee-target'
+                  )
+                  ?.value ||
+                'all'
+        
+        
+              const keyword =
+                document
+                  .querySelector<HTMLInputElement>(
+                    '#head-office-fee-keyword'
+                  )
+                  ?.value
+                  .trim() ||
+                ''
+        
+        
+              if (
+                start >
+                end
+              ) {
+        
+                alert(
+                  '시작일이 종료일보다 늦을 수 없습니다.'
+                )
+        
+                return
+              }
+        
+        
+              sessionStorage.setItem(
+                'head_office_fee_start',
+                start
+              )
+        
+              sessionStorage.setItem(
+                'head_office_fee_end',
+                end
+              )
+        
+              sessionStorage.setItem(
+                'head_office_fee_pg',
+                pg
+              )
+        
+              sessionStorage.setItem(
+                'head_office_fee_target',
+                target
+              )
+        
+              sessionStorage.setItem(
+                'head_office_fee_keyword',
+                keyword
+              )
+        
+              sessionStorage.setItem(
+                'head_office_fee_page',
+                '1'
+              )
+        
+        
+              document
+                .querySelector<HTMLElement>(
+                  '.admin-tab[data-page="payment"]'
+                )
+                ?.click()
+        
+            }
+          )
+
+          const moveHeadOfficeDate = (
+            dateText: string,
+            days: number
+          ): string => {
+          
+            const date =
+              new Date(
+                dateText +
+                'T12:00:00+09:00'
+              )
+          
+            date.setDate(
+              date.getDate() +
+              days
             )
-            ?.click()
-  
-        }
-      )
+          
+            return getKoreaDate(
+              date
+            )
+          }
+          
+          
+          const applyHeadOfficePeriod = (
+            start: string,
+            end: string
+          ) => {
+          
+            sessionStorage.setItem(
+              'head_office_fee_start',
+              start
+            )
+          
+            sessionStorage.setItem(
+              'head_office_fee_end',
+              end
+            )
+          
+            sessionStorage.setItem(
+              'head_office_fee_page',
+              '1'
+            )
+          
+            document
+              .querySelector<HTMLElement>(
+                '.admin-tab[data-page="payment"]'
+              )
+              ?.click()
+          }
+          
+          
+          document
+            .querySelector(
+              '#head-office-fee-prev'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+          
+                applyHeadOfficePeriod(
+                  moveHeadOfficeDate(
+                    savedStartDate,
+                    -1
+                  ),
+                  moveHeadOfficeDate(
+                    savedEndDate,
+                    -1
+                  )
+                )
+          
+              }
+            )
+          
+          
+          document
+            .querySelector(
+              '#head-office-fee-today'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+          
+                applyHeadOfficePeriod(
+                  today,
+                  today
+                )
+          
+              }
+            )
+          
+          
+          document
+            .querySelector(
+              '#head-office-fee-next'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+          
+                applyHeadOfficePeriod(
+                  moveHeadOfficeDate(
+                    savedStartDate,
+                    1
+                  ),
+                  moveHeadOfficeDate(
+                    savedEndDate,
+                    1
+                  )
+                )
+          
+              }
+            )
+          
+          
+          document
+            .querySelector(
+              '#head-office-fee-month'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+          
+                applyHeadOfficePeriod(
+                  monthStart,
+                  today
+                )
+          
+              }
+            )
   
   
     return
@@ -15753,7 +16242,14 @@ if (
   if (summaryBox) {
 
     summaryBox.innerHTML = `
-      <div class="payment-mini-summary">
+      <div
+        class="payment-mini-summary"
+        style="
+          display:grid;
+          grid-template-columns:repeat(6, minmax(0, 1fr));
+          gap:10px;
+        "
+      >
 
         <div
           class="payment-mini-summary-card"
