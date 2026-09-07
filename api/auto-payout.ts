@@ -554,31 +554,44 @@ try {
   continue
 }
 
-    if (
-      !payoutResponse.ok ||
-      !payoutResult.success
-    ) {
-      await supabase
-        .from('payments')
-        .update({
-          payout_status: '출금오류',
-        })
-        .in('id', group.paymentIds)
+if (
+  !payoutResponse.ok ||
+  !payoutResult.success
+) {
+  const payoutErrorMessage =
+    payoutResult?.data?.error?.message ||
+    payoutResult?.data?.message ||
+    payoutResult?.message ||
+    '토스 지급 요청에 실패했습니다.'
 
-      results.push({
-        merchantId: refSellerId,
-        merchantName: group.merchantName,
-        amount: group.settlementAmount,
-        success: false,
-        refPayoutId,
-        message:
-          payoutResult?.data?.error?.message ||
-          payoutResult?.message ||
-          '토스 지급 요청에 실패했습니다.',
-      })
+  console.error('TOSS_AUTO_PAYOUT_FAILED', {
+    merchantId: refSellerId,
+    merchantName: group.merchantName,
+    amount: group.settlementAmount,
+    refPayoutId,
+    status: payoutResponse.status,
+    errorMessage: payoutErrorMessage,
+    response: payoutResult,
+  })
 
-      continue
-    }
+  await supabase
+    .from('payments')
+    .update({
+      payout_status: '출금오류',
+    })
+    .in('id', group.paymentIds)
+
+  results.push({
+    merchantId: refSellerId,
+    merchantName: group.merchantName,
+    amount: group.settlementAmount,
+    success: false,
+    refPayoutId,
+    message: payoutErrorMessage,
+  })
+
+  continue
+}
 
     const { error: payoutUpdateError } = await supabase
   .from('payments')
