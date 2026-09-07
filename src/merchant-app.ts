@@ -15,6 +15,113 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 
+
+
+  function getKorpayEdiDate() {
+
+    const now =
+      new Date()
+  
+    const yyyy =
+      String(
+        now.getFullYear()
+      )
+  
+    const MM =
+      String(
+        now.getMonth() + 1
+      ).padStart(
+        2,
+        '0'
+      )
+  
+    const dd =
+      String(
+        now.getDate()
+      ).padStart(
+        2,
+        '0'
+      )
+  
+    const HH =
+      String(
+        now.getHours()
+      ).padStart(
+        2,
+        '0'
+      )
+  
+    const mm =
+      String(
+        now.getMinutes()
+      ).padStart(
+        2,
+        '0'
+      )
+  
+    const ss =
+      String(
+        now.getSeconds()
+      ).padStart(
+        2,
+        '0'
+      )
+  
+    return (
+      yyyy +
+      MM +
+      dd +
+      HH +
+      mm +
+      ss
+    )
+  }
+  
+  
+  async function createKorpayHash(
+    merchantId: string,
+    ediDate: string,
+    amount: number,
+    mKey: string
+  ) {
+  
+    const text =
+      merchantId +
+      ediDate +
+      String(amount) +
+      mKey
+  
+    const encoder =
+      new TextEncoder()
+  
+    const data =
+      encoder.encode(
+        text
+      )
+  
+    const hashBuffer =
+      await crypto.subtle.digest(
+        'SHA-256',
+        data
+      )
+  
+    const hashArray =
+      Array.from(
+        new Uint8Array(
+          hashBuffer
+        )
+      )
+  
+    return hashArray
+      .map(
+        (byte) =>
+          byte
+            .toString(16)
+            .padStart(2, '0')
+      )
+      .join('')
+  }
+
 const app =
   document.querySelector<HTMLDivElement>('#app')!
 
@@ -8844,60 +8951,53 @@ async function renderMerchantMenuCard() {
               .select(`
                 merchant_name,
                 online_pg_company_1,
-                toss_client_key
+                toss_client_key,
+                korpay_pg_mid,
+                korpay_pg_mkey
               `)
               .eq(
                 'id',
                 merchantId
               )
               .single()
-    
-    
+
+
           if (
             tossMerchantError ||
             !tossMerchant
           ) {
-    
+
             alert(
               '가맹점 결제정보를 불러오지 못했습니다.'
             )
-    
+
             return
           }
-    
-    
+
+
+          const selectedOnlinePg =
+            String(
+              tossMerchant
+                .online_pg_company_1 ||
+              ''
+            ).trim()
+
+
           if (
-            tossMerchant
-              .online_pg_company_1 !==
-            '토스페이먼츠'
+            selectedOnlinePg !==
+              '토스페이먼츠' &&
+            selectedOnlinePg !==
+              '코페이'
           ) {
-    
+
             alert(
-              '온라인결제 PG가 토스페이먼츠로 설정되지 않았습니다.'
+              '온라인결제 1 PG사를 확인해주세요.'
             )
-    
+
             return
           }
-    
-    
-          const tossClientKey =
-  String(
-    tossMerchant
-      .toss_client_key ||
-    clientKey
-  ).trim()
-    
-    
-          if (!tossClientKey) {
-    
-            alert(
-              '토스 Client Key가 등록되지 않았습니다.'
-            )
-    
-            return
-          }
-    
-    
+
+
           const {
             data: nextCallNumber,
             error: callNumberError
@@ -8909,148 +9009,365 @@ async function renderMerchantMenuCard() {
                   merchantId
               }
             )
-    
-    
+
+
           if (
             callNumberError ||
             !nextCallNumber
           ) {
-    
+
             alert(
               '주문번호 생성에 실패했습니다.'
             )
-    
+
             return
           }
-    
-    
+
+
           const callNumber =
             Number(
               nextCallNumber
             )
-    
-    
+
+
           const orderNo =
-            'TOSS-' +
+            (
+              selectedOnlinePg ===
+                '코페이'
+                ? 'KORPAY-'
+                : 'TOSS-'
+            ) +
             callNumber +
             '-' +
             Date.now()
-    
-    
+
+
           sessionStorage.setItem(
             'kiosk_call_number',
             String(
               callNumber
             )
           )
-    
+
           sessionStorage.setItem(
             'kiosk_order_no',
             orderNo
           )
-    
+
           sessionStorage.setItem(
             'kiosk_merchant_id',
             String(
               merchantId
             )
           )
-    
+
           sessionStorage.setItem(
             'kiosk_items',
             JSON.stringify(
               selectedItems
             )
           )
-    
+
           sessionStorage.setItem(
             'kiosk_total_amount',
             String(
               totalPrice
             )
           )
-    
+
           sessionStorage.setItem(
             'merchantId',
             String(
               merchantId
             )
           )
-    
+
           sessionStorage.setItem(
             'merchantName',
             tossMerchant
               .merchant_name ||
               merchantName
           )
-    
+
           sessionStorage.setItem(
             'message',
             '모바일 메뉴결제'
           )
-    
+
           sessionStorage.setItem(
             'selected_pg_company',
-            '토스페이먼츠'
+            selectedOnlinePg
           )
-    
-    
-          const tossPayments =
-            await loadTossPayments(
-              tossClientKey
-            )
-    
-    
-          await tossPayments
-            .requestPayment(
-              '카드',
-              {
-                amount:
-                  totalPrice,
-    
-                orderId:
-                  orderNo.replace(
-                    /[^a-zA-Z0-9]/g,
-                    ''
-                  ),
-    
-                orderName:
-                  selectedItems.length === 1
-                    ? selectedItems[0].name
-                    : (
-                        selectedItems[0].name +
-                        ' 외 ' +
-                        (
-                          selectedItems.length -
-                          1
-                        ) +
-                        '건'
-                      ),
-    
-                customerName:
+
+
+          if (
+            selectedOnlinePg ===
+            '코페이'
+          ) {
+
+            if (
+              !tossMerchant
+                .korpay_pg_mid ||
+              !tossMerchant
+                .korpay_pg_mkey
+            ) {
+
+              alert(
+                '코페이 PG MID 또는 MKEY가 등록되지 않았습니다.'
+              )
+
+              return
+            }
+
+
+            const ediDate =
+              getKorpayEdiDate()
+
+
+            const hashKey =
+              await createKorpayHash(
+                String(
                   tossMerchant
-                    .merchant_name ||
-                  merchantName,
-    
-                successUrl:
-                  window.location.origin +
-                  '/merchant-app/success?source=kiosk' +
-                  '&pg=토스페이먼츠' +
-                  '&merchantId=' +
-                  merchantId +
-                  '&merchantName=' +
-                  encodeURIComponent(
-                    tossMerchant
-                      .merchant_name ||
-                    merchantName
-                  ),
-    
-                failUrl:
-                  window.location.origin +
-                  '/fail'
+                    .korpay_pg_mid
+                ),
+                ediDate,
+                totalPrice,
+                String(
+                  tossMerchant
+                    .korpay_pg_mkey
+                )
+              )
+
+
+            const paymentData = {
+
+              merchantId:
+                tossMerchant
+                  .korpay_pg_mid,
+
+              productName:
+                selectedItems.length === 1
+                  ? selectedItems[0].name
+                  : (
+                      selectedItems[0].name +
+                      ' 외 ' +
+                      (
+                        selectedItems.length -
+                        1
+                      ) +
+                      '건'
+                    ),
+
+              orderNumber:
+                orderNo.replace(
+                  /[^a-zA-Z0-9]/g,
+                  ''
+                ),
+
+              amount:
+                totalPrice,
+
+              payMethod:
+                'card',
+
+              returnUrl:
+                window.location.origin +
+                '/api/korpay-return',
+
+              ediDate:
+                ediDate,
+
+              hashKey:
+                hashKey,
+
+              customerName:
+                tossMerchant
+                  .merchant_name ||
+                merchantName,
+
+              reserved:
+                String(
+                  merchantId
+                ),
+
+              language:
+                'ko'
+            }
+
+
+            const korpay =
+              (window as any)
+                .KorpaySdk
+
+
+            if (!korpay) {
+
+              alert(
+                'Korpay SDK를 찾을 수 없습니다.'
+              )
+
+              return
+            }
+
+
+            korpay.paymentTimeout =
+              30000
+
+
+            korpay.payment(
+              'https://staging-payments.korpay.com/v1',
+              paymentData,
+              {
+
+                onStart: () => {
+
+                  const payButton =
+                    document.querySelector<HTMLButtonElement>(
+                      '#mobile-menu-payment-submit'
+                    )
+
+                  if (payButton) {
+
+                    payButton.disabled =
+                      true
+
+                    payButton.innerText =
+                      '결제창 호출 중...'
+                  }
+                },
+
+
+                onError: (
+                  error: any
+                ) => {
+
+                  alert(
+                    String(error)
+                  )
+
+
+                  const payButton =
+                    document.querySelector<HTMLButtonElement>(
+                      '#mobile-menu-payment-submit'
+                    )
+
+                  if (payButton) {
+
+                    payButton.disabled =
+                      false
+
+                    payButton.innerText =
+                      '카드 결제'
+                  }
+                },
+
+
+                onClose: () => {
+
+                  const payButton =
+                    document.querySelector<HTMLButtonElement>(
+                      '#mobile-menu-payment-submit'
+                    )
+
+                  if (payButton) {
+
+                    payButton.disabled =
+                      false
+
+                    payButton.innerText =
+                      '카드 결제'
+                  }
+                }
+
               }
             )
-    
+
+            return
+          }
+
+
+          if (
+            selectedOnlinePg ===
+            '토스페이먼츠'
+          ) {
+
+            const tossClientKey =
+              String(
+                tossMerchant
+                  .toss_client_key ||
+                clientKey
+              ).trim()
+
+
+            if (!tossClientKey) {
+
+              alert(
+                '토스 Client Key가 등록되지 않았습니다.'
+              )
+
+              return
+            }
+
+
+            const tossPayments =
+              await loadTossPayments(
+                tossClientKey
+              )
+
+
+            await tossPayments
+              .requestPayment(
+                '카드',
+                {
+                  amount:
+                    totalPrice,
+
+                  orderId:
+                    orderNo.replace(
+                      /[^a-zA-Z0-9]/g,
+                      ''
+                    ),
+
+                  orderName:
+                    selectedItems.length === 1
+                      ? selectedItems[0].name
+                      : (
+                          selectedItems[0].name +
+                          ' 외 ' +
+                          (
+                            selectedItems.length -
+                            1
+                          ) +
+                          '건'
+                        ),
+
+                  customerName:
+                    tossMerchant
+                      .merchant_name ||
+                    merchantName,
+
+                  successUrl:
+                    window.location.origin +
+                    '/merchant-app/success?source=kiosk' +
+                    '&pg=토스페이먼츠' +
+                    '&merchantId=' +
+                    merchantId +
+                    '&merchantName=' +
+                    encodeURIComponent(
+                      tossMerchant
+                        .merchant_name ||
+                      merchantName
+                    ),
+
+                  failUrl:
+                    window.location.origin +
+                    '/fail'
+                }
+              )
+
+            return
+          }
+
         }
       )
         
@@ -9878,92 +10195,101 @@ function renderMerchantLogin() {
 
         try {
 
-          const response =
-            await fetch(
-              '/api/merchant-app-login',
-              {
-                method: 'POST',
-
-                headers: {
-                  'Content-Type':
-                    'application/json'
-                },
-
-                body: JSON.stringify({
-                  loginId,
-                  password
-                })
-              }
-            )
-
-
-          const result =
-            await response.json()
-
-
-          if (
-            !response.ok ||
-            !result.success
-          ) {
-
+          const {
+            data: merchants,
+            error
+          } =
+            await supabase
+              .from('merchants')
+              .select(`
+                id,
+                merchant_login_id,
+                merchant_password,
+                merchant_name,
+                merchant_type
+              `)
+              .eq(
+                'merchant_login_id',
+                loginId
+              )
+        
+        
+          if (error) {
+        
             if (message) {
               message.textContent =
-                result.message ||
-                '로그인에 실패했습니다.'
+                '로그인 조회 실패: ' +
+                error.message
             }
-
+        
             return
           }
-
-
+        
+        
           const merchant =
-            result.merchant
-
-
+            (merchants || []).find(
+              (item: any) =>
+                String(
+                  item.merchant_password || ''
+                ).trim() === password
+            )
+        
+        
+          if (!merchant) {
+        
+            if (message) {
+              message.textContent =
+                '아이디 또는 비밀번호가 올바르지 않습니다.'
+            }
+        
+            return
+          }
+        
+        
           const merchantLoginData:
             Record<string, string> = {
-
+        
               login_merchant_id:
                 String(
                   merchant.id || ''
                 ),
-
+        
               login_merchant_code:
                 String(
-                  merchant.loginId || ''
+                  merchant.merchant_login_id || ''
                 ),
-
+        
               login_merchant_name:
                 String(
-                  merchant.name || ''
+                  merchant.merchant_name || ''
                 ),
-
+        
               login_merchant_type:
                 String(
-                  merchant.type || ''
+                  merchant.merchant_type ||
+                  '일반매장'
                 )
             }
-
-
+        
+        
           Object.entries(
             merchantLoginData
           ).forEach(
             ([key, value]) => {
-
+        
               sessionStorage.setItem(
                 key,
                 value
               )
-
+        
               localStorage.setItem(
                 key,
                 value
               )
-
             }
           )
-
-
+        
+        
           location.href =
             '/merchant-app/home'
 
