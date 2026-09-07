@@ -14226,6 +14226,15 @@ const paymentTableBody =
     'payment_sub_page'
   ) || 'approval'
 
+  const currentAdminId =
+  sessionStorage.getItem(
+    'admin_id'
+  ) || ''
+
+const isHeadOfficeMaster =
+  currentAdminId ===
+  'NXGMASTER16'
+
 if (tableTop) {
   tableTop.innerHTML =
     '<button id="payment-excel-download">엑셀 다운로드</button>' +
@@ -14271,9 +14280,26 @@ if (subMenu) {
 
     |
 
-    <span>
-      고액 동일카드 조회
-    </span>
+    ${
+      isHeadOfficeMaster
+        ? `
+          |
+          <span
+            id="payment-sub-head-office"
+            style="
+              cursor:pointer;
+              ${
+                paymentSubPage === 'head-office'
+                  ? 'font-weight:700;color:#174981;'
+                  : ''
+              }
+            "
+          >
+            본사 수수료 합계
+          </span>
+        `
+        : ''
+    }
   `
 }
 
@@ -14323,6 +14349,892 @@ document
     }
   )
 
+  document
+  .querySelector(
+    '#payment-sub-head-office'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      sessionStorage.setItem(
+        'payment_sub_page',
+        'head-office'
+      )
+
+      document
+        .querySelector<HTMLElement>(
+          '.admin-tab[data-page="payment"]'
+        )
+        ?.click()
+
+    }
+  )
+
+  if (
+    paymentSubPage === 'head-office'
+  ) {
+  
+    if (!isHeadOfficeMaster) {
+  
+      sessionStorage.setItem(
+        'payment_sub_page',
+        'approval'
+      )
+  
+      alert(
+        '본사 마스터만 조회할 수 있습니다.'
+      )
+  
+      return
+    }
+  
+  
+    if (titleBox) {
+      titleBox.innerHTML =
+        '▶ 결제관리 > 본사 수수료 합계'
+    }
+  
+  
+    const getKoreaDate = (
+      date: Date
+    ) => {
+  
+      return new Intl.DateTimeFormat(
+        'en-CA',
+        {
+          timeZone: 'Asia/Seoul',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }
+      ).format(date)
+    }
+  
+  
+    const today =
+      getKoreaDate(
+        new Date()
+      )
+  
+  
+    const monthStart =
+      today.slice(0, 7) +
+      '-01'
+  
+  
+    const savedStartDate =
+      sessionStorage.getItem(
+        'head_office_fee_start'
+      ) || monthStart
+  
+  
+    const savedEndDate =
+      sessionStorage.getItem(
+        'head_office_fee_end'
+      ) || today
+  
+  
+    if (searchBox) {
+  
+      searchBox.innerHTML = `
+        <div class="payment-search-line">
+  
+          <input
+            id="head-office-fee-start"
+            type="date"
+            value="${savedStartDate}"
+          />
+  
+          <span>~</span>
+  
+          <input
+            id="head-office-fee-end"
+            type="date"
+            value="${savedEndDate}"
+          />
+  
+          <button
+            id="head-office-fee-search"
+            class="search-btn"
+            type="button"
+          >
+            🔍 조회
+          </button>
+  
+        </div>
+      `
+    }
+  
+  
+    if (tableTop) {
+      tableTop.innerHTML = ''
+    }
+  
+  
+    const startIso =
+      new Date(
+        savedStartDate +
+        'T00:00:00+09:00'
+      ).toISOString()
+  
+  
+    const endIso =
+      new Date(
+        savedEndDate +
+        'T23:59:59.999+09:00'
+      ).toISOString()
+  
+  
+    const {
+      data: headOfficePayments,
+      error: headOfficePaymentError
+    } =
+      await supabase
+        .from('payments')
+        .select(`
+          id,
+          merchant_id,
+          merchant_name,
+          amount,
+          fee_rate,
+          fee_amount,
+          pg_company,
+payment_method,
+branch_admin_id,
+          branch_fee_rate,
+          agency_admin_id,
+          agency_fee_rate,
+          manager_admin_id,
+          manager_fee_rate,
+          created_at
+        `)
+        .eq(
+          'status',
+          'paid'
+        )
+        .gte(
+          'created_at',
+          startIso
+        )
+        .lte(
+          'created_at',
+          endIso
+        )
+        .order(
+          'created_at',
+          {
+            ascending: false
+          }
+        )
+  
+  
+    if (headOfficePaymentError) {
+  
+      alert(
+        '본사 수수료 조회 실패: ' +
+        headOfficePaymentError.message
+      )
+  
+      return
+    }
+  
+    const headOfficeMerchantIds =
+  [
+    ...new Set(
+      (headOfficePayments || [])
+        .map(
+          (payment: any) =>
+            Number(
+              payment.merchant_id || 0
+            )
+        )
+        .filter(
+          (merchantId) =>
+            merchantId > 0
+        )
+    )
+  ]
+
+
+const {
+  data: headOfficeMerchants,
+  error: headOfficeMerchantError
+} =
+  await supabase
+    .from('merchants')
+    .select(
+      'id, settlement_cycle'
+    )
+    .in(
+      'id',
+      headOfficeMerchantIds.length > 0
+        ? headOfficeMerchantIds
+        : [0]
+    )
+
+
+if (headOfficeMerchantError) {
+
+  alert(
+    '가맹점 정산주기 조회 실패: ' +
+    headOfficeMerchantError.message
+  )
+
+  return
+}
+
+
+const headOfficeMerchantCycleMap =
+  new Map<number, string>()
+
+
+;(headOfficeMerchants || [])
+  .forEach(
+    (merchant: any) => {
+
+      headOfficeMerchantCycleMap.set(
+        Number(
+          merchant.id
+        ),
+        String(
+          merchant.settlement_cycle ||
+          '3일'
+        )
+      )
+
+    }
+  )
+  
+    const headOfficeRows =
+      (headOfficePayments || [])
+        .map(
+          (payment: any) => {
+  
+            const amount =
+              Number(
+                payment.amount || 0
+              )
+  
+  
+            const merchantFeeAmount =
+              payment.fee_amount !== null &&
+              payment.fee_amount !== undefined
+  
+                ? Number(
+                    payment.fee_amount || 0
+                  )
+  
+                : Math.floor(
+                    amount *
+                    Number(
+                      payment.fee_rate || 0
+                    ) /
+                    100
+                  )
+  
+  
+            const branchRate =
+              payment.branch_admin_id
+                ? Number(
+                    payment.branch_fee_rate || 0
+                  )
+                : 0
+  
+  
+            const agencyRate =
+              payment.agency_admin_id
+                ? Number(
+                    payment.agency_fee_rate || 0
+                  )
+                : 0
+  
+  
+            const managerRate =
+              payment.manager_admin_id
+                ? Number(
+                    payment.manager_fee_rate || 0
+                  )
+                : 0
+  
+  
+            const branchActualRate =
+              Math.max(
+                branchRate -
+                agencyRate,
+                0
+              )
+  
+  
+            const agencyActualRate =
+              Math.max(
+                agencyRate -
+                managerRate,
+                0
+              )
+  
+  
+            const managerActualRate =
+              Math.max(
+                managerRate,
+                0
+              )
+  
+  
+            const branchCommission =
+              Math.floor(
+                amount *
+                branchActualRate /
+                100
+              )
+  
+  
+            const agencyCommission =
+              Math.floor(
+                amount *
+                agencyActualRate /
+                100
+              )
+  
+  
+            const managerCommission =
+              Math.floor(
+                amount *
+                managerActualRate /
+                100
+              )
+  
+  
+            const organizationCommission =
+              branchCommission +
+              agencyCommission +
+              managerCommission
+  
+              const settlementCycle =
+              headOfficeMerchantCycleMap.get(
+                Number(
+                  payment.merchant_id || 0
+                )
+              ) || '3일'
+            
+            
+            const isOneDay =
+              settlementCycle === '1일'
+            
+            
+            const pgCompany =
+              String(
+                payment.pg_company || ''
+              )
+            
+            
+            const paymentMethod =
+              String(
+                payment.payment_method || ''
+              )
+            
+            
+            let pgFeeRate = 0
+            
+            
+            if (
+              pgCompany.includes(
+                '토스'
+              )
+            ) {
+            
+              pgFeeRate =
+                1.37
+            
+            } else if (
+              pgCompany.includes(
+                '코페이'
+              )
+            ) {
+            
+              if (
+                paymentMethod.includes(
+                  '수기'
+                )
+              ) {
+            
+                pgFeeRate =
+                  isOneDay
+                    ? 0.95
+                    : 0.8
+            
+              } else {
+            
+                /*
+                  온라인 / 무선단말기
+                  동일 요율
+            
+                  1일 = 0.75%
+                  3/4/7일 = 0.60%
+                */
+            
+                pgFeeRate =
+                  isOneDay
+                    ? 0.75
+                    : 0.6
+              }
+            }
+            
+            
+            const pgFeeAmount =
+              Math.floor(
+                amount *
+                pgFeeRate /
+                100
+              )
+            
+            
+            const pgFeeVat =
+              Math.floor(
+                pgFeeAmount *
+                0.1
+              )
+            
+            
+            const pgTotalCost =
+              pgFeeAmount +
+              pgFeeVat 
+  
+              const headOfficeCommission =
+              Math.max(
+                merchantFeeAmount -
+                pgTotalCost -
+                organizationCommission,
+                0
+              )
+  
+  
+              return {
+                ...payment,
+              
+                amount,
+              
+                merchantFeeAmount,
+              
+                pgTotalCost,
+              
+                organizationCommission,
+              
+                headOfficeCommission
+              }
+          }
+        )
+  
+  
+    const totalPaymentAmount =
+      headOfficeRows.reduce(
+        (
+          sum: number,
+          row: any
+        ) =>
+          sum +
+          row.amount,
+        0
+      )
+  
+  
+    const totalMerchantFee =
+      headOfficeRows.reduce(
+        (
+          sum: number,
+          row: any
+        ) =>
+          sum +
+          row.merchantFeeAmount,
+        0
+      )
+  
+      const totalPgCost =
+  headOfficeRows.reduce(
+    (
+      sum: number,
+      row: any
+    ) =>
+      sum +
+      Number(
+        row.pgTotalCost || 0
+      ),
+    0
+  )
+  
+    const totalOrganizationFee =
+      headOfficeRows.reduce(
+        (
+          sum: number,
+          row: any
+        ) =>
+          sum +
+          row.organizationCommission,
+        0
+      )
+  
+  
+    const totalHeadOfficeFee =
+      headOfficeRows.reduce(
+        (
+          sum: number,
+          row: any
+        ) =>
+          sum +
+          row.headOfficeCommission,
+        0
+      )
+  
+  
+    if (summaryBox) {
+  
+      summaryBox.innerHTML = `
+        <div class="payment-mini-summary">
+  
+          <div
+            class="payment-mini-summary-card"
+          >
+            <strong>
+              승인건수
+            </strong>
+  
+            <span>
+              ${headOfficeRows.length.toLocaleString()}건
+            </span>
+          </div>
+  
+  
+          <div
+            class="payment-mini-summary-card"
+          >
+            <strong>
+              총 승인금액
+            </strong>
+  
+            <span>
+              ${totalPaymentAmount.toLocaleString()}원
+            </span>
+          </div>
+  
+  
+          <div
+            class="payment-mini-summary-card"
+          >
+            <strong>
+              가맹점 수수료 합계
+            </strong>
+  
+            <span>
+              ${totalMerchantFee.toLocaleString()}원
+            </span>
+          </div>
+  
+  
+          <div
+            class="payment-mini-summary-card"
+          >
+
+          <div
+  class="payment-mini-summary-card"
+>
+  <strong>
+    PG 원가
+  </strong>
+
+  <span>
+    ${totalPgCost.toLocaleString()}원
+  </span>
+</div>
+
+            <strong>
+              조직 수수료 합계
+            </strong>
+  
+            <span>
+              ${totalOrganizationFee.toLocaleString()}원
+            </span>
+          </div>
+  
+  
+          <div
+            class="payment-mini-summary-card"
+          >
+            <strong>
+  본사 실제 수익
+</strong>
+  
+            <span>
+              ${totalHeadOfficeFee.toLocaleString()}원
+            </span>
+          </div>
+  
+        </div>
+      `
+    }
+  
+  
+    const merchantSummaryMap =
+      new Map<
+        number,
+        {
+          merchantId: number
+          merchantName: string
+          paymentCount: number
+          paymentAmount: number
+          merchantFee: number
+pgCost: number
+organizationFee: number
+headOfficeFee: number
+        }
+      >()
+  
+  
+    headOfficeRows.forEach(
+      (row: any) => {
+  
+        const merchantId =
+          Number(
+            row.merchant_id || 0
+          )
+  
+  
+        const current =
+          merchantSummaryMap.get(
+            merchantId
+          )
+  
+  
+        if (current) {
+  
+          current.paymentCount +=
+            1
+  
+          current.paymentAmount +=
+            row.amount
+  
+          current.merchantFee +=
+            row.merchantFeeAmount
+
+            current.pgCost +=
+  Number(
+    row.pgTotalCost || 0
+  )
+  
+          current.organizationFee +=
+            row.organizationCommission
+  
+          current.headOfficeFee +=
+            row.headOfficeCommission
+  
+        } else {
+  
+          merchantSummaryMap.set(
+            merchantId,
+            {
+              merchantId,
+  
+              merchantName:
+                row.merchant_name ||
+                '-',
+  
+              paymentCount:
+                1,
+  
+              paymentAmount:
+                row.amount,
+  
+              merchantFee:
+                row.merchantFeeAmount,
+
+                pgCost:
+  Number(
+    row.pgTotalCost || 0
+  ),
+  
+              organizationFee:
+                row.organizationCommission,
+  
+              headOfficeFee:
+                row.headOfficeCommission
+            }
+          )
+        }
+  
+      }
+    )
+  
+  
+    const merchantSummaries =
+      Array.from(
+        merchantSummaryMap.values()
+      )
+        .sort(
+          (a, b) =>
+            b.headOfficeFee -
+            a.headOfficeFee
+        )
+  
+  
+    if (tableHead) {
+  
+      tableHead.innerHTML = `
+        <tr>
+          <th>No</th>
+          <th>가맹점</th>
+          <th>승인건수</th>
+          <th>승인금액</th>
+          <th>가맹점 수수료</th>
+<th>PG 원가</th>
+<th>조직 수수료</th>
+<th>본사 실제 수익</th>
+        </tr>
+      `
+    }
+  
+  
+    paymentTableBody.innerHTML =
+      merchantSummaries.length === 0
+  
+        ? `
+          <tr>
+            <td
+              colspan="8"
+              style="
+                text-align:center;
+                padding:30px;
+              "
+            >
+              조회된 결제내역이 없습니다.
+            </td>
+          </tr>
+        `
+  
+        :
+  
+        merchantSummaries
+          .map(
+            (
+              row,
+              index
+            ) => {
+  
+              const merchantCode =
+                'MER' +
+                String(
+                  row.merchantId
+                ).padStart(
+                  4,
+                  '0'
+                )
+  
+  
+              return `
+                <tr>
+  
+                  <td>
+                    ${index + 1}
+                  </td>
+  
+                  <td>
+                    ${merchantCode}<br>
+                    ${row.merchantName}
+                  </td>
+  
+                  <td>
+                    ${row.paymentCount.toLocaleString()}건
+                  </td>
+  
+                  <td>
+                    ${row.paymentAmount.toLocaleString()}원
+                  </td>
+  
+                  <td>
+                    ${row.merchantFee.toLocaleString()}원
+                  </td>
+  
+                  <td>
+  ${row.pgCost.toLocaleString()}원
+</td>
+
+                  <td>
+                    ${row.organizationFee.toLocaleString()}원
+                  </td>
+  
+                  <td>
+                    <strong>
+                      ${row.headOfficeFee.toLocaleString()}원
+                    </strong>
+                  </td>
+  
+                </tr>
+              `
+            }
+          )
+          .join('')
+  
+  
+    document
+      .querySelector(
+        '#head-office-fee-search'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          const start =
+            document
+              .querySelector<HTMLInputElement>(
+                '#head-office-fee-start'
+              )
+              ?.value ||
+            monthStart
+  
+  
+          const end =
+            document
+              .querySelector<HTMLInputElement>(
+                '#head-office-fee-end'
+              )
+              ?.value ||
+            today
+  
+  
+          if (
+            start >
+            end
+          ) {
+  
+            alert(
+              '시작일이 종료일보다 늦을 수 없습니다.'
+            )
+  
+            return
+          }
+  
+  
+          sessionStorage.setItem(
+            'head_office_fee_start',
+            start
+          )
+  
+          sessionStorage.setItem(
+            'head_office_fee_end',
+            end
+          )
+  
+  
+          document
+            .querySelector<HTMLElement>(
+              '.admin-tab[data-page="payment"]'
+            )
+            ?.click()
+  
+        }
+      )
+  
+  
+    return
+  }
 
 if (
   paymentSubPage === 'cash'
