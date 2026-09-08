@@ -8,7 +8,7 @@
   "crons": [
     {
         "path": "/api/auto-payout-toss",
-  "schedule": "40 0 * * *"
+    "schedule": "0 5 * * *"
     },
     {
       "path": "/api/auto-payout-korpay",
