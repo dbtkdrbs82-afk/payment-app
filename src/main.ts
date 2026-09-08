@@ -11021,14 +11021,6 @@ let payoutCardView:
           
               if (payoutCardView === 'incoming') {
 
-                const today =
-                  new Date().toLocaleDateString(
-                    'en-CA',
-                    {
-                      timeZone: 'Asia/Seoul'
-                    }
-                  )
-              
                 const pgCompany =
                   String(row.pg_company || '').trim()
               
@@ -11051,69 +11043,82 @@ let payoutCardView:
               
                 }
               
-                if (incomingDate !== today) {
+                if (
+                  startDate &&
+                  incomingDate < startDate
+                ) {
                   return false
                 }
-                
-                } else if (payoutCardView === 'expected') {
-                
-                  const today =
-                    new Date().toLocaleDateString(
-                      'en-CA',
-                      {
-                        timeZone: 'Asia/Seoul'
-                      }
-                    )
-                
-                  if (row.payout_date !== today) {
-                    return false
-                  }
-                
-                  if (
-                    row.payout_status === '출금완료' ||
-                    row.payout_status === '출금제외'
-                  ) {
-                    return false
-                  }
-
-                } else if (payoutCardView === 'completed') {
-
-                  const today =
-                    new Date().toLocaleDateString(
-                      'en-CA',
-                      {
-                        timeZone: 'Asia/Seoul'
-                      }
-                    )
-                
-                  if (
-                    row.payout_status !== '출금완료' ||
-                    !row.payout_time
-                  ) {
-                    return false
-                  }
-                
-                  const completedDate =
-                    new Date(
-                      row.payout_time
-                    ).toLocaleDateString(
-                      'en-CA',
-                      {
-                        timeZone: 'Asia/Seoul'
-                      }
-                    )
-                
-                  if (completedDate !== today) {
-                    return false
-                  }
-                
-                
-                } else {
-                
-                  if (
-                    startDate &&
-                    row.payout_date < startDate
-                  ) {
+              
+                if (
+                  endDate &&
+                  incomingDate > endDate
+                ) {
+                  return false
+                }
+              
+              } else if (payoutCardView === 'expected') {
+              
+                if (
+                  startDate &&
+                  row.payout_date < startDate
+                ) {
+                  return false
+                }
+              
+                if (
+                  endDate &&
+                  row.payout_date > endDate
+                ) {
+                  return false
+                }
+              
+                if (
+                  row.payout_status === '출금완료' ||
+                  row.payout_status === '출금제외'
+                ) {
+                  return false
+                }
+              
+              } else if (payoutCardView === 'completed') {
+              
+                if (
+                  row.payout_status !== '출금완료' ||
+                  !row.payout_time
+                ) {
+                  return false
+                }
+              
+                const completedDate =
+                  new Date(
+                    row.payout_time
+                  ).toLocaleDateString(
+                    'en-CA',
+                    {
+                      timeZone: 'Asia/Seoul'
+                    }
+                  )
+              
+                if (
+                  startDate &&
+                  completedDate < startDate
+                ) {
+                  return false
+                }
+              
+                if (
+                  endDate &&
+                  completedDate > endDate
+                ) {
+                  return false
+                }
+              
+              } else {
+              
+                if (
+                  startDate &&
+                  row.payout_date < startDate
+                ) {
                   return false
                 }
               
@@ -11484,136 +11489,58 @@ ${canViewPayoutBalance ? `
         }
 
         document.querySelector('#incoming-expected-card')
-        ?.addEventListener('click', () => {
-      
-          payoutCardView = 'incoming'
-          payoutPage = 1
-      
-          const today =
-            new Date().toLocaleDateString(
-              'en-CA',
-              {
-                timeZone: 'Asia/Seoul'
-              }
-            )
-      
-          const startInput =
-            document.querySelector<HTMLInputElement>(
-              '#payout-start-date'
-            )
-      
-          const endInput =
-            document.querySelector<HTMLInputElement>(
-              '#payout-end-date'
-            )
-      
-          if (startInput) {
-            startInput.value = today
-          }
-      
-          if (endInput) {
-            endInput.value = today
-          }
-      
-          const statusSelect =
-            document.querySelector<HTMLSelectElement>(
-              '#payout-status-filter'
-            )
-      
-          if (statusSelect) {
-            statusSelect.value = '전체'
-          }
-      
-          renderPayoutTable()
-        })    
+  ?.addEventListener('click', () => {
 
-        document.querySelector('#payout-expected-card')
-        ?.addEventListener('click', () => {
-      
-          payoutCardView = 'expected'
-          payoutPage = 1
-      
-          const today =
-            new Date().toLocaleDateString(
-              'en-CA',
-              {
-                timeZone: 'Asia/Seoul'
-              }
-            )
-      
-          const startInput =
-            document.querySelector<HTMLInputElement>(
-              '#payout-start-date'
-            )
-      
-          const endInput =
-            document.querySelector<HTMLInputElement>(
-              '#payout-end-date'
-            )
-      
-          if (startInput) {
-            startInput.value = today
-          }
-      
-          if (endInput) {
-            endInput.value = today
-          }
-      
-          const statusSelect =
-            document.querySelector<HTMLSelectElement>(
-              '#payout-status-filter'
-            )
-      
-          if (statusSelect) {
-            statusSelect.value = '전체'
-          }
-      
-          renderPayoutTable()
-        })
+    payoutCardView = 'incoming'
+    payoutPage = 1
 
-        document.querySelector('#payout-completed-card')
-        ?.addEventListener('click', () => {
-      
-          payoutCardView = 'completed'
-          payoutPage = 1
-      
-          const today =
-            new Date().toLocaleDateString(
-              'en-CA',
-              {
-                timeZone: 'Asia/Seoul'
-              }
-            )
-      
-          const startInput =
-            document.querySelector<HTMLInputElement>(
-              '#payout-start-date'
-            )
-      
-          const endInput =
-            document.querySelector<HTMLInputElement>(
-              '#payout-end-date'
-            )
-      
-          if (startInput) {
-            startInput.value = today
-          }
-      
-          if (endInput) {
-            endInput.value = today
-          }
-      
-          const statusSelect =
-            document.querySelector<HTMLSelectElement>(
-              '#payout-status-filter'
-            )
-      
-          if (statusSelect) {
-            statusSelect.value = '전체'
-          }
-      
-          renderPayoutTable()
-        })
+    const statusSelect =
+      document.querySelector<HTMLSelectElement>(
+        '#payout-status-filter'
+      )
+
+    if (statusSelect) {
+      statusSelect.value = '전체'
+    }
+
+    renderPayoutTable()
+  })
+
+  document.querySelector('#payout-expected-card')
+  ?.addEventListener('click', () => {
+
+    payoutCardView = 'expected'
+    payoutPage = 1
+
+    const statusSelect =
+      document.querySelector<HTMLSelectElement>(
+        '#payout-status-filter'
+      )
+
+    if (statusSelect) {
+      statusSelect.value = '전체'
+    }
+
+    renderPayoutTable()
+  })
+
+  document.querySelector('#payout-completed-card')
+  ?.addEventListener('click', () => {
+
+    payoutCardView = 'completed'
+    payoutPage = 1
+
+    const statusSelect =
+      document.querySelector<HTMLSelectElement>(
+        '#payout-status-filter'
+      )
+
+    if (statusSelect) {
+      statusSelect.value = '전체'
+    }
+
+    renderPayoutTable()
+  })
 
         document.querySelector('#payout-balance-button')
   ?.addEventListener('click', async () => {
