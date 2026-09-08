@@ -11335,7 +11335,7 @@ const endDate =
     if (pgCompany === '토스페이먼츠') {
       const pgFee =
         Math.floor(
-          amount * 1.375 / 100
+          amount * 1.37 / 100
         )
 
       const pgVat =
