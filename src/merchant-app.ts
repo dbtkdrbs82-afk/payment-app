@@ -136,6 +136,1160 @@ const merchantLoginKeys = [
   'login_merchant_type'
 ]
 
+/* =========================================
+   무선단말기 모바일
+========================================= */
+
+async function renderMerchantWirelessTerminal() {
+
+  const merchantId =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+  if (!merchantId) {
+    location.replace(
+      '/merchant-app'
+    )
+    return
+  }
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '가맹점'
+
+
+  const getLocalDateValue =
+    (date: Date) => {
+
+      const year =
+        date.getFullYear()
+
+      const month =
+        String(
+          date.getMonth() + 1
+        ).padStart(2, '0')
+
+      const day =
+        String(
+          date.getDate()
+        ).padStart(2, '0')
+
+      return (
+        year +
+        '-' +
+        month +
+        '-' +
+        day
+      )
+    }
+
+
+  const today =
+    getLocalDateValue(
+      new Date()
+    )
+
+
+  const dateParams =
+    new URLSearchParams(
+      window.location.search
+    )
+
+
+  const selectedStartDate =
+    dateParams.get(
+      'terminal_start_date'
+    ) || today
+
+
+  const selectedEndDate =
+    dateParams.get(
+      'terminal_end_date'
+    ) || today
+
+
+  const {
+    data: terminalPayments,
+    error: terminalPaymentError
+  } =
+    await supabase
+      .from('payments')
+      .select(`
+        id,
+        created_at,
+        approved_at,
+        canceled_at,
+        approval_number,
+        order_id,
+        payment_key,
+        amount,
+        settlement_amount,
+        status,
+        payout_status,
+        settlement_status,
+        pg_company
+      `)
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      )
+      .limit(500)
+
+
+  if (terminalPaymentError) {
+    console.error(
+      '무선단말기 거래내역 조회 실패:',
+      terminalPaymentError
+    )
+  }
+
+
+  const allPayments =
+    terminalPayments || []
+
+
+  const selectedDatePayments =
+    allPayments.filter(
+      (payment: any) => {
+
+        const dateText =
+          payment.status === 'cancel'
+            ? (
+                payment.canceled_at ||
+                payment.approved_at ||
+                payment.created_at
+              )
+            : (
+                payment.approved_at ||
+                payment.created_at
+              )
+
+        if (!dateText) {
+          return false
+        }
+
+        const paymentDate =
+          getLocalDateValue(
+            new Date(dateText)
+          )
+
+        return (
+          paymentDate >=
+            selectedStartDate &&
+          paymentDate <=
+            selectedEndDate
+        )
+      }
+    )
+
+
+  const paidPayments =
+    selectedDatePayments.filter(
+      (payment: any) =>
+        payment.status === 'paid'
+    )
+
+
+  const cancelPayments =
+    selectedDatePayments.filter(
+      (payment: any) =>
+        payment.status === 'cancel'
+    )
+
+
+  const approvedAmount =
+    paidPayments.reduce(
+      (
+        sum: number,
+        payment: any
+      ) =>
+        sum +
+        Number(
+          payment.amount || 0
+        ),
+      0
+    )
+
+
+  const canceledAmount =
+    cancelPayments.reduce(
+      (
+        sum: number,
+        payment: any
+      ) =>
+        sum +
+        Number(
+          payment.amount || 0
+        ),
+      0
+    )
+
+
+  const netAmount =
+    approvedAmount -
+    canceledAmount
+
+
+  /* =========================================
+     정산일 계산
+  ========================================= */
+
+  const {
+    data: settlementMerchant
+  } =
+    await supabase
+      .from('merchants')
+      .select(
+        'settlement_cycle'
+      )
+      .eq(
+        'id',
+        merchantId
+      )
+      .single()
+
+
+  const settlementCycle =
+    String(
+      settlementMerchant
+        ?.settlement_cycle ||
+      '1일'
+    )
+
+
+  const {
+    data: holidayData
+  } =
+    await supabase
+      .from('holidays')
+      .select(
+        'holiday_date'
+      )
+
+
+  const holidaySet =
+    new Set(
+      (holidayData || [])
+        .map(
+          (holiday: any) =>
+            String(
+              holiday.holiday_date
+            )
+        )
+    )
+
+
+  const getPayoutDate =
+    (
+      createdAt: string
+    ) => {
+
+      const payoutDate =
+        new Date(createdAt)
+
+
+      const cycleMatch =
+        settlementCycle.match(
+          /\d+/
+        )
+
+
+      const cycleDays =
+        cycleMatch
+          ? Number(
+              cycleMatch[0]
+            )
+          : 1
+
+
+      let addedDays = 0
+
+
+      while (
+        addedDays <
+        cycleDays
+      ) {
+
+        payoutDate.setDate(
+          payoutDate.getDate() + 1
+        )
+
+
+        const dateValue =
+          getLocalDateValue(
+            payoutDate
+          )
+
+
+        const day =
+          payoutDate.getDay()
+
+
+        const isWeekend =
+          day === 0 ||
+          day === 6
+
+
+        const isHoliday =
+          holidaySet.has(
+            dateValue
+          )
+
+
+        if (
+          isWeekend ||
+          isHoliday
+        ) {
+          continue
+        }
+
+
+        addedDays += 1
+      }
+
+
+      return getLocalDateValue(
+        payoutDate
+      )
+    }
+
+
+  const settlementPayments =
+    allPayments.filter(
+      (payment: any) => {
+
+        if (
+          payment.status !==
+          'paid'
+        ) {
+          return false
+        }
+
+
+        const dateText =
+          payment.approved_at ||
+          payment.created_at
+
+
+        if (!dateText) {
+          return false
+        }
+
+
+        const payoutDate =
+          getPayoutDate(
+            dateText
+          )
+
+
+        return (
+          payoutDate >=
+            selectedStartDate &&
+          payoutDate <=
+            selectedEndDate
+        )
+      }
+    )
+
+
+  const settlementAmount =
+    settlementPayments.reduce(
+      (
+        sum: number,
+        payment: any
+      ) =>
+        sum +
+        Number(
+          payment
+            .settlement_amount ||
+          0
+        ),
+      0
+    )
+
+    const page =
+    Math.max(
+      1,
+      Number(
+        dateParams.get(
+          'terminal_page'
+        ) || 1
+      )
+    )
+
+
+  const pageSize =
+    Math.max(
+      1,
+      Number(
+        dateParams.get(
+          'terminal_page_size'
+        ) || 10
+      )
+    )
+
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        selectedDatePayments.length /
+        pageSize
+      )
+    )
+
+
+  const safePage =
+    Math.min(
+      page,
+      totalPages
+    )
+
+
+  const startIndex =
+    (safePage - 1) *
+    pageSize
+
+
+  const pagedPayments =
+    selectedDatePayments.slice(
+      startIndex,
+      startIndex +
+      pageSize
+    )
+
+
+  const getStatusText =
+    (status: string) => {
+
+      if (status === 'paid') {
+        return '승인'
+      }
+
+      if (status === 'cancel') {
+        return '취소'
+      }
+
+      if (status === 'ready') {
+        return '대기'
+      }
+
+      return status || '-'
+    }
+
+
+  const getDateText =
+    (payment: any) => {
+
+      const dateText =
+        payment.status === 'cancel'
+          ? (
+              payment.canceled_at ||
+              payment.approved_at ||
+              payment.created_at
+            )
+          : (
+              payment.approved_at ||
+              payment.created_at
+            )
+
+      if (!dateText) {
+        return '-'
+      }
+
+      return new Date(
+        dateText
+      ).toLocaleString(
+        'ko-KR'
+      )
+    }
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+        <button
+          id="merchant-mobile-logout"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          로그아웃
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <section class="merchant-mobile-welcome">
+
+          <div class="merchant-mobile-welcome-label">
+            무선단말기
+          </div>
+
+          <h1>
+            거래내역
+          </h1>
+
+          <div class="merchant-mobile-type">
+            ${merchantName}
+          </div>
+
+        </section>
+
+
+        <section class="terminal-mobile-date">
+
+          <div class="terminal-mobile-date-inputs">
+
+            <input
+              type="date"
+              id="terminal-mobile-start-date"
+              value="${selectedStartDate}"
+            />
+
+            <span>
+              ~
+            </span>
+
+            <input
+              type="date"
+              id="terminal-mobile-end-date"
+              value="${selectedEndDate}"
+            />
+
+          </div>
+
+
+          <div class="terminal-mobile-date-buttons">
+
+            <button
+              id="terminal-mobile-prev"
+              type="button"
+            >
+              이전
+            </button>
+
+            <button
+              id="terminal-mobile-today"
+              type="button"
+            >
+              오늘
+            </button>
+
+            <button
+              id="terminal-mobile-next"
+              type="button"
+            >
+              다음
+            </button>
+
+            <button
+              id="terminal-mobile-month"
+              type="button"
+            >
+              당월
+            </button>
+
+            <button
+              id="terminal-mobile-search"
+              type="button"
+            >
+              조회
+            </button>
+
+          </div>
+
+        </section>
+
+
+        <section class="terminal-mobile-dashboard">
+
+          <div class="terminal-mobile-card">
+
+            <span>
+              총매출
+            </span>
+
+            <strong>
+              ${approvedAmount.toLocaleString()}원
+            </strong>
+
+            <small>
+              승인 ${paidPayments.length.toLocaleString()}건
+            </small>
+
+          </div>
+
+
+          <div class="terminal-mobile-card">
+
+            <span>
+              취소금액
+            </span>
+
+            <strong>
+              ${canceledAmount.toLocaleString()}원
+            </strong>
+
+            <small>
+              취소 ${cancelPayments.length.toLocaleString()}건
+            </small>
+
+          </div>
+
+
+          <div class="terminal-mobile-card">
+
+            <span>
+              순매출
+            </span>
+
+            <strong>
+              ${netAmount.toLocaleString()}원
+            </strong>
+
+            <small>
+              총 거래 ${selectedDatePayments.length.toLocaleString()}건
+            </small>
+
+          </div>
+
+
+          <div class="terminal-mobile-card">
+
+            <span>
+              정산금액
+            </span>
+
+            <strong>
+              ${settlementAmount.toLocaleString()}원
+            </strong>
+
+            <small>
+              정산대상 ${settlementPayments.length.toLocaleString()}건
+            </small>
+
+          </div>
+
+        </section>
+
+                <section class="terminal-mobile-history">
+
+          <div class="terminal-mobile-history-top">
+
+            <strong>
+              거래내역
+            </strong>
+
+            <select
+              id="terminal-mobile-page-size"
+            >
+              <option
+                value="10"
+                ${pageSize === 10 ? 'selected' : ''}
+              >
+                10개씩
+              </option>
+
+              <option
+                value="20"
+                ${pageSize === 20 ? 'selected' : ''}
+              >
+                20개씩
+              </option>
+
+              <option
+                value="50"
+                ${pageSize === 50 ? 'selected' : ''}
+              >
+                50개씩
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="terminal-mobile-history-list">
+
+            ${
+              pagedPayments.length === 0
+
+                ? `
+                  <div class="terminal-mobile-empty">
+                    등록된 무선단말기 거래내역이 없습니다.
+                  </div>
+                `
+
+                : pagedPayments
+                    .map(
+                      (payment: any) => `
+
+                        <div class="terminal-mobile-history-card">
+
+                          <div class="terminal-mobile-history-head">
+
+                            <strong>
+                              ${Number(
+                                payment.amount || 0
+                              ).toLocaleString()}원
+                            </strong>
+
+                            <span
+                              class="${
+                                payment.status === 'cancel'
+                                  ? 'cancel'
+                                  : 'paid'
+                              }"
+                            >
+                              ${getStatusText(
+                                payment.status
+                              )}
+                            </span>
+
+                          </div>
+
+
+                          <div class="terminal-mobile-history-row">
+
+                            <span>
+                              거래일시
+                            </span>
+
+                            <strong>
+                              ${getDateText(
+                                payment
+                              )}
+                            </strong>
+
+                          </div>
+
+
+                          <div class="terminal-mobile-history-row">
+
+                            <span>
+                              승인번호
+                            </span>
+
+                            <strong>
+                              ${
+                                payment.approval_number ||
+                                '-'
+                              }
+                            </strong>
+
+                          </div>
+
+
+                          <div class="terminal-mobile-history-row">
+
+                            <span>
+                              거래번호
+                            </span>
+
+                            <strong>
+                              ${
+                                payment.order_id ||
+                                payment.payment_key ||
+                                '-'
+                              }
+                            </strong>
+
+                          </div>
+
+
+                          <div class="terminal-mobile-history-row">
+
+                            <span>
+                              정산상태
+                            </span>
+
+                            <strong>
+                              ${
+                                payment.payout_status ||
+                                payment.settlement_status ||
+                                '정산대기'
+                              }
+                            </strong>
+
+                          </div>
+
+                        </div>
+
+                      `
+                    )
+                    .join('')
+            }
+
+          </div>
+
+
+          <div class="terminal-mobile-pagination">
+
+            <button
+              id="terminal-mobile-page-prev"
+              type="button"
+              ${safePage <= 1 ? 'disabled' : ''}
+            >
+              이전
+            </button>
+
+            <strong>
+              ${safePage} / ${totalPages}
+            </strong>
+
+            <button
+              id="terminal-mobile-page-next"
+              type="button"
+              ${safePage >= totalPages ? 'disabled' : ''}
+            >
+              다음
+            </button>
+
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+  `
+
+
+  const moveDate =
+    (
+      dateText: string,
+      amount: number
+    ) => {
+
+      const date =
+        new Date(
+          dateText +
+          'T00:00:00'
+        )
+
+      date.setDate(
+        date.getDate() +
+        amount
+      )
+
+      return getLocalDateValue(
+        date
+      )
+    }
+
+
+  const applyDate =
+    (
+      startDate: string,
+      endDate: string
+    ) => {
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        )
+
+      params.set(
+        'terminal_start_date',
+        startDate
+      )
+
+      params.set(
+        'terminal_end_date',
+        endDate
+      )
+
+      location.href =
+        window.location.pathname +
+        '?' +
+        params.toString()
+    }
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-search'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const startInput =
+          document.querySelector<HTMLInputElement>(
+            '#terminal-mobile-start-date'
+          )
+
+        const endInput =
+          document.querySelector<HTMLInputElement>(
+            '#terminal-mobile-end-date'
+          )
+
+        if (
+          !startInput?.value ||
+          !endInput?.value
+        ) {
+          return
+        }
+
+        applyDate(
+          startInput.value,
+          endInput.value
+        )
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-today'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        applyDate(
+          today,
+          today
+        )
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-prev'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        applyDate(
+          moveDate(
+            selectedStartDate,
+            -1
+          ),
+          moveDate(
+            selectedEndDate,
+            -1
+          )
+        )
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-next'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        applyDate(
+          moveDate(
+            selectedStartDate,
+            1
+          ),
+          moveDate(
+            selectedEndDate,
+            1
+          )
+        )
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-month'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const now =
+          new Date()
+
+        const monthStart =
+          new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+          )
+
+        const monthEnd =
+          new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            0
+          )
+
+        applyDate(
+          getLocalDateValue(
+            monthStart
+          ),
+          getLocalDateValue(
+            monthEnd
+          )
+        )
+      }
+    )
+
+    document
+    .querySelector(
+      '#terminal-mobile-page-prev'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const params =
+          new URLSearchParams(
+            window.location.search
+          )
+
+        params.set(
+          'terminal_page',
+          String(
+            Math.max(
+              1,
+              safePage - 1
+            )
+          )
+        )
+
+        location.href =
+          window.location.pathname +
+          '?' +
+          params.toString()
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-page-next'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const params =
+          new URLSearchParams(
+            window.location.search
+          )
+
+        params.set(
+          'terminal_page',
+          String(
+            Math.min(
+              totalPages,
+              safePage + 1
+            )
+          )
+        )
+
+        location.href =
+          window.location.pathname +
+          '?' +
+          params.toString()
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-page-size'
+    )
+    ?.addEventListener(
+      'change',
+      (event) => {
+
+        const select =
+          event.target as HTMLSelectElement
+
+        const params =
+          new URLSearchParams(
+            window.location.search
+          )
+
+        params.set(
+          'terminal_page_size',
+          select.value
+        )
+
+        params.set(
+          'terminal_page',
+          '1'
+        )
+
+        location.href =
+          window.location.pathname +
+          '?' +
+          params.toString()
+      }
+    )
+
+
+  
+
+  document
+    .querySelector(
+      '#merchant-mobile-logout'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        merchantLoginKeys.forEach(
+          (key) => {
+
+            sessionStorage
+              .removeItem(key)
+
+            localStorage
+              .removeItem(key)
+
+          }
+        )
+
+        location.replace(
+          '/merchant-app'
+        )
+      }
+    )
+}
 
 /* =========================================
    모바일 홈
@@ -192,6 +1346,10 @@ function renderMerchantHome() {
       'login_merchant_type'
     ) || '일반매장'
 
+    if (merchantType === '무선단말기') {
+  void renderMerchantWirelessTerminal()
+  return
+}
 
   app.innerHTML = `
     <div class="merchant-mobile-home">
