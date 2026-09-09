@@ -14683,3 +14683,66 @@ height: 150px !important;
   }
 
 }
+/* =========================================
+   아카데미 청구관리 태블릿 컬럼 복구
+========================================= */
+
+@media (max-width: 1600px) {
+
+  .merchant-members-page .academy-billing-table {
+    width: 100%;
+    min-width: 0 !important;
+    table-layout: fixed !important;
+  }
+
+  /* 선택 */
+  .merchant-members-page .academy-billing-table th:nth-child(1),
+  .merchant-members-page .academy-billing-table td:nth-child(1) {
+    width: 5% !important;
+    min-width: 45px !important;
+    max-width: 55px !important;
+  }
+
+  /* 회원명 */
+  .merchant-members-page .academy-billing-table th:nth-child(2),
+  .merchant-members-page .academy-billing-table td:nth-child(2) {
+    width: 16% !important;
+  }
+
+  /* 청구월 */
+  .merchant-members-page .academy-billing-table th:nth-child(3),
+  .merchant-members-page .academy-billing-table td:nth-child(3) {
+    width: 12% !important;
+  }
+
+  /* 금액 */
+  .merchant-members-page .academy-billing-table th:nth-child(4),
+  .merchant-members-page .academy-billing-table td:nth-child(4) {
+    width: 12% !important;
+  }
+
+  /* 메모 */
+  .merchant-members-page .academy-billing-table th:nth-child(5),
+  .merchant-members-page .academy-billing-table td:nth-child(5) {
+    width: 20% !important;
+  }
+
+  /* 발송상태 */
+  .merchant-members-page .academy-billing-table th:nth-child(6),
+  .merchant-members-page .academy-billing-table td:nth-child(6) {
+    width: 12% !important;
+  }
+
+  /* 결제상태 */
+  .merchant-members-page .academy-billing-table th:nth-child(7),
+  .merchant-members-page .academy-billing-table td:nth-child(7) {
+    width: 11% !important;
+  }
+
+  /* 처리 */
+  .merchant-members-page .academy-billing-table th:nth-child(8),
+  .merchant-members-page .academy-billing-table td:nth-child(8) {
+    width: 12% !important;
+  }
+
+}
