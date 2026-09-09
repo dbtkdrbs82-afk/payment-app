@@ -1436,8 +1436,8 @@ function renderMerchantHome() {
 
       <button type="button" class="merchant-mobile-menu-card" data-menu="academy-card">
         <span class="merchant-mobile-menu-icon">💳</span>
-        <strong>카드결제</strong>
-        <small>아카데미 결제</small>
+        <strong>수기결제</strong>
+<small>일괄 수기결제</small>
       </button>
 
       <button type="button" class="merchant-mobile-menu-card" data-menu="academy-payments">
@@ -1640,17 +1640,17 @@ function renderMerchantHome() {
               '/merchant-app/card',
 
 
-            members:
-              '/merchant-app/members',
-
+              members:
+              '/merchant-members',
+            
             billings:
-              '/merchant-app/billings',
-
+              '/merchant-billings',
+            
             'academy-card':
-              '/merchant-app/academy/card',
-
+              '/merchant-batch',
+            
             'academy-payments':
-              '/merchant-app/academy/payments',
+              '/merchant-academy-payments',
 
 
             'beauty-orders':
