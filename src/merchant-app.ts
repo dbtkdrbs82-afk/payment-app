@@ -15,7 +15,8 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 
-
+const apiBaseUrl =
+  'https://payment-app-ybtf.vercel.app'
 
   function getKorpayEdiDate() {
 
@@ -135,6 +136,1160 @@ const merchantLoginKeys = [
   'login_merchant_type'
 ]
 
+/* =========================================
+   무선단말기 모바일
+========================================= */
+
+async function renderMerchantWirelessTerminal() {
+
+  const merchantId =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+  if (!merchantId) {
+    location.replace(
+      '/merchant-app'
+    )
+    return
+  }
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '가맹점'
+
+
+  const getLocalDateValue =
+    (date: Date) => {
+
+      const year =
+        date.getFullYear()
+
+      const month =
+        String(
+          date.getMonth() + 1
+        ).padStart(2, '0')
+
+      const day =
+        String(
+          date.getDate()
+        ).padStart(2, '0')
+
+      return (
+        year +
+        '-' +
+        month +
+        '-' +
+        day
+      )
+    }
+
+
+  const today =
+    getLocalDateValue(
+      new Date()
+    )
+
+
+  const dateParams =
+    new URLSearchParams(
+      window.location.search
+    )
+
+
+  const selectedStartDate =
+    dateParams.get(
+      'terminal_start_date'
+    ) || today
+
+
+  const selectedEndDate =
+    dateParams.get(
+      'terminal_end_date'
+    ) || today
+
+
+  const {
+    data: terminalPayments,
+    error: terminalPaymentError
+  } =
+    await supabase
+      .from('payments')
+      .select(`
+        id,
+        created_at,
+        approved_at,
+        canceled_at,
+        approval_number,
+        order_id,
+        payment_key,
+        amount,
+        settlement_amount,
+        status,
+        payout_status,
+        settlement_status,
+        pg_company
+      `)
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .order(
+        'created_at',
+        {
+          ascending: false
+        }
+      )
+      .limit(500)
+
+
+  if (terminalPaymentError) {
+    console.error(
+      '무선단말기 거래내역 조회 실패:',
+      terminalPaymentError
+    )
+  }
+
+
+  const allPayments =
+    terminalPayments || []
+
+
+  const selectedDatePayments =
+    allPayments.filter(
+      (payment: any) => {
+
+        const dateText =
+          payment.status === 'cancel'
+            ? (
+                payment.canceled_at ||
+                payment.approved_at ||
+                payment.created_at
+              )
+            : (
+                payment.approved_at ||
+                payment.created_at
+              )
+
+        if (!dateText) {
+          return false
+        }
+
+        const paymentDate =
+          getLocalDateValue(
+            new Date(dateText)
+          )
+
+        return (
+          paymentDate >=
+            selectedStartDate &&
+          paymentDate <=
+            selectedEndDate
+        )
+      }
+    )
+
+
+  const paidPayments =
+    selectedDatePayments.filter(
+      (payment: any) =>
+        payment.status === 'paid'
+    )
+
+
+  const cancelPayments =
+    selectedDatePayments.filter(
+      (payment: any) =>
+        payment.status === 'cancel'
+    )
+
+
+  const approvedAmount =
+    paidPayments.reduce(
+      (
+        sum: number,
+        payment: any
+      ) =>
+        sum +
+        Number(
+          payment.amount || 0
+        ),
+      0
+    )
+
+
+  const canceledAmount =
+    cancelPayments.reduce(
+      (
+        sum: number,
+        payment: any
+      ) =>
+        sum +
+        Number(
+          payment.amount || 0
+        ),
+      0
+    )
+
+
+  const netAmount =
+    approvedAmount -
+    canceledAmount
+
+
+  /* =========================================
+     정산일 계산
+  ========================================= */
+
+  const {
+    data: settlementMerchant
+  } =
+    await supabase
+      .from('merchants')
+      .select(
+        'settlement_cycle'
+      )
+      .eq(
+        'id',
+        merchantId
+      )
+      .single()
+
+
+  const settlementCycle =
+    String(
+      settlementMerchant
+        ?.settlement_cycle ||
+      '1일'
+    )
+
+
+  const {
+    data: holidayData
+  } =
+    await supabase
+      .from('holidays')
+      .select(
+        'holiday_date'
+      )
+
+
+  const holidaySet =
+    new Set(
+      (holidayData || [])
+        .map(
+          (holiday: any) =>
+            String(
+              holiday.holiday_date
+            )
+        )
+    )
+
+
+  const getPayoutDate =
+    (
+      createdAt: string
+    ) => {
+
+      const payoutDate =
+        new Date(createdAt)
+
+
+      const cycleMatch =
+        settlementCycle.match(
+          /\d+/
+        )
+
+
+      const cycleDays =
+        cycleMatch
+          ? Number(
+              cycleMatch[0]
+            )
+          : 1
+
+
+      let addedDays = 0
+
+
+      while (
+        addedDays <
+        cycleDays
+      ) {
+
+        payoutDate.setDate(
+          payoutDate.getDate() + 1
+        )
+
+
+        const dateValue =
+          getLocalDateValue(
+            payoutDate
+          )
+
+
+        const day =
+          payoutDate.getDay()
+
+
+        const isWeekend =
+          day === 0 ||
+          day === 6
+
+
+        const isHoliday =
+          holidaySet.has(
+            dateValue
+          )
+
+
+        if (
+          isWeekend ||
+          isHoliday
+        ) {
+          continue
+        }
+
+
+        addedDays += 1
+      }
+
+
+      return getLocalDateValue(
+        payoutDate
+      )
+    }
+
+
+  const settlementPayments =
+    allPayments.filter(
+      (payment: any) => {
+
+        if (
+          payment.status !==
+          'paid'
+        ) {
+          return false
+        }
+
+
+        const dateText =
+          payment.approved_at ||
+          payment.created_at
+
+
+        if (!dateText) {
+          return false
+        }
+
+
+        const payoutDate =
+          getPayoutDate(
+            dateText
+          )
+
+
+        return (
+          payoutDate >=
+            selectedStartDate &&
+          payoutDate <=
+            selectedEndDate
+        )
+      }
+    )
+
+
+  const settlementAmount =
+    settlementPayments.reduce(
+      (
+        sum: number,
+        payment: any
+      ) =>
+        sum +
+        Number(
+          payment
+            .settlement_amount ||
+          0
+        ),
+      0
+    )
+
+    const page =
+    Math.max(
+      1,
+      Number(
+        dateParams.get(
+          'terminal_page'
+        ) || 1
+      )
+    )
+
+
+  const pageSize =
+    Math.max(
+      1,
+      Number(
+        dateParams.get(
+          'terminal_page_size'
+        ) || 10
+      )
+    )
+
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        selectedDatePayments.length /
+        pageSize
+      )
+    )
+
+
+  const safePage =
+    Math.min(
+      page,
+      totalPages
+    )
+
+
+  const startIndex =
+    (safePage - 1) *
+    pageSize
+
+
+  const pagedPayments =
+    selectedDatePayments.slice(
+      startIndex,
+      startIndex +
+      pageSize
+    )
+
+
+  const getStatusText =
+    (status: string) => {
+
+      if (status === 'paid') {
+        return '승인'
+      }
+
+      if (status === 'cancel') {
+        return '취소'
+      }
+
+      if (status === 'ready') {
+        return '대기'
+      }
+
+      return status || '-'
+    }
+
+
+  const getDateText =
+    (payment: any) => {
+
+      const dateText =
+        payment.status === 'cancel'
+          ? (
+              payment.canceled_at ||
+              payment.approved_at ||
+              payment.created_at
+            )
+          : (
+              payment.approved_at ||
+              payment.created_at
+            )
+
+      if (!dateText) {
+        return '-'
+      }
+
+      return new Date(
+        dateText
+      ).toLocaleString(
+        'ko-KR'
+      )
+    }
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+        <button
+          id="merchant-mobile-logout"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          로그아웃
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <section class="merchant-mobile-welcome">
+
+          <div class="merchant-mobile-welcome-label">
+            무선단말기
+          </div>
+
+          <h1>
+            거래내역
+          </h1>
+
+          <div class="merchant-mobile-type">
+            ${merchantName}
+          </div>
+
+        </section>
+
+
+        <section class="terminal-mobile-date">
+
+          <div class="terminal-mobile-date-inputs">
+
+            <input
+              type="date"
+              id="terminal-mobile-start-date"
+              value="${selectedStartDate}"
+            />
+
+            <span>
+              ~
+            </span>
+
+            <input
+              type="date"
+              id="terminal-mobile-end-date"
+              value="${selectedEndDate}"
+            />
+
+          </div>
+
+
+          <div class="terminal-mobile-date-buttons">
+
+            <button
+              id="terminal-mobile-prev"
+              type="button"
+            >
+              이전
+            </button>
+
+            <button
+              id="terminal-mobile-today"
+              type="button"
+            >
+              오늘
+            </button>
+
+            <button
+              id="terminal-mobile-next"
+              type="button"
+            >
+              다음
+            </button>
+
+            <button
+              id="terminal-mobile-month"
+              type="button"
+            >
+              당월
+            </button>
+
+            <button
+              id="terminal-mobile-search"
+              type="button"
+            >
+              조회
+            </button>
+
+          </div>
+
+        </section>
+
+
+        <section class="terminal-mobile-dashboard">
+
+          <div class="terminal-mobile-card">
+
+            <span>
+              총매출
+            </span>
+
+            <strong>
+              ${approvedAmount.toLocaleString()}원
+            </strong>
+
+            <small>
+              승인 ${paidPayments.length.toLocaleString()}건
+            </small>
+
+          </div>
+
+
+          <div class="terminal-mobile-card">
+
+            <span>
+              취소금액
+            </span>
+
+            <strong>
+              ${canceledAmount.toLocaleString()}원
+            </strong>
+
+            <small>
+              취소 ${cancelPayments.length.toLocaleString()}건
+            </small>
+
+          </div>
+
+
+          <div class="terminal-mobile-card">
+
+            <span>
+              순매출
+            </span>
+
+            <strong>
+              ${netAmount.toLocaleString()}원
+            </strong>
+
+            <small>
+              총 거래 ${selectedDatePayments.length.toLocaleString()}건
+            </small>
+
+          </div>
+
+
+          <div class="terminal-mobile-card">
+
+            <span>
+              정산금액
+            </span>
+
+            <strong>
+              ${settlementAmount.toLocaleString()}원
+            </strong>
+
+            <small>
+              정산대상 ${settlementPayments.length.toLocaleString()}건
+            </small>
+
+          </div>
+
+        </section>
+
+                <section class="terminal-mobile-history">
+
+          <div class="terminal-mobile-history-top">
+
+            <strong>
+              거래내역
+            </strong>
+
+            <select
+              id="terminal-mobile-page-size"
+            >
+              <option
+                value="10"
+                ${pageSize === 10 ? 'selected' : ''}
+              >
+                10개씩
+              </option>
+
+              <option
+                value="20"
+                ${pageSize === 20 ? 'selected' : ''}
+              >
+                20개씩
+              </option>
+
+              <option
+                value="50"
+                ${pageSize === 50 ? 'selected' : ''}
+              >
+                50개씩
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="terminal-mobile-history-list">
+
+            ${
+              pagedPayments.length === 0
+
+                ? `
+                  <div class="terminal-mobile-empty">
+                    등록된 무선단말기 거래내역이 없습니다.
+                  </div>
+                `
+
+                : pagedPayments
+                    .map(
+                      (payment: any) => `
+
+                        <div class="terminal-mobile-history-card">
+
+                          <div class="terminal-mobile-history-head">
+
+                            <strong>
+                              ${Number(
+                                payment.amount || 0
+                              ).toLocaleString()}원
+                            </strong>
+
+                            <span
+                              class="${
+                                payment.status === 'cancel'
+                                  ? 'cancel'
+                                  : 'paid'
+                              }"
+                            >
+                              ${getStatusText(
+                                payment.status
+                              )}
+                            </span>
+
+                          </div>
+
+
+                          <div class="terminal-mobile-history-row">
+
+                            <span>
+                              거래일시
+                            </span>
+
+                            <strong>
+                              ${getDateText(
+                                payment
+                              )}
+                            </strong>
+
+                          </div>
+
+
+                          <div class="terminal-mobile-history-row">
+
+                            <span>
+                              승인번호
+                            </span>
+
+                            <strong>
+                              ${
+                                payment.approval_number ||
+                                '-'
+                              }
+                            </strong>
+
+                          </div>
+
+
+                          <div class="terminal-mobile-history-row">
+
+                            <span>
+                              거래번호
+                            </span>
+
+                            <strong>
+                              ${
+                                payment.order_id ||
+                                payment.payment_key ||
+                                '-'
+                              }
+                            </strong>
+
+                          </div>
+
+
+                          <div class="terminal-mobile-history-row">
+
+                            <span>
+                              정산상태
+                            </span>
+
+                            <strong>
+                              ${
+                                payment.payout_status ||
+                                payment.settlement_status ||
+                                '정산대기'
+                              }
+                            </strong>
+
+                          </div>
+
+                        </div>
+
+                      `
+                    )
+                    .join('')
+            }
+
+          </div>
+
+
+          <div class="terminal-mobile-pagination">
+
+            <button
+              id="terminal-mobile-page-prev"
+              type="button"
+              ${safePage <= 1 ? 'disabled' : ''}
+            >
+              이전
+            </button>
+
+            <strong>
+              ${safePage} / ${totalPages}
+            </strong>
+
+            <button
+              id="terminal-mobile-page-next"
+              type="button"
+              ${safePage >= totalPages ? 'disabled' : ''}
+            >
+              다음
+            </button>
+
+          </div>
+
+        </section>
+
+      </main>
+
+    </div>
+  `
+
+
+  const moveDate =
+    (
+      dateText: string,
+      amount: number
+    ) => {
+
+      const date =
+        new Date(
+          dateText +
+          'T00:00:00'
+        )
+
+      date.setDate(
+        date.getDate() +
+        amount
+      )
+
+      return getLocalDateValue(
+        date
+      )
+    }
+
+
+  const applyDate =
+    (
+      startDate: string,
+      endDate: string
+    ) => {
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        )
+
+      params.set(
+        'terminal_start_date',
+        startDate
+      )
+
+      params.set(
+        'terminal_end_date',
+        endDate
+      )
+
+      location.href =
+        window.location.pathname +
+        '?' +
+        params.toString()
+    }
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-search'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const startInput =
+          document.querySelector<HTMLInputElement>(
+            '#terminal-mobile-start-date'
+          )
+
+        const endInput =
+          document.querySelector<HTMLInputElement>(
+            '#terminal-mobile-end-date'
+          )
+
+        if (
+          !startInput?.value ||
+          !endInput?.value
+        ) {
+          return
+        }
+
+        applyDate(
+          startInput.value,
+          endInput.value
+        )
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-today'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        applyDate(
+          today,
+          today
+        )
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-prev'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        applyDate(
+          moveDate(
+            selectedStartDate,
+            -1
+          ),
+          moveDate(
+            selectedEndDate,
+            -1
+          )
+        )
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-next'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        applyDate(
+          moveDate(
+            selectedStartDate,
+            1
+          ),
+          moveDate(
+            selectedEndDate,
+            1
+          )
+        )
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-month'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const now =
+          new Date()
+
+        const monthStart =
+          new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            1
+          )
+
+        const monthEnd =
+          new Date(
+            now.getFullYear(),
+            now.getMonth() + 1,
+            0
+          )
+
+        applyDate(
+          getLocalDateValue(
+            monthStart
+          ),
+          getLocalDateValue(
+            monthEnd
+          )
+        )
+      }
+    )
+
+    document
+    .querySelector(
+      '#terminal-mobile-page-prev'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const params =
+          new URLSearchParams(
+            window.location.search
+          )
+
+        params.set(
+          'terminal_page',
+          String(
+            Math.max(
+              1,
+              safePage - 1
+            )
+          )
+        )
+
+        location.href =
+          window.location.pathname +
+          '?' +
+          params.toString()
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-page-next'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const params =
+          new URLSearchParams(
+            window.location.search
+          )
+
+        params.set(
+          'terminal_page',
+          String(
+            Math.min(
+              totalPages,
+              safePage + 1
+            )
+          )
+        )
+
+        location.href =
+          window.location.pathname +
+          '?' +
+          params.toString()
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#terminal-mobile-page-size'
+    )
+    ?.addEventListener(
+      'change',
+      (event) => {
+
+        const select =
+          event.target as HTMLSelectElement
+
+        const params =
+          new URLSearchParams(
+            window.location.search
+          )
+
+        params.set(
+          'terminal_page_size',
+          select.value
+        )
+
+        params.set(
+          'terminal_page',
+          '1'
+        )
+
+        location.href =
+          window.location.pathname +
+          '?' +
+          params.toString()
+      }
+    )
+
+
+  
+
+  document
+    .querySelector(
+      '#merchant-mobile-logout'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        merchantLoginKeys.forEach(
+          (key) => {
+
+            sessionStorage
+              .removeItem(key)
+
+            localStorage
+              .removeItem(key)
+
+          }
+        )
+
+        location.replace(
+          '/merchant-app'
+        )
+      }
+    )
+}
 
 /* =========================================
    모바일 홈
@@ -186,11 +1341,187 @@ function renderMerchantHome() {
       'login_merchant_name'
     ) || '가맹점'
 
-  const merchantType =
+    const merchantType =
     sessionStorage.getItem(
       'login_merchant_type'
-    ) || '일반매장'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_type'
+    ) ||
+    '일반매장'
 
+
+  const isNormalStore =
+    merchantType === '일반매장'
+
+  const isWirelessTerminal =
+    merchantType === '무선단말기'
+
+  const isAcademy =
+    merchantType === '아카데미'
+
+  const isBeauty =
+    merchantType === '뷰티'
+
+  const isHotel =
+    merchantType === '호텔'
+
+
+  if (isWirelessTerminal) {
+    void renderMerchantWirelessTerminal()
+    return
+  }
+
+  let merchantHomeMenu = ''
+
+
+  if (isNormalStore) {
+
+    merchantHomeMenu = `
+      <button
+        type="button"
+        class="merchant-mobile-menu-card"
+        data-menu="orders"
+      >
+        <span class="merchant-mobile-menu-icon">📋</span>
+        <strong>주문관리</strong>
+        <small>주문 및 결제내역 관리</small>
+      </button>
+
+      <button
+        type="button"
+        class="merchant-mobile-menu-card"
+        data-menu="products"
+      >
+        <span class="merchant-mobile-menu-icon">🛍️</span>
+        <strong>상품관리</strong>
+        <small>상품 등록 및 수정</small>
+      </button>
+
+      <button
+        type="button"
+        class="merchant-mobile-menu-card"
+        data-menu="qr"
+      >
+        <span class="merchant-mobile-menu-icon">📱</span>
+        <strong>PICK QR</strong>
+        <small>가맹점 QR 확인 및 관리</small>
+      </button>
+
+      <button
+        type="button"
+        class="merchant-mobile-menu-card"
+        data-menu="card"
+      >
+        <span class="merchant-mobile-menu-icon">💳</span>
+        <strong>카드결제</strong>
+        <small>OCR · 수기 · 현금영수증</small>
+      </button>
+    `
+
+  } else if (isAcademy) {
+
+    merchantHomeMenu = `
+      <button type="button" class="merchant-mobile-menu-card" data-menu="members">
+        <span class="merchant-mobile-menu-icon">👥</span>
+        <strong>회원관리</strong>
+        <small>회원 등록 및 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="billings">
+        <span class="merchant-mobile-menu-icon">🧾</span>
+        <strong>청구관리</strong>
+        <small>청구 및 납부 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="academy-card">
+        <span class="merchant-mobile-menu-icon">💳</span>
+        <strong>수기결제</strong>
+<small>일괄 수기결제</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="academy-payments">
+        <span class="merchant-mobile-menu-icon">📋</span>
+        <strong>결제내역</strong>
+        <small>결제 및 취소내역</small>
+      </button>
+    `
+
+  } else if (isBeauty) {
+
+    merchantHomeMenu = `
+      <button type="button" class="merchant-mobile-menu-card" data-menu="beauty-orders">
+        <span class="merchant-mobile-menu-icon">📋</span>
+        <strong>주문관리</strong>
+        <small>예약 및 결제내역</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="beauty-staff">
+        <span class="merchant-mobile-menu-icon">👤</span>
+        <strong>직원관리</strong>
+        <small>직원 및 서비스 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="beauty-products">
+        <span class="merchant-mobile-menu-icon">✂️</span>
+        <strong>서비스관리</strong>
+        <small>서비스 등록 및 수정</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="beauty-hours">
+        <span class="merchant-mobile-menu-icon">🕒</span>
+        <strong>영업시간</strong>
+        <small>영업시간 및 스케줄</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="qr">
+        <span class="merchant-mobile-menu-icon">📱</span>
+        <strong>PICK QR</strong>
+        <small>가맹점 QR 확인 및 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="card">
+        <span class="merchant-mobile-menu-icon">💳</span>
+        <strong>카드결제</strong>
+        <small>카드 결제 관리</small>
+      </button>
+    `
+
+  } else if (isHotel) {
+
+    merchantHomeMenu = `
+      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-orders">
+        <span class="merchant-mobile-menu-icon">📋</span>
+        <strong>주문/결제내역</strong>
+        <small>객실 주문 및 결제내역</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-products">
+        <span class="merchant-mobile-menu-icon">🛍️</span>
+        <strong>상품관리</strong>
+        <small>호텔 상품 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-rooms">
+        <span class="merchant-mobile-menu-icon">🏨</span>
+        <strong>객실관리</strong>
+        <small>객실 등록 및 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-preview">
+        <span class="merchant-mobile-menu-icon">📱</span>
+        <strong>고객 결제창</strong>
+        <small>호텔 고객 결제창</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="card">
+        <span class="merchant-mobile-menu-icon">💳</span>
+        <strong>카드결제</strong>
+        <small>카드 결제 관리</small>
+      </button>
+    `
+
+  }
 
   app.innerHTML = `
     <div class="merchant-mobile-home">
@@ -237,84 +1568,9 @@ function renderMerchantHome() {
         </section>
 
 
-        <section class="merchant-mobile-menu">
-
-  <button
-    type="button"
-    class="merchant-mobile-menu-card"
-    data-menu="orders"
-  >
-    <span class="merchant-mobile-menu-icon">
-      📋
-    </span>
-
-    <strong>
-      주문관리
-    </strong>
-
-    <small>
-      주문 및 결제내역 관리
-    </small>
-  </button>
-
-
-  <button
-    type="button"
-    class="merchant-mobile-menu-card"
-    data-menu="products"
-  >
-    <span class="merchant-mobile-menu-icon">
-      🛍️
-    </span>
-
-    <strong>
-      상품관리
-    </strong>
-
-    <small>
-      상품 등록 및 수정
-    </small>
-  </button>
-
-
-  <button
-    type="button"
-    class="merchant-mobile-menu-card"
-    data-menu="qr"
-  >
-    <span class="merchant-mobile-menu-icon">
-      📱
-    </span>
-
-    <strong>
-      PICK QR
-    </strong>
-
-    <small>
-      가맹점 QR 확인 및 관리
-    </small>
-  </button>
-
-
-  <button
-    type="button"
-    class="merchant-mobile-menu-card"
-    data-menu="card"
-  >
-    <span class="merchant-mobile-menu-icon">
-      💳
-    </span>
-
-    <strong>
-      카드결제
-    </strong>
-
-    <small>
-      OCR · 수기 · 메뉴결제 · 현금영수증
-    </small>
-  </button>
-
-</section>
+                <section class="merchant-mobile-menu">
+          ${merchantHomeMenu}
+        </section>
 
       </main>
 
@@ -346,55 +1602,98 @@ function renderMerchantHome() {
       }
     )
     document
-  .querySelector(
-    '[data-menu="orders"]'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
-      location.href =
-        '/merchant-app/orders'
-    }
-  )
+    .querySelector(
+      '.merchant-mobile-menu'
+    )
+    ?.addEventListener(
+      'click',
+      (event) => {
 
-  document
-  .querySelector(
-    '[data-menu="products"]'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
-      location.href =
-        '/merchant-app/products'
-    }
-  )
+        const button =
+          (
+            event.target as HTMLElement
+          ).closest<HTMLButtonElement>(
+            '[data-menu]'
+          )
 
-  document
-  .querySelector(
-    '[data-menu="qr"]'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
-      location.href =
-        '/merchant-app/qr'
-    }
-  )
-  document
-  .querySelector(
-    '[data-menu="card"]'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
+        if (!button) {
+          return
+        }
 
-      location.href =
-        '/merchant-app/card'
+        const menu =
+          button.dataset.menu || ''
 
-    }
-  )
-}
 
+        const menuRoutes:
+          Record<string, string> = {
+
+            orders:
+              '/merchant-app/orders',
+
+            products:
+              '/merchant-app/products',
+
+            qr:
+              '/merchant-app/qr',
+
+            card:
+              '/merchant-app/card',
+
+
+              members:
+              '/merchant-members',
+            
+            billings:
+              '/merchant-billings',
+            
+            'academy-card':
+              '/merchant-batch',
+            
+            'academy-payments':
+              '/merchant-academy-payments',
+
+
+            'beauty-orders':
+              '/merchant-app/beauty/orders',
+
+            'beauty-staff':
+              '/merchant-app/beauty/staff',
+
+            'beauty-products':
+              '/merchant-app/beauty/products',
+
+            'beauty-hours':
+              '/merchant-app/beauty/hours',
+
+
+            'hotel-orders':
+              '/merchant-app/hotel/orders',
+
+            'hotel-products':
+              '/merchant-app/hotel/products',
+
+            'hotel-rooms':
+              '/merchant-app/hotel/rooms',
+
+            'hotel-preview':
+              '/merchant-app/hotel/preview'
+          }
+
+
+        const targetRoute =
+          menuRoutes[menu]
+
+
+        if (!targetRoute) {
+          return
+        }
+
+
+        location.href =
+          targetRoute
+      }
+    )
+  }
 /* =========================================
    모바일 주문관리
 ========================================= */
@@ -1561,7 +2860,7 @@ cancelOpenButton
       
                 const response =
                   await fetch(
-                    '/api/korpay-cancel',
+                    apiBaseUrl + '/api/korpay-cancel',
                     {
                       method: 'POST',
       
@@ -1624,7 +2923,7 @@ cancelOpenButton
       
                 const response =
                   await fetch(
-                    '/api/toss-cancel',
+                    apiBaseUrl + '/api/toss-cancel',
                     {
                       method: 'POST',
       
@@ -4269,7 +5568,7 @@ async function renderMerchantQr() {
     const kioskUrl =
       merchantType === '아카데미'
         ? (
-            window.location.origin +
+            apiBaseUrl +
             '/academy-chrome?merchant_id=' +
             merchantId
           )
@@ -5394,25 +6693,7 @@ function renderMerchantCard() {
 
 </button>
   
-            <button
-              type="button"
-              class="merchant-mobile-card-menu-item"
-              data-card-menu="menu"
-            >
-  
-              <span>
-                🛒
-              </span>
-  
-              <strong>
-                메뉴결제
-              </strong>
-  
-              <small>
-                상품 선택 후 카드결제
-              </small>
-  
-            </button>
+            
   
   
             <button
@@ -6061,7 +7342,7 @@ function renderMerchantManualCard() {
   
             const response =
               await fetch(
-                '/api/korpay-manual-pay',
+                apiBaseUrl + '/api/korpay-manual-pay',
                 {
                   method:
                     'POST',
@@ -6506,7 +7787,7 @@ function renderMerchantSmsCard() {
       
       
         return (
-          window.location.origin +
+          apiBaseUrl +
           '/pay' +
           '?merchantId=' +
           encodeURIComponent(
@@ -6956,7 +8237,7 @@ function renderMerchantCashReceipt() {
 
           const response =
             await fetch(
-              '/api/toss-cash-receipt',
+              apiBaseUrl + '/api/toss-cash-receipt',
               {
                 method:
                   'POST',
@@ -8267,7 +9548,7 @@ async function renderMerchantCashReceiptHistory() {
 
                 const response =
                   await fetch(
-                    '/api/toss-cash-receipt-cancel',
+                    apiBaseUrl + '/api/toss-cash-receipt-cancel',
                     {
                       method:
                         'POST',
@@ -8943,8 +10224,8 @@ async function renderMerchantMenuCard() {
     
     
           const {
-            data: tossMerchant,
-            error: tossMerchantError
+            data: paymentMerchant,
+            error: paymentMerchantError
           } =
             await supabase
               .from('merchants')
@@ -8963,8 +10244,8 @@ async function renderMerchantMenuCard() {
 
 
           if (
-            tossMerchantError ||
-            !tossMerchant
+            paymentMerchantError ||
+            !paymentMerchant
           ) {
 
             alert(
@@ -8977,7 +10258,7 @@ async function renderMerchantMenuCard() {
 
           const selectedOnlinePg =
             String(
-              tossMerchant
+              paymentMerchant
                 .online_pg_company_1 ||
               ''
             ).trim()
@@ -9084,7 +10365,7 @@ async function renderMerchantMenuCard() {
 
           sessionStorage.setItem(
             'merchantName',
-            tossMerchant
+            paymentMerchant
               .merchant_name ||
               merchantName
           )
@@ -9106,9 +10387,9 @@ async function renderMerchantMenuCard() {
           ) {
 
             if (
-              !tossMerchant
+              !paymentMerchant
                 .korpay_pg_mid ||
-              !tossMerchant
+              !paymentMerchant
                 .korpay_pg_mkey
             ) {
 
@@ -9127,13 +10408,13 @@ async function renderMerchantMenuCard() {
             const hashKey =
               await createKorpayHash(
                 String(
-                  tossMerchant
+                  paymentMerchant
                     .korpay_pg_mid
                 ),
                 ediDate,
                 totalPrice,
                 String(
-                  tossMerchant
+                  paymentMerchant
                     .korpay_pg_mkey
                 )
               )
@@ -9142,7 +10423,7 @@ async function renderMerchantMenuCard() {
             const paymentData = {
 
               merchantId:
-                tossMerchant
+                paymentMerchant
                   .korpay_pg_mid,
 
               productName:
@@ -9171,7 +10452,7 @@ async function renderMerchantMenuCard() {
                 'card',
 
               returnUrl:
-                window.location.origin +
+                apiBaseUrl +
                 '/api/korpay-return',
 
               ediDate:
@@ -9181,7 +10462,7 @@ async function renderMerchantMenuCard() {
                 hashKey,
 
               customerName:
-                tossMerchant
+                paymentMerchant
                   .merchant_name ||
                 merchantName,
 
@@ -9242,9 +10523,10 @@ async function renderMerchantMenuCard() {
                 ) => {
 
                   alert(
-                    String(error)
+                    String(
+                      error
+                    )
                   )
-
 
                   const payButton =
                     document.querySelector<HTMLButtonElement>(
@@ -9293,7 +10575,7 @@ async function renderMerchantMenuCard() {
 
             const tossClientKey =
               String(
-                tossMerchant
+                paymentMerchant
                   .toss_client_key ||
                 clientKey
               ).trim()
@@ -9319,6 +10601,7 @@ async function renderMerchantMenuCard() {
               .requestPayment(
                 '카드',
                 {
+
                   amount:
                     totalPrice,
 
@@ -9342,7 +10625,7 @@ async function renderMerchantMenuCard() {
                         ),
 
                   customerName:
-                    tossMerchant
+                    paymentMerchant
                       .merchant_name ||
                     merchantName,
 
@@ -9354,7 +10637,7 @@ async function renderMerchantMenuCard() {
                     merchantId +
                     '&merchantName=' +
                     encodeURIComponent(
-                      tossMerchant
+                      paymentMerchant
                         .merchant_name ||
                       merchantName
                     ),
@@ -9574,7 +10857,7 @@ async function renderMerchantPaymentSuccess() {
   
         const confirmResponse =
           await fetch(
-            '/api/toss-confirm',
+            apiBaseUrl + '/api/toss-confirm',
             {
               method:
                 'POST',
