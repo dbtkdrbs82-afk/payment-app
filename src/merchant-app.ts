@@ -1341,15 +1341,187 @@ function renderMerchantHome() {
       'login_merchant_name'
     ) || '가맹점'
 
-  const merchantType =
+    const merchantType =
     sessionStorage.getItem(
       'login_merchant_type'
-    ) || '일반매장'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_type'
+    ) ||
+    '일반매장'
 
-    if (merchantType === '무선단말기') {
-  void renderMerchantWirelessTerminal()
-  return
-}
+
+  const isNormalStore =
+    merchantType === '일반매장'
+
+  const isWirelessTerminal =
+    merchantType === '무선단말기'
+
+  const isAcademy =
+    merchantType === '아카데미'
+
+  const isBeauty =
+    merchantType === '뷰티'
+
+  const isHotel =
+    merchantType === '호텔'
+
+
+  if (isWirelessTerminal) {
+    void renderMerchantWirelessTerminal()
+    return
+  }
+
+  let merchantHomeMenu = ''
+
+
+  if (isNormalStore) {
+
+    merchantHomeMenu = `
+      <button
+        type="button"
+        class="merchant-mobile-menu-card"
+        data-menu="orders"
+      >
+        <span class="merchant-mobile-menu-icon">📋</span>
+        <strong>주문관리</strong>
+        <small>주문 및 결제내역 관리</small>
+      </button>
+
+      <button
+        type="button"
+        class="merchant-mobile-menu-card"
+        data-menu="products"
+      >
+        <span class="merchant-mobile-menu-icon">🛍️</span>
+        <strong>상품관리</strong>
+        <small>상품 등록 및 수정</small>
+      </button>
+
+      <button
+        type="button"
+        class="merchant-mobile-menu-card"
+        data-menu="qr"
+      >
+        <span class="merchant-mobile-menu-icon">📱</span>
+        <strong>PICK QR</strong>
+        <small>가맹점 QR 확인 및 관리</small>
+      </button>
+
+      <button
+        type="button"
+        class="merchant-mobile-menu-card"
+        data-menu="card"
+      >
+        <span class="merchant-mobile-menu-icon">💳</span>
+        <strong>카드결제</strong>
+        <small>OCR · 수기 · 현금영수증</small>
+      </button>
+    `
+
+  } else if (isAcademy) {
+
+    merchantHomeMenu = `
+      <button type="button" class="merchant-mobile-menu-card" data-menu="members">
+        <span class="merchant-mobile-menu-icon">👥</span>
+        <strong>회원관리</strong>
+        <small>회원 등록 및 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="billings">
+        <span class="merchant-mobile-menu-icon">🧾</span>
+        <strong>청구관리</strong>
+        <small>청구 및 납부 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="academy-card">
+        <span class="merchant-mobile-menu-icon">💳</span>
+        <strong>카드결제</strong>
+        <small>아카데미 결제</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="academy-payments">
+        <span class="merchant-mobile-menu-icon">📋</span>
+        <strong>결제내역</strong>
+        <small>결제 및 취소내역</small>
+      </button>
+    `
+
+  } else if (isBeauty) {
+
+    merchantHomeMenu = `
+      <button type="button" class="merchant-mobile-menu-card" data-menu="beauty-orders">
+        <span class="merchant-mobile-menu-icon">📋</span>
+        <strong>주문관리</strong>
+        <small>예약 및 결제내역</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="beauty-staff">
+        <span class="merchant-mobile-menu-icon">👤</span>
+        <strong>직원관리</strong>
+        <small>직원 및 서비스 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="beauty-products">
+        <span class="merchant-mobile-menu-icon">✂️</span>
+        <strong>서비스관리</strong>
+        <small>서비스 등록 및 수정</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="beauty-hours">
+        <span class="merchant-mobile-menu-icon">🕒</span>
+        <strong>영업시간</strong>
+        <small>영업시간 및 스케줄</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="qr">
+        <span class="merchant-mobile-menu-icon">📱</span>
+        <strong>PICK QR</strong>
+        <small>가맹점 QR 확인 및 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="card">
+        <span class="merchant-mobile-menu-icon">💳</span>
+        <strong>카드결제</strong>
+        <small>카드 결제 관리</small>
+      </button>
+    `
+
+  } else if (isHotel) {
+
+    merchantHomeMenu = `
+      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-orders">
+        <span class="merchant-mobile-menu-icon">📋</span>
+        <strong>주문/결제내역</strong>
+        <small>객실 주문 및 결제내역</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-products">
+        <span class="merchant-mobile-menu-icon">🛍️</span>
+        <strong>상품관리</strong>
+        <small>호텔 상품 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-rooms">
+        <span class="merchant-mobile-menu-icon">🏨</span>
+        <strong>객실관리</strong>
+        <small>객실 등록 및 관리</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-preview">
+        <span class="merchant-mobile-menu-icon">📱</span>
+        <strong>고객 결제창</strong>
+        <small>호텔 고객 결제창</small>
+      </button>
+
+      <button type="button" class="merchant-mobile-menu-card" data-menu="card">
+        <span class="merchant-mobile-menu-icon">💳</span>
+        <strong>카드결제</strong>
+        <small>카드 결제 관리</small>
+      </button>
+    `
+
+  }
 
   app.innerHTML = `
     <div class="merchant-mobile-home">
@@ -1396,84 +1568,9 @@ function renderMerchantHome() {
         </section>
 
 
-        <section class="merchant-mobile-menu">
-
-  <button
-    type="button"
-    class="merchant-mobile-menu-card"
-    data-menu="orders"
-  >
-    <span class="merchant-mobile-menu-icon">
-      📋
-    </span>
-
-    <strong>
-      주문관리
-    </strong>
-
-    <small>
-      주문 및 결제내역 관리
-    </small>
-  </button>
-
-
-  <button
-    type="button"
-    class="merchant-mobile-menu-card"
-    data-menu="products"
-  >
-    <span class="merchant-mobile-menu-icon">
-      🛍️
-    </span>
-
-    <strong>
-      상품관리
-    </strong>
-
-    <small>
-      상품 등록 및 수정
-    </small>
-  </button>
-
-
-  <button
-    type="button"
-    class="merchant-mobile-menu-card"
-    data-menu="qr"
-  >
-    <span class="merchant-mobile-menu-icon">
-      📱
-    </span>
-
-    <strong>
-      PICK QR
-    </strong>
-
-    <small>
-      가맹점 QR 확인 및 관리
-    </small>
-  </button>
-
-
-  <button
-    type="button"
-    class="merchant-mobile-menu-card"
-    data-menu="card"
-  >
-    <span class="merchant-mobile-menu-icon">
-      💳
-    </span>
-
-    <strong>
-      카드결제
-    </strong>
-
-    <small>
-      OCR · 수기 · 현금영수증
-    </small>
-  </button>
-
-</section>
+                <section class="merchant-mobile-menu">
+          ${merchantHomeMenu}
+        </section>
 
       </main>
 
@@ -1505,55 +1602,98 @@ function renderMerchantHome() {
       }
     )
     document
-  .querySelector(
-    '[data-menu="orders"]'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
-      location.href =
-        '/merchant-app/orders'
-    }
-  )
+    .querySelector(
+      '.merchant-mobile-menu'
+    )
+    ?.addEventListener(
+      'click',
+      (event) => {
 
-  document
-  .querySelector(
-    '[data-menu="products"]'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
-      location.href =
-        '/merchant-app/products'
-    }
-  )
+        const button =
+          (
+            event.target as HTMLElement
+          ).closest<HTMLButtonElement>(
+            '[data-menu]'
+          )
 
-  document
-  .querySelector(
-    '[data-menu="qr"]'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
-      location.href =
-        '/merchant-app/qr'
-    }
-  )
-  document
-  .querySelector(
-    '[data-menu="card"]'
-  )
-  ?.addEventListener(
-    'click',
-    () => {
+        if (!button) {
+          return
+        }
 
-      location.href =
-        '/merchant-app/card'
+        const menu =
+          button.dataset.menu || ''
 
-    }
-  )
-}
 
+        const menuRoutes:
+          Record<string, string> = {
+
+            orders:
+              '/merchant-app/orders',
+
+            products:
+              '/merchant-app/products',
+
+            qr:
+              '/merchant-app/qr',
+
+            card:
+              '/merchant-app/card',
+
+
+            members:
+              '/merchant-app/members',
+
+            billings:
+              '/merchant-app/billings',
+
+            'academy-card':
+              '/merchant-app/academy/card',
+
+            'academy-payments':
+              '/merchant-app/academy/payments',
+
+
+            'beauty-orders':
+              '/merchant-app/beauty/orders',
+
+            'beauty-staff':
+              '/merchant-app/beauty/staff',
+
+            'beauty-products':
+              '/merchant-app/beauty/products',
+
+            'beauty-hours':
+              '/merchant-app/beauty/hours',
+
+
+            'hotel-orders':
+              '/merchant-app/hotel/orders',
+
+            'hotel-products':
+              '/merchant-app/hotel/products',
+
+            'hotel-rooms':
+              '/merchant-app/hotel/rooms',
+
+            'hotel-preview':
+              '/merchant-app/hotel/preview'
+          }
+
+
+        const targetRoute =
+          menuRoutes[menu]
+
+
+        if (!targetRoute) {
+          return
+        }
+
+
+        location.href =
+          targetRoute
+      }
+    )
+  }
 /* =========================================
    모바일 주문관리
 ========================================= */
