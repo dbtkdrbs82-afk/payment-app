@@ -2537,3 +2537,227 @@
 .beauty-mobile-order-service strong {
   line-height: 1.7;
 }
+/* =========================================
+   뷰티 모바일 직원관리 - 주간 근무표
+========================================= */
+
+.beauty-mobile-staff-weekly {
+  margin-top: 18px;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+}
+
+.beauty-mobile-staff-weekly-head h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+}
+
+.beauty-mobile-staff-week-nav {
+  display: grid;
+  grid-template-columns: 72px 1fr 72px;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.beauty-mobile-staff-week-nav button {
+  height: 38px;
+  border: 0;
+  border-radius: 9px;
+  background: #172033;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.beauty-mobile-staff-week-nav strong {
+  text-align: center;
+  font-size: 14px;
+}
+
+.beauty-mobile-staff-week-scroll {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.beauty-mobile-staff-week-grid {
+  display: grid;
+  grid-template-columns:
+    92px
+    repeat(7, 64px);
+  width: max-content;
+  min-width: 100%;
+  gap: 4px;
+}
+
+.beauty-mobile-staff-week-header,
+.beauty-mobile-staff-week-name,
+.beauty-mobile-staff-week-button {
+  min-height: 54px;
+  border-radius: 8px;
+}
+
+.beauty-mobile-staff-week-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #f4f6f8;
+  font-size: 12px;
+}
+
+.beauty-mobile-staff-week-header span {
+  margin-top: 3px;
+  color: #7b8492;
+}
+
+.beauty-mobile-staff-week-name {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6px 8px;
+  background: #f8fafc;
+}
+
+.beauty-mobile-staff-week-name strong {
+  font-size: 13px;
+}
+
+.beauty-mobile-staff-week-name span {
+  margin-top: 3px;
+  font-size: 11px;
+  color: #7b8492;
+}
+
+.beauty-mobile-staff-week-button {
+  border: 0;
+  background: #e9f7ee;
+  color: #18723b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.beauty-mobile-staff-week-button.beauty-mobile-staff-week-off {
+  background: #feecec;
+  color: #c62828;
+}
+/* =========================================
+   뷰티 모바일 직원관리 버튼
+========================================= */
+
+#beauty-mobile-staff-create-open {
+  width: 100%;
+  height: 46px;
+  margin: 0 0 14px;
+  border: 0;
+  border-radius: 12px;
+  background: #172033;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.beauty-mobile-staff-schedule {
+  width: 100%;
+  height: 42px;
+  margin-top: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.beauty-mobile-staff-schedule:active,
+#beauty-mobile-staff-create-open:active {
+  transform: scale(0.98);
+}
+/* =========================================
+   뷰티 모바일 직원 등록 팝업
+========================================= */
+
+#beauty-mobile-staff-create-modal
+.merchant-mobile-product-modal-box {
+  width: calc(100% - 32px);
+  max-width: 420px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+#beauty-mobile-staff-create-modal h2 {
+  margin: 0 0 20px;
+  font-size: 20px;
+}
+
+#beauty-mobile-staff-create-modal label {
+  display: block;
+  margin: 14px 0 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+}
+
+#beauty-mobile-staff-create-modal input,
+#beauty-mobile-staff-create-modal select {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid #d7dce3;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+#beauty-mobile-staff-photo {
+  padding: 9px 10px !important;
+}
+
+#beauty-mobile-staff-photo-preview {
+  width: 130px;
+  height: 130px;
+  margin: 12px auto 6px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8fafc;
+  color: #7b8492;
+  font-size: 13px;
+}
+
+#beauty-mobile-staff-create-modal
+.merchant-mobile-product-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+#beauty-mobile-staff-create-save,
+#beauty-mobile-staff-create-close {
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+#beauty-mobile-staff-create-save {
+  background: #172033;
+  color: #ffffff;
+}
+
+#beauty-mobile-staff-create-close {
+  background: #eef1f5;
+  color: #374151;
+}

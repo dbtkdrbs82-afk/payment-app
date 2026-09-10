@@ -5246,6 +5246,1440 @@ async function renderBeautyOrders() {
   applyBeautyOrderView()
 }
 
+/* =========================================
+   뷰티 모바일 직원관리
+========================================= */
+
+async function renderBeautyStaffMobile() {
+
+  const merchantIdText =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+
+  if (!merchantIdText) {
+
+    location.replace(
+      '/merchant-app'
+    )
+
+    return
+  }
+
+
+  const merchantId =
+    Number(
+      merchantIdText
+    )
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '가맹점'
+
+
+  const {
+    data,
+    error
+  } =
+    await supabase
+      .from('beauty_staff')
+      .select('*')
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .order(
+        'id',
+        {
+          ascending: false
+        }
+      )
+
+
+  const staffList =
+    data || []
+
+    const workingCount =
+    staffList.filter(
+      (staff: any) =>
+        (
+          staff.status ||
+          '근무중'
+        ) === '근무중'
+    ).length
+
+  const stoppedCount =
+    staffList.length -
+    workingCount
+
+    const beautyStaffToday =
+    new Date()
+
+  const beautyStaffWeekOffset =
+    Number(
+      sessionStorage.getItem(
+        'beauty_mobile_staff_week_offset'
+      ) || '0'
+    )
+
+  const beautyStaffMonday =
+    new Date(
+      beautyStaffToday
+    )
+
+  const beautyStaffCurrentDay =
+    beautyStaffToday.getDay()
+
+  const beautyStaffMondayOffset =
+    beautyStaffCurrentDay === 0
+      ? -6
+      : 1 -
+        beautyStaffCurrentDay
+
+  beautyStaffMonday.setDate(
+    beautyStaffToday.getDate() +
+    beautyStaffMondayOffset +
+    beautyStaffWeekOffset * 7
+  )
+
+  beautyStaffMonday.setHours(
+    0,
+    0,
+    0,
+    0
+  )
+
+  const beautyStaffWeekDates =
+    Array.from(
+      {
+        length: 7
+      },
+      (_, index) => {
+
+        const date =
+          new Date(
+            beautyStaffMonday
+          )
+
+        date.setDate(
+          beautyStaffMonday.getDate() +
+          index
+        )
+
+        const dateValue =
+          date.getFullYear() +
+          '-' +
+          String(
+            date.getMonth() + 1
+          ).padStart(
+            2,
+            '0'
+          ) +
+          '-' +
+          String(
+            date.getDate()
+          ).padStart(
+            2,
+            '0'
+          )
+
+        return {
+          dateValue,
+
+          dayLabel:
+            [
+              '월',
+              '화',
+              '수',
+              '목',
+              '금',
+              '토',
+              '일'
+            ][index],
+
+          dateLabel:
+            String(
+              date.getMonth() + 1
+            ) +
+            '/' +
+            String(
+              date.getDate()
+            )
+        }
+
+      }
+    )
+
+  const beautyStaffWeekRangeText =
+    beautyStaffWeekDates[0].dateLabel +
+    ' ~ ' +
+    beautyStaffWeekDates[6].dateLabel
+
+    const beautyStaffWeekStart =
+    beautyStaffWeekDates[0].dateValue
+
+  const beautyStaffWeekEnd =
+    beautyStaffWeekDates[6].dateValue
+
+
+  const {
+    data: beautyStaffWeeklyRows,
+    error: beautyStaffWeeklyError
+  } =
+    await supabase
+      .from(
+        'beauty_staff_schedule'
+      )
+      .select(`
+        staff_id,
+        schedule_date,
+        schedule_time,
+        status,
+        order_id
+      `)
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .gte(
+        'schedule_date',
+        beautyStaffWeekStart
+      )
+      .lte(
+        'schedule_date',
+        beautyStaffWeekEnd
+      )
+
+
+  if (
+    beautyStaffWeeklyError
+  ) {
+
+    alert(
+      '주간 스케줄 조회 실패: ' +
+      beautyStaffWeeklyError.message
+    )
+
+  }
+
+  const beautyStaffDayTimes: string[] =
+  []
+
+for (
+  let minutes = 0;
+  minutes < 24 * 60;
+  minutes += 30
+) {
+
+  const hour =
+    String(
+      Math.floor(
+        minutes / 60
+      )
+    ).padStart(
+      2,
+      '0'
+    )
+
+  const minute =
+    String(
+      minutes % 60
+    ).padStart(
+      2,
+      '0'
+    )
+
+  beautyStaffDayTimes.push(
+    `${hour}:${minute}`
+  )
+
+}
+
+
+const isBeautyMobileStaffDayOff = (
+  staffId: number,
+  dateValue: string
+) => {
+
+  return beautyStaffDayTimes.every(
+    (time) => {
+
+      const row =
+        (
+          beautyStaffWeeklyRows ||
+          []
+        ).find(
+          (item: any) =>
+            Number(
+              item.staff_id
+            ) === staffId &&
+            String(
+              item.schedule_date
+            ) === dateValue &&
+            String(
+              item.schedule_time ||
+              ''
+            ).slice(
+              0,
+              5
+            ) === time
+        )
+
+      if (
+        row?.order_id ||
+        row?.status ===
+          '예약완료'
+      ) {
+        return true
+      }
+
+      return (
+        row?.status ===
+        '예약불가'
+      )
+
+    }
+  )
+
+}
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+        <button
+          id="beauty-mobile-staff-home"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          홈
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <div class="merchant-mobile-page-title">
+
+          <h1>
+            직원관리
+          </h1>
+
+          <span>
+            등록 직원 ${staffList.length}명
+          </span>
+
+        </div>
+
+        <button
+  id="beauty-mobile-staff-create-open"
+  type="button"
+  class="merchant-mobile-product-create-open"
+>
+  + 직원 등록
+</button>
+
+<div class="merchant-mobile-order-summary">
+
+  <span>
+    총 직원 :
+    <strong>
+      ${staffList.length}명
+    </strong>
+  </span>
+
+  <span>
+    근무중 :
+    <strong>
+      ${workingCount}명
+    </strong>
+  </span>
+
+  <span>
+    근무중지 :
+    <strong>
+      ${stoppedCount}명
+    </strong>
+  </span>
+
+</div>
+
+        <div
+          id="beauty-mobile-staff-list"
+          class="merchant-mobile-order-list"
+        >
+
+          ${
+            error
+
+              ? `
+                <div class="merchant-mobile-order-empty">
+                  직원 조회 실패 :
+                  ${error.message}
+                </div>
+              `
+
+              : staffList.length === 0
+
+                ? `
+                  <div class="merchant-mobile-order-empty">
+                    등록된 직원이 없습니다.
+                  </div>
+                `
+
+                : staffList
+                    .map(
+                      (staff: any) => `
+
+                        <div
+                          class="merchant-mobile-order-card"
+                        >
+
+                          <div
+                            class="merchant-mobile-order-card-top"
+                          >
+
+                            <strong>
+                              ${
+                                staff.staff_name ||
+                                '이름 없음'
+                              }
+                            </strong>
+
+                            <span>
+                              ${
+                                staff.status ||
+                                '근무중'
+                              }
+                            </span>
+
+                          </div>
+
+
+                          ${
+                            staff.photo_url
+                              ? `
+                                <div
+                                  style="
+                                    margin:12px 0;
+                                    text-align:center;
+                                  "
+                                >
+                                  <img
+                                    src="${staff.photo_url}"
+                                    alt=""
+                                    style="
+                                      width:90px;
+                                      height:90px;
+                                      object-fit:cover;
+                                      border-radius:14px;
+                                    "
+                                  >
+                                </div>
+                              `
+                              : ''
+                          }
+
+
+                          <div
+                            class="beauty-mobile-order-row"
+                          >
+
+                            <span>
+                              직원명
+                            </span>
+
+                            <strong>
+                              ${
+                                staff.staff_name ||
+                                '-'
+                              }
+                            </strong>
+
+                          </div>
+
+
+                          <div
+  class="beauty-mobile-order-row"
+>
+
+  <span>
+    직급
+  </span>
+
+  <strong>
+    ${
+      staff.position ||
+      '-'
+    }
+  </strong>
+
+</div>
+
+
+<button
+  type="button"
+  class="beauty-mobile-staff-schedule"
+  data-staff-id="${staff.id}"
+>
+  스케줄관리
+</button>
+
+                        </div>
+
+                      `
+                    )
+                    .join('')
+          }
+
+              </div>
+
+
+        <div
+          class="beauty-mobile-staff-weekly"
+        >
+
+          <div
+            class="beauty-mobile-staff-weekly-head"
+          >
+
+            <h2>
+              주간 근무표
+            </h2>
+
+            <div
+              class="beauty-mobile-staff-week-nav"
+            >
+
+              <button
+                id="beauty-mobile-staff-prev-week"
+                type="button"
+              >
+                이전주
+              </button>
+
+              <strong>
+                ${beautyStaffWeekRangeText}
+              </strong>
+
+              <button
+                id="beauty-mobile-staff-next-week"
+                type="button"
+              >
+                다음주
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div
+            class="beauty-mobile-staff-week-scroll"
+          >
+
+            <div
+              class="beauty-mobile-staff-week-grid"
+            >
+
+              <div
+                class="beauty-mobile-staff-week-header"
+              >
+                직원
+              </div>
+
+              ${
+                beautyStaffWeekDates
+                  .map(
+                    (date) => `
+                      <div
+                        class="beauty-mobile-staff-week-header"
+                      >
+                        <strong>
+                          ${date.dayLabel}
+                        </strong>
+
+                        <span>
+                          ${date.dateLabel}
+                        </span>
+                      </div>
+                    `
+                  )
+                  .join('')
+              }
+
+              ${
+                staffList
+                  .map(
+                    (staff: any) => `
+
+                      <div
+                        class="beauty-mobile-staff-week-name"
+                      >
+                        <strong>
+                          ${
+                            staff.staff_name ||
+                            '이름 없음'
+                          }
+                        </strong>
+
+                        <span>
+                          ${
+                            staff.position ||
+                            ''
+                          }
+                        </span>
+                      </div>
+
+                      ${
+                        beautyStaffWeekDates
+                          .map(
+                            (date) => {
+                      
+                              const isDayOff =
+                                isBeautyMobileStaffDayOff(
+                                  Number(
+                                    staff.id
+                                  ),
+                                  date.dateValue
+                                )
+                      
+                              return `
+                                <button
+                                  type="button"
+                                  class="
+                                    beauty-mobile-staff-week-button
+                                    ${
+                                      isDayOff
+                                        ? 'beauty-mobile-staff-week-off'
+                                        : ''
+                                    }
+                                  "
+                                  data-staff-id="${staff.id}"
+                                  data-date="${date.dateValue}"
+                                  data-current-status="${
+                                    isDayOff
+                                      ? 'OFF'
+                                      : 'WORK'
+                                  }"
+                                >
+                                  ${
+                                    isDayOff
+                                      ? 'OFF'
+                                      : '근무'
+                                  }
+                                </button>
+                              `
+                      
+                            }
+                          )
+                          .join('')
+                      }
+
+                    `
+                  )
+                  .join('')
+              }
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+      </main>
+
+    </div>
+  `
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-staff-home'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/home'
+
+      }
+    )
+
+    document
+    .querySelectorAll<HTMLButtonElement>(
+      '.beauty-mobile-staff-schedule'
+    )
+    .forEach(
+      (button) => {
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            const staffId =
+              button.dataset.staffId
+
+            if (!staffId) {
+              return
+            }
+
+            location.href =
+              '/merchant-beauty-schedule?staff_id=' +
+              encodeURIComponent(
+                staffId
+              )
+
+          }
+        )
+
+      }
+    )
+
+    document
+    .querySelectorAll<HTMLButtonElement>(
+      '.beauty-mobile-staff-week-button'
+    )
+    .forEach(
+      (button) => {
+
+        button.addEventListener(
+          'click',
+          async () => {
+
+            const staffId =
+              Number(
+                button.dataset.staffId ||
+                0
+              )
+
+            const scheduleDate =
+              button.dataset.date ||
+              ''
+
+            const currentStatus =
+              button.dataset.currentStatus ||
+              'WORK'
+
+
+            if (
+              !staffId ||
+              !scheduleDate
+            ) {
+              return
+            }
+
+
+            button.disabled =
+              true
+
+
+            /* =========================
+               OFF → 근무
+            ========================= */
+
+            if (
+              currentStatus ===
+              'OFF'
+            ) {
+
+              const {
+                error: workError
+              } =
+                await supabase
+                  .from(
+                    'beauty_staff_schedule'
+                  )
+                  .delete()
+                  .eq(
+                    'merchant_id',
+                    merchantId
+                  )
+                  .eq(
+                    'staff_id',
+                    staffId
+                  )
+                  .eq(
+                    'schedule_date',
+                    scheduleDate
+                  )
+                  .is(
+                    'order_id',
+                    null
+                  )
+
+
+              if (workError) {
+
+                alert(
+                  '근무 전환 실패: ' +
+                  workError.message
+                )
+
+                button.disabled =
+                  false
+
+                return
+              }
+
+
+              button.dataset.currentStatus =
+                'WORK'
+
+              button.textContent =
+                '근무'
+
+              button.classList.remove(
+                'beauty-mobile-staff-week-off'
+              )
+
+              button.disabled =
+                false
+
+              return
+            }
+
+
+            /* =========================
+               근무 → OFF
+            ========================= */
+
+            const {
+              data: dayScheduleRows,
+              error: dayScheduleError
+            } =
+              await supabase
+                .from(
+                  'beauty_staff_schedule'
+                )
+                .select(`
+                  schedule_time,
+                  status,
+                  order_id
+                `)
+                .eq(
+                  'merchant_id',
+                  merchantId
+                )
+                .eq(
+                  'staff_id',
+                  staffId
+                )
+                .eq(
+                  'schedule_date',
+                  scheduleDate
+                )
+
+
+            if (dayScheduleError) {
+
+              alert(
+                '직원 스케줄 조회 실패: ' +
+                dayScheduleError.message
+              )
+
+              button.disabled =
+                false
+
+              return
+            }
+
+
+            const reservationTimes =
+              new Set<string>()
+
+
+            ;(
+              dayScheduleRows ||
+              []
+            ).forEach(
+              (row: any) => {
+
+                if (
+                  row.order_id ||
+                  row.status ===
+                    '예약완료'
+                ) {
+
+                  reservationTimes.add(
+                    String(
+                      row.schedule_time ||
+                      ''
+                    ).slice(
+                      0,
+                      5
+                    )
+                  )
+
+                }
+
+              }
+            )
+
+
+            const offRows =
+              beautyStaffDayTimes
+                .filter(
+                  (time) =>
+                    !reservationTimes.has(
+                      time
+                    )
+                )
+                .map(
+                  (time) => ({
+                    merchant_id:
+                      merchantId,
+
+                    staff_id:
+                      staffId,
+
+                    schedule_date:
+                      scheduleDate,
+
+                    schedule_time:
+                      time,
+
+                    status:
+                      '예약불가'
+                  })
+                )
+
+
+            const {
+              error: offError
+            } =
+              await supabase
+                .from(
+                  'beauty_staff_schedule'
+                )
+                .upsert(
+                  offRows,
+                  {
+                    onConflict:
+                      'staff_id,schedule_date,schedule_time'
+                  }
+                )
+
+
+            if (offError) {
+
+              alert(
+                'OFF 설정 실패: ' +
+                offError.message
+              )
+
+              button.disabled =
+                false
+
+              return
+            }
+
+
+            button.dataset.currentStatus =
+              'OFF'
+
+            button.textContent =
+              'OFF'
+
+            button.classList.add(
+              'beauty-mobile-staff-week-off'
+            )
+
+            button.disabled =
+              false
+
+          }
+        )
+
+      }
+    )
+
+    document
+    .querySelector(
+      '#beauty-mobile-staff-prev-week'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        sessionStorage.setItem(
+          'beauty_mobile_staff_week_offset',
+          String(
+            beautyStaffWeekOffset - 1
+          )
+        )
+
+        void renderBeautyStaffMobile()
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-staff-next-week'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        sessionStorage.setItem(
+          'beauty_mobile_staff_week_offset',
+          String(
+            beautyStaffWeekOffset + 1
+          )
+        )
+
+        void renderBeautyStaffMobile()
+
+      }
+    )
+
+    document
+  .querySelector(
+    '#beauty-mobile-staff-create-open'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      document
+        .querySelector(
+          '#beauty-mobile-staff-create-modal'
+        )
+        ?.remove()
+
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        `
+          <div
+            id="beauty-mobile-staff-create-modal"
+            class="merchant-mobile-product-modal"
+          >
+
+            <div
+              class="merchant-mobile-product-modal-box"
+            >
+
+              <h2>
+                직원 등록
+              </h2>
+
+              <label>
+                직원 사진
+              </label>
+
+              <input
+                id="beauty-mobile-staff-photo"
+                type="file"
+                accept="image/*"
+              >
+
+              <div
+                id="beauty-mobile-staff-photo-preview"
+                class="merchant-mobile-product-preview"
+              >
+                <span>
+                  사진 미리보기
+                </span>
+              </div>
+
+              <label>
+                직원명
+              </label>
+
+              <input
+                id="beauty-mobile-staff-name"
+                type="text"
+                placeholder="예: 김민지"
+              >
+
+              <label>
+                직급
+              </label>
+
+              <select
+                id="beauty-mobile-staff-position"
+              >
+                <option value="원장">원장</option>
+                <option value="실장">실장</option>
+                <option value="디자이너" selected>디자이너</option>
+                <option value="네일리스트">네일리스트</option>
+                <option value="관리사">관리사</option>
+                <option value="타투이스트">타투이스트</option>
+                <option value="기타">기타</option>
+              </select>
+
+              <div
+                class="merchant-mobile-product-modal-actions"
+              >
+
+                <button
+                  id="beauty-mobile-staff-create-save"
+                  type="button"
+                >
+                  직원 등록
+                </button>
+
+                <button
+                  id="beauty-mobile-staff-create-close"
+                  type="button"
+                >
+                  닫기
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        `
+      )
+
+      document
+        .querySelector(
+          '#beauty-mobile-staff-create-close'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            document
+              .querySelector(
+                '#beauty-mobile-staff-create-modal'
+              )
+              ?.remove()
+
+          }
+        )
+
+        const photoInput =
+        document.querySelector<HTMLInputElement>(
+          '#beauty-mobile-staff-photo'
+        )
+
+      const photoPreview =
+        document.querySelector<HTMLDivElement>(
+          '#beauty-mobile-staff-photo-preview'
+        )
+
+
+      photoInput
+        ?.addEventListener(
+          'change',
+          () => {
+
+            const file =
+              photoInput.files?.[0]
+
+            if (
+              !file ||
+              !photoPreview
+            ) {
+              return
+            }
+
+
+            if (
+              !file.type.startsWith(
+                'image/'
+              )
+            ) {
+
+              alert(
+                '이미지 파일만 선택할 수 있습니다.'
+              )
+
+              photoInput.value = ''
+
+              return
+            }
+
+
+            const previewUrl =
+              URL.createObjectURL(
+                file
+              )
+
+
+            photoPreview.innerHTML = `
+              <img
+                src="${previewUrl}"
+                alt=""
+                style="
+                  width:100%;
+                  height:100%;
+                  object-fit:cover;
+                "
+              >
+            `
+
+          }
+        )
+
+
+      document
+        .querySelector(
+          '#beauty-mobile-staff-create-save'
+        )
+        ?.addEventListener(
+          'click',
+          async () => {
+
+            const staffName =
+              (
+                document.querySelector<HTMLInputElement>(
+                  '#beauty-mobile-staff-name'
+                )?.value || ''
+              ).trim()
+
+
+            const position =
+              document.querySelector<HTMLSelectElement>(
+                '#beauty-mobile-staff-position'
+              )?.value ||
+              '디자이너'
+
+
+            const photoFile =
+              photoInput?.files?.[0]
+
+
+            if (!staffName) {
+
+              alert(
+                '직원명을 입력해주세요.'
+              )
+
+              return
+            }
+
+
+            if (!photoFile) {
+
+              alert(
+                '직원 사진을 선택해주세요.'
+              )
+
+              return
+            }
+
+
+            const saveButton =
+              document.querySelector<HTMLButtonElement>(
+                '#beauty-mobile-staff-create-save'
+              )
+
+
+            if (saveButton) {
+
+              saveButton.disabled =
+                true
+
+              saveButton.textContent =
+                '등록 중...'
+
+            }
+
+
+            const extension =
+              photoFile.name
+                .split('.')
+                .pop()
+                ?.toLowerCase() ||
+              'jpg'
+
+
+            const filePath =
+              merchantId +
+              '/' +
+              Date.now() +
+              '-' +
+              crypto.randomUUID() +
+              '.' +
+              extension
+
+
+            const {
+              error: uploadError
+            } =
+              await supabase.storage
+                .from(
+                  'beauty-staff'
+                )
+                .upload(
+                  filePath,
+                  photoFile,
+                  {
+                    cacheControl:
+                      '3600',
+
+                    upsert:
+                      false
+                  }
+                )
+
+
+            if (uploadError) {
+
+              alert(
+                '직원 사진 업로드 실패: ' +
+                uploadError.message
+              )
+
+
+              if (saveButton) {
+
+                saveButton.disabled =
+                  false
+
+                saveButton.textContent =
+                  '직원 등록'
+
+              }
+
+              return
+            }
+
+
+            const {
+              data: publicUrlData
+            } =
+              supabase.storage
+                .from(
+                  'beauty-staff'
+                )
+                .getPublicUrl(
+                  filePath
+                )
+
+
+            const photoUrl =
+              publicUrlData.publicUrl
+
+
+            const {
+              error: insertError
+            } =
+              await supabase
+                .from(
+                  'beauty_staff'
+                )
+                .insert({
+                  merchant_id:
+                    merchantId,
+
+                  staff_name:
+                    staffName,
+
+                  position:
+                    position,
+
+                  photo_url:
+                    photoUrl,
+
+                  phone:
+                    '',
+
+                  work_start:
+                    '10:00',
+
+                  work_end:
+                    '19:00',
+
+                  break_start:
+                    null,
+
+                  break_end:
+                    null,
+
+                  off_days:
+                    [],
+
+                  status:
+                    '근무중'
+                })
+
+
+            if (insertError) {
+
+              await supabase.storage
+                .from(
+                  'beauty-staff'
+                )
+                .remove([
+                  filePath
+                ])
+
+
+              alert(
+                '직원 등록 실패: ' +
+                insertError.message
+              )
+
+
+              if (saveButton) {
+
+                saveButton.disabled =
+                  false
+
+                saveButton.textContent =
+                  '직원 등록'
+
+              }
+
+              return
+            }
+
+
+            alert(
+              '직원이 등록되었습니다.'
+            )
+
+
+            document
+              .querySelector(
+                '#beauty-mobile-staff-create-modal'
+              )
+              ?.remove()
+
+
+            void renderBeautyStaffMobile()
+
+          }
+        )
+
+    }
+  )
+
+}
+
   /* =========================================
    모바일 상품관리
 ========================================= */
@@ -12733,6 +14167,13 @@ if (
   ) {
 
     void renderBeautyOrders()
+
+  } else if (
+    path === '/merchant-app/beauty/staff'
+  ) {
+  
+    void renderBeautyStaffMobile()
+  
   
   } else if (
     path === '/merchant-app/products'
