@@ -1,0 +1,10 @@
+{
+	"appId": "kr.co.nxgsoft.payment",
+	"appName": "NXG PICK",
+	"webDir": "dist",
+	"plugins": {
+		"CapacitorHttp": {
+			"enabled": true
+		}
+	}
+}
