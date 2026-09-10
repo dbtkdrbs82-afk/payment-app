@@ -2031,3 +2031,509 @@
 .merchant-mobile-btn-secondary:active {
   transform: translateY(1px);
 }
+/* =========================================
+   Android 태블릿 대응
+========================================= */
+
+@media (min-width: 700px) {
+
+  .merchant-mobile-content {
+    max-width: 900px;
+    padding: 24px 32px;
+  }
+
+}
+/* =========================================
+   무선단말기 모바일
+========================================= */
+
+.terminal-mobile-date {
+  margin-top: 18px;
+  padding: 16px;
+
+  border: 1px solid #e0e6ef;
+  border-radius: 16px;
+
+  background: #ffffff;
+}
+
+.terminal-mobile-date-inputs {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    auto
+    minmax(0, 1fr);
+
+  align-items: center;
+  gap: 8px;
+}
+
+.terminal-mobile-date-inputs input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+
+  padding: 0 8px;
+
+  border: 1px solid #d7e0eb;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  font-size: 12px;
+  color: #263244;
+}
+
+.terminal-mobile-date-inputs span {
+  color: #7a8595;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.terminal-mobile-date-buttons {
+  display: grid;
+
+  grid-template-columns:
+    repeat(5, 1fr);
+
+  gap: 6px;
+
+  margin-top: 10px;
+}
+
+.terminal-mobile-date-buttons button {
+  min-width: 0;
+  height: 38px;
+
+  padding: 0 4px;
+
+  border: 1px solid #d7e0eb;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #173c68;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+#terminal-mobile-search {
+  border-color: #174981;
+
+  background: #174981;
+
+  color: #ffffff;
+}
+
+
+/* =========================================
+   무선단말기 매출 카드
+========================================= */
+
+.terminal-mobile-dashboard {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 10px;
+
+  margin-top: 14px;
+}
+
+.terminal-mobile-card {
+  min-width: 0;
+  min-height: 112px;
+
+  padding: 16px;
+
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid #e0e6ef;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 12px
+    rgba(15, 23, 42, 0.04);
+}
+
+.terminal-mobile-card span {
+  color: #687386;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.terminal-mobile-card strong {
+  margin-top: 9px;
+
+  overflow: hidden;
+
+  color: #172033;
+
+  font-size: 19px;
+  font-weight: 900;
+
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.terminal-mobile-card small {
+  margin-top: auto;
+  padding-top: 8px;
+
+  color: #7a8595;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+/* =========================================
+   무선단말기 작은 휴대폰
+========================================= */
+
+@media (max-width: 360px) {
+
+  .terminal-mobile-date {
+    padding: 12px;
+  }
+
+  .terminal-mobile-date-inputs input {
+    font-size: 11px;
+  }
+
+  .terminal-mobile-date-buttons {
+    gap: 4px;
+  }
+
+  .terminal-mobile-date-buttons button {
+    font-size: 11px;
+  }
+
+  .terminal-mobile-card {
+    min-height: 104px;
+    padding: 13px;
+  }
+
+  .terminal-mobile-card strong {
+    font-size: 17px;
+  }
+
+}
+
+
+/* =========================================
+   무선단말기 태블릿 / 폴드
+========================================= */
+
+@media (min-width: 700px) {
+
+  .terminal-mobile-dashboard {
+    grid-template-columns:
+      repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+  }
+
+  .terminal-mobile-card {
+    min-height: 125px;
+    padding: 20px;
+  }
+
+  .terminal-mobile-card strong {
+    font-size: 22px;
+  }
+
+}
+/* =========================================
+   무선단말기 거래내역
+========================================= */
+
+.terminal-mobile-history {
+  margin-top: 16px;
+  padding-bottom: 20px;
+}
+
+.terminal-mobile-history-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+}
+
+.terminal-mobile-history-top > strong {
+  color: #172033;
+
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.terminal-mobile-history-top select {
+  height: 36px;
+
+  padding: 0 8px;
+
+  border: 1px solid #d7e0eb;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #263244;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.terminal-mobile-history-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+
+.terminal-mobile-history-card {
+  padding: 16px;
+
+  border: 1px solid #e0e6ef;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 12px
+    rgba(15, 23, 42, 0.04);
+}
+
+
+.terminal-mobile-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+  padding-bottom: 11px;
+
+  border-bottom: 1px solid #edf1f5;
+}
+
+
+.terminal-mobile-history-head > strong {
+  color: #172033;
+
+  font-size: 19px;
+  font-weight: 900;
+}
+
+
+.terminal-mobile-history-head > span {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-width: 48px;
+  height: 28px;
+
+  padding: 0 9px;
+
+  border-radius: 20px;
+
+  font-size: 11px;
+  font-weight: 900;
+}
+
+
+.terminal-mobile-history-head > span.paid {
+  background: #e8f5ee;
+
+  color: #17834d;
+}
+
+
+.terminal-mobile-history-head > span.cancel {
+  background: #feecec;
+
+  color: #d63333;
+}
+
+
+.terminal-mobile-history-row {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  margin-top: 8px;
+}
+
+
+.terminal-mobile-history-row > span {
+  flex-shrink: 0;
+
+  color: #7a8595;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.terminal-mobile-history-row > strong {
+  min-width: 0;
+
+  color: #263244;
+
+  font-size: 12px;
+  font-weight: 800;
+
+  text-align: right;
+
+  word-break: break-all;
+}
+
+
+.terminal-mobile-empty {
+  padding: 34px 16px;
+
+  border: 1px solid #e0e6ef;
+  border-radius: 14px;
+
+  background: #ffffff;
+
+  color: #7a8595;
+
+  text-align: center;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+/* =========================================
+   무선단말기 페이징
+========================================= */
+
+.terminal-mobile-pagination {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-top: 16px;
+}
+
+
+.terminal-mobile-pagination button {
+  height: 38px;
+
+  padding: 0 16px;
+
+  border: 1px solid #d7e0eb;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  color: #173c68;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+.terminal-mobile-pagination button:disabled {
+  opacity: 0.4;
+}
+
+
+.terminal-mobile-pagination > strong {
+  min-width: 52px;
+
+  color: #263244;
+
+  text-align: center;
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* =========================================
+   무선단말기 태블릿 거래내역
+========================================= */
+
+@media (min-width: 700px) {
+
+  .terminal-mobile-history-list {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    gap: 14px;
+  }
+
+}
+/* =========================================
+   뷰티 모바일 주문관리
+========================================= */
+
+.beauty-mobile-date-nav {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.beauty-mobile-order-filter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+/* 뷰티 주문 카드 상세 */
+
+.beauty-mobile-order-card {
+  padding: 16px;
+}
+
+.beauty-mobile-order-row,
+.beauty-mobile-order-service {
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid #eef1f5;
+  font-size: 14px;
+}
+
+.beauty-mobile-order-row span,
+.beauty-mobile-order-service span {
+  color: #7b8492;
+}
+
+.beauty-mobile-order-row strong,
+.beauty-mobile-order-service strong {
+  color: #172033;
+  font-weight: 700;
+  text-align: right;
+  word-break: keep-all;
+}
+
+.beauty-mobile-order-service {
+  margin-top: 2px;
+}
+
+.beauty-mobile-order-service strong {
+  line-height: 1.7;
+}
