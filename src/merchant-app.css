@@ -2485,3 +2485,55 @@
   }
 
 }
+/* =========================================
+   뷰티 모바일 주문관리
+========================================= */
+
+.beauty-mobile-date-nav {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.beauty-mobile-order-filter {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+/* 뷰티 주문 카드 상세 */
+
+.beauty-mobile-order-card {
+  padding: 16px;
+}
+
+.beauty-mobile-order-row,
+.beauty-mobile-order-service {
+  display: grid;
+  grid-template-columns: 82px 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 8px 0;
+  border-bottom: 1px solid #eef1f5;
+  font-size: 14px;
+}
+
+.beauty-mobile-order-row span,
+.beauty-mobile-order-service span {
+  color: #7b8492;
+}
+
+.beauty-mobile-order-row strong,
+.beauty-mobile-order-service strong {
+  color: #172033;
+  font-weight: 700;
+  text-align: right;
+  word-break: keep-all;
+}
+
+.beauty-mobile-order-service {
+  margin-top: 2px;
+}
+
+.beauty-mobile-order-service strong {
+  line-height: 1.7;
+}

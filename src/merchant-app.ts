@@ -4140,6 +4140,1113 @@ receiptButton?.addEventListener(
   }
 
   /* =========================================
+   뷰티 모바일 주문관리
+========================================= */
+
+async function renderBeautyOrders() {
+
+  const merchantIdText =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+
+  if (!merchantIdText) {
+
+    location.replace(
+      '/merchant-app'
+    )
+
+    return
+  }
+
+
+  const merchantId =
+    Number(
+      merchantIdText
+    )
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '가맹점'
+
+    const params =
+    new URLSearchParams(
+      location.search
+    )
+
+
+  const getBeautyKoreaDate = (
+    date: Date
+  ) => {
+
+    return new Intl.DateTimeFormat(
+      'en-CA',
+      {
+        timeZone: 'Asia/Seoul',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }
+    ).format(date)
+
+  }
+
+
+  const beautyToday =
+    getBeautyKoreaDate(
+      new Date()
+    )
+
+
+  const beautyStartDate =
+    params.get('start') ||
+    beautyToday
+
+
+  const beautyEndDate =
+    params.get('end') ||
+    beautyToday
+
+
+  const beautyStartIso =
+    new Date(
+      beautyStartDate +
+      'T00:00:00+09:00'
+    ).toISOString()
+
+
+  const beautyEndIso =
+    new Date(
+      beautyEndDate +
+      'T23:59:59.999+09:00'
+    ).toISOString()
+
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+        <button
+          id="beauty-mobile-order-home"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          홈
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <div class="merchant-mobile-page-title">
+
+          <h1>
+            뷰티 주문관리
+          </h1>
+
+          <span>
+            예약접수
+          </span>
+
+        </div>
+
+        <div class="merchant-mobile-date-nav beauty-mobile-date-nav">
+
+  <button
+    id="beauty-mobile-order-date-prev"
+    type="button"
+  >
+    이전
+  </button>
+
+  <button
+    id="beauty-mobile-order-date-today"
+    type="button"
+  >
+    오늘
+  </button>
+
+  <button
+    id="beauty-mobile-order-date-next"
+    type="button"
+  >
+    다음
+  </button>
+
+  <button
+    id="beauty-mobile-order-date-month"
+    type="button"
+  >
+    당월
+  </button>
+
+  <button
+    id="beauty-mobile-order-date-search"
+    type="button"
+  >
+    조회
+  </button>
+
+</div>
+
+
+<div class="merchant-mobile-date-range">
+
+  <div>
+    <label>시작일</label>
+
+    <input
+      id="beauty-mobile-order-start"
+      type="date"
+      value="${beautyStartDate}"
+    >
+  </div>
+
+  <div>
+    <label>종료일</label>
+
+    <input
+      id="beauty-mobile-order-end"
+      type="date"
+      value="${beautyEndDate}"
+    >
+  </div>
+
+</div>
+
+        <div class="merchant-mobile-order-filter beauty-mobile-order-filter">
+
+  <button
+    type="button"
+    data-beauty-status="전체"
+  >
+    전체
+  </button>
+
+  <button
+    type="button"
+    data-beauty-status="준비중"
+  >
+    준비중
+  </button>
+
+  <button
+    type="button"
+    data-beauty-status="완료"
+  >
+    완료
+  </button>
+
+</div>
+
+        <div
+          id="beauty-mobile-order-summary"
+          class="merchant-mobile-order-summary"
+        >
+          주문을 불러오는 중입니다.
+        </div>
+
+
+        <div
+          id="beauty-mobile-order-list"
+          class="merchant-mobile-order-list"
+        ></div>
+
+        <div
+  id="beauty-mobile-order-pagination"
+  class="merchant-mobile-order-pagination"
+></div>
+
+      </main>
+
+    </div>
+  `
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-order-home'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/home'
+
+      }
+    )
+
+    const moveBeautyOrderDate = (
+      amount: number
+    ) => {
+  
+      const start =
+        new Date(
+          beautyStartDate +
+          'T00:00:00+09:00'
+        )
+  
+      const end =
+        new Date(
+          beautyEndDate +
+          'T00:00:00+09:00'
+        )
+  
+      start.setDate(
+        start.getDate() + amount
+      )
+  
+      end.setDate(
+        end.getDate() + amount
+      )
+  
+      location.href =
+        '/merchant-app/beauty/orders?start=' +
+        getBeautyKoreaDate(start) +
+        '&end=' +
+        getBeautyKoreaDate(end)
+    }
+  
+  
+    document
+      .querySelector(
+        '#beauty-mobile-order-date-prev'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          moveBeautyOrderDate(-1)
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '#beauty-mobile-order-date-today'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          location.href =
+            '/merchant-app/beauty/orders?start=' +
+            beautyToday +
+            '&end=' +
+            beautyToday
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '#beauty-mobile-order-date-next'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          moveBeautyOrderDate(1)
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '#beauty-mobile-order-date-month'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          const monthStart =
+            beautyToday.slice(
+              0,
+              7
+            ) +
+            '-01'
+  
+          location.href =
+            '/merchant-app/beauty/orders?start=' +
+            monthStart +
+            '&end=' +
+            beautyToday
+  
+        }
+      )
+  
+  
+    document
+      .querySelector(
+        '#beauty-mobile-order-date-search'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+  
+          const start =
+            document.querySelector<HTMLInputElement>(
+              '#beauty-mobile-order-start'
+            )?.value || ''
+  
+          const end =
+            document.querySelector<HTMLInputElement>(
+              '#beauty-mobile-order-end'
+            )?.value || ''
+  
+  
+          if (
+            !start ||
+            !end
+          ) {
+            return
+          }
+  
+  
+          if (
+            start > end
+          ) {
+  
+            alert(
+              '시작일이 종료일보다 늦을 수 없습니다.'
+            )
+  
+            return
+          }
+  
+  
+          location.href =
+            '/merchant-app/beauty/orders?start=' +
+            start +
+            '&end=' +
+            end
+  
+        }
+      )
+
+  const {
+    data,
+    error
+  } =
+  await supabase
+  .from('orders')
+  .select('*')
+  .eq(
+    'merchant_id',
+    merchantId
+  )
+  .gte(
+    'created_at',
+    beautyStartIso
+  )
+  .lte(
+    'created_at',
+    beautyEndIso
+  )
+  .order(
+    'created_at',
+    {
+      ascending: false
+    }
+  )
+
+
+  const summary =
+    document.querySelector<HTMLDivElement>(
+      '#beauty-mobile-order-summary'
+    )
+
+
+  const orderList =
+    document.querySelector<HTMLDivElement>(
+      '#beauty-mobile-order-list'
+    )
+
+
+  if (
+    !summary ||
+    !orderList
+  ) {
+    return
+  }
+
+
+  if (error) {
+
+    summary.textContent =
+      '주문 조회 실패'
+
+    orderList.innerHTML = `
+      <div class="merchant-mobile-order-empty">
+        ${error.message}
+      </div>
+    `
+
+    return
+  }
+
+
+  const orders =
+    data || []
+
+
+  summary.innerHTML = `
+    주문수 :
+    <strong>
+      ${orders.length}건
+    </strong>
+  `
+
+
+  if (
+    orders.length === 0
+  ) {
+
+    orderList.innerHTML = `
+      <div class="merchant-mobile-order-empty">
+        예약 주문내역이 없습니다.
+      </div>
+    `
+
+    return
+  }
+
+
+  orderList.innerHTML =
+    orders
+      .map(
+        (
+          order: any,
+          index: number
+        ) => {
+
+          const orderNumber =
+            order.order_no
+              ?.split('-')[1] ||
+            order.order_no ||
+            index + 1
+
+
+          const reservationDates =
+            Array.isArray(
+              order.items
+            )
+              ? Array.from(
+                  new Set(
+                    order.items.map(
+                      (item: any) =>
+                        item.reservation_date ||
+                        order.reservation_date ||
+                        '-'
+                    )
+                  )
+                ).join('<br>')
+              : (
+                  order.reservation_date ||
+                  '-'
+                )
+
+
+          const reservationTimes =
+            Array.isArray(
+              order.items
+            )
+              ? order.items
+                  .map(
+                    (item: any) =>
+                      item.reservation_time ||
+                      order.reservation_time ||
+                      '-'
+                  )
+                  .join('<br>')
+              : (
+                  order.reservation_time ||
+                  '-'
+                )
+
+
+          const beautyItems =
+            Array.isArray(
+              order.items
+            )
+              ? order.items
+                  .map(
+                    (item: any) => {
+
+                      const staffName =
+                        item.beauty_staff_name ||
+                        (
+                          item.beauty_staff_id ||
+                          order.beauty_staff_id
+                            ? '직원ID ' +
+                              (
+                                item.beauty_staff_id ||
+                                order.beauty_staff_id
+                              )
+                            : '-'
+                        )
+
+
+                      return (
+                        (
+                          item.name ||
+                          item.product_name ||
+                          '-'
+                        ) +
+                        ' / ' +
+                        staffName +
+                        ' x ' +
+                        Number(
+                          item.quantity || 1
+                        )
+                      )
+
+                    }
+                  )
+                  .join('<br>')
+              : '-'
+
+
+          const statusText =
+            order.cancel_status ===
+              '취소요청'
+              ? '취소요청'
+              : order.order_status ===
+                  '취소완료'
+                ? '취소완료'
+                : order.order_status ===
+                    '완료'
+                  ? '완료'
+                  : '접수'
+
+
+          return `
+            <div
+              class="merchant-mobile-order-card beauty-mobile-order-card"
+              data-status="${order.order_status || '접수'}"
+            >
+
+              <div class="merchant-mobile-order-card-top">
+
+                <strong>
+                  ${orderNumber}번
+                </strong>
+
+                <span>
+                  ${Number(
+                    order.total_amount || 0
+                  ).toLocaleString()}원
+                </span>
+
+              </div>
+
+
+              <div class="beauty-mobile-order-row">
+
+                <span>
+                  예약자
+                </span>
+
+                <strong>
+                  ${order.customer_name || '-'}
+                </strong>
+
+              </div>
+
+
+              <div class="beauty-mobile-order-row">
+
+                <span>
+                  연락처
+                </span>
+
+                <strong>
+                  ${order.customer_phone || '-'}
+                </strong>
+
+              </div>
+
+
+              <div class="beauty-mobile-order-row">
+
+                <span>
+                  예약일
+                </span>
+
+                <strong>
+                  ${reservationDates}
+                </strong>
+
+              </div>
+
+
+              <div class="beauty-mobile-order-row">
+
+                <span>
+                  예약시간
+                </span>
+
+                <strong>
+                  ${reservationTimes}
+                </strong>
+
+              </div>
+
+
+              <div class="beauty-mobile-order-service">
+
+                <span>
+                  서비스 / 직원
+                </span>
+
+                <strong>
+                  ${beautyItems}
+                </strong>
+
+              </div>
+
+
+              <div class="merchant-mobile-order-bottom">
+
+                <span
+                  class="merchant-mobile-order-status"
+                  data-status="${statusText}"
+                >
+                  ${statusText}
+                </span>
+
+
+                ${
+                  order.order_status ===
+                  '완료'
+
+                    ? `
+                      <strong>
+                        완료
+                      </strong>
+                    `
+
+                    : `
+                      <button
+                        type="button"
+                        class="beauty-mobile-order-complete"
+                        data-id="${order.id}"
+                      >
+                        완료처리
+                      </button>
+                    `
+                }
+
+              </div>
+
+            </div>
+          `
+
+        }
+      )
+      .join('')
+
+
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '.beauty-mobile-order-complete'
+    )
+    .forEach(
+      (button) => {
+
+        button.addEventListener(
+          'click',
+          async () => {
+
+            const orderId =
+              Number(
+                button.dataset.id ||
+                0
+              )
+
+
+            if (!orderId) {
+              return
+            }
+
+
+            const {
+              error
+            } =
+              await supabase
+                .from('orders')
+                .update({
+                  order_status:
+                    '완료'
+                })
+                .eq(
+                  'id',
+                  orderId
+                )
+
+
+            if (error) {
+
+              alert(
+                '완료 처리 실패: ' +
+                error.message
+              )
+
+              return
+            }
+
+
+            void renderBeautyOrders()
+
+          }
+        )
+
+      }
+    )
+
+    let currentBeautyOrderFilter =
+    '전체'
+
+  let currentBeautyPage =
+    1
+
+  let currentBeautyPageSize =
+    10
+
+
+  const applyBeautyOrderView =
+    () => {
+
+      const cards =
+        Array.from(
+          document.querySelectorAll<HTMLElement>(
+            '.beauty-mobile-order-card'
+          )
+        )
+
+
+      const filteredCards =
+        cards.filter(
+          (card) => {
+
+            const status =
+              card.dataset.status ||
+              '접수'
+
+
+            if (
+              currentBeautyOrderFilter ===
+              '전체'
+            ) {
+              return true
+            }
+
+
+            if (
+              currentBeautyOrderFilter ===
+              '준비중'
+            ) {
+              return status !==
+                '완료'
+            }
+
+
+            return status ===
+              '완료'
+
+          }
+        )
+
+
+      const totalPages =
+        Math.max(
+          1,
+          Math.ceil(
+            filteredCards.length /
+            currentBeautyPageSize
+          )
+        )
+
+
+      currentBeautyPage =
+        Math.min(
+          currentBeautyPage,
+          totalPages
+        )
+
+
+      cards.forEach(
+        (card) => {
+
+          card.style.display =
+            'none'
+
+        }
+      )
+
+
+      const startIndex =
+        (
+          currentBeautyPage - 1
+        ) *
+        currentBeautyPageSize
+
+
+      filteredCards
+        .slice(
+          startIndex,
+          startIndex +
+            currentBeautyPageSize
+        )
+        .forEach(
+          (card) => {
+
+            card.style.display =
+              ''
+
+          }
+        )
+
+
+      const pagination =
+        document.querySelector<HTMLDivElement>(
+          '#beauty-mobile-order-pagination'
+        )
+
+
+      if (!pagination) {
+        return
+      }
+
+
+      pagination.innerHTML = `
+
+        <select
+          id="beauty-mobile-order-page-size"
+        >
+
+          <option value="10">
+            10개씩 보기
+          </option>
+
+          <option value="20">
+            20개씩 보기
+          </option>
+
+          <option value="30">
+            30개씩 보기
+          </option>
+
+        </select>
+
+
+        <div
+          class="merchant-mobile-order-page-buttons"
+        >
+
+          <button
+            id="beauty-mobile-order-prev"
+            type="button"
+            ${
+              currentBeautyPage <= 1
+                ? 'disabled'
+                : ''
+            }
+          >
+            이전
+          </button>
+
+          <strong>
+            ${currentBeautyPage} / ${totalPages}
+          </strong>
+
+          <button
+            id="beauty-mobile-order-next"
+            type="button"
+            ${
+              currentBeautyPage >= totalPages
+                ? 'disabled'
+                : ''
+            }
+          >
+            다음
+          </button>
+
+        </div>
+      `
+
+
+      const sizeSelect =
+        document.querySelector<HTMLSelectElement>(
+          '#beauty-mobile-order-page-size'
+        )
+
+
+      if (sizeSelect) {
+
+        sizeSelect.value =
+          String(
+            currentBeautyPageSize
+          )
+
+
+        sizeSelect.addEventListener(
+          'change',
+          () => {
+
+            currentBeautyPageSize =
+              Number(
+                sizeSelect.value
+              )
+
+            currentBeautyPage =
+              1
+
+            applyBeautyOrderView()
+
+          }
+        )
+
+      }
+
+
+      document
+        .querySelector(
+          '#beauty-mobile-order-prev'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            if (
+              currentBeautyPage <= 1
+            ) {
+              return
+            }
+
+            currentBeautyPage -= 1
+
+            applyBeautyOrderView()
+
+          }
+        )
+
+
+      document
+        .querySelector(
+          '#beauty-mobile-order-next'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            if (
+              currentBeautyPage >=
+              totalPages
+            ) {
+              return
+            }
+
+            currentBeautyPage += 1
+
+            applyBeautyOrderView()
+
+          }
+        )
+
+    }
+
+
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '[data-beauty-status]'
+    )
+    .forEach(
+      (button) => {
+
+        button.addEventListener(
+          'click',
+          () => {
+
+            currentBeautyOrderFilter =
+              button.dataset
+                .beautyStatus ||
+              '전체'
+
+            currentBeautyPage =
+              1
+
+
+            document
+              .querySelectorAll<HTMLButtonElement>(
+                '[data-beauty-status]'
+              )
+              .forEach(
+                (item) => {
+
+                  item.classList.remove(
+                    'active'
+                  )
+
+                }
+              )
+
+
+            button.classList.add(
+              'active'
+            )
+
+
+            applyBeautyOrderView()
+
+          }
+        )
+
+      }
+    )
+
+
+  document
+    .querySelector<HTMLButtonElement>(
+      '[data-beauty-status="전체"]'
+    )
+    ?.classList.add(
+      'active'
+    )
+
+
+  applyBeautyOrderView()
+}
+
+  /* =========================================
    모바일 상품관리
 ========================================= */
 
@@ -11620,6 +12727,12 @@ if (
   ) {
   
     void renderMerchantOrders()
+
+  } else if (
+    path === '/merchant-app/beauty/orders'
+  ) {
+
+    void renderBeautyOrders()
   
   } else if (
     path === '/merchant-app/products'
