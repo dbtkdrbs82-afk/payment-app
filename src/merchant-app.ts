@@ -4217,20 +4217,14 @@ async function renderBeautyOrders() {
     params.get('end') ||
     beautyToday
 
+    const beautyViewMode =
+    params.get('view') ||
+    'schedule'
 
-  const beautyStartIso =
-    new Date(
-      beautyStartDate +
-      'T00:00:00+09:00'
-    ).toISOString()
-
-
-  const beautyEndIso =
-    new Date(
-      beautyEndDate +
-      'T23:59:59.999+09:00'
-    ).toISOString()
-
+  const isBeautySalesView =
+    beautyViewMode ===
+    'sales'
+  
 
   app.innerHTML = `
     <div class="merchant-mobile-home">
@@ -4305,11 +4299,11 @@ async function renderBeautyOrders() {
   </button>
 
   <button
-    id="beauty-mobile-order-date-search"
-    type="button"
-  >
-    조회
-  </button>
+  id="beauty-mobile-order-excel"
+  type="button"
+>
+  엑셀 다운로드
+</button>
 
 </div>
 
@@ -4335,7 +4329,12 @@ async function renderBeautyOrders() {
       value="${beautyEndDate}"
     >
   </div>
-
+<button
+  id="beauty-mobile-order-date-search"
+  type="button"
+>
+  조회
+</button>
 </div>
 
         <div class="merchant-mobile-order-filter beauty-mobile-order-filter">
@@ -4370,6 +4369,33 @@ async function renderBeautyOrders() {
           주문을 불러오는 중입니다.
         </div>
 
+                <div class="beauty-mobile-order-view">
+
+          <button
+            id="beauty-mobile-schedule-view"
+            type="button"
+            class="${
+              !isBeautySalesView
+                ? 'active'
+                : ''
+            }"
+          >
+            예약 스케줄
+          </button>
+
+          <button
+            id="beauty-mobile-sales-view"
+            type="button"
+            class="${
+              isBeautySalesView
+                ? 'active'
+                : ''
+            }"
+          >
+            전체 매출
+          </button>
+
+        </div>
 
         <div
           id="beauty-mobile-order-list"
@@ -4401,6 +4427,63 @@ async function renderBeautyOrders() {
       }
     )
 
+    document
+    .querySelector(
+      '#beauty-mobile-schedule-view'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const nextParams =
+          new URLSearchParams(
+            window.location.search
+          )
+
+        nextParams.delete(
+          'view'
+        )
+
+        const queryText =
+          nextParams.toString()
+
+        location.href =
+          '/merchant-app/beauty/orders' +
+          (
+            queryText
+              ? '?' + queryText
+              : ''
+          )
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-sales-view'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const nextParams =
+          new URLSearchParams(
+            window.location.search
+          )
+
+        nextParams.set(
+          'view',
+          'sales'
+        )
+
+        location.href =
+          '/merchant-app/beauty/orders?' +
+          nextParams.toString()
+
+      }
+    )
+
     const moveBeautyOrderDate = (
       amount: number
     ) => {
@@ -4425,11 +4508,24 @@ async function renderBeautyOrders() {
         end.getDate() + amount
       )
   
-      location.href =
-        '/merchant-app/beauty/orders?start=' +
-        getBeautyKoreaDate(start) +
-        '&end=' +
-        getBeautyKoreaDate(end)
+      const nextParams =
+  new URLSearchParams(
+    window.location.search
+  )
+
+nextParams.set(
+  'start',
+  getBeautyKoreaDate(start)
+)
+
+nextParams.set(
+  'end',
+  getBeautyKoreaDate(end)
+)
+
+location.href =
+  '/merchant-app/beauty/orders?' +
+  nextParams.toString()
     }
   
   
@@ -4455,11 +4551,24 @@ async function renderBeautyOrders() {
         'click',
         () => {
   
-          location.href =
-            '/merchant-app/beauty/orders?start=' +
-            beautyToday +
-            '&end=' +
-            beautyToday
+          const nextParams =
+  new URLSearchParams(
+    window.location.search
+  )
+
+nextParams.set(
+  'start',
+  beautyToday
+)
+
+nextParams.set(
+  'end',
+  beautyToday
+)
+
+location.href =
+  '/merchant-app/beauty/orders?' +
+  nextParams.toString()
   
         }
       )
@@ -4494,11 +4603,24 @@ async function renderBeautyOrders() {
             ) +
             '-01'
   
-          location.href =
-            '/merchant-app/beauty/orders?start=' +
-            monthStart +
-            '&end=' +
+            const nextParams =
+            new URLSearchParams(
+              window.location.search
+            )
+          
+          nextParams.set(
+            'start',
+            monthStart
+          )
+          
+          nextParams.set(
+            'end',
             beautyToday
+          )
+          
+          location.href =
+            '/merchant-app/beauty/orders?' +
+            nextParams.toString()
   
         }
       )
@@ -4543,40 +4665,70 @@ async function renderBeautyOrders() {
           }
   
   
-          location.href =
-            '/merchant-app/beauty/orders?start=' +
-            start +
-            '&end=' +
-            end
+          const nextParams =
+          new URLSearchParams(
+            window.location.search
+          )
+        
+        nextParams.set(
+          'start',
+          start
+        )
+        
+        nextParams.set(
+          'end',
+          end
+        )
+        
+        location.href =
+          '/merchant-app/beauty/orders?' +
+          nextParams.toString()
   
         }
       )
-
-  const {
-    data,
-    error
-  } =
-  await supabase
-  .from('orders')
-  .select('*')
-  .eq(
-    'merchant_id',
-    merchantId
-  )
-  .gte(
-    'created_at',
-    beautyStartIso
-  )
-  .lte(
-    'created_at',
-    beautyEndIso
-  )
-  .order(
-    'created_at',
-    {
-      ascending: false
+  
+  
+    let beautyOrderQuery =
+      supabase
+        .from('orders')
+        .select('*')
+        .eq(
+          'merchant_id',
+          merchantId
+        )
+  
+  
+    if (
+      isBeautySalesView
+    ) {
+  
+      beautyOrderQuery =
+        beautyOrderQuery
+          .gte(
+            'created_at',
+            beautyStartDate +
+            'T00:00:00'
+          )
+          .lte(
+            'created_at',
+            beautyEndDate +
+            'T23:59:59'
+          )
+  
     }
-  )
+  
+  
+    const {
+      data,
+      error
+    } =
+      await beautyOrderQuery
+        .order(
+          'created_at',
+          {
+            ascending: false
+          }
+        )
 
 
   const summary =
@@ -4614,16 +4766,588 @@ async function renderBeautyOrders() {
   }
 
 
-  const orders =
-    data || []
+  const beautySearchStartDate =
+  beautyStartDate
+
+  const beautySearchEndDate =
+  beautyEndDate
 
 
-  summary.innerHTML = `
-    주문수 :
-    <strong>
-      ${orders.length}건
-    </strong>
-  `
+const orders =
+  isBeautySalesView
+    ? (data || [])
+    : (data || []).filter(
+        (order: any) => {
+
+          const beautyItemDates =
+            Array.isArray(
+              order.items
+            )
+              ? order.items
+                  .map(
+                    (item: any) =>
+                      item.reservation_date ||
+                      ''
+                  )
+                  .filter(
+                    (date: string) =>
+                      !!date
+                  )
+              : []
+
+          const checkDates =
+            beautyItemDates.length > 0
+              ? beautyItemDates
+              : [
+                  order.reservation_date ||
+                  ''
+                ]
+
+          return checkDates.some(
+            (date: string) =>
+              date >=
+                beautySearchStartDate &&
+              date <=
+                beautySearchEndDate
+          )
+
+        }
+      )
+
+      const receivedOrders =
+      orders.filter(
+        (order: any) =>
+          order.order_status !==
+          '완료'
+      )
+
+const completedOrders =
+  orders.filter(
+    (order: any) =>
+      order.order_status ===
+      '완료'
+  )
+
+const totalSales =
+  orders.reduce(
+    (
+      sum: number,
+      order: any
+    ) => {
+
+      return (
+        sum +
+        Number(
+          order.total_amount ||
+          0
+        )
+      )
+
+    },
+    0
+  )
+
+const averageAmount =
+  orders.length > 0
+    ? Math.floor(
+        totalSales /
+        orders.length
+      )
+    : 0
+
+    const {
+      data: settlementMerchant,
+      error: settlementMerchantError
+    } =
+      await supabase
+        .from('merchants')
+        .select('settlement_cycle')
+        .eq(
+          'id',
+          merchantId
+        )
+        .single()
+  
+  
+    if (settlementMerchantError) {
+  
+      console.error(
+        '정산주기 조회 실패:',
+        settlementMerchantError
+      )
+  
+    }
+  
+  
+    const settlementCycle =
+      String(
+        settlementMerchant
+          ?.settlement_cycle ||
+        '1일'
+      )
+  
+  
+    const {
+      data: settlementHolidayData,
+      error: settlementHolidayError
+    } =
+      await supabase
+        .from('holidays')
+        .select('holiday_date')
+  
+  
+    if (settlementHolidayError) {
+  
+      console.error(
+        '공휴일 조회 실패:',
+        settlementHolidayError
+      )
+  
+    }
+  
+  
+    const settlementHolidaySet =
+      new Set(
+        (
+          settlementHolidayData ||
+          []
+        ).map(
+          (holiday: any) =>
+            String(
+              holiday.holiday_date
+            )
+        )
+      )
+  
+  
+    const formatSettlementDate =
+      (date: Date) => {
+  
+        const year =
+          date.getFullYear()
+  
+        const month =
+          String(
+            date.getMonth() + 1
+          ).padStart(
+            2,
+            '0'
+          )
+  
+        const day =
+          String(
+            date.getDate()
+          ).padStart(
+            2,
+            '0'
+          )
+  
+        return (
+          year +
+          '-' +
+          month +
+          '-' +
+          day
+        )
+  
+      }
+  
+  
+    const getSettlementPayoutDate =
+      (
+        createdAt: string
+      ) => {
+  
+        const payoutDate =
+          new Date(
+            createdAt
+          )
+  
+        const cycleNumberMatch =
+          settlementCycle.match(
+            /\d+/
+          )
+  
+        const cycleDays =
+          cycleNumberMatch
+            ? Number(
+                cycleNumberMatch[0]
+              )
+            : 1
+  
+  
+        if (
+          cycleDays === 0
+        ) {
+  
+          while (true) {
+  
+            const dateText =
+              formatSettlementDate(
+                payoutDate
+              )
+  
+            const dayOfWeek =
+              payoutDate.getDay()
+  
+            const isWeekend =
+              dayOfWeek === 0 ||
+              dayOfWeek === 6
+  
+            const isHoliday =
+              settlementHolidaySet.has(
+                dateText
+              )
+  
+            if (
+              !isWeekend &&
+              !isHoliday
+            ) {
+              return dateText
+            }
+  
+            payoutDate.setDate(
+              payoutDate.getDate() +
+              1
+            )
+  
+          }
+  
+        }
+  
+  
+        let addedBusinessDays =
+          0
+  
+  
+        while (
+          addedBusinessDays <
+          cycleDays
+        ) {
+  
+          payoutDate.setDate(
+            payoutDate.getDate() +
+            1
+          )
+  
+          const dateText =
+            formatSettlementDate(
+              payoutDate
+            )
+  
+          const dayOfWeek =
+            payoutDate.getDay()
+  
+          const isWeekend =
+            dayOfWeek === 0 ||
+            dayOfWeek === 6
+  
+          const isHoliday =
+            settlementHolidaySet.has(
+              dateText
+            )
+  
+          if (
+            isWeekend ||
+            isHoliday
+          ) {
+            continue
+          }
+  
+          addedBusinessDays +=
+            1
+  
+        }
+  
+  
+        return formatSettlementDate(
+          payoutDate
+        )
+  
+      }
+
+      const {
+        data: settlementPayments,
+        error: settlementError
+      } =
+        await supabase
+          .from('payments')
+          .select(`
+            settlement_amount,
+            payout_status,
+            created_at,
+            status
+          `)
+          .eq(
+            'merchant_id',
+            merchantId
+          )
+    
+    
+      if (settlementError) {
+    
+        console.error(
+          '정산예정금액 조회 실패:',
+          settlementError
+        )
+    
+      }
+    
+    
+      const settlementTargetPayments =
+        (
+          settlementPayments ||
+          []
+        ).filter(
+          (payment: any) => {
+    
+            if (
+              payment.status !==
+              'paid'
+            ) {
+              return false
+            }
+    
+            if (
+              !payment.created_at
+            ) {
+              return false
+            }
+    
+            const payoutDate =
+              getSettlementPayoutDate(
+                payment.created_at
+              )
+    
+              if (
+                beautyStartDate &&
+                beautyEndDate
+              ) {
+                return (
+                  payoutDate >=
+                    beautyStartDate &&
+                  payoutDate <=
+                    beautyEndDate
+                )
+              }
+              
+              return true
+    
+          }
+        )
+    
+    
+      const settlementAmount =
+        settlementTargetPayments.reduce(
+          (
+            sum: number,
+            payment: any
+          ) => {
+    
+            return (
+              sum +
+              Number(
+                payment
+                  .settlement_amount ||
+                0
+              )
+            )
+    
+          },
+          0
+        )
+
+        const settlementComplete =
+        settlementTargetPayments.length > 0 &&
+        settlementTargetPayments.every(
+          (payment: any) =>
+            payment.payout_status ===
+            '출금완료'
+        )
+    
+    
+      const settlementPaymentDates =
+        settlementTargetPayments
+          .map(
+            (payment: any) => {
+    
+              if (
+                !payment.created_at
+              ) {
+                return ''
+              }
+    
+              return formatSettlementDate(
+                new Date(
+                  payment.created_at
+                )
+              )
+    
+            }
+          )
+          .filter(Boolean)
+          .sort()
+    
+    
+      let settlementPaymentDateLabel =
+        ''
+    
+    
+      if (
+        settlementPaymentDates.length >
+        0
+      ) {
+    
+        const firstDate =
+          settlementPaymentDates[0]
+    
+        const lastDate =
+          settlementPaymentDates[
+            settlementPaymentDates.length -
+            1
+          ]
+    
+    
+        const formatShortSettlementDate =
+          (
+            dateText: string
+          ) => {
+    
+            const [
+              year,
+              month,
+              day
+            ] =
+              dateText.split('-')
+    
+            return (
+              year.slice(-2) +
+              '.' +
+              month +
+              '.' +
+              day
+            )
+    
+          }
+    
+    
+        settlementPaymentDateLabel =
+          firstDate === lastDate
+            ? formatShortSettlementDate(
+                firstDate
+              )
+            : formatShortSettlementDate(
+                firstDate
+              ) +
+              '~' +
+              formatShortSettlementDate(
+                lastDate
+              )
+    
+      }
+
+      summary.innerHTML = `
+
+      <div class="beauty-mobile-order-summary-grid">
+  
+        <div>
+          <strong>
+            주문수
+          </strong>
+  
+          <span>
+            ${orders.length}건
+          </span>
+        </div>
+  
+  
+        <div>
+          <strong>
+            접수
+          </strong>
+  
+          <span>
+            ${receivedOrders.length}건
+          </span>
+        </div>
+  
+  
+        <div>
+          <strong>
+            완료
+          </strong>
+  
+          <span>
+            ${completedOrders.length}건
+          </span>
+        </div>
+  
+  
+        <div>
+          <strong>
+            매출합계
+          </strong>
+  
+          <span>
+            ${totalSales.toLocaleString()}원
+          </span>
+        </div>
+  
+  
+        <div>
+          <strong>
+            평균객단가
+          </strong>
+  
+          <span>
+            ${averageAmount.toLocaleString()}원
+          </span>
+        </div>
+  
+  
+        <div>
+          <strong>
+            정산예정금액
+          </strong>
+  
+          <span>
+            ${settlementAmount.toLocaleString()}원
+          </span>
+  
+          <small
+            class="${
+              settlementComplete
+                ? 'beauty-mobile-settlement-complete'
+                : 'beauty-mobile-settlement-wait'
+            }"
+          >
+            ${
+              settlementComplete
+                ? '완료'
+                : '대기'
+            }
+          </small>
+  
+          ${
+            settlementTargetPayments.length > 0
+              ? `
+                <em>
+                  정산대상 ${settlementTargetPayments.length.toLocaleString()}건${
+                    settlementPaymentDateLabel
+                      ? ' · ' +
+                        settlementPaymentDateLabel +
+                        ' 결제건'
+                      : ''
+                  }
+                </em>
+              `
+              : ''
+          }
+  
+        </div>
+  
+      </div>
+    `
 
 
   if (
@@ -5064,6 +5788,13 @@ async function renderBeautyOrders() {
           <option value="30">
             30개씩 보기
           </option>
+          <option value="50">
+  50개씩 보기
+</option>
+
+<option value="100">
+  100개씩 보기
+</option>
 
         </select>
 
