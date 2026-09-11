@@ -2665,11 +2665,8 @@
 
 .beauty-mobile-staff-week-grid {
   display: grid;
-  grid-template-columns:
-    92px
-    repeat(7, 64px);
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 0;
   gap: 4px;
 }
 
