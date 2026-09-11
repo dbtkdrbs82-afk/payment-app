@@ -6682,10 +6682,10 @@ const isBeautyMobileStaffDayOff = (
             }
 
             location.href =
-              '/merchant-beauty-schedule?staff_id=' +
-              encodeURIComponent(
-                staffId
-              )
+  '/merchant-app/beauty/schedule?staff_id=' +
+  encodeURIComponent(
+    staffId
+  )
 
           }
         )
@@ -7408,6 +7408,1062 @@ const isBeautyMobileStaffDayOff = (
 
     }
   )
+
+}
+
+/* =========================================
+   뷰티 모바일 직원 스케줄관리
+========================================= */
+
+async function renderBeautyScheduleMobile() {
+
+  const merchantIdText =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+  if (!merchantIdText) {
+
+    location.replace(
+      '/merchant-app'
+    )
+
+    return
+  }
+
+
+  const merchantId =
+    Number(
+      merchantIdText
+    )
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '가맹점'
+
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    )
+
+
+  const staffId =
+    Number(
+      params.get(
+        'staff_id'
+      ) || 0
+    )
+
+
+  if (!staffId) {
+
+    location.href =
+      '/merchant-app/beauty/staff'
+
+    return
+  }
+
+
+  const getBeautyMobileDate =
+    (
+      date: Date
+    ) => {
+
+      return new Intl.DateTimeFormat(
+        'en-CA',
+        {
+          timeZone:
+            'Asia/Seoul',
+
+          year:
+            'numeric',
+
+          month:
+            '2-digit',
+
+          day:
+            '2-digit'
+        }
+      ).format(
+        date
+      )
+
+    }
+
+
+  const today =
+    getBeautyMobileDate(
+      new Date()
+    )
+
+
+  const scheduleDate =
+    params.get(
+      'date'
+    ) ||
+    today
+
+
+  const {
+    data: staff,
+    error: staffError
+  } =
+    await supabase
+      .from(
+        'beauty_staff'
+      )
+      .select(
+        'id, staff_name, position, photo_url'
+      )
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .eq(
+        'id',
+        staffId
+      )
+      .single()
+
+
+  if (
+    staffError ||
+    !staff
+  ) {
+
+    alert(
+      '직원 정보를 불러오지 못했습니다.'
+    )
+
+    location.href =
+      '/merchant-app/beauty/staff'
+
+    return
+  }
+
+
+  const {
+    data: scheduleRows,
+    error: scheduleError
+  } =
+    await supabase
+      .from(
+        'beauty_staff_schedule'
+      )
+      .select(`
+        schedule_time,
+        status,
+        order_id
+      `)
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .eq(
+        'staff_id',
+        staffId
+      )
+      .eq(
+        'schedule_date',
+        scheduleDate
+      )
+
+
+  if (scheduleError) {
+
+    alert(
+      '스케줄 조회 실패: ' +
+      scheduleError.message
+    )
+
+    return
+  }
+
+
+  const scheduleMap =
+    new Map<
+      string,
+      any
+    >()
+
+
+  ;(
+    scheduleRows || []
+  ).forEach(
+    (
+      row: any
+    ) => {
+
+      const time =
+        String(
+          row.schedule_time ||
+          ''
+        ).slice(
+          0,
+          5
+        )
+
+      if (time) {
+
+        scheduleMap.set(
+          time,
+          row
+        )
+
+      }
+
+    }
+  )
+
+
+  const times: string[] =
+    []
+
+
+  for (
+    let minutes = 0;
+    minutes < 24 * 60;
+    minutes += 30
+  ) {
+
+    const hour =
+      String(
+        Math.floor(
+          minutes / 60
+        )
+      ).padStart(
+        2,
+        '0'
+      )
+
+
+    const minute =
+      String(
+        minutes % 60
+      ).padStart(
+        2,
+        '0'
+      )
+
+
+    times.push(
+      hour +
+      ':' +
+      minute
+    )
+
+  }
+
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+
+        <button
+          id="beauty-mobile-schedule-back"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          이전
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <div class="merchant-mobile-page-title">
+
+          <h1>
+            스케줄관리
+          </h1>
+
+          <span>
+            ${staff.staff_name}
+          </span>
+
+        </div>
+
+
+        <div
+          style="
+            background:#ffffff;
+            border:1px solid #e0e6ef;
+            border-radius:16px;
+            padding:16px;
+            margin-bottom:14px;
+          "
+        >
+
+          <strong
+            style="
+              display:block;
+              font-size:18px;
+              margin-bottom:4px;
+            "
+          >
+            ${staff.staff_name}
+          </strong>
+
+          <span
+            style="
+              color:#7a8595;
+              font-size:13px;
+            "
+          >
+            ${staff.position || '-'}
+          </span>
+
+        </div>
+
+
+        <div
+          class="merchant-mobile-date-nav"
+        >
+
+          <button
+            id="beauty-mobile-schedule-prev"
+            type="button"
+          >
+            이전
+          </button>
+
+          <button
+            id="beauty-mobile-schedule-today"
+            type="button"
+          >
+            오늘
+          </button>
+
+          <button
+            id="beauty-mobile-schedule-next"
+            type="button"
+          >
+            다음
+          </button>
+
+          <button
+            id="beauty-mobile-schedule-reset"
+            type="button"
+          >
+            리셋
+          </button>
+
+        </div>
+
+
+        <input
+          id="beauty-mobile-schedule-date"
+          type="date"
+          value="${scheduleDate}"
+          style="
+            width:100%;
+            height:44px;
+            margin-top:10px;
+            padding:0 12px;
+            border:1px solid #d7e0eb;
+            border-radius:10px;
+            background:#ffffff;
+            box-sizing:border-box;
+          "
+        >
+
+
+        <div
+          style="
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:8px;
+            margin:14px 0;
+          "
+        >
+
+          <button
+            id="beauty-mobile-schedule-all-on"
+            type="button"
+            class="merchant-mobile-btn-primary"
+          >
+            전체 ON
+          </button>
+
+          <button
+            id="beauty-mobile-schedule-all-off"
+            type="button"
+            class="merchant-mobile-btn-secondary"
+          >
+            전체 OFF
+          </button>
+
+        </div>
+
+
+        <div
+          style="
+            display:flex;
+            flex-direction:column;
+            gap:7px;
+            padding-bottom:30px;
+          "
+        >
+
+          ${
+            times
+              .map(
+                (
+                  time
+                ) => {
+
+                  const row =
+                    scheduleMap.get(
+                      time
+                    )
+
+
+                  const status =
+                    String(
+                      row?.status ||
+                      '예약가능'
+                    )
+
+
+                  const orderLinked =
+                    !!row?.order_id
+
+
+                  const statusColor =
+                    status ===
+                    '예약가능'
+                      ? '#15803d'
+                      : status ===
+                          '예약불가'
+                        ? '#dc2626'
+                        : status ===
+                            '예약완료'
+                          ? '#2563eb'
+                          : '#ca8a04'
+
+
+                  return `
+                    <div
+                      style="
+                        display:grid;
+                        grid-template-columns:70px 1fr;
+                        align-items:center;
+                        gap:10px;
+                        min-height:54px;
+                        padding:7px 10px;
+                        background:#ffffff;
+                        border:1px solid #e0e6ef;
+                        border-radius:11px;
+                      "
+                    >
+
+                      <strong
+                        style="
+                          text-align:center;
+                          font-size:14px;
+                        "
+                      >
+                        ${time}
+                      </strong>
+
+
+                      <select
+                        class="beauty-mobile-schedule-status"
+                        data-time="${time}"
+                        data-order-linked="${
+                          orderLinked
+                            ? 'true'
+                            : 'false'
+                        }"
+                        style="
+                          width:100%;
+                          height:40px;
+                          padding:0 10px;
+                          border:1px solid #d7e0eb;
+                          border-radius:9px;
+                          background:#ffffff;
+                          color:${statusColor};
+                          font-weight:800;
+                        "
+                      >
+
+                        <option
+                          value="예약가능"
+                          ${
+                            status ===
+                            '예약가능'
+                              ? 'selected'
+                              : ''
+                          }
+                        >
+                          예약가능
+                        </option>
+
+                        <option
+                          value="예약불가"
+                          ${
+                            status ===
+                            '예약불가'
+                              ? 'selected'
+                              : ''
+                          }
+                        >
+                          예약불가
+                        </option>
+
+                        <option
+                          value="휴게"
+                          ${
+                            status ===
+                            '휴게'
+                              ? 'selected'
+                              : ''
+                          }
+                        >
+                          휴게
+                        </option>
+
+                        <option
+                          value="예약완료"
+                          ${
+                            status ===
+                            '예약완료'
+                              ? 'selected'
+                              : ''
+                          }
+                        >
+                          예약완료
+                        </option>
+
+                      </select>
+
+                    </div>
+                  `
+
+                }
+              )
+              .join('')
+          }
+
+        </div>
+
+      </main>
+
+    </div>
+  `
+
+
+  const moveScheduleDate =
+    (
+      amount: number
+    ) => {
+
+      const date =
+        new Date(
+          scheduleDate +
+          'T00:00:00+09:00'
+        )
+
+      date.setDate(
+        date.getDate() +
+        amount
+      )
+
+      const nextDate =
+        getBeautyMobileDate(
+          date
+        )
+
+      location.href =
+        '/merchant-app/beauty/schedule' +
+        '?staff_id=' +
+        encodeURIComponent(
+          String(
+            staffId
+          )
+        ) +
+        '&date=' +
+        encodeURIComponent(
+          nextDate
+        )
+
+    }
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-schedule-back'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/beauty/staff'
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-schedule-prev'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        moveScheduleDate(
+          -1
+        )
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-schedule-next'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        moveScheduleDate(
+          1
+        )
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-schedule-today'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/beauty/schedule' +
+          '?staff_id=' +
+          encodeURIComponent(
+            String(
+              staffId
+            )
+          ) +
+          '&date=' +
+          encodeURIComponent(
+            today
+          )
+
+      }
+    )
+
+
+  document
+    .querySelector<HTMLInputElement>(
+      '#beauty-mobile-schedule-date'
+    )
+    ?.addEventListener(
+      'change',
+      (
+        event
+      ) => {
+
+        const date =
+          (
+            event.target as HTMLInputElement
+          ).value
+
+        if (!date) {
+          return
+        }
+
+        location.href =
+          '/merchant-app/beauty/schedule' +
+          '?staff_id=' +
+          encodeURIComponent(
+            String(
+              staffId
+            )
+          ) +
+          '&date=' +
+          encodeURIComponent(
+            date
+          )
+
+      }
+    )
+
+
+  const getStatusColor =
+    (
+      status: string
+    ) => {
+
+      if (
+        status ===
+        '예약가능'
+      ) {
+        return '#15803d'
+      }
+
+      if (
+        status ===
+        '예약불가'
+      ) {
+        return '#dc2626'
+      }
+
+      if (
+        status ===
+        '예약완료'
+      ) {
+        return '#2563eb'
+      }
+
+      return '#ca8a04'
+
+    }
+
+
+  document
+    .querySelectorAll<HTMLSelectElement>(
+      '.beauty-mobile-schedule-status'
+    )
+    .forEach(
+      (
+        select
+      ) => {
+
+        select.addEventListener(
+          'change',
+          async () => {
+
+            const time =
+              select.dataset.time ||
+              ''
+
+            const status =
+              select.value
+
+
+            if (!time) {
+              return
+            }
+
+
+            select.disabled =
+              true
+
+
+            const {
+              error
+            } =
+              await supabase
+                .from(
+                  'beauty_staff_schedule'
+                )
+                .upsert(
+                  {
+                    merchant_id:
+                      merchantId,
+
+                    staff_id:
+                      staffId,
+
+                    schedule_date:
+                      scheduleDate,
+
+                    schedule_time:
+                      time,
+
+                    status:
+                      status
+                  },
+                  {
+                    onConflict:
+                      'staff_id,schedule_date,schedule_time'
+                  }
+                )
+
+
+            if (error) {
+
+              alert(
+                '스케줄 저장 실패: ' +
+                error.message
+              )
+
+              select.disabled =
+                false
+
+              return
+            }
+
+
+            select.style.color =
+              getStatusColor(
+                status
+              )
+
+
+            select.disabled =
+              false
+
+          }
+        )
+
+      }
+    )
+
+
+  const setAllSchedule =
+    async (
+      status:
+        '예약가능' |
+        '예약불가'
+    ) => {
+
+      const selects =
+        Array.from(
+          document.querySelectorAll<HTMLSelectElement>(
+            '.beauty-mobile-schedule-status'
+          )
+        )
+
+
+      const editableSelects =
+        selects.filter(
+          (
+            select
+          ) =>
+            select.dataset
+              .orderLinked !==
+            'true'
+        )
+
+
+      if (
+        editableSelects.length ===
+        0
+      ) {
+        return
+      }
+
+
+      const rows =
+        editableSelects.map(
+          (
+            select
+          ) => ({
+
+            merchant_id:
+              merchantId,
+
+            staff_id:
+              staffId,
+
+            schedule_date:
+              scheduleDate,
+
+            schedule_time:
+              select.dataset.time,
+
+            status:
+              status
+
+          })
+        )
+
+
+      const {
+        error
+      } =
+        await supabase
+          .from(
+            'beauty_staff_schedule'
+          )
+          .upsert(
+            rows,
+            {
+              onConflict:
+                'staff_id,schedule_date,schedule_time'
+            }
+          )
+
+
+      if (error) {
+
+        alert(
+          '전체 스케줄 저장 실패: ' +
+          error.message
+        )
+
+        return
+      }
+
+
+      editableSelects.forEach(
+        (
+          select
+        ) => {
+
+          select.value =
+            status
+
+          select.style.color =
+            getStatusColor(
+              status
+            )
+
+        }
+      )
+
+    }
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-schedule-all-on'
+    )
+    ?.addEventListener(
+      'click',
+      async () => {
+
+        await setAllSchedule(
+          '예약가능'
+        )
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-schedule-all-off'
+    )
+    ?.addEventListener(
+      'click',
+      async () => {
+
+        await setAllSchedule(
+          '예약불가'
+        )
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-schedule-reset'
+    )
+    ?.addEventListener(
+      'click',
+      async () => {
+
+        if (
+          !confirm(
+            '예약완료 시간을 제외하고 스케줄을 초기화할까요?'
+          )
+        ) {
+          return
+        }
+
+
+        const {
+          error
+        } =
+          await supabase
+            .from(
+              'beauty_staff_schedule'
+            )
+            .delete()
+            .eq(
+              'merchant_id',
+              merchantId
+            )
+            .eq(
+              'staff_id',
+              staffId
+            )
+            .eq(
+              'schedule_date',
+              scheduleDate
+            )
+            .is(
+              'order_id',
+              null
+            )
+
+
+        if (error) {
+
+          alert(
+            '스케줄 초기화 실패: ' +
+            error.message
+          )
+
+          return
+        }
+
+
+        document
+          .querySelectorAll<HTMLSelectElement>(
+            '.beauty-mobile-schedule-status'
+          )
+          .forEach(
+            (
+              select
+            ) => {
+
+              if (
+                select.dataset
+                  .orderLinked ===
+                'true'
+              ) {
+                return
+              }
+
+              select.value =
+                '예약가능'
+
+              select.style.color =
+                '#15803d'
+
+            }
+          )
+
+      }
+    )
 
 }
 
@@ -14904,8 +15960,13 @@ if (
   ) {
   
     void renderBeautyStaffMobile()
+
+  } else if (
+    path === '/merchant-app/beauty/schedule'
+  ) {
   
-  
+    void renderBeautyScheduleMobile()
+    
   } else if (
     path === '/merchant-app/products'
   ) {
