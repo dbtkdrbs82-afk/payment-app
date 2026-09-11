@@ -2838,3 +2838,61 @@
   background: #eef1f5;
   color: #374151;
 }
+.beauty-mobile-staff-week-scroll {
+  overflow-x: visible;
+}
+
+.beauty-mobile-staff-week-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.beauty-mobile-staff-day {
+  padding: 10px;
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.beauty-mobile-staff-day-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+
+.beauty-mobile-staff-day-title strong {
+  font-size: 13px;
+}
+
+.beauty-mobile-staff-day-title span {
+  font-size: 11px;
+  color: #7b8492;
+}
+
+.beauty-mobile-staff-day-workers {
+  display: grid;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(90px, 1fr)
+  );
+  gap: 6px;
+}
+
+.beauty-mobile-staff-day-worker {
+  min-height: 48px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.beauty-mobile-staff-day-worker strong {
+  font-size: 12px;
+}
+
+.beauty-mobile-staff-day-worker span {
+  margin-top: 3px;
+  font-size: 11px;
+}

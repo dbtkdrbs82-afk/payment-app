@@ -6533,56 +6533,10 @@ const isBeautyMobileStaffDayOff = (
             class="beauty-mobile-staff-week-scroll"
           >
 
-            <div
-  class="beauty-mobile-staff-week-grid"
-  style="
-    grid-template-columns:
-      68px
-      repeat(
-        ${Math.max(
-          staffList.length,
-          1
-        )},
-        minmax(72px, 1fr)
-      );
-  "
->
-
+            
   <div
-    class="beauty-mobile-staff-week-header"
-  >
-    요일
-  </div>
-
-
-  ${
-    staffList
-      .map(
-        (staff: any) => `
-          <div
-            class="beauty-mobile-staff-week-name"
-          >
-
-            <strong>
-              ${
-                staff.staff_name ||
-                '이름 없음'
-              }
-            </strong>
-
-            <span>
-              ${
-                staff.position ||
-                ''
-              }
-            </span>
-
-          </div>
-        `
-      )
-      .join('')
-  }
-
+  class="beauty-mobile-staff-week-list"
+>
 
   ${
     beautyStaffWeekDates
@@ -6590,65 +6544,87 @@ const isBeautyMobileStaffDayOff = (
         (date) => `
 
           <div
-            class="beauty-mobile-staff-week-header"
+            class="beauty-mobile-staff-day"
           >
 
-            <strong>
-              ${date.dayLabel}
-            </strong>
+            <div
+              class="beauty-mobile-staff-day-title"
+            >
+              <strong>
+                ${date.dayLabel}
+              </strong>
 
-            <span>
-              ${date.dateLabel}
-            </span>
+              <span>
+                ${date.dateLabel}
+              </span>
+            </div>
+
+
+            <div
+              class="beauty-mobile-staff-day-workers"
+            >
+
+              ${
+                staffList
+                  .map(
+                    (staff: any) => {
+
+                      const isDayOff =
+                        isBeautyMobileStaffDayOff(
+                          Number(
+                            staff.id
+                          ),
+                          date.dateValue
+                        )
+
+
+                      return `
+                        <button
+                          type="button"
+                          class="
+                            beauty-mobile-staff-day-worker
+                            beauty-mobile-staff-week-button
+                            ${
+                              isDayOff
+                                ? 'beauty-mobile-staff-week-off'
+                                : ''
+                            }
+                          "
+                          data-staff-id="${staff.id}"
+                          data-date="${date.dateValue}"
+                          data-current-status="${
+                            isDayOff
+                              ? 'OFF'
+                              : 'WORK'
+                          }"
+                        >
+
+                          <strong>
+                            ${
+                              staff.staff_name ||
+                              '이름 없음'
+                            }
+                          </strong>
+
+                          <span>
+                            ${
+                              isDayOff
+                                ? 'OFF'
+                                : '근무'
+                            }
+                          </span>
+
+                        </button>
+                      `
+
+                    }
+                  )
+                  .join('')
+              }
+
+            </div>
 
           </div>
-
-
-          ${
-            staffList
-              .map(
-                (staff: any) => {
-
-                  const isDayOff =
-                    isBeautyMobileStaffDayOff(
-                      Number(
-                        staff.id
-                      ),
-                      date.dateValue
-                    )
-
-
-                  return `
-                    <button
-                      type="button"
-                      class="
-                        beauty-mobile-staff-week-button
-                        ${
-                          isDayOff
-                            ? 'beauty-mobile-staff-week-off'
-                            : ''
-                        }
-                      "
-                      data-staff-id="${staff.id}"
-                      data-date="${date.dateValue}"
-                      data-current-status="${
-                        isDayOff
-                          ? 'OFF'
-                          : 'WORK'
-                      }"
-                    >
-                      ${
-                        isDayOff
-                          ? 'OFF'
-                          : '근무'
-                      }
-                    </button>
-                  `
-
-                }
-              )
-              .join('')
-          }
 
         `
       )
