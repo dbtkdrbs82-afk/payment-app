@@ -7908,6 +7908,7 @@ async function renderBeautyScheduleMobile() {
                           border-radius:9px;
                           background:#ffffff;
                           color:${statusColor};
+                          font-size:11px;
                           font-weight:800;
                         "
                       >
