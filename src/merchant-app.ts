@@ -6778,8 +6778,15 @@ const isBeautyMobileStaffDayOff = (
               button.dataset.currentStatus =
                 'WORK'
 
-              button.textContent =
-                '근무'
+                const statusText =
+                button.querySelector<HTMLSpanElement>(
+                  'span'
+                )
+              
+              if (statusText) {
+                statusText.textContent =
+                  '근무'
+              }
 
               button.classList.remove(
                 'beauty-mobile-staff-week-off'
@@ -6930,8 +6937,15 @@ const isBeautyMobileStaffDayOff = (
             button.dataset.currentStatus =
               'OFF'
 
-            button.textContent =
-              'OFF'
+              const statusText =
+              button.querySelector<HTMLSpanElement>(
+                'span'
+              )
+            
+            if (statusText) {
+              statusText.textContent =
+                'OFF'
+            }
 
             button.classList.add(
               'beauty-mobile-staff-week-off'
