@@ -53,17 +53,31 @@ if (!sessionStorage.getItem('login_merchant_id')) {
 const loginMerchantType =
   sessionStorage.getItem('login_merchant_type') || ''
 
+const isPgAdminPage =
+  path.startsWith('/pg-admin')
+
+if (isPgAdminPage) {
+
+  document.body.classList.remove(
+    'hotel-mode',
+    'beauty-mode'
+  )
+
+} else {
+
   if (loginMerchantType === '호텔') {
     document.body.classList.add('hotel-mode')
   } else {
     document.body.classList.remove('hotel-mode')
   }
-  
+
   if (loginMerchantType === '뷰티') {
     document.body.classList.add('beauty-mode')
   } else {
     document.body.classList.remove('beauty-mode')
   }
+
+}
 
 
 /* =========================================
