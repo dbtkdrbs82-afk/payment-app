@@ -7822,13 +7822,13 @@ async function renderBeautyScheduleMobile() {
 
 
         <div
-          style="
-            display:flex;
-            flex-direction:column;
-            gap:7px;
-            padding-bottom:30px;
-          "
-        >
+  style="
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:7px;
+    padding-bottom:30px;
+  "
+>
 
           ${
             times
@@ -7869,27 +7869,27 @@ async function renderBeautyScheduleMobile() {
 
                   return `
                     <div
-                      style="
-                        display:grid;
-                        grid-template-columns:70px 1fr;
-                        align-items:center;
-                        gap:10px;
-                        min-height:54px;
-                        padding:7px 10px;
-                        background:#ffffff;
-                        border:1px solid #e0e6ef;
-                        border-radius:11px;
-                      "
-                    >
+  style="
+    display:grid;
+    grid-template-columns:48px minmax(0, 1fr);
+    align-items:center;
+    gap:5px;
+    min-height:50px;
+    padding:6px 7px;
+    background:#ffffff;
+    border:1px solid #e0e6ef;
+    border-radius:10px;
+  "
+>
 
                       <strong
-                        style="
-                          text-align:center;
-                          font-size:14px;
-                        "
-                      >
-                        ${time}
-                      </strong>
+  style="
+    text-align:center;
+    font-size:12px;
+  "
+>
+  ${time}
+</strong>
 
 
                       <select
