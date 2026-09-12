@@ -14610,3 +14610,56 @@ height: 150px !important;
   }
 
 }
+/* =========================================
+   뷰티 모바일 PICK 주문영역 정렬
+========================================= */
+
+@media (max-width: 600px) {
+
+  body:has(#beauty-customer-name)
+  .cart-item {
+    display: block !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  body:has(#beauty-customer-name)
+  .cart-item > div:first-child {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  body:has(#beauty-customer-name)
+  .beauty-cart-date-input,
+  body:has(#beauty-customer-name)
+  .beauty-cart-time-select {
+    width: calc(50% - 2px) !important;
+    min-width: 0 !important;
+  }
+
+  body:has(#beauty-customer-name)
+  .cart-item-buttons {
+    width: 100% !important;
+    margin-top: 10px !important;
+
+    display: flex !important;
+    justify-content: flex-end !important;
+    align-items: center !important;
+
+    gap: 8px !important;
+
+    box-sizing: border-box !important;
+  }
+
+  body:has(#beauty-customer-name)
+  .cart-plus,
+  body:has(#beauty-customer-name)
+  .cart-minus {
+    flex: 0 0 34px !important;
+    width: 34px !important;
+    height: 34px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+}

@@ -36152,53 +36152,68 @@ ${
   isBeautyKiosk
     ? `
       <div style="
-        display:flex;
-        align-items:center;
-        justify-content:space-between;
-        gap:12px;
-        margin:0 0 14px;
-      ">
-        <h2 style="margin:0;font-size:24px;">PICK</h2>
+  margin:0 0 14px;
+">
+  <h2
+    style="
+      margin:0 0 10px;
+      font-size:24px;
+    "
+  >
+    PICK
+  </h2>
 
-        <div style="
-          display:flex;
-          align-items:center;
-          gap:6px;
-        ">
-          <strong style="
-            font-size:14px;
-            white-space:nowrap;
-          ">예약자</strong>
+  <strong
+    style="
+      display:block;
+      margin-bottom:6px;
+      font-size:14px;
+    "
+  >
+    예약자
+  </strong>
 
-          <input
-            id="beauty-customer-name"
-            type="text"
-            placeholder="이름"
-            style="
-              width:120px;
-              height:32px;
-              border:1px solid #d1d5db;
-              border-radius:8px;
-              padding:0 8px;
-              box-sizing:border-box;
-            "
-          />
+  <div
+    style="
+      display:grid;
+      grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+      gap:8px;
+      width:100%;
+    "
+  >
+    <input
+      id="beauty-customer-name"
+      type="text"
+      placeholder="이름"
+      style="
+        width:100%;
+        min-width:0;
+        height:40px;
+        border:1px solid #d1d5db;
+        border-radius:8px;
+        padding:0 10px;
+        box-sizing:border-box;
+      "
+    />
 
-          <input
-            id="beauty-customer-phone"
-            type="tel"
-            placeholder="연락처"
-            style="
-              width:150px;
-              height:32px;
-              border:1px solid #d1d5db;
-              border-radius:8px;
-              padding:0 8px;
-              box-sizing:border-box;
-            "
-          />
-        </div>
-      </div>
+    <input
+      id="beauty-customer-phone"
+      type="tel"
+      placeholder="연락처"
+      style="
+        width:100%;
+        min-width:0;
+        height:40px;
+        border:1px solid #d1d5db;
+        border-radius:8px;
+        padding:0 10px;
+        box-sizing:border-box;
+      "
+    />
+  </div>
+</div>
     `
     : '<h2>PICK</h2>'
 }
