@@ -36104,14 +36104,31 @@ if (isBeautyKiosk) {
               </h3>
 
               <p
-                style="${
-                  isBeautyKiosk
-                    ? 'margin:0;font-size:14px;font-weight:700;white-space:nowrap;'
-                    : ''
-                }"
-              >
-                ${Number(product.price).toLocaleString()}원
-              </p>
+  style="${
+    isBeautyKiosk
+      ? 'margin:0;font-size:14px;font-weight:700;white-space:nowrap;'
+      : ''
+  }"
+>
+  ${
+    isBeautyKiosk
+      ? `
+        <span
+          style="
+            font-size:12px;
+            color:#64748b;
+            font-weight:600;
+            margin-right:4px;
+          "
+        >
+          (${Number(product.duration_minutes || 30)}분)
+        </span>
+      `
+      : ''
+  }
+
+  ${Number(product.price).toLocaleString()}원
+</p>
             </div>
 
             <button 
