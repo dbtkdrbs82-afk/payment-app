@@ -35935,9 +35935,8 @@ if (isBeautyKiosk) {
         app.innerHTML = `
           <div class="kiosk-page">
             <div class="kiosk-header">
-              <h1
+             <h1
   id="kiosk-main-home-title"
-  style="cursor:pointer;"
 >
   키오스 PICK
 </h1>
@@ -36317,10 +36316,7 @@ ${
                  </div>
                  </div>
         `
-        document.querySelector('#kiosk-main-home-title')
-  ?.addEventListener('click', () => {
-    location.href = '/merchant-admin'
-  })
+       
 
   const beautyReservationTimes: string[] = []
 
