@@ -17459,13 +17459,16 @@ if (
   } else if (
     path === '/merchant-app/beauty/products'
   ) {
-  
     void renderMerchantProducts()
-      
+  
+  } else if (
+    path === '/merchant-app/beauty/hours'
+  ) {
+    void renderBeautyHoursMobile()
+  
   } else if (
     path === '/merchant-app/products'
   ) {
-  
     void renderMerchantProducts()
   
   } else if (
