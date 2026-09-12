@@ -8643,6 +8643,649 @@ async function renderBeautyScheduleMobile() {
 
 }
 
+/* =========================================
+   뷰티 모바일 영업시간관리
+========================================= */
+
+async function renderBeautyHoursMobile() {
+
+  const merchantIdText =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    ''
+
+  const merchantId =
+    Number(
+      merchantIdText
+    )
+
+  if (!merchantId) {
+
+    alert(
+      '가맹점 정보를 찾을 수 없습니다.'
+    )
+
+    return
+  }
+
+
+  const {
+    data: businessHoursData,
+    error: businessHoursError
+  } =
+    await supabase
+      .from(
+        'beauty_business_hours'
+      )
+      .select(`
+        id,
+        weekday,
+        open_time,
+        close_time,
+        is_closed,
+        is_24_hours
+      `)
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .order(
+        'weekday',
+        {
+          ascending: true
+        }
+      )
+
+
+  if (businessHoursError) {
+
+    alert(
+      '영업시간 조회 실패: ' +
+      businessHoursError.message
+    )
+
+    return
+  }
+
+
+  const weekdayList = [
+    {
+      value: 1,
+      label: '월요일'
+    },
+    {
+      value: 2,
+      label: '화요일'
+    },
+    {
+      value: 3,
+      label: '수요일'
+    },
+    {
+      value: 4,
+      label: '목요일'
+    },
+    {
+      value: 5,
+      label: '금요일'
+    },
+    {
+      value: 6,
+      label: '토요일'
+    },
+    {
+      value: 0,
+      label: '일요일'
+    }
+  ]
+
+
+  const businessHoursMap =
+    new Map<number, any>()
+
+
+  ;(
+    businessHoursData || []
+  ).forEach(
+    (row: any) => {
+
+      businessHoursMap.set(
+        Number(
+          row.weekday
+        ),
+        row
+      )
+
+    }
+  )
+
+
+  const beautyBusinessTimes:
+    string[] = []
+
+
+  for (
+    let minutes = 0;
+    minutes < 24 * 60;
+    minutes += 30
+  ) {
+
+    const hour =
+      String(
+        Math.floor(
+          minutes / 60
+        )
+      ).padStart(
+        2,
+        '0'
+      )
+
+    const minute =
+      String(
+        minutes % 60
+      ).padStart(
+        2,
+        '0'
+      )
+
+    beautyBusinessTimes.push(
+      `${hour}:${minute}`
+    )
+
+  }
+
+
+  app.innerHTML = `
+    <main
+      style="
+        width:100%;
+        max-width:720px;
+        margin:0 auto;
+        padding:20px 16px 110px;
+        box-sizing:border-box;
+      "
+    >
+
+      <div
+        style="
+          margin-bottom:20px;
+        "
+      >
+
+        <h1
+          style="
+            margin:0;
+            font-size:26px;
+          "
+        >
+          영업시간
+        </h1>
+
+        <span
+          style="
+            display:block;
+            margin-top:6px;
+            color:#64748b;
+            font-size:14px;
+          "
+        >
+          영업시간 및 휴무 설정
+        </span>
+
+      </div>
+
+
+      <div
+        id="beauty-mobile-hours-list"
+        style="
+          display:flex;
+          flex-direction:column;
+          gap:12px;
+        "
+      >
+
+        ${
+          weekdayList
+            .map(
+              (day) => {
+
+                const saved =
+                  businessHoursMap.get(
+                    day.value
+                  )
+
+                const openTime =
+                  String(
+                    saved?.open_time ||
+                    '10:00'
+                  ).slice(
+                    0,
+                    5
+                  )
+
+                const closeTime =
+                  String(
+                    saved?.close_time ||
+                    '21:00'
+                  ).slice(
+                    0,
+                    5
+                  )
+
+                const isClosed =
+                  saved?.is_closed ===
+                  true
+
+                const is24Hours =
+                  saved?.is_24_hours ===
+                  true
+
+
+                return `
+                  <div
+                    class="beauty-mobile-hours-row"
+                    data-weekday="${day.value}"
+                    style="
+                      padding:16px;
+                      background:#ffffff;
+                      border:1px solid #e2e8f0;
+                      border-radius:14px;
+                      box-sizing:border-box;
+                    "
+                  >
+
+                    <strong
+                      style="
+                        display:block;
+                        margin-bottom:12px;
+                        font-size:17px;
+                      "
+                    >
+                      ${day.label}
+                    </strong>
+
+
+                    <div
+                      style="
+                        display:grid;
+                        grid-template-columns:
+                          minmax(0,1fr)
+                          minmax(0,1fr);
+                        gap:8px;
+                      "
+                    >
+
+                      <select
+                        class="beauty-mobile-hours-open"
+                        ${
+                          isClosed ||
+                          is24Hours
+                            ? 'disabled'
+                            : ''
+                        }
+                        style="
+                          width:100%;
+                          min-width:0;
+                          height:42px;
+                          border:1px solid #cbd5e1;
+                          border-radius:8px;
+                          padding:0 8px;
+                          box-sizing:border-box;
+                        "
+                      >
+
+                        ${
+                          beautyBusinessTimes
+                            .map(
+                              (time) => `
+                                <option
+                                  value="${time}"
+                                  ${
+                                    time === openTime
+                                      ? 'selected'
+                                      : ''
+                                  }
+                                >
+                                  ${time}
+                                </option>
+                              `
+                            )
+                            .join('')
+                        }
+
+                      </select>
+
+
+                      <select
+                        class="beauty-mobile-hours-close"
+                        ${
+                          isClosed ||
+                          is24Hours
+                            ? 'disabled'
+                            : ''
+                        }
+                        style="
+                          width:100%;
+                          min-width:0;
+                          height:42px;
+                          border:1px solid #cbd5e1;
+                          border-radius:8px;
+                          padding:0 8px;
+                          box-sizing:border-box;
+                        "
+                      >
+
+                        ${
+                          beautyBusinessTimes
+                            .map(
+                              (time) => `
+                                <option
+                                  value="${time}"
+                                  ${
+                                    time === closeTime
+                                      ? 'selected'
+                                      : ''
+                                  }
+                                >
+                                  ${time}
+                                </option>
+                              `
+                            )
+                            .join('')
+                        }
+
+                      </select>
+
+                    </div>
+
+
+                    <div
+                      style="
+                        display:flex;
+                        align-items:center;
+                        gap:20px;
+                        margin-top:12px;
+                      "
+                    >
+
+                      <label
+                        style="
+                          display:flex;
+                          align-items:center;
+                          gap:6px;
+                          cursor:pointer;
+                        "
+                      >
+
+                        <input
+                          class="beauty-mobile-hours-closed"
+                          type="checkbox"
+                          ${
+                            isClosed
+                              ? 'checked'
+                              : ''
+                          }
+                        >
+
+                        휴무
+
+                      </label>
+
+
+                      <label
+                        style="
+                          display:flex;
+                          align-items:center;
+                          gap:6px;
+                          cursor:pointer;
+                        "
+                      >
+
+                        <input
+                          class="beauty-mobile-hours-24"
+                          type="checkbox"
+                          ${
+                            is24Hours
+                              ? 'checked'
+                              : ''
+                          }
+                        >
+
+                        24시간
+
+                      </label>
+
+                    </div>
+
+                  </div>
+                `
+              }
+            )
+            .join('')
+        }
+
+      </div>
+
+
+      <button
+        id="beauty-mobile-hours-save"
+        type="button"
+        style="
+          width:100%;
+          height:50px;
+          margin-top:20px;
+          border:0;
+          border-radius:12px;
+          background:#111827;
+          color:#ffffff;
+          font-size:16px;
+          font-weight:800;
+          cursor:pointer;
+        "
+      >
+        영업시간 저장
+      </button>
+
+    </main>
+  `
+
+
+  document
+    .querySelectorAll<HTMLElement>(
+      '.beauty-mobile-hours-row'
+    )
+    .forEach(
+      (row) => {
+
+        const openSelect =
+          row.querySelector<HTMLSelectElement>(
+            '.beauty-mobile-hours-open'
+          )
+
+        const closeSelect =
+          row.querySelector<HTMLSelectElement>(
+            '.beauty-mobile-hours-close'
+          )
+
+        const closedCheckbox =
+          row.querySelector<HTMLInputElement>(
+            '.beauty-mobile-hours-closed'
+          )
+
+        const hours24Checkbox =
+          row.querySelector<HTMLInputElement>(
+            '.beauty-mobile-hours-24'
+          )
+
+
+        const updateState =
+          () => {
+
+            if (
+              !openSelect ||
+              !closeSelect ||
+              !closedCheckbox ||
+              !hours24Checkbox
+            ) {
+              return
+            }
+
+
+            openSelect.disabled =
+              closedCheckbox.checked ||
+              hours24Checkbox.checked
+
+
+            closeSelect.disabled =
+              closedCheckbox.checked ||
+              hours24Checkbox.checked
+
+          }
+
+
+        closedCheckbox
+          ?.addEventListener(
+            'change',
+            updateState
+          )
+
+
+        hours24Checkbox
+          ?.addEventListener(
+            'change',
+            updateState
+          )
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#beauty-mobile-hours-save'
+    )
+    ?.addEventListener(
+      'click',
+      async () => {
+
+        const rows =
+          Array.from(
+            document.querySelectorAll<HTMLElement>(
+              '.beauty-mobile-hours-row'
+            )
+          )
+
+
+        const saveRows =
+          rows.map(
+            (row) => {
+
+              const weekday =
+                Number(
+                  row.dataset.weekday
+                )
+
+
+              const openTime =
+                row.querySelector<HTMLSelectElement>(
+                  '.beauty-mobile-hours-open'
+                )?.value ||
+                '10:00'
+
+
+              const closeTime =
+                row.querySelector<HTMLSelectElement>(
+                  '.beauty-mobile-hours-close'
+                )?.value ||
+                '21:00'
+
+
+              const isClosed =
+                row.querySelector<HTMLInputElement>(
+                  '.beauty-mobile-hours-closed'
+                )?.checked ||
+                false
+
+
+              const is24Hours =
+                row.querySelector<HTMLInputElement>(
+                  '.beauty-mobile-hours-24'
+                )?.checked ||
+                false
+
+
+              return {
+
+                merchant_id:
+                  merchantId,
+
+                weekday:
+                  weekday,
+
+                open_time:
+                  isClosed ||
+                  is24Hours
+                    ? null
+                    : openTime,
+
+                close_time:
+                  isClosed ||
+                  is24Hours
+                    ? null
+                    : closeTime,
+
+                is_closed:
+                  isClosed,
+
+                is_24_hours:
+                  is24Hours
+
+              }
+
+            }
+          )
+
+
+        const {
+          error: saveHoursError
+        } =
+          await supabase
+            .from(
+              'beauty_business_hours'
+            )
+            .upsert(
+              saveRows,
+              {
+                onConflict:
+                  'merchant_id,weekday'
+              }
+            )
+
+
+        if (saveHoursError) {
+
+          alert(
+            '영업시간 저장 실패: ' +
+            saveHoursError.message
+          )
+
+          return
+        }
+
+
+        alert(
+          '영업시간이 저장되었습니다.'
+        )
+
+      }
+    )
+
+}
+
   /* =========================================
    모바일 상품관리
 ========================================= */
