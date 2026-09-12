@@ -17456,6 +17456,19 @@ if (paymentFilters) {
         const merchantInfo =
   paymentMerchantMap.get(
     Number(payment.merchant_id)
+  ) ||
+  (paymentOrgMerchants || []).find(
+    (merchant: any) =>
+      String(
+        merchant.merchant_name || ''
+      )
+        .trim()
+        .toLowerCase() ===
+      String(
+        payment.merchant_name || ''
+      )
+        .trim()
+        .toLowerCase()
   )
   
       const targetMap: Record<string, string> = {
