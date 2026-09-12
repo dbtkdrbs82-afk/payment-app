@@ -16970,15 +16970,16 @@ if (searchBox) {
 '<button class="quick-btn" id="payment-next-btn">다음</button>' +
 '<button class="quick-btn" id="payment-month-btn">당월</button>' +
 
-    '<select id="payment-search-type">' +
-  '<option value="all">전체검색</option>' +
-  '<option value="name">가맹점명 / 대표자명</option>' +
-  '<option value="manager">담당자</option>' +
-  '<option value="agency">대리점</option>' +
-  '<option value="branch">지사</option>' +
-  '<option value="order_id">주문번호</option>' +
-  '<option value="payment_key">결제키</option>' +
-'</select>' +
+    '<select id="payment-search-type">' + 
+  '<option value="all">전체검색</option>' + 
+  '<option value="name">가맹점명 / 대표자명</option>' + 
+  '<option value="manager">담당자</option>' + 
+  '<option value="agency">대리점</option>' + 
+  '<option value="branch">지사</option>' + 
+  '<option value="order_id">주문번호</option>' + 
+  '<option value="approval_number">승인번호</option>' + 
+  '<option value="payment_key">결제키</option>' + 
+'</select>' + 
 
     '<input id="payment-search-keyword" placeholder="검색어 입력" />' +
 
@@ -17196,6 +17197,7 @@ const { data: paymentOrgMerchants, error: paymentOrgMerchantError } =
     .select(`
       id,
       merchant_name,
+      owner_name,
       branch_admin_id,
       agency_admin_id,
       manager_admin_id
@@ -17450,10 +17452,21 @@ if (paymentFilters) {
         getPaymentMerchantOrganization(
           Number(payment.merchant_id)
         )
+
+        const merchantInfo =
+  paymentMerchantMap.get(
+    Number(payment.merchant_id)
+  )
   
       const targetMap: Record<string, string> = {
-        name: String(
-          payment.merchant_name || ''
+        name: (
+          String(
+            payment.merchant_name || ''
+          ) +
+          ' ' +
+          String(
+            merchantInfo?.owner_name || ''
+          )
         ).toLowerCase(),
   
         manager: organization.manager,
@@ -17463,7 +17476,11 @@ if (paymentFilters) {
         order_id: String(
           payment.order_id || ''
         ).toLowerCase(),
-  
+        
+        approval_number: String(
+          payment.approval_number || ''
+        ).toLowerCase(),
+        
         payment_key: String(
           payment.payment_key || ''
         ).toLowerCase()
