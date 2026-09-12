@@ -2341,27 +2341,105 @@ const settlementTotal =
   )
 
 
+  const receivedCount =
+  orders.filter(
+    (order: any) =>
+      order.order_status === '접수' &&
+      order.cancel_status !== '취소요청'
+  ).length
+
+
+const completedCount =
+  orders.filter(
+    (order: any) =>
+      order.order_status === '완료' &&
+      order.cancel_status !== '취소요청'
+  ).length
+
+
+const averageAmount =
+  orders.length > 0
+    ? Math.floor(
+        salesTotal /
+        orders.length
+      )
+    : 0
+
+
 summary.innerHTML = `
-  <span>
-    주문수 :
-    <strong>
-      ${orders.length}건
-    </strong>
-  </span>
 
-  <span>
-    매출합계 :
-    <strong>
-      ${salesTotal.toLocaleString()}원
-    </strong>
-  </span>
+  <div class="beauty-mobile-order-summary-grid">
 
-  <span>
-    정산예정금액 :
-    <strong>
-      ${settlementTotal.toLocaleString()}원
-    </strong>
-  </span>
+    <div>
+      <strong>
+        주문수
+      </strong>
+
+      <span>
+        ${orders.length}건
+      </span>
+    </div>
+
+
+    <div>
+      <strong>
+        접수
+      </strong>
+
+      <span>
+        ${receivedCount}건
+      </span>
+    </div>
+
+
+    <div>
+      <strong>
+        완료
+      </strong>
+
+      <span>
+        ${completedCount}건
+      </span>
+    </div>
+
+
+    <div>
+      <strong>
+        매출합계
+      </strong>
+
+      <span>
+        ${salesTotal.toLocaleString()}원
+      </span>
+    </div>
+
+
+    <div>
+      <strong>
+        평균객단가
+      </strong>
+
+      <span>
+        ${averageAmount.toLocaleString()}원
+      </span>
+    </div>
+
+
+    <div>
+      <strong>
+        정산예정금액
+      </strong>
+
+      <span>
+        ${settlementTotal.toLocaleString()}원
+      </span>
+
+      <small class="beauty-mobile-settlement-wait">
+        대기
+      </small>
+    </div>
+
+  </div>
 `
   
   
