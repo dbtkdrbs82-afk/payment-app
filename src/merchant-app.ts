@@ -523,6 +523,81 @@ async function renderMerchantWirelessTerminal() {
       0
     )
 
+    const terminalSettlementPaymentDates =
+    settlementPayments
+      .map(
+        (payment: any) => {
+
+          const dateText =
+            payment.approved_at ||
+            payment.created_at
+
+          if (!dateText) {
+            return ''
+          }
+
+          return getLocalDateValue(
+            new Date(dateText)
+          )
+        }
+      )
+      .filter(Boolean)
+      .sort()
+
+
+  let terminalSettlementPaymentDateLabel =
+    ''
+
+
+  if (
+    terminalSettlementPaymentDates.length > 0
+  ) {
+
+    const firstDate =
+      terminalSettlementPaymentDates[0]
+
+    const lastDate =
+      terminalSettlementPaymentDates[
+        terminalSettlementPaymentDates.length - 1
+      ]
+
+
+    const formatShortDate =
+      (dateValue: string) => {
+
+        const [
+          year,
+          month,
+          day
+        ] =
+          dateValue.split('-')
+
+        return (
+          year.slice(2) +
+          '.' +
+          month +
+          '.' +
+          day
+        )
+      }
+
+
+    terminalSettlementPaymentDateLabel =
+      firstDate === lastDate
+        ? formatShortDate(
+            firstDate
+          )
+        : (
+            formatShortDate(
+              firstDate
+            ) +
+            '~' +
+            formatShortDate(
+              lastDate
+            )
+          )
+  }
+
     const page =
     Math.max(
       1,
@@ -795,9 +870,22 @@ async function renderMerchantWirelessTerminal() {
               ${settlementAmount.toLocaleString()}원
             </strong>
 
-            <small>
-              정산대상 ${settlementPayments.length.toLocaleString()}건
-            </small>
+            <small
+  style="
+    display:block;
+    margin-top:5px;
+    color:#d93025;
+    font-weight:700;
+  "
+>
+  정산대상 ${settlementPayments.length.toLocaleString()}건${
+    terminalSettlementPaymentDateLabel
+      ? ' · ' +
+        terminalSettlementPaymentDateLabel +
+        ' 결제건'
+      : ''
+  }
+</small>
 
           </div>
 
