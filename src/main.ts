@@ -33533,9 +33533,12 @@ top:-10px;
           location.href = '/merchant-card-ocr?mode=manual'
         })
     
-      document.querySelector('#menu-card-payment')
+        document.querySelector('#menu-card-payment')
         ?.addEventListener('click', () => {
-          location.href = '/kiosk?merchant_id=' + merchantId
+          location.href =
+            '/kiosk?merchant_id=' +
+            merchantId +
+            '&source=merchant-card'
         })
         document.querySelector('#sms-card-payment')
   ?.addEventListener('click', () => {
@@ -35832,6 +35835,9 @@ sessionStorage.setItem(
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
 
+      const kioskSource =
+  params.get('source') || ''
+
       const { data: kioskMerchant } = await supabase
   .from('merchants')
   .select('merchant_type')
@@ -36316,7 +36322,32 @@ ${
                  </div>
                  </div>
         `
-       
+     
+        if (
+          kioskSource === 'merchant-card'
+        ) {
+        
+          const kioskMainTitle =
+            document.querySelector<HTMLElement>(
+              '#kiosk-main-home-title'
+            )
+        
+          if (kioskMainTitle) {
+        
+            kioskMainTitle.style.cursor =
+              'pointer'
+        
+            kioskMainTitle.addEventListener(
+              'click',
+              () => {
+                location.href =
+                  '/merchant-admin'
+              }
+            )
+        
+          }
+        
+        }
 
   const beautyReservationTimes: string[] = []
 
