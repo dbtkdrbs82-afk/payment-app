@@ -8725,12 +8725,20 @@ const isBeauty =
           <div class="merchant-mobile-page-title">
   
             <h1>
-              상품관리
-            </h1>
-  
-            <span>
-              상품 등록 및 수정
-            </span>
+  ${
+    isBeauty
+      ? '서비스관리'
+      : '상품관리'
+  }
+</h1>
+
+<span>
+  ${
+    isBeauty
+      ? '서비스 등록 및 수정'
+      : '상품 등록 및 수정'
+  }
+</span>
   
           </div>
   
@@ -8739,7 +8747,11 @@ const isBeauty =
   type="button"
   class="merchant-mobile-product-create-open"
 >
-  + 상품 등록
+${
+  isBeauty
+    ? '+ 서비스 등록'
+    : '+ 상품 등록'
+}
 </button>
 
           <div
@@ -8794,13 +8806,21 @@ const isBeauty =
             >
 
               <h2>
-                상품 등록
-              </h2>
+  ${
+    isBeauty
+      ? '서비스 등록'
+      : '상품 등록'
+  }
+</h2>
 
 
               <label>
-                상품명
-              </label>
+  ${
+    isBeauty
+      ? '서비스명'
+      : '상품명'
+  }
+</label>
 
               <input
                 id="mobile-product-name"
@@ -8810,23 +8830,47 @@ const isBeauty =
 
 
               <label>
-                가격
-              </label>
+  가격
+</label>
 
-              <input
-                id="mobile-product-price"
-                type="number"
-                placeholder="가격"
-              >
+<input
+  id="mobile-product-price"
+  type="number"
+  placeholder="가격"
+>
 
 
-              ${
-                isBeauty
-                  ? ''
-                  : `
-                    <label>
-                      카테고리
-                    </label>
+${
+  isBeauty
+    ? `
+      <label>
+        소요시간
+      </label>
+
+      <select
+        id="mobile-product-duration"
+      >
+        <option value="15">15분</option>
+        <option value="30" selected>30분</option>
+        <option value="45">45분</option>
+        <option value="60">60분</option>
+        <option value="90">90분</option>
+        <option value="120">120분</option>
+        <option value="150">150분</option>
+        <option value="180">180분</option>
+      </select>
+    `
+    : ''
+}
+
+
+${
+  isBeauty
+    ? ''
+    : `
+      <label>
+        카테고리
+      </label>
               
                     <input
                       id="mobile-product-category"
@@ -8987,6 +9031,14 @@ const isBeauty =
                 )?.value || 0
               )
 
+              const durationMinutes =
+  isBeauty
+    ? Number(
+        document.querySelector<HTMLSelectElement>(
+          '#mobile-product-duration'
+        )?.value || 30
+      )
+    : null
 
               const category =
               isBeauty
@@ -9098,9 +9150,14 @@ const isBeauty =
                   category:
                     category,
 
-                  image_url:
+                    image_url:
                     imageUrl,
-
+                  
+                  duration_minutes:
+                    isBeauty
+                      ? durationMinutes
+                      : null,
+                  
                   status:
                     '판매중'
                 })
@@ -9247,13 +9304,23 @@ const isBeauty =
               </strong>
 
               <span
-                class="merchant-mobile-product-category"
-              >
-                ${
-                  product.category ||
-                  '기타'
-                }
-              </span>
+  class="merchant-mobile-product-category"
+>
+  ${
+    isBeauty
+      ? (
+          '소요시간 ' +
+          Number(
+            product.duration_minutes || 30
+          ) +
+          '분'
+        )
+      : (
+          product.category ||
+          '기타'
+        )
+  }
+</span>
 
               <strong
                 class="merchant-mobile-product-price"
@@ -9458,8 +9525,12 @@ const isBeauty =
                 >
 
                   <h2>
-                    상품 수정
-                  </h2>
+  ${
+    isBeauty
+      ? '서비스 수정'
+      : '상품 수정'
+  }
+</h2>
 
 
                   <label>
@@ -9485,6 +9556,123 @@ const isBeauty =
                     )}"
                   >
 
+                  ${
+                    isBeauty
+                      ? `
+                        <label>
+                          소요시간
+                        </label>
+                  
+                        <select
+                          id="mobile-product-edit-duration"
+                        >
+                          <option
+                            value="15"
+                            ${
+                              Number(
+                                product.duration_minutes || 30
+                              ) === 15
+                                ? 'selected'
+                                : ''
+                            }
+                          >
+                            15분
+                          </option>
+                  
+                          <option
+                            value="30"
+                            ${
+                              Number(
+                                product.duration_minutes || 30
+                              ) === 30
+                                ? 'selected'
+                                : ''
+                            }
+                          >
+                            30분
+                          </option>
+                  
+                          <option
+                            value="45"
+                            ${
+                              Number(
+                                product.duration_minutes || 30
+                              ) === 45
+                                ? 'selected'
+                                : ''
+                            }
+                          >
+                            45분
+                          </option>
+                  
+                          <option
+                            value="60"
+                            ${
+                              Number(
+                                product.duration_minutes || 30
+                              ) === 60
+                                ? 'selected'
+                                : ''
+                            }
+                          >
+                            60분
+                          </option>
+                  
+                          <option
+                            value="90"
+                            ${
+                              Number(
+                                product.duration_minutes || 30
+                              ) === 90
+                                ? 'selected'
+                                : ''
+                            }
+                          >
+                            90분
+                          </option>
+                  
+                          <option
+                            value="120"
+                            ${
+                              Number(
+                                product.duration_minutes || 30
+                              ) === 120
+                                ? 'selected'
+                                : ''
+                            }
+                          >
+                            120분
+                          </option>
+                  
+                          <option
+                            value="150"
+                            ${
+                              Number(
+                                product.duration_minutes || 30
+                              ) === 150
+                                ? 'selected'
+                                : ''
+                            }
+                          >
+                            150분
+                          </option>
+                  
+                          <option
+                            value="180"
+                            ${
+                              Number(
+                                product.duration_minutes || 30
+                              ) === 180
+                                ? 'selected'
+                                : ''
+                            }
+                          >
+                            180분
+                          </option>
+                        </select>
+                      `
+                      : ''
+                  }
 
                   ${
                     isBeauty
@@ -9667,6 +9855,14 @@ const isBeauty =
                     )?.value || 0
                   )
 
+                  const durationMinutes =
+  isBeauty
+    ? Number(
+        document.querySelector<HTMLSelectElement>(
+          '#mobile-product-edit-duration'
+        )?.value || 30
+      )
+    : null
 
                 const category =
                   isBeauty
@@ -9772,15 +9968,20 @@ const isBeauty =
                     .update({
                       product_name:
                         productName,
-
+                
                       price:
                         price,
-
+                
                       category:
                         category,
-
+                
                       image_url:
-                        imageUrl
+                        imageUrl,
+                
+                      duration_minutes:
+                        isBeauty
+                          ? durationMinutes
+                          : product.duration_minutes
                     })
                     .eq(
                       'id',
@@ -16142,7 +16343,13 @@ if (
   ) {
   
     void renderBeautyScheduleMobile()
-    
+  
+  } else if (
+    path === '/merchant-app/beauty/products'
+  ) {
+  
+    void renderMerchantProducts()
+      
   } else if (
     path === '/merchant-app/products'
   ) {
