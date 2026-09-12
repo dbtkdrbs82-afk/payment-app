@@ -9243,6 +9243,78 @@ ${
     const products =
       data || []
   
+      let beautyStaff: any[] = []
+let beautyStaffServiceRows: any[] = []
+
+if (isBeauty) {
+
+  const {
+    data: staffData,
+    error: staffError
+  } =
+    await supabase
+      .from('beauty_staff')
+      .select(`
+        id,
+        staff_name,
+        position,
+        status
+      `)
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .order(
+        'id',
+        {
+          ascending: true
+        }
+      )
+
+  if (staffError) {
+
+    alert(
+      '직원 조회 실패: ' +
+      staffError.message
+    )
+
+    return
+  }
+
+  beautyStaff =
+    staffData || []
+
+
+  const {
+    data: staffServiceData,
+    error: staffServiceError
+  } =
+    await supabase
+      .from(
+        'beauty_staff_services'
+      )
+      .select(
+        'staff_id, service_id'
+      )
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+
+  if (staffServiceError) {
+
+    alert(
+      '담당직원 연결 조회 실패: ' +
+      staffServiceError.message
+    )
+
+    return
+  }
+
+  beautyStaffServiceRows =
+    staffServiceData || []
+
+}
   
     if (
       products.length === 0
@@ -9264,6 +9336,44 @@ ${
         const status =
           product.status ||
           '판매중'
+
+          const assignedStaffIds =
+  beautyStaffServiceRows
+    .filter(
+      (row: any) =>
+        Number(
+          row.service_id
+        ) ===
+        Number(
+          product.id
+        )
+    )
+    .map(
+      (row: any) =>
+        Number(
+          row.staff_id
+        )
+    )
+
+const assignedStaff =
+  beautyStaff.filter(
+    (staff: any) =>
+      assignedStaffIds.includes(
+        Number(
+          staff.id
+        )
+      )
+  )
+
+const assignedStaffText =
+  assignedStaff.length > 0
+    ? assignedStaff
+        .map(
+          (staff: any) =>
+            staff.staff_name || '-'
+        )
+        .join(', ')
+    : '미설정'
 
         return `
           <div
@@ -9321,6 +9431,35 @@ ${
         )
   }
 </span>
+
+${
+  isBeauty
+    ? `
+      <span
+        style="
+          font-size:13px;
+          color:#475569;
+          margin-top:4px;
+        "
+      >
+        담당직원 : ${assignedStaffText}
+      </span>
+
+      <button
+        type="button"
+        class="beauty-mobile-service-staff-setting"
+        data-id="${product.id}"
+        style="
+          margin-top:8px;
+          width:100%;
+          height:38px;
+        "
+      >
+        담당직원 설정
+      </button>
+    `
+    : ''
+}
 
               <strong
                 class="merchant-mobile-product-price"
@@ -9401,6 +9540,336 @@ ${
       }
     )
     .join('')
+
+    document
+  .querySelectorAll<HTMLButtonElement>(
+    '.beauty-mobile-service-staff-setting'
+  )
+  .forEach(
+    (button) => {
+
+      button.addEventListener(
+        'click',
+        async () => {
+
+          const productId =
+            Number(
+              button.dataset.id || 0
+            )
+
+          const product =
+            products.find(
+              (item: any) =>
+                Number(item.id) ===
+                productId
+            )
+
+          if (!product) {
+            return
+          }
+
+
+          const connectedStaffIds =
+            beautyStaffServiceRows
+              .filter(
+                (row: any) =>
+                  Number(
+                    row.service_id
+                  ) ===
+                  productId
+              )
+              .map(
+                (row: any) =>
+                  Number(
+                    row.staff_id
+                  )
+              )
+
+
+          document
+            .querySelector(
+              '#beauty-mobile-service-staff-modal'
+            )
+            ?.remove()
+
+
+          document.body.insertAdjacentHTML(
+            'beforeend',
+            `
+              <div
+                id="beauty-mobile-service-staff-modal"
+                class="merchant-mobile-product-modal"
+              >
+
+                <div
+                  class="merchant-mobile-product-modal-box"
+                >
+
+                  <h2>
+                    담당직원 설정
+                  </h2>
+
+                  <p
+                    style="
+                      margin:0 0 18px;
+                      color:#64748b;
+                      font-size:14px;
+                    "
+                  >
+                    ${product.product_name || '서비스'}
+                  </p>
+
+
+                  <div
+                    style="
+                      display:flex;
+                      flex-direction:column;
+                      gap:10px;
+                      margin-bottom:20px;
+                    "
+                  >
+
+                    ${
+                      beautyStaff.length > 0
+                        ? beautyStaff
+                            .map(
+                              (staff: any) => {
+
+                                const checked =
+                                  connectedStaffIds.includes(
+                                    Number(
+                                      staff.id
+                                    )
+                                  )
+
+                                return `
+                                  <label
+                                    style="
+                                      display:flex;
+                                      align-items:center;
+                                      gap:10px;
+                                      min-height:44px;
+                                      padding:10px 12px;
+                                      border:1px solid #e2e8f0;
+                                      border-radius:10px;
+                                      box-sizing:border-box;
+                                    "
+                                  >
+
+                                    <input
+                                      type="checkbox"
+                                      class="beauty-mobile-service-staff-checkbox"
+                                      value="${staff.id}"
+                                      ${
+                                        checked
+                                          ? 'checked'
+                                          : ''
+                                      }
+                                    >
+
+                                    <span>
+                                      ${
+                                        staff.staff_name ||
+                                        '-'
+                                      }
+                                      ${
+                                        staff.position
+                                          ? ' / ' +
+                                            staff.position
+                                          : ''
+                                      }
+                                    </span>
+
+                                  </label>
+                                `
+                              }
+                            )
+                            .join('')
+                        : `
+                          <div
+                            style="
+                              padding:20px 0;
+                              text-align:center;
+                              color:#94a3b8;
+                            "
+                          >
+                            등록된 직원이 없습니다.
+                          </div>
+                        `
+                    }
+
+                  </div>
+
+
+                  <div
+                    class="merchant-mobile-product-modal-actions"
+                  >
+
+                    <button
+                      id="beauty-mobile-service-staff-save"
+                      type="button"
+                    >
+                      저장
+                    </button>
+
+                    <button
+                      id="beauty-mobile-service-staff-close"
+                      type="button"
+                    >
+                      닫기
+                    </button>
+
+                  </div>
+
+                </div>
+
+              </div>
+            `
+          )
+
+
+          document
+            .querySelector(
+              '#beauty-mobile-service-staff-close'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+
+                document
+                  .querySelector(
+                    '#beauty-mobile-service-staff-modal'
+                  )
+                  ?.remove()
+
+              }
+            )
+
+
+          document
+            .querySelector(
+              '#beauty-mobile-service-staff-save'
+            )
+            ?.addEventListener(
+              'click',
+              async () => {
+
+                const selectedStaffIds =
+                  Array.from(
+                    document.querySelectorAll<HTMLInputElement>(
+                      '.beauty-mobile-service-staff-checkbox'
+                    )
+                  )
+                    .filter(
+                      (checkbox) =>
+                        checkbox.checked
+                    )
+                    .map(
+                      (checkbox) =>
+                        Number(
+                          checkbox.value
+                        )
+                    )
+
+
+                const {
+                  error: deleteError
+                } =
+                  await supabase
+                    .from(
+                      'beauty_staff_services'
+                    )
+                    .delete()
+                    .eq(
+                      'merchant_id',
+                      merchantId
+                    )
+                    .eq(
+                      'service_id',
+                      productId
+                    )
+
+
+                if (deleteError) {
+
+                  alert(
+                    '기존 담당직원 삭제 실패: ' +
+                    deleteError.message
+                  )
+
+                  return
+                }
+
+
+                if (
+                  selectedStaffIds.length >
+                  0
+                ) {
+
+                  const rows =
+                    selectedStaffIds.map(
+                      (staffId) => ({
+
+                        merchant_id:
+                          merchantId,
+
+                        staff_id:
+                          staffId,
+
+                        service_id:
+                          productId
+
+                      })
+                    )
+
+
+                  const {
+                    error: insertError
+                  } =
+                    await supabase
+                      .from(
+                        'beauty_staff_services'
+                      )
+                      .insert(
+                        rows
+                      )
+
+
+                  if (insertError) {
+
+                    alert(
+                      '담당직원 저장 실패: ' +
+                      insertError.message
+                    )
+
+                    return
+                  }
+
+                }
+
+
+                alert(
+                  '담당직원이 저장되었습니다.'
+                )
+
+
+                document
+                  .querySelector(
+                    '#beauty-mobile-service-staff-modal'
+                  )
+                  ?.remove()
+
+
+                void renderMerchantProducts()
+
+              }
+            )
+
+        }
+      )
+
+    }
+  )
 
     document
   .querySelectorAll<HTMLButtonElement>(
