@@ -18010,6 +18010,29 @@ visiblePayments.forEach((payment, index) => {
         ? '취소요청'
         : '-'
 
+        const rowMerchantInfo =
+        paymentMerchantMap.get(
+          Number(payment.merchant_id)
+        ) ||
+        (paymentOrgMerchants || []).find(
+          (merchant: any) =>
+            String(
+              merchant.merchant_name || ''
+            )
+              .trim()
+              .toLowerCase() ===
+            String(
+              payment.merchant_name || ''
+            )
+              .trim()
+              .toLowerCase()
+        )
+    
+      const rowOwnerName =
+        String(
+          rowMerchantInfo?.owner_name || ''
+        ).trim()
+
   tr.innerHTML =
     '<td>' + (index + 1) + '</td>' +
     '<td>' +
@@ -18040,7 +18063,15 @@ visiblePayments.forEach((payment, index) => {
     '</span>' +
   '</button>' +
 '</td>' +
-    '<td>' + (payment.merchant_name || '-') + '<br/>가맹점ID ' + (payment.merchant_id || '-') + '</td>' +
+    '<td>' +
+  (payment.merchant_name || '-') +
+  '<br/>' +
+  (rowOwnerName
+    ? '대표자 ' + rowOwnerName + '<br/>'
+    : '') +
+  '가맹점ID ' +
+  (payment.merchant_id || '-') +
+'</td>' +
     '<td>' +
   (payment.card_company || '-') +
 '</td>' +
