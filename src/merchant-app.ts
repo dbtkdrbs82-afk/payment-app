@@ -8663,6 +8663,15 @@ async function renderBeautyHoursMobile() {
       merchantIdText
     )
 
+    const merchantName =
+  sessionStorage.getItem(
+    'login_merchant_name'
+  ) ||
+  localStorage.getItem(
+    'login_merchant_name'
+  ) ||
+  '가맹점'
+
   if (!merchantId) {
 
     alert(
@@ -8800,56 +8809,42 @@ async function renderBeautyHoursMobile() {
 
 
   app.innerHTML = `
-    <main
-      style="
-        width:100%;
-        max-width:720px;
-        margin:0 auto;
-        padding:20px 16px 110px;
-        box-sizing:border-box;
-      "
-    >
+  <div class="merchant-mobile-home">
 
-      <div
-  style="
-    margin-bottom:20px;
-  "
->
+    <header class="merchant-mobile-header">
 
-  <button
-    id="beauty-mobile-hours-home"
-    type="button"
-    style="
-      margin:0 0 14px;
-      padding:8px 14px;
-      border:1px solid #d1d5db;
-      border-radius:8px;
-      background:#ffffff;
-      font-size:14px;
-      font-weight:700;
-      cursor:pointer;
-    "
-  >
-    ← 홈
-  </button>
+      <div>
 
-  <h1
-    style="
-      margin:0;
-      font-size:26px;
-    "
-  >
-    영업시간
-  </h1>
+        <div class="merchant-mobile-brand">
+          NXG PICK
+        </div>
 
-        <span
-          style="
-            display:block;
-            margin-top:6px;
-            color:#64748b;
-            font-size:14px;
-          "
-        >
+        <div class="merchant-mobile-store">
+          ${merchantName}
+        </div>
+
+      </div>
+
+      <button
+        id="beauty-mobile-hours-home"
+        class="merchant-mobile-logout"
+        type="button"
+      >
+        홈
+      </button>
+
+    </header>
+
+
+    <main class="merchant-mobile-content">
+
+      <div class="merchant-mobile-page-title">
+
+        <h1>
+          영업시간
+        </h1>
+
+        <span>
           영업시간 및 휴무 설정
         </span>
 
@@ -9107,8 +9102,10 @@ async function renderBeautyHoursMobile() {
         영업시간 저장
       </button>
 
-    </main>
-  `
+        </main>
+
+  </div>
+`
 
   document
   .querySelector(
