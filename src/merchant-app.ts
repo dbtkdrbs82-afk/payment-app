@@ -8811,19 +8811,36 @@ async function renderBeautyHoursMobile() {
     >
 
       <div
-        style="
-          margin-bottom:20px;
-        "
-      >
+  style="
+    margin-bottom:20px;
+  "
+>
 
-        <h1
-          style="
-            margin:0;
-            font-size:26px;
-          "
-        >
-          영업시간
-        </h1>
+  <button
+    id="beauty-mobile-hours-home"
+    type="button"
+    style="
+      margin:0 0 14px;
+      padding:8px 14px;
+      border:1px solid #d1d5db;
+      border-radius:8px;
+      background:#ffffff;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    ← 홈
+  </button>
+
+  <h1
+    style="
+      margin:0;
+      font-size:26px;
+    "
+  >
+    영업시간
+  </h1>
 
         <span
           style="
@@ -9093,6 +9110,17 @@ async function renderBeautyHoursMobile() {
     </main>
   `
 
+  document
+  .querySelector(
+    '#beauty-mobile-hours-home'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+      location.href =
+        '/merchant-app/home'
+    }
+  )
 
   document
     .querySelectorAll<HTMLElement>(
