@@ -14559,3 +14559,54 @@ height: 150px !important;
   background-color: #d99aaa !important;
   border-color: #d99aaa !important;
 }
+/* =========================================
+   모바일 결제창 하단 결제영역 정렬
+========================================= */
+
+@media (max-width: 600px) {
+
+  .kiosk-bottom-bar {
+    width: 100% !important;
+    max-width: 100% !important;
+
+    grid-template-columns:
+      120px minmax(0, 1fr) !important;
+
+    gap: 10px !important;
+
+    padding:
+      10px 12px
+      calc(10px + env(safe-area-inset-bottom))
+      12px !important;
+
+    box-sizing: border-box !important;
+  }
+
+  .bottom-total {
+    width: auto !important;
+    min-width: 0 !important;
+    flex: none !important;
+  }
+
+  .kiosk-payment-buttons {
+    width: 100% !important;
+    min-width: 0 !important;
+
+    grid-template-columns:
+      minmax(0, 1fr) !important;
+
+    gap: 8px !important;
+  }
+
+  .kiosk-payment-buttons button {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+
+    height: 50px !important;
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+  }
+
+}
