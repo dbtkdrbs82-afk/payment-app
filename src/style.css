@@ -14663,3 +14663,33 @@ height: 150px !important;
   }
 
 }
+@media (max-width: 600px) {
+
+  body:has(#beauty-customer-name)
+  .beauty-cart-price-row {
+    width: 100%;
+    margin-top: 10px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+    box-sizing: border-box;
+  }
+
+  body:has(#beauty-customer-name)
+  .beauty-cart-price-row p {
+    margin: 0 !important;
+    white-space: nowrap;
+  }
+
+  body:has(#beauty-customer-name)
+  .beauty-cart-price-row
+  .cart-item-buttons {
+    width: auto !important;
+    margin-top: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+}

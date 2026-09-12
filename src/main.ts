@@ -36841,13 +36841,34 @@ const statusText =
                     : ''
                 }
 
-                <p>${item.price.toLocaleString()}원 x ${item.quantity}</p>
-              </div>
-              <div class="cart-item-buttons">
-                <button class="cart-minus" data-key="${item.cart_key}">-</button>
-<span>${item.quantity}</span>
-<button class="cart-plus" data-key="${item.cart_key}">+</button>
-              </div>
+               <div
+  class="beauty-cart-price-row"
+>
+  <p>
+    ${item.price.toLocaleString()}원 x ${item.quantity}
+  </p>
+
+  <div class="cart-item-buttons">
+    <button
+      class="cart-minus"
+      data-key="${item.cart_key}"
+    >
+      -
+    </button>
+
+    <span>
+      ${item.quantity}
+    </span>
+
+    <button
+      class="cart-plus"
+      data-key="${item.cart_key}"
+    >
+      +
+    </button>
+  </div>
+</div>
+</div>
             </div>
           `).join('')
 
