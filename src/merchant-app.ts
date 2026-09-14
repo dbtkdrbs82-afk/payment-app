@@ -9645,12 +9645,20 @@ async function renderHotelOrdersMobile() {
 
 
         <div
-          class="merchant-mobile-date-nav"
-        >
+  class="merchant-mobile-date-nav"
+  style="
+    width:100%;
+    max-width:none;
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:6px;
+  "
+>
 
           <button
             id="hotel-staff-order-prev"
             type="button"
+            style="width:100%;"
           >
             이전
           </button>
@@ -9659,6 +9667,7 @@ async function renderHotelOrdersMobile() {
           <button
             id="hotel-staff-order-today"
             type="button"
+            style="width:100%;"
           >
             오늘
           </button>
@@ -9667,6 +9676,7 @@ async function renderHotelOrdersMobile() {
           <button
             id="hotel-staff-order-next"
             type="button"
+            style="width:100%;"
           >
             다음
           </button>
