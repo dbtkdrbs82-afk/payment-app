@@ -19040,6 +19040,9 @@ const merchantTypeForOrderQuery =
 const isBeautyOrderQuery =
   merchantTypeForOrderQuery === '뷰티'
 
+  const isHotelOrderQuery =
+  merchantTypeForOrderQuery === '호텔'
+
   const beautyViewMode =
   params.get('view') || 'schedule'
 
@@ -19110,11 +19113,39 @@ let orderQuery = supabase
   })
 }
  
-  const receivedOrders =
-  (orders || []).filter((order) => order.order_status !== '완료')
+const receivedOrders =
+  (orders || []).filter((order: any) => {
+
+    if (isHotelOrderQuery) {
+
+      const isCompleted =
+        order.hotel_service_status === '완료' ||
+        order.order_status === '완료'
+
+      return !isCompleted
+    }
+
+    return (
+      order.order_status !== '완료'
+    )
+  })
+
 
 const completedOrders =
-  (orders || []).filter((order) => order.order_status === '완료')
+  (orders || []).filter((order: any) => {
+
+    if (isHotelOrderQuery) {
+
+      return (
+        order.hotel_service_status === '완료' ||
+        order.order_status === '완료'
+      )
+    }
+
+    return (
+      order.order_status === '완료'
+    )
+  })
 
 const totalSales =
   (orders || []).reduce((sum, order) => {
