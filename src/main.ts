@@ -21316,6 +21316,140 @@ ${isBeauty ? `
               <button id="preview-order-message">주문 미리듣기</button>
               <button id="save-call-message">저장</button>
             </div>
+
+            <div
+  style="
+    margin-top:24px;
+    padding-top:20px;
+    border-top:1px solid #e5e7eb;
+  "
+>
+  <h4
+    style="
+      margin:0 0 12px;
+      font-size:16px;
+    "
+  >
+    🔒 계정 보안
+  </h4>
+
+  <button
+    id="merchant-password-change-open"
+    type="button"
+    style="
+      width:100%;
+      height:46px;
+      border:0;
+      border-radius:8px;
+      background:#174981;
+      color:#ffffff;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+    "
+  >
+    비밀번호 변경
+  </button>
+
+  <div
+    id="merchant-password-change-panel"
+    style="
+      display:none;
+      margin-top:16px;
+    "
+  >
+
+    <label
+      style="
+        display:block;
+        margin-bottom:7px;
+        font-weight:700;
+      "
+    >
+      현재 비밀번호
+    </label>
+
+    <input
+      id="merchant-current-password"
+      type="password"
+      autocomplete="current-password"
+      style="
+        width:100%;
+        box-sizing:border-box;
+        margin-bottom:14px;
+      "
+    >
+
+
+    <label
+      style="
+        display:block;
+        margin-bottom:7px;
+        font-weight:700;
+      "
+    >
+      새 비밀번호
+    </label>
+
+    <input
+      id="merchant-new-password"
+      type="password"
+      autocomplete="new-password"
+      placeholder="영문/숫자 포함 8자리 이상"
+      style="
+        width:100%;
+        box-sizing:border-box;
+        margin-bottom:14px;
+      "
+    >
+
+
+    <label
+      style="
+        display:block;
+        margin-bottom:7px;
+        font-weight:700;
+      "
+    >
+      새 비밀번호 확인
+    </label>
+
+    <input
+      id="merchant-new-password-confirm"
+      type="password"
+      autocomplete="new-password"
+      style="
+        width:100%;
+        box-sizing:border-box;
+        margin-bottom:14px;
+      "
+    >
+
+
+    <div
+      style="
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:8px;
+      "
+    >
+      <button
+        id="merchant-password-change-save"
+        type="button"
+      >
+        변경
+      </button>
+
+      <button
+        id="merchant-password-change-cancel"
+        type="button"
+      >
+        취소
+      </button>
+    </div>
+
+  </div>
+</div>
           </div>
         </div>
 
@@ -23142,6 +23276,303 @@ document.querySelector('#save-call-message')
       
       alert('설정이 저장되었습니다.')
 })
+
+document
+  .querySelector(
+    '#merchant-password-change-open'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      const panel =
+        document.querySelector<HTMLElement>(
+          '#merchant-password-change-panel'
+        )
+
+      if (!panel) {
+        return
+      }
+
+      panel.style.display =
+        panel.style.display === 'none'
+          ? 'block'
+          : 'none'
+    }
+  )
+
+
+document
+  .querySelector(
+    '#merchant-password-change-cancel'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      const panel =
+        document.querySelector<HTMLElement>(
+          '#merchant-password-change-panel'
+        )
+
+      if (panel) {
+        panel.style.display =
+          'none'
+      }
+
+
+      const currentPasswordInput =
+        document.querySelector<HTMLInputElement>(
+          '#merchant-current-password'
+        )
+
+      const newPasswordInput =
+        document.querySelector<HTMLInputElement>(
+          '#merchant-new-password'
+        )
+
+      const confirmPasswordInput =
+        document.querySelector<HTMLInputElement>(
+          '#merchant-new-password-confirm'
+        )
+
+
+      if (currentPasswordInput) {
+        currentPasswordInput.value = ''
+      }
+
+      if (newPasswordInput) {
+        newPasswordInput.value = ''
+      }
+
+      if (confirmPasswordInput) {
+        confirmPasswordInput.value = ''
+      }
+    }
+  )
+
+
+document
+  .querySelector(
+    '#merchant-password-change-save'
+  )
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      const currentPassword =
+        (
+          document.querySelector<HTMLInputElement>(
+            '#merchant-current-password'
+          )?.value || ''
+        ).trim()
+
+
+      const newPassword =
+        (
+          document.querySelector<HTMLInputElement>(
+            '#merchant-new-password'
+          )?.value || ''
+        ).trim()
+
+
+      const newPasswordConfirm =
+        (
+          document.querySelector<HTMLInputElement>(
+            '#merchant-new-password-confirm'
+          )?.value || ''
+        ).trim()
+
+
+      if (
+        !currentPassword ||
+        !newPassword ||
+        !newPasswordConfirm
+      ) {
+
+        alert(
+          '비밀번호를 모두 입력해주세요.'
+        )
+
+        return
+      }
+
+
+      if (
+        newPassword.length < 8
+      ) {
+
+        alert(
+          '새 비밀번호는 8자리 이상 입력해주세요.'
+        )
+
+        return
+      }
+
+
+      if (
+        !/[A-Za-z]/.test(
+          newPassword
+        ) ||
+        !/[0-9]/.test(
+          newPassword
+        )
+      ) {
+
+        alert(
+          '새 비밀번호는 영문과 숫자를 모두 포함해주세요.'
+        )
+
+        return
+      }
+
+
+      if (
+        newPassword !==
+        newPasswordConfirm
+      ) {
+
+        alert(
+          '새 비밀번호 확인이 일치하지 않습니다.'
+        )
+
+        return
+      }
+
+
+      if (
+        currentPassword ===
+        newPassword
+      ) {
+
+        alert(
+          '현재 비밀번호와 다른 비밀번호를 입력해주세요.'
+        )
+
+        return
+      }
+
+
+      const {
+        data: passwordMerchant,
+        error: passwordCheckError
+      } =
+        await supabase
+          .from('merchants')
+          .select(
+            'merchant_password'
+          )
+          .eq(
+            'id',
+            merchantId
+          )
+          .single()
+
+
+      if (
+        passwordCheckError ||
+        !passwordMerchant
+      ) {
+
+        alert(
+          '현재 비밀번호 확인에 실패했습니다.'
+        )
+
+        return
+      }
+
+
+      if (
+        String(
+          passwordMerchant
+            .merchant_password ||
+          ''
+        ).trim() !==
+        currentPassword
+      ) {
+
+        alert(
+          '현재 비밀번호가 일치하지 않습니다.'
+        )
+
+        return
+      }
+
+
+      const {
+        error: passwordUpdateError
+      } =
+        await supabase
+          .from('merchants')
+          .update({
+            merchant_password:
+              newPassword
+          })
+          .eq(
+            'id',
+            merchantId
+          )
+
+
+      if (
+        passwordUpdateError
+      ) {
+
+        alert(
+          '비밀번호 변경 실패: ' +
+          passwordUpdateError.message
+        )
+
+        return
+      }
+
+
+      alert(
+        '비밀번호가 변경되었습니다.'
+      )
+
+
+      const panel =
+        document.querySelector<HTMLElement>(
+          '#merchant-password-change-panel'
+        )
+
+      if (panel) {
+        panel.style.display =
+          'none'
+      }
+
+
+      const currentPasswordInput =
+        document.querySelector<HTMLInputElement>(
+          '#merchant-current-password'
+        )
+
+      const newPasswordInput =
+        document.querySelector<HTMLInputElement>(
+          '#merchant-new-password'
+        )
+
+      const confirmPasswordInput =
+        document.querySelector<HTMLInputElement>(
+          '#merchant-new-password-confirm'
+        )
+
+
+      if (currentPasswordInput) {
+        currentPasswordInput.value = ''
+      }
+
+      if (newPasswordInput) {
+        newPasswordInput.value = ''
+      }
+
+      if (confirmPasswordInput) {
+        confirmPasswordInput.value = ''
+      }
+
+    }
+  )
 
 const getLocalDateTextForMerchant = (date: Date) => {
   const year = date.getFullYear()
