@@ -2424,6 +2424,17 @@ const extraFile =
     return
   }
 
+  const submitButton =
+  document.querySelector<HTMLButtonElement>(
+    '#merchant-apply-submit'
+  )
+
+if (submitButton) {
+  submitButton.disabled = true
+  submitButton.textContent =
+    '가입신청 처리 중...'
+}
+
 const safeTime = Date.now()
 
 const businessFileName = businessFile
