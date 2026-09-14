@@ -10367,13 +10367,16 @@ async function renderHotelOrdersMobile() {
                 .update({
                   hotel_service_status:
                     '완료',
-
+                
+                  order_status:
+                    '완료',
+                
                   hotel_completed_by_staff_id:
                     staffId,
-
+                
                   hotel_completed_by_staff_name:
                     staffName,
-
+                
                   hotel_completed_at:
                     new Date()
                       .toISOString()

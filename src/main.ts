@@ -21790,27 +21790,80 @@ const hotelCustomerRequestHtml =
         '</td>' +
     
         '<td>' +
-          (
-            order.cancel_status === '취소요청'
-              ? '<span class="order-status-cancel-request">취소요청</span>'
-              : order.order_status === '취소완료'
-                ? '<span class="order-status-cancel">취소완료</span>'
-                : order.order_status === '완료'
-                  ? '<span class="order-status-complete">완료</span>'
-                  : '<span class="order-status-received">접수</span>'
-          ) +
-        '</td>' +
-    
-        '<td>' +
+  (
+    order.cancel_status === '취소요청'
+      ? '<span class="order-status-cancel-request">취소요청</span>'
+
+      : order.cancel_status === '취소완료' ||
+        order.order_status === '취소완료'
+        ? '<span class="order-status-cancel">취소완료</span>'
+
+        : order.hotel_service_status === '완료'
+          ? '<span class="order-status-complete">완료</span>'
+
+          : order.hotel_service_status === '처리중'
+            ? '<span class="order-status-received">처리중</span>'
+
+            : '<span class="order-status-received">접수</span>'
+  ) +
+'</td>' +
+
+'<td>' +
   (
     order.cancel_status === '취소완료' ||
     order.order_status === '취소완료'
       ? '취소완료'
-      : order.order_status === '완료'
-        ? '완료'
-        : '<button class="order-complete-button" data-id="' +
-            order.id +
-          '">완료처리</button>'
+
+      : order.hotel_service_status === '완료'
+        ? (
+            '<strong>' +
+              (
+                order.hotel_completed_by_staff_name ||
+                order.hotel_accepted_by_staff_name ||
+                '직원'
+              ) +
+            '</strong>' +
+
+            '<br>' +
+
+            '<span style="font-size:12px;color:#667085;">' +
+              '완료 ' +
+              (
+                order.hotel_completed_at
+                  ? new Date(
+                      order.hotel_completed_at
+                    ).toLocaleString('ko-KR')
+                  : ''
+              ) +
+            '</span>'
+          )
+
+        : order.hotel_service_status === '처리중'
+          ? (
+              '<strong>' +
+                (
+                  order.hotel_accepted_by_staff_name ||
+                  '직원'
+                ) +
+              '</strong>' +
+
+              '<br>' +
+
+              '<span style="font-size:12px;color:#667085;">' +
+                '처리중 ' +
+                (
+                  order.hotel_accepted_at
+                    ? new Date(
+                        order.hotel_accepted_at
+                      ).toLocaleString('ko-KR')
+                    : ''
+                ) +
+              '</span>'
+            )
+
+          : '<button class="order-complete-button" data-id="' +
+              order.id +
+            '">완료처리</button>'
   ) +
 '</td>'
     
