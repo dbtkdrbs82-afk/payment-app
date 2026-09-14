@@ -2561,7 +2561,7 @@ branch_admin_name: matchedBranch?.admin_name || '',
 business_type: (document.getElementById('apply-business-item') as HTMLInputElement)?.value || '',
 product_item: (document.getElementById('apply-product-item') as HTMLInputElement)?.value || '',
     email: (document.getElementById('apply-email') as HTMLInputElement)?.value || '',
-
+    merchant_password: applyPassword,
     zipcode: (document.getElementById('apply-zipcode') as HTMLInputElement)?.value || '',
     address: (document.getElementById('apply-address') as HTMLInputElement)?.value || '',
     address_detail: (document.getElementById('apply-address-detail') as HTMLInputElement)?.value || '',
@@ -2624,57 +2624,7 @@ memo: (document.getElementById('apply-memo') as HTMLTextAreaElement)?.value || '
     return
   }
 
-  const passwordSaveResponse =
-  await fetch(
-    '/api/merchant-apply-password',
-    {
-      method: 'POST',
-
-      headers: {
-        'Content-Type':
-          'application/json'
-      },
-
-      body:
-        JSON.stringify({
-          merchantId:
-            createdMerchant.id,
-
-          ownerName:
-            createdMerchant.owner_name || '',
-
-          phone:
-            createdMerchant.phone || '',
-
-          email:
-            createdMerchant.email || '',
-
-          password:
-            applyPassword
-        })
-    }
-  )
-
-
-const passwordSaveResult =
-  await passwordSaveResponse.json()
-
-
-if (
-  !passwordSaveResponse.ok ||
-  !passwordSaveResult.success
-) {
-
-  alert(
-    '가입신청은 저장되었지만 비밀번호 등록에 실패했습니다.\n\n' +
-    (
-      passwordSaveResult?.message ||
-      '비밀번호 저장정보를 확인해주세요.'
-    )
-  )
-
-  return
-}
+  
   
   const tossRefSellerId =
     'MER' +
@@ -14235,27 +14185,22 @@ document.querySelectorAll('.product-delete-button')
       const loginId =
         'MER' + String(merchantId).padStart(4, '0')
 
-      const tempPassword =
-        '1234'
-
-      const { error } = await supabase
+        const { error } = await supabase
         .from('merchants')
         .update({
           status: '승인',
-          merchant_login_id: loginId,
-          merchant_password: tempPassword
+          merchant_login_id: loginId
         })
         .eq('id', Number(merchantId))
-
+      
       if (error) {
         alert('승인 실패: ' + error.message)
         return
       }
-
+      
       alert(
         '승인 완료\n' +
-        '가맹점 아이디: ' + loginId + '\n' +
-        '임시 비밀번호: ' + tempPassword
+        '가맹점 아이디: ' + loginId
       )
 
       location.reload()
