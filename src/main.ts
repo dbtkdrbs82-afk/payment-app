@@ -2171,6 +2171,22 @@ location.href = ref
           <label>이메일 *</label>
           <input id="apply-email" type="email">
 
+          <label>비밀번호 *</label>
+<input
+  id="apply-password"
+  type="password"
+  placeholder="영문/숫자 포함 8자리 이상"
+  autocomplete="new-password"
+>
+
+<label>비밀번호 확인 *</label>
+<input
+  id="apply-password-confirm"
+  type="password"
+  placeholder="비밀번호를 다시 입력해주세요"
+  autocomplete="new-password"
+>
+
           <label>사업자유형 *</label>
           <select id="apply-business-type">
             <option value="">선택</option>
@@ -2347,6 +2363,46 @@ document.querySelector<HTMLButtonElement>('#find-postcode-btn')
    
 document.querySelector<HTMLButtonElement>('#merchant-apply-submit')
 ?.addEventListener('click', async () => {
+
+  const applyPassword =
+  document.querySelector<HTMLInputElement>(
+    '#apply-password'
+  )?.value || ''
+
+const applyPasswordConfirm =
+  document.querySelector<HTMLInputElement>(
+    '#apply-password-confirm'
+  )?.value || ''
+
+
+if (applyPassword.length < 8) {
+  alert(
+    '비밀번호는 8자리 이상 입력해주세요.'
+  )
+  return
+}
+
+
+if (
+  !/[A-Za-z]/.test(applyPassword) ||
+  !/[0-9]/.test(applyPassword)
+) {
+  alert(
+    '비밀번호는 영문과 숫자를 모두 포함해주세요.'
+  )
+  return
+}
+
+
+if (
+  applyPassword !==
+  applyPasswordConfirm
+) {
+  alert(
+    '비밀번호 확인이 일치하지 않습니다.'
+  )
+  return
+}  
 
   const businessFile =
   document.querySelector<HTMLInputElement>('#apply-file-business-license')?.files?.[0]
@@ -2567,6 +2623,58 @@ memo: (document.getElementById('apply-memo') as HTMLTextAreaElement)?.value || '
     )
     return
   }
+
+  const passwordSaveResponse =
+  await fetch(
+    '/api/merchant-apply-password',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          merchantId:
+            createdMerchant.id,
+
+          ownerName:
+            createdMerchant.owner_name || '',
+
+          phone:
+            createdMerchant.phone || '',
+
+          email:
+            createdMerchant.email || '',
+
+          password:
+            applyPassword
+        })
+    }
+  )
+
+
+const passwordSaveResult =
+  await passwordSaveResponse.json()
+
+
+if (
+  !passwordSaveResponse.ok ||
+  !passwordSaveResult.success
+) {
+
+  alert(
+    '가입신청은 저장되었지만 비밀번호 등록에 실패했습니다.\n\n' +
+    (
+      passwordSaveResult?.message ||
+      '비밀번호 저장정보를 확인해주세요.'
+    )
+  )
+
+  return
+}
   
   const tossRefSellerId =
     'MER' +
@@ -18790,52 +18898,110 @@ const orderIdValue =
       return
     }
 
-    const { data: merchants, error } = await supabase
-      .from('merchants')
-      .select('*')
-      .eq('merchant_login_id', loginId)
+    const loginResponse =
+  await fetch(
+    '/api/merchant-login',
+    {
+      method: 'POST',
 
-    if (error) {
-      alert('로그인 조회 실패: ' + error.message)
-      return
+      headers: {
+        'Content-Type':
+          'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          loginId:
+            loginId,
+
+          password:
+            password
+        })
     }
+  )
 
-    const merchant = (merchants || []).find((item) => {
-      return String(item.merchant_password || '').trim() === password
-    })
 
-    if (!merchant) {
-      alert('아이디 또는 비밀번호가 올바르지 않습니다.')
-      return
-    }
+const loginResult =
+  await loginResponse.json()
 
-    sessionStorage.setItem('login_merchant_id', String(merchant.id))
-    sessionStorage.setItem('login_merchant_code', merchant.merchant_login_id || '')
-    sessionStorage.setItem('login_merchant_name', merchant.merchant_name || '')
-    sessionStorage.setItem('login_merchant_type', merchant.merchant_type || '일반매장')
 
-    localStorage.setItem(
-      'login_merchant_id',
-      String(merchant.id)
-    )
-    
-    localStorage.setItem(
-      'login_merchant_code',
-      merchant.merchant_login_id || ''
-    )
-    
-    localStorage.setItem(
-      'login_merchant_name',
-      merchant.merchant_name || ''
-    )
-    
-    localStorage.setItem(
-      'login_merchant_type',
-      merchant.merchant_type || '일반매장'
-    )
+if (
+  !loginResponse.ok ||
+  !loginResult.success
+) {
 
-    alert((merchant.merchant_name || '가맹점') + '님 로그인되었습니다.')
-    window.location.href = '/merchant-admin'
+  alert(
+    loginResult?.message ||
+    '아이디 또는 비밀번호가 올바르지 않습니다.'
+  )
+
+  return
+}
+
+
+const merchant =
+  loginResult.merchant
+
+
+sessionStorage.setItem(
+  'login_merchant_id',
+  String(merchant.id)
+)
+
+sessionStorage.setItem(
+  'login_merchant_code',
+  String(merchant.loginId || '')
+)
+
+sessionStorage.setItem(
+  'login_merchant_name',
+  String(merchant.name || '')
+)
+
+sessionStorage.setItem(
+  'login_merchant_type',
+  String(
+    merchant.type ||
+    '일반매장'
+  )
+)
+
+
+localStorage.setItem(
+  'login_merchant_id',
+  String(merchant.id)
+)
+
+localStorage.setItem(
+  'login_merchant_code',
+  String(merchant.loginId || '')
+)
+
+localStorage.setItem(
+  'login_merchant_name',
+  String(merchant.name || '')
+)
+
+localStorage.setItem(
+  'login_merchant_type',
+  String(
+    merchant.type ||
+    '일반매장'
+  )
+)
+
+
+alert(
+  String(
+    merchant.name ||
+    '가맹점'
+  ) +
+  '님 로그인되었습니다.'
+)
+
+
+window.location.href =
+  '/merchant-admin'
   })
 
         document.querySelector('#merchant-signup-button')

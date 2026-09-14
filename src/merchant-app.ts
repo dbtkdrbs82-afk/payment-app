@@ -18692,212 +18692,265 @@ function renderMerchantLogin() {
 
         try {
 
-          const {
-            data: merchants,
-            error
-          } =
-            await supabase
-              .from('merchants')
-              .select(`
-                id,
-                merchant_login_id,
-                merchant_password,
-                merchant_name,
-                merchant_type
-              `)
-              .eq(
-                'merchant_login_id',
-                loginId
-              )
-        
-        
-          if (error) {
-        
-            if (message) {
-              message.textContent =
-                '로그인 조회 실패: ' +
-                error.message
-            }
-        
-            return
-          }
-        
-        
-          const merchant =
-            (merchants || []).find(
-              (item: any) =>
-                String(
-                  item.merchant_password || ''
-                ).trim() === password
-            )
-        
-        
-            if (!merchant) {
+          const merchantResponse =
+          await fetch(
+            '/api/merchant-login',
+            {
+              method: 'POST',
 
-              const staffResponse =
-                await fetch(
-                  '/api/hotel-staff-login',
-                  {
-                    method: 'POST',
-            
-                    headers: {
-                      'Content-Type':
-                        'application/json'
-                    },
-            
-                    body:
-                      JSON.stringify({
-                        loginId:
-                          loginId,
-            
-                        password:
-                          password
-                      })
-                  }
-                )
-            
-            
-              const staffResult =
-                await staffResponse.json()
-            
-            
-              if (
-                staffResponse.ok &&
-                staffResult.success
-              ) {
-            
-                const staffLoginData:
-                  Record<string, string> = {
-            
-                    login_merchant_id:
-                      String(
-                        staffResult.merchant.id
-                      ),
-            
-                    login_merchant_code:
-                      '',
-            
-                    login_merchant_name:
-                      String(
-                        staffResult.merchant.name ||
-                        ''
-                      ),
-            
-                    login_merchant_type:
-                      '호텔',
-            
-                    hotel_staff_mode:
-                      'true',
-            
-                    hotel_staff_id:
-                      String(
-                        staffResult.staff.id
-                      ),
-            
-                    hotel_staff_name:
-                      String(
-                        staffResult.staff.staffName ||
-                        ''
-                      ),
-            
-                    hotel_staff_login_id:
-                      String(
-                        staffResult.staff.loginId ||
-                        ''
-                      ),
-            
-                    hotel_staff_role:
-                      String(
-                        staffResult.staff.role ||
-                        'STAFF'
-                      )
-                  }
-            
-            
-                Object.entries(
-                  staffLoginData
-                ).forEach(
-                  ([key, value]) => {
-            
-                    sessionStorage.setItem(
-                      key,
-                      value
-                    )
-            
-                    localStorage.setItem(
-                      key,
-                      value
-                    )
-            
-                  }
-                )
-            
-            
-                location.href =
-                  '/merchant-app/hotel/orders'
-            
-                return
-              }
-            
-            
-              if (message) {
-            
-                message.textContent =
-                  staffResult?.message ||
-                  '아이디 또는 비밀번호가 올바르지 않습니다.'
-            
-              }
-            
-              return
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+
+              body:
+                JSON.stringify({
+                  loginId:
+                    loginId,
+
+                  password:
+                    password
+                })
             }
-        
-        
+          )
+
+
+        const merchantResult =
+          await merchantResponse.json()
+
+
+        /* =========================================
+           일반 가맹점 로그인 성공
+        ========================================= */
+
+        if (
+          merchantResponse.ok &&
+          merchantResult.success
+        ) {
+
+          const merchant =
+            merchantResult.merchant
+
+
           const merchantLoginData:
             Record<string, string> = {
-        
+
               login_merchant_id:
                 String(
-                  merchant.id || ''
+                  merchant.id ||
+                  ''
                 ),
-        
+
               login_merchant_code:
                 String(
-                  merchant.merchant_login_id || ''
+                  merchant.loginId ||
+                  ''
                 ),
-        
+
               login_merchant_name:
                 String(
-                  merchant.merchant_name || ''
+                  merchant.name ||
+                  ''
                 ),
-        
+
               login_merchant_type:
                 String(
-                  merchant.merchant_type ||
+                  merchant.type ||
                   '일반매장'
                 )
             }
-        
-        
+
+
           Object.entries(
             merchantLoginData
           ).forEach(
             ([key, value]) => {
-        
+
               sessionStorage.setItem(
                 key,
                 value
               )
-        
+
               localStorage.setItem(
                 key,
                 value
               )
+
             }
           )
-        
-        
+
+
+          /*
+ * 이전 호텔 직원 로그인 정보 제거
+ */
+;[
+            'hotel_staff_mode',
+            'hotel_staff_id',
+            'hotel_staff_name',
+            'hotel_staff_login_id',
+            'hotel_staff_role'
+          ].forEach(
+            (key) => {
+
+              sessionStorage.removeItem(
+                key
+              )
+
+              localStorage.removeItem(
+                key
+              )
+
+            }
+          )
+
+
           location.href =
             '/merchant-app/home'
+
+          return
+        }
+
+
+        /*
+         * 가맹점 계정을 찾았지만
+         * 운영상태 등의 이유로 거절된 경우
+         */
+        if (
+          merchantResponse.status !== 401
+        ) {
+
+          if (message) {
+
+            message.textContent =
+              merchantResult?.message ||
+              '로그인할 수 없습니다.'
+
+          }
+
+          return
+        }
+
+
+        /* =========================================
+           호텔 직원 계정 확인
+        ========================================= */
+
+        const staffResponse =
+          await fetch(
+            '/api/hotel-staff-login',
+            {
+              method: 'POST',
+
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+
+              body:
+                JSON.stringify({
+                  loginId:
+                    loginId,
+
+                  password:
+                    password
+                })
+            }
+          )
+
+
+        const staffResult =
+          await staffResponse.json()
+
+
+        if (
+          staffResponse.ok &&
+          staffResult.success
+        ) {
+
+          const staffLoginData:
+            Record<string, string> = {
+
+              login_merchant_id:
+                String(
+                  staffResult.merchant.id
+                ),
+
+              login_merchant_code:
+                '',
+
+              login_merchant_name:
+                String(
+                  staffResult.merchant.name ||
+                  ''
+                ),
+
+              login_merchant_type:
+                '호텔',
+
+              hotel_staff_mode:
+                'true',
+
+              hotel_staff_id:
+                String(
+                  staffResult.staff.id
+                ),
+
+              hotel_staff_name:
+                String(
+                  staffResult.staff.staffName ||
+                  ''
+                ),
+
+              hotel_staff_login_id:
+                String(
+                  staffResult.staff.loginId ||
+                  ''
+                ),
+
+              hotel_staff_role:
+                String(
+                  staffResult.staff.role ||
+                  'STAFF'
+                )
+            }
+
+
+          Object.entries(
+            staffLoginData
+          ).forEach(
+            ([key, value]) => {
+
+              sessionStorage.setItem(
+                key,
+                value
+              )
+
+              localStorage.setItem(
+                key,
+                value
+              )
+
+            }
+          )
+
+
+          location.href =
+            '/merchant-app/hotel/orders'
+
+          return
+        }
+
+
+        if (message) {
+
+          message.textContent =
+            staffResult?.message ||
+            merchantResult?.message ||
+            '아이디 또는 비밀번호가 올바르지 않습니다.'
+
+        }
+
+        return
 
 
         } catch (error) {
