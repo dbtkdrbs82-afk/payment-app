@@ -17,88 +17,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
 
-/* =========================================
-   호텔 직원 비밀번호 암호화
-========================================= */
 
-function hotelStaffBytesToBase64(
-  bytes: Uint8Array
-) {
-
-  let binary = ''
-
-  bytes.forEach(
-    (byte) => {
-      binary +=
-        String.fromCharCode(byte)
-    }
-  )
-
-  return btoa(binary)
-}
-
-
-async function createHotelStaffPasswordHash(
-  password: string
-) {
-
-  const encoder =
-    new TextEncoder()
-
-  const salt =
-    crypto.getRandomValues(
-      new Uint8Array(16)
-    )
-
-
-  const keyMaterial =
-    await crypto.subtle.importKey(
-      'raw',
-      encoder.encode(password),
-      'PBKDF2',
-      false,
-      [
-        'deriveBits'
-      ]
-    )
-
-
-  const hashBuffer =
-    await crypto.subtle.deriveBits(
-      {
-        name:
-          'PBKDF2',
-
-        salt,
-
-        iterations:
-          210000,
-
-        hash:
-          'SHA-256'
-      },
-      keyMaterial,
-      256
-    )
-
-
-  const hash =
-    new Uint8Array(
-      hashBuffer
-    )
-
-
-  return (
-    'pbkdf2$210000$' +
-    hotelStaffBytesToBase64(
-      salt
-    ) +
-    '$' +
-    hotelStaffBytesToBase64(
-      hash
-    )
-  )
-}
 
 
 
@@ -23763,42 +23682,71 @@ if (orderRequestError) {
       
         } else {
       
-          const {
-            data: hotelStaffData,
-            error: hotelStaffError
-          } =
-            await supabase
-              .from(
-                'hotel_staff'
-              )
-              .select('*')
-              .eq(
-                'merchant_id',
-                merchantId
-              )
-              .order(
-                'id',
-                {
-                  ascending:
-                    true
-                }
-              )
-      
-      
-          if (
-            hotelStaffError
-          ) {
-      
-            alert(
-              '직원 목록 조회 실패: ' +
-              hotelStaffError.message
-            )
-          }
-      
-      
-          const staffList =
-            hotelStaffData ||
-            []
+          const merchantLoginId =
+  sessionStorage.getItem(
+    'login_merchant_code'
+  ) ||
+  localStorage.getItem(
+    'login_merchant_code'
+  ) ||
+  ''
+
+
+const merchantPassword =
+  prompt(
+    '직원관리 확인을 위해 호텔 관리자 비밀번호를 입력해주세요.'
+  ) || ''
+
+
+const staffListResponse =
+  await fetch(
+    '/api/hotel-staff-manage',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          action:
+            'list',
+
+          merchantId:
+            merchantId,
+
+          merchantLoginId:
+            merchantLoginId,
+
+          merchantPassword:
+            merchantPassword
+        })
+    }
+  )
+
+
+const staffListResult =
+  await staffListResponse.json()
+
+
+if (
+  !staffListResponse.ok ||
+  !staffListResult.success
+) {
+
+  alert(
+    staffListResult?.message ||
+    '직원 목록을 불러오지 못했습니다.'
+  )
+}
+
+
+const staffList =
+  staffListResult.success
+    ? staffListResult.staff || []
+    : []
       
       
           const activeStaffCount =
@@ -24248,85 +24196,74 @@ if (orderRequestError) {
                 }
       
       
-                const passwordHash =
-                  await createHotelStaffPasswordHash(
-                    password
-                  )
-      
-      
-                const {
-                  error
-                } =
-                  await supabase
-                    .from(
-                      'hotel_staff'
-                    )
-                    .insert({
-                      merchant_id:
-                        merchantId,
-      
-                      staff_name:
-                        staffName,
-      
-                      login_id:
-                        loginId,
-      
-                      password_hash:
-                        passwordHash,
-      
-                      status:
-                        '사용중',
-      
-                      role:
-                        'STAFF',
-      
-                      updated_at:
-                        new Date()
-                          .toISOString()
-                    })
-      
-      
-                if (error) {
-      
-                  if (
-                    String(
-                      error.message
-                    )
-                      .toLowerCase()
-                      .includes(
-                        'unique'
-                      )
-                  ) {
-      
-                    alert(
-                      '이미 사용 중인 로그인 아이디입니다.'
-                    )
-      
-                    return
-                  }
-      
-      
-                  alert(
-                    '직원 등록 실패: ' +
-                    error.message
-                  )
-      
-                  return
-                }
-      
-      
-                alert(
-                  '직원이 등록되었습니다.'
-                )
-      
-      
-                location.reload()
+                const createResponse =
+  await fetch(
+    '/api/hotel-staff-manage',
+    {
+      method: 'POST',
+
+      headers: {
+        'Content-Type':
+          'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          action:
+            'create',
+
+          merchantId:
+            merchantId,
+
+          merchantLoginId:
+            merchantLoginId,
+
+          merchantPassword:
+            merchantPassword,
+
+          staffName:
+            staffName,
+
+          loginId:
+            loginId,
+
+          password:
+            password
+        })
+    }
+  )
+
+
+const createResult =
+  await createResponse.json()
+
+
+if (
+  !createResponse.ok ||
+  !createResult.success
+) {
+
+  alert(
+    createResult?.message ||
+    '직원 등록에 실패했습니다.'
+  )
+
+  return
+}
+
+
+alert(
+  '직원이 등록되었습니다.'
+)
+
+
+location.reload()
       
               }
             )
       
       
-          document
+            document
             .querySelectorAll<HTMLButtonElement>(
               '.hotel-staff-status-button'
             )
@@ -24334,76 +24271,110 @@ if (orderRequestError) {
               (
                 button
               ) => {
-      
+          
                 button.addEventListener(
                   'click',
                   async () => {
-      
+          
                     const staffId =
                       Number(
                         button.dataset.id ||
                         0
                       )
-      
-      
+          
+          
                     const currentStatus =
                       button.dataset.status ||
                       '사용중'
-      
-      
+          
+          
                     const nextStatus =
                       currentStatus ===
                       '사용중'
                         ? '사용중지'
                         : '사용중'
-      
-      
-                    const {
-                      error
-                    } =
-                      await supabase
-                        .from(
-                          'hotel_staff'
-                        )
-                        .update({
-                          status:
-                            nextStatus,
-      
-                          updated_at:
-                            new Date()
-                              .toISOString()
-                        })
-                        .eq(
-                          'id',
-                          staffId
-                        )
-                        .eq(
-                          'merchant_id',
-                          merchantId
-                        )
-      
-      
-                    if (error) {
-      
+          
+          
+                    if (!staffId) {
+          
                       alert(
-                        '직원 상태 변경 실패: ' +
-                        error.message
+                        '직원 정보를 확인할 수 없습니다.'
                       )
-      
+          
                       return
                     }
-      
-      
+          
+          
+                    const statusResponse =
+                      await fetch(
+                        '/api/hotel-staff-manage',
+                        {
+                          method: 'POST',
+          
+                          headers: {
+                            'Content-Type':
+                              'application/json'
+                          },
+          
+                          body:
+                            JSON.stringify({
+                              action:
+                                'status',
+          
+                              merchantId:
+                                merchantId,
+          
+                              merchantLoginId:
+                                merchantLoginId,
+          
+                              merchantPassword:
+                                merchantPassword,
+          
+                              staffId:
+                                staffId,
+          
+                              status:
+                                nextStatus
+                            })
+                        }
+                      )
+          
+          
+                    const statusResult =
+                      await statusResponse.json()
+          
+          
+                    if (
+                      !statusResponse.ok ||
+                      !statusResult.success
+                    ) {
+          
+                      alert(
+                        statusResult?.message ||
+                        '직원 상태 변경에 실패했습니다.'
+                      )
+          
+                      return
+                    }
+          
+          
+                    alert(
+                      nextStatus === '사용중지'
+                        ? '직원 계정이 사용중지되었습니다.'
+                        : '직원 계정이 다시 활성화되었습니다.'
+                    )
+          
+          
                     location.reload()
-      
+          
                   }
                 )
-      
+          
               }
             )
       
       
-          document
+            document
             .querySelectorAll<HTMLButtonElement>(
               '.hotel-staff-password-button'
             )
@@ -24411,98 +24382,119 @@ if (orderRequestError) {
               (
                 button
               ) => {
-      
+          
                 button.addEventListener(
                   'click',
                   async () => {
-      
+          
                     const staffId =
                       Number(
                         button.dataset.id ||
                         0
                       )
-      
-      
+          
+          
                     const staffName =
                       button.dataset.name ||
                       '직원'
-      
-      
+          
+          
+                    if (!staffId) {
+          
+                      alert(
+                        '직원 정보를 확인할 수 없습니다.'
+                      )
+          
+                      return
+                    }
+          
+          
                     const newPassword =
                       prompt(
                         staffName +
                         ' 직원의 새 비밀번호를 입력해주세요.'
                       ) ||
                       ''
-      
-      
+          
+          
                     if (!newPassword) {
                       return
                     }
-      
-      
+          
+          
                     if (
                       newPassword.length <
                       6
                     ) {
-      
+          
                       alert(
                         '비밀번호는 6자리 이상 입력해주세요.'
                       )
-      
+          
                       return
                     }
-      
-      
-                    const passwordHash =
-                      await createHotelStaffPasswordHash(
-                        newPassword
+          
+          
+                    const passwordResponse =
+                      await fetch(
+                        '/api/hotel-staff-manage',
+                        {
+                          method: 'POST',
+          
+                          headers: {
+                            'Content-Type':
+                              'application/json'
+                          },
+          
+                          body:
+                            JSON.stringify({
+                              action:
+                                'password',
+          
+                              merchantId:
+                                merchantId,
+          
+                              merchantLoginId:
+                                merchantLoginId,
+          
+                              merchantPassword:
+                                merchantPassword,
+          
+                              staffId:
+                                staffId,
+          
+                              password:
+                                newPassword
+                            })
+                        }
                       )
-      
-      
-                    const {
-                      error
-                    } =
-                      await supabase
-                        .from(
-                          'hotel_staff'
-                        )
-                        .update({
-                          password_hash:
-                            passwordHash,
-      
-                          updated_at:
-                            new Date()
-                              .toISOString()
-                        })
-                        .eq(
-                          'id',
-                          staffId
-                        )
-                        .eq(
-                          'merchant_id',
-                          merchantId
-                        )
-      
-      
-                    if (error) {
-      
+          
+          
+                    const passwordResult =
+                      await passwordResponse.json()
+          
+          
+                    if (
+                      !passwordResponse.ok ||
+                      !passwordResult.success
+                    ) {
+          
                       alert(
-                        '비밀번호 변경 실패: ' +
-                        error.message
+                        passwordResult?.message ||
+                        '비밀번호 변경에 실패했습니다.'
                       )
-      
+          
                       return
                     }
-      
-      
+          
+          
                     alert(
                       '비밀번호가 변경되었습니다.'
                     )
-      
+          
                   }
                 )
-      
+          
               }
             )
       
