@@ -206,30 +206,30 @@ import type {
   
   
     const {
-      data: merchant,
-      error: merchantError
-    } =
-      await supabase
-        .from('merchants')
-        .select(`
-          id,
-          merchant_login_id,
-          merchant_password,
-          merchant_name,
-          merchant_type,
-          status
-        `)
-        .eq(
-          'merchant_login_id',
-          loginId
-        )
-        .maybeSingle()
-  
-  
-    if (
-      merchantError ||
-      !merchant
-    ) {
+        data: merchant,
+        error: merchantError
+      } =
+        await supabase
+          .from('merchants')
+          .select(`
+            id,
+            merchant_login_id,
+            merchant_password,
+            merchant_name,
+            merchant_type,
+            status
+          `)
+          .eq(
+            'merchant_login_id',
+            loginId
+          )
+          .maybeSingle()
+    
+    
+      if (
+        merchantError ||
+        !merchant
+      ) {
   
       return res
         .status(401)
