@@ -9311,6 +9311,1416 @@ async function renderBeautyHoursMobile() {
 
 }
 
+/* =========================================
+   호텔 모바일 주문/결제내역
+========================================= */
+
+async function renderHotelOrdersMobile() {
+
+  const merchantIdText =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+
+  if (!merchantIdText) {
+
+    location.replace(
+      '/merchant-app'
+    )
+
+    return
+  }
+
+
+  const merchantId =
+    Number(
+      merchantIdText
+    )
+
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '호텔'
+
+
+  const merchantType =
+    sessionStorage.getItem(
+      'login_merchant_type'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_type'
+    ) ||
+    ''
+
+
+  if (
+    merchantType !==
+    '호텔'
+  ) {
+
+    location.href =
+      '/merchant-app/home'
+
+    return
+  }
+
+
+  const params =
+    new URLSearchParams(
+      location.search
+    )
+
+
+  const getHotelKoreaDate = (
+    date: Date
+  ) => {
+
+    return new Intl.DateTimeFormat(
+      'en-CA',
+      {
+        timeZone:
+          'Asia/Seoul',
+
+        year:
+          'numeric',
+
+        month:
+          '2-digit',
+
+        day:
+          '2-digit'
+      }
+    ).format(
+      date
+    )
+
+  }
+
+
+  const today =
+    getHotelKoreaDate(
+      new Date()
+    )
+
+
+  const startDate =
+    params.get(
+      'start'
+    ) ||
+    today
+
+
+  const endDate =
+    params.get(
+      'end'
+    ) ||
+    today
+
+
+  const startIso =
+    new Date(
+      startDate +
+      'T00:00:00+09:00'
+    ).toISOString()
+
+
+  const endIso =
+    new Date(
+      endDate +
+      'T23:59:59.999+09:00'
+    ).toISOString()
+
+
+  const [
+    orderResult,
+    paymentResult
+  ] =
+    await Promise.all([
+
+      supabase
+        .from(
+          'orders'
+        )
+        .select('*')
+        .eq(
+          'merchant_id',
+          merchantId
+        )
+        .gte(
+          'created_at',
+          startIso
+        )
+        .lte(
+          'created_at',
+          endIso
+        )
+        .order(
+          'created_at',
+          {
+            ascending:
+              false
+          }
+        ),
+
+      supabase
+        .from(
+          'payments'
+        )
+        .select(`
+          id,
+          order_id,
+          payment_key,
+          amount,
+          settlement_amount,
+          approval_number,
+          approved_at,
+          created_at,
+          status
+        `)
+        .eq(
+          'merchant_id',
+          merchantId
+        )
+        .gte(
+          'created_at',
+          startIso
+        )
+        .lte(
+          'created_at',
+          endIso
+        )
+
+    ])
+
+
+  const orders =
+    orderResult.data ||
+    []
+
+
+  const payments =
+    paymentResult.data ||
+    []
+
+
+  const paidPayments =
+    payments.filter(
+      (payment: any) =>
+        payment.status ===
+        'paid'
+    )
+
+
+  const receivedCount =
+    orders.filter(
+      (order: any) =>
+        order.order_status !==
+          '완료' &&
+        order.order_status !==
+          '취소완료'
+    ).length
+
+
+  const completedCount =
+    orders.filter(
+      (order: any) =>
+        order.order_status ===
+        '완료'
+    ).length
+
+
+  const salesTotal =
+    paidPayments.reduce(
+      (
+        sum: number,
+        payment: any
+      ) =>
+        sum +
+        Number(
+          payment.amount ||
+          0
+        ),
+      0
+    )
+
+
+  const settlementTotal =
+    paidPayments.reduce(
+      (
+        sum: number,
+        payment: any
+      ) =>
+        sum +
+        Number(
+          payment
+            .settlement_amount ||
+          0
+        ),
+      0
+    )
+
+
+  const averageAmount =
+    orders.length > 0
+      ? Math.floor(
+          salesTotal /
+          orders.length
+        )
+      : 0
+
+
+  const requestedPage =
+    Math.max(
+      1,
+      Number(
+        params.get(
+          'page'
+        ) ||
+        1
+      )
+    )
+
+
+  const pageSize =
+    Math.max(
+      1,
+      Number(
+        params.get(
+          'size'
+        ) ||
+        10
+      )
+    )
+
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        orders.length /
+        pageSize
+      )
+    )
+
+
+  const currentPage =
+    Math.min(
+      requestedPage,
+      totalPages
+    )
+
+
+  const pageOrders =
+    orders.slice(
+      (
+        currentPage -
+        1
+      ) *
+        pageSize,
+
+      currentPage *
+        pageSize
+    )
+
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+
+        <button
+          id="hotel-mobile-order-home"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          홈
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <div class="merchant-mobile-page-title">
+
+          <h1>
+            주문/결제내역
+          </h1>
+
+          <span>
+            호텔 객실 주문관리
+          </span>
+
+        </div>
+
+
+        <div class="merchant-mobile-date-nav">
+
+          <button
+            id="hotel-mobile-order-prev"
+            type="button"
+          >
+            이전
+          </button>
+
+          <button
+            id="hotel-mobile-order-today"
+            type="button"
+          >
+            오늘
+          </button>
+
+          <button
+            id="hotel-mobile-order-next"
+            type="button"
+          >
+            다음
+          </button>
+
+          <button
+            id="hotel-mobile-order-month"
+            type="button"
+          >
+            당월
+          </button>
+
+        </div>
+
+
+        <div class="merchant-mobile-date-range">
+
+          <div>
+
+            <label>
+              시작일
+            </label>
+
+            <input
+              id="hotel-mobile-order-start"
+              type="date"
+              value="${startDate}"
+            >
+
+          </div>
+
+
+          <div>
+
+            <label>
+              종료일
+            </label>
+
+            <input
+              id="hotel-mobile-order-end"
+              type="date"
+              value="${endDate}"
+            >
+
+          </div>
+
+
+          <button
+            id="hotel-mobile-order-search"
+            type="button"
+          >
+            조회
+          </button>
+
+        </div>
+
+
+        <div class="merchant-mobile-order-summary">
+
+          <div class="beauty-mobile-order-summary-grid">
+
+            <div>
+
+              <strong>
+                주문수
+              </strong>
+
+              <span>
+                ${orders.length}건
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                접수
+              </strong>
+
+              <span>
+                ${receivedCount}건
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                완료
+              </strong>
+
+              <span>
+                ${completedCount}건
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                매출합계
+              </strong>
+
+              <span>
+                ${salesTotal.toLocaleString()}원
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                평균객단가
+              </strong>
+
+              <span>
+                ${averageAmount.toLocaleString()}원
+              </span>
+
+            </div>
+
+
+            <div>
+
+              <strong>
+                정산예정금액
+              </strong>
+
+              <span>
+                ${settlementTotal.toLocaleString()}원
+              </span>
+
+              <small
+                class="beauty-mobile-settlement-wait"
+              >
+                대기
+              </small>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div
+          id="hotel-mobile-order-list"
+          class="merchant-mobile-order-list"
+        >
+
+          ${
+            orderResult.error
+
+              ? `
+                <div class="merchant-mobile-order-empty">
+
+                  주문 조회 실패 :
+                  ${orderResult.error.message}
+
+                </div>
+              `
+
+              : pageOrders.length ===
+                0
+
+                ? `
+                  <div class="merchant-mobile-order-empty">
+
+                    주문내역이 없습니다.
+
+                  </div>
+                `
+
+                : pageOrders
+                    .map(
+                      (
+                        order: any,
+                        index: number
+                      ) => {
+
+                        const paymentForOrder =
+                          payments.find(
+                            (
+                              payment:
+                                any
+                            ) => {
+
+                              const paymentOrderId =
+                                String(
+                                  payment.order_id ||
+                                  ''
+                                ).replace(
+                                  /[^a-zA-Z0-9]/g,
+                                  ''
+                                )
+
+
+                              const orderPgId =
+                                String(
+                                  order.pg_order_id ||
+                                  ''
+                                ).replace(
+                                  /[^a-zA-Z0-9]/g,
+                                  ''
+                                )
+
+
+                              const sameOrderId =
+                                paymentOrderId &&
+                                orderPgId &&
+                                paymentOrderId ===
+                                  orderPgId
+
+
+                              const samePaymentKey =
+                                order.payment_key &&
+                                payment.payment_key &&
+                                String(
+                                  order.payment_key
+                                ) ===
+                                  String(
+                                    payment.payment_key
+                                  )
+
+
+                              const sameAmount =
+                                Number(
+                                  payment.amount ||
+                                  0
+                                ) ===
+                                  Number(
+                                    order.total_amount ||
+                                    0
+                                  )
+
+
+                              const timeGap =
+                                Math.abs(
+                                  new Date(
+                                    payment.created_at
+                                  ).getTime() -
+                                  new Date(
+                                    order.created_at
+                                  ).getTime()
+                                )
+
+
+                              return (
+                                sameOrderId ||
+                                samePaymentKey ||
+                                (
+                                  sameAmount &&
+                                  timeGap <
+                                    1000 *
+                                      60 *
+                                      5
+                                )
+                              )
+
+                            }
+                          )
+
+
+                        const orderNumber =
+                          order.order_no ||
+                          index + 1
+
+
+                        const roomNumber =
+                          order.room_number ||
+                          '-'
+
+
+                        const orderItems =
+                          Array.isArray(
+                            order.items
+                          )
+
+                            ? order.items
+                                .map(
+                                  (
+                                    item:
+                                      any
+                                  ) =>
+                                    (
+                                      item.name ||
+                                      item.product_name ||
+                                      '-'
+                                    ) +
+                                    ' x ' +
+                                    Number(
+                                      item.quantity ||
+                                      1
+                                    )
+                                )
+                                .join(
+                                  '<br>'
+                                )
+
+                            : '-'
+
+
+                        const statusText =
+                          order.cancel_status ===
+                            '취소요청'
+
+                            ? '취소요청'
+
+                            : order.order_status ===
+                                '취소완료'
+
+                              ? '취소완료'
+
+                              : order.order_status ===
+                                  '완료'
+
+                                ? '완료'
+
+                                : '접수'
+
+
+                        const paymentDate =
+                          paymentForOrder
+                            ?.approved_at ||
+                          paymentForOrder
+                            ?.created_at ||
+                          order.created_at
+
+
+                        return `
+                          <div
+                            class="
+                              merchant-mobile-order-card
+                              hotel-mobile-order-card
+                            "
+                          >
+
+                            <div
+                              style="
+                                display:flex;
+                                align-items:center;
+                                justify-content:space-between;
+                                margin-bottom:12px;
+                              "
+                            >
+
+                              <strong
+                                style="
+                                  font-size:22px;
+                                  font-weight:900;
+                                "
+                              >
+                                ROOM ${roomNumber}
+                              </strong>
+
+                              <strong
+                                style="
+                                  font-size:18px;
+                                "
+                              >
+                                ${Number(
+                                  order.total_amount ||
+                                  0
+                                ).toLocaleString()}원
+                              </strong>
+
+                            </div>
+
+
+                            <div
+                              class="beauty-mobile-order-row"
+                            >
+
+                              <span>
+                                주문번호
+                              </span>
+
+                              <strong>
+                                ${orderNumber}번
+                              </strong>
+
+                            </div>
+
+
+                            <div
+                              class="beauty-mobile-order-row"
+                            >
+
+                              <span>
+                                결제일시
+                              </span>
+
+                              <strong>
+
+                                ${
+                                  paymentDate
+
+                                    ? new Date(
+                                        paymentDate
+                                      )
+                                        .toLocaleString(
+                                          'ko-KR'
+                                        )
+
+                                    : '-'
+                                }
+
+                              </strong>
+
+                            </div>
+
+
+                            <div
+                              class="beauty-mobile-order-row"
+                            >
+
+                              <span>
+                                승인번호
+                              </span>
+
+                              <strong>
+                                ${
+                                  paymentForOrder
+                                    ?.approval_number ||
+                                  '-'
+                                }
+                              </strong>
+
+                            </div>
+
+
+                            <div
+                              style="
+                                margin-top:12px;
+                                padding:12px;
+                                background:#f8fafc;
+                                border-radius:10px;
+                              "
+                            >
+
+                              <span
+                                style="
+                                  display:block;
+                                  margin-bottom:6px;
+                                  font-size:12px;
+                                  color:#64748b;
+                                "
+                              >
+                                주문내용
+                              </span>
+
+                              <strong
+                                style="
+                                  line-height:1.7;
+                                "
+                              >
+                                ${orderItems}
+                              </strong>
+
+                            </div>
+
+
+                            ${
+                              order.customer_request
+
+                                ? `
+                                  <div
+                                    style="
+                                      margin-top:10px;
+                                      padding:12px;
+                                      border:1px solid #eadfca;
+                                      border-radius:10px;
+                                      background:#fffaf2;
+                                    "
+                                  >
+
+                                    <span
+                                      style="
+                                        display:block;
+                                        margin-bottom:5px;
+                                        font-size:12px;
+                                        color:#9a6d28;
+                                      "
+                                    >
+                                      요청사항
+                                    </span>
+
+                                    <strong>
+                                      ${order.customer_request}
+                                    </strong>
+
+                                  </div>
+                                `
+
+                                : ''
+                            }
+
+
+                            <div
+                              class="merchant-mobile-order-bottom"
+                              style="
+                                margin-top:14px;
+                              "
+                            >
+
+                              <span
+                                class="merchant-mobile-order-status"
+                                data-status="${statusText}"
+                              >
+                                ${statusText}
+                              </span>
+
+
+                              ${
+                                statusText ===
+                                  '완료' ||
+                                statusText ===
+                                  '취소완료'
+
+                                  ? `
+                                    <strong>
+                                      ${statusText}
+                                    </strong>
+                                  `
+
+                                  : `
+                                    <button
+                                      type="button"
+                                      class="hotel-mobile-order-complete"
+                                      data-id="${order.id}"
+                                    >
+                                      완료처리
+                                    </button>
+                                  `
+                              }
+
+                            </div>
+
+                          </div>
+                        `
+
+                      }
+                    )
+                    .join('')
+          }
+
+        </div>
+
+
+        <div
+          class="merchant-mobile-order-pagination"
+        >
+
+          <select
+            id="hotel-mobile-order-page-size"
+          >
+
+            <option
+              value="10"
+              ${
+                pageSize ===
+                10
+                  ? 'selected'
+                  : ''
+              }
+            >
+              10개씩 보기
+            </option>
+
+            <option
+              value="20"
+              ${
+                pageSize ===
+                20
+                  ? 'selected'
+                  : ''
+              }
+            >
+              20개씩 보기
+            </option>
+
+            <option
+              value="30"
+              ${
+                pageSize ===
+                30
+                  ? 'selected'
+                  : ''
+              }
+            >
+              30개씩 보기
+            </option>
+
+          </select>
+
+
+          <div
+            class="merchant-mobile-order-page-buttons"
+          >
+
+            <button
+              id="hotel-mobile-order-page-prev"
+              type="button"
+              ${
+                currentPage <=
+                1
+                  ? 'disabled'
+                  : ''
+              }
+            >
+              이전
+            </button>
+
+            <strong>
+              ${currentPage} / ${totalPages}
+            </strong>
+
+            <button
+              id="hotel-mobile-order-page-next"
+              type="button"
+              ${
+                currentPage >=
+                totalPages
+                  ? 'disabled'
+                  : ''
+              }
+            >
+              다음
+            </button>
+
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+  `
+
+
+  const goHotelOrders = (
+    values:
+      Record<
+        string,
+        string
+      >
+  ) => {
+
+    const nextParams =
+      new URLSearchParams(
+        location.search
+      )
+
+
+    Object.entries(
+      values
+    ).forEach(
+      (
+        [
+          key,
+          value
+        ]
+      ) => {
+
+        nextParams.set(
+          key,
+          value
+        )
+
+      }
+    )
+
+
+    location.href =
+      '/merchant-app/hotel/orders?' +
+      nextParams.toString()
+
+  }
+
+
+  const moveHotelDate = (
+    amount: number
+  ) => {
+
+    const start =
+      new Date(
+        startDate +
+        'T00:00:00+09:00'
+      )
+
+
+    const end =
+      new Date(
+        endDate +
+        'T00:00:00+09:00'
+      )
+
+
+    start.setDate(
+      start.getDate() +
+      amount
+    )
+
+
+    end.setDate(
+      end.getDate() +
+      amount
+    )
+
+
+    goHotelOrders({
+      start:
+        getHotelKoreaDate(
+          start
+        ),
+
+      end:
+        getHotelKoreaDate(
+          end
+        ),
+
+      page:
+        '1'
+    })
+
+  }
+
+
+  document
+    .querySelector(
+      '#hotel-mobile-order-home'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/home'
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#hotel-mobile-order-prev'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        moveHotelDate(
+          -1
+        )
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#hotel-mobile-order-next'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        moveHotelDate(
+          1
+        )
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#hotel-mobile-order-today'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        goHotelOrders({
+          start:
+            today,
+
+          end:
+            today,
+
+          page:
+            '1'
+        })
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#hotel-mobile-order-month'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        goHotelOrders({
+          start:
+            today.slice(
+              0,
+              7
+            ) +
+            '-01',
+
+          end:
+            today,
+
+          page:
+            '1'
+        })
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#hotel-mobile-order-search'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        const start =
+          document.querySelector<HTMLInputElement>(
+            '#hotel-mobile-order-start'
+          )?.value ||
+          ''
+
+
+        const end =
+          document.querySelector<HTMLInputElement>(
+            '#hotel-mobile-order-end'
+          )?.value ||
+          ''
+
+
+        if (
+          !start ||
+          !end
+        ) {
+          return
+        }
+
+
+        if (
+          start >
+          end
+        ) {
+
+          alert(
+            '시작일이 종료일보다 늦을 수 없습니다.'
+          )
+
+          return
+        }
+
+
+        goHotelOrders({
+          start,
+          end,
+          page:
+            '1'
+        })
+
+      }
+    )
+
+
+  document
+    .querySelectorAll<HTMLButtonElement>(
+      '.hotel-mobile-order-complete'
+    )
+    .forEach(
+      (
+        button
+      ) => {
+
+        button.addEventListener(
+          'click',
+          async () => {
+
+            const orderId =
+              Number(
+                button.dataset.id ||
+                0
+              )
+
+
+            if (!orderId) {
+              return
+            }
+
+
+            const {
+              error
+            } =
+              await supabase
+                .from(
+                  'orders'
+                )
+                .update({
+                  order_status:
+                    '완료'
+                })
+                .eq(
+                  'id',
+                  orderId
+                )
+
+
+            if (error) {
+
+              alert(
+                '완료 처리 실패: ' +
+                error.message
+              )
+
+              return
+            }
+
+
+            void renderHotelOrdersMobile()
+
+          }
+        )
+
+      }
+    )
+
+
+  document
+    .querySelector<HTMLSelectElement>(
+      '#hotel-mobile-order-page-size'
+    )
+    ?.addEventListener(
+      'change',
+      (
+        event
+      ) => {
+
+        goHotelOrders({
+          size:
+            (
+              event.target as
+                HTMLSelectElement
+            ).value,
+
+          page:
+            '1'
+        })
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#hotel-mobile-order-page-prev'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        if (
+          currentPage <=
+          1
+        ) {
+          return
+        }
+
+
+        goHotelOrders({
+          page:
+            String(
+              currentPage -
+              1
+            )
+        })
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#hotel-mobile-order-page-next'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        if (
+          currentPage >=
+          totalPages
+        ) {
+          return
+        }
+
+
+        goHotelOrders({
+          page:
+            String(
+              currentPage +
+              1
+            )
+        })
+
+      }
+    )
+
+}
+
   /* =========================================
    모바일 상품관리
 ========================================= */
@@ -17462,6 +18872,12 @@ if (
   ) {
   
     void renderMerchantOrders()
+
+  } else if (
+    path === '/merchant-app/hotel/orders'
+  ) {
+
+    void renderHotelOrdersMobile()
 
   } else if (
     path === '/merchant-app/beauty/orders'
