@@ -17,6 +17,89 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const app = document.querySelector<HTMLDivElement>('#app')!
 const path = window.location.pathname
 
+/* =========================================
+   호텔 직원 비밀번호 암호화
+========================================= */
+
+function hotelStaffBytesToBase64(
+  bytes: Uint8Array
+) {
+
+  let binary = ''
+
+  bytes.forEach(
+    (byte) => {
+      binary +=
+        String.fromCharCode(byte)
+    }
+  )
+
+  return btoa(binary)
+}
+
+
+async function createHotelStaffPasswordHash(
+  password: string
+) {
+
+  const encoder =
+    new TextEncoder()
+
+  const salt =
+    crypto.getRandomValues(
+      new Uint8Array(16)
+    )
+
+
+  const keyMaterial =
+    await crypto.subtle.importKey(
+      'raw',
+      encoder.encode(password),
+      'PBKDF2',
+      false,
+      [
+        'deriveBits'
+      ]
+    )
+
+
+  const hashBuffer =
+    await crypto.subtle.deriveBits(
+      {
+        name:
+          'PBKDF2',
+
+        salt,
+
+        iterations:
+          210000,
+
+        hash:
+          'SHA-256'
+      },
+      keyMaterial,
+      256
+    )
+
+
+  const hash =
+    new Uint8Array(
+      hashBuffer
+    )
+
+
+  return (
+    'pbkdf2$210000$' +
+    hotelStaffBytesToBase64(
+      salt
+    ) +
+    '$' +
+    hotelStaffBytesToBase64(
+      hash
+    )
+  )
+}
+
 
 
 /* =========================================
@@ -19512,6 +19595,7 @@ if (isBeauty) {
     <button id="merchant-order-tab">주문/결제내역</button>
     <button id="merchant-product-tab">상품관리</button>
     <button id="merchant-hotel-room-tab">객실관리</button>
+    <button id="merchant-hotel-staff-tab">직원관리</button>
     <button id="merchant-hotel-preview-tab">고객 결제창</button>
     <button id="merchant-card-tab">카드결제</button>
   `
@@ -22512,6 +22596,7 @@ document.querySelectorAll('.admin-table .customer-call-button')
       'merchant-order-tab',
       'merchant-product-tab',
       'merchant-hotel-room-tab',
+      'merchant-hotel-staff-tab',
       'merchant-hotel-preview-tab',
       'merchant-card-tab'
     ]
@@ -22562,6 +22647,19 @@ document.querySelector('#merchant-hotel-room-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-hotel-rooms'
   })
+
+  document.querySelector(
+    '#merchant-hotel-staff-tab'
+  )
+    ?.addEventListener(
+      'click',
+      () => {
+  
+        location.href =
+          '/merchant-hotel-staff'
+  
+      }
+    )
 
   document.querySelector('#merchant-hotel-preview-tab')
   ?.addEventListener('click', () => {
@@ -23617,6 +23715,891 @@ if (orderRequestError) {
           location.href = '/merchant-login'
         })
 
+      } else if (
+        path ===
+        '/merchant-hotel-staff'
+      ) {
+      
+        const merchantId =
+          Number(
+            sessionStorage.getItem(
+              'login_merchant_id'
+            ) || 0
+          )
+      
+      
+        const merchantName =
+          sessionStorage.getItem(
+            'login_merchant_name'
+          ) || ''
+      
+      
+        const merchantType =
+          sessionStorage.getItem(
+            'login_merchant_type'
+          ) || ''
+      
+      
+        if (!merchantId) {
+      
+          alert(
+            '로그인이 필요합니다.'
+          )
+      
+          location.href =
+            '/merchant-login'
+      
+        } else if (
+          merchantType !==
+          '호텔'
+        ) {
+      
+          alert(
+            '호텔 가맹점에서만 사용할 수 있습니다.'
+          )
+      
+          location.href =
+            '/merchant-admin'
+      
+        } else {
+      
+          const {
+            data: hotelStaffData,
+            error: hotelStaffError
+          } =
+            await supabase
+              .from(
+                'hotel_staff'
+              )
+              .select('*')
+              .eq(
+                'merchant_id',
+                merchantId
+              )
+              .order(
+                'id',
+                {
+                  ascending:
+                    true
+                }
+              )
+      
+      
+          if (
+            hotelStaffError
+          ) {
+      
+            alert(
+              '직원 목록 조회 실패: ' +
+              hotelStaffError.message
+            )
+          }
+      
+      
+          const staffList =
+            hotelStaffData ||
+            []
+      
+      
+          const activeStaffCount =
+            staffList.filter(
+              (staff: any) =>
+                staff.status ===
+                '사용중'
+            ).length
+      
+      
+          const inactiveStaffCount =
+            staffList.filter(
+              (staff: any) =>
+                staff.status ===
+                '사용중지'
+            ).length
+      
+      
+          app.innerHTML = `
+            <div
+              class="hotel-room-admin-page"
+            >
+      
+              <div
+                class="merchant-pick-header"
+              >
+      
+                <div>
+      
+                  <h1>
+                    호텔 직원관리
+                  </h1>
+      
+                  <p
+                    class="hotel-room-admin-desc"
+                  >
+                    모바일 주문처리 직원 계정을 관리합니다.
+                  </p>
+      
+                </div>
+      
+      
+                <div
+                  class="merchant-user-box"
+                >
+      
+                  <strong>
+                    ${merchantName}님
+                  </strong>
+      
+                  <button
+                    id="hotel-staff-logout"
+                  >
+                    로그아웃
+                  </button>
+      
+                </div>
+      
+              </div>
+      
+      
+              <div
+                class="merchant-toolbar hotel-room-toolbar"
+              >
+      
+                <button
+                  id="hotel-staff-go-order"
+                >
+                  주문/결제내역
+                </button>
+      
+                <button
+                  id="hotel-staff-go-product"
+                >
+                  상품관리
+                </button>
+      
+                <button
+                  id="hotel-staff-go-room"
+                >
+                  객실관리
+                </button>
+      
+                <button
+                  id="hotel-staff-go-staff"
+                  class="active"
+                >
+                  직원관리
+                </button>
+      
+                <button
+                  id="hotel-staff-go-card"
+                >
+                  카드결제
+                </button>
+      
+              </div>
+      
+      
+              <div
+                class="hotel-room-summary"
+              >
+      
+                <div>
+      
+                  <span>
+                    전체 직원
+                  </span>
+      
+                  <strong>
+                    ${staffList.length}명
+                  </strong>
+      
+                </div>
+      
+      
+                <div>
+      
+                  <span>
+                    사용중
+                  </span>
+      
+                  <strong>
+                    ${activeStaffCount}명
+                  </strong>
+      
+                </div>
+      
+      
+                <div>
+      
+                  <span>
+                    사용중지
+                  </span>
+      
+                  <strong>
+                    ${inactiveStaffCount}명
+                  </strong>
+      
+                </div>
+      
+              </div>
+      
+      
+              <div
+                class="hotel-room-content"
+              >
+      
+                <section
+                  class="hotel-room-create-card"
+                >
+      
+                  <h2>
+                    직원 등록
+                  </h2>
+      
+                  <p>
+                    모바일에서 사용할 직원 계정을 등록합니다.
+                  </p>
+      
+      
+                  <label>
+                    직원명
+                  </label>
+      
+                  <input
+                    id="hotel-staff-name"
+                    type="text"
+                    placeholder="예: 김민수"
+                    autocomplete="off"
+                  />
+      
+      
+                  <label>
+                    로그인 아이디
+                  </label>
+      
+                  <input
+                    id="hotel-staff-login-id"
+                    type="text"
+                    placeholder="예: NXGHOTEL01"
+                    autocomplete="off"
+                  />
+      
+      
+                  <label>
+                    비밀번호
+                  </label>
+      
+                  <input
+                    id="hotel-staff-password"
+                    type="password"
+                    placeholder="6자리 이상"
+                    autocomplete="new-password"
+                  />
+      
+      
+                  <button
+                    id="hotel-staff-create-button"
+                  >
+                    직원 등록
+                  </button>
+      
+                </section>
+      
+      
+                <section
+                  class="hotel-room-list-card"
+                >
+      
+                  <div
+                    class="hotel-room-list-title"
+                  >
+      
+                    <div>
+      
+                      <h2>
+                        등록된 직원
+                      </h2>
+      
+                      <p>
+                        직원별 모바일 접속 계정을 관리합니다.
+                      </p>
+      
+                    </div>
+      
+                  </div>
+      
+      
+                  ${
+                    staffList.length ===
+                    0
+      
+                      ? `
+                        <div
+                          class="hotel-room-empty"
+                        >
+                          등록된 직원이 없습니다.
+                        </div>
+                      `
+      
+                      : `
+                        <div
+                          class="hotel-room-table-wrap"
+                        >
+      
+                          <table
+                            class="hotel-room-table"
+                          >
+      
+                            <thead>
+      
+                              <tr>
+                                <th>직원명</th>
+                                <th>로그인 ID</th>
+                                <th>상태</th>
+                                <th>최근 로그인</th>
+                                <th>관리</th>
+                              </tr>
+      
+                            </thead>
+      
+      
+                            <tbody>
+      
+                              ${
+                                staffList
+                                  .map(
+                                    (
+                                      staff:
+                                        any
+                                    ) => `
+                                      <tr>
+      
+                                        <td>
+                                          <strong>
+                                            ${
+                                              staff.staff_name ||
+                                              '-'
+                                            }
+                                          </strong>
+                                        </td>
+      
+                                        <td>
+                                          ${
+                                            staff.login_id ||
+                                            '-'
+                                          }
+                                        </td>
+      
+                                        <td>
+      
+                                          <span
+                                            class="${
+                                              staff.status ===
+                                              '사용중'
+                                                ? 'hotel-room-status-on'
+                                                : 'hotel-room-status-off'
+                                            }"
+                                          >
+                                            ${
+                                              staff.status ||
+                                              '사용중'
+                                            }
+                                          </span>
+      
+                                        </td>
+      
+                                        <td>
+                                          ${
+                                            staff.last_login_at
+      
+                                              ? new Date(
+                                                  staff.last_login_at
+                                                )
+                                                  .toLocaleString(
+                                                    'ko-KR'
+                                                  )
+      
+                                              : '-'
+                                          }
+                                        </td>
+      
+                                        <td>
+      
+                                          <button
+                                            class="hotel-staff-status-button"
+                                            data-id="${staff.id}"
+                                            data-status="${
+                                              staff.status ||
+                                              '사용중'
+                                            }"
+                                          >
+                                            ${
+                                              staff.status ===
+                                              '사용중'
+                                                ? '사용중지'
+                                                : '사용재개'
+                                            }
+                                          </button>
+      
+                                          <button
+                                            class="hotel-staff-password-button"
+                                            data-id="${staff.id}"
+                                            data-name="${
+                                              staff.staff_name ||
+                                              ''
+                                            }"
+                                          >
+                                            비밀번호 변경
+                                          </button>
+      
+                                        </td>
+      
+                                      </tr>
+                                    `
+                                  )
+                                  .join('')
+                              }
+      
+                            </tbody>
+      
+                          </table>
+      
+                        </div>
+                      `
+                  }
+      
+                </section>
+      
+              </div>
+      
+            </div>
+          `
+      
+      
+          document
+            .querySelector(
+              '#hotel-staff-create-button'
+            )
+            ?.addEventListener(
+              'click',
+              async () => {
+      
+                const staffName =
+                  (
+                    document.querySelector<HTMLInputElement>(
+                      '#hotel-staff-name'
+                    )?.value ||
+                    ''
+                  ).trim()
+      
+      
+                const loginId =
+                  (
+                    document.querySelector<HTMLInputElement>(
+                      '#hotel-staff-login-id'
+                    )?.value ||
+                    ''
+                  )
+                    .trim()
+                    .toUpperCase()
+      
+      
+                const password =
+                  document.querySelector<HTMLInputElement>(
+                    '#hotel-staff-password'
+                  )?.value ||
+                  ''
+      
+      
+                if (!staffName) {
+      
+                  alert(
+                    '직원명을 입력해주세요.'
+                  )
+      
+                  return
+                }
+      
+      
+                if (
+                  !/^[A-Z0-9_-]{4,30}$/
+                    .test(
+                      loginId
+                    )
+                ) {
+      
+                  alert(
+                    '로그인 아이디는 영문 대문자, 숫자, - 또는 _ 로 4~30자리로 입력해주세요.'
+                  )
+      
+                  return
+                }
+      
+      
+                if (
+                  password.length <
+                  6
+                ) {
+      
+                  alert(
+                    '비밀번호는 6자리 이상 입력해주세요.'
+                  )
+      
+                  return
+                }
+      
+      
+                const passwordHash =
+                  await createHotelStaffPasswordHash(
+                    password
+                  )
+      
+      
+                const {
+                  error
+                } =
+                  await supabase
+                    .from(
+                      'hotel_staff'
+                    )
+                    .insert({
+                      merchant_id:
+                        merchantId,
+      
+                      staff_name:
+                        staffName,
+      
+                      login_id:
+                        loginId,
+      
+                      password_hash:
+                        passwordHash,
+      
+                      status:
+                        '사용중',
+      
+                      role:
+                        'STAFF',
+      
+                      updated_at:
+                        new Date()
+                          .toISOString()
+                    })
+      
+      
+                if (error) {
+      
+                  if (
+                    String(
+                      error.message
+                    )
+                      .toLowerCase()
+                      .includes(
+                        'unique'
+                      )
+                  ) {
+      
+                    alert(
+                      '이미 사용 중인 로그인 아이디입니다.'
+                    )
+      
+                    return
+                  }
+      
+      
+                  alert(
+                    '직원 등록 실패: ' +
+                    error.message
+                  )
+      
+                  return
+                }
+      
+      
+                alert(
+                  '직원이 등록되었습니다.'
+                )
+      
+      
+                location.reload()
+      
+              }
+            )
+      
+      
+          document
+            .querySelectorAll<HTMLButtonElement>(
+              '.hotel-staff-status-button'
+            )
+            .forEach(
+              (
+                button
+              ) => {
+      
+                button.addEventListener(
+                  'click',
+                  async () => {
+      
+                    const staffId =
+                      Number(
+                        button.dataset.id ||
+                        0
+                      )
+      
+      
+                    const currentStatus =
+                      button.dataset.status ||
+                      '사용중'
+      
+      
+                    const nextStatus =
+                      currentStatus ===
+                      '사용중'
+                        ? '사용중지'
+                        : '사용중'
+      
+      
+                    const {
+                      error
+                    } =
+                      await supabase
+                        .from(
+                          'hotel_staff'
+                        )
+                        .update({
+                          status:
+                            nextStatus,
+      
+                          updated_at:
+                            new Date()
+                              .toISOString()
+                        })
+                        .eq(
+                          'id',
+                          staffId
+                        )
+                        .eq(
+                          'merchant_id',
+                          merchantId
+                        )
+      
+      
+                    if (error) {
+      
+                      alert(
+                        '직원 상태 변경 실패: ' +
+                        error.message
+                      )
+      
+                      return
+                    }
+      
+      
+                    location.reload()
+      
+                  }
+                )
+      
+              }
+            )
+      
+      
+          document
+            .querySelectorAll<HTMLButtonElement>(
+              '.hotel-staff-password-button'
+            )
+            .forEach(
+              (
+                button
+              ) => {
+      
+                button.addEventListener(
+                  'click',
+                  async () => {
+      
+                    const staffId =
+                      Number(
+                        button.dataset.id ||
+                        0
+                      )
+      
+      
+                    const staffName =
+                      button.dataset.name ||
+                      '직원'
+      
+      
+                    const newPassword =
+                      prompt(
+                        staffName +
+                        ' 직원의 새 비밀번호를 입력해주세요.'
+                      ) ||
+                      ''
+      
+      
+                    if (!newPassword) {
+                      return
+                    }
+      
+      
+                    if (
+                      newPassword.length <
+                      6
+                    ) {
+      
+                      alert(
+                        '비밀번호는 6자리 이상 입력해주세요.'
+                      )
+      
+                      return
+                    }
+      
+      
+                    const passwordHash =
+                      await createHotelStaffPasswordHash(
+                        newPassword
+                      )
+      
+      
+                    const {
+                      error
+                    } =
+                      await supabase
+                        .from(
+                          'hotel_staff'
+                        )
+                        .update({
+                          password_hash:
+                            passwordHash,
+      
+                          updated_at:
+                            new Date()
+                              .toISOString()
+                        })
+                        .eq(
+                          'id',
+                          staffId
+                        )
+                        .eq(
+                          'merchant_id',
+                          merchantId
+                        )
+      
+      
+                    if (error) {
+      
+                      alert(
+                        '비밀번호 변경 실패: ' +
+                        error.message
+                      )
+      
+                      return
+                    }
+      
+      
+                    alert(
+                      '비밀번호가 변경되었습니다.'
+                    )
+      
+                  }
+                )
+      
+              }
+            )
+      
+      
+          document
+            .querySelector(
+              '#hotel-staff-go-order'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+      
+                location.href =
+                  '/merchant-admin'
+      
+              }
+            )
+      
+      
+          document
+            .querySelector(
+              '#hotel-staff-go-product'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+      
+                location.href =
+                  '/merchant-product'
+      
+              }
+            )
+      
+      
+          document
+            .querySelector(
+              '#hotel-staff-go-room'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+      
+                location.href =
+                  '/merchant-hotel-rooms'
+      
+              }
+            )
+      
+      
+          document
+            .querySelector(
+              '#hotel-staff-go-card'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+      
+                location.href =
+                  '/merchant-card'
+      
+              }
+            )
+      
+      
+          document
+            .querySelector(
+              '#hotel-staff-logout'
+            )
+            ?.addEventListener(
+              'click',
+              () => {
+      
+                sessionStorage.removeItem(
+                  'login_merchant_id'
+                )
+      
+                sessionStorage.removeItem(
+                  'login_merchant_name'
+                )
+      
+                sessionStorage.removeItem(
+                  'login_merchant_code'
+                )
+      
+                sessionStorage.removeItem(
+                  'login_merchant_type'
+                )
+      
+      
+                location.href =
+                  '/merchant-login'
+      
+              }
+            )
+      
+        }
+
       } else if (path === '/merchant-hotel-rooms') {
 
         const merchantId =
@@ -23732,6 +24715,10 @@ if (orderRequestError) {
               >
                 객실관리
               </button>
+
+              <button id="hotel-room-go-staff">
+  직원관리
+</button>
       
               <button id="hotel-room-go-card">
                 카드결제
@@ -24256,6 +25243,19 @@ const hotelQrUrl =
             }
           )
       
+          document
+  .querySelector(
+    '#hotel-room-go-staff'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      location.href =
+        '/merchant-hotel-staff'
+
+    }
+  )
       
         document
           .querySelector(
