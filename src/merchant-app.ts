@@ -1603,38 +1603,246 @@ if (
 
   } else if (isHotel) {
 
-    merchantHomeMenu = `
-      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-orders">
-        <span class="merchant-mobile-menu-icon">📋</span>
-        <strong>주문/결제내역</strong>
-        <small>객실 주문 및 결제내역</small>
-      </button>
+    app.innerHTML = `
+      <div class="merchant-mobile-home">
 
-      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-products">
-        <span class="merchant-mobile-menu-icon">🛍️</span>
-        <strong>상품관리</strong>
-        <small>호텔 상품 관리</small>
-      </button>
+        <header class="merchant-mobile-header">
 
-      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-rooms">
-        <span class="merchant-mobile-menu-icon">🏨</span>
-        <strong>객실관리</strong>
-        <small>객실 등록 및 관리</small>
-      </button>
+          <div>
 
-      <button type="button" class="merchant-mobile-menu-card" data-menu="hotel-preview">
-        <span class="merchant-mobile-menu-icon">📱</span>
-        <strong>고객 결제창</strong>
-        <small>호텔 고객 결제창</small>
-      </button>
+            <div class="merchant-mobile-brand">
+              NXG PICK
+            </div>
 
-      <button type="button" class="merchant-mobile-menu-card" data-menu="card">
-        <span class="merchant-mobile-menu-icon">💳</span>
-        <strong>카드결제</strong>
-        <small>카드 결제 관리</small>
-      </button>
+            <div class="merchant-mobile-store">
+              ${merchantName}
+            </div>
+
+          </div>
+
+
+          <button
+            id="hotel-admin-mobile-logout"
+            class="merchant-mobile-logout"
+            type="button"
+          >
+            로그아웃
+          </button>
+
+        </header>
+
+
+        <main
+          class="merchant-mobile-content"
+          style="
+            max-width:760px;
+            margin:0 auto;
+          "
+        >
+
+          <section
+            style="
+              margin-top:34px;
+              background:#ffffff;
+              border:1px solid #dbe3ee;
+              border-radius:18px;
+              padding:34px 28px;
+              text-align:center;
+              box-shadow:0 8px 24px rgba(15,35,60,0.05);
+            "
+          >
+
+            <div
+              style="
+                display:inline-flex;
+                align-items:center;
+                justify-content:center;
+                padding:7px 13px;
+                border-radius:999px;
+                background:#eef4fb;
+                color:#174981;
+                font-size:13px;
+                font-weight:800;
+                margin-bottom:18px;
+              "
+            >
+              호텔 관리자 계정
+            </div>
+
+
+            <h1
+              style="
+                margin:0;
+                font-size:27px;
+                font-weight:900;
+                color:#0b2342;
+              "
+            >
+              ${merchantName}
+            </h1>
+
+
+            <p
+              style="
+                margin:20px 0 0;
+                font-size:17px;
+                font-weight:800;
+                color:#172033;
+                line-height:1.7;
+              "
+            >
+              호텔 모바일 서비스는<br>
+              직원 전용 서비스입니다.
+            </p>
+
+
+            <p
+              style="
+                margin:14px 0 0;
+                font-size:14px;
+                color:#667085;
+                line-height:1.8;
+              "
+            >
+              상품관리, 객실관리, 직원관리 등<br>
+              호텔 관리 기능은 PC 관리자에서 이용해주세요.
+            </p>
+
+
+            <div
+              style="
+                margin-top:26px;
+                padding:18px;
+                border-radius:12px;
+                background:#f7f9fc;
+                text-align:left;
+                line-height:1.8;
+                font-size:14px;
+                color:#475467;
+              "
+            >
+              <strong
+                style="
+                  display:block;
+                  margin-bottom:5px;
+                  color:#172033;
+                "
+              >
+                직원 모바일 사용방법
+              </strong>
+
+              PC 관리자 → 직원관리에서 직원 계정을 등록한 후,
+              직원별 아이디로 모바일에 로그인하면 객실 주문을
+              접수하고 처리할 수 있습니다.
+            </div>
+
+
+            <button
+              id="hotel-admin-open-pc"
+              type="button"
+              style="
+                width:100%;
+                margin-top:24px;
+                padding:15px;
+                border:0;
+                border-radius:10px;
+                background:#174981;
+                color:#ffffff;
+                font-size:15px;
+                font-weight:800;
+                cursor:pointer;
+              "
+            >
+              PC 관리자 페이지 열기
+            </button>
+
+
+            <button
+              id="hotel-admin-other-login"
+              type="button"
+              style="
+                width:100%;
+                margin-top:10px;
+                padding:15px;
+                border:1px solid #d0d7e2;
+                border-radius:10px;
+                background:#ffffff;
+                color:#172033;
+                font-size:15px;
+                font-weight:800;
+                cursor:pointer;
+              "
+            >
+              다른 계정으로 로그인
+            </button>
+
+          </section>
+
+        </main>
+
+      </div>
     `
 
+
+    document
+      .querySelector(
+        '#hotel-admin-open-pc'
+      )
+      ?.addEventListener(
+        'click',
+        () => {
+
+          location.href =
+            '/merchant-admin'
+
+        }
+      )
+
+
+    const hotelAdminLogout = () => {
+
+      merchantLoginKeys.forEach(
+        (key) => {
+
+          sessionStorage.removeItem(
+            key
+          )
+
+          localStorage.removeItem(
+            key
+          )
+
+        }
+      )
+
+
+      location.replace(
+        '/merchant-app'
+      )
+    }
+
+
+    document
+      .querySelector(
+        '#hotel-admin-other-login'
+      )
+      ?.addEventListener(
+        'click',
+        hotelAdminLogout
+      )
+
+
+    document
+      .querySelector(
+        '#hotel-admin-mobile-logout'
+      )
+      ?.addEventListener(
+        'click',
+        hotelAdminLogout
+      )
+
+
+    return
   }
 
   app.innerHTML = `
