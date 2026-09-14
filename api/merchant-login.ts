@@ -178,12 +178,10 @@ import type {
       )
   
   
-    const loginId =
+      const loginId =
       String(
         req.body?.loginId || ''
-      )
-        .trim()
-        .toUpperCase()
+      ).trim()
   
   
     const password =
@@ -346,10 +344,10 @@ import type {
      * merchant_password 사용
      */
     const legacyPassword =
-      String(
-        merchant.merchant_password ||
-        ''
-      )
+  String(
+    merchant.merchant_password ||
+    ''
+  ).trim()
   
   
     if (
