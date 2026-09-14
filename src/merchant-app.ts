@@ -1894,6 +1894,30 @@ if (
           ${merchantHomeMenu}
         </section>
 
+        <section
+  style="
+    margin-top:16px;
+  "
+>
+  <button
+    id="merchant-mobile-password-open"
+    type="button"
+    style="
+      width:100%;
+      height:50px;
+      border:1px solid #d7e0eb;
+      border-radius:12px;
+      background:#ffffff;
+      color:#172033;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+    "
+  >
+    🔒 비밀번호 변경
+  </button>
+</section>
+
       </main>
 
     </div>
@@ -1923,6 +1947,403 @@ if (
 
       }
     )
+
+    document
+  .querySelector(
+    '#merchant-mobile-password-open'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      document
+        .querySelector(
+          '#merchant-mobile-password-modal'
+        )
+        ?.remove()
+
+
+      document.body.insertAdjacentHTML(
+        'beforeend',
+        `
+          <div
+            id="merchant-mobile-password-modal"
+            style="
+              position:fixed;
+              inset:0;
+              z-index:99999;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              padding:20px;
+              background:rgba(0,0,0,0.45);
+              box-sizing:border-box;
+            "
+          >
+
+            <div
+              style="
+                width:100%;
+                max-width:420px;
+                padding:24px;
+                border-radius:16px;
+                background:#ffffff;
+                box-sizing:border-box;
+              "
+            >
+
+              <h2
+                style="
+                  margin:0 0 22px;
+                  font-size:21px;
+                "
+              >
+                🔒 비밀번호 변경
+              </h2>
+
+
+              <label
+                style="
+                  display:block;
+                  margin-bottom:7px;
+                  font-weight:700;
+                "
+              >
+                현재 비밀번호
+              </label>
+
+              <input
+                id="merchant-mobile-current-password"
+                type="password"
+                autocomplete="current-password"
+                style="
+                  width:100%;
+                  height:46px;
+                  padding:0 12px;
+                  margin-bottom:16px;
+                  border:1px solid #d7e0eb;
+                  border-radius:10px;
+                  box-sizing:border-box;
+                "
+              >
+
+
+              <label
+                style="
+                  display:block;
+                  margin-bottom:7px;
+                  font-weight:700;
+                "
+              >
+                새 비밀번호
+              </label>
+
+              <input
+                id="merchant-mobile-new-password"
+                type="password"
+                autocomplete="new-password"
+                placeholder="영문/숫자 포함 8자리 이상"
+                style="
+                  width:100%;
+                  height:46px;
+                  padding:0 12px;
+                  margin-bottom:16px;
+                  border:1px solid #d7e0eb;
+                  border-radius:10px;
+                  box-sizing:border-box;
+                "
+              >
+
+
+              <label
+                style="
+                  display:block;
+                  margin-bottom:7px;
+                  font-weight:700;
+                "
+              >
+                새 비밀번호 확인
+              </label>
+
+              <input
+                id="merchant-mobile-new-password-confirm"
+                type="password"
+                autocomplete="new-password"
+                style="
+                  width:100%;
+                  height:46px;
+                  padding:0 12px;
+                  margin-bottom:20px;
+                  border:1px solid #d7e0eb;
+                  border-radius:10px;
+                  box-sizing:border-box;
+                "
+              >
+
+
+              <div
+                style="
+                  display:grid;
+                  grid-template-columns:1fr 1fr;
+                  gap:8px;
+                "
+              >
+
+                <button
+                  id="merchant-mobile-password-save"
+                  type="button"
+                  style="
+                    height:46px;
+                    border:0;
+                    border-radius:10px;
+                    background:#174981;
+                    color:#ffffff;
+                    font-weight:800;
+                    cursor:pointer;
+                  "
+                >
+                  변경
+                </button>
+
+
+                <button
+                  id="merchant-mobile-password-cancel"
+                  type="button"
+                  style="
+                    height:46px;
+                    border:1px solid #d7e0eb;
+                    border-radius:10px;
+                    background:#ffffff;
+                    font-weight:800;
+                    cursor:pointer;
+                  "
+                >
+                  취소
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        `
+      )
+
+
+      document
+        .querySelector(
+          '#merchant-mobile-password-cancel'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            document
+              .querySelector(
+                '#merchant-mobile-password-modal'
+              )
+              ?.remove()
+
+          }
+        )
+
+
+      document
+        .querySelector(
+          '#merchant-mobile-password-save'
+        )
+        ?.addEventListener(
+          'click',
+          async () => {
+
+            const currentPassword =
+              (
+                document.querySelector<HTMLInputElement>(
+                  '#merchant-mobile-current-password'
+                )?.value || ''
+              ).trim()
+
+
+            const newPassword =
+              (
+                document.querySelector<HTMLInputElement>(
+                  '#merchant-mobile-new-password'
+                )?.value || ''
+              ).trim()
+
+
+            const newPasswordConfirm =
+              (
+                document.querySelector<HTMLInputElement>(
+                  '#merchant-mobile-new-password-confirm'
+                )?.value || ''
+              ).trim()
+
+
+            if (
+              !currentPassword ||
+              !newPassword ||
+              !newPasswordConfirm
+            ) {
+
+              alert(
+                '비밀번호를 모두 입력해주세요.'
+              )
+
+              return
+            }
+
+
+            if (
+              newPassword.length < 8
+            ) {
+
+              alert(
+                '새 비밀번호는 8자리 이상 입력해주세요.'
+              )
+
+              return
+            }
+
+
+            if (
+              !/[A-Za-z]/.test(
+                newPassword
+              ) ||
+              !/[0-9]/.test(
+                newPassword
+              )
+            ) {
+
+              alert(
+                '새 비밀번호는 영문과 숫자를 모두 포함해주세요.'
+              )
+
+              return
+            }
+
+
+            if (
+              newPassword !==
+              newPasswordConfirm
+            ) {
+
+              alert(
+                '새 비밀번호 확인이 일치하지 않습니다.'
+              )
+
+              return
+            }
+
+
+            if (
+              currentPassword ===
+              newPassword
+            ) {
+
+              alert(
+                '현재 비밀번호와 다른 비밀번호를 입력해주세요.'
+              )
+
+              return
+            }
+
+
+            const {
+              data: passwordMerchant,
+              error: passwordCheckError
+            } =
+              await supabase
+                .from(
+                  'merchants'
+                )
+                .select(
+                  'merchant_password'
+                )
+                .eq(
+                  'id',
+                  merchantId
+                )
+                .single()
+
+
+            if (
+              passwordCheckError ||
+              !passwordMerchant
+            ) {
+
+              alert(
+                '현재 비밀번호 확인에 실패했습니다.'
+              )
+
+              return
+            }
+
+
+            if (
+              String(
+                passwordMerchant
+                  .merchant_password ||
+                ''
+              ).trim() !==
+              currentPassword
+            ) {
+
+              alert(
+                '현재 비밀번호가 일치하지 않습니다.'
+              )
+
+              return
+            }
+
+
+            const {
+              error: passwordUpdateError
+            } =
+              await supabase
+                .from(
+                  'merchants'
+                )
+                .update({
+                  merchant_password:
+                    newPassword
+                })
+                .eq(
+                  'id',
+                  merchantId
+                )
+
+
+            if (
+              passwordUpdateError
+            ) {
+
+              alert(
+                '비밀번호 변경 실패: ' +
+                passwordUpdateError.message
+              )
+
+              return
+            }
+
+
+            alert(
+              '비밀번호가 변경되었습니다.'
+            )
+
+
+            document
+              .querySelector(
+                '#merchant-mobile-password-modal'
+              )
+              ?.remove()
+
+          }
+        )
+
+    }
+  )
+  
     document
     .querySelector(
       '.merchant-mobile-menu'
