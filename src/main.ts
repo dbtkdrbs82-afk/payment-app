@@ -58,6 +58,29 @@ const loginMerchantType =
 const isPgAdminPage =
   path.startsWith('/pg-admin')
 
+  const isFold5 =
+  /SM-F946/i.test(
+    navigator.userAgent
+  )
+
+
+if (
+  isPgAdminPage &&
+  isFold5
+) {
+
+  document.body.classList.add(
+    'fold5-admin'
+  )
+
+} else {
+
+  document.body.classList.remove(
+    'fold5-admin'
+  )
+
+}
+
 if (isPgAdminPage) {
 
   document.body.classList.remove(

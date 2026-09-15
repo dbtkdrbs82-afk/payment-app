@@ -14693,3 +14693,463 @@ height: 150px !important;
   }
 
 }
+/* =========================================================
+   Galaxy Z Fold5 관리자 전용
+   PC / 일반폰 영향 없음
+========================================================= */
+
+body.fold5-admin {
+  width: 100% !important;
+  overflow-x: hidden !important;
+  font-size: 10px !important;
+}
+
+
+/* 전체 관리자 폭 */
+
+body.fold5-admin .admin-wrap {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+
+/* 로그인 사용자 */
+
+body.fold5-admin .admin-top-user {
+  padding: 7px 8px !important;
+  font-size: 9px !important;
+}
+
+
+/* 상단 메뉴 */
+
+body.fold5-admin .admin-menu {
+  width: 100% !important;
+
+  display: flex !important;
+  flex-wrap: nowrap !important;
+
+  gap: 0 !important;
+
+  padding: 0 !important;
+
+  overflow: hidden !important;
+}
+
+
+body.fold5-admin .admin-tab {
+  flex: 1 1 0 !important;
+
+  min-width: 0 !important;
+
+  padding: 9px 3px !important;
+
+  font-size: 10px !important;
+
+  text-align: center !important;
+
+  white-space: nowrap !important;
+}
+
+
+/* 서브메뉴 / 제목 */
+
+body.fold5-admin .admin-sub-menu {
+  padding: 7px 8px !important;
+
+  font-size: 9px !important;
+
+  white-space: nowrap !important;
+}
+
+
+body.fold5-admin .admin-title {
+  padding: 8px !important;
+
+  font-size: 10px !important;
+}
+
+
+/* 검색 영역 */
+
+body.fold5-admin .admin-search-box {
+  width: calc(100% - 12px) !important;
+
+  margin: 0 6px !important;
+
+  padding: 6px !important;
+
+  box-sizing: border-box !important;
+
+  overflow: visible !important;
+}
+
+
+body.fold5-admin .merchant-filter-line,
+body.fold5-admin .payment-search-line,
+body.fold5-admin .filter-row {
+
+  display: flex !important;
+
+  flex-wrap: wrap !important;
+
+  align-items: center !important;
+
+  gap: 4px !important;
+}
+
+
+body.fold5-admin .admin-search-box select,
+body.fold5-admin .admin-search-box input,
+body.fold5-admin .admin-search-box button {
+
+  width: auto !important;
+
+  min-width: 0 !important;
+
+  height: 28px !important;
+
+  min-height: 28px !important;
+
+  margin: 0 !important;
+
+  padding: 0 5px !important;
+
+  font-size: 9px !important;
+}
+
+
+body.fold5-admin .merchant-filter-line input {
+  width: 92px !important;
+}
+
+
+body.fold5-admin .merchant-filter-line input:last-of-type {
+  width: 110px !important;
+}
+
+
+body.fold5-admin .quick-btn {
+  width: auto !important;
+
+  min-width: 42px !important;
+
+  height: 28px !important;
+
+  padding: 0 6px !important;
+
+  font-size: 9px !important;
+}
+
+
+/* 요약영역 */
+
+body.fold5-admin .admin-summary {
+  width: calc(100% - 12px) !important;
+
+  margin: 0 6px !important;
+
+  padding: 7px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* 가맹점 4개 카드 한 줄 */
+
+body.fold5-admin .merchant-status-cards {
+
+  width: 100% !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr)) !important;
+
+  gap: 5px !important;
+
+  margin: 0 !important;
+}
+
+
+body.fold5-admin .merchant-status-card {
+
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  height: 58px !important;
+
+  min-height: 58px !important;
+
+  padding: 6px 7px !important;
+
+  border-radius: 8px !important;
+
+  box-sizing: border-box !important;
+}
+
+
+body.fold5-admin .merchant-status-card p {
+
+  margin: 0 0 4px !important;
+
+  font-size: 9px !important;
+
+  line-height: 1 !important;
+}
+
+
+body.fold5-admin .merchant-status-card strong {
+
+  font-size: 17px !important;
+
+  line-height: 1 !important;
+}
+
+
+/* 가입신청 버튼 */
+
+body.fold5-admin #copy-merchant-apply-link,
+body.fold5-admin #merchant-bulk-check {
+
+  height: 28px !important;
+
+  min-height: 28px !important;
+
+  padding: 0 8px !important;
+
+  font-size: 9px !important;
+}
+
+
+/* 목록 상단 */
+
+body.fold5-admin .admin-table-top {
+
+  width: calc(100% - 12px) !important;
+
+  margin: 0 6px !important;
+
+  padding: 6px !important;
+
+  box-sizing: border-box !important;
+
+  display: flex !important;
+
+  flex-wrap: nowrap !important;
+
+  align-items: center !important;
+
+  gap: 5px !important;
+
+  overflow: hidden !important;
+}
+
+
+body.fold5-admin #admin-page-size {
+
+  width: 82px !important;
+
+  height: 28px !important;
+
+  min-height: 28px !important;
+
+  font-size: 9px !important;
+}
+
+
+/* 이전 / 다음 */
+
+body.fold5-admin #merchant-pagination {
+
+  flex: 1 !important;
+
+  display: grid !important;
+
+  grid-template-columns:
+    minmax(48px, 1fr)
+    34px
+    minmax(48px, 1fr) !important;
+
+  align-items: center !important;
+
+  gap: 4px !important;
+
+  margin: 0 !important;
+}
+
+
+body.fold5-admin #merchant-pagination button {
+
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  height: 28px !important;
+
+  min-height: 28px !important;
+
+  padding: 0 4px !important;
+
+  font-size: 9px !important;
+}
+
+
+body.fold5-admin #merchant-pagination span {
+
+  font-size: 9px !important;
+
+  text-align: center !important;
+}
+
+
+/* 테이블 바깥 */
+
+body.fold5-admin .admin-table-scroll {
+
+  width: calc(100% - 12px) !important;
+
+  max-width: calc(100% - 12px) !important;
+
+  margin: 0 6px !important;
+
+  overflow-x: hidden !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* ★ 기존 680 / 760 / 900px 강제폭 제거 */
+
+body.fold5-admin .admin-table {
+
+  width: 100% !important;
+
+  max-width: 100% !important;
+
+  min-width: 0 !important;
+
+  margin: 0 !important;
+
+  table-layout: fixed !important;
+
+  box-sizing: border-box !important;
+}
+
+
+body.fold5-admin .admin-table th,
+body.fold5-admin .admin-table td {
+
+  height: 34px !important;
+
+  min-height: 34px !important;
+
+  padding: 3px 2px !important;
+
+  font-size: 8px !important;
+
+  line-height: 1.15 !important;
+
+  white-space: nowrap !important;
+
+  overflow: hidden !important;
+
+  text-overflow: ellipsis !important;
+
+  box-sizing: border-box !important;
+}
+
+
+/* 가맹점관리 8개 열 폭 */
+
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table th:nth-child(1),
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table td:nth-child(1) {
+  width: 5% !important;
+}
+
+
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table th:nth-child(2),
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table td:nth-child(2) {
+  width: 14% !important;
+}
+
+
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table th:nth-child(3),
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table td:nth-child(3) {
+  width: 18% !important;
+}
+
+
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table th:nth-child(4),
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table td:nth-child(4) {
+  width: 11% !important;
+}
+
+
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table th:nth-child(5),
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table td:nth-child(5) {
+  width: 19% !important;
+}
+
+
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table th:nth-child(6),
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table td:nth-child(6) {
+  width: 10% !important;
+}
+
+
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table th:nth-child(7),
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table td:nth-child(7) {
+  width: 12% !important;
+}
+
+
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table th:nth-child(8),
+body.fold5-admin:has(.merchant-status-cards)
+.admin-table td:nth-child(8) {
+  width: 11% !important;
+}
+
+
+/* 가맹점 ID / 가맹점명 버튼 */
+
+body.fold5-admin .merchant-link-btn {
+
+  width: 100% !important;
+
+  min-width: 0 !important;
+
+  height: 25px !important;
+
+  min-height: 25px !important;
+
+  padding: 0 2px !important;
+
+  font-size: 8px !important;
+
+  border-radius: 5px !important;
+
+  white-space: nowrap !important;
+
+  overflow: hidden !important;
+
+  text-overflow: ellipsis !important;
+}
