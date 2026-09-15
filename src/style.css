@@ -15153,3 +15153,162 @@ body.fold5-admin .merchant-link-btn {
 
   text-overflow: ellipsis !important;
 }
+/* =========================================
+   Fold 관리자 초소형 표시
+========================================= */
+
+body.fold5-admin {
+  font-size: 6px !important;
+}
+
+
+/* 상단 메뉴 */
+
+body.fold5-admin .admin-tab {
+  padding: 5px 2px !important;
+  font-size: 6px !important;
+}
+
+
+/* 사용자 / 서브메뉴 / 제목 */
+
+body.fold5-admin .admin-top-user,
+body.fold5-admin .admin-sub-menu,
+body.fold5-admin .admin-title {
+  font-size: 6px !important;
+}
+
+
+/* 검색창 */
+
+body.fold5-admin .admin-search-box {
+  padding: 4px !important;
+}
+
+
+body.fold5-admin .admin-search-box select,
+body.fold5-admin .admin-search-box input,
+body.fold5-admin .admin-search-box button {
+
+  height: 20px !important;
+  min-height: 20px !important;
+
+  padding: 0 3px !important;
+
+  font-size: 6px !important;
+}
+
+
+/* 오늘 / 어제 / 당월 등 */
+
+body.fold5-admin .quick-btn {
+
+  height: 20px !important;
+  min-height: 20px !important;
+
+  min-width: 28px !important;
+
+  padding: 0 3px !important;
+
+  font-size: 6px !important;
+}
+
+
+/* 상태 카드 */
+
+body.fold5-admin .merchant-status-card {
+
+  height: 40px !important;
+  min-height: 40px !important;
+
+  padding: 4px !important;
+}
+
+
+body.fold5-admin .merchant-status-card p {
+
+  margin: 0 0 2px !important;
+
+  font-size: 6px !important;
+}
+
+
+body.fold5-admin .merchant-status-card strong {
+
+  font-size: 11px !important;
+}
+
+
+/* 가입신청 링크 / 일괄조회 */
+
+body.fold5-admin #copy-merchant-apply-link,
+body.fold5-admin #merchant-bulk-check {
+
+  height: 22px !important;
+  min-height: 22px !important;
+
+  padding: 0 4px !important;
+
+  font-size: 6px !important;
+}
+
+
+/* 10개씩 보기 */
+
+body.fold5-admin #admin-page-size {
+
+  width: 60px !important;
+
+  height: 22px !important;
+  min-height: 22px !important;
+
+  font-size: 6px !important;
+}
+
+
+/* 이전 / 다음 */
+
+body.fold5-admin #merchant-pagination button {
+
+  height: 22px !important;
+  min-height: 22px !important;
+
+  padding: 0 2px !important;
+
+  font-size: 6px !important;
+}
+
+
+body.fold5-admin #merchant-pagination span {
+
+  font-size: 6px !important;
+}
+
+
+/* 테이블 */
+
+body.fold5-admin .admin-table th,
+body.fold5-admin .admin-table td {
+
+  height: 24px !important;
+  min-height: 24px !important;
+
+  padding: 2px 1px !important;
+
+  font-size: 6px !important;
+}
+
+
+/* 가맹점ID / 가맹점명 버튼 */
+
+body.fold5-admin .merchant-link-btn {
+
+  height: 18px !important;
+  min-height: 18px !important;
+
+  padding: 0 2px !important;
+
+  font-size: 6px !important;
+
+  border-radius: 3px !important;
+}

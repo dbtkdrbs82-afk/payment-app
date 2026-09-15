@@ -58,10 +58,28 @@ const loginMerchantType =
 const isPgAdminPage =
   path.startsWith('/pg-admin')
 
-  const isFold5 =
-  /SM-F946/i.test(
-    navigator.userAgent
+  const foldScreenShort =
+  Math.min(
+    window.screen.width,
+    window.screen.height
   )
+
+const foldScreenLong =
+  Math.max(
+    window.screen.width,
+    window.screen.height
+  )
+
+const foldScreenRatio =
+  foldScreenShort /
+  foldScreenLong
+
+const isFold5 =
+  /Android/i.test(
+    navigator.userAgent
+  ) &&
+  foldScreenRatio >= 0.72 &&
+  foldScreenRatio <= 0.90
 
 
 if (
