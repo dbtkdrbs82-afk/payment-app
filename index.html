@@ -15,6 +15,11 @@
       const path = window.location.pathname
     
       if (
+        path === '/demo/store' ||
+        path === '/demo/store/'
+      ) {
+        import('/src/demo/store-demo.ts')
+      } else if (
         path === '/merchant-app' ||
         path.startsWith('/merchant-app/')
       ) {
