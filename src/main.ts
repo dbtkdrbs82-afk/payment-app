@@ -4762,19 +4762,26 @@ document.querySelector('.admin-table')?.classList.add('payment-admin-table')
       }
 
        
-       document.querySelector('#admin-logout')
-?.addEventListener('click', () => {
+      document
+  .querySelector('#admin-logout')
+  ?.addEventListener('click', async () => {
+    if (!confirm('로그아웃 하시겠습니까?')) return
 
-  if (!confirm('로그아웃 하시겠습니까?')) {
-    return
-  }
+    try {
+      await fetch('/api/admin-logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } catch (error) {
+      console.error('관리자 로그아웃 오류:', error)
+    }
 
-  sessionStorage.removeItem('admin_id')
-  sessionStorage.removeItem('admin_name')
-  sessionStorage.removeItem('admin_role')
+    sessionStorage.removeItem('admin_id')
+    sessionStorage.removeItem('admin_name')
+    sessionStorage.removeItem('admin_role')
 
-  location.href = '/admin-login'
-})
+    location.href = '/admin-login'
+  })
 
        const adminWindow = window as Window & {
         cancelApproveClickReady?: boolean
