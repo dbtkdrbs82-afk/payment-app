@@ -4552,35 +4552,94 @@ document.querySelector('#receipt-close-btn')
 
   `
 
-  document.querySelector<HTMLButtonElement>('#admin-login-button')
-    ?.addEventListener('click', async () => {
-      const loginId =
-  (document.querySelector<HTMLInputElement>('#admin-login-id')?.value || '')
-    .trim()
-    .toUpperCase()
+  document
+  .querySelector('#admin-login-button')
+  ?.addEventListener('click', async () => {
+    const loginId = (
+      (
+        document.querySelector(
+          '#admin-login-id'
+        ) as HTMLInputElement
+      )?.value || ''
+    )
+      .trim()
+      .toUpperCase()
 
-      const password =
-        (document.querySelector<HTMLInputElement>('#admin-login-password')?.value || '').trim()
+    const password = (
+      (
+        document.querySelector(
+          '#admin-login-password'
+        ) as HTMLInputElement
+      )?.value || ''
+    ).trim()
 
-      const { data: adminUser, error: adminLoginError } = await supabase
-  .from('admin_users')
-  .select('*')
-  .eq('login_id', loginId)
-  .eq('password', password)
-  .eq('status', '사용중')
-  .single()
+    if (!loginId || !password) {
+      alert('아이디와 비밀번호를 입력해주세요.')
+      return
+    }
 
-if (adminUser && !adminLoginError) {
-  sessionStorage.setItem('admin_id', adminUser.login_id)
-  sessionStorage.setItem('admin_name', adminUser.admin_name || '')
-  sessionStorage.setItem('admin_role', adminUser.role || '')
+    try {
+      const response = await fetch(
+        '/api/admin-login',
+        {
+          method: 'POST',
 
-  location.replace('/pg-admin')
-  return
-}
+          headers: {
+            'Content-Type': 'application/json',
+          },
 
-      alert('아이디 또는 비밀번호가 올바르지 않습니다.')
-    })
+          credentials: 'include',
+
+          body: JSON.stringify({
+            loginId,
+            password,
+          }),
+        }
+      )
+
+      const result = await response.json()
+
+      if (
+        !response.ok ||
+        !result?.success ||
+        !result?.admin
+      ) {
+        alert(
+          result?.message ||
+            '아이디 또는 비밀번호가 올바르지 않습니다.'
+        )
+        return
+      }
+
+      const adminUser = result.admin
+
+      sessionStorage.setItem(
+        'admin_id',
+        adminUser.login_id
+      )
+
+      sessionStorage.setItem(
+        'admin_name',
+        adminUser.admin_name || ''
+      )
+
+      sessionStorage.setItem(
+        'admin_role',
+        adminUser.role || ''
+      )
+
+      location.replace('/pg-admin')
+    } catch (error) {
+      console.error(
+        '관리자 로그인 오류:',
+        error
+      )
+
+      alert(
+        '로그인 서버에 연결하지 못했습니다.'
+      )
+    }
+  })
 
     document.querySelector('#go-merchant-apply-button')
   ?.addEventListener('click', () => {
