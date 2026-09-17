@@ -37827,13 +37827,17 @@ if (isBeautyKiosk) {
         style="${isBeautyKiosk ? 'display:contents;' : ''}"
       >
         ${groupedProducts[category].map((product: any) => `
-                    <div
+                             <div
             class="kiosk-product-card"
             data-product-id="${product.id}"
             style="${
-              useCompactProductCard
-                ? 'min-height:0;height:auto;overflow:hidden;'
-                : ''
+              isNormalStoreKiosk
+                ? 'width:240px;min-width:240px;max-width:240px;height:275px;min-height:275px;max-height:275px;overflow:hidden;display:flex;flex-direction:column;'
+                : (
+                    isBeautyKiosk
+                      ? 'min-height:0;height:auto;overflow:hidden;'
+                      : ''
+                  )
             }"
           >
             ${
@@ -37844,31 +37848,50 @@ if (isBeautyKiosk) {
                     alt="${product.product_name}"
                     style="${
                       useCompactProductCard
-                        ? 'width:100%;height:175px;object-fit:cover;display:block;'
+                        ? 'width:100%;height:175px;min-height:175px;max-height:175px;object-fit:cover;display:block;'
                         : ''
                     }"
                   >
                 `
                 : (
-                  isBeautyKiosk
-                    ? ''
-                    : '<div class="no-image">이미지 없음</div>'
-                )
+                    isBeautyKiosk
+                      ? ''
+                      : `
+                        <div
+                          class="no-image"
+                          style="${
+                            isNormalStoreKiosk
+                              ? 'width:100%;height:175px;min-height:175px;max-height:175px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;'
+                              : ''
+                          }"
+                        >
+                          이미지 없음
+                        </div>
+                      `
+                  )
             }
 
             <div
               class="kiosk-product-info"
               style="${
-                useCompactProductCard
-                  ? 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 12px 6px;min-height:0;'
-                  : ''
+                isNormalStoreKiosk
+                  ? 'height:44px;min-height:44px;max-height:44px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px;box-sizing:border-box;'
+                  : (
+                      isBeautyKiosk
+                        ? 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 12px 6px;'
+                        : ''
+                    )
               }"
             >
               <h3
                 style="${
-                  useCompactProductCard
-                    ? 'margin:0;font-size:17px;line-height:1.2;'
-                    : ''
+                  isNormalStoreKiosk
+                    ? 'margin:0;font-size:17px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;'
+                    : (
+                        isBeautyKiosk
+                          ? 'margin:0;font-size:17px;line-height:1.2;'
+                          : ''
+                      )
                 }"
               >
                 ${product.product_name}
@@ -37908,9 +37931,13 @@ if (isBeautyKiosk) {
               data-name="${product.product_name}"
               data-price="${product.price}"
               style="${
-                useCompactProductCard
-                  ? 'width:calc(100% - 20px);height:38px;margin:8px 10px 10px;padding:0;'
-                  : ''
+                isNormalStoreKiosk
+                  ? 'width:calc(100% - 20px);height:38px;min-height:38px;max-height:38px;margin:8px 10px 10px;padding:0;box-sizing:border-box;'
+                  : (
+                      isBeautyKiosk
+                        ? 'width:calc(100% - 20px);height:38px;margin:8px 10px 10px;'
+                        : ''
+                    )
               }"
             >
               담기
