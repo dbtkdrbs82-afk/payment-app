@@ -37580,8 +37580,15 @@ sessionStorage.setItem(
   .eq('id', merchantId)
   .maybeSingle()
 
-const isBeautyKiosk =
+  const isBeautyKiosk =
   kioskMerchant?.merchant_type === '뷰티'
+
+const isNormalStoreKiosk =
+  kioskMerchant?.merchant_type === '일반매장'
+
+const useCompactProductCard =
+  isBeautyKiosk ||
+  isNormalStoreKiosk
 
 let beautyKioskStaff: any[] = []
 let beautyKioskStaffServices: any[] = []
@@ -37797,11 +37804,11 @@ if (isBeautyKiosk) {
         style="${isBeautyKiosk ? 'display:contents;' : ''}"
       >
         ${groupedProducts[category].map((product: any) => `
-          <div
+                    <div
             class="kiosk-product-card"
             data-product-id="${product.id}"
             style="${
-              isBeautyKiosk
+              useCompactProductCard
                 ? 'min-height:0;height:auto;overflow:hidden;'
                 : ''
             }"
@@ -37813,7 +37820,7 @@ if (isBeautyKiosk) {
                     src="${product.image_url}"
                     alt="${product.product_name}"
                     style="${
-                      isBeautyKiosk
+                      useCompactProductCard
                         ? 'width:100%;height:175px;object-fit:cover;display:block;'
                         : ''
                     }"
@@ -37829,14 +37836,14 @@ if (isBeautyKiosk) {
             <div
               class="kiosk-product-info"
               style="${
-                isBeautyKiosk
-                  ? 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 12px 6px;'
+                useCompactProductCard
+                  ? 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 12px 6px;min-height:0;'
                   : ''
               }"
             >
               <h3
                 style="${
-                  isBeautyKiosk
+                  useCompactProductCard
                     ? 'margin:0;font-size:17px;line-height:1.2;'
                     : ''
                 }"
@@ -37845,41 +37852,41 @@ if (isBeautyKiosk) {
               </h3>
 
               <p
-  style="${
-    isBeautyKiosk
-      ? 'margin:0;font-size:14px;font-weight:700;white-space:nowrap;'
-      : ''
-  }"
->
-  ${
-    isBeautyKiosk
-      ? `
-        <span
-          style="
-            font-size:12px;
-            color:#64748b;
-            font-weight:600;
-            margin-right:4px;
-          "
-        >
-          (${Number(product.duration_minutes || 30)}분)
-        </span>
-      `
-      : ''
-  }
+                style="${
+                  useCompactProductCard
+                    ? 'margin:0;font-size:14px;font-weight:700;line-height:1.2;white-space:nowrap;'
+                    : ''
+                }"
+              >
+                ${
+                  isBeautyKiosk
+                    ? `
+                      <span
+                        style="
+                          font-size:12px;
+                          color:#64748b;
+                          font-weight:600;
+                          margin-right:4px;
+                        "
+                      >
+                        (${Number(product.duration_minutes || 30)}분)
+                      </span>
+                    `
+                    : ''
+                }
 
-  ${Number(product.price).toLocaleString()}원
-</p>
+                ${Number(product.price).toLocaleString()}원
+              </p>
             </div>
 
-            <button 
+            <button
               class="add-cart-button"
               data-id="${product.id}"
               data-name="${product.product_name}"
               data-price="${product.price}"
               style="${
-                isBeautyKiosk
-                  ? 'width:calc(100% - 20px);height:38px;margin:8px 10px 10px;'
+                useCompactProductCard
+                  ? 'width:calc(100% - 20px);height:38px;margin:8px 10px 10px;padding:0;'
                   : ''
               }"
             >
