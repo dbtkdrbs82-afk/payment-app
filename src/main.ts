@@ -37759,15 +37759,34 @@ if (isBeautyKiosk) {
                 ? ''
                 : `
                   <div class="kiosk-category-tabs">
-                    ${Object.keys(groupedProducts).map((category, index) => `
-                      <button
-                        class="kiosk-category-tab ${index === 0 ? 'active' : ''}"
-                        data-category="${category}"
-                      >
-                        ${category}
-                      </button>
-                    `).join('')}
-                  </div>
+
+  ${
+    isNormalStoreKiosk
+      ? `
+        <button
+          class="kiosk-category-tab active"
+          data-category="__all__"
+        >
+          전체
+        </button>
+      `
+      : ''
+  }
+
+  ${Object.keys(groupedProducts).map((category, index) => `
+    <button
+      class="kiosk-category-tab ${
+        !isNormalStoreKiosk && index === 0
+          ? 'active'
+          : ''
+      }"
+      data-category="${category}"
+    >
+      ${category}
+    </button>
+  `).join('')}
+
+</div>
                 `
             }
 
@@ -37782,14 +37801,18 @@ if (isBeautyKiosk) {
   ${Object.keys(groupedProducts).map((category) => `
     <section
       class="kiosk-category-section ${
-        isBeautyKiosk
+  isBeautyKiosk
+    ? ''
+    : (
+        isNormalStoreKiosk
           ? ''
           : (
               Object.keys(groupedProducts)[0] === category
                 ? ''
                 : 'hidden-category'
             )
-      }"
+      )
+}"
       data-category-section="${category}"
       style="${isBeautyKiosk ? 'display:contents;' : ''}"
     >
@@ -38367,30 +38390,51 @@ reservationDateInput?.addEventListener(
   }
 )
 
-        document.querySelectorAll('.kiosk-category-tab')
-  .forEach((button) => {
-    button.addEventListener('click', () => {
-      const category =
-        (button as HTMLElement).getAttribute('data-category')
+document.querySelectorAll('.kiosk-category-tab')
+.forEach((button) => {
 
-      document.querySelectorAll('.kiosk-category-tab')
-        .forEach((tab) => tab.classList.remove('active'))
+  button.addEventListener('click', () => {
 
-      button.classList.add('active')
+    const category =
+      (button as HTMLElement)
+        .getAttribute('data-category')
 
-      document.querySelectorAll('.kiosk-category-section')
-        .forEach((section) => {
-          const sectionCategory =
-            (section as HTMLElement).getAttribute('data-category-section')
+    document
+      .querySelectorAll('.kiosk-category-tab')
+      .forEach((tab) => {
+        tab.classList.remove('active')
+      })
 
-          if (sectionCategory === category) {
-            section.classList.remove('hidden-category')
-          } else {
-            section.classList.add('hidden-category')
-          }
-        })
-    })
+    button.classList.add('active')
+
+    document
+      .querySelectorAll('.kiosk-category-section')
+      .forEach((section) => {
+
+        const sectionCategory =
+          (section as HTMLElement)
+            .getAttribute(
+              'data-category-section'
+            )
+
+        if (
+          category === '__all__' ||
+          sectionCategory === category
+        ) {
+          section.classList.remove(
+            'hidden-category'
+          )
+        } else {
+          section.classList.add(
+            'hidden-category'
+          )
+        }
+
+      })
+
   })
+
+})
 
   const cart: {
     cart_key: string
