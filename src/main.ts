@@ -1790,7 +1790,7 @@ setTimeout(() => {
       price: number
       quantity: number
     }[] = []
-    
+ 
     const renderCart = () => {
       const cartText = cart
         .map((item) => `${item.name} x ${item.quantity}`)
@@ -38091,9 +38091,40 @@ ${
 
 <div class="kiosk-bottom-bar">
   <div class="bottom-total">
-    <span>총 결제금액</span>
-    <strong id="cart-total-price-bottom">0원</strong>
-  </div>
+  <span>총 결제금액</span>
+
+  <strong id="cart-total-price-bottom">
+    0원
+  </strong>
+
+  ${
+    isNormalStoreKiosk
+      ? `
+        <input
+          id="kiosk-direct-amount"
+          type="number"
+          min="1"
+          inputmode="numeric"
+          placeholder="금액 입력"
+          style="
+            width:150px;
+            max-width:100%;
+            height:40px;
+            margin-top:8px;
+            padding:0 10px;
+            border:1px solid #cbd5e1;
+            border-radius:8px;
+            box-sizing:border-box;
+            font-size:16px;
+            font-weight:700;
+            text-align:right;
+            background:#ffffff;
+          "
+        />
+      `
+      : ''
+  }
+</div>
 
   <div class="kiosk-payment-buttons">
 
@@ -38477,6 +38508,32 @@ duration_minutes?: number
 beauty_schedule_status?: Record<string, string>
   }[] = []
 
+  const getDirectPaymentAmount = (): number => {
+
+    if (!isNormalStoreKiosk) {
+      return 0
+    }
+  
+    const input =
+      document.querySelector<HTMLInputElement>(
+        '#kiosk-direct-amount'
+      )
+  
+    const amount =
+      Math.floor(
+        Number(input?.value || 0)
+      )
+  
+    if (
+      !Number.isFinite(amount) ||
+      amount <= 0
+    ) {
+      return 0
+    }
+  
+    return amount
+  }
+
         const renderCart = () => {
           const cartItems = document.querySelector<HTMLDivElement>('#cart-items')!
           const cartCount = document.querySelector<HTMLSpanElement>('#cart-count')!
@@ -38485,10 +38542,19 @@ beauty_schedule_status?: Record<string, string>
             document.querySelector<HTMLElement>('#cart-total-price-bottom')
         
           const totalCount = cart.reduce((sum, item) => sum + item.quantity, 0)
-          const totalPrice = cart.reduce(
-            (sum, item) => sum + item.price * item.quantity,
+          const cartAmount = cart.reduce(
+            (sum, item) =>
+              sum + item.price * item.quantity,
             0
           )
+          
+          const directAmount =
+            getDirectPaymentAmount()
+          
+          const totalPrice =
+            cartAmount > 0
+              ? cartAmount
+              : directAmount
         
           cartCount.textContent = String(totalCount)
           cartTotalPrice.textContent = totalPrice.toLocaleString() + '원'
@@ -39004,7 +39070,20 @@ const item = cart.find(
           })
         }
 
-        
+        document
+  .querySelector<HTMLInputElement>(
+    '#kiosk-direct-amount'
+  )
+  ?.addEventListener(
+    'input',
+    () => {
+
+      if (cart.length === 0) {
+        renderCart()
+      }
+
+    }
+  )
 
         let selectedBeautyStaffId =
   isBeautyKiosk && beautyKioskStaff.length > 0
@@ -39089,13 +39168,56 @@ duration_minutes:
 
     
 
-    const totalPrice = cart.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+    const cartTotalPrice = cart.reduce(
+      (sum, item) =>
+        sum + item.price * item.quantity,
       0
     )
-
-    if (cart.length === 0 || totalPrice <= 0) {
-      alert('상품을 먼저 선택해주세요.')
+    
+    const directAmount =
+      getDirectPaymentAmount()
+    
+    const totalPrice =
+      cartTotalPrice > 0
+        ? cartTotalPrice
+        : directAmount
+    
+    
+    const paymentItems =
+      cart.length > 0
+        ? cart
+        : (
+            isNormalStoreKiosk &&
+            directAmount > 0
+              ? [
+                  {
+                    cart_key:
+                      'direct-payment',
+    
+                    id: 0,
+    
+                    name:
+                      '직접결제',
+    
+                    price:
+                      directAmount,
+    
+                    quantity: 1
+                  }
+                ]
+              : []
+          )
+    
+    
+    if (
+      totalPrice <= 0 ||
+      paymentItems.length === 0
+    ) {
+    
+      alert(
+        '상품을 선택하거나 결제금액을 입력해주세요.'
+      )
+    
       return
     }
 
@@ -39228,14 +39350,16 @@ if (
   return
 }
 
-  const kioskOrderItems =
-  isBeautyKiosk
-    ? cart.map((item) => ({
-        ...item,
-        reservation_date: item.reservation_date || '',
-        reservation_time: item.reservation_time || ''
-      }))
-    : cart
+const kioskOrderItems =
+isBeautyKiosk
+  ? cart.map((item) => ({
+      ...item,
+      reservation_date:
+        item.reservation_date || '',
+      reservation_time:
+        item.reservation_time || ''
+    }))
+  : paymentItems
 
 sessionStorage.setItem(
   'kiosk_items',
@@ -39569,6 +39693,59 @@ document.querySelector('#kiosk-card-pay-button')
       return
     }
 
+    const cartTotalPrice = cart.reduce(
+      (sum, item) =>
+        sum + item.price * item.quantity,
+      0
+    )
+    
+    const directAmount =
+      getDirectPaymentAmount()
+    
+    const paymentAmount =
+      cartTotalPrice > 0
+        ? cartTotalPrice
+        : directAmount
+    
+    
+    const manualPaymentItems =
+      cart.length > 0
+        ? cart
+        : (
+            isNormalStoreKiosk &&
+            directAmount > 0
+              ? [
+                  {
+                    cart_key:
+                      'direct-payment',
+    
+                    id: 0,
+    
+                    name:
+                      '직접결제',
+    
+                    price:
+                      directAmount,
+    
+                    quantity: 1
+                  }
+                ]
+              : []
+          )
+    
+    
+    if (
+      paymentAmount <= 0 ||
+      manualPaymentItems.length === 0
+    ) {
+    
+      alert(
+        '상품을 선택하거나 결제금액을 입력해주세요.'
+      )
+    
+      return
+    }
+
     sessionStorage.setItem(
       'card_payment_merchant_id',
       merchantId
@@ -39612,14 +39789,16 @@ if (
   return
 }
 
-    const cardOrderItems =
-    isBeautyKiosk
-      ? cart.map((item) => ({
-          ...item,
-          reservation_date: item.reservation_date || '',
-          reservation_time: item.reservation_time || ''
-        }))
-      : cart
+const cardOrderItems =
+isBeautyKiosk
+  ? cart.map((item) => ({
+      ...item,
+      reservation_date:
+        item.reservation_date || '',
+      reservation_time:
+        item.reservation_time || ''
+    }))
+  : manualPaymentItems
 
 sessionStorage.setItem(
   'card_payment_items',
@@ -39646,16 +39825,10 @@ sessionStorage.setItem(
   ''
 )
     
-    sessionStorage.setItem(
-      'card_payment_amount',
-      String(
-        cart.reduce(
-          (sum, item) =>
-            sum + item.price * item.quantity,
-          0
-        )
-      )
-    )
+sessionStorage.setItem(
+  'card_payment_amount',
+  String(paymentAmount)
+)
 
     if (isBeautyKiosk) {
       sessionStorage.setItem(
