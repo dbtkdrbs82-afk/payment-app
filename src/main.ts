@@ -37832,7 +37832,7 @@ if (isBeautyKiosk) {
             data-product-id="${product.id}"
             style="${
               isNormalStoreKiosk
-                ? 'width:240px;min-width:240px;max-width:240px;height:275px;min-height:275px;max-height:275px;overflow:hidden;display:flex;flex-direction:column;'
+  ? 'width:100%;min-width:0;max-width:240px;height:275px;min-height:275px;max-height:275px;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;'
                 : (
                     isBeautyKiosk
                       ? 'min-height:0;height:auto;overflow:hidden;'
