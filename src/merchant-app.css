@@ -2896,3 +2896,70 @@
   margin-top: 3px;
   font-size: 11px;
 }
+/* 일반매장 모바일 홈 QR 안내 */
+.merchant-mobile-qr-welcome {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  min-height: 150px;
+
+  padding: 22px 24px;
+}
+
+.merchant-mobile-qr-guide {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+
+  min-width: 0;
+}
+
+.merchant-mobile-qr-guide-title {
+  color: #ffffff;
+
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+
+.merchant-mobile-qr-guide-type {
+  margin-top: 12px;
+
+  padding: 5px 10px;
+
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.14);
+
+  color: #ffffff;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.merchant-home-qr {
+  width: 118px;
+  height: 118px;
+
+  flex: 0 0 118px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 8px;
+
+  border-radius: 12px;
+
+  background: #ffffff;
+}
+
+.merchant-home-qr-canvas {
+  display: block;
+
+  width: 100% !important;
+  height: 100% !important;
+}

@@ -1873,21 +1873,49 @@ if (
 
       <main class="merchant-mobile-content">
 
-        <section class="merchant-mobile-welcome">
+                ${
+          isNormalStore
+            ? `
+              <section class="merchant-mobile-welcome merchant-mobile-qr-welcome">
 
-          <div class="merchant-mobile-welcome-label">
-            가맹점 모바일
-          </div>
+                <div class="merchant-mobile-qr-guide">
 
-          <h1>
-            ${merchantName}
-          </h1>
+                  <div class="merchant-mobile-qr-guide-title">
+                    휴대폰으로<br>
+                    촬영 해주세요.
+                  </div>
 
-          <div class="merchant-mobile-type">
-            ${merchantType}
-          </div>
+                  <div class="merchant-mobile-qr-guide-type">
+                    (${merchantType})
+                  </div>
 
-        </section>
+                </div>
+
+                <div
+                  id="merchant-home-qr"
+                  class="merchant-home-qr"
+                ></div>
+
+              </section>
+            `
+            : `
+              <section class="merchant-mobile-welcome">
+
+                <div class="merchant-mobile-welcome-label">
+                  가맹점 모바일
+                </div>
+
+                <h1>
+                  ${merchantName}
+                </h1>
+
+                <div class="merchant-mobile-type">
+                  ${merchantType}
+                </div>
+
+              </section>
+            `
+        }
 
 
                 <section class="merchant-mobile-menu">
@@ -1923,6 +1951,51 @@ if (
     </div>
   `
 
+  if (isNormalStore) {
+
+    const homeQrBox =
+      document.querySelector<HTMLDivElement>(
+        '#merchant-home-qr'
+      )
+
+    const homeQrUrl =
+      'https://nxgsoft.co.kr/pay/?merchant_id=' +
+      merchantId
+
+    if (homeQrBox) {
+
+      QRCode.toCanvas(
+        homeQrUrl,
+        {
+          width: 500,
+          margin: 1
+        },
+        (
+          error,
+          canvas
+        ) => {
+
+          if (error) {
+            console.error(
+              '홈 QR 생성 실패',
+              error
+            )
+            return
+          }
+
+          canvas.className =
+            'merchant-home-qr-canvas'
+
+          homeQrBox.replaceChildren(
+            canvas
+          )
+
+        }
+      )
+
+    }
+
+  }
 
   document
     .querySelector(
