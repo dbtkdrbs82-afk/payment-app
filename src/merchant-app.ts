@@ -1492,46 +1492,46 @@ if (
   if (isNormalStore) {
 
     merchantHomeMenu = `
-      <button
-        type="button"
-        class="merchant-mobile-menu-card"
-        data-menu="orders"
-      >
-        <span class="merchant-mobile-menu-icon">📋</span>
-        <strong>주문관리</strong>
-        <small>주문 및 결제내역 관리</small>
-      </button>
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="card"
+    >
+      <span class="merchant-mobile-menu-icon">💳</span>
+      <strong>카드결제</strong>
+      <small>OCR · 수기 · 현금영수증</small>
+    </button>
 
-      <button
-        type="button"
-        class="merchant-mobile-menu-card"
-        data-menu="products"
-      >
-        <span class="merchant-mobile-menu-icon">🛍️</span>
-        <strong>상품관리</strong>
-        <small>상품 등록 및 수정</small>
-      </button>
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="orders"
+    >
+      <span class="merchant-mobile-menu-icon">📋</span>
+      <strong>주문관리</strong>
+      <small>주문 및 결제내역 관리</small>
+    </button>
 
-      <button
-        type="button"
-        class="merchant-mobile-menu-card"
-        data-menu="qr"
-      >
-        <span class="merchant-mobile-menu-icon">📱</span>
-        <strong>PICK QR</strong>
-        <small>가맹점 QR 확인 및 관리</small>
-      </button>
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="products"
+    >
+      <span class="merchant-mobile-menu-icon">🛍️</span>
+      <strong>상품관리</strong>
+      <small>상품 등록 및 수정</small>
+    </button>
 
-      <button
-        type="button"
-        class="merchant-mobile-menu-card"
-        data-menu="card"
-      >
-        <span class="merchant-mobile-menu-icon">💳</span>
-        <strong>카드결제</strong>
-        <small>OCR · 수기 · 현금영수증</small>
-      </button>
-    `
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="qr"
+    >
+      <span class="merchant-mobile-menu-icon">📱</span>
+      <strong>QR관리</strong>
+      <small>가맹점 QR 확인 및 관리</small>
+    </button>
+  `
 
   } else if (isAcademy) {
 
