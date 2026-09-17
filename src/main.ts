@@ -37816,11 +37816,11 @@ if (isBeautyKiosk) {
       data-category-section="${category}"
       style="${isBeautyKiosk ? 'display:contents;' : ''}"
     >
-      ${
-        isBeautyKiosk
-          ? ''
-          : `<h2 class="kiosk-category-title">${category}</h2>`
-      }
+    ${
+      isBeautyKiosk || isNormalStoreKiosk
+        ? ''
+        : `<h2 class="kiosk-category-title">${category}</h2>`
+    }
 
       <div
         class="kiosk-products"
