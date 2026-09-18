@@ -39084,19 +39084,37 @@ const item = cart.find(
         }
 
         document
-  .querySelector<HTMLInputElement>(
-    '#kiosk-direct-amount'
-  )
-  ?.addEventListener(
-    'input',
-    () => {
-
-      if (cart.length === 0) {
-        renderCart()
-      }
-
-    }
-  )
+        .querySelector<HTMLInputElement>(
+          '#kiosk-direct-amount'
+        )
+        ?.addEventListener(
+          'input',
+          (event) => {
+      
+            const input =
+              event.target as HTMLInputElement
+      
+            const directAmount =
+              Math.floor(
+                Number(
+                  input.value || 0
+                )
+              )
+      
+            if (
+              directAmount > 0 &&
+              cart.length > 0
+            ) {
+      
+              cart.splice(
+                0,
+                cart.length
+              )
+            }
+      
+            renderCart()
+          }
+        )
 
         let selectedBeautyStaffId =
   isBeautyKiosk && beautyKioskStaff.length > 0
@@ -39105,6 +39123,17 @@ const item = cart.find(
 
         document.querySelectorAll<HTMLButtonElement>('.add-cart-button').forEach((button) => {
           button.addEventListener('click', () => {
+            const directAmountInput =
+  document.querySelector<HTMLInputElement>(
+    '#kiosk-direct-amount'
+  )
+
+if (
+  isNormalStoreKiosk &&
+  directAmountInput
+) {
+  directAmountInput.value = ''
+}
             const id = Number(button.dataset.id)
             const name = button.dataset.name || ''
             const price = Number(button.dataset.price)
