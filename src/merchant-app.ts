@@ -2908,86 +2908,109 @@ const endIso =
         )
 
         const [
-            orderResult,
-            merchantResult,
-            paymentResult
-          ] =
-            await Promise.all([
-  
-        supabase
-          .from('orders')
-          .select('*')
-          .eq(
-            'merchant_id',
-            merchantId
-          )
-          .gte(
-            'created_at',
-            startIso
-          )
-          .lte(
-            'created_at',
-            endIso
-          )
-          .order(
-            'created_at',
-            {
-              ascending: false
-            }
-          ),
-  
-          supabase
-          .from('merchants')
-          .select(`
-            voice_enabled,
-            call_message,
-            merchant_name,
-            owner_name,
-            business_number,
-            corporate_number,
-            phone,
-            address,
-            address_detail,
-            toss_mid,
-            korpay_mid
-          `)
-          .eq(
-            'id',
-            merchantId
-          )
-          .maybeSingle(),
+          orderResult,
+          merchantResult,
+          paymentResult,
+          settlementPaymentResult,
+          holidayResult
+        ] =
+          await Promise.all([
         
-        supabase
-          .from('payments')
-          .select(`
-            id,
-            order_id,
-            payment_key,
-            amount,
-            settlement_amount,
-            approval_number,
-            card_number,
-            card_company,
-            pg_company,
-            approved_at,
-            created_at,
-            status,
-            canceled_at
-          `)
-          .eq(
-            'merchant_id',
-            merchantId
-          )
-          .gte(
-            'created_at',
-            startIso
-          )
-          .lte(
-            'created_at',
-            endIso
-          )
-  
-      ])
+            supabase
+              .from('orders')
+              .select('*')
+              .eq(
+                'merchant_id',
+                merchantId
+              )
+              .gte(
+                'created_at',
+                startIso
+              )
+              .lte(
+                'created_at',
+                endIso
+              )
+              .order(
+                'created_at',
+                {
+                  ascending: false
+                }
+              ),
+        
+            supabase
+              .from('merchants')
+              .select(`
+                voice_enabled,
+                call_message,
+                merchant_name,
+                owner_name,
+                business_number,
+                corporate_number,
+                phone,
+                address,
+                address_detail,
+                toss_mid,
+                korpay_mid,
+                settlement_cycle
+              `)
+              .eq(
+                'id',
+                merchantId
+              )
+              .maybeSingle(),
+        
+            supabase
+              .from('payments')
+              .select(`
+                id,
+                order_id,
+                payment_key,
+                amount,
+                settlement_amount,
+                approval_number,
+                card_number,
+                card_company,
+                pg_company,
+                approved_at,
+                created_at,
+                status,
+                canceled_at
+              `)
+              .eq(
+                'merchant_id',
+                merchantId
+              )
+              .gte(
+                'created_at',
+                startIso
+              )
+              .lte(
+                'created_at',
+                endIso
+              ),
+        
+            supabase
+              .from('payments')
+              .select(`
+                settlement_amount,
+                approved_at,
+                created_at,
+                status,
+                payout_status
+              `)
+              .eq(
+                'merchant_id',
+                merchantId
+              ),
+        
+            supabase
+              .from('holidays')
+              .select(
+                'holiday_date'
+              )
+        
+          ])
   
   
     const orderList =
@@ -3143,19 +3166,236 @@ const salesTotal =
   )
 
 
+  const settlementCycle =
+  String(
+    merchantResult.data
+      ?.settlement_cycle ||
+    '1일'
+  )
+
+
+const holidaySet =
+  new Set(
+    (
+      holidayResult.data ||
+      []
+    ).map(
+      (holiday: any) =>
+        String(
+          holiday.holiday_date
+        )
+    )
+  )
+
+
+const getSettlementPayoutDate =
+  (
+    dateText: string
+  ) => {
+
+    const payoutDate =
+      new Date(dateText)
+
+
+    const cycleMatch =
+      settlementCycle.match(
+        /\d+/
+      )
+
+
+    const cycleDays =
+      cycleMatch
+        ? Number(
+            cycleMatch[0]
+          )
+        : 1
+
+
+    let addedDays = 0
+
+
+    while (
+      addedDays <
+      cycleDays
+    ) {
+
+      payoutDate.setDate(
+        payoutDate.getDate() + 1
+      )
+
+
+      const dateValue =
+        getKoreaDate(
+          payoutDate
+        )
+
+
+      const day =
+        new Date(
+          dateValue +
+          'T12:00:00+09:00'
+        ).getDay()
+
+
+      const isWeekend =
+        day === 0 ||
+        day === 6
+
+
+      const isHoliday =
+        holidaySet.has(
+          dateValue
+        )
+
+
+      if (
+        isWeekend ||
+        isHoliday
+      ) {
+        continue
+      }
+
+
+      addedDays += 1
+    }
+
+
+    return getKoreaDate(
+      payoutDate
+    )
+  }
+
+
+const settlementTargetPayments =
+  (
+    settlementPaymentResult.data ||
+    []
+  ).filter(
+    (payment: any) => {
+
+      if (
+        payment.status !==
+        'paid'
+      ) {
+        return false
+      }
+
+
+      const dateText =
+        payment.approved_at ||
+        payment.created_at
+
+
+      if (!dateText) {
+        return false
+      }
+
+
+      const payoutDate =
+        getSettlementPayoutDate(
+          dateText
+        )
+
+
+      return (
+        payoutDate >=
+          startDate &&
+        payoutDate <=
+          endDate
+      )
+    }
+  )
+
+
 const settlementTotal =
-  paidPayments.reduce(
+  settlementTargetPayments.reduce(
     (
       sum: number,
       payment: any
     ) =>
       sum +
       Number(
-        payment.settlement_amount || 0
+        payment
+          .settlement_amount ||
+        0
       ),
     0
   )
 
+  const settlementPaymentDates =
+  settlementTargetPayments
+    .map(
+      (payment: any) => {
+
+        const dateText =
+          payment.approved_at ||
+          payment.created_at
+
+        if (!dateText) {
+          return ''
+        }
+
+        return getKoreaDate(
+          new Date(dateText)
+        )
+      }
+    )
+    .filter(Boolean)
+    .sort()
+
+
+let settlementPaymentDateLabel =
+  ''
+
+
+if (
+  settlementPaymentDates.length > 0
+) {
+
+  const firstDate =
+    settlementPaymentDates[0]
+
+  const lastDate =
+    settlementPaymentDates[
+      settlementPaymentDates.length - 1
+    ]
+
+
+  const formatShortDate =
+    (dateValue: string) => {
+
+      const [
+        year,
+        month,
+        day
+      ] =
+        dateValue.split('-')
+
+      return (
+        year.slice(2) +
+        '.' +
+        month +
+        '.' +
+        day
+      )
+    }
+
+
+  settlementPaymentDateLabel =
+    firstDate === lastDate
+      ? formatShortDate(
+          firstDate
+        )
+      : (
+          formatShortDate(
+            firstDate
+          ) +
+          '~' +
+          formatShortDate(
+            lastDate
+          )
+        )
+}
 
   const receivedCount =
   orders.filter(
@@ -3242,18 +3482,34 @@ summary.innerHTML = `
 
 
     <div>
-      <strong>
-        정산예정금액
-      </strong>
+  <strong>
+    정산예정금액
+  </strong>
 
-      <span>
-        ${settlementTotal.toLocaleString()}원
-      </span>
+  <span>
+    ${settlementTotal.toLocaleString()}원
+  </span>
 
-      <small class="beauty-mobile-settlement-wait">
-        대기
-      </small>
-    </div>
+  <small class="beauty-mobile-settlement-wait">
+    대기
+  </small>
+
+  ${
+    settlementTargetPayments.length > 0
+      ? `
+        <em>
+          정산대상 ${settlementTargetPayments.length.toLocaleString()}건${
+            settlementPaymentDateLabel
+              ? ' · ' +
+                settlementPaymentDateLabel +
+                ' 결제건'
+              : ''
+          }
+        </em>
+      `
+      : ''
+  }
+</div>
 
   </div>
 `
