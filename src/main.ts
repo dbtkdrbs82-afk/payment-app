@@ -10190,10 +10190,23 @@ daou_manual_mkey: getValue('daou_manual_mkey'),
         opened_at: getValue('opened_at') || null,
       
         bank_name: getValue('bank_name'),
-        account_number: getValue('account_number'),
-        account_holder: getValue('account_holder'),
-        settlement_cycle: getValue('settlement_cycle'),
-        memo: getValue('merchant-memo')
+account_number: getValue('account_number'),
+account_holder: getValue('account_holder'),
+settlement_cycle: getValue('settlement_cycle'),
+
+installment_month:
+  getValue('installment-month'),
+
+daily_limit:
+  getValue('daily-limit'),
+
+monthly_limit:
+  getValue('monthly-limit'),
+
+yearly_limit:
+  getValue('yearly-limit'),
+
+memo: getValue('merchant-memo')
       }
 
       const currentAdminId =
