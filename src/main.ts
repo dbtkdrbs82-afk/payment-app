@@ -18964,7 +18964,13 @@ const orderIdValue =
       document.querySelector<HTMLButtonElement>('#merchant-login-button')
   ?.addEventListener('click', async () => {
     const loginId =
-      document.querySelector<HTMLInputElement>('#merchant-login-id')?.value.trim() || ''
+  (
+    document.querySelector<HTMLInputElement>(
+      '#merchant-login-id'
+    )?.value || ''
+  )
+    .trim()
+    .toUpperCase()
 
     const password =
       document.querySelector<HTMLInputElement>('#merchant-login-password')?.value.trim() || ''

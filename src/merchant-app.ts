@@ -19411,8 +19411,12 @@ function renderMerchantLogin() {
           )
 
 
-        const loginId =
-          loginIdInput?.value.trim() || ''
+          const loginId =
+          (
+            loginIdInput?.value || ''
+          )
+            .trim()
+            .toUpperCase()
 
         const password =
           passwordInput?.value.trim() || ''
