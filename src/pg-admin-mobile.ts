@@ -975,7 +975,7 @@ export async function renderPgAdminMobile(
   
   
           location.href =
-            '/admin-login'
+  '/pg-admin-mobile-login'
   
         }
       )

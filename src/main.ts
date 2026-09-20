@@ -4646,6 +4646,18 @@ document.querySelector('#receipt-close-btn')
     location.href = '/merchant-apply'
   })
 
+} else if (path === '/pg-admin-mobile-login') {
+
+  const {
+    renderPgAdminMobileLogin
+  } = await import(
+    './pg-admin-mobile-login'
+  )
+
+  await renderPgAdminMobileLogin(
+    app
+  )
+
 } else if (path === '/pg-admin-mobile') {
 
   const {
