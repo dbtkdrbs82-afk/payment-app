@@ -2338,62 +2338,476 @@ export async function renderPgAdminMobile(
       }
   
   
-    const renderOrganizationPage =
+      const renderOrganizationPage =
       async () => {
-  
+    
         const visibleAdmins =
           getVisibleAdminUsers()
-  
-  
+    
+    
         const branches =
           visibleAdmins.filter(
             (user: any) =>
               user.role ===
               'BRANCH'
           )
-  
-  
+    
+    
         const agencies =
           visibleAdmins.filter(
             (user: any) =>
               user.role ===
               'AGENCY'
           )
-  
-  
+    
+    
         const managers =
           visibleAdmins.filter(
             (user: any) =>
               user.role ===
               'MANAGER'
           )
-  
-  
+    
+    
         const visibleMerchants =
           getVisibleMerchants()
-  
-  
+    
+    
+        const {
+          data: orgPaymentData,
+          error: orgPaymentError
+        } =
+          await supabase
+            .from(
+              'payments'
+            )
+            .select(`
+              id,
+              merchant_id,
+              amount,
+              status,
+              approved_at,
+              created_at
+            `)
+            .eq(
+              'status',
+              'paid'
+            )
+    
+    
+        if (orgPaymentError) {
+    
+          alert(
+            '조직 매출정보를 불러오지 못했습니다.\n' +
+            orgPaymentError.message
+          )
+    
+          return
+        }
+    
+    
+        const orgPayments =
+          orgPaymentData || []
+    
+    
+        const getOrgCommissionRate =
+          (
+            adminUser: any,
+            settlementCycle: string
+          ) => {
+    
+            if (!adminUser) {
+              return 0
+            }
+    
+    
+            if (
+              settlementCycle ===
+              '1일'
+            ) {
+    
+              return Number(
+                adminUser
+                  .commission_rate_1day ||
+                0
+              )
+    
+            }
+    
+    
+            if (
+              settlementCycle ===
+              '3일'
+            ) {
+    
+              return Number(
+                adminUser
+                  .commission_rate_3day ||
+                0
+              )
+    
+            }
+    
+    
+            if (
+              settlementCycle ===
+              '7일'
+            ) {
+    
+              return Number(
+                adminUser
+                  .commission_rate_7day ||
+                0
+              )
+    
+            }
+    
+    
+            return Number(
+              adminUser
+                .commission_rate_4day ||
+              0
+            )
+    
+          }
+    
+    
+        const getMerchantMonthSales =
+          (
+            merchantId: number
+          ) => {
+    
+            const now =
+              new Date()
+    
+    
+            const currentMonthStart =
+              new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                1,
+                0,
+                0,
+                0,
+                0
+              )
+    
+    
+            const nextMonthStart =
+              new Date(
+                now.getFullYear(),
+                now.getMonth() + 1,
+                1,
+                0,
+                0,
+                0,
+                0
+              )
+    
+    
+            return orgPayments
+              .filter(
+                (payment: any) => {
+    
+                  if (
+                    Number(
+                      payment.merchant_id
+                    ) !==
+                    merchantId
+                  ) {
+    
+                    return false
+    
+                  }
+    
+    
+                  const paymentDate =
+                    new Date(
+                      payment.approved_at ||
+                      payment.created_at
+                    )
+    
+    
+                  return (
+                    paymentDate >=
+                      currentMonthStart &&
+                    paymentDate <
+                      nextMonthStart
+                  )
+    
+                }
+              )
+              .reduce(
+                (
+                  sum: number,
+                  payment: any
+                ) =>
+                  sum +
+                  Number(
+                    payment.amount ||
+                    0
+                  ),
+                0
+              )
+    
+          }
+    
+    
+        const getOrgSummary =
+          (
+            user: any
+          ) => {
+    
+            let targetMerchants:
+              any[] = []
+    
+    
+            if (
+              user.role ===
+              'MANAGER'
+            ) {
+    
+              targetMerchants =
+                visibleMerchants.filter(
+                  (merchant: any) =>
+                    Number(
+                      merchant
+                        .manager_admin_id
+                    ) ===
+                    Number(
+                      user.id
+                    )
+                )
+    
+            }
+    
+    
+            if (
+              user.role ===
+              'AGENCY'
+            ) {
+    
+              const agencyManagers =
+                adminUsers.filter(
+                  (manager: any) =>
+                    manager.role ===
+                      'MANAGER' &&
+                    Number(
+                      manager
+                        .parent_admin_id
+                    ) ===
+                    Number(
+                      user.id
+                    )
+                )
+    
+    
+              const managerIds =
+                agencyManagers.map(
+                  (manager: any) =>
+                    Number(
+                      manager.id
+                    )
+                )
+    
+    
+              targetMerchants =
+                visibleMerchants.filter(
+                  (merchant: any) =>
+                    Number(
+                      merchant
+                        .agency_admin_id
+                    ) ===
+                      Number(
+                        user.id
+                      ) ||
+    
+                    managerIds.includes(
+                      Number(
+                        merchant
+                          .manager_admin_id
+                      )
+                    )
+                )
+    
+            }
+    
+    
+            if (
+              user.role ===
+              'BRANCH'
+            ) {
+    
+              const branchAgencies =
+                adminUsers.filter(
+                  (agency: any) =>
+                    agency.role ===
+                      'AGENCY' &&
+                    Number(
+                      agency
+                        .parent_admin_id
+                    ) ===
+                    Number(
+                      user.id
+                    )
+                )
+    
+    
+              const agencyIds =
+                branchAgencies.map(
+                  (agency: any) =>
+                    Number(
+                      agency.id
+                    )
+                )
+    
+    
+              const branchManagers =
+                adminUsers.filter(
+                  (manager: any) =>
+                    manager.role ===
+                      'MANAGER' &&
+                    (
+                      Number(
+                        manager
+                          .parent_admin_id
+                      ) ===
+                        Number(
+                          user.id
+                        ) ||
+    
+                      agencyIds.includes(
+                        Number(
+                          manager
+                            .parent_admin_id
+                        )
+                      )
+                    )
+                )
+    
+    
+              const managerIds =
+                branchManagers.map(
+                  (manager: any) =>
+                    Number(
+                      manager.id
+                    )
+                )
+    
+    
+              targetMerchants =
+                visibleMerchants.filter(
+                  (merchant: any) =>
+                    Number(
+                      merchant
+                        .branch_admin_id
+                    ) ===
+                      Number(
+                        user.id
+                      ) ||
+    
+                    agencyIds.includes(
+                      Number(
+                        merchant
+                          .agency_admin_id
+                      )
+                    ) ||
+    
+                    managerIds.includes(
+                      Number(
+                        merchant
+                          .manager_admin_id
+                      )
+                    )
+                )
+    
+            }
+    
+    
+            let totalSales =
+              0
+    
+            let commissionAmount =
+              0
+    
+    
+            targetMerchants.forEach(
+              (merchant: any) => {
+    
+                const sales =
+                  getMerchantMonthSales(
+                    Number(
+                      merchant.id
+                    )
+                  )
+    
+    
+                if (
+                  sales <= 0
+                ) {
+                  return
+                }
+    
+    
+                const settlementCycle =
+                  String(
+                    merchant
+                      .settlement_cycle ||
+                    '4일'
+                  )
+    
+    
+                const rate =
+                  getOrgCommissionRate(
+                    user,
+                    settlementCycle
+                  )
+    
+    
+                totalSales +=
+                  sales
+    
+    
+                commissionAmount +=
+                  Math.floor(
+                    sales *
+                    rate /
+                    100
+                  )
+    
+              }
+            )
+    
+    
+            return {
+              totalSales,
+              commissionAmount
+            }
+    
+          }
+    
+    
         content.innerHTML =
           `
             <div
               class="nxg-mobile-title"
             >
-  
+    
               <h2>
                 조직관리
               </h2>
-  
+    
               <p>
                 PC 관리자와 동일한 조직 권한으로 조회합니다.
               </p>
-  
+    
             </div>
-  
-  
+    
+    
             <div
               class="nxg-mobile-summary"
             >
-  
+    
               <div
                 class="
                   nxg-mobile-summary-card
@@ -2402,14 +2816,14 @@ export async function renderPgAdminMobile(
                 <span>
                   지사
                 </span>
-  
+    
                 <strong>
                   ${
                     branches.length
                   }
                 </strong>
               </div>
-  
+    
               <div
                 class="
                   nxg-mobile-summary-card
@@ -2418,14 +2832,14 @@ export async function renderPgAdminMobile(
                 <span>
                   대리점
                 </span>
-  
+    
                 <strong>
                   ${
                     agencies.length
                   }
                 </strong>
               </div>
-  
+    
               <div
                 class="
                   nxg-mobile-summary-card
@@ -2434,14 +2848,14 @@ export async function renderPgAdminMobile(
                 <span>
                   담당자
                 </span>
-  
+    
                 <strong>
                   ${
                     managers.length
                   }
                 </strong>
               </div>
-  
+    
               <div
                 class="
                   nxg-mobile-summary-card
@@ -2450,7 +2864,7 @@ export async function renderPgAdminMobile(
                 <span>
                   가맹점
                 </span>
-  
+    
                 <strong>
                   ${
                     visibleMerchants
@@ -2458,20 +2872,21 @@ export async function renderPgAdminMobile(
                   }
                 </strong>
               </div>
-  
+    
             </div>
-  
-  
+    
+    
             <section
               class="nxg-mobile-org-level"
             >
-  
+    
               <div
                 class="
                   nxg-mobile-org-level-title
                 "
               >
                 지사
+    
                 <span
                   class="
                     nxg-mobile-section-count
@@ -2480,20 +2895,108 @@ export async function renderPgAdminMobile(
                   ${branches.length}명
                 </span>
               </div>
-  
+    
               ${
                 branches.length
                   ? branches
                       .map(
-                        (user: any) =>
-                          `
+                        (user: any) => {
+    
+                          const summary =
+                            getOrgSummary(
+                              user
+                            )
+    
+    
+                          const agencyCount =
+                            adminUsers
+                              .filter(
+                                (agency: any) =>
+                                  agency.role ===
+                                    'AGENCY' &&
+                                  Number(
+                                    agency
+                                      .parent_admin_id
+                                  ) ===
+                                  Number(
+                                    user.id
+                                  )
+                              )
+                              .length
+    
+    
+                          const branchAgencyIds =
+                            adminUsers
+                              .filter(
+                                (agency: any) =>
+                                  agency.role ===
+                                    'AGENCY' &&
+                                  Number(
+                                    agency
+                                      .parent_admin_id
+                                  ) ===
+                                  Number(
+                                    user.id
+                                  )
+                              )
+                              .map(
+                                (agency: any) =>
+                                  Number(
+                                    agency.id
+                                  )
+                              )
+    
+    
+                          const managerCount =
+                            adminUsers
+                              .filter(
+                                (manager: any) =>
+                                  manager.role ===
+                                    'MANAGER' &&
+                                  (
+                                    Number(
+                                      manager
+                                        .parent_admin_id
+                                    ) ===
+                                      Number(
+                                        user.id
+                                      ) ||
+    
+                                    branchAgencyIds.includes(
+                                      Number(
+                                        manager
+                                          .parent_admin_id
+                                      )
+                                    )
+                                  )
+                              )
+                              .length
+    
+    
+                          const merchantCount =
+                            visibleMerchants
+                              .filter(
+                                (merchant: any) =>
+                                  Number(
+                                    merchant
+                                      .branch_admin_id
+                                  ) ===
+                                  Number(
+                                    user.id
+                                  )
+                              )
+                              .length
+    
+    
+                          return `
                             <div
                               class="
                                 nxg-mobile-org-card
                               "
                             >
+    
                               <strong>
-                                ${
+                                🏢 ${
                                   escapeHtml(
                                     user
                                       .company_name ||
@@ -2503,24 +3006,57 @@ export async function renderPgAdminMobile(
                                   )
                                 }
                               </strong>
-  
+    
                               <div>
-                                ${
-                                  escapeHtml(
-                                    user.login_id ||
-                                    '-'
-                                  )
-                                }
-                                ·
-                                ${
-                                  escapeHtml(
-                                    user.status ||
-                                    '-'
-                                  )
-                                }
+                                대리점
+                                ${agencyCount}개
                               </div>
+    
+                              <div>
+                                담당자
+                                ${managerCount}명
+                              </div>
+    
+                              <div>
+                                가맹점
+                                ${merchantCount}개
+                              </div>
+    
+                              <div
+                                style="
+                                  margin-top:10px;
+                                  color:#111827;
+                                  font-weight:800;
+                                "
+                              >
+                                총매출
+                                ${
+                                  summary
+                                    .totalSales
+                                    .toLocaleString()
+                                }원
+                              </div>
+    
+                              <div
+                                style="
+                                  margin-top:5px;
+                                  color:#174981;
+                                  font-size:16px;
+                                  font-weight:900;
+                                "
+                              >
+                                수수료
+                                ${
+                                  summary
+                                    .commissionAmount
+                                    .toLocaleString()
+                                }원
+                              </div>
+    
                             </div>
                           `
+    
+                        }
                       )
                       .join('')
                   : `
@@ -2531,20 +3067,21 @@ export async function renderPgAdminMobile(
                       </div>
                     `
               }
-  
+    
             </section>
-  
-  
+    
+    
             <section
               class="nxg-mobile-org-level"
             >
-  
+    
               <div
                 class="
                   nxg-mobile-org-level-title
                 "
               >
                 대리점
+    
                 <span
                   class="
                     nxg-mobile-section-count
@@ -2553,20 +3090,74 @@ export async function renderPgAdminMobile(
                   ${agencies.length}명
                 </span>
               </div>
-  
+    
               ${
                 agencies.length
                   ? agencies
                       .map(
-                        (user: any) =>
-                          `
+                        (user: any) => {
+    
+                          const summary =
+                            getOrgSummary(
+                              user
+                            )
+    
+    
+                          const agencyManagers =
+                            adminUsers.filter(
+                              (manager: any) =>
+                                manager.role ===
+                                  'MANAGER' &&
+                                Number(
+                                  manager
+                                    .parent_admin_id
+                                ) ===
+                                Number(
+                                  user.id
+                                )
+                            )
+    
+    
+                          const managerIds =
+                            agencyManagers.map(
+                              (manager: any) =>
+                                Number(
+                                  manager.id
+                                )
+                            )
+    
+    
+                          const merchantCount =
+                            visibleMerchants
+                              .filter(
+                                (merchant: any) =>
+                                  Number(
+                                    merchant
+                                      .agency_admin_id
+                                  ) ===
+                                    Number(
+                                      user.id
+                                    ) ||
+    
+                                  managerIds.includes(
+                                    Number(
+                                      merchant
+                                        .manager_admin_id
+                                    )
+                                  )
+                              )
+                              .length
+    
+    
+                          return `
                             <div
                               class="
                                 nxg-mobile-org-card
                               "
                             >
+    
                               <strong>
-                                ${
+                                🤝 ${
                                   escapeHtml(
                                     user
                                       .company_name ||
@@ -2576,24 +3167,55 @@ export async function renderPgAdminMobile(
                                   )
                                 }
                               </strong>
-  
+    
                               <div>
+                                담당자
                                 ${
-                                  escapeHtml(
-                                    user.login_id ||
-                                    '-'
-                                  )
-                                }
-                                ·
-                                ${
-                                  escapeHtml(
-                                    user.status ||
-                                    '-'
-                                  )
-                                }
+                                  agencyManagers
+                                    .length
+                                }명
                               </div>
+    
+                              <div>
+                                가맹점
+                                ${merchantCount}개
+                              </div>
+    
+                              <div
+                                style="
+                                  margin-top:10px;
+                                  color:#111827;
+                                  font-weight:800;
+                                "
+                              >
+                                총매출
+                                ${
+                                  summary
+                                    .totalSales
+                                    .toLocaleString()
+                                }원
+                              </div>
+    
+                              <div
+                                style="
+                                  margin-top:5px;
+                                  color:#174981;
+                                  font-size:16px;
+                                  font-weight:900;
+                                "
+                              >
+                                수수료
+                                ${
+                                  summary
+                                    .commissionAmount
+                                    .toLocaleString()
+                                }원
+                              </div>
+    
                             </div>
                           `
+    
+                        }
                       )
                       .join('')
                   : `
@@ -2604,20 +3226,21 @@ export async function renderPgAdminMobile(
                       </div>
                     `
               }
-  
+    
             </section>
-  
-  
+    
+    
             <section
               class="nxg-mobile-org-level"
             >
-  
+    
               <div
                 class="
                   nxg-mobile-org-level-title
                 "
               >
                 담당자
+    
                 <span
                   class="
                     nxg-mobile-section-count
@@ -2626,13 +3249,19 @@ export async function renderPgAdminMobile(
                   ${managers.length}명
                 </span>
               </div>
-  
+    
               ${
                 managers.length
                   ? managers
                       .map(
                         (user: any) => {
-  
+    
+                          const summary =
+                            getOrgSummary(
+                              user
+                            )
+    
+    
                           const merchantCount =
                             visibleMerchants
                               .filter(
@@ -2649,16 +3278,17 @@ export async function renderPgAdminMobile(
                                   )
                               )
                               .length
-  
-  
+    
+    
                           return `
                             <div
                               class="
                                 nxg-mobile-org-card
                               "
                             >
+    
                               <strong>
-                                ${
+                                👤 ${
                                   escapeHtml(
                                     user
                                       .admin_name ||
@@ -2666,7 +3296,7 @@ export async function renderPgAdminMobile(
                                   )
                                 }
                               </strong>
-  
+    
                               <div>
                                 ${
                                   escapeHtml(
@@ -2674,13 +3304,47 @@ export async function renderPgAdminMobile(
                                     '-'
                                   )
                                 }
-                                ·
+                              </div>
+    
+                              <div>
                                 가맹점
                                 ${merchantCount}개
                               </div>
+    
+                              <div
+                                style="
+                                  margin-top:10px;
+                                  color:#111827;
+                                  font-weight:800;
+                                "
+                              >
+                                총매출
+                                ${
+                                  summary
+                                    .totalSales
+                                    .toLocaleString()
+                                }원
+                              </div>
+    
+                              <div
+                                style="
+                                  margin-top:5px;
+                                  color:#174981;
+                                  font-size:16px;
+                                  font-weight:900;
+                                "
+                              >
+                                수수료
+                                ${
+                                  summary
+                                    .commissionAmount
+                                    .toLocaleString()
+                                }원
+                              </div>
+    
                             </div>
                           `
-  
+    
                         }
                       )
                       .join('')
@@ -2692,10 +3356,10 @@ export async function renderPgAdminMobile(
                       </div>
                     `
               }
-  
+    
             </section>
           `
-  
+    
       }
   
   
