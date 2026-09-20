@@ -812,7 +812,7 @@ export async function renderPgAdminMobile(
               <div
                 class="nxg-mobile-admin-logo"
               >
-                NXG PAYMENT ADMIN
+                XNG PICK
               </div>
   
               <button

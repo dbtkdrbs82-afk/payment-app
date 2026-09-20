@@ -163,7 +163,7 @@ export async function renderPgAdminMobileLogin(
             <div
               class="nxg-mobile-login-logo"
             >
-              NXG PAYMENT
+              XNG PICK
             </div>
   
             <h1>
@@ -185,7 +185,7 @@ export async function renderPgAdminMobileLogin(
             <div
               class="nxg-mobile-login-badge"
             >
-              NXG MOBILE ADMIN
+              XNG PICK
             </div>
   
             <h2>
@@ -223,7 +223,7 @@ export async function renderPgAdminMobileLogin(
             <div
               class="nxg-mobile-login-footer"
             >
-              NXG Payment Admin System
+              XNG PICK
             </div>
   
           </div>
