@@ -1536,14 +1536,15 @@ if (isManualPayment) {
     </button>
 
     <button
-      type="button"
-      class="merchant-mobile-menu-card"
-      data-menu="orders"
-    >
-      <span class="merchant-mobile-menu-icon">📋</span>
-      <strong>주문관리</strong>
-      <small>주문 및 결제내역 관리</small>
-    </button>
+  type="button"
+  class="merchant-mobile-menu-card"
+  data-menu="orders"
+  style="grid-column: 1 / -1;"
+>
+  <span class="merchant-mobile-menu-icon">📋</span>
+  <strong>주문관리</strong>
+  <small>주문 및 결제내역 관리</small>
+</button>
   `
 
 } else if (isNormalStore) {
