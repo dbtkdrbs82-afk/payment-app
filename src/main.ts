@@ -9685,6 +9685,7 @@ merchantButtons.forEach((button) => {
 '<option value="무선단말기" ' + (merchant.merchant_type === '무선단말기' ? 'selected' : '') + '>무선단말기</option>' +
 '<option value="뷰티" ' + (merchant.merchant_type === '뷰티' ? 'selected' : '') + '>뷰티</option>' +
 '<option value="호텔" ' + (merchant.merchant_type === '호텔' ? 'selected' : '') + '>호텔</option>' +
+'<option value="수기결제" ' + (merchant.merchant_type === '수기결제' ? 'selected' : '') + '>수기결제</option>' +
 '</select>' +
 
     '<label>대표자</label>' +
@@ -19728,6 +19729,9 @@ const isWirelessTerminal =
   const isHotel =
   merchantType === '호텔'
 
+  const isManualPayment =
+  merchantType === '수기결제'
+
  
   let terminalPayments: any[] = []
 
@@ -19787,6 +19791,33 @@ if (isBeauty) {
   `
 
   merchantContent = ''
+
+} else if (isManualPayment) {
+
+  merchantMenu = `
+    <button id="merchant-manual-payment-tab">
+      수기결제
+    </button>
+
+    <button id="merchant-sms-payment-tab">
+      SMS결제
+    </button>
+
+    <button id="merchant-cash-payment-tab">
+      현금영수증
+    </button>
+
+    <button id="merchant-cash-history-tab">
+      현금영수증내역
+    </button>
+
+    <button id="merchant-order-tab">
+      주문관리
+    </button>
+  `
+
+  merchantContent = ''
+
 
 } else if (isHotel) {
   merchantMenu = `
@@ -23075,6 +23106,40 @@ document.querySelector('#merchant-qr-tab')
   ?.addEventListener('click', () => {
     location.href = '/merchant-card'
   })
+
+  if (isManualPayment) {
+
+    document.querySelector('#merchant-manual-payment-tab')
+      ?.addEventListener('click', () => {
+        location.href =
+          '/merchant-card-ocr?mode=manual'
+      })
+  
+    document.querySelector('#merchant-sms-payment-tab')
+      ?.addEventListener('click', () => {
+        location.href =
+          '/merchant-card-sms'
+      })
+  
+    document.querySelector('#merchant-cash-payment-tab')
+      ?.addEventListener('click', () => {
+        location.href =
+          '/merchant-card?open=cash'
+      })
+  
+    document.querySelector('#merchant-cash-history-tab')
+      ?.addEventListener('click', () => {
+        location.href =
+          '/merchant-cash-receipts'
+      })
+  
+    document.querySelector('#merchant-order-tab')
+      ?.addEventListener('click', () => {
+        location.href =
+          '/merchant-admin'
+      })
+  
+  }
   
   document.querySelector('#merchant-member-tab')
   ?.addEventListener('click', () => {
@@ -34071,7 +34136,14 @@ if (cashReceiptSaveError) {
     min-width:90px;
   "
 >
-  카드결제
+  >
+  ${
+    sessionStorage.getItem(
+      'login_merchant_type'
+    ) === '수기결제'
+      ? '이전'
+      : '카드결제'
+  }
 </button>
 
         </div>
@@ -34367,18 +34439,25 @@ top:-10px;
 
 
     document
-      .querySelector(
-        '#cash-history-back'
-      )
-      ?.addEventListener(
-        'click',
-        () => {
+  .querySelector(
+    '#cash-history-back'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
 
-          location.href =
-            '/merchant-card'
+      const merchantType =
+        sessionStorage.getItem(
+          'login_merchant_type'
+        ) || ''
 
-        }
-      )
+      location.href =
+        merchantType === '수기결제'
+          ? '/merchant-admin'
+          : '/merchant-card'
+
+    }
+  )
 
 
     document
@@ -35387,16 +35466,31 @@ top:-10px;
 
     document.body.appendChild(modal)
 
-    document.querySelector('#cash-receipt-modal-close')
-      ?.addEventListener('click', () => {
-        modal.remove()
-      })
+    const closeCashReceiptModal = () => {
 
-    modal.addEventListener('click', (event) => {
-      if (event.target === modal) {
-        modal.remove()
+      const merchantType =
+        sessionStorage.getItem(
+          'login_merchant_type'
+        ) || ''
+    
+      if (merchantType === '수기결제') {
+        location.href = '/merchant-admin'
+        return
       }
-    })
+    
+      modal.remove()
+    }
+
+    document.querySelector('#cash-receipt-modal-close')
+  ?.addEventListener('click', () => {
+    closeCashReceiptModal()
+  })
+
+modal.addEventListener('click', (event) => {
+  if (event.target === modal) {
+    closeCashReceiptModal()
+  }
+})
 
     document.querySelector('#cash-receipt-type')
       ?.addEventListener('change', () => {
@@ -35649,7 +35743,7 @@ alert(
   '현금영수증 발급이 완료되었습니다.'
 )
 
-      document.querySelector('#cash-receipt-modal')?.remove()
+closeCashReceiptModal()
     } catch (error) {
       alert(
         '현금영수증 발급 중 오류가 발생했습니다.'
@@ -35663,6 +35757,20 @@ alert(
     }
   })
   })
+
+  const cardOpenMode =
+  new URLSearchParams(
+    window.location.search
+  ).get('open')
+
+if (cardOpenMode === 'cash') {
+
+  document.querySelector<HTMLButtonElement>(
+    '#cash-receipt-payment'
+  )?.click()
+
+}
+
       } else if (path === '/merchant-card-manual') {
 
         const merchantId =
@@ -35982,17 +36090,24 @@ alert(
               }
         
         
-            document
+              document
               .querySelector(
                 '#pc-sms-back'
               )
               ?.addEventListener(
                 'click',
                 () => {
-        
+            
+                  const merchantType =
+                    sessionStorage.getItem(
+                      'login_merchant_type'
+                    ) || ''
+            
                   location.href =
-                    '/merchant-card'
-        
+                    merchantType === '수기결제'
+                      ? '/merchant-admin'
+                      : '/merchant-card'
+            
                 }
               )
         
@@ -36223,9 +36338,18 @@ alert(
         `
       
         document.querySelector('#ocr-back-btn')
-          ?.addEventListener('click', () => {
-            location.href = '/merchant-card'
-          })
+  ?.addEventListener('click', () => {
+
+    const merchantType =
+      sessionStorage.getItem(
+        'login_merchant_type'
+      ) || ''
+
+    location.href =
+      merchantType === '수기결제'
+        ? '/merchant-admin'
+        : '/merchant-card'
+  })
 
           const savedCardPaymentAmount =
   sessionStorage.getItem('card_payment_amount') || ''
