@@ -1477,10 +1477,13 @@ if (
   const isBeauty =
     merchantType === '뷰티'
 
-  const isHotel =
+    const isHotel =
     merchantType === '호텔'
-
-
+  
+  const isManualPayment =
+    merchantType === '수기결제'
+  
+  
   if (isWirelessTerminal) {
     void renderMerchantWirelessTerminal()
     return
@@ -1489,7 +1492,61 @@ if (
   let merchantHomeMenu = ''
 
 
-  if (isNormalStore) {
+if (isManualPayment) {
+
+  merchantHomeMenu = `
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="manual-payment"
+    >
+      <span class="merchant-mobile-menu-icon">💳</span>
+      <strong>수기결제</strong>
+      <small>카드정보 직접 입력</small>
+    </button>
+
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="sms-payment"
+    >
+      <span class="merchant-mobile-menu-icon">📨</span>
+      <strong>SMS결제</strong>
+      <small>결제링크 문자 발송</small>
+    </button>
+
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="cash-receipt"
+    >
+      <span class="merchant-mobile-menu-icon">🧾</span>
+      <strong>현금영수증</strong>
+      <small>현금영수증 발급</small>
+    </button>
+
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="cash-history"
+    >
+      <span class="merchant-mobile-menu-icon">📄</span>
+      <strong>현금영수증내역</strong>
+      <small>승인 및 취소내역</small>
+    </button>
+
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="orders"
+    >
+      <span class="merchant-mobile-menu-icon">📋</span>
+      <strong>주문관리</strong>
+      <small>주문 및 결제내역 관리</small>
+    </button>
+  `
+
+} else if (isNormalStore) {
 
     merchantHomeMenu = `
     <button
@@ -1897,9 +1954,11 @@ if (
                 ></div>
 
               </section>
-            `
-            : `
-              <section class="merchant-mobile-welcome">
+           `
+  : isManualPayment
+    ? ''
+    : `
+      <section class="merchant-mobile-welcome">
 
                 <div class="merchant-mobile-welcome-label">
                   가맹점 모바일
@@ -2440,12 +2499,24 @@ if (
           button.dataset.menu || ''
 
 
-        const menuRoutes:
+          const menuRoutes:
           Record<string, string> = {
-
+        
+            'manual-payment':
+              '/merchant-app/card/manual',
+        
+            'sms-payment':
+              '/merchant-app/card/sms',
+        
+            'cash-receipt':
+              '/merchant-app/card/cash',
+        
+            'cash-history':
+              '/merchant-app/card/cash-history',
+        
             orders:
               '/merchant-app/orders',
-
+        
             products:
               '/merchant-app/products',
 
@@ -15030,18 +15101,29 @@ function renderMerchantManualCard() {
   
   
     document
-      .querySelector(
-        '#mobile-manual-card-back'
-      )
-      ?.addEventListener(
-        'click',
-        () => {
-  
-          location.href =
-            '/merchant-app/card'
-  
-        }
-      )
+  .querySelector(
+    '#mobile-manual-card-back'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      const merchantType =
+        sessionStorage.getItem(
+          'login_merchant_type'
+        ) ||
+        localStorage.getItem(
+          'login_merchant_type'
+        ) ||
+        ''
+
+      location.href =
+        merchantType === '수기결제'
+          ? '/merchant-app/home'
+          : '/merchant-app/card'
+
+    }
+  )
   
   
     const cardNumberInput =
@@ -15696,18 +15778,29 @@ function renderMerchantSmsCard() {
   
   
     document
-      .querySelector(
-        '#mobile-sms-card-back'
-      )
-      ?.addEventListener(
-        'click',
-        () => {
-  
-          location.href =
-            '/merchant-app/card'
-  
-        }
-      )
+  .querySelector(
+    '#mobile-sms-card-back'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      const merchantType =
+        sessionStorage.getItem(
+          'login_merchant_type'
+        ) ||
+        localStorage.getItem(
+          'login_merchant_type'
+        ) ||
+        ''
+
+      location.href =
+        merchantType === '수기결제'
+          ? '/merchant-app/home'
+          : '/merchant-app/card'
+
+    }
+  )
 
       const createSmsPaymentLink = () => {
 
@@ -16033,18 +16126,29 @@ function renderMerchantCashReceipt() {
 
 
   document
-    .querySelector(
-      '#mobile-cash-back'
-    )
-    ?.addEventListener(
-      'click',
-      () => {
+  .querySelector(
+    '#mobile-cash-back'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
 
-        location.href =
-          '/merchant-app/card'
+      const merchantType =
+        sessionStorage.getItem(
+          'login_merchant_type'
+        ) ||
+        localStorage.getItem(
+          'login_merchant_type'
+        ) ||
+        ''
 
-      }
-    )
+      location.href =
+        merchantType === '수기결제'
+          ? '/merchant-app/home'
+          : '/merchant-app/card'
+
+    }
+  )
 
 
   const typeSelect =
@@ -16923,18 +17027,29 @@ async function renderMerchantCashReceiptHistory() {
 
 
   document
-    .querySelector(
-      '#mobile-cash-history-back'
-    )
-    ?.addEventListener(
-      'click',
-      () => {
+  .querySelector(
+    '#mobile-cash-history-back'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
 
-        location.href =
-          '/merchant-app/card'
+      const merchantType =
+        sessionStorage.getItem(
+          'login_merchant_type'
+        ) ||
+        localStorage.getItem(
+          'login_merchant_type'
+        ) ||
+        ''
 
-      }
-    )
+      location.href =
+        merchantType === '수기결제'
+          ? '/merchant-app/home'
+          : '/merchant-app/card'
+
+    }
+  )
 
 
   document
