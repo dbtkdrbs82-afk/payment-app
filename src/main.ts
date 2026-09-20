@@ -35952,12 +35952,20 @@ if (cardOpenMode === 'cash') {
                   SMS결제
                 </h1>
         
-                <p>
-                  고객에게 온라인 카드결제 링크를 발송합니다.
-                </p>
-        
-        
-                <div class="ocr-payment-form">
+               <p>
+  고객에게 온라인 카드결제 링크를 발송합니다.
+</p>
+
+<div class="ocr-action-box">
+  <button
+    id="pc-sms-back"
+    type="button"
+  >
+    이전으로
+  </button>
+</div>
+
+<div class="ocr-payment-form">
         
                   <label>
                     상품명
@@ -36013,13 +36021,7 @@ if (cardOpenMode === 'cash') {
                   </button>
         
         
-                  <button
-                    id="pc-sms-back"
-                    type="button"
-                    class="merchant-close-btn"
-                  >
-                    이전
-                  </button>
+                  
         
                 </div>
         
