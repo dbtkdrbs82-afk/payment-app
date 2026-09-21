@@ -638,6 +638,17 @@ window.addEventListener(
     'hotel_staff_role'
   ]
 
+  /* =========================================
+   모바일 로그인 정보는 세션으로만 사용
+   기존 localStorage 로그인 정보 제거
+========================================= */
+
+merchantLoginKeys.forEach(
+  (key) => {
+    localStorage.removeItem(key)
+  }
+)
+
 /* =========================================
    무선단말기 모바일
 ========================================= */
@@ -1888,12 +1899,9 @@ async function renderMerchantWirelessTerminal() {
 function renderMerchantHome() {
 
   const merchantId =
-    sessionStorage.getItem(
-      'login_merchant_id'
-    ) ||
-    localStorage.getItem(
-      'login_merchant_id'
-    )
+  sessionStorage.getItem(
+    'login_merchant_id'
+  )
 
   if (!merchantId) {
     location.replace(
@@ -1904,9 +1912,6 @@ function renderMerchantHome() {
 
   const hotelStaffMode =
   sessionStorage.getItem(
-    'hotel_staff_mode'
-  ) ||
-  localStorage.getItem(
     'hotel_staff_mode'
   )
 
@@ -1923,27 +1928,7 @@ if (
   return
 }
 
-  merchantLoginKeys.forEach(
-    (key) => {
-
-      if (
-        !sessionStorage.getItem(key)
-      ) {
-
-        const savedValue =
-          localStorage.getItem(key)
-
-        if (savedValue !== null) {
-          sessionStorage.setItem(
-            key,
-            savedValue
-          )
-        }
-
-      }
-
-    }
-  )
+ 
 
 
   const merchantName =
@@ -1952,13 +1937,10 @@ if (
     ) || '가맹점'
 
     const merchantType =
-    sessionStorage.getItem(
-      'login_merchant_type'
-    ) ||
-    localStorage.getItem(
-      'login_merchant_type'
-    ) ||
-    '일반매장'
+  sessionStorage.getItem(
+    'login_merchant_type'
+  ) ||
+  '일반매장'
 
 
   const isNormalStore =
@@ -19923,9 +19905,6 @@ function renderMerchantLogin() {
   const savedMerchantId =
     sessionStorage.getItem(
       'login_merchant_id'
-    ) ||
-    localStorage.getItem(
-      'login_merchant_id'
     )
 
   if (savedMerchantId) {
@@ -20135,12 +20114,7 @@ function renderMerchantLogin() {
               sessionStorage.setItem(
                 key,
                 value
-              )
-
-              localStorage.setItem(
-                key,
-                value
-              )
+              )             
 
             }
           )
@@ -20291,10 +20265,7 @@ function renderMerchantLogin() {
                 value
               )
 
-              localStorage.setItem(
-                key,
-                value
-              )
+              
 
             }
           )
