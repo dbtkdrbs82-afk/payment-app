@@ -129,6 +129,502 @@ const app =
 const path =
   window.location.pathname
 
+  type NxgBeforeInstallPromptEvent =
+  Event & {
+    prompt: () => Promise<void>
+    userChoice: Promise<{
+      outcome: 'accepted' | 'dismissed'
+      platform: string
+    }>
+  }
+
+let nxgDeferredInstallPrompt:
+  NxgBeforeInstallPromptEvent | null =
+  null
+
+
+const isNxgMobileOrTablet = () => {
+
+  const userAgent =
+    navigator.userAgent.toLowerCase()
+
+  const isAndroid =
+    userAgent.includes('android')
+
+  const isIOS =
+    /iphone|ipad|ipod/.test(
+      userAgent
+    )
+
+  const isIPadDesktopMode =
+    navigator.platform === 'MacIntel' &&
+    navigator.maxTouchPoints > 1
+
+  return (
+    isAndroid ||
+    isIOS ||
+    isIPadDesktopMode
+  )
+}
+
+
+const isNxgInstalledApp = () => {
+
+  const navigatorWithStandalone =
+    navigator as Navigator & {
+      standalone?: boolean
+    }
+
+  return (
+    window.matchMedia(
+      '(display-mode: standalone)'
+    ).matches ||
+    navigatorWithStandalone
+      .standalone === true
+  )
+}
+
+
+const isNxgInstallPage = () => {
+
+  return (
+    path === '/merchant-app' ||
+    path === '/merchant-app/' ||
+    path === '/merchant-app/home' ||
+    path === '/merchant-app/home/'
+  )
+}
+
+
+const nxgInstallDismissKey =
+  'nxg_mobile_install_dismiss_until'
+
+
+const canShowNxgInstallPrompt = () => {
+
+  if (!isNxgMobileOrTablet()) {
+    return false
+  }
+
+  if (!isNxgInstallPage()) {
+    return false
+  }
+
+  if (isNxgInstalledApp()) {
+    return false
+  }
+
+  const dismissedUntil =
+    Number(
+      localStorage.getItem(
+        nxgInstallDismissKey
+      ) || 0
+    )
+
+  if (
+    dismissedUntil >
+    Date.now()
+  ) {
+    return false
+  }
+
+  return true
+}
+
+
+const dismissNxgInstallPrompt =
+  () => {
+
+    const sevenDays =
+      7 *
+      24 *
+      60 *
+      60 *
+      1000
+
+    localStorage.setItem(
+      nxgInstallDismissKey,
+      String(
+        Date.now() +
+        sevenDays
+      )
+    )
+
+    document
+      .querySelector(
+        '#nxg-mobile-install-prompt'
+      )
+      ?.remove()
+  }
+
+
+const showNxgAndroidInstallPrompt =
+  () => {
+
+    if (
+      !canShowNxgInstallPrompt() ||
+      !nxgDeferredInstallPrompt
+    ) {
+      return
+    }
+
+    if (
+      document.querySelector(
+        '#nxg-mobile-install-prompt'
+      )
+    ) {
+      return
+    }
+
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
+        <div
+          id="nxg-mobile-install-prompt"
+          style="
+            position:fixed;
+            left:12px;
+            right:12px;
+            bottom:16px;
+            z-index:999999;
+            max-width:520px;
+            margin:0 auto;
+            padding:18px;
+            background:#ffffff;
+            border:1px solid #dbe3ee;
+            border-radius:16px;
+            box-shadow:0 10px 35px rgba(0,0,0,0.22);
+            box-sizing:border-box;
+          "
+        >
+
+          <div
+            style="
+              display:flex;
+              align-items:center;
+              gap:12px;
+            "
+          >
+
+            <div
+              style="
+                width:48px;
+                height:48px;
+                flex:0 0 48px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                border-radius:12px;
+                background:#174981;
+                color:#ffffff;
+                font-size:17px;
+                font-weight:900;
+              "
+            >
+              NXG
+            </div>
+
+            <div
+              style="
+                min-width:0;
+              "
+            >
+
+              <strong
+                style="
+                  display:block;
+                  color:#172033;
+                  font-size:17px;
+                  font-weight:900;
+                "
+              >
+                NXG PICK 설치
+              </strong>
+
+              <span
+                style="
+                  display:block;
+                  margin-top:4px;
+                  color:#667085;
+                  font-size:13px;
+                  line-height:1.5;
+                "
+              >
+                홈 화면에 설치하면
+                앱처럼 바로 사용할 수 있습니다.
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div
+            style="
+              display:grid;
+              grid-template-columns:1fr 1fr;
+              gap:8px;
+              margin-top:16px;
+            "
+          >
+
+            <button
+              id="nxg-mobile-install-now"
+              type="button"
+              style="
+                height:46px;
+                border:0;
+                border-radius:10px;
+                background:#174981;
+                color:#ffffff;
+                font-size:15px;
+                font-weight:800;
+                cursor:pointer;
+              "
+            >
+              설치하기
+            </button>
+
+            <button
+              id="nxg-mobile-install-later"
+              type="button"
+              style="
+                height:46px;
+                border:1px solid #d7e0eb;
+                border-radius:10px;
+                background:#ffffff;
+                color:#475467;
+                font-size:15px;
+                font-weight:800;
+                cursor:pointer;
+              "
+            >
+              나중에
+            </button>
+
+          </div>
+
+        </div>
+      `
+    )
+
+
+    document
+      .querySelector(
+        '#nxg-mobile-install-later'
+      )
+      ?.addEventListener(
+        'click',
+        dismissNxgInstallPrompt
+      )
+
+
+    document
+      .querySelector(
+        '#nxg-mobile-install-now'
+      )
+      ?.addEventListener(
+        'click',
+        async () => {
+
+          if (
+            !nxgDeferredInstallPrompt
+          ) {
+            return
+          }
+
+          await nxgDeferredInstallPrompt
+            .prompt()
+
+          const choice =
+            await nxgDeferredInstallPrompt
+              .userChoice
+
+          nxgDeferredInstallPrompt =
+            null
+
+          document
+            .querySelector(
+              '#nxg-mobile-install-prompt'
+            )
+            ?.remove()
+
+          if (
+            choice.outcome ===
+            'dismissed'
+          ) {
+
+            dismissNxgInstallPrompt()
+          }
+
+        }
+      )
+  }
+
+
+const showNxgIOSInstallGuide =
+  () => {
+
+    if (
+      !canShowNxgInstallPrompt()
+    ) {
+      return
+    }
+
+    const userAgent =
+      navigator.userAgent.toLowerCase()
+
+    const isIOS =
+      /iphone|ipad|ipod/.test(
+        userAgent
+      ) ||
+      (
+        navigator.platform ===
+          'MacIntel' &&
+        navigator.maxTouchPoints > 1
+      )
+
+    if (!isIOS) {
+      return
+    }
+
+    if (
+      document.querySelector(
+        '#nxg-mobile-install-prompt'
+      )
+    ) {
+      return
+    }
+
+    document.body.insertAdjacentHTML(
+      'beforeend',
+      `
+        <div
+          id="nxg-mobile-install-prompt"
+          style="
+            position:fixed;
+            left:12px;
+            right:12px;
+            bottom:16px;
+            z-index:999999;
+            max-width:520px;
+            margin:0 auto;
+            padding:18px;
+            background:#ffffff;
+            border:1px solid #dbe3ee;
+            border-radius:16px;
+            box-shadow:0 10px 35px rgba(0,0,0,0.22);
+            box-sizing:border-box;
+          "
+        >
+
+          <strong
+            style="
+              display:block;
+              font-size:17px;
+              color:#172033;
+              font-weight:900;
+            "
+          >
+            NXG PICK 홈 화면에 설치
+          </strong>
+
+          <div
+            style="
+              margin-top:9px;
+              color:#475467;
+              font-size:14px;
+              line-height:1.7;
+            "
+          >
+            Safari 아래쪽
+            <strong>공유 버튼</strong>을 누른 후
+            <strong>홈 화면에 추가</strong>를
+            선택해주세요.
+          </div>
+
+          <button
+            id="nxg-mobile-install-later"
+            type="button"
+            style="
+              width:100%;
+              height:44px;
+              margin-top:14px;
+              border:1px solid #d7e0eb;
+              border-radius:10px;
+              background:#ffffff;
+              color:#475467;
+              font-weight:800;
+              cursor:pointer;
+            "
+          >
+            확인
+          </button>
+
+        </div>
+      `
+    )
+
+
+    document
+      .querySelector(
+        '#nxg-mobile-install-later'
+      )
+      ?.addEventListener(
+        'click',
+        dismissNxgInstallPrompt
+      )
+  }
+
+
+window.addEventListener(
+  'beforeinstallprompt',
+  (event) => {
+
+    event.preventDefault()
+
+    nxgDeferredInstallPrompt =
+      event as
+        NxgBeforeInstallPromptEvent
+
+    showNxgAndroidInstallPrompt()
+  }
+)
+
+
+window.addEventListener(
+  'appinstalled',
+  () => {
+
+    nxgDeferredInstallPrompt =
+      null
+
+    localStorage.removeItem(
+      nxgInstallDismissKey
+    )
+
+    document
+      .querySelector(
+        '#nxg-mobile-install-prompt'
+      )
+      ?.remove()
+  }
+)
+
+
+window.addEventListener(
+  'load',
+  () => {
+
+    setTimeout(
+      () => {
+        showNxgIOSInstallGuide()
+      },
+      700
+    )
+  }
+)
+
   const merchantLoginKeys = [
     'login_merchant_id',
     'login_merchant_code',
