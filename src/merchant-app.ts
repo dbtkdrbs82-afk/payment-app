@@ -19608,7 +19608,7 @@ function renderMerchantLogin() {
     cursor:pointer;
   "
 >
-  📲 홈 화면에 앱 설치
+ 앱 설치 
 </button>
 
         <div class="merchant-app-login-footer">
@@ -19625,35 +19625,34 @@ function renderMerchantLogin() {
     '#nxg-login-install-button'
   )
 
+
 if (
   nxgInstallButton &&
   isNxgMobileOrTablet() &&
   !isNxgInstalledApp()
 ) {
 
-  const userAgent =
-    navigator.userAgent.toLowerCase()
+  nxgInstallButton.style.display =
+    'block'
 
-  const isIOS =
-    /iphone|ipad|ipod/.test(
-      userAgent
-    ) ||
-    (
-      navigator.platform === 'MacIntel' &&
-      navigator.maxTouchPoints > 1
-    )
-
-  if (
-    isIOS ||
-    nxgDeferredInstallPrompt
-  ) {
-    nxgInstallButton.style.display =
-      'block'
-  }
 
   nxgInstallButton.addEventListener(
     'click',
     async () => {
+
+      const userAgent =
+        navigator.userAgent
+
+
+      const isIOS =
+        /iphone|ipad|ipod/i.test(
+          userAgent
+        ) ||
+        (
+          navigator.platform === 'MacIntel' &&
+          navigator.maxTouchPoints > 1
+        )
+
 
       if (isIOS) {
 
@@ -19665,33 +19664,95 @@ if (
         return
       }
 
-      if (!nxgDeferredInstallPrompt) {
+
+      const isSamsung =
+        /SamsungBrowser/i.test(
+          userAgent
+        )
+
+
+      const isNaver =
+        /NAVER/i.test(
+          userAgent
+        )
+
+
+      const isKakao =
+        /KAKAOTALK/i.test(
+          userAgent
+        )
+
+
+      const isChrome =
+        /Chrome/i.test(
+          userAgent
+        ) &&
+        !isSamsung &&
+        !isNaver &&
+        !isKakao
+
+
+      if (
+        isChrome &&
+        nxgDeferredInstallPrompt
+      ) {
+
+        await nxgDeferredInstallPrompt
+          .prompt()
+
+
+        const choice =
+          await nxgDeferredInstallPrompt
+            .userChoice
+
+
+        if (
+          choice.outcome ===
+          'accepted'
+        ) {
+
+          nxgInstallButton.style.display =
+            'none'
+        }
+
+
+        nxgDeferredInstallPrompt =
+          null
+
+        return
+      }
+
+
+      if (isChrome) {
 
         alert(
-          '현재 브라우저에서 설치 준비 중입니다.\n' +
-          '잠시 후 다시 눌러주세요.'
+          'Chrome 오른쪽 위 메뉴에서\n' +
+          '"앱 설치" 또는 "홈 화면에 추가"를 눌러주세요.'
         )
 
         return
       }
 
-      await nxgDeferredInstallPrompt.prompt()
 
-      const choice =
-        await nxgDeferredInstallPrompt.userChoice
+      const chromeIntent =
+        'intent://app.nxgsoft.co.kr/merchant-app' +
+        '#Intent;' +
+        'scheme=https;' +
+        'package=com.android.chrome;' +
+        'S.browser_fallback_url=' +
+        encodeURIComponent(
+          'https://app.nxgsoft.co.kr/merchant-app'
+        ) +
+        ';end'
 
-      if (
-        choice.outcome === 'accepted'
-      ) {
-        nxgInstallButton.style.display =
-          'none'
-      }
 
-      nxgDeferredInstallPrompt =
-        null
+      window.location.href =
+        chromeIntent
     }
   )
 }
+
+
 
   document
     .querySelector(
