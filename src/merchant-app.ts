@@ -176,41 +176,6 @@ let nxgDeferredInstallPrompt:
   }
 
 
-const isNxgInstalledApp = () => {
-
-  const navigatorWithStandalone =
-    navigator as Navigator & {
-      standalone?: boolean
-    }
-
-  return (
-    window.matchMedia(
-      '(display-mode: standalone)'
-    ).matches ||
-    navigatorWithStandalone
-      .standalone === true
-  )
-}
-
-
-
-
-
-window.addEventListener(
-  'beforeinstallprompt',
-  (event) => {
-
-    event.preventDefault()
-
-    nxgDeferredInstallPrompt =
-      event as
-        NxgBeforeInstallPromptEvent
-
-    
-  }
-)
-
-
 window.addEventListener(
   'beforeinstallprompt',
   (event) => {
@@ -220,18 +185,32 @@ window.addEventListener(
     nxgDeferredInstallPrompt =
       event as NxgBeforeInstallPromptEvent
 
+
     const installButton =
       document.querySelector<HTMLButtonElement>(
         '#nxg-login-install-button'
       )
 
+
     if (
       installButton &&
-      isNxgMobileOrTablet() &&
-      !isNxgInstalledApp()
+      isNxgMobileOrTablet()
     ) {
+
       installButton.style.display =
         'block'
+
+      installButton.disabled =
+        false
+
+      installButton.innerText =
+        '앱 설치'
+
+      installButton.style.opacity =
+        '1'
+
+      installButton.style.cursor =
+        'pointer'
     }
   }
 )
