@@ -262,35 +262,16 @@ window.addEventListener(
     'hotel_staff_role'
   ]
 
- /* =========================================
-   저장된 모바일 로그인 정보 복구
+  /* =========================================
+   모바일 로그인 정보는 세션으로만 사용
+   기존 localStorage 로그인 정보 제거
 ========================================= */
 
-if (
-  !sessionStorage.getItem(
-    'login_merchant_id'
-  )
-) {
-
-  merchantLoginKeys.forEach(
-    (key) => {
-
-      const savedValue =
-        localStorage.getItem(key)
-
-      if (savedValue !== null) {
-
-        sessionStorage.setItem(
-          key,
-          savedValue
-        )
-
-      }
-
-    }
-  )
-
-}
+merchantLoginKeys.forEach(
+  (key) => {
+    localStorage.removeItem(key)
+  }
+)
 
 /* =========================================
    무선단말기 모바일
@@ -19545,27 +19526,24 @@ async function renderMerchantPaymentSuccess() {
 
 function renderMerchantLogin() {
 
- /* =========================================
-   저장된 로그인 상태면 모바일 홈으로 이동
-========================================= */
+  /* =========================================
+     /merchant-app 직접 접속 시
+     무조건 새로 로그인
+  ========================================= */
 
-if (
-  (
+  if (
     path === '/merchant-app' ||
     path === '/merchant-app/'
-  ) &&
-  sessionStorage.getItem(
-    'login_merchant_id'
-  ) &&
-  isNxgInstalledApp()
-) {
+  ) {
 
-  location.replace(
-    '/merchant-app/home'
-  )
+    merchantLoginKeys.forEach(
+      (key) => {
+        sessionStorage.removeItem(key)
+        localStorage.removeItem(key)
+      }
+    )
 
-  return
-}
+  }
 
 
   app.innerHTML = `
@@ -19648,14 +19626,14 @@ if (
   )
 
 
-  if (
-    nxgInstallButton &&
-    isNxgMobileOrTablet() &&
-    !isNxgInstalledApp()
-  ) {
-  
-    nxgInstallButton.style.display =
-      'block'
+if (
+  nxgInstallButton &&
+  isNxgMobileOrTablet() &&
+  !isNxgInstalledApp()
+) {
+
+  nxgInstallButton.style.display =
+    'block'
 
 
   nxgInstallButton.addEventListener(
@@ -19757,15 +19735,15 @@ if (
 
 
       const chromeIntent =
-  'intent://app.nxgsoft.co.kr/merchant-app' +
-  '#Intent;' +
-  'scheme=https;' +
-  'package=com.android.chrome;' +
-  'S.browser_fallback_url=' +
-  encodeURIComponent(
-    'https://app.nxgsoft.co.kr/merchant-app'
-  ) +
-  ';end'
+        'intent://app.nxgsoft.co.kr/merchant-app' +
+        '#Intent;' +
+        'scheme=https;' +
+        'package=com.android.chrome;' +
+        'S.browser_fallback_url=' +
+        encodeURIComponent(
+          'https://app.nxgsoft.co.kr/merchant-app'
+        ) +
+        ';end'
 
 
       window.location.href =
@@ -19912,23 +19890,18 @@ if (
             }
 
 
-            Object.entries(
-              merchantLoginData
-            ).forEach(
-              ([key, value]) => {
-            
-                sessionStorage.setItem(
-                  key,
-                  value
-                )
-            
-                localStorage.setItem(
-                  key,
-                  value
-                )
-            
-              }
-            )
+          Object.entries(
+            merchantLoginData
+          ).forEach(
+            ([key, value]) => {
+
+              sessionStorage.setItem(
+                key,
+                value
+              )             
+
+            }
+          )
 
 
           /*
@@ -20066,23 +20039,20 @@ if (
             }
 
 
-            Object.entries(
-              staffLoginData
-            ).forEach(
-              ([key, value]) => {
-            
-                sessionStorage.setItem(
-                  key,
-                  value
-                )
-            
-                localStorage.setItem(
-                  key,
-                  value
-                )
-            
-              }
-            )
+          Object.entries(
+            staffLoginData
+          ).forEach(
+            ([key, value]) => {
+
+              sessionStorage.setItem(
+                key,
+                value
+              )
+
+              
+
+            }
+          )
 
 
           location.href =
