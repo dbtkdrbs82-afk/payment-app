@@ -160,60 +160,73 @@ let nxgDeferredInstallPrompt:
       navigator.platform === 'MacIntel' &&
       navigator.maxTouchPoints > 1
   
-    const isTouchMobile =
-      navigator.maxTouchPoints > 0 &&
-      Math.min(
-        window.screen.width,
-        window.screen.height
-      ) <= 1024
-  
     return (
       isAndroid ||
       isIOS ||
-      isIPadDesktopMode ||
-      isTouchMobile
+      isIPadDesktopMode
     )
   }
-
-
-window.addEventListener(
-  'beforeinstallprompt',
-  (event) => {
-
-    event.preventDefault()
-
-    nxgDeferredInstallPrompt =
-      event as NxgBeforeInstallPromptEvent
-
-
-    const installButton =
-      document.querySelector<HTMLButtonElement>(
-        '#nxg-login-install-button'
-      )
-
-
-    if (
-      installButton &&
-      isNxgMobileOrTablet()
-    ) {
-
-      installButton.style.display =
-        'block'
-
-      installButton.disabled =
-        false
-
-      installButton.innerText =
-        '앱 설치'
-
-      installButton.style.opacity =
-        '1'
-
-      installButton.style.cursor =
-        'pointer'
-    }
+  
+  
+  const isNxgInstalledApp = () => {
+  
+    const navigatorWithStandalone =
+      navigator as Navigator & {
+        standalone?: boolean
+      }
+  
+    return (
+      window.matchMedia(
+        '(display-mode: standalone)'
+      ).matches ||
+      navigatorWithStandalone
+        .standalone === true
+    )
   }
-)
+  
+  
+  
+  
+  
+  window.addEventListener(
+    'beforeinstallprompt',
+    (event) => {
+  
+      event.preventDefault()
+  
+      nxgDeferredInstallPrompt =
+        event as
+          NxgBeforeInstallPromptEvent
+  
+  
+    }
+  )
+  
+  
+  window.addEventListener(
+    'beforeinstallprompt',
+    (event) => {
+  
+      event.preventDefault()
+  
+      nxgDeferredInstallPrompt =
+        event as NxgBeforeInstallPromptEvent
+  
+      const installButton =
+        document.querySelector<HTMLButtonElement>(
+          '#nxg-login-install-button'
+        )
+  
+      if (
+        installButton &&
+        isNxgMobileOrTablet() &&
+        !isNxgInstalledApp()
+      ) {
+        installButton.style.display =
+          'block'
+      }
+    }
+  )
 
 
 window.addEventListener(
