@@ -143,29 +143,37 @@ let nxgDeferredInstallPrompt:
   null
 
 
-const isNxgMobileOrTablet = () => {
+  const isNxgMobileOrTablet = () => {
 
-  const userAgent =
-    navigator.userAgent.toLowerCase()
-
-  const isAndroid =
-    userAgent.includes('android')
-
-  const isIOS =
-    /iphone|ipad|ipod/.test(
-      userAgent
+    const userAgent =
+      navigator.userAgent.toLowerCase()
+  
+    const isAndroid =
+      userAgent.includes('android')
+  
+    const isIOS =
+      /iphone|ipad|ipod/.test(
+        userAgent
+      )
+  
+    const isIPadDesktopMode =
+      navigator.platform === 'MacIntel' &&
+      navigator.maxTouchPoints > 1
+  
+    const isTouchMobile =
+      navigator.maxTouchPoints > 0 &&
+      Math.min(
+        window.screen.width,
+        window.screen.height
+      ) <= 1024
+  
+    return (
+      isAndroid ||
+      isIOS ||
+      isIPadDesktopMode ||
+      isTouchMobile
     )
-
-  const isIPadDesktopMode =
-    navigator.platform === 'MacIntel' &&
-    navigator.maxTouchPoints > 1
-
-  return (
-    isAndroid ||
-    isIOS ||
-    isIPadDesktopMode
-  )
-}
+  }
 
 
 const isNxgInstalledApp = () => {
