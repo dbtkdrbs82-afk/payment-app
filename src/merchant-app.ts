@@ -249,16 +249,7 @@ window.addEventListener(
     'hotel_staff_role'
   ]
 
-  /* =========================================
-   모바일 로그인 정보는 세션으로만 사용
-   기존 localStorage 로그인 정보 제거
-========================================= */
-
-merchantLoginKeys.forEach(
-  (key) => {
-    localStorage.removeItem(key)
-  }
-)
+  
 
 /* =========================================
    무선단말기 모바일
@@ -19513,24 +19504,61 @@ async function renderMerchantPaymentSuccess() {
 
 function renderMerchantLogin() {
 
-  /* =========================================
-     /merchant-app 직접 접속 시
-     무조건 새로 로그인
-  ========================================= */
+ /* =========================================
+   설치된 앱에서만 저장 로그인 복구
+========================================= */
 
-  if (
-    path === '/merchant-app' ||
-    path === '/merchant-app/'
-  ) {
+const isMerchantStandaloneApp =
+window.matchMedia(
+  '(display-mode: standalone)'
+).matches ||
+(
+  navigator as Navigator & {
+    standalone?: boolean
+  }
+).standalone === true
 
-    merchantLoginKeys.forEach(
-      (key) => {
-        sessionStorage.removeItem(key)
-        localStorage.removeItem(key)
-      }
-    )
+
+if (
+(
+  path === '/merchant-app' ||
+  path === '/merchant-app/'
+) &&
+isMerchantStandaloneApp
+) {
+
+merchantLoginKeys.forEach(
+  (key) => {
+
+    const savedValue =
+      localStorage.getItem(key)
+
+    if (savedValue !== null) {
+
+      sessionStorage.setItem(
+        key,
+        savedValue
+      )
+
+    }
 
   }
+)
+
+
+if (
+  sessionStorage.getItem(
+    'login_merchant_id'
+  )
+) {
+
+  location.replace(
+    '/merchant-app/home'
+  )
+
+  return
+}
+}
 
 
   app.innerHTML = `
@@ -19876,18 +19904,23 @@ function renderMerchantLogin() {
             }
 
 
-          Object.entries(
-            merchantLoginData
-          ).forEach(
-            ([key, value]) => {
-
-              sessionStorage.setItem(
-                key,
-                value
-              )             
-
-            }
-          )
+            Object.entries(
+              merchantLoginData
+            ).forEach(
+              ([key, value]) => {
+            
+                sessionStorage.setItem(
+                  key,
+                  value
+                )
+            
+                localStorage.setItem(
+                  key,
+                  value
+                )
+            
+              }
+            )
 
 
           /*
@@ -20025,20 +20058,23 @@ function renderMerchantLogin() {
             }
 
 
-          Object.entries(
-            staffLoginData
-          ).forEach(
-            ([key, value]) => {
-
-              sessionStorage.setItem(
-                key,
-                value
-              )
-
-              
-
-            }
-          )
+            Object.entries(
+              staffLoginData
+            ).forEach(
+              ([key, value]) => {
+            
+                sessionStorage.setItem(
+                  key,
+                  value
+                )
+            
+                localStorage.setItem(
+                  key,
+                  value
+                )
+            
+              }
+            )
 
 
           location.href =
