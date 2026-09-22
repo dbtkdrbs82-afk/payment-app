@@ -19554,9 +19554,6 @@ if (
     path === '/merchant-app' ||
     path === '/merchant-app/'
   ) &&
-  new URLSearchParams(
-    window.location.search
-  ).get('install') !== '1' &&
   sessionStorage.getItem(
     'login_merchant_id'
   ) &&
@@ -19651,23 +19648,14 @@ if (
   )
 
 
-  const nxgInstallMode =
-  new URLSearchParams(
-    window.location.search
-  ).get('install') === '1'
-
-
-if (
-  nxgInstallButton &&
-  isNxgMobileOrTablet() &&
-  (
-    nxgInstallMode ||
+  if (
+    nxgInstallButton &&
+    isNxgMobileOrTablet() &&
     !isNxgInstalledApp()
-  )
-) {
-
-  nxgInstallButton.style.display =
-    'block'
+  ) {
+  
+    nxgInstallButton.style.display =
+      'block'
 
 
   nxgInstallButton.addEventListener(
@@ -19769,15 +19757,15 @@ if (
 
 
       const chromeIntent =
-      'intent://app.nxgsoft.co.kr/merchant-app?install=1' +
-      '#Intent;' +
-      'scheme=https;' +
-      'package=com.android.chrome;' +
-      'S.browser_fallback_url=' +
-      encodeURIComponent(
-        'https://app.nxgsoft.co.kr/merchant-app?install=1'
-      ) +
-      ';end'
+  'intent://app.nxgsoft.co.kr/merchant-app' +
+  '#Intent;' +
+  'scheme=https;' +
+  'package=com.android.chrome;' +
+  'S.browser_fallback_url=' +
+  encodeURIComponent(
+    'https://app.nxgsoft.co.kr/merchant-app'
+  ) +
+  ';end'
 
 
       window.location.href =
