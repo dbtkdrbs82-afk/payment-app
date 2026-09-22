@@ -19781,6 +19781,36 @@ if (
     'pointer'
 }
 
+if (
+  nxgPopupInstallButton &&
+  !nxgDeferredInstallPrompt
+) {
+
+  setTimeout(
+    () => {
+
+      if (
+        !nxgDeferredInstallPrompt
+      ) {
+
+        nxgPopupInstallButton.disabled =
+          false
+
+        nxgPopupInstallButton.innerText =
+          '앱 설치'
+
+        nxgPopupInstallButton.style.opacity =
+          '1'
+
+        nxgPopupInstallButton.style.cursor =
+          'pointer'
+      }
+
+    },
+    2000
+  )
+}
+
 
 nxgPopupInstallButton
   ?.addEventListener(
@@ -19789,9 +19819,11 @@ nxgPopupInstallButton
 
       if (!nxgDeferredInstallPrompt) {
 
-        nxgPopupInstallButton.innerText =
-          '설치 준비 중...'
-
+        alert(
+          'Chrome 오른쪽 위 ⋮ 메뉴에서\n' +
+          '"앱 설치" 또는 "홈 화면에 추가"를 눌러주세요.'
+        )
+      
         return
       }
 
