@@ -19556,7 +19556,8 @@ if (
   ) &&
   sessionStorage.getItem(
     'login_merchant_id'
-  )
+  ) &&
+  isNxgInstalledApp()
 ) {
 
   location.replace(
