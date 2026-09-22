@@ -176,44 +176,66 @@ let nxgDeferredInstallPrompt:
   }
 
 
-window.addEventListener(
-  'beforeinstallprompt',
-  (event) => {
-
-    event.preventDefault()
-
-    nxgDeferredInstallPrompt =
-      event as NxgBeforeInstallPromptEvent
-
-
-    const installButton =
-      document.querySelector<HTMLButtonElement>(
-        '#nxg-login-install-button'
-      )
-
-
-    if (
-      installButton &&
-      isNxgMobileOrTablet()
-    ) {
-
-      installButton.style.display =
-        'block'
-
-      installButton.disabled =
-        false
-
-      installButton.innerText =
-        '앱 설치'
-
-      installButton.style.opacity =
-        '1'
-
-      installButton.style.cursor =
-        'pointer'
+  window.addEventListener(
+    'beforeinstallprompt',
+    (event) => {
+  
+      event.preventDefault()
+  
+      nxgDeferredInstallPrompt =
+        event as NxgBeforeInstallPromptEvent
+  
+  
+      const installButton =
+        document.querySelector<HTMLButtonElement>(
+          '#nxg-login-install-button'
+        )
+  
+  
+      if (
+        installButton &&
+        isNxgMobileOrTablet()
+      ) {
+  
+        installButton.style.display =
+          'block'
+  
+        installButton.disabled =
+          false
+  
+        installButton.innerText =
+          '앱 설치'
+  
+        installButton.style.opacity =
+          '1'
+  
+        installButton.style.cursor =
+          'pointer'
+      }
+  
+  
+      const popupInstallButton =
+        document.querySelector<HTMLButtonElement>(
+          '#nxg-install-popup-button'
+        )
+  
+  
+      if (popupInstallButton) {
+  
+        popupInstallButton.disabled =
+          false
+  
+        popupInstallButton.innerText =
+          '앱 설치'
+  
+        popupInstallButton.style.opacity =
+          '1'
+  
+        popupInstallButton.style.cursor =
+          'pointer'
+      }
     }
-  }
-)
+  )
 
 
 window.addEventListener(
@@ -19635,6 +19657,187 @@ if (
     </div>
   `
 
+  const nxgPwaInstallMode =
+  new URLSearchParams(
+    window.location.search
+  ).get('pwa_install') === '1'
+
+
+if (nxgPwaInstallMode) {
+
+  document.body.insertAdjacentHTML(
+    'beforeend',
+    `
+      <div
+        id="nxg-install-popup"
+        style="
+          position:fixed;
+          inset:0;
+          z-index:999999;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          padding:20px;
+          background:rgba(0,0,0,0.48);
+          box-sizing:border-box;
+        "
+      >
+
+        <div
+          style="
+            width:100%;
+            max-width:380px;
+            padding:28px 22px;
+            border-radius:18px;
+            background:#ffffff;
+            box-sizing:border-box;
+            text-align:center;
+            box-shadow:0 14px 40px rgba(0,0,0,0.20);
+          "
+        >
+
+          <div
+            style="
+              margin-bottom:10px;
+              color:#174981;
+              font-size:13px;
+              font-weight:900;
+            "
+          >
+            NXG PICK
+          </div>
+
+          <h2
+            style="
+              margin:0 0 14px;
+              color:#172033;
+              font-size:24px;
+              font-weight:900;
+            "
+          >
+            앱 설치
+          </h2>
+
+          <p
+            style="
+              margin:0 0 22px;
+              color:#555f70;
+              font-size:16px;
+              line-height:1.6;
+            "
+          >
+            Chrome으로 연결되었습니다.<br>
+            아래 버튼을 눌러 앱을 설치해주세요.
+          </p>
+
+          <button
+            id="nxg-install-popup-button"
+            type="button"
+            disabled
+            style="
+              width:100%;
+              height:54px;
+              border:0;
+              border-radius:12px;
+              background:#174981;
+              color:#ffffff;
+              font-size:18px;
+              font-weight:900;
+              opacity:0.55;
+              cursor:default;
+            "
+          >
+            설치 준비 중...
+          </button>
+
+        </div>
+
+      </div>
+    `
+  )
+}
+
+const nxgPopupInstallButton =
+  document.querySelector<HTMLButtonElement>(
+    '#nxg-install-popup-button'
+  )
+
+
+if (
+  nxgPopupInstallButton &&
+  nxgDeferredInstallPrompt
+) {
+
+  nxgPopupInstallButton.disabled =
+    false
+
+  nxgPopupInstallButton.innerText =
+    '앱 설치'
+
+  nxgPopupInstallButton.style.opacity =
+    '1'
+
+  nxgPopupInstallButton.style.cursor =
+    'pointer'
+}
+
+
+nxgPopupInstallButton
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      if (!nxgDeferredInstallPrompt) {
+
+        nxgPopupInstallButton.innerText =
+          '설치 준비 중...'
+
+        return
+      }
+
+
+      await nxgDeferredInstallPrompt
+        .prompt()
+
+
+      const choice =
+        await nxgDeferredInstallPrompt
+          .userChoice
+
+
+      nxgDeferredInstallPrompt =
+        null
+
+
+      if (
+        choice.outcome ===
+        'accepted'
+      ) {
+
+        document
+          .querySelector(
+            '#nxg-install-popup'
+          )
+          ?.remove()
+
+        return
+      }
+
+
+      nxgPopupInstallButton.disabled =
+        true
+
+      nxgPopupInstallButton.innerText =
+        '설치가 취소되었습니다.'
+
+      nxgPopupInstallButton.style.opacity =
+        '0.55'
+
+      nxgPopupInstallButton.style.cursor =
+        'default'
+    }
+  )
+
   const nxgInstallButton =
   document.querySelector<HTMLButtonElement>(
     '#nxg-login-install-button'
@@ -19749,15 +19952,15 @@ if (
 
 
       const chromeIntent =
-        'intent://app.nxgsoft.co.kr/merchant-app' +
-        '#Intent;' +
-        'scheme=https;' +
-        'package=com.android.chrome;' +
-        'S.browser_fallback_url=' +
-        encodeURIComponent(
-          'https://app.nxgsoft.co.kr/merchant-app'
-        ) +
-        ';end'
+  'intent://app.nxgsoft.co.kr/merchant-app?pwa_install=1' +
+  '#Intent;' +
+  'scheme=https;' +
+  'package=com.android.chrome;' +
+  'S.browser_fallback_url=' +
+  encodeURIComponent(
+    'https://app.nxgsoft.co.kr/merchant-app?pwa_install=1'
+  ) +
+  ';end'
 
 
       window.location.href =
