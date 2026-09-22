@@ -12401,18 +12401,42 @@ if (!confirm(confirmMessage)) {
     modal.innerHTML = `
       <div class="payout-error-modal-card">
         <div class="payout-error-modal-header">
-          <h3>출금오류 관리</h3>
+  <h3>출금오류 관리</h3>
 
-          <button
-            type="button"
-            id="payout-error-modal-close"
-            class="payout-error-modal-close"
-          >
-            ×
-          </button>
-        </div>
+  <button
+    type="button"
+    id="payout-error-modal-close"
+    class="payout-error-modal-close"
+  >
+    ×
+  </button>
+</div>
 
-        <div class="payout-error-modal-body">
+<div
+  style="
+    display:flex;
+    justify-content:flex-end;
+    padding:12px 16px 0;
+  "
+>
+  <button
+    type="button"
+    id="payout-error-excel-download"
+    style="
+      border:none;
+      border-radius:6px;
+      padding:9px 14px;
+      background:#174981;
+      color:#fff;
+      font-weight:700;
+      cursor:pointer;
+    "
+  >
+    수동정산 엑셀 다운로드
+  </button>
+</div>
+
+<div class="payout-error-modal-body">
           ${payoutErrorPayments.map((payment: any) => `
             <div class="payout-error-row">
               <div>
@@ -12486,13 +12510,325 @@ if (!confirm(confirmMessage)) {
         modal.remove()
       })
 
-    modal.addEventListener('click', (event) => {
-      if (event.target === modal) {
-        modal.remove()
-      }
-    })
-
-    document.querySelectorAll('.payout-error-retry-button')
+      modal.addEventListener('click', (event) => {
+        if (event.target === modal) {
+          modal.remove()
+        }
+      })
+      
+      
+      document.querySelector('#payout-error-excel-download')
+        ?.addEventListener('click', async () => {
+      
+          if (payoutErrorPayments.length === 0) {
+            alert('출금오류 내역이 없습니다.')
+            return
+          }
+      
+      
+          const payoutErrorMerchantIds =
+            Array.from(
+              new Set(
+                payoutErrorPayments
+                  .map((payment: any) =>
+                    Number(payment.merchant_id || 0)
+                  )
+                  .filter(
+                    (merchantId: number) =>
+                      merchantId > 0
+                  )
+              )
+            )
+      
+      
+          if (payoutErrorMerchantIds.length === 0) {
+            alert('가맹점 정보를 찾을 수 없습니다.')
+            return
+          }
+      
+      
+          const {
+            data: payoutErrorMerchants,
+            error: payoutErrorMerchantError
+          } =
+            await supabase
+              .from('merchants')
+              .select(`
+                id,
+                merchant_name,
+                bank_name,
+                account_number,
+                account_holder
+              `)
+              .in(
+                'id',
+                payoutErrorMerchantIds
+              )
+      
+      
+          if (payoutErrorMerchantError) {
+            alert(
+              '가맹점 정산계좌 조회 실패: ' +
+              payoutErrorMerchantError.message
+            )
+            return
+          }
+      
+      
+          const payoutErrorMerchantMap =
+            new Map<number, any>()
+      
+      
+          ;(payoutErrorMerchants || [])
+            .forEach((merchant: any) => {
+      
+              payoutErrorMerchantMap.set(
+                Number(merchant.id),
+                merchant
+              )
+      
+            })
+      
+      
+          type ManualPayoutExcelRow = {
+            merchantId: number
+            merchantName: string
+            bankName: string
+            accountNumber: string
+            accountHolder: string
+            amount: number
+          }
+      
+      
+          const manualPayoutMap =
+            new Map<number, ManualPayoutExcelRow>()
+      
+      
+          payoutErrorPayments
+            .forEach((payment: any) => {
+      
+              const merchantId =
+                Number(
+                  payment.merchant_id || 0
+                )
+      
+      
+              if (!merchantId) {
+                return
+              }
+      
+      
+              const merchant =
+                payoutErrorMerchantMap.get(
+                  merchantId
+                )
+      
+      
+              if (!merchant) {
+                return
+              }
+      
+      
+              const paymentAmount =
+                Number(
+                  payment.amount || 0
+                )
+      
+      
+              const feeAmount =
+                Number(
+                  payment.fee_amount || 0
+                )
+      
+      
+              const settlementAmount =
+                Number(
+                  payment.settlement_amount ??
+                  paymentAmount - feeAmount
+                )
+      
+      
+              if (settlementAmount <= 0) {
+                return
+              }
+      
+      
+              const existing =
+                manualPayoutMap.get(
+                  merchantId
+                )
+      
+      
+              if (existing) {
+      
+                existing.amount +=
+                  settlementAmount
+      
+                return
+              }
+      
+      
+              manualPayoutMap.set(
+                merchantId,
+                {
+                  merchantId,
+      
+                  merchantName:
+                    String(
+                      merchant.merchant_name ||
+                      payment.merchant_name ||
+                      ''
+                    ).trim(),
+      
+                  bankName:
+                    String(
+                      merchant.bank_name || ''
+                    ).trim(),
+      
+                  accountNumber:
+                    String(
+                      merchant.account_number || ''
+                    ).trim(),
+      
+                  accountHolder:
+                    String(
+                      merchant.account_holder || ''
+                    ).trim(),
+      
+                  amount:
+                    settlementAmount
+                }
+              )
+      
+            })
+      
+      
+          const manualPayoutRows =
+            Array.from(
+              manualPayoutMap.values()
+            )
+      
+      
+          if (manualPayoutRows.length === 0) {
+            alert(
+              '다운로드할 수동정산 내역이 없습니다.'
+            )
+            return
+          }
+      
+      
+          const invalidMerchants =
+            manualPayoutRows.filter(
+              (row) =>
+                !row.bankName ||
+                !row.accountNumber
+            )
+      
+      
+          if (invalidMerchants.length > 0) {
+      
+            alert(
+              '정산계좌 정보가 없는 가맹점이 있습니다.\n\n' +
+              invalidMerchants
+                .map(
+                  (row) =>
+                    'MER' +
+                    String(
+                      row.merchantId
+                    ).padStart(
+                      4,
+                      '0'
+                    ) +
+                    ' ' +
+                    (
+                      row.merchantName ||
+                      '-'
+                    )
+                )
+                .join('\n') +
+              '\n\n가맹점 정산계좌를 먼저 확인해주세요.'
+            )
+      
+            return
+          }
+      
+      
+          const bankTransferRows =
+            manualPayoutRows.map(
+              (row) => [
+      
+                // A 입금은행
+                row.bankName,
+      
+                // B 입금계좌번호
+                row.accountNumber,
+      
+                // C 이체금액
+                row.amount,
+      
+                // D 보내는분 통장표시
+                row.merchantName,
+      
+                // E 받는분 통장표시
+                'NXG정산',
+      
+                // F 집금(CMS)번호
+                ''
+      
+              ]
+            )
+      
+      
+          const worksheet =
+            XLSX.utils.aoa_to_sheet(
+              bankTransferRows
+            )
+      
+      
+          worksheet['!cols'] = [
+            { wch: 14 },
+            { wch: 24 },
+            { wch: 16 },
+            { wch: 24 },
+            { wch: 16 },
+            { wch: 16 }
+          ]
+      
+      
+          const workbook =
+            XLSX.utils.book_new()
+      
+      
+          XLSX.utils.book_append_sheet(
+            workbook,
+            worksheet,
+            '다계좌이체'
+          )
+      
+      
+          const todayText =
+            new Date()
+              .toLocaleDateString(
+                'en-CA',
+                {
+                  timeZone:
+                    'Asia/Seoul'
+                }
+              )
+      
+      
+          XLSX.writeFile(
+            workbook,
+            `다계좌이체_출금오류_${todayText}.xls`,
+            {
+              bookType: 'biff8'
+            }
+          )
+      
+        })
+      
+      
+      document.querySelectorAll('.payout-error-retry-button')
       .forEach((button) => {
         button.addEventListener('click', async () => {
           const paymentId =
