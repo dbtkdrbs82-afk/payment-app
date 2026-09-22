@@ -10401,7 +10401,7 @@ if (page === 'payout') {
 
         if (tableTop) {
           tableTop.innerHTML =
-            '<button>엑셀 다운로드</button>' +
+            '<button id="payout-excel-download" type="button">엑셀 다운로드</button>' +
         
             '<div class="payout-top-pagination">' +
               '<button id="payout-prev-top">이전</button>' +
@@ -13171,6 +13171,184 @@ if (payoutPageSizeSelect) {
   })
 }
     
+document.querySelector('#payout-excel-download')
+  ?.addEventListener('click', () => {
+
+    if (currentPayoutView === 'manager') {
+      alert(
+        '담당자 정산 엑셀은 별도 정산내역에서 내려받아주세요.'
+      )
+      return
+    }
+
+
+    const excelPayoutRows =
+      getFilteredPayoutRows()
+
+
+    if (excelPayoutRows.length === 0) {
+      alert('다운로드할 출금내역이 없습니다.')
+      return
+    }
+
+
+    const excelRows =
+      excelPayoutRows.map(
+        (row, index) => {
+
+          const amount =
+            Number(row.amount || 0)
+
+          const feeAmount =
+            Number(row.fee_amount || 0)
+
+          const settlementAmount =
+            Number(
+              row.settlement_amount ??
+              amount - feeAmount
+            )
+
+
+          const paymentDate =
+            row.created_at
+              ? new Date(
+                  row.created_at
+                ).toLocaleDateString(
+                  'en-CA',
+                  {
+                    timeZone:
+                      'Asia/Seoul'
+                  }
+                )
+              : '-'
+
+
+          return {
+            No:
+              index + 1,
+
+            가맹점ID:
+              row.merchant_id
+                ? 'MER' +
+                  String(
+                    row.merchant_id
+                  ).padStart(
+                    4,
+                    '0'
+                  )
+                : '-',
+
+            가맹점명:
+              row.merchant_name ||
+              '-',
+
+            PG사:
+              row.pg_company ||
+              '-',
+
+            결제금액:
+              amount,
+
+            수수료:
+              feeAmount,
+
+            출금예정금액:
+              settlementAmount,
+
+            결제일:
+              paymentDate,
+
+            출금예정일:
+              row.payout_date ||
+              '-',
+
+            출금상태:
+              row.payout_status ||
+              '출금대기'
+          }
+
+        }
+      )
+
+
+    const worksheet =
+      XLSX.utils.json_to_sheet(
+        excelRows
+      )
+
+
+    worksheet['!cols'] = [
+      { wch: 7 },
+      { wch: 14 },
+      { wch: 24 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 17 },
+      { wch: 14 },
+      { wch: 14 },
+      { wch: 14 }
+    ]
+
+
+    const workbook =
+      XLSX.utils.book_new()
+
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      '출금관리'
+    )
+
+
+    const startDate =
+      document
+        .querySelector<HTMLInputElement>(
+          '#payout-start-date'
+        )
+        ?.value || ''
+
+
+    const endDate =
+      document
+        .querySelector<HTMLInputElement>(
+          '#payout-end-date'
+        )
+        ?.value || ''
+
+
+    const todayText =
+      new Date()
+        .toLocaleDateString(
+          'en-CA',
+          {
+            timeZone:
+              'Asia/Seoul'
+          }
+        )
+
+
+    const fileDate =
+      startDate && endDate
+        ? (
+            startDate === endDate
+              ? startDate
+              : startDate +
+                '_' +
+                endDate
+          )
+        : todayText
+
+
+    XLSX.writeFile(
+      workbook,
+      `출금관리_${fileDate}.xlsx`
+    )
+
+  })
+
+
 document.querySelector('#payout-search-btn')
   ?.addEventListener('click', () => {
     if (currentPayoutView === 'manager') {
