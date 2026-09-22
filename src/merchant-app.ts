@@ -19656,7 +19656,8 @@ if (
 
   if (
     nxgInstallButton &&
-    isNxgMobileOrTablet()
+    isNxgMobileOrTablet() &&
+    !isNxgInstalledApp()
   ) {
   
     nxgInstallButton.style.display =
