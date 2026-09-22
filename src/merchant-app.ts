@@ -262,16 +262,35 @@ window.addEventListener(
     'hotel_staff_role'
   ]
 
-  /* =========================================
-   모바일 로그인 정보는 세션으로만 사용
-   기존 localStorage 로그인 정보 제거
+ /* =========================================
+   저장된 모바일 로그인 정보 복구
 ========================================= */
 
-merchantLoginKeys.forEach(
-  (key) => {
-    localStorage.removeItem(key)
-  }
-)
+if (
+  !sessionStorage.getItem(
+    'login_merchant_id'
+  )
+) {
+
+  merchantLoginKeys.forEach(
+    (key) => {
+
+      const savedValue =
+        localStorage.getItem(key)
+
+      if (savedValue !== null) {
+
+        sessionStorage.setItem(
+          key,
+          savedValue
+        )
+
+      }
+
+    }
+  )
+
+}
 
 /* =========================================
    무선단말기 모바일
@@ -19526,24 +19545,26 @@ async function renderMerchantPaymentSuccess() {
 
 function renderMerchantLogin() {
 
-  /* =========================================
-     /merchant-app 직접 접속 시
-     무조건 새로 로그인
-  ========================================= */
+ /* =========================================
+   저장된 로그인 상태면 모바일 홈으로 이동
+========================================= */
 
-  if (
+if (
+  (
     path === '/merchant-app' ||
     path === '/merchant-app/'
-  ) {
+  ) &&
+  sessionStorage.getItem(
+    'login_merchant_id'
+  )
+) {
 
-    merchantLoginKeys.forEach(
-      (key) => {
-        sessionStorage.removeItem(key)
-        localStorage.removeItem(key)
-      }
-    )
+  location.replace(
+    '/merchant-app/home'
+  )
 
-  }
+  return
+}
 
 
   app.innerHTML = `
@@ -19890,18 +19911,23 @@ if (
             }
 
 
-          Object.entries(
-            merchantLoginData
-          ).forEach(
-            ([key, value]) => {
-
-              sessionStorage.setItem(
-                key,
-                value
-              )             
-
-            }
-          )
+            Object.entries(
+              merchantLoginData
+            ).forEach(
+              ([key, value]) => {
+            
+                sessionStorage.setItem(
+                  key,
+                  value
+                )
+            
+                localStorage.setItem(
+                  key,
+                  value
+                )
+            
+              }
+            )
 
 
           /*
@@ -20039,20 +20065,23 @@ if (
             }
 
 
-          Object.entries(
-            staffLoginData
-          ).forEach(
-            ([key, value]) => {
-
-              sessionStorage.setItem(
-                key,
-                value
-              )
-
-              
-
-            }
-          )
+            Object.entries(
+              staffLoginData
+            ).forEach(
+              ([key, value]) => {
+            
+                sessionStorage.setItem(
+                  key,
+                  value
+                )
+            
+                localStorage.setItem(
+                  key,
+                  value
+                )
+            
+              }
+            )
 
 
           location.href =
