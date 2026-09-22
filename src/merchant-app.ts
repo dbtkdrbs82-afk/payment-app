@@ -19626,14 +19626,13 @@ function renderMerchantLogin() {
   )
 
 
-if (
-  nxgInstallButton &&
-  isNxgMobileOrTablet() &&
-  !isNxgInstalledApp()
-) {
-
-  nxgInstallButton.style.display =
-    'block'
+  if (
+    nxgInstallButton &&
+    isNxgMobileOrTablet()
+  ) {
+  
+    nxgInstallButton.style.display =
+      'block'
 
 
   nxgInstallButton.addEventListener(
@@ -20212,4 +20211,3 @@ if (
     renderMerchantLogin()
   
   }
-  
