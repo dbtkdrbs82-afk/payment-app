@@ -3859,6 +3859,16 @@ if (filteredOrders.length === 0) {
   data-order-id="${order.id}"
 >
   ${orderNumber}번
+  <span
+    style="
+      margin-left:8px;
+      font-size:13px;
+      font-weight:700;
+      color:#6b7280;
+    "
+  >
+    &lt;&lt; 영수증
+  </span>
 </button>
   
             <span>
@@ -3889,6 +3899,17 @@ if (filteredOrders.length === 0) {
     paymentForOrder?.approval_number ||
     '-'
   }
+
+  <span
+    style="
+      margin-left:8px;
+      font-size:13px;
+      font-weight:700;
+      color:#d93025;
+    "
+  >
+    &lt;&lt; 결제취소
+  </span>
 </button>
   
   
