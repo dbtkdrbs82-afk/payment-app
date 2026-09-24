@@ -19988,6 +19988,12 @@ const averageAmount =
             String(holiday.holiday_date)
           )
       )
+
+      const isMerchantSelectedHoliday =
+  startDate === endDate &&
+  settlementHolidaySet.has(
+    startDate
+  )
     
     const formatSettlementDate =
       (date: Date) => {
@@ -20431,6 +20437,13 @@ new Set(
     )
 )
 
+const isTerminalSelectedHoliday =
+  selectedStartDate ===
+    selectedEndDate &&
+  terminalHolidaySet.has(
+    selectedStartDate
+  )
+
 const getTerminalPayoutDate = (
 createdAt: string
 ) => {
@@ -20861,12 +20874,16 @@ const terminalPagedPayments =
   font-weight:700;
 "
 >
-  정산대상 ${selectedSettlementCount.toLocaleString()}건${
-    settlementPaymentDateLabel
-      ? ' · ' +
-        settlementPaymentDateLabel +
-        ' 결제건'
-      : ''
+  ${
+    isTerminalSelectedHoliday
+      ? '공휴일'
+      : `정산대상 ${selectedSettlementCount.toLocaleString()}건${
+          settlementPaymentDateLabel
+            ? ' · ' +
+              settlementPaymentDateLabel +
+              ' 결제건'
+            : ''
+        }`
   }
 </small>
   </div>
@@ -21127,6 +21144,13 @@ const allAcademyPayments =
           String(holiday.holiday_date)
         )
     )
+
+    const isAcademySelectedHoliday =
+  selectedStartDate ===
+    selectedEndDate &&
+  academyHolidaySet.has(
+    selectedStartDate
+  )
   
   const formatAcademySettlementDate =
     (date: Date) => {
@@ -21475,7 +21499,7 @@ const newMemberCount =
   </strong>
 
   ${
-    academyPendingSettlementPayments.length > 0
+    isAcademySelectedHoliday
       ? `
         <small
           style="
@@ -21488,11 +21512,27 @@ const newMemberCount =
             font-weight:700;
           "
         >
-          정산대상 ${academyPendingSettlementPayments.length.toLocaleString()}건 ·
-          ${academySettlementPaymentDateLabel} 결제건
+          공휴일
         </small>
       `
-      : ''
+      : academyPendingSettlementPayments.length > 0
+        ? `
+          <small
+            style="
+              display:block;
+              margin-top:2px;
+              white-space:nowrap;
+              font-size:11px;
+              line-height:1.1;
+              color:#d93025;
+              font-weight:700;
+            "
+          >
+            정산대상 ${academyPendingSettlementPayments.length.toLocaleString()}건 ·
+            ${academySettlementPaymentDateLabel} 결제건
+          </small>
+        `
+        : ''
   }
 </div>
 
@@ -21824,7 +21864,7 @@ ${merchantContent}
   </span>
 
   ${
-    settlementTargetPayments.length > 0
+    isMerchantSelectedHoliday
       ? `
         <small
           style="
@@ -21837,11 +21877,27 @@ ${merchantContent}
             font-weight:700;
           "
         >
-          정산대상 ${settlementTargetPayments.length.toLocaleString()}건 ·
-          ${settlementPaymentDateLabel} 결제건
+          공휴일
         </small>
       `
-      : ''
+      : settlementTargetPayments.length > 0
+        ? `
+          <small
+            style="
+              display:block;
+              margin-top:2px;
+              white-space:nowrap;
+              font-size:11px;
+              line-height:1.1;
+              color:#d93025;
+              font-weight:700;
+            "
+          >
+            정산대상 ${settlementTargetPayments.length.toLocaleString()}건 ·
+            ${settlementPaymentDateLabel} 결제건
+          </small>
+        `
+        : ''
   }
 </div>
 </div>
