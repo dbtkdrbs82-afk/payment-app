@@ -522,6 +522,12 @@ async function renderMerchantWirelessTerminal() {
         )
     )
 
+    const isTerminalSelectedHoliday =
+  selectedStartDate ===
+    selectedEndDate &&
+  holidaySet.has(
+    selectedStartDate
+  )
 
   const getPayoutDate =
     (
@@ -1006,12 +1012,16 @@ async function renderMerchantWirelessTerminal() {
     font-weight:700;
   "
 >
-  정산대상 ${settlementPayments.length.toLocaleString()}건${
-    terminalSettlementPaymentDateLabel
-      ? ' · ' +
-        terminalSettlementPaymentDateLabel +
-        ' 결제건'
-      : ''
+  ${
+    isTerminalSelectedHoliday
+      ? '공휴일'
+      : `정산대상 ${settlementPayments.length.toLocaleString()}건${
+          terminalSettlementPaymentDateLabel
+            ? ' · ' +
+              terminalSettlementPaymentDateLabel +
+              ' 결제건'
+            : ''
+        }`
   }
 </small>
 
@@ -3306,6 +3316,32 @@ const pageOrders =
 const merchantSetting =
   merchantResult.data
 
+  const {
+    data: mobileHolidayData
+  } =
+    await supabase
+      .from('holidays')
+      .select('holiday_date')
+  
+  
+  const mobileHolidaySet =
+    new Set(
+      (mobileHolidayData || [])
+        .map(
+          (holiday: any) =>
+            String(
+              holiday.holiday_date
+            )
+        )
+    )
+  
+  
+  const isMobileSelectedHoliday =
+    startDate === endDate &&
+    mobileHolidaySet.has(
+      startDate
+    )
+
       const payments =
   paymentResult.data || []
 
@@ -3655,9 +3691,20 @@ summary.innerHTML = `
     ${settlementTotal.toLocaleString()}원
   </span>
 
-  <small class="beauty-mobile-settlement-wait">
-    대기
-  </small>
+  <small
+  class="beauty-mobile-settlement-wait"
+  style="${
+    isMobileSelectedHoliday
+      ? 'color:#d93025;font-weight:700;'
+      : ''
+  }"
+>
+  ${
+    isMobileSelectedHoliday
+      ? '공휴일'
+      : '대기'
+  }
+</small>
 
   ${
     settlementTargetPayments.length > 0
@@ -6234,6 +6281,12 @@ const averageAmount =
         )
       )
   
+      const isBeautySelectedHoliday =
+  beautyStartDate ===
+    beautyEndDate &&
+  settlementHolidaySet.has(
+    beautyStartDate
+  )
   
     const formatSettlementDate =
       (date: Date) => {
@@ -6644,19 +6697,30 @@ const averageAmount =
           </small>
   
           ${
-            settlementTargetPayments.length > 0
+            isBeautySelectedHoliday
               ? `
-                <em>
-                  정산대상 ${settlementTargetPayments.length.toLocaleString()}건${
-                    settlementPaymentDateLabel
-                      ? ' · ' +
-                        settlementPaymentDateLabel +
-                        ' 결제건'
-                      : ''
-                  }
+                <em
+                  style="
+                    color:#d93025;
+                    font-weight:700;
+                  "
+                >
+                  공휴일
                 </em>
               `
-              : ''
+              : settlementTargetPayments.length > 0
+                ? `
+                  <em>
+                    정산대상 ${settlementTargetPayments.length.toLocaleString()}건${
+                      settlementPaymentDateLabel
+                        ? ' · ' +
+                          settlementPaymentDateLabel +
+                          ' 결제건'
+                        : ''
+                    }
+                  </em>
+                `
+                : ''
           }
   
         </div>
