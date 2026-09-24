@@ -15546,7 +15546,7 @@ function renderMerchantManualCard() {
   
             const response =
               await fetch(
-                apiBaseUrl + '/api/korpay-manual-pay',
+                '/api/korpay-manual-pay',
                 {
                   method:
                     'POST',
