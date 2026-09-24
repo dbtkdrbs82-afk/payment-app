@@ -2860,11 +2860,11 @@ alert(
 )
 
 location.href =
-  '/merchant-login'
+  '/merchant-app'
 
   alert('가입신청이 완료되었습니다.')
 
-location.href = '/merchant-login'
+location.href = '/merchant-app'
 })
 
 } else if (path === '/merchant-create') {
