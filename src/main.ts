@@ -4257,6 +4257,26 @@ const successGuideHtml =
   🔔 픽업 알림 받기
 </button>
 
+<button
+  id="customer-vibration-stop"
+  type="button"
+  style="
+    display:none;
+    width:100%;
+    margin-top:10px;
+    padding:16px 20px;
+    border:0;
+    border-radius:12px;
+    background:#dc2626;
+    color:#ffffff;
+    font-size:18px;
+    font-weight:800;
+    cursor:pointer;
+  "
+>
+  진동 끄기
+</button>
+
 <p
   style="
     margin-top:8px;
@@ -4495,51 +4515,242 @@ const successGuideHtml =
       number | null =
       null
   
-      let customerAlertAudioContext:
-  AudioContext | null =
-  null
-
-
-const alertEnableButton =
-  document.querySelector<HTMLButtonElement>(
-    '#customer-alert-enable'
-  )
-
-
-alertEnableButton
-  ?.addEventListener(
-    'click',
-    async () => {
-
-      const AudioContextClass =
-        window.AudioContext ||
-        (
-          window as any
-        ).webkitAudioContext
-
-
-      customerAlertAudioContext =
-        new AudioContextClass()
-
-
-      await customerAlertAudioContext
-        .resume()
-
-
-      if (
-        'vibrate' in navigator
-      ) {
-        navigator.vibrate(100)
+    let customerVibrationTimer:
+      number | null =
+      null
+  
+    let customerAlertAudioContext:
+      AudioContext | null =
+      null
+  
+    let lastHandledCallAt =
+      ''
+  
+  
+    const alertEnableButton =
+      document.querySelector<HTMLButtonElement>(
+        '#customer-alert-enable'
+      )
+  
+    const vibrationStopButton =
+      document.querySelector<HTMLButtonElement>(
+        '#customer-vibration-stop'
+      )
+  
+  
+    const stopCustomerVibration =
+      () => {
+  
+        if (
+          customerVibrationTimer !==
+          null
+        ) {
+  
+          window.clearInterval(
+            customerVibrationTimer
+          )
+  
+          customerVibrationTimer =
+            null
+        }
+  
+  
+        if (
+          'vibrate' in navigator
+        ) {
+  
+          navigator.vibrate(0)
+        }
       }
-
-
-      alertEnableButton.textContent =
-  '✓ 픽업 알림 설정완료'
-
-      alertEnableButton.disabled =
-        true
-    }
-  )
+  
+  
+    const startCustomerVibration =
+      () => {
+  
+        stopCustomerVibration()
+  
+  
+        const vibrateNow =
+          () => {
+  
+            if (
+              'vibrate' in navigator
+            ) {
+  
+              navigator.vibrate([
+                300,
+                150,
+                300,
+                150,
+                300,
+                150,
+                300,
+                150,
+                300
+              ])
+            }
+          }
+  
+  
+        vibrateNow()
+  
+  
+        customerVibrationTimer =
+          window.setInterval(
+            vibrateNow,
+            3000
+          )
+      }
+  
+  
+    const playCustomerAlertSound =
+      () => {
+  
+        if (
+          !customerAlertAudioContext
+        ) {
+          return
+        }
+  
+  
+        const playBeep =
+          (
+            frequency: number,
+            delay: number
+          ) => {
+  
+            window.setTimeout(
+              () => {
+  
+                if (
+                  !customerAlertAudioContext
+                ) {
+                  return
+                }
+  
+  
+                const oscillator =
+                  customerAlertAudioContext
+                    .createOscillator()
+  
+                const gain =
+                  customerAlertAudioContext
+                    .createGain()
+  
+  
+                oscillator.frequency.value =
+                  frequency
+  
+                oscillator.type =
+                  'sine'
+  
+                gain.gain.value =
+                  0.25
+  
+  
+                oscillator.connect(
+                  gain
+                )
+  
+                gain.connect(
+                  customerAlertAudioContext
+                    .destination
+                )
+  
+  
+                oscillator.start()
+  
+                oscillator.stop(
+                  customerAlertAudioContext
+                    .currentTime +
+                  0.35
+                )
+  
+              },
+              delay
+            )
+          }
+  
+  
+        playBeep(
+          880,
+          0
+        )
+  
+        playBeep(
+          1040,
+          450
+        )
+  
+        playBeep(
+          1320,
+          900
+        )
+      }
+  
+  
+    alertEnableButton
+      ?.addEventListener(
+        'click',
+        async () => {
+  
+          const AudioContextClass =
+            window.AudioContext ||
+            (
+              window as any
+            ).webkitAudioContext
+  
+  
+          customerAlertAudioContext =
+            new AudioContextClass()
+  
+  
+          await customerAlertAudioContext
+            .resume()
+  
+  
+          if (
+            'vibrate' in navigator
+          ) {
+  
+            navigator.vibrate(100)
+          }
+  
+  
+          alertEnableButton.textContent =
+            '✓ 픽업 알림 설정완료'
+  
+          alertEnableButton.disabled =
+            true
+        }
+      )
+  
+  
+    vibrationStopButton
+      ?.addEventListener(
+        'click',
+        async () => {
+  
+          stopCustomerVibration()
+  
+  
+          await supabase
+            .from('orders')
+            .update({
+              customer_acknowledged_at:
+                new Date().toISOString()
+            })
+            .eq(
+              'pg_order_id',
+              customerOrderId
+            )
+  
+  
+          vibrationStopButton.style.display =
+            'none'
+        }
+      )
+  
   
     const checkCustomerCallStatus =
       async () => {
@@ -4550,7 +4761,9 @@ alertEnableButton
         } =
           await supabase
             .from('orders')
-            .select('order_status')
+            .select(
+              'order_status,last_called_at,customer_acknowledged_at'
+            )
             .eq(
               'pg_order_id',
               customerOrderId
@@ -4566,126 +4779,32 @@ alertEnableButton
         }
   
   
+        const calledAt =
+          String(
+            customerOrder
+              .last_called_at ||
+            ''
+          )
+  
+  
+        const acknowledgedAt =
+          String(
+            customerOrder
+              .customer_acknowledged_at ||
+            ''
+          )
+  
+  
+        const isUnacknowledgedCall =
+          Boolean(calledAt) &&
+          !acknowledgedAt
+  
+  
         if (
           customerOrder.order_status ===
-          '완료'
+            '완료' &&
+          isUnacknowledgedCall
         ) {
-
-          if (
-            'vibrate' in navigator
-          ) {
-          
-            const vibrationPattern:
-              number[] = []
-          
-          
-            for (
-              let i = 0;
-              i < 20;
-              i++
-            ) {
-          
-              vibrationPattern.push(
-                300
-              )
-          
-          
-              if (
-                i < 19
-              ) {
-          
-                vibrationPattern.push(
-                  150
-                )
-              }
-            }
-          
-          
-            navigator.vibrate(
-              vibrationPattern
-            )
-          }
-          
-          
-          if (
-            customerAlertAudioContext
-          ) {
-          
-            const playBeep =
-              (
-                frequency: number,
-                delay: number
-              ) => {
-          
-                window.setTimeout(
-                  () => {
-          
-                    if (
-                      !customerAlertAudioContext
-                    ) {
-                      return
-                    }
-          
-          
-                    const oscillator =
-                      customerAlertAudioContext
-                        .createOscillator()
-          
-                    const gain =
-                      customerAlertAudioContext
-                        .createGain()
-          
-          
-                    oscillator.frequency.value =
-                      frequency
-          
-                    oscillator.type =
-                      'sine'
-          
-          
-                    gain.gain.value =
-                      0.25
-          
-          
-                    oscillator.connect(
-                      gain
-                    )
-          
-                    gain.connect(
-                      customerAlertAudioContext
-                        .destination
-                    )
-          
-          
-                    oscillator.start()
-          
-                    oscillator.stop(
-                      customerAlertAudioContext
-                        .currentTime +
-                      0.35
-                    )
-          
-                  },
-                  delay
-                )
-              }
-          
-          
-            playBeep(
-              880,
-              0
-            )
-          
-            playBeep(
-              1040,
-              450
-            )
-          
-            playBeep(
-              1320,
-              900
-            )
-          }
   
           const waitMessage =
             document.querySelector<HTMLElement>(
@@ -4714,16 +4833,38 @@ alertEnableButton
   
   
           if (
-            customerCallTimer !==
-            null
+            vibrationStopButton
           ) {
   
-            window.clearInterval(
-              customerCallTimer
-            )
+            vibrationStopButton.style.display =
+              'block'
+          }
   
-            customerCallTimer =
-              null
+  
+          if (
+            calledAt !==
+            lastHandledCallAt
+          ) {
+  
+            lastHandledCallAt =
+              calledAt
+  
+            startCustomerVibration()
+  
+            playCustomerAlertSound()
+          }
+  
+        } else {
+  
+          stopCustomerVibration()
+  
+  
+          if (
+            vibrationStopButton
+          ) {
+  
+            vibrationStopButton.style.display =
+              'none'
           }
         }
       }
@@ -4736,7 +4877,54 @@ alertEnableButton
       )
   
   
+    document.addEventListener(
+      'visibilitychange',
+      () => {
+  
+        if (
+          document.visibilityState ===
+          'visible'
+        ) {
+  
+          lastHandledCallAt =
+            ''
+  
+          void checkCustomerCallStatus()
+        }
+      }
+    )
+  
+  
     await checkCustomerCallStatus()
+  }
+
+  if (source === 'kiosk') {
+
+    window.history.pushState(
+      {
+        kioskSuccess:
+          true
+      },
+      '',
+      window.location.href
+    )
+  
+  
+    window.addEventListener(
+      'popstate',
+      () => {
+  
+        window.history.pushState(
+          {
+            kioskSuccess:
+              true
+          },
+          '',
+          window.location.href
+        )
+  
+      }
+    )
   }
 
   document.querySelector<HTMLButtonElement>('#home-button')!
@@ -23832,7 +24020,11 @@ if (statusBox) {
     const { error } = await supabase
       .from('orders')
       .update({
-        order_status: '완료'
+        order_status: '완료',
+        last_called_at:
+          new Date().toISOString(),
+        customer_acknowledged_at:
+          null
       })
       .eq('id', Number(order.id))
   
