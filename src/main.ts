@@ -4200,7 +4200,35 @@ approved_at:
     }
   }
 }
-window.history.replaceState({}, '', '/success')
+if (source === 'kiosk') {
+
+  const kioskSuccessRecoveryUrl =
+    window.location.href
+
+
+  sessionStorage.setItem(
+    'kiosk_success_recovery_url',
+    kioskSuccessRecoveryUrl
+  )
+
+
+  window.history.replaceState(
+    {
+      kioskSuccess:
+        true
+    },
+    '',
+    kioskSuccessRecoveryUrl
+  )
+
+} else {
+
+  window.history.replaceState(
+    {},
+    '',
+    '/success'
+  )
+}
 
 const isHotelSuccess =
   source === 'hotel'
@@ -4926,6 +4954,15 @@ const successGuideHtml =
 
   document.querySelector<HTMLButtonElement>('#home-button')!
   .addEventListener('click', () => {
+
+    if (
+      source === 'kiosk'
+    ) {
+    
+      sessionStorage.removeItem(
+        'kiosk_success_recovery_url'
+      )
+    }
 
     const merchantId =
       sessionStorage.getItem('merchantId') ||
@@ -38810,6 +38847,49 @@ sessionStorage.setItem(
     } else if (path === '/kiosk') {
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
+
+      const kioskSuccessRecoveryUrl =
+  sessionStorage.getItem(
+    'kiosk_success_recovery_url'
+  )
+
+
+if (kioskSuccessRecoveryUrl) {
+
+  const recoveryUrl =
+    new URL(
+      kioskSuccessRecoveryUrl
+    )
+
+
+  const recoveryMerchantId =
+    recoveryUrl.searchParams.get(
+      'merchantId'
+    )
+
+
+  if (
+    !recoveryMerchantId ||
+    recoveryMerchantId ===
+      String(merchantId)
+  ) {
+
+    window.location.replace(
+      kioskSuccessRecoveryUrl
+    )
+
+
+    await new Promise<void>(
+      (resolve) => {
+
+        window.setTimeout(
+          resolve,
+          1000
+        )
+      }
+    )
+  }
+}
 
       const kioskSource =
   params.get('source') || ''
