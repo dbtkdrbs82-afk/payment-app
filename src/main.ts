@@ -4511,9 +4511,7 @@ const successGuideHtml =
       )
   
   
-    let customerCallTimer:
-      number | null =
-      null
+    
   
     let customerVibrationTimer:
       number | null =
@@ -4870,7 +4868,6 @@ const successGuideHtml =
       }
   
   
-    customerCallTimer =
       window.setInterval(
         checkCustomerCallStatus,
         2000
