@@ -24085,7 +24085,13 @@ document.querySelectorAll('.admin-table .customer-call-button')
         const { error } = await supabase
           .from('orders')
           .update({
-            order_status: '완료'
+            order_status: '완료',
+          
+            last_called_at:
+              new Date().toISOString(),
+          
+            customer_acknowledged_at:
+              null
           })
           .eq('id', Number(orderId))
 
