@@ -5049,10 +5049,6 @@ ${
       sessionStorage.removeItem(
         'kiosk_success_recovery_url'
       )
-    
-      localStorage.removeItem(
-        'nxg_last_kiosk_order'
-      )
     }
 
     const merchantId =
@@ -40974,6 +40970,26 @@ const orderNo =
     sessionStorage.setItem(
       'kiosk_merchant_id',
       String(merchantId)
+    )
+
+    localStorage.setItem(
+      'nxg_last_kiosk_order',
+      JSON.stringify({
+        pgOrderId:
+          orderNo.replace(
+            /[^a-zA-Z0-9]/g,
+            ''
+          ),
+    
+        merchantId:
+          String(merchantId),
+    
+        orderNumber:
+          String(callNumber),
+    
+        savedAt:
+          Date.now()
+      })
     )
 
     const beautyReservationDate =
