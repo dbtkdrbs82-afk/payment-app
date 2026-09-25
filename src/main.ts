@@ -4434,6 +4434,102 @@ const successGuideHtml =
     </div>
   `
 
+  if (source === 'kiosk') {
+
+    const customerOrderId =
+      orderId.replace(
+        /[^a-zA-Z0-9]/g,
+        ''
+      )
+  
+  
+    let customerCallTimer:
+      number | null =
+      null
+  
+  
+    const checkCustomerCallStatus =
+      async () => {
+  
+        const {
+          data: customerOrder,
+          error: customerOrderError
+        } =
+          await supabase
+            .from('orders')
+            .select('order_status')
+            .eq(
+              'pg_order_id',
+              customerOrderId
+            )
+            .maybeSingle()
+  
+  
+        if (
+          customerOrderError ||
+          !customerOrder
+        ) {
+          return
+        }
+  
+  
+        if (
+          customerOrder.order_status ===
+          '완료'
+        ) {
+  
+          const waitMessage =
+            document.querySelector<HTMLElement>(
+              '.order-wait-message'
+            )
+  
+  
+          if (waitMessage) {
+  
+            waitMessage.innerHTML =
+              '<strong style="' +
+                'font-size:22px;' +
+                'color:#16a34a;' +
+                'font-weight:800;' +
+              '">' +
+                '상품이 준비되었습니다.' +
+              '</strong>' +
+              '<br>' +
+              '<span style="' +
+                'font-size:18px;' +
+                'font-weight:700;' +
+              '">' +
+                '픽업해주세요.' +
+              '</span>'
+          }
+  
+  
+          if (
+            customerCallTimer !==
+            null
+          ) {
+  
+            window.clearInterval(
+              customerCallTimer
+            )
+  
+            customerCallTimer =
+              null
+          }
+        }
+      }
+  
+  
+    customerCallTimer =
+      window.setInterval(
+        checkCustomerCallStatus,
+        2000
+      )
+  
+  
+    await checkCustomerCallStatus()
+  }
+
   document.querySelector<HTMLButtonElement>('#home-button')!
   .addEventListener('click', () => {
 
