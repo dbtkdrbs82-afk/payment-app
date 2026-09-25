@@ -3828,6 +3828,68 @@ document.querySelector<HTMLButtonElement>('#sales-yearly')!
 } else if (path === '/success') {
   const params = new URLSearchParams(window.location.search)
 
+  const kioskBackGuardSource =
+  params.get('source')
+
+
+if (
+  kioskBackGuardSource ===
+  'kiosk'
+) {
+
+  const kioskBackGuardUrl =
+    window.location.href
+
+
+  sessionStorage.setItem(
+    'kiosk_success_recovery_url',
+    kioskBackGuardUrl
+  )
+
+
+  window.history.replaceState(
+    {
+      kioskSuccess:
+        true
+    },
+    '',
+    kioskBackGuardUrl
+  )
+
+
+  for (
+    let i = 0;
+    i < 3;
+    i++
+  ) {
+
+    window.history.pushState(
+      {
+        kioskSuccess:
+          true
+      },
+      '',
+      kioskBackGuardUrl
+    )
+  }
+
+
+  window.addEventListener(
+    'popstate',
+    () => {
+
+      window.history.pushState(
+        {
+          kioskSuccess:
+            true
+        },
+        '',
+        kioskBackGuardUrl
+      )
+    }
+  )
+}
+
   const orderId = params.get('orderId')
 const amount = params.get('amount')
 const paymentKey = params.get('paymentKey')
@@ -4923,34 +4985,7 @@ const successGuideHtml =
     await checkCustomerCallStatus()
   }
 
-  if (source === 'kiosk') {
-
-    window.history.pushState(
-      {
-        kioskSuccess:
-          true
-      },
-      '',
-      window.location.href
-    )
   
-  
-    window.addEventListener(
-      'popstate',
-      () => {
-  
-        window.history.pushState(
-          {
-            kioskSuccess:
-              true
-          },
-          '',
-          window.location.href
-        )
-  
-      }
-    )
-  }
 
   document.querySelector<HTMLButtonElement>('#home-button')!
   .addEventListener('click', () => {
