@@ -3925,6 +3925,20 @@ const settlementAmount = paymentAmount - feeAmount
 
 const nextOrderNumber = (count || 0) + 1
 
+const customerDisplayOrderNumber =
+  source === 'kiosk'
+    ? (
+        sessionStorage.getItem(
+          'kiosk_call_number'
+        ) ||
+        String(
+          nextOrderNumber
+        )
+      )
+    : String(
+        nextOrderNumber
+      )
+
 const { data: existingPayment } = await supabase
   .from('payments')
   .select('id')
@@ -4224,22 +4238,23 @@ const successGuideHtml =
         잠시만 기다려주세요.
       </p>
 
-      <button
+    <button
   id="customer-alert-enable"
   type="button"
   style="
-    margin-top:12px;
-    padding:10px 18px;
+    width:100%;
+    margin-top:14px;
+    padding:16px 20px;
     border:0;
-    border-radius:10px;
+    border-radius:12px;
     background:#f3f4f6;
     color:#1f2937;
-    font-size:14px;
-    font-weight:700;
+    font-size:18px;
+    font-weight:800;
     cursor:pointer;
   "
 >
-  🔔 호출 알림 켜기
+  🔔 픽업 알림 받기
 </button>
 
 <p
@@ -4273,7 +4288,7 @@ const successGuideHtml =
   </p>
 
   <div class="order-number-box">
-    ${nextOrderNumber}번
+    ${customerDisplayOrderNumber}번
   </div>
 
   ${successGuideHtml}
@@ -4337,7 +4352,7 @@ const successGuideHtml =
         <table>
           <tr><th>주문자명</th><td>${senderName || '-'}</td></tr>
           <tr><th>승인번호</th><td>결제사 제공값</td></tr>
-          <tr><th>주문번호</th><td>${nextOrderNumber}</td></tr>
+          <tr><th>주문번호</th><td>${customerDisplayOrderNumber}</td></tr>
           <tr><th>상품명 / 구매자</th><td>${merchantName || '-'}</td></tr>
         </table>
       </section>
@@ -4519,7 +4534,7 @@ alertEnableButton
 
 
       alertEnableButton.textContent =
-        '✓ 호출 알림 켜짐'
+  '✓ 픽업 알림 설정완료'
 
       alertEnableButton.disabled =
         true
