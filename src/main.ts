@@ -4001,6 +4001,34 @@ const customerDisplayOrderNumber =
         nextOrderNumber
       )
 
+      if (
+        source === 'kiosk' &&
+        merchantId
+      ) {
+      
+        localStorage.setItem(
+          'nxg_last_kiosk_order',
+          JSON.stringify({
+            pgOrderId:
+              orderId.replace(
+                /[^a-zA-Z0-9]/g,
+                ''
+              ),
+      
+            merchantId:
+              String(merchantId),
+      
+            orderNumber:
+              String(
+                customerDisplayOrderNumber
+              ),
+      
+            savedAt:
+              Date.now()
+          })
+        )
+      }
+
 const { data: existingPayment } = await supabase
   .from('payments')
   .select('id')
@@ -4379,6 +4407,30 @@ const successGuideHtml =
   호출 알림을 받으려면<br>
   이 화면을 닫지 말고 유지해주세요.
 </p>
+
+${
+  source === 'kiosk'
+    ? `
+      <p
+        style="
+          margin-top:12px;
+          padding:12px;
+          border-radius:10px;
+          background:#fff7ed;
+          color:#9a3412;
+          font-size:13px;
+          line-height:1.6;
+          font-weight:700;
+          text-align:center;
+        "
+      >
+        주문번호 화면이 사라졌나요?<br>
+        매장의 QR코드를 다시 촬영한 후<br>
+        <strong>방금 주문번호 다시보기</strong>를 눌러주세요.
+      </p>
+    `
+    : ''
+}
     `
 
     
@@ -4996,6 +5048,10 @@ const successGuideHtml =
     
       sessionStorage.removeItem(
         'kiosk_success_recovery_url'
+      )
+    
+      localStorage.removeItem(
+        'nxg_last_kiosk_order'
       )
     }
 
@@ -38883,6 +38939,75 @@ sessionStorage.setItem(
       const params = new URLSearchParams(window.location.search)
       const merchantId = Number(params.get('merchant_id') || 1)
 
+      let recentKioskOrder:
+  {
+    pgOrderId: string
+    merchantId: string
+    orderNumber: string
+    savedAt: number
+  } | null =
+  null
+
+
+try {
+
+  const savedOrderText =
+    localStorage.getItem(
+      'nxg_last_kiosk_order'
+    )
+
+
+  if (savedOrderText) {
+
+    const savedOrder =
+      JSON.parse(
+        savedOrderText
+      )
+
+
+    const isSameMerchant =
+      String(
+        savedOrder.merchantId
+      ) ===
+      String(
+        merchantId
+      )
+
+
+    const isRecentOrder =
+      Date.now() -
+        Number(
+          savedOrder.savedAt || 0
+        ) <=
+      2 * 60 * 60 * 1000
+
+
+    if (
+      isSameMerchant &&
+      isRecentOrder &&
+      savedOrder.pgOrderId
+    ) {
+
+      recentKioskOrder =
+        savedOrder
+
+    } else if (
+      !isRecentOrder
+    ) {
+
+      localStorage.removeItem(
+        'nxg_last_kiosk_order'
+      )
+    }
+  }
+
+} catch {
+
+  localStorage.removeItem(
+    'nxg_last_kiosk_order'
+  )
+}
+
       const kioskSuccessRecoveryUrl =
   sessionStorage.getItem(
     'kiosk_success_recovery_url'
@@ -39047,7 +39172,55 @@ if (isBeautyKiosk) {
               <div class="cart-badge">
                 PICK <span id="cart-count">0</span>
               </div>
-            </div>          
+            </div>  
+            
+            ${
+              recentKioskOrder
+                ? `
+                  <div
+                    style="
+                      margin:12px 16px 18px;
+                      padding:14px;
+                      background:#fff7ed;
+                      border:1px solid #fed7aa;
+                      border-radius:12px;
+                      text-align:center;
+                    "
+                  >
+                    <button
+                      id="kiosk-last-order-button"
+                      type="button"
+                      style="
+                        width:100%;
+                        padding:15px 12px;
+                        border:0;
+                        border-radius:10px;
+                        background:#111827;
+                        color:#ffffff;
+                        font-size:17px;
+                        font-weight:800;
+                        cursor:pointer;
+                      "
+                    >
+                      방금 주문번호 다시보기
+                    </button>
+            
+                    <p
+                      style="
+                        margin:10px 0 0;
+                        font-size:13px;
+                        line-height:1.5;
+                        color:#9a3412;
+                        font-weight:700;
+                      "
+                    >
+                      이미 결제한 고객은 다시 결제하지 마시고<br>
+                      위 버튼을 눌러 주문번호를 확인해주세요.
+                    </p>
+                  </div>
+                `
+                : ''
+            }
 
             ${
               isBeautyKiosk
@@ -40457,6 +40630,113 @@ const item = cart.find(
             renderCart()
           }
         )
+
+        const lastOrderButton =
+  document.querySelector<HTMLButtonElement>(
+    '#kiosk-last-order-button'
+  )
+
+
+lastOrderButton
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      if (
+        !recentKioskOrder
+      ) {
+        return
+      }
+
+
+      const {
+        data: savedOrder,
+        error: savedOrderError
+      } =
+        await supabase
+          .from('orders')
+          .select(
+            `
+              pg_order_id,
+              order_no,
+              call_number,
+              total_amount,
+              merchant_id,
+              order_status,
+              payment_status
+            `
+          )
+          .eq(
+            'pg_order_id',
+            recentKioskOrder.pgOrderId
+          )
+          .eq(
+            'merchant_id',
+            merchantId
+          )
+          .maybeSingle()
+
+
+      if (
+        savedOrderError ||
+        !savedOrder
+      ) {
+
+        alert(
+          '최근 주문정보를 찾을 수 없습니다.'
+        )
+
+        localStorage.removeItem(
+          'nxg_last_kiosk_order'
+        )
+
+        return
+      }
+
+
+      sessionStorage.setItem(
+        'kiosk_call_number',
+        String(
+          savedOrder.call_number ||
+          savedOrder.order_no ||
+          recentKioskOrder.orderNumber
+        )
+      )
+
+
+      sessionStorage.setItem(
+        'merchantId',
+        String(
+          merchantId
+        )
+      )
+
+
+      window.location.href =
+        '/success' +
+        '?source=kiosk' +
+        '&pg=토스페이먼츠' +
+        '&merchantId=' +
+        encodeURIComponent(
+          String(
+            merchantId
+          )
+        ) +
+        '&orderId=' +
+        encodeURIComponent(
+          String(
+            savedOrder.pg_order_id
+          )
+        ) +
+        '&paymentKey=RECOVERY' +
+        '&amount=' +
+        encodeURIComponent(
+          String(
+            savedOrder.total_amount
+          )
+        )
+    }
+  )
 
         let selectedBeautyStaffId =
   isBeautyKiosk && beautyKioskStaff.length > 0
