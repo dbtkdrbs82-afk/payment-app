@@ -4560,13 +4560,35 @@ alertEnableButton
             'vibrate' in navigator
           ) {
           
-            navigator.vibrate([
-              400,
-              200,
-              400,
-              200,
-              700
-            ])
+            const vibrationPattern:
+              number[] = []
+          
+          
+            for (
+              let i = 0;
+              i < 20;
+              i++
+            ) {
+          
+              vibrationPattern.push(
+                300
+              )
+          
+          
+              if (
+                i < 19
+              ) {
+          
+                vibrationPattern.push(
+                  150
+                )
+              }
+            }
+          
+          
+            navigator.vibrate(
+              vibrationPattern
+            )
           }
           
           
