@@ -4223,7 +4223,40 @@ const successGuideHtml =
         고객 호출 시까지<br>
         잠시만 기다려주세요.
       </p>
+
+      <button
+  id="customer-alert-enable"
+  type="button"
+  style="
+    margin-top:12px;
+    padding:10px 18px;
+    border:0;
+    border-radius:10px;
+    background:#f3f4f6;
+    color:#1f2937;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+  "
+>
+  🔔 호출 알림 켜기
+</button>
+
+<p
+  style="
+    margin-top:8px;
+    font-size:13px;
+    line-height:1.5;
+    color:#6b7280;
+    font-weight:600;
+  "
+>
+  호출 알림을 받으려면<br>
+  이 화면을 닫지 말고 유지해주세요.
+</p>
     `
+
+    
 
   app.innerHTML = `
     <div class="page ${isHotelSuccess ? 'hotel-success-page' : ''}">
@@ -4447,6 +4480,51 @@ const successGuideHtml =
       number | null =
       null
   
+      let customerAlertAudioContext:
+  AudioContext | null =
+  null
+
+
+const alertEnableButton =
+  document.querySelector<HTMLButtonElement>(
+    '#customer-alert-enable'
+  )
+
+
+alertEnableButton
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      const AudioContextClass =
+        window.AudioContext ||
+        (
+          window as any
+        ).webkitAudioContext
+
+
+      customerAlertAudioContext =
+        new AudioContextClass()
+
+
+      await customerAlertAudioContext
+        .resume()
+
+
+      if (
+        'vibrate' in navigator
+      ) {
+        navigator.vibrate(100)
+      }
+
+
+      alertEnableButton.textContent =
+        '✓ 호출 알림 켜짐'
+
+      alertEnableButton.disabled =
+        true
+    }
+  )
   
     const checkCustomerCallStatus =
       async () => {
@@ -4477,6 +4555,100 @@ const successGuideHtml =
           customerOrder.order_status ===
           '완료'
         ) {
+
+          if (
+            'vibrate' in navigator
+          ) {
+          
+            navigator.vibrate([
+              400,
+              200,
+              400,
+              200,
+              700
+            ])
+          }
+          
+          
+          if (
+            customerAlertAudioContext
+          ) {
+          
+            const playBeep =
+              (
+                frequency: number,
+                delay: number
+              ) => {
+          
+                window.setTimeout(
+                  () => {
+          
+                    if (
+                      !customerAlertAudioContext
+                    ) {
+                      return
+                    }
+          
+          
+                    const oscillator =
+                      customerAlertAudioContext
+                        .createOscillator()
+          
+                    const gain =
+                      customerAlertAudioContext
+                        .createGain()
+          
+          
+                    oscillator.frequency.value =
+                      frequency
+          
+                    oscillator.type =
+                      'sine'
+          
+          
+                    gain.gain.value =
+                      0.25
+          
+          
+                    oscillator.connect(
+                      gain
+                    )
+          
+                    gain.connect(
+                      customerAlertAudioContext
+                        .destination
+                    )
+          
+          
+                    oscillator.start()
+          
+                    oscillator.stop(
+                      customerAlertAudioContext
+                        .currentTime +
+                      0.35
+                    )
+          
+                  },
+                  delay
+                )
+              }
+          
+          
+            playBeep(
+              880,
+              0
+            )
+          
+            playBeep(
+              1040,
+              450
+            )
+          
+            playBeep(
+              1320,
+              900
+            )
+          }
   
           const waitMessage =
             document.querySelector<HTMLElement>(
