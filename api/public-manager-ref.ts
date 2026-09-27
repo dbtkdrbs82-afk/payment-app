@@ -17,7 +17,10 @@ import type {
     req: VercelRequest,
     res: VercelResponse
   ) {
-    res.setHeader('Cache-Control', 'no-store')
+    res.setHeader(
+      'Cache-Control',
+      'no-store'
+    )
   
     if (req.method !== 'GET') {
       return res.status(405).json({
@@ -38,7 +41,7 @@ import type {
   
     const refCode =
       String(req.query.ref || '')
-        .replace(/-/g, '')
+        .replace(/\D/g, '')
         .trim()
   
     if (!refCode) {
@@ -53,7 +56,7 @@ import type {
     if (!/^[0-9]+$/.test(refCode)) {
       return res.status(400).json({
         success: false,
-        message: '담당자 코드가 올바르지 않습니다.',
+        message: '추천코드가 올바르지 않습니다.',
       })
     }
   
@@ -70,20 +73,27 @@ import type {
       )
   
       const {
-        data: managerData,
-        error: managerError,
+        data: userData,
+        error: userError,
       } = await supabase
         .from('admin_users')
         .select(
-          'id, admin_name, phone, parent_admin_id'
+          'id, admin_name, login_id, phone, role, status, parent_admin_id'
         )
-        .eq('role', 'MANAGER')
         .eq('status', '사용중')
+        .in(
+          'role',
+          [
+            'BRANCH',
+            'AGENCY',
+            'MANAGER',
+          ]
+        )
   
-      if (managerError) {
+      if (userError) {
         console.error(
-          '담당자 조회 오류:',
-          managerError.message
+          '추천 조직 조회 오류:',
+          userError.message
         )
   
         return res.status(500).json({
@@ -93,15 +103,45 @@ import type {
         })
       }
   
-      const matchedManager =
-        (managerData || []).find(
+      const matchedUsers =
+        (userData || []).filter(
           (user) =>
             String(user.phone || '')
-              .replace(/-/g, '')
+              .replace(/\D/g, '')
               .endsWith(refCode)
         )
   
-      if (!matchedManager) {
+      /*
+        같은 전화번호가 여러 조직에 등록된 경우
+  
+        1. 담당자
+        2. 지사
+        3. 대리점
+  
+        순서로 찾습니다.
+  
+        현재 99382962는
+        MANAGER 계정이 없고
+        BRANCH 계정이 있으므로
+        지사로 연결됩니다.
+      */
+  
+      const matchedUser =
+        matchedUsers.find(
+          (user) =>
+            user.role === 'MANAGER'
+        ) ||
+        matchedUsers.find(
+          (user) =>
+            user.role === 'BRANCH'
+        ) ||
+        matchedUsers.find(
+          (user) =>
+            user.role === 'AGENCY'
+        ) ||
+        null
+  
+      if (!matchedUser) {
         return res.status(200).json({
           success: true,
           manager: null,
@@ -110,75 +150,160 @@ import type {
         })
       }
   
+      let matchedManager: any = null
       let matchedAgency: any = null
       let matchedBranch: any = null
   
-      if (matchedManager.parent_admin_id) {
-        const {
-          data: agencyData,
-          error: agencyError,
-        } = await supabase
-          .from('admin_users')
-          .select(
-            'id, admin_name, role, parent_admin_id'
-          )
-          .eq(
-            'id',
-            matchedManager.parent_admin_id
-          )
-          .maybeSingle()
+      /*
+        담당자 링크
+      */
   
-        if (agencyError) {
-          console.error(
-            '대리점 조회 오류:',
-            agencyError.message
-          )
-        } else {
-          matchedAgency = agencyData || null
+      if (matchedUser.role === 'MANAGER') {
+        matchedManager = matchedUser
+  
+        if (matchedUser.parent_admin_id) {
+          const {
+            data: parentData,
+            error: parentError,
+          } = await supabase
+            .from('admin_users')
+            .select(
+              'id, admin_name, login_id, phone, role, status, parent_admin_id'
+            )
+            .eq(
+              'id',
+              Number(
+                matchedUser.parent_admin_id
+              )
+            )
+            .eq('status', '사용중')
+            .maybeSingle()
+  
+          if (parentError) {
+            console.error(
+              '담당자 상위조직 조회 오류:',
+              parentError.message
+            )
+          }
+  
+          if (
+            parentData?.role === 'AGENCY'
+          ) {
+            matchedAgency = parentData
+  
+            if (
+              parentData.parent_admin_id
+            ) {
+              const {
+                data: branchData,
+                error: branchError,
+              } = await supabase
+                .from('admin_users')
+                .select(
+                  'id, admin_name, login_id, phone, role, status, parent_admin_id'
+                )
+                .eq(
+                  'id',
+                  Number(
+                    parentData.parent_admin_id
+                  )
+                )
+                .eq('status', '사용중')
+                .maybeSingle()
+  
+              if (branchError) {
+                console.error(
+                  '지사 조회 오류:',
+                  branchError.message
+                )
+              }
+  
+              if (
+                branchData?.role ===
+                'BRANCH'
+              ) {
+                matchedBranch =
+                  branchData
+              }
+            }
+          }
+  
+          if (
+            parentData?.role === 'BRANCH'
+          ) {
+            matchedBranch = parentData
+          }
         }
       }
   
-      if (matchedAgency?.parent_admin_id) {
-        const {
-          data: branchData,
-          error: branchError,
-        } = await supabase
-          .from('admin_users')
-          .select(
-            'id, admin_name, role'
-          )
-          .eq(
-            'id',
-            matchedAgency.parent_admin_id
-          )
-          .maybeSingle()
+      /*
+        대리점 링크
+      */
   
-        if (branchError) {
-          console.error(
-            '지사 조회 오류:',
-            branchError.message
-          )
-        } else {
-          matchedBranch = branchData || null
+      if (matchedUser.role === 'AGENCY') {
+        matchedAgency = matchedUser
+  
+        if (matchedUser.parent_admin_id) {
+          const {
+            data: branchData,
+            error: branchError,
+          } = await supabase
+            .from('admin_users')
+            .select(
+              'id, admin_name, login_id, phone, role, status, parent_admin_id'
+            )
+            .eq(
+              'id',
+              Number(
+                matchedUser.parent_admin_id
+              )
+            )
+            .eq('status', '사용중')
+            .maybeSingle()
+  
+          if (branchError) {
+            console.error(
+              '대리점 상위 지사 조회 오류:',
+              branchError.message
+            )
+          }
+  
+          if (
+            branchData?.role === 'BRANCH'
+          ) {
+            matchedBranch = branchData
+          }
         }
+      }
+  
+      /*
+        지사 링크
+      */
+  
+      if (matchedUser.role === 'BRANCH') {
+        matchedBranch = matchedUser
       }
   
       return res.status(200).json({
         success: true,
   
-        manager: {
-          id: matchedManager.id,
-          admin_name:
-            matchedManager.admin_name || '',
-          phone:
-            matchedManager.phone || '',
-        },
+        manager: matchedManager
+          ? {
+              id: matchedManager.id,
+              admin_name:
+                matchedManager.admin_name ||
+                '',
+              phone:
+                matchedManager.phone || '',
+            }
+          : null,
   
         agency: matchedAgency
           ? {
               id: matchedAgency.id,
               admin_name:
-                matchedAgency.admin_name || '',
+                matchedAgency.admin_name ||
+                '',
             }
           : null,
   
@@ -186,13 +311,14 @@ import type {
           ? {
               id: matchedBranch.id,
               admin_name:
-                matchedBranch.admin_name || '',
+                matchedBranch.admin_name ||
+                '',
             }
           : null,
       })
     } catch (error) {
       console.error(
-        '담당자 추천코드 API 오류:',
+        '추천코드 API 오류:',
         error
       )
   
