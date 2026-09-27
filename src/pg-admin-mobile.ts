@@ -116,37 +116,65 @@ export async function renderPgAdminMobile(
       )
   
   
-    const {
-      data: allAdminUsers,
-      error: adminUsersError
-    } =
-      await supabase
-        .from(
-          'admin_users'
+      let adminUsers: any[] = []
+
+
+      try {
+      
+        const response =
+          await fetch(
+            '/api/admin-user-list',
+            {
+              method:
+                'GET',
+      
+              credentials:
+                'include',
+      
+              cache:
+                'no-store'
+            }
+          )
+      
+      
+        const result =
+          await response.json()
+      
+      
+        if (
+          !response.ok ||
+          !result?.success
+        ) {
+      
+          throw new Error(
+            result?.message ||
+            '조직정보를 불러오지 못했습니다.'
+          )
+      
+        }
+      
+      
+        adminUsers =
+          result.users || []
+      
+      
+      } catch (error) {
+      
+        console.error(
+          '모바일 관리자 조직정보 조회 오류:',
+          error
         )
-        .select('*')
-        .order(
-          'id',
-          {
-            ascending:
-              true
-          }
+      
+      
+        alert(
+          error instanceof Error
+            ? error.message
+            : '조직정보를 불러오지 못했습니다.'
         )
-  
-  
-    if (adminUsersError) {
-  
-      alert(
-        '조직정보를 불러오지 못했습니다.\n' +
-        adminUsersError.message
-      )
-  
-      return
-    }
-  
-  
-    const adminUsers =
-      allAdminUsers || []
+      
+      
+        return
+      }
   
   
     const currentAdmin =
