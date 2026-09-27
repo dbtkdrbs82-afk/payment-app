@@ -8881,13 +8881,38 @@ if (adminRole === 'AGENCY' && currentAdminUser) {
 
 const adminUserId = Number(target.dataset.id)
 
-const { data: adminUser, error } = await supabase
-  .from('admin_users')
-  .select('*')
-  .eq('id', adminUserId)
-  .single()
+let adminUser: any = null
 
-if (error || !adminUser) {
+try {
+  const adminUserResponse = await fetch(
+    '/api/admin-user-detail?id=' + adminUserId,
+    {
+      method: 'GET',
+      credentials: 'include',
+    }
+  )
+
+  const adminUserResult =
+    await adminUserResponse.json()
+
+  if (
+    !adminUserResponse.ok ||
+    !adminUserResult?.success ||
+    !adminUserResult?.adminUser
+  ) {
+    throw new Error(
+      adminUserResult?.message ||
+        '담당자 정보를 불러오지 못했습니다.'
+    )
+  }
+
+  adminUser = adminUserResult.adminUser
+} catch (error) {
+  console.error(
+    '담당자 정보 조회 오류:',
+    error
+  )
+
   alert('담당자 정보를 불러오지 못했습니다.')
   return
 }
@@ -9012,197 +9037,214 @@ if (editParentSelect) {
     document.querySelector<HTMLElement>('[data-sub="admin-users"]')?.click()
   })
 
-document.querySelector('#safe-update-admin-user')
+  document.querySelector('#safe-update-admin-user')
   ?.addEventListener('click', async () => {
+
     const newRole =
-      (document.querySelector<HTMLSelectElement>('#edit-admin-role')?.value || adminUser.role).trim()
+      (
+        document.querySelector<HTMLSelectElement>(
+          '#edit-admin-role'
+        )?.value || adminUser.role
+      ).trim()
 
     const newName =
-      (document.querySelector<HTMLInputElement>('#edit-admin-name')?.value || '').trim()
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-name'
+        )?.value || ''
+      ).trim()
 
     const newPassword =
-      (document.querySelector<HTMLInputElement>('#edit-admin-password')?.value || '').trim()
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-password'
+        )?.value || ''
+      ).trim()
 
-      const newPhone =
-  (document.querySelector<HTMLInputElement>('#edit-admin-phone')?.value || '').trim()
-      
-  const newEmail =
-  (document.querySelector<HTMLInputElement>('#edit-admin-email')?.value || '').trim()
+    const newPhone =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-phone'
+        )?.value || ''
+      ).trim()
 
-const newResidentNumber =
-  (document.querySelector<HTMLInputElement>('#edit-admin-resident-number')?.value || '').trim()
+    const newEmail =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-email'
+        )?.value || ''
+      ).trim()
 
-const newCompanyName =
-  (document.querySelector<HTMLInputElement>('#edit-admin-company-name')?.value || '').trim()
+    const newResidentNumber =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-resident-number'
+        )?.value || ''
+      ).trim()
 
-const newBusinessNumber =
-  (document.querySelector<HTMLInputElement>('#edit-admin-business-number')?.value || '').trim()
+    const newCompanyName =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-company-name'
+        )?.value || ''
+      ).trim()
 
+    const newBusinessNumber =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-business-number'
+        )?.value || ''
+      ).trim()
 
+    const newBankName =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-bank-name'
+        )?.value || ''
+      ).trim()
 
-const newBankName =
-  (document.querySelector<HTMLInputElement>('#edit-admin-bank-name')?.value || '').trim()
+    const newAccountNumber =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-account-number'
+        )?.value || ''
+      ).trim()
 
-const newAccountNumber =
-  (document.querySelector<HTMLInputElement>('#edit-admin-account-number')?.value || '').trim()
+    const newAccountHolder =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#edit-admin-account-holder'
+        )?.value || ''
+      ).trim()
 
-const newAccountHolder =
-  (document.querySelector<HTMLInputElement>('#edit-admin-account-holder')?.value || '').trim()
-
-const newMemo =
-  (document.querySelector<HTMLTextAreaElement>('#edit-admin-memo')?.value || '').trim()
+    const newMemo =
+      (
+        document.querySelector<HTMLTextAreaElement>(
+          '#edit-admin-memo'
+        )?.value || ''
+      ).trim()
 
     const newStatus =
-      (document.querySelector<HTMLSelectElement>('#edit-admin-status')?.value || adminUser.status).trim()
+      (
+        document.querySelector<HTMLSelectElement>(
+          '#edit-admin-status'
+        )?.value || adminUser.status
+      ).trim()
 
-      const newParentAdminId =
-  Number(
-    document.querySelector<HTMLSelectElement>('#edit-parent-admin-id')
-      ?.value || 0
-  )
+    const newParentAdminId =
+      Number(
+        document.querySelector<HTMLSelectElement>(
+          '#edit-parent-admin-id'
+        )?.value || 0
+      )
+
     if (!newName) {
       alert('이름을 입력해주세요.')
       return
     }
 
-    const isRootMaster = adminUser.login_id === 'NXGMASTER16'
+    try {
+      const response = await fetch(
+        '/api/admin-user-update',
+        {
+          method: 'POST',
 
-    let newLoginId = adminUser.login_id
+          headers: {
+            'Content-Type': 'application/json',
+          },
 
-    if (!isRootMaster && adminUser.role !== newRole) {
-      const prefix =
-        newRole === 'BRANCH'
-          ? 'S'
-          : newRole === 'AGENCY'
-            ? 'A'
-            : newRole === 'MANAGER'
-              ? 'B'
-              : 'NXGMASTER'
+          credentials: 'include',
 
-      if (newRole !== 'MASTER') {
-        const { data: lastUsers, error: lastError } = await supabase
-          .from('admin_users')
-          .select('login_id')
-          .like('login_id', prefix + '%')
-          .order('id', { ascending: false })
-          .limit(1)
+          body: JSON.stringify({
+            id: adminUser.id,
 
-        if (lastError) {
-          alert('아이디 생성 실패: ' + lastError.message)
-          return
+            admin_name: newName,
+            password: newPassword,
+            phone: newPhone,
+            email: newEmail,
+            resident_number: newResidentNumber,
+            company_name: newCompanyName,
+            business_number: newBusinessNumber,
+
+            commission_rate_1day:
+              Number(
+                document.querySelector<HTMLInputElement>(
+                  '#edit-admin-commission-rate-1day'
+                )?.value || 0
+              ),
+
+            commission_rate_3day:
+              Number(
+                document.querySelector<HTMLInputElement>(
+                  '#edit-admin-commission-rate-3day'
+                )?.value || 0
+              ),
+
+            commission_rate_4day:
+              Number(
+                document.querySelector<HTMLInputElement>(
+                  '#edit-admin-commission-rate-4day'
+                )?.value || 0
+              ),
+
+            commission_rate_7day:
+              Number(
+                document.querySelector<HTMLInputElement>(
+                  '#edit-admin-commission-rate-7day'
+                )?.value || 0
+              ),
+
+            bank_name: newBankName,
+            account_number: newAccountNumber,
+            account_holder: newAccountHolder,
+            memo: newMemo,
+
+            role: newRole,
+            status: newStatus,
+            parent_admin_id: newParentAdminId,
+          }),
         }
+      )
 
-        let nextNumber = 1
+      const result = await response.json()
 
-        if (lastUsers && lastUsers.length > 0) {
-          const lastLoginId = lastUsers[0].login_id || ''
-          const numberPart = Number(lastLoginId.replace(prefix, ''))
+      if (
+        !response.ok ||
+        !result?.success
+      ) {
+        alert(
+          '수정 실패: ' +
+            (
+              result?.message ||
+              '담당자 수정에 실패했습니다.'
+            )
+        )
 
-          if (!isNaN(numberPart)) {
-            nextNumber = numberPart + 1
-          }
-        }
-
-        newLoginId = prefix + String(nextNumber).padStart(4, '0')
+        return
       }
+
+      alert('수정되었습니다.')
+
+      document
+        .querySelector('[data-sub="admin-users"]')
+        ?.dispatchEvent(
+          new MouseEvent('click', {
+            bubbles: true,
+          })
+        )
+    } catch (error) {
+      console.error(
+        '담당자 수정 오류:',
+        error
+      )
+
+      alert(
+        '수정 실패: 서버에 연결하지 못했습니다.'
+      )
     }
-
-    const updateData = isRootMaster
-  ? {
-      admin_name: newName,
-      password: newPassword,
-      phone: newPhone,
-      email: newEmail,
-      resident_number: newResidentNumber,
-      company_name: newCompanyName,
-      business_number: newBusinessNumber,
-
-      commission_rate_1day: Number(
-        document.querySelector<HTMLInputElement>(
-          '#edit-admin-commission-rate-1day'
-        )?.value || 0
-      ),
-
-      commission_rate_3day: Number(
-        document.querySelector<HTMLInputElement>(
-          '#edit-admin-commission-rate-3day'
-        )?.value || 0
-      ),
-
-      commission_rate_4day: Number(
-        document.querySelector<HTMLInputElement>(
-          '#edit-admin-commission-rate-4day'
-        )?.value || 0
-      ),
-
-      commission_rate_7day: Number(
-        document.querySelector<HTMLInputElement>(
-          '#edit-admin-commission-rate-7day'
-        )?.value || 0
-      ),
-
-      bank_name: newBankName,
-      account_number: newAccountNumber,
-      account_holder: newAccountHolder,
-      memo: newMemo
-    }
-  : {
-      admin_name: newName,
-      password: newPassword,
-      phone: newPhone,
-      email: newEmail,
-      resident_number: newResidentNumber,
-      company_name: newCompanyName,
-      business_number: newBusinessNumber,
-
-      commission_rate_1day: Number(
-        document.querySelector<HTMLInputElement>(
-          '#edit-admin-commission-rate-1day'
-        )?.value || 0
-      ),
-
-      commission_rate_3day: Number(
-        document.querySelector<HTMLInputElement>(
-          '#edit-admin-commission-rate-3day'
-        )?.value || 0
-      ),
-
-      commission_rate_4day: Number(
-        document.querySelector<HTMLInputElement>(
-          '#edit-admin-commission-rate-4day'
-        )?.value || 0
-      ),
-
-      commission_rate_7day: Number(
-        document.querySelector<HTMLInputElement>(
-          '#edit-admin-commission-rate-7day'
-        )?.value || 0
-      ),
-
-      bank_name: newBankName,
-      account_number: newAccountNumber,
-      account_holder: newAccountHolder,
-      memo: newMemo,
-      role: newRole,
-      status: newStatus,
-      login_id: newLoginId,
-      parent_admin_id: newParentAdminId
-    }
-
-    const { error } = await supabase
-      .from('admin_users')
-      .update(updateData)
-      .eq('id', adminUser.id)
-
-    if (error) {
-      alert('수정 실패: ' + error.message)
-      return
-    }
-
-    alert('수정되었습니다.')
-
-    document.querySelector<HTMLElement>('[data-sub="admin-users"]')?.click()
   })
+
+    
       })
     }
     
@@ -9322,123 +9364,174 @@ if (parentSelect) {
   })
   
 
-document.querySelector('#safe-save-admin-user')
+  document.querySelector('#safe-save-admin-user')
   ?.addEventListener('click', async () => {
+
     const role =
-      (document.querySelector<HTMLSelectElement>('#safe-admin-role')?.value || 'MANAGER').trim()
+      (
+        document.querySelector<HTMLSelectElement>(
+          '#safe-admin-role'
+        )?.value || 'MANAGER'
+      ).trim()
 
     const adminName =
-      (document.querySelector<HTMLInputElement>('#safe-admin-name')?.value || '').trim()
+      (
+        document.querySelector<HTMLInputElement>(
+          '#safe-admin-name'
+        )?.value || ''
+      ).trim()
 
     const password =
-      (document.querySelector<HTMLInputElement>('#safe-admin-password')?.value || '1234').trim()
+      (
+        document.querySelector<HTMLInputElement>(
+          '#safe-admin-password'
+        )?.value || '1234'
+      ).trim()
 
-      const residentNumber =
-      (document.querySelector<HTMLInputElement>('#admin-resident-number')?.value || '').trim()
-    
+    const residentNumber =
+      (
+        document.querySelector<HTMLInputElement>(
+          '#admin-resident-number'
+        )?.value || ''
+      ).trim()
+
     const companyName =
-      (document.querySelector<HTMLInputElement>('#admin-company-name')?.value || '').trim()
-    
+      (
+        document.querySelector<HTMLInputElement>(
+          '#admin-company-name'
+        )?.value || ''
+      ).trim()
+
     const businessNumber =
-      (document.querySelector<HTMLInputElement>('#admin-business-number')?.value || '').trim()
-    
+      (
+        document.querySelector<HTMLInputElement>(
+          '#admin-business-number'
+        )?.value || ''
+      ).trim()
+
     const commissionRate =
       Number(
-        document.querySelector<HTMLInputElement>('#admin-commission-rate')
-          ?.value || 0
+        document.querySelector<HTMLInputElement>(
+          '#admin-commission-rate'
+        )?.value || 0
       )
-    
+
     const bankName =
-      (document.querySelector<HTMLInputElement>('#admin-bank-name')?.value || '').trim()
-    
+      (
+        document.querySelector<HTMLInputElement>(
+          '#admin-bank-name'
+        )?.value || ''
+      ).trim()
+
     const accountNumber =
-      (document.querySelector<HTMLInputElement>('#admin-account-number')?.value || '').trim()
-    
+      (
+        document.querySelector<HTMLInputElement>(
+          '#admin-account-number'
+        )?.value || ''
+      ).trim()
+
     const accountHolder =
-      (document.querySelector<HTMLInputElement>('#admin-account-holder')?.value || '').trim()
-    
+      (
+        document.querySelector<HTMLInputElement>(
+          '#admin-account-holder'
+        )?.value || ''
+      ).trim()
+
     const memo =
-      (document.querySelector<HTMLTextAreaElement>('#admin-memo')?.value || '').trim()
+      (
+        document.querySelector<HTMLTextAreaElement>(
+          '#admin-memo'
+        )?.value || ''
+      ).trim()
 
     const parentAdminId =
       Number(
-        document.querySelector<HTMLSelectElement>('#safe-parent-admin-id')
-          ?.value || 0
+        document.querySelector<HTMLSelectElement>(
+          '#safe-parent-admin-id'
+        )?.value || 0
       )
+
     if (!adminName) {
       alert('이름을 입력해주세요.')
       return
     }
+
     if (!parentAdminId) {
       alert('상위조직을 선택해주세요.')
       return
     }
 
-    const prefix =
-      role === 'BRANCH'
-        ? 'S'
-        : role === 'AGENCY'
-          ? 'A'
-          : 'B'
+    try {
+      const response = await fetch(
+        '/api/admin-user-create',
+        {
+          method: 'POST',
 
-    const { data: lastUsers, error: lastError } = await supabase
-      .from('admin_users')
-      .select('login_id')
-      .like('login_id', prefix + '%')
-      .order('id', { ascending: false })
-      .limit(1)
+          headers: {
+            'Content-Type': 'application/json',
+          },
 
-    if (lastError) {
-      alert('아이디 생성 실패: ' + lastError.message)
-      return
-    }
+          credentials: 'include',
 
-    let nextNumber = 1
+          body: JSON.stringify({
+            role,
+            admin_name: adminName,
+            password,
+            parent_admin_id: parentAdminId,
 
-    if (lastUsers && lastUsers.length > 0) {
-      const lastLoginId = lastUsers[0].login_id || ''
-      const numberPart = Number(lastLoginId.replace(prefix, ''))
+            resident_number: residentNumber,
+            company_name: companyName,
+            business_number: businessNumber,
+            commission_rate: commissionRate,
+            bank_name: bankName,
+            account_number: accountNumber,
+            account_holder: accountHolder,
+            memo,
+          }),
+        }
+      )
 
-      if (!isNaN(numberPart)) {
-        nextNumber = numberPart + 1
+      const result = await response.json()
+
+      if (
+        !response.ok ||
+        !result?.success
+      ) {
+        alert(
+          '담당자 저장 실패: ' +
+            (
+              result?.message ||
+              '담당자 저장에 실패했습니다.'
+            )
+        )
+
+        return
       }
+
+      alert(
+        '등록되었습니다.\n\n' +
+        '아이디: ' +
+        result.login_id +
+        '\n' +
+        '비밀번호: ' +
+        password
+      )
+
+      document
+        .querySelector('[data-sub="admin-users"]')
+        ?.dispatchEvent(
+          new Event('click')
+        )
+    } catch (error) {
+      console.error(
+        '담당자 등록 오류:',
+        error
+      )
+
+      alert(
+        '담당자 저장 실패: 서버에 연결하지 못했습니다.'
+      )
     }
-
-    const loginId = prefix + String(nextNumber).padStart(4, '0')
-
-    const { error } = await supabase
-      .from('admin_users')
-      .insert({
-        admin_name: adminName,
-        login_id: loginId,
-        password: password,
-        role: role,
-        status: '사용중',
-        parent_admin_id: parentAdminId,
-      
-        resident_number: residentNumber,
-        company_name: companyName,
-        business_number: businessNumber,
-        commission_rate: commissionRate,
-        bank_name: bankName,
-        account_number: accountNumber,
-        account_holder: accountHolder,
-        memo: memo
-      })
-
-    if (error) {
-      alert('담당자 저장 실패: ' + error.message)
-      return
-    }
-
-    alert(
-      '등록되었습니다.\n\n' +
-      '아이디: ' + loginId + '\n' +
-      '비밀번호: ' + password
-    )
-
-    document.querySelector('[data-sub="admin-users"]')
-      ?.dispatchEvent(new Event('click'))
   })
   })
 })
@@ -10601,11 +10694,41 @@ const agencySelect =
 const managerSelect =
   document.querySelector<HTMLSelectElement>('#manager_admin_id')
 
-const { data: organizationUsers, error: organizationUsersError } =
-  await supabase
-    .from('admin_users')
-    .select('id, admin_name, login_id, role, status, parent_admin_id, phone')
-    .eq('status', '사용중')
+  let organizationUsers: any[] = []
+  let organizationUsersError: Error | null = null
+  
+  try {
+    const organizationResponse = await fetch(
+      '/api/admin-organization-users',
+      {
+        method: 'GET',
+        credentials: 'include',
+      }
+    )
+  
+    const organizationResult =
+      await organizationResponse.json()
+  
+    if (
+      !organizationResponse.ok ||
+      !organizationResult?.success
+    ) {
+      throw new Error(
+        organizationResult?.message ||
+          '조직정보를 불러오지 못했습니다.'
+      )
+    }
+  
+    organizationUsers =
+      organizationResult.users || []
+  } catch (error) {
+    organizationUsersError =
+      error instanceof Error
+        ? error
+        : new Error(
+            '조직정보를 불러오지 못했습니다.'
+          )
+  }
 
 if (organizationUsersError) {
   console.error('조직정보 조회 실패:', organizationUsersError)
