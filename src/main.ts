@@ -18942,20 +18942,19 @@ if (savedPaymentFilters) {
   if (keywordInput) keywordInput.value = savedPaymentFilters.keyword || ''
 }
 
-const result = await supabase
-  .from('payments')
-  .select('*')
-  .order('created_at', { ascending: false })
+const [
+  paymentResult,
+  merchantOrgResult,
+  adminUsersRequest
+] = await Promise.all([
+  supabase
+    .from('payments')
+    .select('*')
+    .order('created_at', {
+      ascending: false
+    }),
 
-if (result.error) {
-  alert('결제내역 조회 실패: ' + result.error.message)
-  return
-}
-
-let payments = result.data || []
-
-const { data: paymentOrgMerchants, error: paymentOrgMerchantError } =
-  await supabase
+  supabase
     .from('merchants')
     .select(`
       id,
@@ -18964,54 +18963,68 @@ const { data: paymentOrgMerchants, error: paymentOrgMerchantError } =
       branch_admin_id,
       agency_admin_id,
       manager_admin_id
-    `)
+    `),
 
-if (paymentOrgMerchantError) {
-  alert(
-    '가맹점 조직정보 조회 실패: ' +
-    paymentOrgMerchantError.message
-  )
-  return
-}
-
-let paymentOrgAdmins: any[] = []
-
-try {
-  const response = await fetch(
+  fetch(
     '/api/admin-user-list',
     {
       method: 'GET',
       credentials: 'include',
       cache: 'no-store'
     }
-  )
+  ).then(async (response) => {
+    return {
+      response,
+      result:
+        await response.json()
+    }
+  })
+])
 
-  const result = await response.json()
 
-  if (
-    !response.ok ||
-    !result?.success
-  ) {
-    throw new Error(
-      result?.message ||
-      '조직정보를 불러오지 못했습니다.'
-    )
-  }
-
-  paymentOrgAdmins =
-    result.users || []
-} catch (error) {
-  console.error(
-    '결제 조직정보 조회 오류:',
-    error
-  )
-
+if (paymentResult.error) {
   alert(
+    '결제내역 조회 실패: ' +
+    paymentResult.error.message
+  )
+
+  return
+}
+
+
+if (merchantOrgResult.error) {
+  alert(
+    '가맹점 조직정보 조회 실패: ' +
+    merchantOrgResult.error.message
+  )
+
+  return
+}
+
+
+if (
+  !adminUsersRequest.response.ok ||
+  !adminUsersRequest.result?.success
+) {
+  alert(
+    adminUsersRequest.result?.message ||
     '조직정보를 불러오지 못했습니다.'
   )
 
   return
 }
+
+
+let payments =
+  paymentResult.data || []
+
+
+const paymentOrgMerchants =
+  merchantOrgResult.data || []
+
+
+let paymentOrgAdmins: any[] =
+  adminUsersRequest.result.users || []
 
 const paymentMerchantMap =
   new Map<number, any>()
