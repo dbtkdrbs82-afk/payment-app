@@ -30588,77 +30588,124 @@ document
         alert('QR 생성 실패')
         return
       }
-  
+
       qrBox.innerHTML = ''
 qrBox.appendChild(canvas)
-
-
-const merchantQrStoreName =
-  document.createElement('div')
-
-
-merchantQrStoreName.textContent =
-  merchantName || '가맹점'
-
-
-merchantQrStoreName.style.position =
-  'absolute'
-
-merchantQrStoreName.style.left =
-  '50%'
-
-merchantQrStoreName.style.bottom =
-  'calc(100% + 10px)'
-
-merchantQrStoreName.style.width =
-  '240px'
-
-merchantQrStoreName.style.textAlign =
-  'center'
-
-merchantQrStoreName.style.fontWeight =
-  '900'
-
-merchantQrStoreName.style.lineHeight =
-  '1.2'
-
-merchantQrStoreName.style.color =
-  '#111827'
-
-merchantQrStoreName.style.whiteSpace =
-  'nowrap'
-
-merchantQrStoreName.style.zIndex =
-  '20'
-
-merchantQrStoreName.style.background =
-  'rgba(255,255,255,0.95)'
-
-merchantQrStoreName.style.padding =
-  '3px 6px'
-
-merchantQrStoreName.style.borderRadius =
-  '6px'
-
-
-merchantQrStoreName.style.fontSize =
-  merchantName.length >= 14
-    ? '15px'
-    : merchantName.length >= 9
-      ? '17px'
-      : '20px'
-
-
-merchantQrStoreName.style.transform =
-  selectedQrTemplateKey ===
-    'qr-design-07'
-    ? 'translateX(-50%) rotate(18deg)'
-    : 'translateX(-50%)'
-
-
-qrBox.appendChild(
-  merchantQrStoreName
-)
+  
+      const qrPrintMain =
+      document.querySelector<HTMLElement>(
+        '.qr-print-main'
+      )
+    
+    
+    if (qrPrintMain) {
+    
+      const merchantQrStoreName =
+        document.createElement('div')
+    
+    
+      merchantQrStoreName.id =
+        'merchant-qr-store-name'
+    
+    
+      merchantQrStoreName.textContent =
+        merchantName || '가맹점'
+    
+    
+      merchantQrStoreName.style.position =
+        'absolute'
+    
+      merchantQrStoreName.style.zIndex =
+        '30'
+    
+      merchantQrStoreName.style.fontWeight =
+        '900'
+    
+      merchantQrStoreName.style.color =
+        '#111827'
+    
+      merchantQrStoreName.style.textAlign =
+        'center'
+    
+      merchantQrStoreName.style.whiteSpace =
+        'nowrap'
+    
+      merchantQrStoreName.style.lineHeight =
+        '1.2'
+    
+      merchantQrStoreName.style.background =
+        'rgba(255,255,255,0.92)'
+    
+      merchantQrStoreName.style.padding =
+        '3px 8px'
+    
+      merchantQrStoreName.style.borderRadius =
+        '5px'
+    
+      merchantQrStoreName.style.fontSize =
+        merchantName.length >= 14
+          ? '14px'
+          : merchantName.length >= 9
+            ? '16px'
+            : '18px'
+    
+    
+      qrPrintMain.appendChild(
+        merchantQrStoreName
+      )
+    
+    
+      const positionMerchantName =
+        () => {
+    
+          const qrRect =
+            qrBox.getBoundingClientRect()
+    
+          const mainRect =
+            qrPrintMain.getBoundingClientRect()
+    
+    
+          merchantQrStoreName.style.left =
+            (
+              qrRect.left -
+              mainRect.left +
+              qrRect.width / 2
+            ) + 'px'
+    
+    
+          merchantQrStoreName.style.top =
+            (
+              qrRect.top -
+              mainRect.top -
+              8
+            ) + 'px'
+    
+    
+          merchantQrStoreName.style.transform =
+            'translate(-50%, -100%)'
+        }
+    
+    
+      positionMerchantName()
+    
+    
+      window.addEventListener(
+        'resize',
+        positionMerchantName
+      )
+    
+    
+      window.addEventListener(
+        'beforeprint',
+        () => {
+    
+          window.setTimeout(
+            positionMerchantName,
+            50
+          )
+        }
+      )
+    }
     })
 
     document
