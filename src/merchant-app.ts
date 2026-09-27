@@ -262,7 +262,21 @@ window.addEventListener(
     'hotel_staff_role'
   ]
 
-  
+  const clearMerchantServerSession = () => {
+    void fetch(
+      '/api/merchant-logout',
+      {
+        method: 'POST',
+        credentials: 'include',
+        keepalive: true,
+      }
+    ).catch((error) => {
+      console.error(
+        '가맹점 로그아웃 API 오류:',
+        error
+      )
+    })
+  }
 
 /* =========================================
    무선단말기 모바일
@@ -1497,7 +1511,9 @@ async function renderMerchantWirelessTerminal() {
     ?.addEventListener(
       'click',
       () => {
-
+    
+        clearMerchantServerSession()
+    
         merchantLoginKeys.forEach(
           (key) => {
 
@@ -1962,6 +1978,8 @@ if (isManualPayment) {
 
     const hotelAdminLogout = () => {
 
+      clearMerchantServerSession()
+
       merchantLoginKeys.forEach(
         (key) => {
 
@@ -2167,7 +2185,9 @@ if (isManualPayment) {
     ?.addEventListener(
       'click',
       () => {
-
+    
+        clearMerchantServerSession()
+    
         merchantLoginKeys.forEach(
           (key) => {
 
@@ -2485,94 +2505,59 @@ if (isManualPayment) {
             }
 
 
-            const {
-              data: passwordMerchant,
-              error: passwordCheckError
-            } =
-              await supabase
-                .from(
-                  'merchants'
-                )
-                .select(
-                  'merchant_password'
-                )
-                .eq(
-                  'id',
-                  merchantId
-                )
-                .single()
+            const passwordResponse =
+  await fetch(
+    '/api/merchant-password-change',
+    {
+      method: 'POST',
+
+      credentials: 'include',
+
+      headers: {
+        'Content-Type':
+          'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          currentPassword:
+            currentPassword,
+
+          newPassword:
+            newPassword
+        })
+    }
+  )
 
 
-            if (
-              passwordCheckError ||
-              !passwordMerchant
-            ) {
-
-              alert(
-                '현재 비밀번호 확인에 실패했습니다.'
-              )
-
-              return
-            }
+const passwordResult =
+  await passwordResponse.json()
 
 
-            if (
-              String(
-                passwordMerchant
-                  .merchant_password ||
-                ''
-              ).trim() !==
-              currentPassword
-            ) {
+if (
+  !passwordResponse.ok ||
+  !passwordResult?.success
+) {
 
-              alert(
-                '현재 비밀번호가 일치하지 않습니다.'
-              )
+  alert(
+    passwordResult?.message ||
+    '비밀번호 변경에 실패했습니다.'
+  )
 
-              return
-            }
+  return
+}
 
 
-            const {
-              error: passwordUpdateError
-            } =
-              await supabase
-                .from(
-                  'merchants'
-                )
-                .update({
-                  merchant_password:
-                    newPassword
-                })
-                .eq(
-                  'id',
-                  merchantId
-                )
+alert(
+  '비밀번호가 변경되었습니다.'
+)
 
 
-            if (
-              passwordUpdateError
-            ) {
-
-              alert(
-                '비밀번호 변경 실패: ' +
-                passwordUpdateError.message
-              )
-
-              return
-            }
-
-
-            alert(
-              '비밀번호가 변경되었습니다.'
-            )
-
-
-            document
-              .querySelector(
-                '#merchant-mobile-password-modal'
-              )
-              ?.remove()
+document
+  .querySelector(
+    '#merchant-mobile-password-modal'
+  )
+  ?.remove()
 
           }
         )
@@ -4242,15 +4227,17 @@ cancelOpenButton
               ) {
       
                 const response =
-                  await fetch(
-                    apiBaseUrl + '/api/korpay-cancel',
-                    {
-                      method: 'POST',
-      
-                      headers: {
-                        'Content-Type':
-                          'application/json'
-                      },
+                await fetch(
+                  '/api/korpay-cancel',
+                  {
+                    method: 'POST',
+                
+                    credentials: 'include',
+                
+                    headers: {
+                      'Content-Type':
+                        'application/json'
+                    },
       
                       body:
                         JSON.stringify({
@@ -4305,15 +4292,17 @@ cancelOpenButton
       
       
                 const response =
-                  await fetch(
-                    apiBaseUrl + '/api/toss-cancel',
-                    {
-                      method: 'POST',
-      
-                      headers: {
-                        'Content-Type':
-                          'application/json'
-                      },
+                await fetch(
+                  '/api/toss-cancel',
+                  {
+                    method: 'POST',
+                
+                    credentials: 'include',
+                
+                    headers: {
+                      'Content-Type':
+                        'application/json'
+                    },
       
                       body:
                         JSON.stringify({

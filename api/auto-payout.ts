@@ -406,7 +406,12 @@ if (paymentPgCompany !== targetPg) {
 const baseUrl = 'https://payment-app-lv6a.vercel.app'
 
 const sellerResponse = await fetch(
-  `${baseUrl}/api/toss-seller-get`
+  `${baseUrl}/api/toss-seller-get`,
+  {
+    headers: {
+      Authorization: `Bearer ${cronSecret}`,
+    },
+  }
 )
 
 const sellerResponseText =
@@ -561,6 +566,7 @@ for (const group of payoutGroups) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${cronSecret}`,
         },
         body: JSON.stringify({
           destination: seller.id,

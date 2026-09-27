@@ -24,7 +24,8 @@ import type {
     if (!cookieHeader) return ''
   
     for (const cookie of cookieHeader.split(';')) {
-      const [key, ...rest] = cookie.trim().split('=')
+      const [key, ...rest] =
+        cookie.trim().split('=')
   
       if (key === name) {
         return rest.join('=')
@@ -47,12 +48,13 @@ import type {
   
     const [body, signature] = parts
   
-    const expectedSignature = createHmac(
-      'sha256',
-      ADMIN_SESSION_SECRET
-    )
-      .update(body)
-      .digest('base64url')
+    const expectedSignature =
+      createHmac(
+        'sha256',
+        ADMIN_SESSION_SECRET
+      )
+        .update(body)
+        .digest('base64url')
   
     const receivedBuffer =
       Buffer.from(signature)
@@ -61,7 +63,8 @@ import type {
       Buffer.from(expectedSignature)
   
     if (
-      receivedBuffer.length !== expectedBuffer.length ||
+      receivedBuffer.length !==
+        expectedBuffer.length ||
       !timingSafeEqual(
         receivedBuffer,
         expectedBuffer
@@ -102,10 +105,10 @@ import type {
       'no-store'
     )
   
-    if (req.method !== 'GET') {
+    if (req.method !== 'POST') {
       return res.status(405).json({
         success: false,
-        message: 'GET 요청만 가능합니다.',
+        message: 'POST 요청만 가능합니다.',
       })
     }
   
@@ -134,6 +137,18 @@ import type {
       })
     }
   
+    const password =
+      String(
+        req.body?.password || ''
+      ).trim()
+  
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: '관리자 비밀번호를 입력해주세요.',
+      })
+    }
+  
     try {
       const supabase = createClient(
         SUPABASE_URL,
@@ -146,24 +161,26 @@ import type {
         }
       )
   
-      const { data: actor, error: actorError } =
-        await supabase
-          .from('admin_users')
-          .select(
-            'id, login_id, role, status, parent_admin_id'
-          )
-          .eq(
-            'id',
-            Number(adminSession.id)
-          )
-          .eq(
-            'login_id',
-            String(adminSession.login_id)
-          )
-          .eq('status', '사용중')
-          .single()
+      const {
+        data: admin,
+        error,
+      } = await supabase
+        .from('admin_users')
+        .select(
+          'id, login_id, password, role, status'
+        )
+        .eq(
+          'id',
+          Number(adminSession.id)
+        )
+        .eq(
+          'login_id',
+          String(adminSession.login_id)
+        )
+        .eq('status', '사용중')
+        .maybeSingle()
   
-      if (actorError || !actor) {
+      if (error || !admin) {
         return res.status(401).json({
           success: false,
           message:
@@ -171,103 +188,47 @@ import type {
         })
       }
   
-      const { data, error } =
-        await supabase
-          .from('admin_users')
-          .select(
-            'id, admin_name, login_id, company_name, role, status, parent_admin_id, commission_rate_1day, commission_rate_3day, commission_rate_4day, commission_rate_7day'
-          )
-          .order('id', {
-            ascending: true,
-          })
-  
-      if (error) {
-        console.error(
-          '담당자 목록 조회 오류:',
-          error.message
-        )
-  
-        return res.status(500).json({
+      if (
+        admin.role !== 'MASTER' ||
+        String(admin.login_id) !==
+          'NXGMASTER16'
+      ) {
+        return res.status(403).json({
           success: false,
           message:
-            '담당자 목록을 불러오지 못했습니다.',
+            '대표관리자만 처리할 수 있습니다.',
         })
       }
   
-      const allUsers = data || []
-  
-      let users = allUsers
-  
-      if (actor.role === 'BRANCH') {
-        const agencyIds = allUsers
-          .filter(
-            (user) =>
-              user.role === 'AGENCY' &&
-              Number(user.parent_admin_id) ===
-                Number(actor.id)
-          )
-          .map((user) => Number(user.id))
-  
-        users = allUsers.filter(
-          (user) =>
-            Number(user.id) ===
-              Number(actor.id) ||
-  
-            (
-              user.role === 'AGENCY' &&
-              Number(user.parent_admin_id) ===
-                Number(actor.id)
-            ) ||
-  
-            (
-              user.role === 'MANAGER' &&
-              (
-                Number(user.parent_admin_id) ===
-                  Number(actor.id) ||
-                agencyIds.includes(
-                  Number(user.parent_admin_id)
-                )
-              )
-            )
-        )
-      }
-  
-      if (actor.role === 'AGENCY') {
-        users = allUsers.filter(
-          (user) =>
-            Number(user.id) ===
-              Number(actor.id) ||
-  
-            (
-              user.role === 'MANAGER' &&
-              Number(user.parent_admin_id) ===
-                Number(actor.id)
-            )
-        )
-      }
-  
-      if (actor.role === 'MANAGER') {
-        users = allUsers.filter(
-          (user) =>
-            Number(user.id) ===
-            Number(actor.id)
-        )
+      if (
+        String(admin.password || '') !==
+        password
+      ) {
+        return res.status(401).json({
+          success: false,
+          message:
+            '관리자 비밀번호가 올바르지 않습니다.',
+        })
       }
   
       return res.status(200).json({
         success: true,
-        users,
+        admin: {
+          id: admin.id,
+          login_id: admin.login_id,
+          role: admin.role,
+        },
       })
     } catch (error) {
       console.error(
-        '담당자 목록 API 오류:',
+        '대표관리자 비밀번호 확인 API 오류:',
         error
       )
   
       return res.status(500).json({
         success: false,
         message:
-          '담당자 목록을 불러오지 못했습니다.',
+          '관리자 인증 중 오류가 발생했습니다.',
       })
     }
   }

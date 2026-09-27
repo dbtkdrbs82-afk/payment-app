@@ -36,7 +36,12 @@ export default async function handler(
 
   try {
     const balanceResponse = await fetch(
-      `${BASE_URL}/api/toss-balance`
+      `${BASE_URL}/api/toss-balance`,
+      {
+        headers: {
+          Authorization: `Bearer ${cronSecret}`,
+        },
+      }
     )
 
     const balanceResponseText =
@@ -95,9 +100,14 @@ export default async function handler(
         })
       }
 
-    const sellerResponse = await fetch(
-      `${BASE_URL}/api/toss-seller-get`
-    )
+      const sellerResponse = await fetch(
+        `${BASE_URL}/api/toss-seller-get`,
+        {
+          headers: {
+            Authorization: `Bearer ${cronSecret}`,
+          },
+        }
+      )
 
     const sellerResponseText =
       await sellerResponse.text()
@@ -170,6 +180,7 @@ export default async function handler(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          Authorization: `Bearer ${cronSecret}`,
         },
         body: JSON.stringify({
           destination: sweepSeller.id,

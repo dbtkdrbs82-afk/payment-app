@@ -145,34 +145,56 @@ document.addEventListener(
       event.target as HTMLElement | null
 
     const logoutButton =
-      target?.closest<HTMLElement>('[id$="-logout"]')
+      target?.closest<HTMLElement>(
+        '[id$="-logout"]'
+      )
 
     if (
       !logoutButton ||
-      !logoutButton.id.startsWith('merchant-')
+      !logoutButton.id.startsWith(
+        'merchant-'
+      )
     ) {
       return
     }
 
+    void fetch(
+      '/api/merchant-logout',
+      {
+        method: 'POST',
+        credentials: 'include',
+        keepalive: true,
+      }
+    ).catch((error) => {
+      console.error(
+        '가맹점 로그아웃 API 오류:',
+        error
+      )
+    })
+
     const logoutMerchantId =
-  sessionStorage.getItem('login_merchant_id')
+      sessionStorage.getItem(
+        'login_merchant_id'
+      )
 
-if (logoutMerchantId) {
-  sessionStorage.removeItem(
-    'last_checked_order_id_' + logoutMerchantId
-  )
+    if (logoutMerchantId) {
+      sessionStorage.removeItem(
+        'last_checked_order_id_' +
+        logoutMerchantId
+      )
 
-  sessionStorage.removeItem(
-    'order_voice_initialized_' + logoutMerchantId
-  )
-}
+      sessionStorage.removeItem(
+        'order_voice_initialized_' +
+        logoutMerchantId
+      )
+    }
 
-merchantLoginKeys.forEach((key) => {
-  sessionStorage.removeItem(key)
-  localStorage.removeItem(key)
-})
-
-    
+    merchantLoginKeys.forEach(
+      (key) => {
+        sessionStorage.removeItem(key)
+        localStorage.removeItem(key)
+      }
+    )
   },
   true
 )
@@ -7397,38 +7419,50 @@ return
 
            
 
-            const { data: orgMerchants, error: orgMerchantError } = await supabase
-            .from('merchants')
-            .select(`
-              id,
-              merchant_name,
-              settlement_cycle,
-              branch_admin_id,
-              agency_admin_id,
-              manager_admin_id
-            `)
+            let orgMerchants: any[] = []
+let orgPayments: any[] = []
 
-if (orgMerchantError) {
-  alert('조직 가맹점 정보를 불러오지 못했습니다: ' + orgMerchantError.message)
+try {
+  const response = await fetch(
+    '/api/admin-organization-data',
+    {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
+    }
+  )
+
+  const result = await response.json()
+
+  if (
+    !response.ok ||
+    !result?.success
+  ) {
+    throw new Error(
+      result?.message ||
+      '조직 정보를 불러오지 못했습니다.'
+    )
+  }
+
+  orgMerchants =
+    result.merchants || []
+
+  orgPayments =
+    result.payments || []
+} catch (error) {
+  console.error(
+    '조직관리 데이터 조회 오류:',
+    error
+  )
+
+  alert(
+    '조직 정보를 불러오지 못했습니다.'
+  )
+
   return
 }
 
-const { data: orgPayments, error: orgPaymentError } = await supabase
-  .from('payments')
-  .select(`
-    id,
-    merchant_id,
-    amount,
-    status,
-    approved_at,
-    created_at
-  `)
-  .eq('status', 'paid')
 
-if (orgPaymentError) {
-  alert('조직 매출 정보를 불러오지 못했습니다: ' + orgPaymentError.message)
-  return
-}
 
 const getOrgCommissionRate = (
   adminUser: any,
@@ -8457,8 +8491,7 @@ if (subMenu) {
 
 document.querySelector('#save-admin-user')
   ?.addEventListener('click', async () => {
-    const role =
-  (document.querySelector<HTMLSelectElement>('#admin-role')?.value || '').trim()
+    
 
 const adminName =
   (document.querySelector<HTMLInputElement>('#admin-name')?.value || '').trim()
@@ -8471,80 +8504,11 @@ const password =
       return
     }
 
-    const prefix =
-      role === 'BRANCH'
-        ? 'S'
-        : role === 'AGENCY'
-          ? 'A'
-          : 'B'
+   
 
-    const { data: lastUsers, error: lastError } = await supabase
-      .from('admin_users')
-      .select('login_id')
-      .like('login_id', prefix + '%')
-      .order('id', { ascending: false })
-      .limit(1)
+    const loginId = ''
 
-    if (lastError) {
-      alert('아이디 생성 실패: ' + lastError.message)
-      return
-    }
-
-    let nextNumber = 1
-
-    if (lastUsers && lastUsers.length > 0) {
-      const lastLoginId = lastUsers[0].login_id || ''
-      const numberPart = Number(lastLoginId.replace(prefix, ''))
-
-      if (!isNaN(numberPart)) {
-        nextNumber = numberPart + 1
-      }
-    }
-
-    const loginId = prefix + String(nextNumber).padStart(4, '0')
-
-    const { error } = await supabase
-  .from('admin_users')
-  .insert({
-    admin_name: adminName,
-    login_id: loginId,
-    password: password,
-    role: role,
-
-    phone: (document.querySelector<HTMLInputElement>('#admin-phone')?.value || '').trim(),
-    email: (document.querySelector<HTMLInputElement>('#admin-email')?.value || '').trim(),
-    resident_number: (document.querySelector<HTMLInputElement>('#admin-resident-number')?.value || '').trim(),
-
-    company_name: (document.querySelector<HTMLInputElement>('#admin-company-name')?.value || '').trim(),
-    business_number: (document.querySelector<HTMLInputElement>('#admin-business-number')?.value || '').trim(),
-
-    commission_rate_1day: Number(
-      document.querySelector<HTMLInputElement>('#admin-commission-rate-1day')?.value || 0
-    ),
-    
-    commission_rate_3day: Number(
-      document.querySelector<HTMLInputElement>('#admin-commission-rate-3day')?.value || 0
-    ),
-    
-    commission_rate_4day: Number(
-      document.querySelector<HTMLInputElement>('#admin-commission-rate-4day')?.value || 0
-    ),
-    
-    commission_rate_7day: Number(
-      document.querySelector<HTMLInputElement>('#admin-commission-rate-7day')?.value || 0
-    ),
-
-    bank_name: (document.querySelector<HTMLInputElement>('#admin-bank-name')?.value || '').trim(),
-    account_number: (document.querySelector<HTMLInputElement>('#admin-account-number')?.value || '').trim(),
-    account_holder: (document.querySelector<HTMLInputElement>('#admin-account-holder')?.value || '').trim(),
-
-    memo: (document.querySelector<HTMLTextAreaElement>('#admin-memo')?.value || '').trim(),
-
-    status: '사용중',
-    parent_admin_id: Number(
-      document.querySelector<HTMLSelectElement>('#admin-parent-admin-id')?.value || 0
-    ),
-  })
+    const error = new Error('사용하지 않는 구형 담당자 등록 코드입니다.')
 
     if (error) {
       alert('담당자 저장 실패: ' + error.message)
@@ -8994,17 +8958,43 @@ document.addEventListener('click', async (event) => {
   if (tableHead) tableHead.innerHTML = ''
   if (paymentTableBody) paymentTableBody.innerHTML = ''
 
-  const { data: allAdminUsers, error } = await supabase
-  .from('admin_users')
-  .select('*')
-  .order('id', { ascending: true })
+  let adminUsers: any[] = []
 
-if (error) {
-  alert('담당자 조회 실패: ' + error.message)
+try {
+  const response = await fetch(
+    '/api/admin-user-list',
+    {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
+    }
+  )
+
+  const result = await response.json()
+
+  if (
+    !response.ok ||
+    !result?.success
+  ) {
+    throw new Error(
+      result?.message ||
+      '담당자 조회에 실패했습니다.'
+    )
+  }
+
+  adminUsers = result.users || []
+} catch (error) {
+  console.error(
+    '담당자 조회 오류:',
+    error
+  )
+
+  alert(
+    '담당자 조회에 실패했습니다.'
+  )
+
   return
 }
-
-let adminUsers = allAdminUsers || []
 
 const currentAdminUser =
   adminUsers.find((user) =>
@@ -9908,114 +9898,69 @@ const merchantSearchButton =
   merchantSearchButton?.addEventListener('click', async () => {
   
 
-      const result = await supabase
-        .from('merchants')
-        .select('*')
-        .order('id', { ascending: true })
-    
-      if (result.error) {
-        alert('가맹점 조회 실패: ' + result.error.message)
-        return
+    const merchantListResponse =
+    await fetch(
+      '/api/admin-merchant-list',
+      {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store',
       }
-    
-      const pgFilter =
-  document.querySelector<HTMLSelectElement>('#merchant-pg-filter')?.value || ''
-
-const statusFilter =
-  document.querySelector<HTMLSelectElement>('#merchant-status-filter')?.value || ''
-
-const searchType =
-  document.querySelector<HTMLSelectElement>('#merchant-search-type')?.value || 'all'
-
-  const keyword =
-  document.querySelector<HTMLInputElement>('#merchant-search-keyword')?.value.trim() || ''
-
-const cleanKeyword = keyword.replace(/-/g, '')
-
-const startDate =
-  document.querySelector<HTMLInputElement>('#merchant-start-date')?.value || ''
-
-const endDate =
-  document.querySelector<HTMLInputElement>('#merchant-end-date')?.value || ''
-
-let merchants = result.data || []
-
-if (
-  adminRole === 'MANAGER' ||
-  adminRole === 'AGENCY' ||
-  adminRole === 'BRANCH'
-) {
-  try {
-    const response =
-      await fetch(
-        '/api/admin-me',
-        {
-          method: 'GET',
-          credentials: 'include',
-        }
-      )
-
-    const result =
-      await response.json()
-
-    if (
-      !response.ok ||
-      !result?.success ||
-      !result?.admin?.id
-    ) {
-      alert(
-        result?.message ||
-          '관리자 정보를 확인하지 못했습니다.'
-      )
-
-      return
-    }
-
-    const currentAdminId =
-      Number(result.admin.id)
-
-    if (adminRole === 'MANAGER') {
-      merchants =
-        merchants.filter(
-          (merchant) =>
-            Number(
-              merchant.manager_admin_id
-            ) === currentAdminId
-        )
-    }
-
-    if (adminRole === 'AGENCY') {
-      merchants =
-        merchants.filter(
-          (merchant) =>
-            Number(
-              merchant.agency_admin_id
-            ) === currentAdminId
-        )
-    }
-
-    if (adminRole === 'BRANCH') {
-      merchants =
-        merchants.filter(
-          (merchant) =>
-            Number(
-              merchant.branch_admin_id
-            ) === currentAdminId
-        )
-    }
-  } catch (error) {
-    console.error(
-      '관리자 정보 조회 오류:',
-      error
     )
-
+  
+  const merchantListResult =
+    await merchantListResponse.json()
+  
+  if (
+    !merchantListResponse.ok ||
+    !merchantListResult?.success
+  ) {
     alert(
-      '관리자 정보를 확인하지 못했습니다.'
+      merchantListResult?.message ||
+      '가맹점 조회에 실패했습니다.'
     )
-
+  
     return
   }
-}
+  
+  const pgFilter =
+    document.querySelector<HTMLSelectElement>(
+      '#merchant-pg-filter'
+    )?.value || ''
+  
+  const statusFilter =
+    document.querySelector<HTMLSelectElement>(
+      '#merchant-status-filter'
+    )?.value || ''
+  
+  const searchType =
+    document.querySelector<HTMLSelectElement>(
+      '#merchant-search-type'
+    )?.value || 'all'
+  
+  const keyword =
+    document.querySelector<HTMLInputElement>(
+      '#merchant-search-keyword'
+    )?.value.trim() || ''
+  
+  const cleanKeyword =
+    keyword.replace(/-/g, '')
+  
+  const startDate =
+    document.querySelector<HTMLInputElement>(
+      '#merchant-start-date'
+    )?.value || ''
+  
+  const endDate =
+    document.querySelector<HTMLInputElement>(
+      '#merchant-end-date'
+    )?.value || ''
+  
+    let merchants: any[] =
+    merchantListResult.merchants || []  
+    
+    const allScopedMerchants: any[] =
+  [...merchants]
 
 if (pgFilter) {
   merchants = merchants.filter((merchant) =>
@@ -10129,27 +10074,8 @@ merchants = sortedMerchants.slice(
   
 
       
-  let allMerchantsQuery = supabase
-  .from('merchants')
-  .select('status, manager_admin_id')
-
-if (adminRole === 'MANAGER') {
-  const { data: currentManager, error: managerSummaryError } = await supabase
-    .from('admin_users')
-    .select('id')
-    .eq('login_id', adminId)
-    .single()
-
-  if (managerSummaryError || !currentManager) {
-    alert('담당자 정보를 확인하지 못했습니다.')
-    return
-  }
-
-  allMerchantsQuery =
-    allMerchantsQuery.eq('manager_admin_id', currentManager.id)
-}
-
-const { data: allMerchants } = await allMerchantsQuery
+  const allMerchants =
+  allScopedMerchants
 
 const waitingCount =
   allMerchants?.filter((item) => item.status === '신청').length || 0
@@ -10297,14 +10223,8 @@ const residentNumbers =
       return
     }
 
-    const { data: merchants, error } = await supabase
-      .from('merchants')
-      .select('id, merchant_name, business_number, resident_number, status')
-
-    if (error) {
-      alert('가맹점 조회 실패: ' + error.message)
-      return
-    }
+    const merchants =
+  allScopedMerchants
 
     const matchedMerchants =
       (merchants || []).filter((merchant: any) => {
@@ -10503,6 +10423,43 @@ merchantTableTop?.appendChild(
 merchantButtons.forEach((button) => {
   button.addEventListener('click', async () => {
     sessionStorage.setItem('selected_merchant_id', String(merchant.id))
+
+    const merchantDetailResponse =
+  await fetch(
+    '/api/admin-merchant-detail?id=' +
+      encodeURIComponent(
+        String(merchant.id)
+      ),
+    {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
+    }
+  )
+
+
+const merchantDetailResult =
+  await merchantDetailResponse.json()
+
+
+if (
+  !merchantDetailResponse.ok ||
+  !merchantDetailResult?.success ||
+  !merchantDetailResult?.merchant
+) {
+  alert(
+    merchantDetailResult?.message ||
+    '가맹점 상세정보를 불러오지 못했습니다.'
+  )
+
+  return
+}
+
+
+Object.assign(
+  merchant,
+  merchantDetailResult.merchant
+)
 
     if (titleBox) {
       titleBox.innerHTML = '▶ 가맹점관리 > 업체/가맹점 등록'
@@ -11269,22 +11226,46 @@ if (newPassword) {
   updateData.merchant_password = newPassword
 }
     
-      console.log('실제 저장 데이터:', updateData)
-      
-      const { data, error } = await supabase
-  .from('merchants')
-  .update(updateData)
-  .eq('id', merchant.id)
-  .select()
+const updateResponse =
+await fetch(
+  '/api/admin-merchant-update',
+  {
+    method: 'POST',
 
-console.log('저장 대상 merchant.id:', merchant.id)
-console.log('저장 결과 data:', data)
-console.log('저장 error:', error)
+    credentials: 'include',
 
-    if (error) {
-      alert('저장 실패: ' + error.message)
-      return
-    }
+    headers: {
+      'Content-Type':
+        'application/json'
+    },
+
+    body:
+      JSON.stringify({
+        merchantId:
+          merchant.id,
+
+        data:
+          updateData
+      })
+  }
+)
+
+
+const updateResult =
+await updateResponse.json()
+
+
+if (
+!updateResponse.ok ||
+!updateResult?.success
+) {
+alert(
+  updateResult?.message ||
+  '가맹점 정보 저장에 실패했습니다.'
+)
+
+return
+}
 
     alert('저장되었습니다.')
     location.reload()
@@ -11299,26 +11280,43 @@ console.log('저장 error:', error)
 
     if (!confirm('개통완료 처리하시겠습니까?')) return
 
-    const loginId =
-      merchant.merchant_login_id || 'MER' + String(merchant.id).padStart(4, '0')
+    const approveResponse =
+  await fetch(
+    '/api/admin-merchant-approve',
+    {
+      method: 'POST',
 
-    const password =
-      merchant.merchant_password || '1234'
+      credentials: 'include',
 
-    const { error } = await supabase
-      .from('merchants')
-      .update({
-        status: '운영',
-        merchant_login_id: loginId,
-        merchant_password: password,
-        opened_at: new Date().toISOString().slice(0, 10),
-      })
-      .eq('id', merchant.id)
+      headers: {
+        'Content-Type':
+          'application/json'
+      },
 
-    if (error) {
-      alert('개통완료 실패: ' + error.message)
-      return
+      body:
+        JSON.stringify({
+          merchantId:
+            merchant.id
+        })
     }
+  )
+
+
+const approveResult =
+  await approveResponse.json()
+
+
+if (
+  !approveResponse.ok ||
+  !approveResult?.success
+) {
+  alert(
+    approveResult?.message ||
+    '개통완료 처리에 실패했습니다.'
+  )
+
+  return
+}
 
     alert('개통완료 처리되었습니다.')
 
@@ -11326,20 +11324,59 @@ location.reload()
   })
 
   document.querySelector('#show-merchant-login')
-  ?.addEventListener('click', () => {
+  ?.addEventListener('click', async () => {
 
-    if (adminRole === 'AGENCY' || adminRole === 'MANAGER') {
+    if (
+      adminRole === 'AGENCY' ||
+      adminRole === 'MANAGER'
+    ) {
       alert('권한이 없습니다.')
       return
     }
 
+
+    const loginInfoResponse =
+      await fetch(
+        '/api/admin-merchant-login-info?id=' +
+          encodeURIComponent(
+            String(merchant.id)
+          ),
+        {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store'
+        }
+      )
+
+
+    const loginInfoResult =
+      await loginInfoResponse.json()
+
+
+    if (
+      !loginInfoResponse.ok ||
+      !loginInfoResult?.success
+    ) {
+      alert(
+        loginInfoResult?.message ||
+        '로그인정보를 확인하지 못했습니다.'
+      )
+
+      return
+    }
+
+
     alert(
       '가맹점 로그인정보\n\n' +
       '로그인 주소 : https://payment-app-ybtf.vercel.app/merchant-login\n' +
-      '아이디 : ' + (merchant.merchant_login_id || '-') + '\n' +
-      '비밀번호 : ' + (merchant.merchant_password || '-')
+      '아이디 : ' +
+      (loginInfoResult.loginId || '-') +
+      '\n' +
+      '비밀번호 : ' +
+      (loginInfoResult.password || '-')
     )
   })
+
   document.querySelector('#delete-merchant')
   ?.addEventListener('click', async () => {
 
@@ -11350,15 +11387,43 @@ location.reload()
 
     if (!confirm('이 신청내역을 삭제하시겠습니까?')) return
 
-    const { error } = await supabase
-      .from('merchants')
-      .delete()
-      .eq('id', merchant.id)
+    const deleteResponse =
+  await fetch(
+    '/api/admin-merchant-delete',
+    {
+      method: 'POST',
 
-    if (error) {
-      alert('삭제 실패: ' + error.message)
-      return
+      credentials: 'include',
+
+      headers: {
+        'Content-Type':
+          'application/json'
+      },
+
+      body:
+        JSON.stringify({
+          merchantId:
+            merchant.id
+        })
     }
+  )
+
+
+const deleteResult =
+  await deleteResponse.json()
+
+
+if (
+  !deleteResponse.ok ||
+  !deleteResult?.success
+) {
+  alert(
+    deleteResult?.message ||
+    '가맹점 삭제에 실패했습니다.'
+  )
+
+  return
+}
 
     alert('삭제되었습니다.')
     location.reload()
@@ -12078,22 +12143,42 @@ if (payoutOrgMerchantError) {
   return
 }
 
-const { data: payoutOrgAdmins, error: payoutOrgAdminError } =
-  await supabase
-    .from('admin_users')
-    .select(`
-      id,
-      admin_name,
-      company_name,
-      role,
-      parent_admin_id
-    `)
+let payoutOrgAdmins: any[] = []
 
-if (payoutOrgAdminError) {
-  alert(
-    '출금 조직정보 조회 실패: ' +
-    payoutOrgAdminError.message
+try {
+  const response = await fetch(
+    '/api/admin-user-list',
+    {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
+    }
   )
+
+  const result = await response.json()
+
+  if (
+    !response.ok ||
+    !result?.success
+  ) {
+    throw new Error(
+      result?.message ||
+      '출금 조직정보를 불러오지 못했습니다.'
+    )
+  }
+
+  payoutOrgAdmins =
+    result.users || []
+} catch (error) {
+  console.error(
+    '출금 조직정보 조회 오류:',
+    error
+  )
+
+  alert(
+    '출금 조직정보를 불러오지 못했습니다.'
+  )
+
   return
 }
 
@@ -13006,126 +13091,93 @@ if (withdrawAmount > accountBalance) {
 }
 
 
-    const adminPassword = prompt(
-      '회사계좌 회수를 위해 관리자 비밀번호를 입력해주세요.'
+const adminPassword = prompt(
+  '회사계좌 회수를 위해 관리자 비밀번호를 입력해주세요.'
+)
+
+if (!adminPassword) {
+  return
+}
+
+const confirmMessage =
+  '회사계좌로 회수하시겠습니까?\n\n' +
+  '회수금액: ' +
+  withdrawAmount.toLocaleString() +
+  '원\n\n' +
+  '은행: ' +
+  companyAccount.bank_name +
+  '\n' +
+  '예금주: ' +
+  companyAccount.account_holder +
+  '\n' +
+  '계좌번호: ' +
+  companyAccount.account_number +
+  '\n\n' +
+  '처리자: ' +
+  adminId
+
+if (!confirm(confirmMessage)) {
+  return
+}
+
+try {
+  const sweepResponse =
+    await fetch(
+      '/api/admin-company-sweep',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type':
+            'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          amount: withdrawAmount,
+          password: adminPassword,
+        }),
+      }
     )
 
-    if (!adminPassword) {
-      return
-    }
+  const sweepResult =
+    await sweepResponse.json()
 
-    const { data: verifiedAdmin, error: verifyError } = await supabase
-      .from('admin_users')
-      .select('id, login_id, role, status')
-      .eq('login_id', adminId)
-      .eq('password', adminPassword)
-      .eq('role', 'MASTER')
-      .eq('status', '사용중')
-      .maybeSingle()
-
-    if (verifyError || !verifiedAdmin) {
-      alert('관리자 비밀번호가 올바르지 않습니다.')
-      return
-    }
-
-    const confirmMessage =
-      '회사계좌로 회수하시겠습니까?\n\n' +
-      '회수금액: ' +
-      withdrawAmount.toLocaleString() +
-      '원\n\n' +
-'은행: ' + companyAccount.bank_name + '\n' +
-'예금주: ' + companyAccount.account_holder + '\n' +
-'계좌번호: ' + companyAccount.account_number + '\n\n' +
-      '처리자: ' +
-      verifiedAdmin.login_id
-
-    if (!confirm(confirmMessage)) {
-      return
-    }
-
-    try {
-      const sellerResponse = await fetch('/api/toss-seller-get')
-      const sellerResult = await sellerResponse.json()
-    
-      if (!sellerResponse.ok || !sellerResult.success) {
-        alert('회사 회수용 셀러 조회에 실패했습니다.')
-        return
-      }
-    
-      const sellers =
-        sellerResult?.data?.entityBody?.items || []
-    
-      const sweepSeller = sellers.find(
-        (seller: any) =>
-          String(seller.refSellerId || '').trim() ===
-          'NXGSOFT01'
+  if (
+    !sweepResponse.ok ||
+    !sweepResult?.success
+  ) {
+    alert(
+      '회사계좌 회수 실패\n\n' +
+      (
+        sweepResult?.message ||
+        '회사계좌 회수에 실패했습니다.'
       )
-    
-      if (!sweepSeller?.id) {
-        alert('NXGSOFT01 회수용 셀러를 찾을 수 없습니다.')
-        return
-      }
-    
-      if (sweepSeller.status !== 'APPROVED') {
-        alert('NXGSOFT01 셀러가 지급가능 상태가 아닙니다.')
-        return
-      }
-    
-      const refPayoutId =
-        'SWEEP-' +
-        Date.now() +
-        '-' +
-        withdrawAmount
-    
-      const payoutResponse = await fetch(
-        '/api/toss-payout',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            destination: sweepSeller.id,
-            amount: withdrawAmount,
-            transactionDescription: '잔액회수',
-            refPayoutId,
-          }),
-        }
-      )
-    
-      const payoutResult = await payoutResponse.json()
-    
-      if (!payoutResponse.ok || !payoutResult.success) {
-        const errorMessage =
-          payoutResult?.data?.error?.message ||
-          payoutResult?.data?.message ||
-          payoutResult?.message ||
-          '회사계좌 회수에 실패했습니다.'
-    
-        alert(
-          '회사계좌 회수 실패\n\n' +
-          errorMessage
-        )
-    
-        return
-      }
-    
-      alert(
-        '회사계좌 회수가 완료되었습니다.\n\n' +
-        '회수금액: ' +
-        withdrawAmount.toLocaleString() +
-        '원'
-      )
-    
-      modal.remove()
-    
-    } catch (error) {
-      console.error('회사계좌 회수 오류:', error)
-    
-      alert(
-        '회사계좌 회수 중 오류가 발생했습니다.'
-      )
-    }
+    )
+
+    return
+  }
+
+  alert(
+    '회사계좌 회수가 완료되었습니다.\n\n' +
+    '회수금액: ' +
+    Number(
+      sweepResult.amount ||
+      withdrawAmount
+    ).toLocaleString() +
+    '원'
+  )
+
+  modal.remove()
+
+} catch (error) {
+  console.error(
+    '회사계좌 회수 오류:',
+    error
+  )
+
+  alert(
+    '회사계좌 회수 중 오류가 발생했습니다.'
+  )
+}
   })
 })
 
@@ -14088,154 +14140,94 @@ if (nextTop) {
         document.querySelectorAll('.payout-complete-button')
   .forEach((button) => {
     button.addEventListener('click', async () => {
-      const targetButton = button as HTMLButtonElement
+      const targetButton =
+        button as HTMLButtonElement
 
       const paymentIdsText =
-        targetButton.getAttribute('data-ids') || ''
+        targetButton.getAttribute(
+          'data-ids'
+        ) || ''
 
-      const paymentIds = paymentIdsText
-        .split(',')
-        .map((id) => Number(id))
-        .filter((id) => !Number.isNaN(id))
+      const paymentIds =
+        paymentIdsText
+          .split(',')
+          .map((id) => Number(id))
+          .filter(
+            (id) =>
+              Number.isInteger(id) &&
+              id > 0
+          )
 
-      if (paymentIds.length === 0) {
-        alert('출금대상 결제정보가 없습니다.')
+      if (
+        paymentIds.length === 0
+      ) {
+        alert(
+          '출금대상 결제정보가 없습니다.'
+        )
         return
       }
 
       targetButton.disabled = true
-      targetButton.textContent = '처리중'
+      targetButton.textContent =
+        '처리중'
 
       try {
-        const { data: paymentRows, error: paymentError } =
-          await supabase
-            .from('payments')
-            .select(`
-              id,
-              merchant_id,
-              merchant_name,
-              settlement_amount,
-              payout_status,
-              payout_hold
-            `)
-            .in('id', paymentIds)
-
-        if (paymentError) {
-          alert('결제정보 조회 실패: ' + paymentError.message)
-          return
-        }
-
-        if (!paymentRows || paymentRows.length === 0) {
-          alert('출금대상 결제정보가 없습니다.')
-          return
-        }
-
-        const merchantIds = [
-          ...new Set(
-            paymentRows
-              .map((row) => String(row.merchant_id || '').trim())
-              .filter(Boolean)
+        /*
+         * 1. 서버에서 실제 출금대상과
+         *    지급금액을 다시 계산
+         */
+        const previewResponse =
+          await fetch(
+            '/api/admin-payout-complete',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                action: 'preview',
+                payment_ids:
+                  paymentIds
+              })
+            }
           )
-        ]
 
-        if (merchantIds.length !== 1) {
-          alert('서로 다른 가맹점의 결제건은 함께 출금할 수 없습니다.')
-          return
-        }
-
-        const rawMerchantId = merchantIds[0]
-
-const merchantId = rawMerchantId.startsWith('MER')
-  ? rawMerchantId
-  : 'MER' + rawMerchantId.padStart(4, '0')
-        const merchantName =
-          String(paymentRows[0].merchant_name || merchantId)
-
-        const hasHoldPayment = paymentRows.some(
-          (row) =>
-            row.payout_hold === true ||
-            row.payout_status === '출금보류'
-        )
-
-        if (hasHoldPayment) {
-          alert('출금보류된 결제건이 포함되어 있습니다.')
-          return
-        }
-
-        const payoutAmount = paymentRows.reduce(
-          (sum, row) =>
-            sum + Number(row.settlement_amount || 0),
-          0
-        )
-
-        if (payoutAmount <= 0) {
-          alert('출금예정금액이 올바르지 않습니다.')
-          return
-        }
-
-        const sellerResponse = await fetch(
-          '/api/toss-seller-get'
-        )
-
-        const sellerResult = await sellerResponse.json()
-
-        if (!sellerResponse.ok || !sellerResult.success) {
-          alert('토스 셀러 조회에 실패했습니다.')
-          return
-        }
-
-        const sellers =
-          sellerResult?.data?.entityBody?.items || []
-
-        const seller = sellers.find(
-          (item: any) =>
-            String(item.refSellerId || '').trim() === merchantId
-        )
-
-        if (!seller?.id) {
-          alert(
-            merchantId +
-              ' 가맹점이 토스 셀러로 등록되어 있지 않습니다.'
-          )
-          return
-        }
+        const previewResult =
+          await previewResponse.json()
 
         if (
-          seller.status !== 'PARTIALLY_APPROVED' &&
-          seller.status !== 'APPROVED'
+          !previewResponse.ok ||
+          !previewResult?.success
         ) {
           alert(
-            '토스 셀러가 지급가능 상태가 아닙니다.\n현재 상태: ' +
-              seller.status
+            previewResult?.message ||
+            '출금정보를 확인하지 못했습니다.'
           )
           return
         }
 
-        const balanceResponse = await fetch(
-          '/api/toss-balance'
-        )
+        const merchantName =
+          String(
+            previewResult
+              .merchant_name ||
+            previewResult
+              .merchant_id ||
+            ''
+          )
 
-        const balanceResult = await balanceResponse.json()
+        const payoutAmount =
+          Number(
+            previewResult.amount ||
+            0
+          )
 
-        if (!balanceResponse.ok || !balanceResult.success) {
-          alert('토스 지급가능 잔액 조회에 실패했습니다.')
-          return
-        }
-
-        const availableAmount = Number(
-          balanceResult?.data?.entityBody
-            ?.availableAmount?.value || 0
-        )
-
-        if (availableAmount < payoutAmount) {
+        if (
+          payoutAmount <= 0
+        ) {
           alert(
-            '토스 지급대행 잔액이 부족합니다.\n\n' +
-              '지급 가능 잔액: ' +
-              availableAmount.toLocaleString() +
-              '원\n' +
-              '출금 예정 금액: ' +
-              payoutAmount.toLocaleString() +
-              '원'
+            '출금예정금액이 올바르지 않습니다.'
           )
           return
         }
@@ -14243,81 +14235,86 @@ const merchantId = rawMerchantId.startsWith('MER')
         if (
           !confirm(
             merchantName +
-              ' 가맹점에 ' +
-              payoutAmount.toLocaleString() +
-              '원을 실제 지급하시겠습니까?'
+            ' 가맹점에 ' +
+            payoutAmount
+              .toLocaleString() +
+            '원을 실제 지급하시겠습니까?'
           )
         ) {
           return
         }
 
-        const minPaymentId = Math.min(...paymentIds)
-        const maxPaymentId = Math.max(...paymentIds)
+        /*
+         * 2. 실제 출금
+         *    서버에서 재검증 후 실행
+         */
+        const executeResponse =
+          await fetch(
+            '/api/admin-payout-complete',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type':
+                  'application/json'
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                action: 'execute',
+                payment_ids:
+                  paymentIds
+              })
+            }
+          )
 
-        const refPayoutId =
-          'NXG-' +
-          merchantId +
-          '-' +
-          minPaymentId +
-          '-' +
-          maxPaymentId
+        const executeResult =
+          await executeResponse.json()
 
-        const payoutResponse = await fetch(
-          '/api/toss-payout',
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              destination: seller.id,
-              amount: payoutAmount,
-              transactionDescription: '가맹점정산',
-              refPayoutId
-            })
+        if (
+          !executeResponse.ok ||
+          !executeResult?.success
+        ) {
+          if (
+            executeResult
+              ?.payout_sent === true
+          ) {
+            alert(
+              executeResult?.message ||
+              '토스 지급은 완료됐지만 DB 저장 확인이 필요합니다.\n중복 출금하지 마세요.'
+            )
+            return
           }
-        )
 
-        const payoutResult = await payoutResponse.json()
-
-        if (!payoutResponse.ok || !payoutResult.success) {
-          const errorMessage =
-            payoutResult?.data?.error?.message ||
-            payoutResult?.message ||
-            '토스 지급 요청에 실패했습니다.'
-
-          alert(errorMessage)
-          return
-        }
-
-        const { error: updateError } = await supabase
-  .from('payments')
-  .update({
-    payout_status: '출금완료',
-    payout_time: new Date().toISOString()
-  })
-  .in('id', paymentIds)
-
-        if (updateError) {
           alert(
-            '토스 지급 요청은 전송됐지만 DB 저장에 실패했습니다.\n' +
-              updateError.message
+            executeResult?.message ||
+            '출금 처리에 실패했습니다.'
           )
           return
         }
 
         alert(
           '출금완료 처리되었습니다.\n\n' +
-            '가맹점: ' +
-            merchantName +
-            '\n' +
-            '지급금액: ' +
-            payoutAmount.toLocaleString() +
-            '원'
+          '가맹점: ' +
+          String(
+            executeResult
+              .merchant_name ||
+            merchantName
+          ) +
+          '\n' +
+          '지급금액: ' +
+          Number(
+            executeResult.amount ||
+            payoutAmount
+          ).toLocaleString() +
+          '원'
         )
 
         location.reload()
       } catch (error) {
+        console.error(
+          '출금 처리 오류:',
+          error
+        )
+
         alert(
           error instanceof Error
             ? error.message
@@ -14325,11 +14322,13 @@ const merchantId = rawMerchantId.startsWith('MER')
         )
       } finally {
         targetButton.disabled = false
-        targetButton.textContent = '출금완료'
+        targetButton.textContent =
+          '출금완료'
       }
     })
   })
-}
+
+          }
 
       document.querySelectorAll('.payout-hold-button')
       .forEach((button) => {
@@ -14371,21 +14370,6 @@ const merchantId = rawMerchantId.startsWith('MER')
             return
           }
     
-          const { data: verifiedAdmin, error: verifyError } =
-            await supabase
-              .from('admin_users')
-              .select('login_id, role, status')
-              .eq('login_id', currentAdminId)
-              .eq('password', adminPassword)
-              .eq('role', 'MASTER')
-              .eq('status', '사용중')
-              .maybeSingle()
-    
-          if (verifyError || !verifiedAdmin) {
-            alert('관리자 비밀번호가 올바르지 않습니다.')
-            return
-          }
-    
           if (
             !confirm(
               '이 가맹점의 현재 출금대상을 보류하시겠습니까?\n\n' +
@@ -14395,20 +14379,46 @@ const merchantId = rawMerchantId.startsWith('MER')
           ) {
             return
           }
-    
-          const { error } = await supabase
-            .from('payments')
-            .update({
-              payout_hold: true,
-              payout_hold_reason: holdReason.trim(),
-              payout_hold_at: new Date().toISOString(),
-              payout_hold_by: currentAdminId,
-              payout_status: '출금보류'
-            })
-            .in('id', paymentIds)
-    
-          if (error) {
-            alert('출금보류 처리 실패: ' + error.message)
+          
+          try {
+            const response = await fetch(
+              '/api/admin-payout-hold',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                  action: 'hold',
+                  password: adminPassword,
+                  hold_reason: holdReason.trim(),
+                  payment_ids: paymentIds
+                })
+              }
+            )
+          
+            const result = await response.json()
+          
+            if (
+              !response.ok ||
+              !result?.success
+            ) {
+              alert(
+                result?.message ||
+                '출금보류 처리에 실패했습니다.'
+              )
+              return
+            }
+          } catch (error) {
+            console.error(
+              '출금보류 처리 오류:',
+              error
+            )
+          
+            alert(
+              '출금보류 처리 중 오류가 발생했습니다.'
+            )
             return
           }
     
@@ -14449,21 +14459,6 @@ const merchantId = rawMerchantId.startsWith('MER')
             return
           }
     
-          const { data: verifiedAdmin, error: verifyError } =
-            await supabase
-              .from('admin_users')
-              .select('login_id, role, status')
-              .eq('login_id', currentAdminId)
-              .eq('password', adminPassword)
-              .eq('role', 'MASTER')
-              .eq('status', '사용중')
-              .maybeSingle()
-    
-          if (verifyError || !verifiedAdmin) {
-            alert('관리자 비밀번호가 올바르지 않습니다.')
-            return
-          }
-    
           if (
             !confirm(
               '출금보류를 해제하시겠습니까?\n\n' +
@@ -14472,20 +14467,45 @@ const merchantId = rawMerchantId.startsWith('MER')
           ) {
             return
           }
-    
-          const { error } = await supabase
-            .from('payments')
-            .update({
-              payout_hold: false,
-              payout_hold_reason: null,
-              payout_hold_at: null,
-              payout_hold_by: null,
-              payout_status: '출금대기'
-            })
-            .in('id', paymentIds)
-    
-          if (error) {
-            alert('보류해제 실패: ' + error.message)
+          
+          try {
+            const response = await fetch(
+              '/api/admin-payout-hold',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                  action: 'release',
+                  password: adminPassword,
+                  payment_ids: paymentIds
+                })
+              }
+            )
+          
+            const result = await response.json()
+          
+            if (
+              !response.ok ||
+              !result?.success
+            ) {
+              alert(
+                result?.message ||
+                '보류해제 처리에 실패했습니다.'
+              )
+              return
+            }
+          } catch (error) {
+            console.error(
+              '출금보류 해제 오류:',
+              error
+            )
+          
+            alert(
+              '보류해제 처리 중 오류가 발생했습니다.'
+            )
             return
           }
     
@@ -16498,32 +16518,44 @@ const headOfficeMerchantOrgMap =
     }
   )
 
-  const {
-    data: headOfficeOrgAdmins,
-    error: headOfficeOrgAdminError
-  } =
-    await supabase
-      .from('admin_users')
-      .select(`
-        id,
-        role,
-        parent_admin_id,
-        commission_rate_1day,
-        commission_rate_3day,
-        commission_rate_4day,
-        commission_rate_7day
-      `)
-  
-  
-  if (headOfficeOrgAdminError) {
-  
-    alert(
-      '조직 수수료 정보 조회 실패: ' +
-      headOfficeOrgAdminError.message
+  let headOfficeOrgAdmins: any[] = []
+
+try {
+  const response = await fetch(
+    '/api/admin-user-list',
+    {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
+    }
+  )
+
+  const result = await response.json()
+
+  if (
+    !response.ok ||
+    !result?.success
+  ) {
+    throw new Error(
+      result?.message ||
+      '조직 수수료 정보를 불러오지 못했습니다.'
     )
-  
-    return
   }
+
+  headOfficeOrgAdmins =
+    result.users || []
+} catch (error) {
+  console.error(
+    '조직 수수료 정보 조회 오류:',
+    error
+  )
+
+  alert(
+    '조직 수수료 정보를 불러오지 못했습니다.'
+  )
+
+  return
+}
   
   
   const headOfficeOrgAdminMap =
@@ -18940,22 +18972,42 @@ if (paymentOrgMerchantError) {
   return
 }
 
-const { data: paymentOrgAdmins, error: paymentOrgAdminError } =
-  await supabase
-    .from('admin_users')
-    .select(`
-      id,
-      admin_name,
-      company_name,
-      role,
-      parent_admin_id
-    `)
+let paymentOrgAdmins: any[] = []
 
-if (paymentOrgAdminError) {
-  alert(
-    '조직정보 조회 실패: ' +
-    paymentOrgAdminError.message
+try {
+  const response = await fetch(
+    '/api/admin-user-list',
+    {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
+    }
   )
+
+  const result = await response.json()
+
+  if (
+    !response.ok ||
+    !result?.success
+  ) {
+    throw new Error(
+      result?.message ||
+      '조직정보를 불러오지 못했습니다.'
+    )
+  }
+
+  paymentOrgAdmins =
+    result.users || []
+} catch (error) {
+  console.error(
+    '결제 조직정보 조회 오류:',
+    error
+  )
+
+  alert(
+    '조직정보를 불러오지 못했습니다.'
+  )
+
   return
 }
 
@@ -25307,78 +25359,47 @@ document
       }
 
 
-      const {
-        data: passwordMerchant,
-        error: passwordCheckError
-      } =
-        await supabase
-          .from('merchants')
-          .select(
-            'merchant_password'
-          )
-          .eq(
-            'id',
-            merchantId
-          )
-          .single()
-
-
-      if (
-        passwordCheckError ||
-        !passwordMerchant
-      ) {
-
-        alert(
-          '현재 비밀번호 확인에 실패했습니다.'
-        )
-
-        return
-      }
-
-
-      if (
-        String(
-          passwordMerchant
-            .merchant_password ||
-          ''
-        ).trim() !==
-        currentPassword
-      ) {
-
-        alert(
-          '현재 비밀번호가 일치하지 않습니다.'
-        )
-
-        return
-      }
-
-
-      const {
-        error: passwordUpdateError
-      } =
-        await supabase
-          .from('merchants')
-          .update({
-            merchant_password:
-              newPassword
-          })
-          .eq(
-            'id',
-            merchantId
-          )
-
-
-      if (
-        passwordUpdateError
-      ) {
-
-        alert(
-          '비밀번호 변경 실패: ' +
-          passwordUpdateError.message
-        )
-
-        return
-      }
+      const passwordResponse =
+      await fetch(
+        '/api/merchant-password-change',
+        {
+          method: 'POST',
+    
+          credentials: 'include',
+    
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+    
+          body:
+            JSON.stringify({
+              currentPassword:
+                currentPassword,
+    
+              newPassword:
+                newPassword
+            })
+        }
+      )
+    
+    
+    const passwordResult =
+      await passwordResponse.json()
+    
+    
+    if (
+      !passwordResponse.ok ||
+      !passwordResult?.success
+    ) {
+    
+      alert(
+        passwordResult?.message ||
+        '비밀번호 변경에 실패했습니다.'
+      )
+    
+      return
+    }
 
 
       alert(
@@ -42024,227 +42045,57 @@ total_amount: Number(totalAmount),
             payment_status: '결제완료',
           })
   
-          const { data: merchantData } = await supabase
-  .from('merchants')
-  .select(
-    'merchant_name, fee_rate, settlement_cycle, branch_admin_id, agency_admin_id, manager_admin_id'
-  )
-  .eq('id', Number(merchantId))
-  .maybeSingle()
+          let kioskPaymentSaveError = ''
 
-  const kioskAmount = Number(totalAmount)
-  const kioskFeeRate = Number(merchantData?.fee_rate || 0)
-  const kioskFeeAmount = Math.floor(kioskAmount * kioskFeeRate / 100)
-  const kioskSettlementAmount = kioskAmount - kioskFeeAmount
-  
-  const managerAdminId = merchantData?.manager_admin_id
-let managerAdminName = ''
-let managerFeeRate = 0
+if (!error) {
+  try {
+    const paymentSaveResponse =
+      await fetch(
+        '/api/kiosk-payment-org',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json'
+          },
+          body: JSON.stringify({
+            merchant_id:
+              Number(merchantId),
 
-let agencyAdminId: number | null =
-  merchantData?.agency_admin_id
-    ? Number(merchantData.agency_admin_id)
-    : null
+            order_no:
+              orderNo
+          })
+        }
+      )
 
-let agencyAdminName = ''
-let agencyFeeRate = 0
+    const paymentSaveResult =
+      await paymentSaveResponse.json()
 
-let branchAdminId: number | null =
-  merchantData?.branch_admin_id
-    ? Number(merchantData.branch_admin_id)
-    : null
-
-let branchAdminName = ''
-let branchFeeRate = 0
-
-const settlementCycle =
-  String(merchantData?.settlement_cycle || '4일')
-
-const getCommissionRate = (adminUser: any) => {
-  if (!adminUser) return 0
-
-  if (settlementCycle === '1일') {
-    return Number(adminUser.commission_rate_1day || 0)
-  }
-
-  if (settlementCycle === '3일') {
-    return Number(adminUser.commission_rate_3day || 0)
-  }
-
-  if (settlementCycle === '7일') {
-    return Number(adminUser.commission_rate_7day || 0)
-  }
-
-  return Number(adminUser.commission_rate_4day || 0)
-}
-
-if (managerAdminId) {
-  const { data: managerData } = await supabase
-    .from('admin_users')
-    .select(
-      'id, admin_name, parent_admin_id, commission_rate_1day, commission_rate_3day, commission_rate_4day, commission_rate_7day'
-    )
-    .eq('id', Number(managerAdminId))
-    .maybeSingle()
-
-  if (managerData) {
-    managerAdminName =
-      managerData.admin_name || ''
-
-    managerFeeRate =
-      getCommissionRate(managerData)
-
-    if (!agencyAdminId && managerData.parent_admin_id) {
-      agencyAdminId =
-        Number(managerData.parent_admin_id)
+    if (
+      !paymentSaveResponse.ok ||
+      !paymentSaveResult?.success
+    ) {
+      kioskPaymentSaveError =
+        paymentSaveResult?.message ||
+        '결제내역 저장에 실패했습니다.'
     }
-  }
-}
-
-if (agencyAdminId) {
-  const { data: agencyData } = await supabase
-    .from('admin_users')
-    .select(
-      'id, admin_name, parent_admin_id, commission_rate_1day, commission_rate_3day, commission_rate_4day, commission_rate_7day'
+  } catch (paymentSaveError) {
+    console.error(
+      '키오스크 결제내역 저장 오류:',
+      paymentSaveError
     )
-    .eq('id', agencyAdminId)
-    .maybeSingle()
 
-  if (agencyData) {
-    agencyAdminName =
-      agencyData.admin_name || ''
-
-    agencyFeeRate =
-      getCommissionRate(agencyData)
-
-    if (!branchAdminId && agencyData.parent_admin_id) {
-      branchAdminId =
-        Number(agencyData.parent_admin_id)
-    }
+    kioskPaymentSaveError =
+      '결제내역 저장 중 오류가 발생했습니다.'
   }
 }
 
-if (branchAdminId) {
-  const { data: branchData } = await supabase
-    .from('admin_users')
-    .select(
-      'id, admin_name, commission_rate_1day, commission_rate_3day, commission_rate_4day, commission_rate_7day'
-    )
-    .eq('id', branchAdminId)
-    .maybeSingle()
-
-  if (branchData) {
-    branchAdminName =
-      branchData.admin_name || ''
-
-    branchFeeRate =
-      getCommissionRate(branchData)
-  }
-}
-
-if (managerAdminId) {
-  const { data: managerData } = await supabase
-    .from('admin_users')
-    .select('id, admin_name, commission_rate, parent_admin_id')
-    .eq('id', Number(managerAdminId))
-    .maybeSingle()
-
-  if (managerData) {
-    managerAdminName = managerData.admin_name || ''
-    managerFeeRate = Number(managerData.commission_rate || 0)
-
-    agencyAdminId = managerData.parent_admin_id
-      ? Number(managerData.parent_admin_id)
-      : null
-  }
-}
-
-if (agencyAdminId) {
-  const { data: agencyData } = await supabase
-    .from('admin_users')
-    .select('id, admin_name, commission_rate, parent_admin_id')
-    .eq('id', agencyAdminId)
-    .maybeSingle()
-
-  if (agencyData) {
-    agencyAdminName = agencyData.admin_name || ''
-    agencyFeeRate = Number(agencyData.commission_rate || 0)
-
-    branchAdminId = agencyData.parent_admin_id
-      ? Number(agencyData.parent_admin_id)
-      : null
-  }
-}
-
-if (branchAdminId) {
-  const { data: branchData } = await supabase
-    .from('admin_users')
-    .select('id, admin_name, commission_rate')
-    .eq('id', branchAdminId)
-    .maybeSingle()
-
-  if (branchData) {
-    branchAdminName = branchData.admin_name || ''
-    branchFeeRate = Number(branchData.commission_rate || 0)
-  }
-}
-  
-  const { error: paymentSaveError } = await supabase
-    .from('payments')
-    .insert({
-      order_id: orderNo,
-      payment_key: 'kiosk-' + orderNo,
-      amount: kioskAmount,
-      fee_rate: kioskFeeRate,
-      fee_amount: kioskFeeAmount,
-      settlement_amount: kioskSettlementAmount,
-      status: 'paid',
-  
-      merchant_id: Number(merchantId),
-      merchant_name: merchantData?.merchant_name || '',
-
-      beauty_staff_id:
-      sessionStorage.getItem('beauty_staff_id')
-        ? Number(sessionStorage.getItem('beauty_staff_id'))
-        : null,
-    
-    reservation_date:
-      sessionStorage.getItem(
-        'beauty_reservation_date'
-      ) || null,
-    
-    reservation_time:
-      sessionStorage.getItem(
-        'beauty_reservation_time'
-      ) || null,
-    
-    manager_admin_id: managerAdminId,
-manager_admin_name: managerAdminName,
-manager_fee_rate: managerFeeRate,
-
-agency_admin_id: agencyAdminId,
-agency_admin_name: agencyAdminName,
-agency_fee_rate: agencyFeeRate,
-
-branch_admin_id: branchAdminId,
-branch_admin_name: branchAdminName,
-branch_fee_rate: branchFeeRate,
-  
-      order_status: '준비중',
-      pg_company: '코페이'
-    })
-  
-  if (paymentSaveError) {
-    alert('결제내역 저장 실패: ' + paymentSaveError.message)
-  
-  }
-
-        if (error) {
+if (error || kioskPaymentSaveError) {
           app.innerHTML = `
             <div class="page">
               <div class="payment-card">
                 <h1>주문 저장 실패</h1>
-                <p>${error.message}</p>
+                <p>${error?.message || kioskPaymentSaveError}</p>
               </div>
             </div>
           `
