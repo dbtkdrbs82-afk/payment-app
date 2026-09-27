@@ -30590,7 +30590,75 @@ document
       }
   
       qrBox.innerHTML = ''
-      qrBox.appendChild(canvas)
+qrBox.appendChild(canvas)
+
+
+const merchantQrStoreName =
+  document.createElement('div')
+
+
+merchantQrStoreName.textContent =
+  merchantName || '가맹점'
+
+
+merchantQrStoreName.style.position =
+  'absolute'
+
+merchantQrStoreName.style.left =
+  '50%'
+
+merchantQrStoreName.style.bottom =
+  'calc(100% + 10px)'
+
+merchantQrStoreName.style.width =
+  '240px'
+
+merchantQrStoreName.style.textAlign =
+  'center'
+
+merchantQrStoreName.style.fontWeight =
+  '900'
+
+merchantQrStoreName.style.lineHeight =
+  '1.2'
+
+merchantQrStoreName.style.color =
+  '#111827'
+
+merchantQrStoreName.style.whiteSpace =
+  'nowrap'
+
+merchantQrStoreName.style.zIndex =
+  '20'
+
+merchantQrStoreName.style.background =
+  'rgba(255,255,255,0.95)'
+
+merchantQrStoreName.style.padding =
+  '3px 6px'
+
+merchantQrStoreName.style.borderRadius =
+  '6px'
+
+
+merchantQrStoreName.style.fontSize =
+  merchantName.length >= 14
+    ? '15px'
+    : merchantName.length >= 9
+      ? '17px'
+      : '20px'
+
+
+merchantQrStoreName.style.transform =
+  selectedQrTemplateKey ===
+    'qr-design-07'
+    ? 'translateX(-50%) rotate(18deg)'
+    : 'translateX(-50%)'
+
+
+qrBox.appendChild(
+  merchantQrStoreName
+)
     })
 
     document
