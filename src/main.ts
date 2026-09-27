@@ -5562,77 +5562,7 @@ requestAnimationFrame(() => {
 
           if (page) sessionStorage.setItem('adminPage', page)
 
-            if (page !== 'tax') {
-              const loadingSubMenu =
-                document.querySelector<HTMLElement>('.admin-sub-menu')
             
-              const loadingTitle =
-                document.querySelector<HTMLElement>('.admin-title')
-            
-              const loadingSearch =
-                document.querySelector<HTMLElement>('.admin-search-box')
-            
-              const loadingSummary =
-                document.querySelector<HTMLElement>('.admin-summary')
-            
-              const loadingTableTop =
-                document.querySelector<HTMLElement>('.admin-table-top')
-            
-              const loadingTableHead =
-                document.querySelector<HTMLElement>('.admin-table thead')
-            
-              const loadingTableBody =
-                document.querySelector<HTMLElement>('#paymentTableBody')
-            
-              if (loadingSubMenu) {
-                loadingSubMenu.innerHTML = ''
-              }
-            
-              if (loadingSearch) {
-                loadingSearch.innerHTML = ''
-              }
-            
-              if (loadingTableTop) {
-                loadingTableTop.innerHTML = ''
-              }
-            
-              if (loadingTableHead) {
-                loadingTableHead.innerHTML = ''
-              }
-            
-              if (loadingTableBody) {
-                loadingTableBody.innerHTML = ''
-              }
-            
-              if (loadingTitle) {
-                loadingTitle.innerHTML =
-                  page === 'merchant'
-                    ? '▶ 가맹점관리'
-                    : page === 'payment'
-                      ? '▶ 결제관리'
-                      : page === 'payout'
-                        ? '▶ 출금관리'
-                        : page === 'organization'
-                          ? '▶ 조직관리'
-                          : ''
-              }
-            
-              if (loadingSummary) {
-                loadingSummary.innerHTML =
-                  '<div style="' +
-                    'padding:40px 20px;' +
-                    'text-align:center;' +
-                    'color:#777;' +
-                    'font-weight:700;' +
-                  '">' +
-                    '불러오는 중...' +
-                  '</div>'
-              }
-            
-              await new Promise<void>((resolve) => {
-                requestAnimationFrame(() => resolve())
-              })
-            }
 
             if (page === 'tax') {
               const subMenu = document.querySelector('.admin-sub-menu')
