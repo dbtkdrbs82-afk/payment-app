@@ -9760,45 +9760,80 @@ const endDate =
 
 let merchants = result.data || []
 
-if (adminRole === 'MANAGER') {
-  const { data: currentManager, error: managerError } = await supabase
-    .from('admin_users')
-    .select('id')
-    .eq('login_id', adminId)
-    .single()
+if (
+  adminRole === 'MANAGER' ||
+  adminRole === 'AGENCY' ||
+  adminRole === 'BRANCH'
+) {
+  try {
+    const response =
+      await fetch(
+        '/api/admin-me',
+        {
+          method: 'GET',
+          credentials: 'include',
+        }
+      )
 
-  if (managerError || !currentManager) {
-    alert('담당자 정보를 확인하지 못했습니다.')
-    return
-  }
+    const result =
+      await response.json()
 
-  merchants = merchants.filter((merchant) =>
-    Number(merchant.manager_admin_id) === Number(currentManager.id)
-  )
-}
+    if (
+      !response.ok ||
+      !result?.success ||
+      !result?.admin?.id
+    ) {
+      alert(
+        result?.message ||
+          '관리자 정보를 확인하지 못했습니다.'
+      )
 
-if (adminRole === 'AGENCY' || adminRole === 'BRANCH') {
-  const { data: currentAdmin, error: currentAdminError } = await supabase
-    .from('admin_users')
-    .select('id')
-    .eq('login_id', adminId)
-    .single()
+      return
+    }
 
-  if (currentAdminError || !currentAdmin) {
-    alert('조직 정보를 확인하지 못했습니다.')
-    return
-  }
+    const currentAdminId =
+      Number(result.admin.id)
 
-  if (adminRole === 'AGENCY') {
-    merchants = merchants.filter((merchant) =>
-      Number(merchant.agency_admin_id) === Number(currentAdmin.id)
+    if (adminRole === 'MANAGER') {
+      merchants =
+        merchants.filter(
+          (merchant) =>
+            Number(
+              merchant.manager_admin_id
+            ) === currentAdminId
+        )
+    }
+
+    if (adminRole === 'AGENCY') {
+      merchants =
+        merchants.filter(
+          (merchant) =>
+            Number(
+              merchant.agency_admin_id
+            ) === currentAdminId
+        )
+    }
+
+    if (adminRole === 'BRANCH') {
+      merchants =
+        merchants.filter(
+          (merchant) =>
+            Number(
+              merchant.branch_admin_id
+            ) === currentAdminId
+        )
+    }
+  } catch (error) {
+    console.error(
+      '관리자 정보 조회 오류:',
+      error
     )
-  }
 
-  if (adminRole === 'BRANCH') {
-    merchants = merchants.filter((merchant) =>
-      Number(merchant.branch_admin_id) === Number(currentAdmin.id)
+    alert(
+      '관리자 정보를 확인하지 못했습니다.'
     )
+
+    return
   }
 }
 
