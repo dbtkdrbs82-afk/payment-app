@@ -7300,15 +7300,43 @@ return
   if (tableHead) tableHead.innerHTML = ''
   if (paymentTableBody) paymentTableBody.innerHTML = ''
           
-            const { data: adminUsers, error } = await supabase
-              .from('admin_users')
-              .select('*')
-              .order('id', { ascending: true })
-          
-            if (error) {
-              alert('조직 정보를 불러오지 못했습니다: ' + error.message)
-              return
-            }
+  let adminUsers: any[] = []
+
+  try {
+    const response = await fetch(
+      '/api/admin-user-list',
+      {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store'
+      }
+    )
+  
+    const result = await response.json()
+  
+    if (
+      !response.ok ||
+      !result?.success
+    ) {
+      throw new Error(
+        result?.message ||
+        '조직 정보를 불러오지 못했습니다.'
+      )
+    }
+  
+    adminUsers = result.users || []
+  } catch (error) {
+    console.error(
+      '조직 정보 조회 오류:',
+      error
+    )
+  
+    alert(
+      '조직 정보를 불러오지 못했습니다.'
+    )
+  
+    return
+  }
               
           
             let branchUsers = (adminUsers || []).filter((user) =>

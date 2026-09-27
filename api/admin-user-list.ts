@@ -175,7 +175,7 @@ import type {
         await supabase
           .from('admin_users')
           .select(
-            'id, admin_name, login_id, role, status, parent_admin_id'
+            'id, admin_name, login_id, role, status, parent_admin_id, commission_rate_1day, commission_rate_3day, commission_rate_4day, commission_rate_7day'
           )
           .order('id', {
             ascending: true,
