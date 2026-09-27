@@ -19167,8 +19167,12 @@ const getPaymentMerchantOrganization = (
   }
 }
 
-try {
-  const response = await fetch(
+const savedAdminRole =
+  sessionStorage.getItem('admin_role') || ''
+
+  if (savedAdminRole !== 'MASTER') {
+    try {
+      const response = await fetch(
     '/api/admin-me',
     {
       method: 'GET',
@@ -19294,6 +19298,7 @@ try {
   )
 
   return
+}
 }
 
 const paymentFilters = (window as any).paymentFilters
