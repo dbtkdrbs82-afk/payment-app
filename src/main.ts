@@ -2547,49 +2547,70 @@ if (extraFile) {
   }
 }
 
-const applyParams = new URLSearchParams(window.location.search)
-const refCode = (applyParams.get('ref') || '').replace(/-/g, '').trim()
+const applyParams =
+  new URLSearchParams(
+    window.location.search
+  )
+
+const refCode =
+  (applyParams.get('ref') || '')
+    .replace(/-/g, '')
+    .trim()
 
 let matchedManager: any = null
 let matchedAgency: any = null
 let matchedBranch: any = null
 
 if (refCode) {
-  const { data: managerData, error: managerError } = await supabase
-    .from('admin_users')
-    .select('*')
-    .eq('role', 'MANAGER')
-    .eq('status', '사용중')
+  try {
+    const response = await fetch(
+      '/api/public-manager-ref?ref=' +
+        encodeURIComponent(refCode),
+      {
+        method: 'GET',
+        cache: 'no-store',
+      }
+    )
 
-  if (managerError) {
-    alert('담당자 정보를 확인하지 못했습니다: ' + managerError.message)
+    const result = await response.json()
+
+    if (
+      !response.ok ||
+      !result?.success
+    ) {
+      alert(
+        '담당자 정보를 확인하지 못했습니다: ' +
+          (
+            result?.message ||
+            '조회 오류'
+          )
+      )
+
+      return
+    }
+
+    matchedManager =
+      result.manager || null
+
+    matchedAgency =
+      result.agency || null
+
+    matchedBranch =
+      result.branch || null
+  } catch (error) {
+    console.error(
+      '담당자 정보 조회 오류:',
+      error
+    )
+
+    alert(
+      '담당자 정보를 확인하지 못했습니다.'
+    )
+
     return
   }
-
-  matchedManager = (managerData || []).find((user) =>
-    String(user.phone || '').replace(/-/g, '').endsWith(refCode)
-  )
-
-  if (matchedManager?.parent_admin_id) {
-    const { data: agencyData } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('id', matchedManager.parent_admin_id)
-      .single()
-
-    matchedAgency = agencyData || null
-  }
-
-  if (matchedAgency?.parent_admin_id) {
-    const { data: branchData } = await supabase
-      .from('admin_users')
-      .select('*')
-      .eq('id', matchedAgency.parent_admin_id)
-      .single()
-
-    matchedBranch = branchData || null
-  }
 }
+
 
   const insertData = {
     merchant_name: (document.getElementById('apply-merchant-name') as HTMLInputElement)?.value || '',
@@ -8164,13 +8185,43 @@ if (subMenu) {
       titleBox.innerHTML = '▶ 가맹점관리 > 담당자관리'
     }
 
-    const { data: adminUsers, error } = await supabase
-      .from('admin_users')
-      .select('*')
-      .order('id', { ascending: true })
+    let adminUsers: any[] = []
 
-    if (error) {
-      alert('담당자 조회 실패: ' + error.message)
+    try {
+      const adminUsersResponse =
+        await fetch(
+          '/api/admin-user-list',
+          {
+            method: 'GET',
+            credentials: 'include',
+          }
+        )
+    
+      const adminUsersResult =
+        await adminUsersResponse.json()
+    
+      if (
+        !adminUsersResponse.ok ||
+        !adminUsersResult?.success
+      ) {
+        throw new Error(
+          adminUsersResult?.message ||
+            '담당자 목록을 불러오지 못했습니다.'
+        )
+      }
+    
+      adminUsers =
+        adminUsersResult.users || []
+    } catch (error) {
+      console.error(
+        '담당자 목록 조회 오류:',
+        error
+      )
+    
+      alert(
+        '담당자 목록을 불러오지 못했습니다.'
+      )
+    
       return
     }
 
