@@ -18954,17 +18954,41 @@ if (savedPaymentFilters) {
   if (keywordInput) keywordInput.value = savedPaymentFilters.keyword || ''
 }
 
+const paymentQueryStartDate =
+  savedPaymentFilters?.startDate || ''
+
+const paymentQueryEndDate =
+  savedPaymentFilters?.endDate || ''
+
+const paymentQueryStart =
+  paymentQueryStartDate
+    ? paymentQueryStartDate + 'T00:00:00'
+    : ''
+
+const paymentQueryEnd =
+  paymentQueryEndDate
+    ? paymentQueryEndDate + 'T23:59:59.999'
+    : ''
+
 const [
   paymentResult,
   merchantOrgResult,
   adminUsersRequest
 ] = await Promise.all([
   supabase
-    .from('payments')
-    .select('*')
-    .order('created_at', {
-      ascending: false
-    }),
+  .from('payments')
+  .select('*')
+  .gte(
+    'created_at',
+    paymentQueryStart
+  )
+  .lte(
+    'created_at',
+    paymentQueryEnd
+  )
+  .order('created_at', {
+    ascending: false
+  }),
 
   supabase
     .from('merchants')
