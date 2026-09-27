@@ -19036,78 +19036,133 @@ const getPaymentMerchantOrganization = (
   }
 }
 
-if (adminRole === 'MANAGER') {
-  const { data: currentManager, error: managerPaymentError } = await supabase
-    .from('admin_users')
-    .select('id')
-    .eq('login_id', adminId)
-    .single()
-
-  if (managerPaymentError || !currentManager) {
-    alert('담당자 정보를 확인하지 못했습니다.')
-    return
-  }
-
-  const { data: managerMerchants, error: managerMerchantError } = await supabase
-    .from('merchants')
-    .select('id')
-    .eq('manager_admin_id', currentManager.id)
-
-  if (managerMerchantError) {
-    alert('담당 가맹점 정보를 확인하지 못했습니다.')
-    return
-  }
-
-  const managerMerchantIds =
-    (managerMerchants || []).map((merchant) => Number(merchant.id))
-
-  payments = payments.filter((payment) =>
-    managerMerchantIds.includes(Number(payment.merchant_id))
+try {
+  const response = await fetch(
+    '/api/admin-me',
+    {
+      method: 'GET',
+      credentials: 'include',
+      cache: 'no-store'
+    }
   )
-}
 
-if (adminRole === 'AGENCY' || adminRole === 'BRANCH') {
-  const { data: currentAdmin, error: currentAdminError } = await supabase
-    .from('admin_users')
-    .select('id')
-    .eq('login_id', adminId)
-    .single()
+  const result = await response.json()
 
-  if (currentAdminError || !currentAdmin) {
-    alert('조직 정보를 확인하지 못했습니다.')
-    return
-  }
-
-  let merchantQuery = supabase
-    .from('merchants')
-    .select('id')
-
-  if (adminRole === 'AGENCY') {
-    merchantQuery =
-      merchantQuery.eq('agency_admin_id', currentAdmin.id)
-  }
-
-  if (adminRole === 'BRANCH') {
-    merchantQuery =
-      merchantQuery.eq('branch_admin_id', currentAdmin.id)
-  }
-
-  const { data: organizationMerchants, error: organizationMerchantError } =
-    await merchantQuery
-
-  if (organizationMerchantError) {
-    alert('소속 가맹점 정보를 확인하지 못했습니다.')
-    return
-  }
-
-  const organizationMerchantIds =
-    (organizationMerchants || []).map((merchant) =>
-      Number(merchant.id)
+  if (
+    !response.ok ||
+    !result?.success ||
+    !result?.admin?.id
+  ) {
+    alert(
+      result?.message ||
+      '관리자 정보를 확인하지 못했습니다.'
     )
+    return
+  }
 
-  payments = payments.filter((payment) =>
-    organizationMerchantIds.includes(Number(payment.merchant_id))
+  const currentAdminId =
+    Number(result.admin.id)
+
+  const currentAdminRole =
+    String(result.admin.role || '')
+
+  if (currentAdminRole === 'MANAGER') {
+    const {
+      data: managerMerchants,
+      error: managerMerchantError
+    } = await supabase
+      .from('merchants')
+      .select('id')
+      .eq(
+        'manager_admin_id',
+        currentAdminId
+      )
+
+    if (managerMerchantError) {
+      alert(
+        '담당 가맹점 정보를 확인하지 못했습니다.'
+      )
+      return
+    }
+
+    const managerMerchantIds =
+      (managerMerchants || []).map(
+        (merchant) =>
+          Number(merchant.id)
+      )
+
+    payments = payments.filter(
+      (payment) =>
+        managerMerchantIds.includes(
+          Number(payment.merchant_id)
+        )
+    )
+  }
+
+  if (
+    currentAdminRole === 'AGENCY' ||
+    currentAdminRole === 'BRANCH'
+  ) {
+    let merchantQuery = supabase
+      .from('merchants')
+      .select('id')
+
+    if (
+      currentAdminRole === 'AGENCY'
+    ) {
+      merchantQuery =
+        merchantQuery.eq(
+          'agency_admin_id',
+          currentAdminId
+        )
+    }
+
+    if (
+      currentAdminRole === 'BRANCH'
+    ) {
+      merchantQuery =
+        merchantQuery.eq(
+          'branch_admin_id',
+          currentAdminId
+        )
+    }
+
+    const {
+      data: organizationMerchants,
+      error: organizationMerchantError
+    } = await merchantQuery
+
+    if (organizationMerchantError) {
+      alert(
+        '소속 가맹점 정보를 확인하지 못했습니다.'
+      )
+      return
+    }
+
+    const organizationMerchantIds =
+      (organizationMerchants || []).map(
+        (merchant) =>
+          Number(merchant.id)
+      )
+
+    payments = payments.filter(
+      (payment) =>
+        organizationMerchantIds.includes(
+          Number(payment.merchant_id)
+        )
+    )
+  }
+} catch (error) {
+  console.error(
+    '결제내역 관리자 정보 조회 오류:',
+    error
   )
+
+  alert(
+    '관리자 정보를 확인하지 못했습니다.'
+  )
+
+  return
 }
 
 const paymentFilters = (window as any).paymentFilters
