@@ -15913,6 +15913,18 @@ const paymentTableBody =
   document.querySelector<HTMLTableSectionElement>('#paymentTableBody')!
   const tableTop = document.querySelector('.admin-table-top')
 
+  if (summaryBox) {
+    summaryBox.innerHTML = ''
+  }
+  
+  if (tableHead) {
+    tableHead.innerHTML = ''
+  }
+  
+  if (paymentTableBody) {
+    paymentTableBody.innerHTML = ''
+  }
+
   const paymentSubPage =
   sessionStorage.getItem(
     'payment_sub_page'
