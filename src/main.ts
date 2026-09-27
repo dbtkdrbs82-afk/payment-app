@@ -7428,50 +7428,133 @@ const getManagerMerchantCount = (managerId: number) =>
     Number(merchant.manager_admin_id) === managerId
   ).length
 
-  const getMerchantPaymentAmount = (merchantId: number) => {
-    const now = new Date()
-  
-    const currentMonthStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      1,
-      0,
-      0,
-      0,
-      0
-    )
-  
-    const nextMonthStart = new Date(
-      now.getFullYear(),
-      now.getMonth() + 1,
-      1,
-      0,
-      0,
-      0,
-      0
-    )
-  
-    return (orgPayments || [])
-      .filter((payment) => {
-        if (Number(payment.merchant_id) !== merchantId) {
-          return false
-        }
-  
-        const paymentDate = new Date(
-          payment.approved_at || payment.created_at
-        )
-  
-        return (
-          paymentDate >= currentMonthStart &&
-          paymentDate < nextMonthStart
-        )
-      })
-      .reduce(
-        (sum, payment) =>
-          sum + Number(payment.amount || 0),
-        0
+  let organizationMonthOffset = 0
+
+const getOrganizationMonthDate = () => {
+  const now = new Date()
+
+  return new Date(
+    now.getFullYear(),
+    now.getMonth() + organizationMonthOffset,
+    1
+  )
+}
+
+const getOrganizationMonthLabel = () => {
+  const targetDate =
+    getOrganizationMonthDate()
+
+  return (
+    targetDate.getFullYear() +
+    '년 ' +
+    (targetDate.getMonth() + 1) +
+    '월'
+  )
+}
+
+const getMerchantPaymentAmount = (
+  merchantId: number
+) => {
+  const targetDate =
+    getOrganizationMonthDate()
+
+  const monthStart = new Date(
+    targetDate.getFullYear(),
+    targetDate.getMonth(),
+    1,
+    0,
+    0,
+    0,
+    0
+  )
+
+  const nextMonthStart = new Date(
+    targetDate.getFullYear(),
+    targetDate.getMonth() + 1,
+    1,
+    0,
+    0,
+    0,
+    0
+  )
+
+  return (orgPayments || [])
+    .filter((payment) => {
+      if (
+        Number(payment.merchant_id) !==
+        merchantId
+      ) {
+        return false
+      }
+
+      const paymentDate = new Date(
+        payment.approved_at ||
+        payment.created_at
       )
-  }
+
+      return (
+        paymentDate >= monthStart &&
+        paymentDate < nextMonthStart
+      )
+    })
+    .reduce(
+      (sum, payment) =>
+        sum + Number(payment.amount || 0),
+      0
+    )
+}
+
+const getOrganizationMonthToolbar = () => {
+  return (
+    '<div style="' +
+      'display:flex;' +
+      'align-items:center;' +
+      'gap:8px;' +
+      'margin:14px 0 18px 0;' +
+    '">' +
+
+      '<button id="org-month-prev" class="merchant-search-btn">' +
+        '이전' +
+      '</button>' +
+
+      '<button id="org-month-current" class="merchant-search-btn">' +
+        '당월' +
+      '</button>' +
+
+      '<button id="org-month-next" class="merchant-search-btn">' +
+        '다음' +
+      '</button>' +
+
+      '<strong style="margin-left:8px;">' +
+        getOrganizationMonthLabel() +
+      '</strong>' +
+
+    '</div>'
+  )
+}
+
+const bindOrganizationMonthButtons = () => {
+  document
+    .querySelector('#org-month-prev')
+    ?.addEventListener('click', () => {
+      organizationMonthOffset -= 1
+      renderOrganizationHome()
+    })
+
+  document
+    .querySelector('#org-month-current')
+    ?.addEventListener('click', () => {
+      organizationMonthOffset = 0
+      renderOrganizationHome()
+    })
+
+  document
+    .querySelector('#org-month-next')
+    ?.addEventListener('click', () => {
+      organizationMonthOffset += 1
+      renderOrganizationHome()
+    })
+}
   
   const getManagerCommissionSummary = (managerId: number) => {
     const manager = managerUsers.find((user) =>
@@ -7679,6 +7762,8 @@ if (adminRole === 'AGENCY') {
       '<p>대리점 > 담당자 순서로 조회합니다.</p>' +
     '</div>' +
 
+    getOrganizationMonthToolbar() +
+
     '<div class="org-v2-wrap">' +
       '<div class="org-v2-breadcrumb">대리점</div>' +
       '<h3>내 대리점</h3>' +
@@ -7696,8 +7781,9 @@ if (adminRole === 'AGENCY') {
       '<div id="org-v2-detail-area"></div>' +
     '</div>'
 
-  bindAgencyClick()
-  return
+    bindAgencyClick()
+    bindOrganizationMonthButtons()
+    return
 }
  
   const branchCards = branchUsers.map((branch) => {
@@ -7737,6 +7823,8 @@ if (adminRole === 'AGENCY') {
       '<h2>조직관리</h2>' +
       '<p>본사 > 지사 > 대리점 > 담당자 순서로 조회합니다.</p>' +
     '</div>' +
+
+    getOrganizationMonthToolbar() +
     
     '<div class="org-v2-wrap">' +
       '<div class="org-v2-breadcrumb">본사</div>' +
@@ -7745,7 +7833,8 @@ if (adminRole === 'AGENCY') {
       '<div id="org-v2-detail-area"></div>' +
     '</div>'
 
-  bindBranchClick()
+    bindBranchClick()
+    bindOrganizationMonthButtons()
 }
 
 const bindBranchClick = () => {
@@ -7787,17 +7876,39 @@ if (directBranchMerchants.length > 0) {
       '<div class="org-v2-merchant-box">' +
         directBranchMerchants
           .slice(0, 20)
-          .map((merchant, index) =>
-            '<p>' +
-              (index + 1) + '. ' +
-              (merchant.merchant_name || '-') +
-              ' (' +
-              (merchant.id
-                ? 'MER' + String(merchant.id).padStart(4, '0')
-                : '-') +
-              ')' +
-            '</p>'
-          )
+          .map((merchant, index) => {
+            const monthSales =
+              getMerchantPaymentAmount(
+                Number(merchant.id)
+              )
+          
+            return (
+              '<p>' +
+                (index + 1) + '. ' +
+                (merchant.merchant_name || '-') +
+                ' (' +
+                (
+                  merchant.id
+                    ? 'MER' +
+                      String(merchant.id).padStart(4, '0')
+                    : '-'
+                ) +
+                ')' +
+                '<span style="' +
+                  'margin-left:16px;' +
+                  'font-weight:700;' +
+                  'color:' +
+                  (monthSales > 0
+                    ? '#1565c0'
+                    : '#999') +
+                ';">' +
+                  '당월매출 ' +
+                  monthSales.toLocaleString() +
+                  '원' +
+                '</span>' +
+              '</p>'
+            )
+          })
           .join('') +
       '</div>'
   }
@@ -7926,19 +8037,39 @@ const bindAgencyClick = () => {
                 '<div class="org-v2-merchant-box">' +
                   directAgencyMerchants
                     .slice(0, 20)
-                    .map((merchant, index) =>
-                      '<p>' +
-                        (index + 1) + '. ' +
-                        (merchant.merchant_name || '-') +
-                        ' (' +
-                        (
-                          merchant.id
-                            ? 'MER' + String(merchant.id).padStart(4, '0')
-                            : '-'
-                        ) +
-                        ')' +
-                      '</p>'
-                    )
+                    .map((merchant, index) => {
+                      const monthSales =
+                        getMerchantPaymentAmount(
+                          Number(merchant.id)
+                        )
+                    
+                      return (
+                        '<p>' +
+                          (index + 1) + '. ' +
+                          (merchant.merchant_name || '-') +
+                          ' (' +
+                          (
+                            merchant.id
+                              ? 'MER' +
+                                String(merchant.id).padStart(4, '0')
+                              : '-'
+                          ) +
+                          ')' +
+                          '<span style="' +
+                            'margin-left:16px;' +
+                            'font-weight:700;' +
+                            'color:' +
+                            (monthSales > 0
+                              ? '#1565c0'
+                              : '#999') +
+                          ';">' +
+                            '당월매출 ' +
+                            monthSales.toLocaleString() +
+                            '원' +
+                          '</span>' +
+                        '</p>'
+                      )
+                    })
                     .join('') +
                 '</div>'
               : ''
@@ -8031,18 +8162,39 @@ function bindManagerClick() {
         ? '<p>연결된 가맹점이 없습니다.</p>'
         : merchantList
             .slice(0, 20)
-            .map(
-              (merchant, index) =>
+            .map((merchant, index) => {
+              const monthSales =
+                getMerchantPaymentAmount(
+                  Number(merchant.id)
+                )
+            
+              return (
                 '<p>' +
                   (index + 1) + '. ' +
                   (merchant.merchant_name || '-') +
                   ' (' +
-                  (merchant.id
-                    ? 'MER' + String(merchant.id).padStart(4, '0')
-                    : '-') +
+                  (
+                    merchant.id
+                      ? 'MER' +
+                        String(merchant.id).padStart(4, '0')
+                      : '-'
+                  ) +
                   ')' +
+                  '<span style="' +
+                    'margin-left:16px;' +
+                    'font-weight:700;' +
+                    'color:' +
+                    (monthSales > 0
+                      ? '#1565c0'
+                      : '#999') +
+                  ';">' +
+                    '당월매출 ' +
+                    monthSales.toLocaleString() +
+                    '원' +
+                  '</span>' +
                 '</p>'
-            )
+              )
+            })
             .join('')
     ) +
   '</div>'
