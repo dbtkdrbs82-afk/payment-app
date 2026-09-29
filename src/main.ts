@@ -11842,11 +11842,18 @@ const cancelRequestMap =
     request
   )
 })
+
+const payoutMerchantCyclesLoadStart = performance.now()
         
         const { data: merchantCycles, error: merchantCyclesError } =
   await supabase
     .from('merchants')
     .select('id, settlement_cycle')
+
+    console.log(
+      '[출금관리] merchantCycles:',
+      Math.round(performance.now() - payoutMerchantCyclesLoadStart) + 'ms'
+    )
 
 if (merchantCyclesError) {
   alert('가맹점 정산주기 조회 실패: ' + merchantCyclesError.message)
