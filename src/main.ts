@@ -7445,19 +7445,29 @@ if (
             let orgMerchants: any[] = []
 let orgPayments: any[] = []
 
+const cachedOrganizationData =
+  (window as any).nxgOrganizationDataCache
+
 try {
   const organizationDataStart = performance.now()
 
-  const response = await fetch(
-    '/api/admin-organization-data',
-    {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store'
-    }
-  )
+  const response =
+  cachedOrganizationData
+    ? {
+        ok: true
+      }
+    : await fetch(
+        '/api/admin-organization-data',
+        {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store'
+        }
+      )
 
-  const result = await response.json()
+const result =
+  cachedOrganizationData ||
+  await (response as Response).json()
 
 console.log(
   '[조직관리] admin-organization-data:',
@@ -7479,6 +7489,12 @@ if (
 
   orgPayments =
     result.payments || []
+
+    if (!cachedOrganizationData) {
+      ;(window as any).nxgOrganizationDataCache =
+        result
+    }
+    
 } catch (error) {
   console.error(
     '조직관리 데이터 조회 오류:',
