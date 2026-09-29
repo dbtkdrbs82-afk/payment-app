@@ -27489,11 +27489,36 @@ location.reload()
       
             </div>
       
-            <div class="hotel-room-content">
-      
-              <section class="hotel-room-create-card">
+            <div
+  class="hotel-room-content"
+  style="
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    width:100%;
+    padding-top:40px;
+  "
+>
 
-  <h2>룸서비스 운영시간</h2>
+  <section
+    class="hotel-room-create-card"
+    style="
+      width:100%;
+      max-width:520px;
+      padding:36px;
+      box-sizing:border-box;
+    "
+  >
+
+    <h2
+      style="
+        font-size:28px;
+        margin-top:0;
+        margin-bottom:10px;
+      "
+    >
+      룸서비스 운영시간
+    </h2>
 
   <p>
     호텔에서 직접 룸서비스 운영시간을 설정합니다.
