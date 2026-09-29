@@ -27525,11 +27525,24 @@ location.reload()
   </p>
 
   <label
-    style="display:flex; align-items:center; gap:8px; margin:20px 0;"
-  >
+  style="
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    gap:12px;
+    margin:24px 0;
+    width:100%;
+  "
+>
     <input
       id="hotel-service-24h"
       type="checkbox"
+      style="
+  width:22px;
+  height:22px;
+  min-width:22px;
+  margin:0;
+"
       ${
         hotelServiceSettings?.hotel_service_24h
           ? 'checked'
