@@ -11799,13 +11799,18 @@ rows.forEach((row) => {
             '<th>처리</th>' +
           '</tr>'
       }
+
+      const payoutPaymentsLoadStart = performance.now()
     
       const { data: payments, error } = await supabase
         .from('payments')
         .select('*')
         .order('created_at', { ascending: false })
 
-        
+        console.log(
+          '[출금관리] payments:',
+          Math.round(performance.now() - payoutPaymentsLoadStart) + 'ms'
+        )
 
         const { data: cancelRequests, error: cancelRequestError } =
   await supabase
