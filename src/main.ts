@@ -12182,16 +12182,35 @@ let payoutOrgAdmins: any[] = []
 
 try {
   const payoutAdminUsersLoadStart = performance.now()
-  const response = await fetch(
-    '/api/admin-user-list',
-    {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store'
-    }
-  )
 
-  const result = await response.json()
+  const cachedPayoutAdminUsers =
+  (window as any).nxgAdminUsersCache
+  
+  const response =
+  cachedPayoutAdminUsers
+    ? {
+        ok: true,
+        json: async () => ({
+          success: true,
+          users: cachedPayoutAdminUsers
+        })
+      }
+    : await fetch(
+        '/api/admin-user-list',
+        {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store'
+        }
+      )
+
+  const result =
+  cachedPayoutAdminUsers
+    ? {
+        success: true,
+        users: cachedPayoutAdminUsers
+      }
+    : await response.json()
 
   console.log(
     '[출금관리] admin-user-list:',
