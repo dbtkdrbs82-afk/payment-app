@@ -18970,6 +18970,8 @@ const paymentQueryEnd =
     ? paymentQueryEndDate + 'T23:59:59.999'
     : ''
 
+    const paymentLoadStart = performance.now()
+
 const [
   paymentResult,
   merchantOrgResult,
@@ -19016,6 +19018,11 @@ const [
     }
   })
 ])
+
+console.log(
+  '[결제관리] 1차 데이터 조회:',
+  Math.round(performance.now() - paymentLoadStart) + 'ms'
+)
 
 
 if (paymentResult.error) {
