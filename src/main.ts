@@ -11812,12 +11812,18 @@ rows.forEach((row) => {
           Math.round(performance.now() - payoutPaymentsLoadStart) + 'ms'
         )
 
+        const payoutCancelLoadStart = performance.now()
+
         const { data: cancelRequests, error: cancelRequestError } =
   await supabase
     .from('cancel_requests')
     .select('id, payment_id, status, reason')
     .eq('status', '요청중')
 
+    console.log(
+      '[출금관리] cancel_requests:',
+      Math.round(performance.now() - payoutCancelLoadStart) + 'ms'
+    )
     
 if (cancelRequestError) {
   alert(
