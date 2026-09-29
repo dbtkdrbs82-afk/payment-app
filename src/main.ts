@@ -11889,10 +11889,14 @@ if (holidayError) {
         let accountBalance = 0
 
 try {
+  const payoutTossBalanceLoadStart = performance.now()
   const response = await fetch('/api/toss-balance')
 
   const result = await response.json()
-
+  console.log(
+    '[출금관리] toss-balance:',
+    Math.round(performance.now() - payoutTossBalanceLoadStart) + 'ms'
+  )
   if (result.success) {
     accountBalance =
       Number(
