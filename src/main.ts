@@ -7494,7 +7494,7 @@ if (
       ;(window as any).nxgOrganizationDataCache =
         result
     }
-    
+
 } catch (error) {
   console.error(
     '조직관리 데이터 조회 오류:',
@@ -11558,6 +11558,12 @@ if (page === 'payout') {
       if (subMenu) {
         subMenu.innerHTML = ''
       }
+
+      await new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          resolve()
+        })
+      })
     
       document.querySelectorAll('.payout-sub-tab')
       .forEach((tab) => {
