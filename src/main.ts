@@ -14766,14 +14766,12 @@ const formatDate = (date: Date) => {
   return `${y}-${m}-${d}`
 }
 
-const initialPayoutToday =
-  formatDate(new Date())
+const initialPayoutToday = formatDate(new Date())
 
-payoutStartDate.value =
-  initialPayoutToday
-
-payoutEndDate.value =
-  initialPayoutToday
+if (payoutStartDate && payoutEndDate) {
+  payoutStartDate.value = initialPayoutToday
+  payoutEndDate.value = initialPayoutToday
+}
 
   const changePayoutDate = (
     moveDays: number
