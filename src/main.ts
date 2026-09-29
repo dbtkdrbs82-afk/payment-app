@@ -11522,10 +11522,6 @@ if (page === 'payout') {
           searchBox.innerHTML = ''
         }
       
-        if (summaryBox) {
-          summaryBox.innerHTML = ''
-        
-        }
         
         if (tableHead) {
           tableHead.innerHTML = ''
@@ -11559,11 +11555,7 @@ if (page === 'payout') {
         subMenu.innerHTML = ''
       }
 
-      await new Promise<void>((resolve) => {
-        requestAnimationFrame(() => {
-          resolve()
-        })
-      })
+      
     
       document.querySelectorAll('.payout-sub-tab')
       .forEach((tab) => {
