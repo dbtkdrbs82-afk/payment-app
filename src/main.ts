@@ -18999,19 +18999,7 @@ const [
     branch_admin_id,
     agency_admin_id,
     manager_admin_id
-  `)
-  .in(
-    'id',
-    (
-      await supabase
-        .from('payments')
-        .select('merchant_id')
-        .gte('created_at', paymentQueryStart)
-        .lte('created_at', paymentQueryEnd)
-    ).data
-      ?.map((payment: any) => Number(payment.merchant_id))
-      .filter((id: number) => Number.isFinite(id)) || [-1]
-  ),
+  `),
 
   fetch(
     '/api/admin-user-list',
