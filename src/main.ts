@@ -27466,7 +27466,12 @@ location.reload()
             <button
   type="button"
   onclick="location.href='/merchant-admin'"
-  style="margin-bottom:16px;"
+  style="
+    width:auto;
+    min-width:100px;
+    padding:10px 20px;
+    margin-bottom:16px;
+  "
 >
   홈으로
 </button>
