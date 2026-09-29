@@ -12181,6 +12181,7 @@ if (payoutOrgMerchantError) {
 let payoutOrgAdmins: any[] = []
 
 try {
+  const payoutAdminUsersLoadStart = performance.now()
   const response = await fetch(
     '/api/admin-user-list',
     {
@@ -12191,6 +12192,11 @@ try {
   )
 
   const result = await response.json()
+
+  console.log(
+    '[출금관리] admin-user-list:',
+    Math.round(performance.now() - payoutAdminUsersLoadStart) + 'ms'
+  )
 
   if (
     !response.ok ||
