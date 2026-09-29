@@ -18972,51 +18972,75 @@ const paymentQueryEnd =
 
     const paymentLoadStart = performance.now()
 
+    const measurePaymentRequest = async <T>(
+      name: string,
+      request: PromiseLike<T>
+    ): Promise<T> => {
+      const start = performance.now()
+      const result = await request
+    
+      console.log(
+        '[결제관리] ' + name + ':',
+        Math.round(performance.now() - start) + 'ms'
+      )
+    
+      return result
+    }
+
 const [
   paymentResult,
   merchantOrgResult,
   adminUsersRequest
 ] = await Promise.all([
-  supabase
-  .from('payments')
-  .select('*')
-  .gte(
-    'created_at',
-    paymentQueryStart
-  )
-  .lte(
-    'created_at',
-    paymentQueryEnd
-  )
-  .order('created_at', {
-    ascending: false
-  }),
+  measurePaymentRequest(
+    'payments',
+    supabase
+      .from('payments')
+      .select('*')
+      .gte(
+        'created_at',
+        paymentQueryStart
+      )
+      .lte(
+        'created_at',
+        paymentQueryEnd
+      )
+      .order('created_at', {
+        ascending: false
+      })
+  ),
 
-  supabase
-  .from('merchants')
-  .select(`
-    id,
-    merchant_name,
-    owner_name,
-    branch_admin_id,
-    agency_admin_id,
-    manager_admin_id
-  `),
+  measurePaymentRequest(
+    'merchants',
+    supabase
+      .from('merchants')
+      .select(`
+        id,
+        merchant_name,
+        owner_name,
+        branch_admin_id,
+        agency_admin_id,
+        manager_admin_id
+      `)
+  ),
 
-  fetch(
-    '/api/admin-user-list',
-    {
-      method: 'GET',
-      credentials: 'include',
-      cache: 'no-store'
-    }
-  ).then(async (response) => {
-    return {
-      response,
-      result:
-        await response.json()
-    }
-  })
+  measurePaymentRequest(
+    'admin-user-list',
+    fetch(
+      '/api/admin-user-list',
+      {
+        method: 'GET',
+        credentials: 'include',
+        cache: 'no-store'
+      }
+    ).then(async (response) => {
+      return {
+        response,
+        result:
+          await response.json()
+      }
+    })
+  )
 ])
 
 console.log(
