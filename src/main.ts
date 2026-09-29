@@ -11888,37 +11888,56 @@ if (holidayError) {
         
         let accountBalance = 0
 
+        let payoutBalanceLoaded = false
+
         const cachedPayoutTossBalance =
   (window as any).nxgPayoutTossBalanceCache
 
-try {
-  const payoutTossBalanceLoadStart = performance.now()
-  const response =
-  cachedPayoutTossBalance
-    ? {
-        ok: true
-      }
-    : await fetch('/api/toss-balance')
-
-const result =
-  cachedPayoutTossBalance ||
-  await (response as Response).json()
-  console.log(
-    '[출금관리] toss-balance:',
-    Math.round(performance.now() - payoutTossBalanceLoadStart) + 'ms'
-  )
-  if (result.success) {
-    accountBalance =
-      Number(
-        result.data?.entityBody?.availableAmount?.value || 0
+  const loadPayoutTossBalance = async () => {
+    try {
+      const payoutTossBalanceLoadStart = performance.now()
+  
+      const response =
+        cachedPayoutTossBalance
+          ? {
+              ok: true
+            }
+          : await fetch('/api/toss-balance')
+  
+      const result =
+        cachedPayoutTossBalance ||
+        await (response as Response).json()
+  
+      console.log(
+        '[출금관리] toss-balance:',
+        Math.round(performance.now() - payoutTossBalanceLoadStart) + 'ms'
       )
+  
+      if (result.success) {
+        accountBalance =
+          Number(
+            result.data?.entityBody?.availableAmount?.value || 0
+          )
+  
+        payoutBalanceLoaded = true
 
-      ;(window as any).nxgPayoutTossBalanceCache =
-  result
-  }
-} catch (error) {
-  console.error('토스 잔액 조회 실패:', error)
+        const payoutBalanceValue =
+  document.querySelector<HTMLElement>('#payout-balance-value')
+
+if (payoutBalanceValue) {
+  payoutBalanceValue.textContent =
+    accountBalance.toLocaleString() + '원'
 }
+  
+        ;(window as any).nxgPayoutTossBalanceCache =
+          result
+      }
+    } catch (error) {
+      console.error('토스 잔액 조회 실패:', error)
+    }
+  }
+  
+  void loadPayoutTossBalance()
         
 
         const duplicatePaymentKeys = new Set<string>()
@@ -12830,9 +12849,16 @@ ${canViewPayoutBalance ? `
     <div class="payout-summary-icon">🏦</div>
     <div class="payout-summary-info">
       <div class="payout-summary-title">출금계좌잔액</div>
-      <div class="payout-summary-value">
-        ${accountBalance.toLocaleString()}원
-      </div>
+<div
+  id="payout-balance-value"
+  class="payout-summary-value"
+>
+  ${
+    payoutBalanceLoaded
+      ? accountBalance.toLocaleString() + '원'
+      : '조회중...'
+  }
+</div>
     </div>
   </button>
 ` : ''}
@@ -12954,8 +12980,13 @@ ${canViewPayoutBalance ? `
     renderPayoutTable()
   })
 
-        document.querySelector('#payout-balance-button')
+  document.querySelector('#payout-balance-button')
   ?.addEventListener('click', async () => {
+
+    if (!payoutBalanceLoaded) {
+      alert('출금계좌잔액을 조회 중입니다. 잠시 후 다시 눌러주세요.')
+      return
+    }
 
     const adminId =
   sessionStorage.getItem('admin_id') || ''
