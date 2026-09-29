@@ -27463,6 +27463,14 @@ location.reload()
       
             <div class="merchant-pick-header">
       
+            <button
+  type="button"
+  onclick="location.href='/merchant-admin'"
+  style="margin-bottom:16px;"
+>
+  홈으로
+</button>
+
               <div>
                 <h1>룸서비스 설정</h1>
                 <p class="hotel-room-admin-desc">
