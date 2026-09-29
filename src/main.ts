@@ -9901,18 +9901,34 @@ const merchantSearchButton =
   
     const merchantListLoadStart = performance.now()
 
-    const merchantListResponse =
-    await fetch(
-      '/api/admin-merchant-list',
-      {
-        method: 'GET',
-        credentials: 'include',
-        cache: 'no-store',
+    const cachedMerchantList =
+  (window as any).nxgMerchantListCache
+
+const merchantListResponse =
+  cachedMerchantList
+    ? {
+        ok: true
       }
-    )
-  
-  const merchantListResult =
-    await merchantListResponse.json()
+    : await fetch(
+        '/api/admin-merchant-list',
+        {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store',
+        }
+      )
+
+const merchantListResult =
+  cachedMerchantList ||
+  await (merchantListResponse as Response).json()
+
+    if (
+      merchantListResponse.ok &&
+      merchantListResult?.success
+    ) {
+      ;(window as any).nxgMerchantListCache =
+        merchantListResult
+    }
 
     console.log(
       '[가맹점관리] admin-merchant-list:',
