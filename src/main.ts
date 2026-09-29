@@ -7327,6 +7327,7 @@ return
   let adminUsers: any[] = []
 
   try {
+    const organizationAdminUsersStart = performance.now()
     const response = await fetch(
       '/api/admin-user-list',
       {
@@ -7337,11 +7338,16 @@ return
     )
   
     const result = await response.json()
-  
-    if (
-      !response.ok ||
-      !result?.success
-    ) {
+
+console.log(
+  '[조직관리] admin-user-list:',
+  Math.round(performance.now() - organizationAdminUsersStart) + 'ms'
+)
+
+if (
+  !response.ok ||
+  !result?.success
+) {
       throw new Error(
         result?.message ||
         '조직 정보를 불러오지 못했습니다.'
@@ -7425,6 +7431,8 @@ return
 let orgPayments: any[] = []
 
 try {
+  const organizationDataStart = performance.now()
+
   const response = await fetch(
     '/api/admin-organization-data',
     {
@@ -7436,10 +7444,15 @@ try {
 
   const result = await response.json()
 
-  if (
-    !response.ok ||
-    !result?.success
-  ) {
+console.log(
+  '[조직관리] admin-organization-data:',
+  Math.round(performance.now() - organizationDataStart) + 'ms'
+)
+
+if (
+  !response.ok ||
+  !result?.success
+) {
     throw new Error(
       result?.message ||
       '조직 정보를 불러오지 못했습니다.'
