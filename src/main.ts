@@ -12620,6 +12620,8 @@ let payoutCardView:
             ) {
               return
             }
+
+            
           
             const filteredRows = getFilteredPayoutRows()
 
@@ -14923,7 +14925,14 @@ document.querySelector('#payout-target-filter')
   payoutPage = 1
   renderPayoutTable()
 })    
-      renderPayoutTable()
+const payoutInitialRenderStart = performance.now()
+
+renderPayoutTable()
+
+console.log(
+  '[출금관리] 최초 화면 렌더링:',
+  Math.round(performance.now() - payoutInitialRenderStart) + 'ms'
+)
     
     
 } else if (page === 'order') {
