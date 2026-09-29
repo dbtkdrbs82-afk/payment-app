@@ -26633,6 +26633,12 @@ const staffList =
                 >
                   직원관리
                 </button>
+
+                <button
+  id="hotel-staff-go-service-hours"
+>
+  룸서비스 설정
+</button>
       
                 <button
                   id="hotel-staff-go-card"
@@ -27340,6 +27346,19 @@ location.reload()
               }
             )
       
+            document
+  .querySelector(
+    '#hotel-staff-go-service-hours'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      location.href =
+        '/merchant-hotel-service-hours'
+
+    }
+  )
       
           document
             .querySelector(
@@ -27388,6 +27407,251 @@ location.reload()
             )
       
         }
+
+      } else if (path === '/merchant-hotel-service-hours') {
+
+        const merchantId =
+          Number(
+            sessionStorage.getItem(
+              'login_merchant_id'
+            )
+          )
+      
+        const merchantName =
+          sessionStorage.getItem(
+            'login_merchant_name'
+          ) || ''
+      
+        const merchantType =
+          sessionStorage.getItem(
+            'login_merchant_type'
+          ) || ''
+      
+        if (!merchantId) {
+          alert('로그인이 필요합니다.')
+          location.href = '/merchant-login'
+        }
+      
+        if (merchantType !== '호텔') {
+          alert('호텔 가맹점에서만 사용할 수 있습니다.')
+          location.href = '/merchant-admin'
+        }
+
+        const {
+          data: hotelServiceSettings,
+          error: hotelServiceSettingsError
+        } = await supabase
+          .from('merchants')
+          .select(`
+            hotel_service_start_time,
+            hotel_service_end_time,
+            hotel_service_24h,
+            hotel_service_force_closed_date
+          `)
+          .eq('id', merchantId)
+          .single()
+        
+        if (hotelServiceSettingsError) {
+          alert(
+            '룸서비스 설정을 불러오지 못했습니다: ' +
+            hotelServiceSettingsError.message
+          )
+        }
+      
+        app.innerHTML = `
+          <div class="hotel-room-admin-page">
+      
+            <div class="merchant-pick-header">
+      
+              <div>
+                <h1>룸서비스 설정</h1>
+                <p class="hotel-room-admin-desc">
+                  룸서비스 운영시간을 설정합니다.
+                </p>
+              </div>
+      
+              <div class="merchant-user-box">
+                <strong>${merchantName}님</strong>
+              </div>
+      
+            </div>
+      
+            <div class="hotel-room-content">
+      
+              <section class="hotel-room-create-card">
+
+  <h2>룸서비스 운영시간</h2>
+
+  <p>
+    호텔에서 직접 룸서비스 운영시간을 설정합니다.
+  </p>
+
+  <label
+    style="display:flex; align-items:center; gap:8px; margin:20px 0;"
+  >
+    <input
+      id="hotel-service-24h"
+      type="checkbox"
+      ${
+        hotelServiceSettings?.hotel_service_24h
+          ? 'checked'
+          : ''
+      }
+    />
+    24시간 운영
+  </label>
+
+  <label>
+    시작시간
+  </label>
+
+  <input
+    id="hotel-service-start-time"
+    type="time"
+    value="${
+      hotelServiceSettings?.hotel_service_start_time
+        ?.slice(0, 5) || '07:00'
+    }"
+  />
+
+  <label>
+    마감시간
+  </label>
+
+  <input
+    id="hotel-service-end-time"
+    type="time"
+    value="${
+      hotelServiceSettings?.hotel_service_end_time
+        ?.slice(0, 5) || '23:00'
+    }"
+  />
+
+  <div
+    style="display:flex; gap:10px; margin-top:20px;"
+  >
+    <button
+      id="hotel-service-save-button"
+      type="button"
+    >
+      저장
+    </button>
+
+    <button
+      id="hotel-service-close-now-button"
+      type="button"
+    >
+      지금 마감
+    </button>
+  </div>
+
+</section>
+      
+            </div>
+      
+          </div>
+        `
+      
+        document
+  .querySelector(
+    '#hotel-service-save-button'
+  )
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      const service24h =
+        (
+          document.querySelector(
+            '#hotel-service-24h'
+          ) as HTMLInputElement
+        )?.checked || false
+
+      const startTime =
+        (
+          document.querySelector(
+            '#hotel-service-start-time'
+          ) as HTMLInputElement
+        )?.value || '07:00'
+
+      const endTime =
+        (
+          document.querySelector(
+            '#hotel-service-end-time'
+          ) as HTMLInputElement
+        )?.value || '23:00'
+
+      const {
+        error: saveHotelServiceError
+      } = await supabase
+        .from('merchants')
+        .update({
+          hotel_service_24h: service24h,
+          hotel_service_start_time:
+            startTime,
+          hotel_service_end_time:
+            endTime
+        })
+        .eq('id', merchantId)
+
+      if (saveHotelServiceError) {
+        alert(
+          '룸서비스 운영시간 저장 실패: ' +
+          saveHotelServiceError.message
+        )
+        return
+      }
+
+      alert(
+        '룸서비스 운영시간이 저장되었습니다.'
+      )
+
+    }
+  )
+
+  document
+  .querySelector(
+    '#hotel-service-close-now-button'
+  )
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      const todayKorea =
+        new Intl.DateTimeFormat(
+          'en-CA',
+          {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+          }
+        ).format(new Date())
+
+      const {
+        error: closeHotelServiceError
+      } = await supabase
+        .from('merchants')
+        .update({
+          hotel_service_force_closed_date:
+            todayKorea
+        })
+        .eq('id', merchantId)
+
+      if (closeHotelServiceError) {
+        alert(
+          '룸서비스 마감 처리 실패: ' +
+          closeHotelServiceError.message
+        )
+        return
+      }
+
+      alert(
+        '오늘 룸서비스가 마감되었습니다.'
+      )
+
+    }
+  )
 
       } else if (path === '/merchant-hotel-rooms') {
 
@@ -38960,7 +39224,16 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
               await supabase
                 .from('merchants')
                 .select(
-                  'id, merchant_name, online_pg_company_1, toss_client_key'
+                  `
+                    id,
+                    merchant_name,
+                    online_pg_company_1,
+                    toss_client_key,
+                    hotel_service_start_time,
+                    hotel_service_end_time,
+                    hotel_service_24h,
+                    hotel_service_force_closed_date
+                  `
                 )
                 .eq('id', merchantId)
                 .maybeSingle()
@@ -39525,6 +39798,80 @@ NXG PICK은 결제 처리 및 고객 응대를 위해 필요한 최소한의 개
                 ?.addEventListener(
                   'click',
                   async () => {
+
+                    const nowKorea = new Date()
+
+const todayKorea =
+  new Intl.DateTimeFormat(
+    'en-CA',
+    {
+      timeZone: 'Asia/Seoul',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }
+  ).format(nowKorea)
+
+const currentTimeKorea =
+  new Intl.DateTimeFormat(
+    'en-GB',
+    {
+      timeZone: 'Asia/Seoul',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    }
+  ).format(nowKorea)
+
+if (
+  hotelMerchant
+    .hotel_service_force_closed_date ===
+  todayKorea
+) {
+  alert(
+    '오늘 룸서비스 운영이 마감되었습니다.'
+  )
+  return
+}
+
+if (!hotelMerchant.hotel_service_24h) {
+
+  const startTime =
+    (
+      hotelMerchant
+        .hotel_service_start_time ||
+      '07:00'
+    ).slice(0, 5)
+
+  const endTime =
+    (
+      hotelMerchant
+        .hotel_service_end_time ||
+      '23:00'
+    ).slice(0, 5)
+
+  const isOpen =
+    startTime <= endTime
+      ? (
+          currentTimeKorea >= startTime &&
+          currentTimeKorea < endTime
+        )
+      : (
+          currentTimeKorea >= startTime ||
+          currentTimeKorea < endTime
+        )
+
+  if (!isOpen) {
+    alert(
+      '룸서비스 운영시간이 아닙니다.\n' +
+      '이용시간: ' +
+      startTime +
+      ' ~ ' +
+      endTime
+    )
+    return
+  }
+}
         
                     const totalPrice =
                       hotelCart.reduce(
