@@ -12166,6 +12166,8 @@ branch_admin_name: row.branch_admin_name || '',
         const payoutRows: PayoutGroup[] =
           Object.values(payoutGroupMap)
 
+          const payoutOrgMerchantsLoadStart = performance.now()
+
           const { data: payoutOrgMerchants, error: payoutOrgMerchantError } =
   await supabase
     .from('merchants')
@@ -12176,6 +12178,11 @@ branch_admin_name: row.branch_admin_name || '',
       agency_admin_id,
       manager_admin_id
     `)
+
+    console.log(
+      '[출금관리] payoutOrgMerchants:',
+      Math.round(performance.now() - payoutOrgMerchantsLoadStart) + 'ms'
+    )
 
 if (payoutOrgMerchantError) {
   alert(
