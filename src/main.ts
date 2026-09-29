@@ -9899,6 +9899,7 @@ const merchantSearchButton =
 
   merchantSearchButton?.addEventListener('click', async () => {
   
+    const merchantListLoadStart = performance.now()
 
     const merchantListResponse =
     await fetch(
@@ -9912,6 +9913,11 @@ const merchantSearchButton =
   
   const merchantListResult =
     await merchantListResponse.json()
+
+    console.log(
+      '[가맹점관리] admin-merchant-list:',
+      Math.round(performance.now() - merchantListLoadStart) + 'ms'
+    )
   
   if (
     !merchantListResponse.ok ||
