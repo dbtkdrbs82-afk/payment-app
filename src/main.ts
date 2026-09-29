@@ -19024,23 +19024,33 @@ const [
       `)
   ),
 
-  measurePaymentRequest(
-    'admin-user-list',
-    fetch(
-      '/api/admin-user-list',
-      {
-        method: 'GET',
-        credentials: 'include',
-        cache: 'no-store'
-      }
-    ).then(async (response) => {
-      return {
-        response,
-        result:
-          await response.json()
+  (window as any).nxgAdminUsersCache
+  ? Promise.resolve({
+      response: {
+        ok: true
+      },
+      result: {
+        success: true,
+        users: (window as any).nxgAdminUsersCache
       }
     })
-  )
+  : measurePaymentRequest(
+      'admin-user-list',
+      fetch(
+        '/api/admin-user-list',
+        {
+          method: 'GET',
+          credentials: 'include',
+          cache: 'no-store'
+        }
+      ).then(async (response) => {
+        return {
+          response,
+          result:
+            await response.json()
+        }
+      })
+    )
 ])
 
 console.log(
@@ -19090,8 +19100,11 @@ const paymentOrgMerchants =
   merchantOrgResult.data || []
 
 
-let paymentOrgAdmins: any[] =
+  let paymentOrgAdmins: any[] =
   adminUsersRequest.result.users || []
+
+;(window as any).nxgAdminUsersCache =
+  paymentOrgAdmins
 
 const paymentMerchantMap =
   new Map<number, any>()
