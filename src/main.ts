@@ -19405,11 +19405,27 @@ if (paymentFilters) {
   }
 }
 
-const { data: paymentCancelRequests, error: paymentCancelRequestError } =
-  await supabase
-    .from('cancel_requests')
-    .select('id, payment_id, status, reason')
-    .eq('status', '요청중')
+const currentPaymentIds =
+  payments
+    .map((payment) => Number(payment.id))
+    .filter((id) => Number.isFinite(id))
+
+const paymentCancelRequestResult =
+  currentPaymentIds.length > 0
+    ? await supabase
+        .from('cancel_requests')
+        .select('id, payment_id, status, reason')
+        .eq('status', '요청중')
+        .in('payment_id', currentPaymentIds)
+    : {
+        data: [],
+        error: null
+      }
+
+const {
+  data: paymentCancelRequests,
+  error: paymentCancelRequestError
+} = paymentCancelRequestResult
 
 if (paymentCancelRequestError) {
   alert(
