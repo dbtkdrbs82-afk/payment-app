@@ -7328,16 +7328,31 @@ return
 
   try {
     const organizationAdminUsersStart = performance.now()
-    const response = await fetch(
-      '/api/admin-user-list',
-      {
-        method: 'GET',
-        credentials: 'include',
-        cache: 'no-store'
-      }
-    )
-  
-    const result = await response.json()
+
+    const cachedOrganizationAdminUsers =
+      (window as any).nxgAdminUsersCache
+
+    const response =
+      cachedOrganizationAdminUsers
+        ? {
+            ok: true
+          }
+        : await fetch(
+            '/api/admin-user-list',
+            {
+              method: 'GET',
+              credentials: 'include',
+              cache: 'no-store'
+            }
+          )
+
+    const result =
+      cachedOrganizationAdminUsers
+        ? {
+            success: true,
+            users: cachedOrganizationAdminUsers
+          }
+        : await (response as Response).json()
 
 console.log(
   '[조직관리] admin-user-list:',
