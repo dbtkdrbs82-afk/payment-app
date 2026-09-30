@@ -7,7 +7,10 @@ import {
     loadTossPayments
   } from '@tosspayments/payment-sdk'
   import QRCode from 'qrcode'
-  import { createWorker } from 'tesseract.js'
+  import {
+    createWorker,
+    PSM
+  } from 'tesseract.js'
 
   const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
@@ -15151,56 +15154,16 @@ function renderMerchantOcrCard() {
     </strong>
 
     <div
-      style="
-        font-size: 13px;
-        margin-bottom: 14px;
-      "
-    >
-      가로·세로 방향 모두 가능합니다.
-    </div>
-
-
-   <div
   style="
-    display: flex;
-    gap: 8px;
+    font-size: 13px;
     margin-bottom: 14px;
   "
 >
-
-  <button
-    id="ocr-v2-landscape"
-    type="button"
-    style="
-      flex: 1;
-      padding: 12px 8px;
-      border: 2px solid #111;
-      border-radius: 10px;
-      background: #111;
-      color: #fff;
-      font-weight: 700;
-    "
-  >
-    가로형 카드
-  </button>
-
-  <button
-    id="ocr-v2-portrait"
-    type="button"
-    style="
-      flex: 1;
-      padding: 12px 8px;
-      border: 2px solid #ddd;
-      border-radius: 10px;
-      background: #fff;
-      color: #333;
-      font-weight: 700;
-    "
-  >
-    세로형 카드
-  </button>
-
+  카드번호와 유효기간이 잘 보이도록 맞춰주세요.
 </div>
+
+
+  
 
 
 <div
@@ -15233,21 +15196,53 @@ function renderMerchantOcrCard() {
 
 
   <div
-    id="ocr-v2-card-guide"
+  id="ocr-v2-card-guide"
+  style="
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 92%;
+    height: 38%;
+    transform: translate(-50%, -50%);
+    border: 3px solid #fff;
+    border-radius: 14px;
+    box-sizing: border-box;
+    pointer-events: none;
+    box-shadow:
+      0 0 0 9999px rgba(0,0,0,0.92);
+  "
+>
+
+  <div
+    id="ocr-v2-number-guide"
     style="
       position: absolute;
-      left: 2.5%;
-      top: 50%;
-      width: 84%;
-      aspect-ratio: 1.586 / 1;
-      transform: translateY(-50%);
-      border: 3px solid #fff;
-      border-radius: 16px;
+      left: 4%;
+      right: 4%;
+      top: 10%;
+      height: 45%;
+      border: 2px dashed rgba(255,255,255,0.9);
+      border-radius: 8px;
       box-sizing: border-box;
-      pointer-events: none;
-      box-shadow: 0 0 0 9999px rgba(0,0,0,0.18);
     "
   ></div>
+
+
+  <div
+    id="ocr-v2-expiry-guide"
+    style="
+      position: absolute;
+      left: 4%;
+      width: 48%;
+      bottom: 8%;
+      height: 27%;
+      border: 2px dashed rgba(255,255,255,0.8);
+      border-radius: 7px;
+      box-sizing: border-box;
+    "
+  ></div>
+
+</div>
 
 
   <div
@@ -15322,16 +15317,10 @@ const ocrV2Video =
   )
 
 
-  const ocrV2LandscapeButton =
-  document.querySelector<HTMLButtonElement>(
-    '#ocr-v2-landscape'
-  )
+  
 
 
-const ocrV2PortraitButton =
-  document.querySelector<HTMLButtonElement>(
-    '#ocr-v2-portrait'
-  )
+
 
 
 const ocrV2CardGuide =
@@ -15339,16 +15328,10 @@ const ocrV2CardGuide =
     '#ocr-v2-card-guide'
   )
 
-
-const ocrV2GuideLabel =
+  const ocrV2NumberGuide =
   document.querySelector<HTMLDivElement>(
-    '#ocr-v2-guide-label'
+    '#ocr-v2-number-guide'
   )
-
-
-let ocrV2CardDirection:
-  'landscape' | 'portrait' =
-  'landscape'
 
 
 const ocrV2CaptureButton =
@@ -15483,120 +15466,7 @@ const ocrV2Status =
 
   
 
-  ocrV2LandscapeButton
-  ?.addEventListener(
-    'click',
-    () => {
-
-      ocrV2CardDirection =
-        'landscape'
-
-
-      if (ocrV2CardGuide) {
-
-        ocrV2CardGuide.style.width =
-  '84%'
-
-        ocrV2CardGuide.style.height =
-          'auto'
-
-        ocrV2CardGuide.style.aspectRatio =
-          '1.586 / 1'
-
-      }
-
-
-      if (ocrV2GuideLabel) {
-
-        ocrV2GuideLabel.textContent =
-          '가로형 카드를 흰색 선에 맞춰주세요'
-
-      }
-
-
-      ocrV2LandscapeButton.style.background =
-        '#111'
-
-      ocrV2LandscapeButton.style.color =
-        '#fff'
-
-      ocrV2LandscapeButton.style.borderColor =
-        '#111'
-
-
-      if (ocrV2PortraitButton) {
-
-        ocrV2PortraitButton.style.background =
-          '#fff'
-
-        ocrV2PortraitButton.style.color =
-          '#333'
-
-        ocrV2PortraitButton.style.borderColor =
-          '#ddd'
-
-      }
-
-    }
-  )
-
-
-ocrV2PortraitButton
-  ?.addEventListener(
-    'click',
-    () => {
-
-      ocrV2CardDirection =
-        'portrait'
-
-
-      if (ocrV2CardGuide) {
-
-        ocrV2CardGuide.style.width =
-  '56%'
-
-ocrV2CardGuide.style.height =
-  'auto'
-
-        ocrV2CardGuide.style.aspectRatio =
-          '1 / 1.586'
-
-      }
-
-
-      if (ocrV2GuideLabel) {
-
-        ocrV2GuideLabel.textContent =
-          '세로형 카드를 흰색 선에 맞춰주세요'
-
-      }
-
-
-      ocrV2PortraitButton.style.background =
-        '#111'
-
-      ocrV2PortraitButton.style.color =
-        '#fff'
-
-      ocrV2PortraitButton.style.borderColor =
-        '#111'
-
-
-      if (ocrV2LandscapeButton) {
-
-        ocrV2LandscapeButton.style.background =
-          '#fff'
-
-        ocrV2LandscapeButton.style.color =
-          '#333'
-
-        ocrV2LandscapeButton.style.borderColor =
-          '#ddd'
-
-      }
-
-    }
-  )
+  
 
 
 void startOcrV2Camera()
@@ -15783,11 +15653,7 @@ const guideDisplayY =
   guideRect.top -
   videoRect.top
 
-const guideDisplayWidth =
-  guideRect.width
 
-const guideDisplayHeight =
-  guideRect.height
 
 
 /*
@@ -15816,14 +15682,40 @@ const sourceY =
   sourceScaleY
 
 
-const sourceWidth =
-  guideDisplayWidth *
+
+
+  const numberGuideRect =
+  ocrV2NumberGuide?.getBoundingClientRect()
+
+if (!numberGuideRect) {
+  throw new Error(
+    '카드번호 가이드를 찾을 수 없습니다.'
+  )
+}
+
+const numberDisplayX =
+  numberGuideRect.left -
+  guideRect.left
+
+const numberDisplayY =
+  numberGuideRect.top -
+  guideRect.top
+
+const numberSourceX =
+  numberDisplayX *
   sourceScaleX
 
-const sourceHeight =
-  guideDisplayHeight *
+const numberSourceY =
+  numberDisplayY *
   sourceScaleY
 
+const numberSourceWidth =
+  numberGuideRect.width *
+  sourceScaleX
+
+const numberSourceHeight =
+  numberGuideRect.height *
+  sourceScaleY
 
 /*
   OCR용 canvas에는
@@ -15832,12 +15724,12 @@ const sourceHeight =
 
 ocrV2Canvas.width =
   Math.round(
-    sourceWidth
+    numberSourceWidth
   )
 
 ocrV2Canvas.height =
   Math.round(
-    sourceHeight
+    numberSourceHeight
   )
 
 
@@ -15852,10 +15744,10 @@ context.clearRect(
 context.drawImage(
   ocrV2Video,
 
-  sourceX,
-  sourceY,
-  sourceWidth,
-  sourceHeight,
+  sourceX + numberSourceX,
+  sourceY + numberSourceY,
+  numberSourceWidth,
+  numberSourceHeight,
 
   0,
   0,
@@ -15965,54 +15857,27 @@ const createRotatedOcrCanvas =
   }
 
 
-  const ocrV2RotationCandidates = (
-    ocrV2CardDirection ===
-    'landscape'
+  const ocrV2RotationCandidates = [
+
+    /*
+      카드번호 + 유효기간 영역만 촬영한다.
   
-      ? [
+      사용자가 숫자가 가로로 보이도록
+      가이드에 맞추는 방식이므로
+      정상 방향과 180도 방향만 검사한다.
+    */
   
-          /*
-            가로형 카드
+    createRotatedOcrCanvas(
+      ocrV2Canvas,
+      0
+    ),
   
-            정상 방향과
-            거꾸로 촬영된 방향만 검사한다.
-          */
+    createRotatedOcrCanvas(
+      ocrV2Canvas,
+      180
+    )
   
-          createRotatedOcrCanvas(
-            ocrV2Canvas,
-            0
-          ),
-  
-          createRotatedOcrCanvas(
-            ocrV2Canvas,
-            180
-          )
-  
-        ]
-  
-      : [
-  
-          /*
-            세로형 카드
-  
-            세로로 촬영된 카드를
-            OCR이 읽기 쉬운 가로 방향으로
-            회전해서 검사한다.
-          */
-  
-          createRotatedOcrCanvas(
-            ocrV2Canvas,
-            90
-          ),
-  
-          createRotatedOcrCanvas(
-            ocrV2Canvas,
-            270
-          )
-  
-        ]
-  
-  ).filter(
+  ].filter(
     (
       canvas
     ): canvas is HTMLCanvasElement =>
@@ -16037,19 +15902,18 @@ const createOcrProcessedCanvases =
       []
 
 
-    const createCopy =
-      () => {
+      const createCopy = () => {
 
         const canvas =
           document.createElement(
             'canvas'
           )
 
-        canvas.width =
-          sourceCanvas.width
-
+          canvas.width =
+          sourceCanvas.width * 2
+        
         canvas.height =
-          sourceCanvas.height
+          sourceCanvas.height * 2
 
 
         const context =
@@ -16066,13 +15930,32 @@ const createOcrProcessedCanvases =
           return null
 
         }
+       
+        context.imageSmoothingEnabled =
+        true
 
+      context.imageSmoothingQuality =
+        'high'
 
-        context.drawImage(
-          sourceCanvas,
-          0,
-          0
-        )
+      context.globalCompositeOperation =
+        'copy'
+
+      context.filter =
+        'contrast(1.2) brightness(1.05)'
+
+      context.drawImage(
+        sourceCanvas,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      )
+
+      context.filter =
+        'none'
+
+      context.globalCompositeOperation =
+        'source-over'
 
 
         return {
@@ -16177,13 +16060,14 @@ const createOcrProcessedCanvases =
       전처리 이미지 생성 함수
     */
 
-    const createVariant =
+      const createVariant =
       (
         mode:
           'gray' |
           'contrast' |
           'binary' |
-          'inverse'
+          'inverse' |
+          'strongContrast'
       ) => {
 
         const copy =
@@ -16216,7 +16100,7 @@ const createOcrProcessedCanvases =
           i += 4
         ) {
 
-          const gray =
+          let gray =
             pixels[i] *
               0.299 +
             pixels[i + 1] *
@@ -16228,6 +16112,22 @@ const createOcrProcessedCanvases =
           let value =
             gray
 
+            if (
+              mode === 'strongContrast'
+            ) {
+    
+              gray =
+                Math.max(
+                  0,
+                  Math.min(
+                    255,
+                    (gray - 128) *
+                      2.2 +
+                      128
+                  )
+                )
+    
+            }
 
           if (
             mode ===
@@ -16312,21 +16212,11 @@ const createOcrProcessedCanvases =
       5. 반전 흑백
     */
 
-    createVariant(
-      'gray'
-    )
-
-    createVariant(
-      'contrast'
-    )
-
-    createVariant(
-      'binary'
-    )
-
-    createVariant(
-      'inverse'
-    )
+      createVariant('gray')
+      createVariant('contrast')
+      createVariant('strongContrast')
+      createVariant('binary')
+      createVariant('inverse')
 
 
     /*
@@ -16353,6 +16243,16 @@ const ocrV2ProcessedCandidates =
           canvas
         )
     )
+
+    /*
+  OCR 후보가 너무 많아져
+  처리시간이 길어지는 것을 방지한다.
+*/
+const ocrV2RecognitionCandidates =
+ocrV2ProcessedCandidates.slice(
+  0,
+  12
+)
 
     /*
   Tesseract OCR 실행
@@ -16394,15 +16294,11 @@ void (
         )
 
 
-      await worker.setParameters({
-
-        tessedit_char_whitelist:
-          '0123456789',
-
-        preserve_interword_spaces:
-          '1'
-
-      })
+        await worker.setParameters({
+          tessedit_char_whitelist: '0123456789',
+          preserve_interword_spaces: '1',
+          tessedit_pageseg_mode: PSM.SINGLE_LINE
+        })
 
 
       const detectedCandidates:
@@ -16412,7 +16308,7 @@ void (
 
       for (
         const candidateCanvas
-        of ocrV2ProcessedCandidates
+        of ocrV2RecognitionCandidates
       ) {
 
         const result =
@@ -16426,12 +16322,14 @@ void (
           숫자만 메모리에서 추출한다.
         */
 
-        const digits =
-          result.data.text
-            .replace(
-              /\D/g,
-              ''
-            )
+          const digitLines = result.data.text
+          .split(/\r?\n/)
+          .map(line =>
+            line.replace(/\D/g, '')
+          )
+          .filter(Boolean)
+        
+        
 
 
         /*
@@ -16439,52 +16337,46 @@ void (
           13~19자리 범위에서 검사한다.
         */
 
-        if (
-          digits.length >= 13 &&
-          digits.length <= 19
-        ) {
-
-          detectedCandidates.push(
-            digits
-          )
-
-        }
-
-
-        /*
-          OCR이 숫자를 붙여서 읽었을 경우
-          13~19자리 구간도 추가 검사한다.
-        */
-
-        if (
-          digits.length > 19
-        ) {
-
           for (
-            let length = 19;
-            length >= 13;
-            length--
+            let start = 0;
+            start < digitLines.length;
+            start++
           ) {
-
+  
+            let combined = ''
+  
             for (
-              let start = 0;
-              start + length <=
-                digits.length;
-              start++
+              let end = start;
+              end < Math.min(
+                start + 5,
+                digitLines.length
+              );
+              end++
             ) {
-
-              detectedCandidates.push(
-                digits.slice(
-                  start,
-                  start + length
+  
+              combined +=
+                digitLines[end]
+  
+              if (
+                combined.length > 19
+              ) {
+                break
+              }
+  
+              if (
+                combined.length >= 13 &&
+                combined.length <= 19
+              ) {
+  
+                detectedCandidates.push(
+                  combined
                 )
-              )
-
+  
+              }
+  
             }
-
+  
           }
-
-        }
 
       }
 
@@ -16556,8 +16448,10 @@ void (
   반복 검출되었는지도 함께 계산한다.
 */
 
+
+
 const validCandidates =
-detectedCandidates.filter(
+  detectedCandidates.filter(
   (value) =>
     isValidLuhn(
       value
