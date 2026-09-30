@@ -15328,10 +15328,7 @@ const ocrV2CardGuide =
     '#ocr-v2-card-guide'
   )
 
-  const ocrV2NumberGuide =
-  document.querySelector<HTMLDivElement>(
-    '#ocr-v2-number-guide'
-  )
+  
 
 
 const ocrV2CaptureButton =
@@ -15684,75 +15681,60 @@ const sourceY =
 
 
 
-  const numberGuideRect =
-  ocrV2NumberGuide?.getBoundingClientRect()
+  /*
+  OCR V2
 
-if (!numberGuideRect) {
-  throw new Error(
-    '카드번호 가이드를 찾을 수 없습니다.'
-  )
-}
-
-const numberDisplayX =
-  numberGuideRect.left -
-  guideRect.left
-
-const numberDisplayY =
-  numberGuideRect.top -
-  guideRect.top
-
-const numberSourceX =
-  numberDisplayX *
-  sourceScaleX
-
-const numberSourceY =
-  numberDisplayY *
-  sourceScaleY
-
-const numberSourceWidth =
-  numberGuideRect.width *
-  sourceScaleX
-
-const numberSourceHeight =
-  numberGuideRect.height *
-  sourceScaleY
-
-/*
-  OCR용 canvas에는
-  카드 영역만 들어간다.
+  카드번호 위치가 카드 디자인마다 다르기 때문에
+  특정 점선 영역만 자르지 않고
+  흰색 카드 가이드 전체를 OCR 원본으로 사용한다.
 */
 
+const cardSourceWidth =
+guideRect.width *
+sourceScaleX
+
+const cardSourceHeight =
+guideRect.height *
+sourceScaleY
+
+
 ocrV2Canvas.width =
+Math.max(
+  1,
   Math.round(
-    numberSourceWidth
+    cardSourceWidth
   )
+)
 
 ocrV2Canvas.height =
+Math.max(
+  1,
   Math.round(
-    numberSourceHeight
+    cardSourceHeight
   )
+)
 
 
 context.clearRect(
-  0,
-  0,
-  ocrV2Canvas.width,
-  ocrV2Canvas.height
+0,
+0,
+ocrV2Canvas.width,
+ocrV2Canvas.height
 )
 
 
 context.drawImage(
-  ocrV2Video,
+ocrV2Video,
 
-  sourceX + numberSourceX,
-  sourceY + numberSourceY,
-  numberSourceWidth,
-  numberSourceHeight,
+sourceX,
+sourceY,
+cardSourceWidth,
+cardSourceHeight,
 
-  0,
-  0,
-  ocrV2Canvas.width,
-  ocrV2Canvas.height
+0,
+0,
+ocrV2Canvas.width,
+ocrV2Canvas.height
 )
 
 /*
@@ -15856,28 +15838,104 @@ const createRotatedOcrCanvas =
 
   }
 
+  /*
+  카드 전체에서 카드번호 위치 후보를 여러 영역으로 만든다.
+  카드 디자인마다 번호 높이가 다른 문제 대응.
+*/
+const createCardNumberBands =
+(
+  sourceCanvas: HTMLCanvasElement
+) => {
 
-  const ocrV2RotationCandidates = [
+  const bands: HTMLCanvasElement[] = []
 
-    /*
-      카드번호 + 유효기간 영역만 촬영한다.
-  
-      사용자가 숫자가 가로로 보이도록
-      가이드에 맞추는 방식이므로
-      정상 방향과 180도 방향만 검사한다.
-    */
-  
-    createRotatedOcrCanvas(
-      ocrV2Canvas,
-      0
-    ),
-  
-    createRotatedOcrCanvas(
-      ocrV2Canvas,
-      180
+  const bandSettings = [
+    { top: 0.18, height: 0.32 },
+    { top: 0.28, height: 0.32 },
+    { top: 0.38, height: 0.32 },
+    { top: 0.48, height: 0.32 }
+  ]
+
+  for (const setting of bandSettings) {
+
+    const canvas =
+      document.createElement('canvas')
+
+    const context =
+      canvas.getContext(
+        '2d',
+        {
+          willReadFrequently: true
+        }
+      )
+
+    if (!context) {
+      continue
+    }
+
+    const sourceY =
+      Math.round(
+        sourceCanvas.height *
+        setting.top
+      )
+
+    const sourceHeight =
+      Math.min(
+        sourceCanvas.height - sourceY,
+        Math.round(
+          sourceCanvas.height *
+          setting.height
+        )
+      )
+
+    canvas.width =
+      sourceCanvas.width
+
+    canvas.height =
+      sourceHeight
+
+    context.drawImage(
+      sourceCanvas,
+
+      0,
+      sourceY,
+      sourceCanvas.width,
+      sourceHeight,
+
+      0,
+      0,
+      canvas.width,
+      canvas.height
     )
-  
-  ].filter(
+
+    bands.push(canvas)
+  }
+
+  return bands
+}
+
+
+const ocrV2NumberBands =
+createCardNumberBands(
+  ocrV2Canvas
+)
+
+const ocrV2RotationCandidates =
+ocrV2NumberBands
+  .flatMap(
+    (canvas) => [
+      createRotatedOcrCanvas(
+        canvas,
+        0
+      ),
+
+      createRotatedOcrCanvas(
+        canvas,
+        180
+      )
+    ]
+  )
+  .filter(
     (
       canvas
     ): canvas is HTMLCanvasElement =>
@@ -15910,10 +15968,10 @@ const createOcrProcessedCanvases =
           )
 
           canvas.width =
-          sourceCanvas.width * 2
+          sourceCanvas.width * 3
         
         canvas.height =
-          sourceCanvas.height * 2
+          sourceCanvas.height * 3
 
 
         const context =
@@ -16115,7 +16173,6 @@ const createOcrProcessedCanvases =
             if (
               mode === 'strongContrast'
             ) {
-    
               gray =
                 Math.max(
                   0,
@@ -16126,7 +16183,9 @@ const createOcrProcessedCanvases =
                       128
                   )
                 )
-    
+            
+              value =
+                gray
             }
 
           if (
@@ -16244,15 +16303,8 @@ const ocrV2ProcessedCandidates =
         )
     )
 
-    /*
-  OCR 후보가 너무 많아져
-  처리시간이 길어지는 것을 방지한다.
-*/
-const ocrV2RecognitionCandidates =
-ocrV2ProcessedCandidates.slice(
-  0,
-  12
-)
+    const ocrV2RecognitionCandidates =
+    ocrV2ProcessedCandidates
 
     /*
   Tesseract OCR 실행
@@ -16504,8 +16556,6 @@ Array.from(
 const bestCandidate =
 rankedCandidates[0]
 
-const secondCandidate =
-rankedCandidates[1]
 
 
 /*
@@ -16519,15 +16569,10 @@ rankedCandidates[1]
 */
 
 const hasReliableCandidate =
-Boolean(
-  bestCandidate &&
-  bestCandidate[1] >= 2 &&
-  (
-    !secondCandidate ||
-    bestCandidate[1] >
-      secondCandidate[1]
+  Boolean(
+    bestCandidate &&
+    bestCandidate[1] >= 2
   )
-)
 
 
 if (
