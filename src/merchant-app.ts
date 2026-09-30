@@ -15213,33 +15213,6 @@ function renderMerchantOcrCard() {
   "
 >
 
-  <div
-    style="
-      position: absolute;
-      left: 4%;
-      right: 4%;
-      top: 30%;
-      height: 30%;
-      border: 2px dashed rgba(255,255,255,0.95);
-      border-radius: 7px;
-      box-sizing: border-box;
-    "
-  ></div>
-
-  <div
-    style="
-      position: absolute;
-      left: 5%;
-      bottom: 10%;
-      width: 34%;
-      height: 20%;
-      border: 2px dashed rgba(255,255,255,0.85);
-      border-radius: 6px;
-      box-sizing: border-box;
-    "
-  ></div>
-
-
 
 </div>
 
@@ -15936,6 +15909,103 @@ createCardNumberArea(
   ocrV2Canvas
 )
 
+/*
+  유효기간 OCR 영역
+
+  촬영은 한 번만 한다.
+  이미 촬영된 카드 이미지에서
+  카드 하단 영역을 별도로 잘라
+  유효기간 OCR에 사용한다.
+
+  카드마다 유효기간 위치가 다르므로
+  너무 좁게 자르지 않고
+  카드 하단의 넓은 영역을 확보한다.
+*/
+
+const createCardExpiryArea =
+(
+  sourceCanvas: HTMLCanvasElement
+) => {
+
+  const canvas =
+    document.createElement(
+      'canvas'
+    )
+
+  const context =
+    canvas.getContext(
+      '2d',
+      {
+        willReadFrequently: true
+      }
+    )
+
+  if (!context) {
+    return null
+  }
+
+
+  const sourceX =
+    Math.round(
+      sourceCanvas.width *
+      0.02
+    )
+
+  const sourceY =
+    Math.round(
+      sourceCanvas.height *
+      0.52
+    )
+
+  const sourceWidth =
+    Math.round(
+      sourceCanvas.width *
+      0.96
+    )
+
+  const sourceHeight =
+    Math.round(
+      sourceCanvas.height *
+      0.42
+    )
+
+
+  canvas.width =
+    Math.max(
+      1,
+      sourceWidth
+    )
+
+  canvas.height =
+    Math.max(
+      1,
+      sourceHeight
+    )
+
+
+  context.drawImage(
+    sourceCanvas,
+
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  )
+
+
+  return canvas
+}
+
+
+const ocrV2ExpiryArea =
+  createCardExpiryArea(
+    ocrV2Canvas
+  )
 
 const ocrV2RotationCandidates =
 ocrV2NumberArea
@@ -16309,6 +16379,10 @@ const createOcrProcessedCanvases =
   }
 
 
+/*
+  카드번호 OCR 후보
+*/
+
 const ocrV2ProcessedCandidates =
   ocrV2RotationCandidates
     .flatMap(
@@ -16318,8 +16392,77 @@ const ocrV2ProcessedCandidates =
         )
     )
 
-    const ocrV2RecognitionCandidates =
-    ocrV2ProcessedCandidates
+
+const ocrV2RecognitionCandidates =
+  ocrV2ProcessedCandidates.filter(
+    (_, index) =>
+      index === 0 ||
+      index === 1 ||
+      index === 2 ||
+      index === 5 ||
+      index === 6 ||
+      index === 7
+  )
+
+
+/*
+  유효기간 OCR 후보
+
+  카드 촬영은 다시 하지 않는다.
+  같은 촬영 이미지에서 잘라둔
+  ocrV2ExpiryArea를 사용한다.
+
+  카드 방향이 반대인 경우까지 고려해
+  0도 / 180도 두 방향을 검사한다.
+*/
+
+const ocrV2ExpiryRotationCandidates =
+  ocrV2ExpiryArea
+    ? [
+        createRotatedOcrCanvas(
+          ocrV2ExpiryArea,
+          0
+        ),
+
+        createRotatedOcrCanvas(
+          ocrV2ExpiryArea,
+          180
+        )
+      ].filter(
+        (
+          canvas
+        ): canvas is HTMLCanvasElement =>
+          canvas !== null
+      )
+    : []
+
+
+const ocrV2ExpiryProcessedCandidates =
+  ocrV2ExpiryRotationCandidates
+    .flatMap(
+      (canvas) =>
+        createOcrProcessedCanvases(
+          canvas
+        )
+    )
+
+
+/*
+  유효기간은 카드번호보다 짧기 때문에
+  모든 전처리를 돌리지 않는다.
+
+  각 방향에서 필요한 후보만 사용해
+  OCR 시간을 줄인다.
+*/
+
+const ocrV2ExpiryRecognitionCandidates =
+  ocrV2ExpiryProcessedCandidates.filter(
+    (_, index) =>
+      index === 0 ||
+      index === 1 ||
+      index === 5 ||
+      index === 6
+  )
 
     /*
   Tesseract OCR 실행
@@ -16447,6 +16590,202 @@ void (
 
       }
 
+      /*
+  유효기간 OCR
+
+  카드 촬영은 다시 하지 않는다.
+  같은 촬영 이미지에서 만들어둔
+  유효기간 후보 영역만 OCR 한다.
+*/
+
+const detectedExpiryCandidates:
+string[] =
+[]
+
+
+if (ocrV2Status) {
+
+ocrV2Status.textContent =
+  '카드번호 확인 완료 · 유효기간 분석 중...'
+
+}
+
+
+/*
+유효기간은 숫자와 / 만 인식한다.
+*/
+
+await worker.setParameters({
+tessedit_char_whitelist:
+  '0123456789/',
+preserve_interword_spaces:
+  '1',
+tessedit_pageseg_mode:
+  PSM.SINGLE_LINE
+})
+
+
+for (
+const candidateCanvas
+of ocrV2ExpiryRecognitionCandidates
+) {
+
+const result =
+  await worker.recognize(
+    candidateCanvas
+  )
+
+
+/*
+  OCR 원문은 저장하거나
+  로그로 남기지 않는다.
+*/
+
+const expiryDigits =
+  result.data.text.replace(
+    /\D/g,
+    ''
+  )
+
+
+/*
+  OCR 결과 안에서 MMYY 형태의
+  4자리 후보를 모두 검사한다.
+*/
+
+for (
+  let index = 0;
+  index <=
+    expiryDigits.length - 4;
+  index++
+) {
+
+  const candidate =
+    expiryDigits.slice(
+      index,
+      index + 4
+    )
+
+
+  const month =
+    Number(
+      candidate.slice(
+        0,
+        2
+      )
+    )
+
+
+  const year =
+    Number(
+      candidate.slice(
+        2,
+        4
+      )
+    )
+
+
+  /*
+    월은 01 ~ 12만 허용한다.
+  */
+
+  if (
+    month < 1 ||
+    month > 12
+  ) {
+    continue
+  }
+
+
+  /*
+    이미 만료된 카드는
+    유효기간 후보에서 제외한다.
+  */
+
+  const now =
+    new Date()
+
+  const currentYear =
+    now.getFullYear() %
+    100
+
+  const currentMonth =
+    now.getMonth() + 1
+
+
+  const isExpired =
+    year < currentYear ||
+    (
+      year === currentYear &&
+      month < currentMonth
+    )
+
+
+  if (isExpired) {
+    continue
+  }
+
+
+  detectedExpiryCandidates.push(
+    candidate
+  )
+
+}
+
+}
+
+
+/*
+같은 유효기간이 여러 OCR 후보에서
+반복 검출됐는지 계산한다.
+*/
+
+const expiryCandidateCounts =
+new Map<
+  string,
+  number
+>()
+
+
+for (
+const candidate
+of detectedExpiryCandidates
+) {
+
+expiryCandidateCounts.set(
+  candidate,
+  (
+    expiryCandidateCounts.get(
+      candidate
+    ) || 0
+  ) + 1
+)
+
+}
+
+
+const rankedExpiryCandidates =
+Array.from(
+  expiryCandidateCounts.entries()
+)
+  .sort(
+    (
+      first,
+      second
+    ) =>
+      second[1] -
+      first[1]
+  )
+
+
+const bestExpiryCandidate =
+rankedExpiryCandidates[0]
+
+
+const expiryDate =
+bestExpiryCandidate
+  ? bestExpiryCandidate[0]
+  : null
 
       /*
         Luhn 검사
@@ -16599,26 +16938,40 @@ const cardNumber =
   bestCandidate[0]
 
 
-const maskedCardNumber =
-  cardNumber.length >= 12
+  const formattedCardNumber =
+  cardNumber.replace(
+    /(\d{4})(?=\d)/g,
+    '$1 '
+  )
+
+
+const formattedExpiryDate =
+  expiryDate
     ? (
-        cardNumber.slice(
+        expiryDate.slice(
           0,
-          4
+          2
         ) +
-        ' **** **** ' +
-        cardNumber.slice(
-          -4
+        ' / ' +
+        expiryDate.slice(
+          2,
+          4
         )
       )
-    : '인식 완료'
+    : '인식 실패'
 
 
 if (ocrV2Status) {
 
   ocrV2Status.textContent =
-    '인식 성공 : ' +
-    maskedCardNumber
+    '카드번호 : ' +
+    formattedCardNumber +
+    '\n' +
+    '유효기간 : ' +
+    formattedExpiryDate
+
+  ocrV2Status.style.whiteSpace =
+    'pre-line'
 
 }
 
@@ -16723,12 +17076,7 @@ if (ocrV2Status) {
   }
 )()
 
-      if (ocrV2Status) {
-
-        ocrV2Status.textContent =
-          '카드 촬영 완료 · OCR 분석 준비 완료'
-
-      }
+     
 
     }
   )
