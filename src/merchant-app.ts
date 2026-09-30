@@ -7,6 +7,7 @@ import {
     loadTossPayments
   } from '@tosspayments/payment-sdk'
   import QRCode from 'qrcode'
+  import { createWorker } from 'tesseract.js'
 
   const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
@@ -14969,19 +14970,18 @@ function renderMerchantCard() {
   
   
       document
-      .querySelector(
-        '[data-card-menu="ocr"]'
-      )
-      ?.addEventListener(
-        'click',
-        () => {
-    
-          alert(
-            'OCR 카드결제는 준비중입니다.'
-          )
-    
-        }
-      )
+  .querySelector(
+    '[data-card-menu="ocr"]'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      location.href =
+        '/merchant-app/card/ocr'
+
+    }
+  )
   
   
     document
@@ -15055,6 +15055,1348 @@ function renderMerchantCard() {
     }
   )
   }
+
+  /* =========================================
+   모바일 OCR V2 카드결제
+========================================= */
+
+function renderMerchantOcrCard() {
+
+  const merchantId =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+  if (!merchantId) {
+
+    location.replace(
+      '/merchant-app'
+    )
+
+    return
+  }
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    '가맹점'
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+
+        </div>
+
+        <button
+          id="mobile-ocr-card-back"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          이전
+        </button>
+
+      </header>
+
+
+      <main class="merchant-mobile-content">
+
+        <div class="merchant-mobile-page-title">
+
+          <h1>
+            OCR 카드결제
+          </h1>
+
+          <span>
+            카드 촬영 인식 테스트 V2
+          </span>
+
+        </div>
+
+
+        <div class="merchant-mobile-manual-card">
+
+  <div
+    style="
+      padding: 16px;
+      text-align: center;
+    "
+  >
+
+    <strong
+      style="
+        display: block;
+        font-size: 18px;
+        margin-bottom: 6px;
+      "
+    >
+      카드를 가이드 안에 맞춰주세요
+    </strong>
+
+    <div
+      style="
+        font-size: 13px;
+        margin-bottom: 14px;
+      "
+    >
+      가로·세로 방향 모두 가능합니다.
+    </div>
+
+
+    <div
+      id="ocr-v2-camera-wrap"
+      style="
+        position: relative;
+        width: 100%;
+        max-width: 520px;
+        margin: 0 auto;
+        overflow: hidden;
+        border-radius: 14px;
+        background: #111;
+        aspect-ratio: 1.586 / 1;
+      "
+    >
+
+      <video
+        id="ocr-v2-video"
+        autoplay
+        playsinline
+        muted
+        style="
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        "
+      ></video>
+
+
+      <div
+  style="
+    position: absolute;
+    inset: 7%;
+    border: 3px solid white;
+    border-radius: 14px;
+    pointer-events: none;
+    box-sizing: border-box;
+  "
+></div>
+
+
+<div
+  style="
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 52%;
+    height: 82%;
+    transform: translate(-50%, -50%);
+    border: 2px dashed rgba(255,255,255,0.55);
+    border-radius: 14px;
+    pointer-events: none;
+    box-sizing: border-box;
+  "
+></div>
+
+
+<div
+  style="
+    position: absolute;
+    left: 50%;
+    bottom: 3%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.55);
+    color: white;
+    font-size: 12px;
+    white-space: nowrap;
+    pointer-events: none;
+  "
+>
+  가로 · 세로 카드 모두 인식
+</div>
+
+    </div>
+
+
+    <canvas
+      id="ocr-v2-canvas"
+      style="display:none;"
+    ></canvas>
+
+
+    <button
+      id="ocr-v2-start-camera"
+      type="button"
+      style="
+        width: 100%;
+        margin-top: 16px;
+      "
+    >
+      카메라 켜기
+    </button>
+
+
+    <button
+      id="ocr-v2-capture"
+      type="button"
+      disabled
+      style="
+        width: 100%;
+        margin-top: 10px;
+      "
+    >
+      카드 촬영
+    </button>
+
+
+    <div
+      id="ocr-v2-status"
+      style="
+        margin-top: 14px;
+        font-size: 13px;
+        line-height: 1.5;
+      "
+    >
+      카메라를 켜주세요.
+    </div>
+
+  </div>
+
+</div>
+
+      </main>
+
+    </div>
+  `
+
+  let ocrV2CameraStream:
+  MediaStream | null =
+  null
+
+
+const ocrV2Video =
+  document.querySelector<HTMLVideoElement>(
+    '#ocr-v2-video'
+  )
+
+
+const ocrV2StartButton =
+  document.querySelector<HTMLButtonElement>(
+    '#ocr-v2-start-camera'
+  )
+
+
+const ocrV2CaptureButton =
+  document.querySelector<HTMLButtonElement>(
+    '#ocr-v2-capture'
+  )
+
+  const ocrV2Canvas =
+  document.querySelector<HTMLCanvasElement>(
+    '#ocr-v2-canvas'
+  )
+
+const ocrV2Status =
+  document.querySelector<HTMLDivElement>(
+    '#ocr-v2-status'
+  )
+
+
+ocrV2StartButton
+  ?.addEventListener(
+    'click',
+    async () => {
+
+      if (
+        !navigator.mediaDevices ||
+        !navigator.mediaDevices.getUserMedia
+      ) {
+
+        alert(
+          '이 기기에서는 카메라를 사용할 수 없습니다.'
+        )
+
+        return
+      }
+
+
+      try {
+
+        if (ocrV2Status) {
+
+          ocrV2Status.textContent =
+            '카메라를 연결하고 있습니다...'
+
+        }
+
+
+        ocrV2CameraStream =
+          await navigator.mediaDevices.getUserMedia({
+
+            audio: false,
+
+            video: {
+
+              facingMode: {
+                ideal: 'environment'
+              },
+
+              width: {
+                ideal: 1920
+              },
+
+              height: {
+                ideal: 1080
+              }
+
+            }
+
+          })
+
+
+        if (!ocrV2Video) {
+
+          throw new Error(
+            '카메라 화면을 찾을 수 없습니다.'
+          )
+
+        }
+
+
+        ocrV2Video.srcObject =
+          ocrV2CameraStream
+
+
+        await ocrV2Video.play()
+
+
+        if (ocrV2CaptureButton) {
+
+          ocrV2CaptureButton.disabled =
+            false
+
+        }
+
+
+        if (ocrV2StartButton) {
+
+          ocrV2StartButton.textContent =
+            '카메라 다시 연결'
+
+        }
+
+
+        if (ocrV2Status) {
+
+          ocrV2Status.textContent =
+            '카드를 흰색 가이드 안에 맞춰주세요.'
+
+        }
+
+
+      } catch (error) {
+
+        if (ocrV2Status) {
+
+          ocrV2Status.textContent =
+            '카메라를 실행하지 못했습니다.'
+
+        }
+
+
+        alert(
+          '카메라 권한을 허용해주세요.'
+        )
+
+      }
+
+    }
+  )
+
+  ocrV2CaptureButton
+  ?.addEventListener(
+    'click',
+    () => {
+
+      if (
+        !ocrV2Video ||
+        !ocrV2Canvas
+      ) {
+
+        alert(
+          '촬영 화면을 준비하지 못했습니다.'
+        )
+
+        return
+      }
+
+
+      if (
+        ocrV2Video.readyState < 2 ||
+        !ocrV2Video.videoWidth ||
+        !ocrV2Video.videoHeight
+      ) {
+
+        alert(
+          '카메라 화면이 준비되지 않았습니다.'
+        )
+
+        return
+      }
+
+
+      const context =
+        ocrV2Canvas.getContext(
+          '2d',
+          {
+            willReadFrequently: true
+          }
+        )
+
+
+      if (!context) {
+
+        alert(
+          '촬영 이미지를 처리하지 못했습니다.'
+        )
+
+        return
+      }
+
+
+      const videoWidth =
+  ocrV2Video.videoWidth
+
+const videoHeight =
+  ocrV2Video.videoHeight
+
+
+const displayWidth =
+  ocrV2Video.clientWidth
+
+const displayHeight =
+  ocrV2Video.clientHeight
+
+
+if (
+  !displayWidth ||
+  !displayHeight
+) {
+
+  alert(
+    '카메라 화면 크기를 확인하지 못했습니다.'
+  )
+
+  return
+}
+
+
+/*
+  video는 object-fit: cover 상태이므로
+  실제 원본 영상에서 화면 밖으로 잘려나간
+  영역까지 계산한다.
+*/
+
+const videoRatio =
+  videoWidth /
+  videoHeight
+
+const displayRatio =
+  displayWidth /
+  displayHeight
+
+
+let visibleSourceWidth =
+  videoWidth
+
+let visibleSourceHeight =
+  videoHeight
+
+let sourceOffsetX =
+  0
+
+let sourceOffsetY =
+  0
+
+
+if (
+  videoRatio >
+  displayRatio
+) {
+
+  /*
+    원본 영상이 더 가로로 넓음
+    좌우가 잘려서 표시됨
+  */
+
+  visibleSourceWidth =
+    videoHeight *
+    displayRatio
+
+  sourceOffsetX =
+    (
+      videoWidth -
+      visibleSourceWidth
+    ) / 2
+
+} else {
+
+  /*
+    원본 영상이 더 세로로 김
+    위아래가 잘려서 표시됨
+  */
+
+  visibleSourceHeight =
+    videoWidth /
+    displayRatio
+
+  sourceOffsetY =
+    (
+      videoHeight -
+      visibleSourceHeight
+    ) / 2
+
+}
+
+
+/*
+  현재 카드 가이드는
+  inset: 7% 이므로
+
+  화면에 실제 보이는 영상 중
+  중앙 86% 영역만 추출한다.
+*/
+
+const guideInset =
+  0.07
+
+
+const sourceX =
+  sourceOffsetX +
+  visibleSourceWidth *
+  guideInset
+
+const sourceY =
+  sourceOffsetY +
+  visibleSourceHeight *
+  guideInset
+
+
+const sourceWidth =
+  visibleSourceWidth *
+  (
+    1 -
+    guideInset * 2
+  )
+
+const sourceHeight =
+  visibleSourceHeight *
+  (
+    1 -
+    guideInset * 2
+  )
+
+
+/*
+  OCR용 canvas에는
+  카드 영역만 들어간다.
+*/
+
+ocrV2Canvas.width =
+  Math.round(
+    sourceWidth
+  )
+
+ocrV2Canvas.height =
+  Math.round(
+    sourceHeight
+  )
+
+
+context.clearRect(
+  0,
+  0,
+  ocrV2Canvas.width,
+  ocrV2Canvas.height
+)
+
+
+context.drawImage(
+  ocrV2Video,
+
+  sourceX,
+  sourceY,
+  sourceWidth,
+  sourceHeight,
+
+  0,
+  0,
+  ocrV2Canvas.width,
+  ocrV2Canvas.height
+)
+
+/*
+  OCR 방향 후보 생성
+
+  카드 방향에 관계없이 인식할 수 있도록
+  0 / 90 / 180 / 270도 이미지를
+  메모리에서만 생성한다.
+
+  파일 저장 / 업로드는 하지 않는다.
+*/
+
+const createRotatedOcrCanvas =
+  (
+    sourceCanvas:
+      HTMLCanvasElement,
+
+    degree:
+      0 | 90 | 180 | 270
+
+  ) => {
+
+    const rotatedCanvas =
+      document.createElement(
+        'canvas'
+      )
+
+
+    const rotatedContext =
+      rotatedCanvas.getContext(
+        '2d',
+        {
+          willReadFrequently: true
+        }
+      )
+
+
+    if (!rotatedContext) {
+
+      return null
+
+    }
+
+
+    const sourceCanvasWidth =
+      sourceCanvas.width
+
+    const sourceCanvasHeight =
+      sourceCanvas.height
+
+
+    if (
+      degree === 90 ||
+      degree === 270
+    ) {
+
+      rotatedCanvas.width =
+        sourceCanvasHeight
+
+      rotatedCanvas.height =
+        sourceCanvasWidth
+
+    } else {
+
+      rotatedCanvas.width =
+        sourceCanvasWidth
+
+      rotatedCanvas.height =
+        sourceCanvasHeight
+
+    }
+
+
+    rotatedContext.save()
+
+
+    rotatedContext.translate(
+      rotatedCanvas.width / 2,
+      rotatedCanvas.height / 2
+    )
+
+
+    rotatedContext.rotate(
+      degree *
+      Math.PI /
+      180
+    )
+
+
+    rotatedContext.drawImage(
+      sourceCanvas,
+      -sourceCanvasWidth / 2,
+      -sourceCanvasHeight / 2
+    )
+
+
+    rotatedContext.restore()
+
+
+    return rotatedCanvas
+
+  }
+
+
+const ocrV2RotationCandidates = [
+
+  createRotatedOcrCanvas(
+    ocrV2Canvas,
+    0
+  ),
+
+  createRotatedOcrCanvas(
+    ocrV2Canvas,
+    90
+  ),
+
+  createRotatedOcrCanvas(
+    ocrV2Canvas,
+    180
+  ),
+
+  createRotatedOcrCanvas(
+    ocrV2Canvas,
+    270
+  )
+
+].filter(
+  (
+    canvas
+  ): canvas is HTMLCanvasElement =>
+    canvas !== null
+)
+
+/*
+  OCR 전처리
+
+  각 방향의 카드 이미지를
+  고대비 흑백 이미지로 변환한다.
+
+  모든 처리는 메모리 canvas에서만 한다.
+*/
+
+const createOcrProcessedCanvas =
+  (
+    sourceCanvas:
+      HTMLCanvasElement
+  ) => {
+
+    const processedCanvas =
+      document.createElement(
+        'canvas'
+      )
+
+
+    processedCanvas.width =
+      sourceCanvas.width
+
+    processedCanvas.height =
+      sourceCanvas.height
+
+
+    const processedContext =
+      processedCanvas.getContext(
+        '2d',
+        {
+          willReadFrequently: true
+        }
+      )
+
+
+    if (!processedContext) {
+
+      return null
+
+    }
+
+
+    processedContext.drawImage(
+      sourceCanvas,
+      0,
+      0
+    )
+
+
+    const imageData =
+      processedContext.getImageData(
+        0,
+        0,
+        processedCanvas.width,
+        processedCanvas.height
+      )
+
+
+    const pixels =
+      imageData.data
+
+
+    /*
+      카드마다 밝기가 다르므로
+      먼저 전체 평균 밝기를 계산한다.
+    */
+
+    let brightnessTotal =
+      0
+
+
+    for (
+      let i = 0;
+      i < pixels.length;
+      i += 4
+    ) {
+
+      const red =
+        pixels[i]
+
+      const green =
+        pixels[i + 1]
+
+      const blue =
+        pixels[i + 2]
+
+
+      const gray =
+        red * 0.299 +
+        green * 0.587 +
+        blue * 0.114
+
+
+      brightnessTotal +=
+        gray
+
+    }
+
+
+    const pixelCount =
+      pixels.length / 4
+
+
+    const averageBrightness =
+      pixelCount > 0
+        ? brightnessTotal /
+          pixelCount
+        : 128
+
+
+    /*
+      평균 밝기를 기준으로
+      임계값을 자동 조절한다.
+    */
+
+    const threshold =
+      Math.max(
+        75,
+        Math.min(
+          190,
+          averageBrightness *
+          0.92
+        )
+      )
+
+
+    for (
+      let i = 0;
+      i < pixels.length;
+      i += 4
+    ) {
+
+      const red =
+        pixels[i]
+
+      const green =
+        pixels[i + 1]
+
+      const blue =
+        pixels[i + 2]
+
+
+      const gray =
+        red * 0.299 +
+        green * 0.587 +
+        blue * 0.114
+
+
+      /*
+        대비를 조금 더 강하게 만든다.
+      */
+
+      const contrast =
+        Math.max(
+          0,
+          Math.min(
+            255,
+            (
+              gray -
+              128
+            ) *
+            1.45 +
+            128
+          )
+        )
+
+
+      const value =
+        contrast >
+        threshold
+          ? 255
+          : 0
+
+
+      pixels[i] =
+        value
+
+      pixels[i + 1] =
+        value
+
+      pixels[i + 2] =
+        value
+
+    }
+
+
+    processedContext.putImageData(
+      imageData,
+      0,
+      0
+    )
+
+
+    return processedCanvas
+
+  }
+
+
+const ocrV2ProcessedCandidates =
+  ocrV2RotationCandidates
+    .map(
+      (canvas) =>
+        createOcrProcessedCanvas(
+          canvas
+        )
+    )
+    .filter(
+      (
+        canvas
+      ): canvas is HTMLCanvasElement =>
+        canvas !== null
+    )
+
+    /*
+  Tesseract OCR 실행
+
+  현재 단계에서는
+  카드번호 후보를 화면에 표시만 한다.
+  저장 / 업로드 / 결제 전송은 하지 않는다.
+*/
+
+if (ocrV2Status) {
+
+  ocrV2Status.textContent =
+    '카드번호를 분석하고 있습니다...'
+
+}
+
+
+ocrV2CaptureButton.disabled =
+  true
+
+
+void (
+  async () => {
+
+    let worker:
+      Awaited<
+        ReturnType<
+          typeof createWorker
+        >
+      > | null =
+      null
+
+
+    try {
+
+      worker =
+        await createWorker(
+          'eng'
+        )
+
+
+      await worker.setParameters({
+
+        tessedit_char_whitelist:
+          '0123456789',
+
+        preserve_interword_spaces:
+          '1'
+
+      })
+
+
+      const detectedCandidates:
+        string[] =
+        []
+
+
+      for (
+        const candidateCanvas
+        of ocrV2ProcessedCandidates
+      ) {
+
+        const result =
+          await worker.recognize(
+            candidateCanvas
+          )
+
+
+        /*
+          OCR 원문은 로그로 남기지 않는다.
+          숫자만 메모리에서 추출한다.
+        */
+
+        const digits =
+          result.data.text
+            .replace(
+              /\D/g,
+              ''
+            )
+
+
+        /*
+          카드번호는 일반적으로
+          13~19자리 범위에서 검사한다.
+        */
+
+        if (
+          digits.length >= 13 &&
+          digits.length <= 19
+        ) {
+
+          detectedCandidates.push(
+            digits
+          )
+
+        }
+
+
+        /*
+          OCR이 숫자를 붙여서 읽었을 경우
+          13~19자리 구간도 추가 검사한다.
+        */
+
+        if (
+          digits.length > 19
+        ) {
+
+          for (
+            let length = 19;
+            length >= 13;
+            length--
+          ) {
+
+            for (
+              let start = 0;
+              start + length <=
+                digits.length;
+              start++
+            ) {
+
+              detectedCandidates.push(
+                digits.slice(
+                  start,
+                  start + length
+                )
+              )
+
+            }
+
+          }
+
+        }
+
+      }
+
+
+      /*
+        Luhn 검사
+      */
+
+      const isValidLuhn =
+        (
+          value:
+            string
+        ) => {
+
+          let sum =
+            0
+
+          let doubleDigit =
+            false
+
+
+          for (
+            let i =
+              value.length - 1;
+            i >= 0;
+            i--
+          ) {
+
+            let digit =
+              Number(
+                value[i]
+              )
+
+
+            if (doubleDigit) {
+
+              digit *= 2
+
+
+              if (digit > 9) {
+
+                digit -= 9
+
+              }
+
+            }
+
+
+            sum +=
+              digit
+
+            doubleDigit =
+              !doubleDigit
+
+          }
+
+
+          return (
+            sum % 10 === 0
+          )
+
+        }
+
+
+      const validCandidates =
+        Array.from(
+          new Set(
+            detectedCandidates
+              .filter(
+                (value) =>
+                  isValidLuhn(
+                    value
+                  )
+              )
+          )
+        )
+
+
+      if (
+        validCandidates.length === 1
+      ) {
+
+        const cardNumber =
+          validCandidates[0]
+
+
+        /*
+          화면에는 테스트 확인용으로
+          가운데 숫자를 가려서 표시한다.
+        */
+
+        const maskedCardNumber =
+          cardNumber.length >= 12
+            ? (
+                cardNumber.slice(
+                  0,
+                  4
+                ) +
+                ' **** **** ' +
+                cardNumber.slice(
+                  -4
+                )
+              )
+            : '인식 완료'
+
+
+        if (ocrV2Status) {
+
+          ocrV2Status.textContent =
+            '인식 성공 : ' +
+            maskedCardNumber
+
+        }
+
+
+      } else if (
+        validCandidates.length > 1
+      ) {
+
+        if (ocrV2Status) {
+
+          ocrV2Status.textContent =
+            '여러 카드번호 후보가 감지되었습니다. 다시 촬영해주세요.'
+
+        }
+
+
+      } else {
+
+        if (ocrV2Status) {
+
+          ocrV2Status.textContent =
+            '카드번호를 정확히 읽지 못했습니다. 빛 반사를 피해서 다시 촬영해주세요.'
+
+        }
+
+      }
+
+
+    } catch (error) {
+
+      if (ocrV2Status) {
+
+        ocrV2Status.textContent =
+          'OCR 분석 중 오류가 발생했습니다.'
+
+      }
+
+    } finally {
+
+      if (worker) {
+
+        await worker.terminate()
+
+      }
+
+
+      /*
+        전처리 후보 canvas 메모리 정리
+      */
+
+      for (
+        const canvas
+        of ocrV2ProcessedCandidates
+      ) {
+
+        canvas.width =
+          0
+
+        canvas.height =
+          0
+
+      }
+
+
+      for (
+        const canvas
+        of ocrV2RotationCandidates
+      ) {
+
+        canvas.width =
+          0
+
+        canvas.height =
+          0
+
+      }
+
+
+      if (ocrV2Canvas) {
+
+        const clearContext =
+          ocrV2Canvas.getContext(
+            '2d'
+          )
+
+
+        clearContext?.clearRect(
+          0,
+          0,
+          ocrV2Canvas.width,
+          ocrV2Canvas.height
+        )
+
+      }
+
+
+      ocrV2CaptureButton.disabled =
+        false
+
+    }
+
+  }
+)()
+
+      if (ocrV2Status) {
+
+        ocrV2Status.textContent =
+          '카드 촬영 완료 · OCR 분석 준비 완료'
+
+      }
+
+    }
+  )
+
+  document
+  .querySelector(
+    '#mobile-ocr-card-back'
+  )
+  ?.addEventListener(
+    'click',
+    () => {
+
+      if (ocrV2CameraStream) {
+
+        ocrV2CameraStream
+          .getTracks()
+          .forEach(
+            (track) => {
+
+              track.stop()
+
+            }
+          )
+
+        ocrV2CameraStream =
+          null
+
+      }
+
+
+      if (ocrV2Video) {
+
+        ocrV2Video.srcObject =
+          null
+
+      }
+
+
+      location.href =
+        '/merchant-app/card'
+
+    }
+  )
+
+}
 
   /* =========================================
    모바일 수기 카드결제
@@ -20284,6 +21626,13 @@ if (
   ) {
   
     renderMerchantCard()
+
+  } else if (
+    path === '/merchant-app/card/ocr'
+  ) {
+
+    renderMerchantOcrCard()
+
   
 } else if (
     path === '/merchant-app/card/manual'
