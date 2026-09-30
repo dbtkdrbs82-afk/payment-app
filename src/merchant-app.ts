@@ -15201,46 +15201,45 @@ function renderMerchantOcrCard() {
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 92%;
-    height: 38%;
+    width: 90%;
+    aspect-ratio: 1.586 / 1;
     transform: translate(-50%, -50%);
     border: 3px solid #fff;
     border-radius: 14px;
     box-sizing: border-box;
     pointer-events: none;
     box-shadow:
-      0 0 0 9999px rgba(0,0,0,0.92);
+      0 0 0 9999px rgba(0,0,0,0.82);
   "
 >
 
   <div
-    id="ocr-v2-number-guide"
     style="
       position: absolute;
       left: 4%;
       right: 4%;
-      top: 10%;
-      height: 45%;
-      border: 2px dashed rgba(255,255,255,0.9);
-      border-radius: 8px;
-      box-sizing: border-box;
-    "
-  ></div>
-
-
-  <div
-    id="ocr-v2-expiry-guide"
-    style="
-      position: absolute;
-      left: 4%;
-      width: 48%;
-      bottom: 8%;
-      height: 27%;
-      border: 2px dashed rgba(255,255,255,0.8);
+      top: 30%;
+      height: 30%;
+      border: 2px dashed rgba(255,255,255,0.95);
       border-radius: 7px;
       box-sizing: border-box;
     "
   ></div>
+
+  <div
+    style="
+      position: absolute;
+      left: 5%;
+      bottom: 10%;
+      width: 34%;
+      height: 20%;
+      border: 2px dashed rgba(255,255,255,0.85);
+      border-radius: 6px;
+      box-sizing: border-box;
+    "
+  ></div>
+
+
 
 </div>
 
@@ -15838,109 +15837,125 @@ const createRotatedOcrCanvas =
 
   }
 
-  /*
-  카드 전체에서 카드번호 위치 후보를 여러 영역으로 만든다.
-  카드 디자인마다 번호 높이가 다른 문제 대응.
+ /*
+  카드번호 전용 OCR 영역
+
+  화면의 카드번호 점선 영역과 동일하게
+  카드 전체 중 가운데 숫자 영역만 잘라낸다.
 */
-const createCardNumberBands =
+
+const createCardNumberArea =
 (
   sourceCanvas: HTMLCanvasElement
 ) => {
 
-  const bands: HTMLCanvasElement[] = []
-
-  const bandSettings = [
-    { top: 0.18, height: 0.32 },
-    { top: 0.28, height: 0.32 },
-    { top: 0.38, height: 0.32 },
-    { top: 0.48, height: 0.32 }
-  ]
-
-  for (const setting of bandSettings) {
-
-    const canvas =
-      document.createElement('canvas')
-
-    const context =
-      canvas.getContext(
-        '2d',
-        {
-          willReadFrequently: true
-        }
-      )
-
-    if (!context) {
-      continue
-    }
-
-    const sourceY =
-      Math.round(
-        sourceCanvas.height *
-        setting.top
-      )
-
-    const sourceHeight =
-      Math.min(
-        sourceCanvas.height - sourceY,
-        Math.round(
-          sourceCanvas.height *
-          setting.height
-        )
-      )
-
-    canvas.width =
-      sourceCanvas.width
-
-    canvas.height =
-      sourceHeight
-
-    context.drawImage(
-      sourceCanvas,
-
-      0,
-      sourceY,
-      sourceCanvas.width,
-      sourceHeight,
-
-      0,
-      0,
-      canvas.width,
-      canvas.height
+  const canvas =
+    document.createElement(
+      'canvas'
     )
 
-    bands.push(canvas)
+  const context =
+    canvas.getContext(
+      '2d',
+      {
+        willReadFrequently: true
+      }
+    )
+
+  if (!context) {
+    return null
   }
 
-  return bands
+  /*
+    화면 카드번호 가이드:
+    left 4%
+    right 4%
+    top 30%
+    height 30%
+
+    OCR은 글자가 점선에 약간 걸쳐도
+    잘리지 않도록 위/아래 여유를 준다.
+  */
+
+  const sourceX =
+    Math.round(
+      sourceCanvas.width *
+      0.02
+    )
+
+  const sourceY =
+    Math.round(
+      sourceCanvas.height *
+      0.24
+    )
+
+  const sourceWidth =
+    Math.round(
+      sourceCanvas.width *
+      0.96
+    )
+
+  const sourceHeight =
+    Math.round(
+      sourceCanvas.height *
+      0.42
+    )
+
+  canvas.width =
+    Math.max(
+      1,
+      sourceWidth
+    )
+
+  canvas.height =
+    Math.max(
+      1,
+      sourceHeight
+    )
+
+  context.drawImage(
+    sourceCanvas,
+
+    sourceX,
+    sourceY,
+    sourceWidth,
+    sourceHeight,
+
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  )
+
+  return canvas
 }
 
 
-const ocrV2NumberBands =
-createCardNumberBands(
+const ocrV2NumberArea =
+createCardNumberArea(
   ocrV2Canvas
 )
 
+
 const ocrV2RotationCandidates =
-ocrV2NumberBands
-  .flatMap(
-    (canvas) => [
+ocrV2NumberArea
+  ? [
       createRotatedOcrCanvas(
-        canvas,
+        ocrV2NumberArea,
         0
       ),
 
       createRotatedOcrCanvas(
-        canvas,
+        ocrV2NumberArea,
         180
       )
-    ]
-  )
-  .filter(
-    (
-      canvas
-    ): canvas is HTMLCanvasElement =>
-      canvas !== null
-  )
+    ].filter(
+      (
+        canvas
+      ): canvas is HTMLCanvasElement =>
+        canvas !== null
+    )
+  : []
 
 /*
   OCR 다중 전처리
