@@ -15238,7 +15238,7 @@ function renderMerchantOcrCard() {
       position: absolute;
       left: 2.5%;
       top: 50%;
-      width: 95%;
+      width: 84%;
       aspect-ratio: 1.586 / 1;
       transform: translateY(-50%);
       border: 3px solid #fff;
@@ -15495,7 +15495,7 @@ const ocrV2Status =
       if (ocrV2CardGuide) {
 
         ocrV2CardGuide.style.width =
-          '95%'
+  '84%'
 
         ocrV2CardGuide.style.height =
           'auto'
@@ -15553,10 +15553,10 @@ ocrV2PortraitButton
       if (ocrV2CardGuide) {
 
         ocrV2CardGuide.style.width =
-          '62%'
+  '56%'
 
-        ocrV2CardGuide.style.height =
-          '92%'
+ocrV2CardGuide.style.height =
+  'auto'
 
         ocrV2CardGuide.style.aspectRatio =
           '1 / 1.586'
@@ -16020,73 +16020,115 @@ const createRotatedOcrCanvas =
   )
 
 /*
-  OCR 전처리
+  OCR 다중 전처리
 
-  각 방향의 카드 이미지를
-  고대비 흑백 이미지로 변환한다.
-
-  모든 처리는 메모리 canvas에서만 한다.
+  카드 색상 / 음각 / 반사광에 대응하기 위해
+  한 장을 여러 형태로 변환한다.
 */
 
-const createOcrProcessedCanvas =
+const createOcrProcessedCanvases =
   (
     sourceCanvas:
       HTMLCanvasElement
   ) => {
 
-    const processedCanvas =
-      document.createElement(
-        'canvas'
-      )
+    const results:
+      HTMLCanvasElement[] =
+      []
 
 
-    processedCanvas.width =
-      sourceCanvas.width
+    const createCopy =
+      () => {
 
-    processedCanvas.height =
-      sourceCanvas.height
+        const canvas =
+          document.createElement(
+            'canvas'
+          )
+
+        canvas.width =
+          sourceCanvas.width
+
+        canvas.height =
+          sourceCanvas.height
 
 
-    const processedContext =
-      processedCanvas.getContext(
-        '2d',
-        {
-          willReadFrequently: true
+        const context =
+          canvas.getContext(
+            '2d',
+            {
+              willReadFrequently: true
+            }
+          )
+
+
+        if (!context) {
+
+          return null
+
         }
+
+
+        context.drawImage(
+          sourceCanvas,
+          0,
+          0
+        )
+
+
+        return {
+          canvas,
+          context
+        }
+
+      }
+
+
+    /*
+      1. 원본
+    */
+
+    const original =
+      createCopy()
+
+
+    if (original) {
+
+      results.push(
+        original.canvas
       )
-
-
-    if (!processedContext) {
-
-      return null
 
     }
 
 
-    processedContext.drawImage(
-      sourceCanvas,
-      0,
-      0
-    )
-
-
-    const imageData =
-      processedContext.getImageData(
-        0,
-        0,
-        processedCanvas.width,
-        processedCanvas.height
-      )
-
-
-    const pixels =
-      imageData.data
-
-
     /*
-      카드마다 밝기가 다르므로
-      먼저 전체 평균 밝기를 계산한다.
+      나머지 전처리에서 사용할
+      평균 밝기 계산
     */
+
+    const brightnessSource =
+      createCopy()
+
+
+    if (!brightnessSource) {
+
+      return results
+
+    }
+
+
+    const brightnessImageData =
+      brightnessSource.context
+        .getImageData(
+          0,
+          0,
+          brightnessSource.canvas.width,
+          brightnessSource.canvas.height
+        )
+
+
+    const brightnessPixels =
+      brightnessImageData.data
+
 
     let brightnessTotal =
       0
@@ -16094,34 +16136,23 @@ const createOcrProcessedCanvas =
 
     for (
       let i = 0;
-      i < pixels.length;
+      i < brightnessPixels.length;
       i += 4
     ) {
 
-      const red =
-        pixels[i]
-
-      const green =
-        pixels[i + 1]
-
-      const blue =
-        pixels[i + 2]
-
-
-      const gray =
-        red * 0.299 +
-        green * 0.587 +
-        blue * 0.114
-
-
       brightnessTotal +=
-        gray
+        brightnessPixels[i] *
+          0.299 +
+        brightnessPixels[i + 1] *
+          0.587 +
+        brightnessPixels[i + 2] *
+          0.114
 
     }
 
 
     const pixelCount =
-      pixels.length / 4
+      brightnessPixels.length / 4
 
 
     const averageBrightness =
@@ -16131,107 +16162,196 @@ const createOcrProcessedCanvas =
         : 128
 
 
-    /*
-      평균 밝기를 기준으로
-      임계값을 자동 조절한다.
-    */
-
     const threshold =
       Math.max(
-        75,
+        70,
         Math.min(
-          190,
+          195,
           averageBrightness *
-          0.92
+            0.92
         )
       )
 
 
-    for (
-      let i = 0;
-      i < pixels.length;
-      i += 4
-    ) {
+    /*
+      전처리 이미지 생성 함수
+    */
 
-      const red =
-        pixels[i]
+    const createVariant =
+      (
+        mode:
+          'gray' |
+          'contrast' |
+          'binary' |
+          'inverse'
+      ) => {
 
-      const green =
-        pixels[i + 1]
-
-      const blue =
-        pixels[i + 2]
-
-
-      const gray =
-        red * 0.299 +
-        green * 0.587 +
-        blue * 0.114
+        const copy =
+          createCopy()
 
 
-      /*
-        대비를 조금 더 강하게 만든다.
-      */
+        if (!copy) {
 
-      const contrast =
-        Math.max(
-          0,
-          Math.min(
-            255,
-            (
-              gray -
-              128
-            ) *
-            1.45 +
-            128
+          return
+
+        }
+
+
+        const imageData =
+          copy.context.getImageData(
+            0,
+            0,
+            copy.canvas.width,
+            copy.canvas.height
           )
+
+
+        const pixels =
+          imageData.data
+
+
+        for (
+          let i = 0;
+          i < pixels.length;
+          i += 4
+        ) {
+
+          const gray =
+            pixels[i] *
+              0.299 +
+            pixels[i + 1] *
+              0.587 +
+            pixels[i + 2] *
+              0.114
+
+
+          let value =
+            gray
+
+
+          if (
+            mode ===
+            'contrast'
+          ) {
+
+            value =
+              Math.max(
+                0,
+                Math.min(
+                  255,
+                  (
+                    gray -
+                    128
+                  ) *
+                    1.6 +
+                  128
+                )
+              )
+
+          }
+
+
+          if (
+            mode ===
+            'binary'
+          ) {
+
+            value =
+              gray >
+              threshold
+                ? 255
+                : 0
+
+          }
+
+
+          if (
+            mode ===
+            'inverse'
+          ) {
+
+            value =
+              gray >
+              threshold
+                ? 0
+                : 255
+
+          }
+
+
+          pixels[i] =
+            value
+
+          pixels[i + 1] =
+            value
+
+          pixels[i + 2] =
+            value
+
+        }
+
+
+        copy.context.putImageData(
+          imageData,
+          0,
+          0
         )
 
 
-      const value =
-        contrast >
-        threshold
-          ? 255
-          : 0
+        results.push(
+          copy.canvas
+        )
+
+      }
 
 
-      pixels[i] =
-        value
+    /*
+      2. 그레이스케일
+      3. 대비 강화
+      4. 흑백
+      5. 반전 흑백
+    */
 
-      pixels[i + 1] =
-        value
+    createVariant(
+      'gray'
+    )
 
-      pixels[i + 2] =
-        value
+    createVariant(
+      'contrast'
+    )
 
-    }
+    createVariant(
+      'binary'
+    )
 
-
-    processedContext.putImageData(
-      imageData,
-      0,
-      0
+    createVariant(
+      'inverse'
     )
 
 
-    return processedCanvas
+    /*
+      평균 밝기 계산용 임시 canvas 정리
+    */
+
+    brightnessSource.canvas.width =
+      0
+
+    brightnessSource.canvas.height =
+      0
+
+
+    return results
 
   }
 
 
 const ocrV2ProcessedCandidates =
   ocrV2RotationCandidates
-    .map(
+    .flatMap(
       (canvas) =>
-        createOcrProcessedCanvas(
+        createOcrProcessedCanvases(
           canvas
         )
-    )
-    .filter(
-      (
-        canvas
-      ): canvas is HTMLCanvasElement =>
-        canvas !== null
     )
 
     /*
