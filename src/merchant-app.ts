@@ -15160,99 +15160,122 @@ function renderMerchantOcrCard() {
     </div>
 
 
-    <div
-      id="ocr-v2-camera-wrap"
-      style="
-        position: relative;
-        width: 100%;
-        max-width: 520px;
-        margin: 0 auto;
-        overflow: hidden;
-        border-radius: 14px;
-        background: #111;
-        aspect-ratio: 1.586 / 1;
-      "
-    >
-
-      <video
-        id="ocr-v2-video"
-        autoplay
-        playsinline
-        muted
-        style="
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        "
-      ></video>
-
-
-      <div
+   <div
   style="
-    position: absolute;
-    inset: 7%;
-    border: 3px solid white;
-    border-radius: 14px;
-    pointer-events: none;
-    box-sizing: border-box;
-  "
-></div>
-
-
-<div
-  style="
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 52%;
-    height: 82%;
-    transform: translate(-50%, -50%);
-    border: 2px dashed rgba(255,255,255,0.55);
-    border-radius: 14px;
-    pointer-events: none;
-    box-sizing: border-box;
-  "
-></div>
-
-
-<div
-  style="
-    position: absolute;
-    left: 50%;
-    bottom: 3%;
-    transform: translateX(-50%);
-    padding: 5px 10px;
-    border-radius: 20px;
-    background: rgba(0,0,0,0.55);
-    color: white;
-    font-size: 12px;
-    white-space: nowrap;
-    pointer-events: none;
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
   "
 >
-  가로 · 세로 카드 모두 인식
+
+  <button
+    id="ocr-v2-landscape"
+    type="button"
+    style="
+      flex: 1;
+      padding: 12px 8px;
+      border: 2px solid #111;
+      border-radius: 10px;
+      background: #111;
+      color: #fff;
+      font-weight: 700;
+    "
+  >
+    가로형 카드
+  </button>
+
+  <button
+    id="ocr-v2-portrait"
+    type="button"
+    style="
+      flex: 1;
+      padding: 12px 8px;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      background: #fff;
+      color: #333;
+      font-weight: 700;
+    "
+  >
+    세로형 카드
+  </button>
+
 </div>
 
-    </div>
+
+<div
+  id="ocr-v2-camera-wrap"
+  style="
+    position: relative;
+    width: 100%;
+    max-width: 560px;
+    height: min(68vh, 620px);
+    min-height: 420px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 14px;
+    background: #111;
+  "
+>
+
+  <video
+    id="ocr-v2-video"
+    autoplay
+    playsinline
+    muted
+    style="
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    "
+  ></video>
 
 
-    <canvas
-      id="ocr-v2-canvas"
-      style="display:none;"
-    ></canvas>
+  <div
+    id="ocr-v2-card-guide"
+    style="
+      position: absolute;
+      left: 2.5%;
+      top: 50%;
+      width: 95%;
+      aspect-ratio: 1.586 / 1;
+      transform: translateY(-50%);
+      border: 3px solid #fff;
+      border-radius: 16px;
+      box-sizing: border-box;
+      pointer-events: none;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.18);
+    "
+  ></div>
 
 
-    <button
-      id="ocr-v2-start-camera"
-      type="button"
-      style="
-        width: 100%;
-        margin-top: 16px;
-      "
-    >
-      카메라 켜기
-    </button>
+  <div
+    id="ocr-v2-guide-label"
+    style="
+      position: absolute;
+      left: 50%;
+      bottom: 12px;
+      transform: translateX(-50%);
+      padding: 6px 12px;
+      border-radius: 20px;
+      background: rgba(0,0,0,0.65);
+      color: #fff;
+      font-size: 12px;
+      white-space: nowrap;
+      pointer-events: none;
+    "
+  >
+    가로형 카드를 흰색 선에 맞춰주세요
+  </div>
+
+</div>
+
+
+<canvas
+  id="ocr-v2-canvas"
+  style="display:none;"
+></canvas>
 
 
     <button
@@ -15299,10 +15322,33 @@ const ocrV2Video =
   )
 
 
-const ocrV2StartButton =
+  const ocrV2LandscapeButton =
   document.querySelector<HTMLButtonElement>(
-    '#ocr-v2-start-camera'
+    '#ocr-v2-landscape'
   )
+
+
+const ocrV2PortraitButton =
+  document.querySelector<HTMLButtonElement>(
+    '#ocr-v2-portrait'
+  )
+
+
+const ocrV2CardGuide =
+  document.querySelector<HTMLDivElement>(
+    '#ocr-v2-card-guide'
+  )
+
+
+const ocrV2GuideLabel =
+  document.querySelector<HTMLDivElement>(
+    '#ocr-v2-guide-label'
+  )
+
+
+let ocrV2CardDirection:
+  'landscape' | 'portrait' =
+  'landscape'
 
 
 const ocrV2CaptureButton =
@@ -15320,117 +15366,240 @@ const ocrV2Status =
     '#ocr-v2-status'
   )
 
+  const startOcrV2Camera =
+  async () => {
 
-ocrV2StartButton
-  ?.addEventListener(
-    'click',
-    async () => {
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ) {
 
-      if (
-        !navigator.mediaDevices ||
-        !navigator.mediaDevices.getUserMedia
-      ) {
+      alert(
+        '이 기기에서는 카메라를 사용할 수 없습니다.'
+      )
 
-        alert(
-          '이 기기에서는 카메라를 사용할 수 없습니다.'
-        )
+      return
+    }
 
-        return
+
+    try {
+
+      if (ocrV2Status) {
+
+        ocrV2Status.textContent =
+          '카메라를 연결하고 있습니다...'
+
       }
 
 
-      try {
+      if (ocrV2CameraStream) {
 
-        if (ocrV2Status) {
+        ocrV2CameraStream
+          .getTracks()
+          .forEach(
+            (track) => {
 
-          ocrV2Status.textContent =
-            '카메라를 연결하고 있습니다...'
-
-        }
-
-
-        ocrV2CameraStream =
-          await navigator.mediaDevices.getUserMedia({
-
-            audio: false,
-
-            video: {
-
-              facingMode: {
-                ideal: 'environment'
-              },
-
-              width: {
-                ideal: 1920
-              },
-
-              height: {
-                ideal: 1080
-              }
+              track.stop()
 
             }
-
-          })
-
-
-        if (!ocrV2Video) {
-
-          throw new Error(
-            '카메라 화면을 찾을 수 없습니다.'
           )
 
-        }
+      }
 
 
-        ocrV2Video.srcObject =
-          ocrV2CameraStream
+      ocrV2CameraStream =
+        await navigator.mediaDevices.getUserMedia({
+
+          audio: false,
+
+          video: {
+
+            facingMode: {
+              ideal: 'environment'
+            },
+
+            width: {
+              ideal: 1920
+            },
+
+            height: {
+              ideal: 1080
+            }
+
+          }
+
+        })
 
 
-        await ocrV2Video.play()
+      if (!ocrV2Video) {
 
-
-        if (ocrV2CaptureButton) {
-
-          ocrV2CaptureButton.disabled =
-            false
-
-        }
-
-
-        if (ocrV2StartButton) {
-
-          ocrV2StartButton.textContent =
-            '카메라 다시 연결'
-
-        }
-
-
-        if (ocrV2Status) {
-
-          ocrV2Status.textContent =
-            '카드를 흰색 가이드 안에 맞춰주세요.'
-
-        }
-
-
-      } catch (error) {
-
-        if (ocrV2Status) {
-
-          ocrV2Status.textContent =
-            '카메라를 실행하지 못했습니다.'
-
-        }
-
-
-        alert(
-          '카메라 권한을 허용해주세요.'
+        throw new Error(
+          '카메라 화면을 찾을 수 없습니다.'
         )
+
+      }
+
+
+      ocrV2Video.srcObject =
+        ocrV2CameraStream
+
+
+      await ocrV2Video.play()
+
+
+      if (ocrV2CaptureButton) {
+
+        ocrV2CaptureButton.disabled =
+          false
+
+      }
+
+
+      if (ocrV2Status) {
+
+        ocrV2Status.textContent =
+          '카드를 흰색 가이드에 맞춰주세요.'
+
+      }
+
+
+    } catch (error) {
+
+      if (ocrV2Status) {
+
+        ocrV2Status.textContent =
+          '카메라를 실행하지 못했습니다.'
+
+      }
+
+
+      alert(
+        '카메라 권한을 허용해주세요.'
+      )
+
+    }
+
+  }
+
+  
+
+  ocrV2LandscapeButton
+  ?.addEventListener(
+    'click',
+    () => {
+
+      ocrV2CardDirection =
+        'landscape'
+
+
+      if (ocrV2CardGuide) {
+
+        ocrV2CardGuide.style.width =
+          '95%'
+
+        ocrV2CardGuide.style.height =
+          'auto'
+
+        ocrV2CardGuide.style.aspectRatio =
+          '1.586 / 1'
+
+      }
+
+
+      if (ocrV2GuideLabel) {
+
+        ocrV2GuideLabel.textContent =
+          '가로형 카드를 흰색 선에 맞춰주세요'
+
+      }
+
+
+      ocrV2LandscapeButton.style.background =
+        '#111'
+
+      ocrV2LandscapeButton.style.color =
+        '#fff'
+
+      ocrV2LandscapeButton.style.borderColor =
+        '#111'
+
+
+      if (ocrV2PortraitButton) {
+
+        ocrV2PortraitButton.style.background =
+          '#fff'
+
+        ocrV2PortraitButton.style.color =
+          '#333'
+
+        ocrV2PortraitButton.style.borderColor =
+          '#ddd'
 
       }
 
     }
   )
+
+
+ocrV2PortraitButton
+  ?.addEventListener(
+    'click',
+    () => {
+
+      ocrV2CardDirection =
+        'portrait'
+
+
+      if (ocrV2CardGuide) {
+
+        ocrV2CardGuide.style.width =
+          '62%'
+
+        ocrV2CardGuide.style.height =
+          '92%'
+
+        ocrV2CardGuide.style.aspectRatio =
+          '1 / 1.586'
+
+      }
+
+
+      if (ocrV2GuideLabel) {
+
+        ocrV2GuideLabel.textContent =
+          '세로형 카드를 흰색 선에 맞춰주세요'
+
+      }
+
+
+      ocrV2PortraitButton.style.background =
+        '#111'
+
+      ocrV2PortraitButton.style.color =
+        '#fff'
+
+      ocrV2PortraitButton.style.borderColor =
+        '#111'
+
+
+      if (ocrV2LandscapeButton) {
+
+        ocrV2LandscapeButton.style.background =
+          '#fff'
+
+        ocrV2LandscapeButton.style.color =
+          '#333'
+
+        ocrV2LandscapeButton.style.borderColor =
+          '#ddd'
+
+      }
+
+    }
+  )
+
+
+void startOcrV2Camera()
 
   ocrV2CaptureButton
   ?.addEventListener(
@@ -15579,41 +15748,81 @@ if (
 
 
 /*
-  현재 카드 가이드는
-  inset: 7% 이므로
-
-  화면에 실제 보이는 영상 중
-  중앙 86% 영역만 추출한다.
+  선택한 가로형 / 세로형 카드 가이드의
+  실제 화면 위치를 기준으로
+  원본 카메라 좌표를 계산한다.
 */
 
-const guideInset =
-  0.07
+if (!ocrV2CardGuide) {
+
+  alert(
+    '카드 가이드 영역을 찾지 못했습니다.'
+  )
+
+  return
+}
+
+
+const videoRect =
+  ocrV2Video.getBoundingClientRect()
+
+const guideRect =
+  ocrV2CardGuide.getBoundingClientRect()
+
+
+/*
+  video 화면 안에서
+  카드 가이드가 차지하는 위치
+*/
+
+const guideDisplayX =
+  guideRect.left -
+  videoRect.left
+
+const guideDisplayY =
+  guideRect.top -
+  videoRect.top
+
+const guideDisplayWidth =
+  guideRect.width
+
+const guideDisplayHeight =
+  guideRect.height
+
+
+/*
+  화면 좌표를
+  object-fit: cover가 적용된
+  실제 원본 카메라 좌표로 변환한다.
+*/
+
+const sourceScaleX =
+  visibleSourceWidth /
+  displayWidth
+
+const sourceScaleY =
+  visibleSourceHeight /
+  displayHeight
 
 
 const sourceX =
   sourceOffsetX +
-  visibleSourceWidth *
-  guideInset
+  guideDisplayX *
+  sourceScaleX
 
 const sourceY =
   sourceOffsetY +
-  visibleSourceHeight *
-  guideInset
+  guideDisplayY *
+  sourceScaleY
 
 
 const sourceWidth =
-  visibleSourceWidth *
-  (
-    1 -
-    guideInset * 2
-  )
+  guideDisplayWidth *
+  sourceScaleX
 
 const sourceHeight =
-  visibleSourceHeight *
-  (
-    1 -
-    guideInset * 2
-  )
+  guideDisplayHeight *
+  sourceScaleY
 
 
 /*
@@ -15756,34 +15965,59 @@ const createRotatedOcrCanvas =
   }
 
 
-const ocrV2RotationCandidates = [
-
-  createRotatedOcrCanvas(
-    ocrV2Canvas,
-    0
-  ),
-
-  createRotatedOcrCanvas(
-    ocrV2Canvas,
-    90
-  ),
-
-  createRotatedOcrCanvas(
-    ocrV2Canvas,
-    180
-  ),
-
-  createRotatedOcrCanvas(
-    ocrV2Canvas,
-    270
+  const ocrV2RotationCandidates = (
+    ocrV2CardDirection ===
+    'landscape'
+  
+      ? [
+  
+          /*
+            가로형 카드
+  
+            정상 방향과
+            거꾸로 촬영된 방향만 검사한다.
+          */
+  
+          createRotatedOcrCanvas(
+            ocrV2Canvas,
+            0
+          ),
+  
+          createRotatedOcrCanvas(
+            ocrV2Canvas,
+            180
+          )
+  
+        ]
+  
+      : [
+  
+          /*
+            세로형 카드
+  
+            세로로 촬영된 카드를
+            OCR이 읽기 쉬운 가로 방향으로
+            회전해서 검사한다.
+          */
+  
+          createRotatedOcrCanvas(
+            ocrV2Canvas,
+            90
+          ),
+  
+          createRotatedOcrCanvas(
+            ocrV2Canvas,
+            270
+          )
+  
+        ]
+  
+  ).filter(
+    (
+      canvas
+    ): canvas is HTMLCanvasElement =>
+      canvas !== null
   )
-
-].filter(
-  (
-    canvas
-  ): canvas is HTMLCanvasElement =>
-    canvas !== null
-)
 
 /*
   OCR 전처리
@@ -16195,79 +16429,148 @@ void (
         }
 
 
-      const validCandidates =
-        Array.from(
-          new Set(
-            detectedCandidates
-              .filter(
-                (value) =>
-                  isValidLuhn(
-                    value
-                  )
-              )
-          )
+      /*
+  Luhn을 통과한 후보만 남긴다.
+
+  같은 번호가 여러 OCR 방향에서
+  반복 검출되었는지도 함께 계산한다.
+*/
+
+const validCandidates =
+detectedCandidates.filter(
+  (value) =>
+    isValidLuhn(
+      value
+    )
+)
+
+
+const candidateCounts =
+new Map<
+  string,
+  number
+>()
+
+
+for (
+const candidate
+of validCandidates
+) {
+
+candidateCounts.set(
+  candidate,
+  (
+    candidateCounts.get(
+      candidate
+    ) || 0
+  ) + 1
+)
+
+}
+
+
+/*
+반복 검출 횟수가 높은 순서대로 정렬
+*/
+
+const rankedCandidates =
+Array.from(
+  candidateCounts.entries()
+)
+  .sort(
+    (
+      first,
+      second
+    ) =>
+      second[1] -
+      first[1]
+  )
+
+
+const bestCandidate =
+rankedCandidates[0]
+
+const secondCandidate =
+rankedCandidates[1]
+
+
+/*
+성공 조건
+
+1. Luhn 통과
+2. 같은 번호가 최소 2회 이상 검출
+3. 2위 후보보다 더 많이 검출
+
+애매한 결과는 자동 성공시키지 않는다.
+*/
+
+const hasReliableCandidate =
+Boolean(
+  bestCandidate &&
+  bestCandidate[1] >= 2 &&
+  (
+    !secondCandidate ||
+    bestCandidate[1] >
+      secondCandidate[1]
+  )
+)
+
+
+if (
+hasReliableCandidate &&
+bestCandidate
+) {
+
+const cardNumber =
+  bestCandidate[0]
+
+
+const maskedCardNumber =
+  cardNumber.length >= 12
+    ? (
+        cardNumber.slice(
+          0,
+          4
+        ) +
+        ' **** **** ' +
+        cardNumber.slice(
+          -4
         )
+      )
+    : '인식 완료'
 
 
-      if (
-        validCandidates.length === 1
-      ) {
+if (ocrV2Status) {
 
-        const cardNumber =
-          validCandidates[0]
+  ocrV2Status.textContent =
+    '인식 성공 : ' +
+    maskedCardNumber
 
-
-        /*
-          화면에는 테스트 확인용으로
-          가운데 숫자를 가려서 표시한다.
-        */
-
-        const maskedCardNumber =
-          cardNumber.length >= 12
-            ? (
-                cardNumber.slice(
-                  0,
-                  4
-                ) +
-                ' **** **** ' +
-                cardNumber.slice(
-                  -4
-                )
-              )
-            : '인식 완료'
+}
 
 
-        if (ocrV2Status) {
+} else if (
+rankedCandidates.length > 0
+) {
 
-          ocrV2Status.textContent =
-            '인식 성공 : ' +
-            maskedCardNumber
+if (ocrV2Status) {
 
-        }
+  ocrV2Status.textContent =
+    '카드번호 후보는 감지했지만 정확도가 부족합니다. 다시 촬영해주세요.'
 
-
-      } else if (
-        validCandidates.length > 1
-      ) {
-
-        if (ocrV2Status) {
-
-          ocrV2Status.textContent =
-            '여러 카드번호 후보가 감지되었습니다. 다시 촬영해주세요.'
-
-        }
+}
 
 
-      } else {
+} else {
 
-        if (ocrV2Status) {
+if (ocrV2Status) {
 
-          ocrV2Status.textContent =
-            '카드번호를 정확히 읽지 못했습니다. 빛 반사를 피해서 다시 촬영해주세요.'
+  ocrV2Status.textContent =
+    '카드번호를 정확히 읽지 못했습니다. 빛 반사를 피해서 다시 촬영해주세요.'
 
-        }
+}
 
-      }
+}
 
 
     } catch (error) {
