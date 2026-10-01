@@ -15438,12 +15438,12 @@ const ocrV2Status =
   
 
 
-void startOcrV2Camera()
+  void startOcrV2Camera()
 
   ocrV2CaptureButton
-  ?.addEventListener(
-    'click',
-    () => {
+    ?.addEventListener(
+      'click',
+      async () => {
 
       if (
         !ocrV2Video ||
@@ -15707,6 +15707,45 @@ cardSourceHeight,
 0,
 ocrV2Canvas.width,
 ocrV2Canvas.height
+)
+
+/*
+  한 장 촬영 완료 후 카메라 즉시 종료
+
+  촬영 이미지는 갤러리나 서버에 저장하지 않고
+  메모리의 canvas에서만 OCR 처리한다.
+*/
+
+if (ocrV2CameraStream) {
+
+  ocrV2CameraStream
+    .getTracks()
+    .forEach(
+      track =>
+        track.stop()
+    )
+
+  ocrV2CameraStream =
+    null
+}
+
+ocrV2Video.pause()
+ocrV2Video.srcObject =
+  null
+
+if (ocrV2Status) {
+  ocrV2Status.textContent =
+    '사진 촬영 완료 · 카드번호 분석 중...'
+}
+
+await new Promise<void>(
+  resolve =>
+    requestAnimationFrame(
+      () =>
+        requestAnimationFrame(
+          () => resolve()
+        )
+    )
 )
 
 /*
