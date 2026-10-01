@@ -16616,10 +16616,27 @@ const earlyCandidateCounts =
     number
   >()
 
-  for (
-    const candidateCanvas
-    of ocrV2RecognitionCandidates
-  ) {
+  const primaryOcrCandidates =
+  ocrV2RecognitionCandidates.slice(
+    0,
+    1
+  )
+
+const fallbackOcrCandidates =
+  ocrV2RecognitionCandidates.slice(
+    1
+  )
+
+const orderedOcrCandidates =
+  [
+    ...primaryOcrCandidates,
+    ...fallbackOcrCandidates
+  ]
+
+for (
+  const candidateCanvas
+  of orderedOcrCandidates
+) {
   
     const candidateStartIndex =
       detectedCandidates.length
@@ -16777,7 +16794,7 @@ const earlyConfirmedCandidate =
   )
     .find(
       ([, count]) =>
-        count >= 2
+        count >= 1
     )
 
 if (earlyConfirmedCandidate) {
@@ -17075,7 +17092,7 @@ const secondCandidate =
 const hasReliableCandidate =
   Boolean(
     bestCandidate &&
-    bestCandidate[1] >= 2 &&
+    bestCandidate[1] >= 1 &&
     (
       !secondCandidate ||
       bestCandidate[1] >
