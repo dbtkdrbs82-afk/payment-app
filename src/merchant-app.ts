@@ -16569,16 +16569,65 @@ void (
         string[] =
         []
 
+        const isValidLuhn =
+  (
+    value: string
+  ) => {
 
-      for (
-        const candidateCanvas
-        of ocrV2RecognitionCandidates
-      ) {
+    let sum = 0
+    let doubleDigit = false
 
-        const result =
-          await worker.recognize(
-            candidateCanvas
-          )
+    for (
+      let i =
+        value.length - 1;
+      i >= 0;
+      i--
+    ) {
+
+      let digit =
+        Number(
+          value[i]
+        )
+
+      if (doubleDigit) {
+
+        digit *= 2
+
+        if (digit > 9) {
+          digit -= 9
+        }
+      }
+
+      sum += digit
+
+      doubleDigit =
+        !doubleDigit
+    }
+
+    return (
+      sum % 10 === 0
+    )
+  }
+
+
+const earlyCandidateCounts =
+  new Map<
+    string,
+    number
+  >()
+
+  for (
+    const candidateCanvas
+    of ocrV2RecognitionCandidates
+  ) {
+  
+    const candidateStartIndex =
+      detectedCandidates.length
+  
+    const result =
+      await worker.recognize(
+        candidateCanvas
+      )
 
 
         /*
@@ -16690,6 +16739,52 @@ void (
             }
   
           }
+
+          const currentRecognitionCandidates =
+  Array.from(
+    new Set(
+      detectedCandidates
+        .slice(
+          candidateStartIndex
+        )
+        .filter(
+          value =>
+            isValidLuhn(
+              value
+            )
+        )
+    )
+  )
+
+for (
+  const candidate
+  of currentRecognitionCandidates
+) {
+
+  earlyCandidateCounts.set(
+    candidate,
+    (
+      earlyCandidateCounts.get(
+        candidate
+      ) || 0
+    ) + 1
+  )
+}
+
+const earlyConfirmedCandidate =
+  Array.from(
+    earlyCandidateCounts.entries()
+  )
+    .find(
+      ([, count]) =>
+        count >= 2
+    )
+
+if (earlyConfirmedCandidate) {
+
+  break
+
+}
 
       }
 
@@ -16894,60 +16989,7 @@ bestExpiryCandidate
         Luhn 검사
       */
 
-      const isValidLuhn =
-        (
-          value:
-            string
-        ) => {
-
-          let sum =
-            0
-
-          let doubleDigit =
-            false
-
-
-          for (
-            let i =
-              value.length - 1;
-            i >= 0;
-            i--
-          ) {
-
-            let digit =
-              Number(
-                value[i]
-              )
-
-
-            if (doubleDigit) {
-
-              digit *= 2
-
-
-              if (digit > 9) {
-
-                digit -= 9
-
-              }
-
-            }
-
-
-            sum +=
-              digit
-
-            doubleDigit =
-              !doubleDigit
-
-          }
-
-
-          return (
-            sum % 10 === 0
-          )
-
-        }
+     
 
 
       /*
