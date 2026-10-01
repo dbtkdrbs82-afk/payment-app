@@ -16800,6 +16800,8 @@ const detectedExpiryCandidates:
 string[] =
 []
 
+const skipExpiryOcr =
+  true
 
 if (ocrV2Status) {
 
@@ -16824,9 +16826,11 @@ tessedit_pageseg_mode:
 
 
 for (
-const candidateCanvas
-of ocrV2ExpiryRecognitionCandidates
-) {
+  const candidateCanvas
+  of skipExpiryOcr
+    ? []
+    : ocrV2ExpiryRecognitionCandidates
+  ) {
 
 const result =
   await worker.recognize(
@@ -17139,6 +17143,7 @@ if (ocrV2Status) {
 
 }
 
+void startOcrV2Camera()
 
 } else {
 
@@ -17148,7 +17153,7 @@ if (ocrV2Status) {
     '카드번호를 정확히 읽지 못했습니다. 빛 반사를 피해서 다시 촬영해주세요.'
 
 }
-
+void startOcrV2Camera()
 }
 
 
