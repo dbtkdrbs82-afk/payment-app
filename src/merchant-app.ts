@@ -15856,22 +15856,22 @@ const createCardNumberArea =
       0.02
     )
 
-  const sourceY =
+    const sourceY =
     Math.round(
       sourceCanvas.height *
-      0.24
+      0.16
     )
-
+  
   const sourceWidth =
     Math.round(
       sourceCanvas.width *
       0.96
     )
-
+  
   const sourceHeight =
     Math.round(
       sourceCanvas.height *
-      0.42
+      0.54
     )
 
   canvas.width =
