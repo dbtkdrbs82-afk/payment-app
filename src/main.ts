@@ -10529,6 +10529,56 @@ Object.assign(
   merchantDetailResult.merchant
 )
 
+const korpayManualMids =
+  Array.isArray(
+    merchantDetailResult.korpayManualMids
+  )
+    ? merchantDetailResult.korpayManualMids
+    : []
+
+
+const getKorpayManualMidValue = (
+  priority: number,
+  field: 'mid' | 'mkey'
+) => {
+
+  const row =
+    korpayManualMids.find(
+      (item: any) =>
+        Number(item.priority) ===
+        priority
+    )
+
+
+  if (row) {
+    return String(
+      row[field] || ''
+    )
+  }
+
+
+  /*
+   * 1번은 기존 merchants 컬럼 fallback
+   */
+  if (priority === 1) {
+
+    if (field === 'mid') {
+      return String(
+        merchant.korpay_manual_mid ||
+        ''
+      )
+    }
+
+    return String(
+      merchant.korpay_manual_mkey ||
+      ''
+    )
+  }
+
+
+  return ''
+}
+
     if (titleBox) {
       titleBox.innerHTML = '▶ 가맹점관리 > 업체/가맹점 등록'
     }
@@ -10791,8 +10841,61 @@ Object.assign(
     '<label>코페이 단말기 MID</label><input id="korpay_terminal_mid" value="' + (merchant.korpay_terminal_mid || '') + '" />' +
     '<label>코페이 단말기 MKEY</label><input id="korpay_terminal_mkey" value="' + (merchant.korpay_terminal_mkey || '') + '" />' +
 
-    '<label>코페이 수기 MID</label><input id="korpay_manual_mid" value="' + (merchant.korpay_manual_mid || '') + '" />' +
-    '<label>코페이 수기 MKEY</label><input id="korpay_manual_mkey" value="' + (merchant.korpay_manual_mkey || '') + '" />' +
+    Array.from(
+      { length: 10 },
+      (_, index) => {
+    
+        const number =
+          index + 1
+    
+        const midId =
+          number === 1
+            ? 'korpay_manual_mid'
+            : 'korpay_manual_mid_' +
+              number
+    
+        const mkeyId =
+          number === 1
+            ? 'korpay_manual_mkey'
+            : 'korpay_manual_mkey_' +
+              number
+    
+        const midValue =
+          getKorpayManualMidValue(
+            number,
+            'mid'
+          )
+    
+        const mkeyValue =
+          getKorpayManualMidValue(
+            number,
+            'mkey'
+          )
+    
+    
+        return (
+          '<label>코페이 수기 MID ' +
+          number +
+          '</label>' +
+    
+          '<input id="' +
+          midId +
+          '" value="' +
+          midValue +
+          '" />' +
+    
+          '<label>코페이 수기 MKEY ' +
+          number +
+          '</label>' +
+    
+          '<input id="' +
+          mkeyId +
+          '" value="' +
+          mkeyValue +
+          '" />'
+        )
+      }
+    ).join('') +
 
     '<label>토스 Client Key</label><input id="toss_client_key" value="' + (merchant.toss_client_key || '') + '" />' +
     '<label>토스 Secret Key</label><input id="toss_secret_key" value="' + (merchant.toss_secret_key || '') + '" />' +
@@ -11263,6 +11366,50 @@ yearly_limit:
 memo: getValue('merchant-memo')
       }
 
+      const korpayManualMids =
+  Array.from(
+    { length: 10 },
+    (_, index) => {
+
+      const number =
+        index + 1
+
+      const midId =
+        number === 1
+          ? 'korpay_manual_mid'
+          : 'korpay_manual_mid_' +
+            number
+
+      const mkeyId =
+        number === 1
+          ? 'korpay_manual_mkey'
+          : 'korpay_manual_mkey_' +
+            number
+
+
+      return {
+        mid:
+          getValue(
+            midId
+          ).trim(),
+
+        mkey:
+          getValue(
+            mkeyId
+          ).trim(),
+
+        priority:
+          number,
+
+        monthly_limit:
+          5000000,
+
+        status:
+          '사용중'
+      }
+    }
+  )
+
       const currentAdminId =
   sessionStorage.getItem('admin_id') || ''
 
@@ -11308,13 +11455,16 @@ await fetch(
     },
 
     body:
-      JSON.stringify({
-        merchantId:
-          merchant.id,
-
-        data:
-          updateData
-      })
+    JSON.stringify({
+      merchantId:
+        merchant.id,
+  
+      data:
+        updateData,
+  
+      korpayManualMids:
+        korpayManualMids
+    })
   }
 )
 

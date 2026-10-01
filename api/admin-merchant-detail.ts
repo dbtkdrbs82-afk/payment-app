@@ -361,16 +361,69 @@ import type {
   
   
       const {
+        data: manualMids,
+        error: manualMidsError,
+      } =
+        await supabase
+          .from(
+            'merchant_korpay_manual_mids'
+          )
+          .select(`
+            id,
+            merchant_id,
+            mid,
+            mkey,
+            priority,
+            monthly_limit,
+            status
+          `)
+          .eq(
+            'merchant_id',
+            merchantId
+          )
+          .order(
+            'priority',
+            {
+              ascending: true
+            }
+          )
+          .order(
+            'id',
+            {
+              ascending: true
+            }
+          )
+
+
+      if (manualMidsError) {
+
+        console.error(
+          '코페이 수기 MID 조회 오류:',
+          manualMidsError.message
+        )
+
+        return res.status(500).json({
+          success: false,
+          message:
+            '코페이 수기 MID 정보를 불러오지 못했습니다.',
+        })
+      }
+
+
+      const {
         merchant_password,
         ...safeMerchant
       } = merchant
-  
-  
+
+
       return res.status(200).json({
         success: true,
-  
+
         merchant:
           safeMerchant,
+
+        korpayManualMids:
+          manualMids || [],
       })
   
     } catch (error) {

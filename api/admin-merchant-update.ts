@@ -234,6 +234,13 @@ import type {
         'object'
         ? req.body.data
         : {}
+
+        const inputKorpayManualMids =
+  Array.isArray(
+    req.body?.korpayManualMids
+  )
+    ? req.body.korpayManualMids
+    : []
   
   
     if (
@@ -892,6 +899,182 @@ import type {
         })
       }
   
+            /*
+       * 코페이 수기 MID 1~10 저장
+       * MASTER / BRANCH만 수정 가능
+       */
+            if (
+              actor.role === 'MASTER' ||
+              actor.role === 'BRANCH'
+            ) {
+      
+              const normalizedManualMids =
+                inputKorpayManualMids
+                  .slice(0, 10)
+                  .map(
+                    (
+                      row: any,
+                      index: number
+                    ) => {
+      
+                      const mid =
+                        String(
+                          row?.mid || ''
+                        ).trim()
+      
+                      const mkey =
+                        String(
+                          row?.mkey || ''
+                        ).trim()
+      
+                      const monthlyLimit =
+                        Number(
+                          row?.monthly_limit ||
+                          5000000
+                        )
+      
+                      return {
+                        merchant_id:
+                          merchantId,
+      
+                        mid,
+      
+                        mkey,
+      
+                        priority:
+                          index + 1,
+      
+                        monthly_limit:
+                          Number.isFinite(
+                            monthlyLimit
+                          ) &&
+                          monthlyLimit > 0
+                            ? monthlyLimit
+                            : 5000000,
+      
+                        status:
+                          String(
+                            row?.status ||
+                            '사용중'
+                          ).trim() ||
+                          '사용중'
+                      }
+                    }
+                  )
+                  .filter(
+                    (row: any) =>
+                      row.mid &&
+                      row.mkey
+                  )
+      
+      
+              const {
+                error:
+                  manualMidDeleteError,
+              } =
+                await supabase
+                  .from(
+                    'merchant_korpay_manual_mids'
+                  )
+                  .delete()
+                  .eq(
+                    'merchant_id',
+                    merchantId
+                  )
+      
+      
+              if (manualMidDeleteError) {
+      
+                console.error(
+                  '코페이 수기 MID 기존정보 삭제 오류:',
+                  manualMidDeleteError.message
+                )
+      
+                return res.status(500).json({
+                  success: false,
+                  message:
+                    '코페이 수기 MID 기존정보 정리에 실패했습니다.',
+                })
+              }
+      
+      
+              if (
+                normalizedManualMids.length > 0
+              ) {
+      
+                const {
+                  error:
+                    manualMidInsertError,
+                } =
+                  await supabase
+                    .from(
+                      'merchant_korpay_manual_mids'
+                    )
+                    .insert(
+                      normalizedManualMids
+                    )
+      
+      
+                if (manualMidInsertError) {
+      
+                  console.error(
+                    '코페이 수기 MID 저장 오류:',
+                    manualMidInsertError.message
+                  )
+      
+                  return res.status(500).json({
+                    success: false,
+                    message:
+                      '코페이 수기 MID 저장에 실패했습니다.',
+                  })
+                }
+              }
+      
+      
+              /*
+               * 1번 MID는 기존 merchants 컬럼에도 유지
+               */
+              const firstManualMid =
+                normalizedManualMids[0]
+      
+      
+              const {
+                error:
+                  firstManualMidUpdateError,
+              } =
+                await supabase
+                  .from(
+                    'merchants'
+                  )
+                  .update({
+                    korpay_manual_mid:
+                      firstManualMid?.mid || '',
+      
+                    korpay_manual_mkey:
+                      firstManualMid?.mkey || ''
+                  })
+                  .eq(
+                    'id',
+                    merchantId
+                  )
+      
+      
+              if (
+                firstManualMidUpdateError
+              ) {
+      
+                console.error(
+                  '대표 코페이 수기 MID 저장 오류:',
+                  firstManualMidUpdateError.message
+                )
+      
+                return res.status(500).json({
+                  success: false,
+                  message:
+                    '대표 코페이 수기 MID 저장에 실패했습니다.',
+                })
+              }
+            }
   
       return res.status(200).json({
         success: true,

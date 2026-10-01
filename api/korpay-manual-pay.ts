@@ -96,7 +96,8 @@ const ordHp = onlyDigits(customerPhone)
       }
     )
 
-    const merchantRows = await merchantResponse.json()
+    const merchantRows =
+      await merchantResponse.json()
 
     if (!merchantResponse.ok) {
       return res.status(500).json({
@@ -107,7 +108,8 @@ const ordHp = onlyDigits(customerPhone)
     }
 
     const merchant =
-      Array.isArray(merchantRows) && merchantRows.length > 0
+      Array.isArray(merchantRows) &&
+      merchantRows.length > 0
         ? merchantRows[0]
         : null
 
@@ -118,15 +120,347 @@ const ordHp = onlyDigits(customerPhone)
       })
     }
 
-    const mid = String(merchant.korpay_manual_mid || '').trim()
-    const mkey = String(merchant.korpay_manual_mkey || '').trim()
 
-    if (!mid || !mkey) {
-      return res.status(400).json({
+    /* =========================================
+       코페이 수기결제 다중 MID 조회
+    ========================================= */
+
+    const manualMidResponse =
+      await fetch(
+        `${supabaseUrl}/rest/v1/merchant_korpay_manual_mids` +
+          `?select=id,merchant_id,mid,mkey,priority,monthly_limit,status` +
+          `&merchant_id=eq.${merchantDbId}` +
+          `&status=eq.${encodeURIComponent('사용중')}` +
+          `&order=priority.asc,id.asc`,
+        {
+          method: 'GET',
+          headers: supabaseHeaders
+        }
+      )
+
+    const manualMidResult =
+      await manualMidResponse.json()
+
+    if (!manualMidResponse.ok) {
+      return res.status(500).json({
         success: false,
-        message: '코페이 수기결제 MID 또는 MKEY가 등록되지 않았습니다.'
+        message:
+          '코페이 수기결제 MID 목록 조회에 실패했습니다.',
+        detail: manualMidResult
       })
     }
+
+
+    let manualMidRows: any[] =
+      Array.isArray(manualMidResult)
+        ? manualMidResult
+        : []
+
+
+    /*
+     * 기존 merchants MID도 당분간 fallback으로 유지
+     * 새 테이블에 데이터가 없는 기존 가맹점 보호
+     */
+    if (
+      manualMidRows.length === 0 &&
+      String(
+        merchant.korpay_manual_mid || ''
+      ).trim() &&
+      String(
+        merchant.korpay_manual_mkey || ''
+      ).trim()
+    ) {
+
+      manualMidRows = [
+        {
+          mid:
+            String(
+              merchant.korpay_manual_mid
+            ).trim(),
+
+          mkey:
+            String(
+              merchant.korpay_manual_mkey
+            ).trim(),
+
+          priority: 1,
+
+          monthly_limit:
+            5000000,
+
+          status:
+            '사용중'
+        }
+      ]
+    }
+
+
+    if (manualMidRows.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          '사용 가능한 코페이 수기결제 MID가 없습니다.'
+      })
+    }
+
+
+    /* =========================================
+       한국시간 기준 이번 달 범위 계산
+    ========================================= */
+
+    const koreaDateParts =
+      new Intl.DateTimeFormat(
+        'en-US',
+        {
+          timeZone:
+            'Asia/Seoul',
+
+          year:
+            'numeric',
+
+          month:
+            '2-digit'
+        }
+      ).formatToParts(
+        new Date()
+      )
+
+
+    const koreaYear =
+      Number(
+        koreaDateParts.find(
+          (part) =>
+            part.type === 'year'
+        )?.value || 0
+      )
+
+
+    const koreaMonth =
+      Number(
+        koreaDateParts.find(
+          (part) =>
+            part.type === 'month'
+        )?.value || 0
+      )
+
+
+    if (
+      !koreaYear ||
+      !koreaMonth
+    ) {
+
+      return res.status(500).json({
+        success: false,
+        message:
+          '월 결제한도 기준일 계산에 실패했습니다.'
+      })
+    }
+
+
+    const monthStart =
+      new Date(
+        `${koreaYear}-` +
+        `${String(koreaMonth).padStart(2, '0')}-` +
+        `01T00:00:00+09:00`
+      )
+
+
+    const nextMonthYear =
+      koreaMonth === 12
+        ? koreaYear + 1
+        : koreaYear
+
+
+    const nextMonthValue =
+      koreaMonth === 12
+        ? 1
+        : koreaMonth + 1
+
+
+    const nextMonthStart =
+      new Date(
+        `${nextMonthYear}-` +
+        `${String(nextMonthValue).padStart(2, '0')}-` +
+        `01T00:00:00+09:00`
+      )
+
+
+    const monthStartIso =
+      monthStart.toISOString()
+
+    const nextMonthStartIso =
+      nextMonthStart.toISOString()
+
+
+    /* =========================================
+       MID별 월 승인금액 확인 후 사용 MID 선택
+    ========================================= */
+
+    let selectedManualMid: any =
+      null
+
+    let selectedMonthlyUsed =
+      0
+
+
+    for (
+      const manualMid of manualMidRows
+    ) {
+
+      const candidateMid =
+        String(
+          manualMid.mid || ''
+        ).trim()
+
+
+      const candidateMkey =
+        String(
+          manualMid.mkey || ''
+        ).trim()
+
+
+      const candidateMonthlyLimit =
+        Number(
+          manualMid.monthly_limit ||
+          5000000
+        )
+
+
+      if (
+        !candidateMid ||
+        !candidateMkey ||
+        !Number.isFinite(
+          candidateMonthlyLimit
+        ) ||
+        candidateMonthlyLimit <= 0
+      ) {
+        continue
+      }
+
+
+      const monthlyPaymentResponse =
+        await fetch(
+          `${supabaseUrl}/rest/v1/payments` +
+            `?select=amount` +
+            `&pg_mid=eq.${encodeURIComponent(candidateMid)}` +
+            `&pg_company=eq.${encodeURIComponent('코페이')}` +
+            `&payment_method=eq.${encodeURIComponent('수기결제')}` +
+            `&status=eq.paid` +
+            `&created_at=gte.${encodeURIComponent(monthStartIso)}` +
+            `&created_at=lt.${encodeURIComponent(nextMonthStartIso)}`,
+          {
+            method: 'GET',
+            headers: supabaseHeaders
+          }
+        )
+
+
+      const monthlyPaymentRows =
+        await monthlyPaymentResponse.json()
+
+
+      if (!monthlyPaymentResponse.ok) {
+
+        console.error(
+          '코페이 MID 월 사용금액 조회 실패:',
+          candidateMid,
+          monthlyPaymentRows
+        )
+
+        continue
+      }
+
+
+      const monthlyUsed =
+        (
+          Array.isArray(
+            monthlyPaymentRows
+          )
+            ? monthlyPaymentRows
+            : []
+        ).reduce(
+          (
+            sum: number,
+            payment: any
+          ) =>
+            sum +
+            Number(
+              payment.amount || 0
+            ),
+          0
+        )
+
+
+      if (
+        monthlyUsed +
+        goodsAmt <=
+        candidateMonthlyLimit
+      ) {
+
+        selectedManualMid =
+          manualMid
+
+        selectedMonthlyUsed =
+          monthlyUsed
+
+        break
+      }
+    }
+
+
+    if (!selectedManualMid) {
+
+      return res.status(400).json({
+        success: false,
+
+        message:
+          '등록된 코페이 수기결제 MID의 월 결제한도가 모두 부족합니다.',
+
+        resultCode:
+          'MONTHLY_LIMIT_EXCEEDED'
+      })
+    }
+
+
+    const mid =
+      String(
+        selectedManualMid.mid
+      ).trim()
+
+
+    const mkey =
+      String(
+        selectedManualMid.mkey
+      ).trim()
+
+
+    const monthlyLimit =
+      Number(
+        selectedManualMid.monthly_limit ||
+        5000000
+      )
+
+
+    console.log(
+      '[코페이 수기결제 MID 선택]',
+      {
+        merchantId:
+          merchantDbId,
+
+        mid,
+
+        monthlyUsed:
+          selectedMonthlyUsed,
+
+        paymentAmount:
+          goodsAmt,
+
+        monthlyLimit,
+
+        priority:
+          selectedManualMid.priority
+      }
+    )
 
     const ordNo =
   Date.now().toString().padStart(13, '0').slice(-13) +
@@ -239,6 +573,9 @@ if (
           order_id: ordNo,
           payment_key: paymentTid,
 
+          pg_order_no: ordNo,
+          pg_mid: mid,
+
           merchant_id: merchantDbId,
           merchant_name:
             merchant.merchant_name || null,
@@ -292,6 +629,7 @@ installment_months:
       success: true,
       message: '결제가 승인되었습니다.',
       orderId: ordNo,
+      usedMid: mid,
       approvalNumber: korpayData.APP_NO || null,
       approvedAt: korpayData.APP_DATE || null,
       tid: korpayData.TID || null,
