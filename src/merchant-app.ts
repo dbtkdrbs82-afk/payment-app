@@ -16019,20 +16019,25 @@ const ocrV2ExpiryArea =
   )
 
   const ocrV2RotationCandidates =
-  ocrV2NumberAreas
-    .map(
-      (numberArea) =>
+  ocrV2NumberAreas.flatMap(
+    (numberArea) =>
+      [
         createRotatedOcrCanvas(
           numberArea,
           0
+        ),
+
+        createRotatedOcrCanvas(
+          numberArea,
+          180
         )
-    )
-    .filter(
-      (
-        canvas
-      ): canvas is HTMLCanvasElement =>
-        canvas !== null
-    )
+      ].filter(
+        (
+          canvas
+        ): canvas is HTMLCanvasElement =>
+          canvas !== null
+      )
+  )
 
 /*
   OCR 다중 전처리
@@ -16408,6 +16413,7 @@ const ocrV2ProcessedCandidates =
   
         return (
           variantIndex === 0 ||
+          variantIndex === 1 ||
           variantIndex === 2
         )
       }
