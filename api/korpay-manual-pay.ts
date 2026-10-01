@@ -547,83 +547,159 @@ const ordHp = onlyDigits(customerPhone)
       const paymentTid =
   String(korpayData.TID || '').trim()
 
-const normalizedBillingIds =
-  Array.isArray(billingIds)
-    ? billingIds
-        .map((id) => Number(id))
-        .filter((id) => id > 0)
-    : []
-
-/* 학원 일괄결제만 즉시 payments 저장 */
-if (
-  normalizedBillingIds.length > 0 &&
-  paymentTid &&
-  String(buyerName || '').trim()
-) {
-  const academyPaymentResponse =
-    await fetch(
-      `${supabaseUrl}/rest/v1/payments`,
-      {
-        method: 'POST',
-        headers: {
-          ...supabaseHeaders,
-          Prefer: 'return=minimal'
-        },
-        body: JSON.stringify({
-          order_id: ordNo,
-          payment_key: paymentTid,
-
-          pg_order_no: ordNo,
-          pg_mid: mid,
-
-          merchant_id: merchantDbId,
-          merchant_name:
-            merchant.merchant_name || null,
-
-          amount: goodsAmt,
-          status: 'paid',
-
-          pg_company: '코페이',
-          payment_method: '수기결제',
-
-          sender_name:
-  String(buyerName).trim(),
 
 
-message:
-  '아카데미 정기결제 / 청구ID ' +
-  normalizedBillingIds.join(','),
-
-          approval_number:
-            korpayData.APP_NO || null,
-
-            card_number:
-  String(
-    korpayData.CARD_NO ||
-    korpayData.cardNo ||
-    ''
-  ).trim() || null,
-
-installment_months:
-  quotaMon || '00',
-
-          approved_at:
-            new Date().toISOString(),
-
-          settlement_status: '정산대기',
-          payout_status: '출금대기',
-          duplicate_status: '정상'
-        })
-      }
-    )
-
-  if (!academyPaymentResponse.ok) {
-    console.error(
-      '아카데미 결제 즉시 저장 실패:',
-      await academyPaymentResponse.text()
-    )
+    const normalizedBillingIds =
+    Array.isArray(billingIds)
+      ? billingIds
+          .map((id) => Number(id))
+          .filter((id) => id > 0)
+      : []
+  
+  
+  const approvalNumber =
+    String(
+      korpayData.APP_NO ||
+      korpayData.app_no ||
+      korpayData.approval_number ||
+      korpayData.approvalNo ||
+      ''
+    ).trim() || null
+  
+  
+  const cardNumberResult =
+    String(
+      korpayData.CARD_NO ||
+      korpayData.cardNo ||
+      ''
+    ).trim() || null
+  
+  
+  const paymentMessage =
+    normalizedBillingIds.length > 0
+      ? (
+          '아카데미 정기결제 / 청구ID ' +
+          normalizedBillingIds.join(',')
+        )
+      : (
+          String(
+            goodsName ||
+            '수기결제'
+          ).trim()
+        )
+  
+  
+  const paymentSenderName =
+    String(
+      buyerName ||
+      ''
+    ).trim() || null
+  
+  
+  if (paymentTid) {
+  
+    const paymentResponse =
+      await fetch(
+        `${supabaseUrl}/rest/v1/payments`,
+        {
+          method: 'POST',
+  
+          headers: {
+            ...supabaseHeaders,
+            Prefer: 'return=minimal'
+          },
+  
+          body:
+            JSON.stringify({
+  
+              order_id:
+                ordNo,
+  
+              payment_key:
+                paymentTid,
+  
+              pg_order_no:
+                ordNo,
+  
+              pg_mid:
+                mid,
+  
+              merchant_id:
+                merchantDbId,
+  
+              merchant_name:
+                merchant.merchant_name ||
+                null,
+  
+              amount:
+                goodsAmt,
+  
+              status:
+                'paid',
+  
+              pg_company:
+                '코페이',
+  
+              payment_method:
+                '수기결제',
+  
+              sender_name:
+                paymentSenderName,
+  
+              message:
+                paymentMessage,
+  
+              approval_number:
+                approvalNumber,
+  
+              card_number:
+                cardNumberResult,
+  
+              installment_months:
+                quotaMon || '00',
+  
+              approved_at:
+                new Date().toISOString(),
+  
+              settlement_status:
+                '정산대기',
+  
+              payout_status:
+                '출금대기',
+  
+              duplicate_status:
+                '정상'
+            })
+        }
+      )
+  
+  
+    if (!paymentResponse.ok) {
+  
+      const paymentSaveError =
+        await paymentResponse.text()
+  
+      console.error(
+        '코페이 수기결제 payments 저장 실패:',
+        paymentSaveError
+      )
+  
+      return res.status(500).json({
+        success: false,
+  
+        message:
+          '코페이 결제는 승인됐지만 결제내역 저장에 실패했습니다.',
+  
+        approvalNumber,
+  
+        tid:
+          paymentTid,
+  
+        usedMid:
+          mid
+      })
+    }
   }
-}
 
     return res.status(200).json({
       success: true,
