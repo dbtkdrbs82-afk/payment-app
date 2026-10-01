@@ -16747,10 +16747,14 @@ findLargestTextBand(
 )
 
 const ocrV2RecognitionCandidates =
-ocrV2LargestTextBand
-  ? [
-      ocrV2LargestTextBand
-    ]
+  ocrV2LargestTextBand
+    ? createOcrProcessedCanvases(
+        ocrV2LargestTextBand
+      ).filter(
+        (_, index) =>
+          index === 0 ||
+          index === 2
+      )
   : ocrV2ProcessedCandidates.filter(
       (_, index) => {
         const variantIndex =
@@ -17100,7 +17104,7 @@ const earlyConfirmedCandidate =
   )
     .find(
       ([, count]) =>
-        count >= 1
+        count >= 2
     )
 
 if (earlyConfirmedCandidate) {
@@ -17398,7 +17402,7 @@ const secondCandidate =
 const hasReliableCandidate =
   Boolean(
     bestCandidate &&
-    bestCandidate[1] >= 1 &&
+    bestCandidate[1] >= 2 &&
     (
       !secondCandidate ||
       bestCandidate[1] >
