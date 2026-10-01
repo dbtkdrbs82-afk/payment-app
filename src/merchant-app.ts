@@ -16443,9 +16443,315 @@ const ocrV2ProcessedCandidates =
         )
     )
 
+    /*
+  카드 이미지에서 가장 큰 글자 줄 자동 탐색
 
-    const ocrV2RecognitionCandidates =
-    ocrV2ProcessedCandidates.filter(
+  OCR로 위치를 찾지 않고
+  Canvas 픽셀 분석으로 먼저 큰 글자 영역을 찾는다.
+
+  카드번호 위치를 고정하지 않는다.
+*/
+
+const findLargestTextBand =
+(
+  sourceCanvas: HTMLCanvasElement
+): HTMLCanvasElement | null => {
+
+  const sourceContext =
+    sourceCanvas.getContext(
+      '2d',
+      {
+        willReadFrequently: true
+      }
+    )
+
+  if (!sourceContext) {
+    return null
+  }
+
+  const width =
+    sourceCanvas.width
+
+  const height =
+    sourceCanvas.height
+
+  if (
+    width < 1 ||
+    height < 1
+  ) {
+    return null
+  }
+
+  const imageData =
+    sourceContext.getImageData(
+      0,
+      0,
+      width,
+      height
+    )
+
+  const data =
+    imageData.data
+
+  /*
+    각 행의 밝기 변화량을 계산한다.
+
+    큰 글자는 위/아래 경계가 크기 때문에
+    여러 행에 걸쳐 강한 변화가 나타난다.
+  */
+
+  const rowScores =
+    new Array<number>(
+      height
+    ).fill(0)
+
+  for (
+    let y = 1;
+    y < height - 1;
+    y++
+  ) {
+
+    let score = 0
+
+    for (
+      let x = 2;
+      x < width - 2;
+      x += 2
+    ) {
+
+      const index =
+        (
+          y * width +
+          x
+        ) * 4
+
+      const leftIndex =
+        (
+          y * width +
+          x - 2
+        ) * 4
+
+      const gray =
+        (
+          data[index] +
+          data[index + 1] +
+          data[index + 2]
+        ) / 3
+
+      const leftGray =
+        (
+          data[leftIndex] +
+          data[leftIndex + 1] +
+          data[leftIndex + 2]
+        ) / 3
+
+      const difference =
+        Math.abs(
+          gray -
+          leftGray
+        )
+
+      if (difference > 35) {
+        score += difference
+      }
+    }
+
+    rowScores[y] =
+      score
+  }
+
+  /*
+    카드번호 한 줄 정도 높이의 창을 이동시키면서
+    가장 강한 글자 영역을 찾는다.
+  */
+
+  const minimumBandHeight =
+    Math.max(
+      20,
+      Math.round(
+        height * 0.10
+      )
+    )
+
+  const maximumBandHeight =
+    Math.max(
+      minimumBandHeight,
+      Math.round(
+        height * 0.28
+      )
+    )
+
+  let bestTop = 0
+  let bestBottom = 0
+  let bestScore = -1
+
+  for (
+    let bandHeight =
+      minimumBandHeight;
+    bandHeight <=
+      maximumBandHeight;
+    bandHeight +=
+      Math.max(
+        4,
+        Math.round(
+          height * 0.02
+        )
+      )
+  ) {
+
+    let windowScore = 0
+
+    for (
+      let y = 0;
+      y < bandHeight &&
+      y < height;
+      y++
+    ) {
+      windowScore +=
+        rowScores[y]
+    }
+
+    for (
+      let top = 0;
+      top + bandHeight <= height;
+      top++
+    ) {
+
+      if (
+        windowScore >
+        bestScore
+      ) {
+
+        bestScore =
+          windowScore
+
+        bestTop =
+          top
+
+        bestBottom =
+          top +
+          bandHeight
+      }
+
+      windowScore -=
+        rowScores[top]
+
+      const nextRow =
+        top +
+        bandHeight
+
+      if (
+        nextRow <
+        height
+      ) {
+        windowScore +=
+          rowScores[nextRow]
+      }
+    }
+  }
+
+  if (
+    bestScore <= 0 ||
+    bestBottom <= bestTop
+  ) {
+    return null
+  }
+
+  /*
+    글자 위/아래에 약간의 여유를 둔다.
+  */
+
+  const paddingY =
+    Math.round(
+      height * 0.035
+    )
+
+  const cropTop =
+    Math.max(
+      0,
+      bestTop -
+      paddingY
+    )
+
+  const cropBottom =
+    Math.min(
+      height,
+      bestBottom +
+      paddingY
+    )
+
+  const cropX =
+    Math.round(
+      width * 0.02
+    )
+
+  const cropWidth =
+    Math.round(
+      width * 0.96
+    )
+
+  const cropHeight =
+    cropBottom -
+    cropTop
+
+  const outputCanvas =
+    document.createElement(
+      'canvas'
+    )
+
+  const outputContext =
+    outputCanvas.getContext(
+      '2d',
+      {
+        willReadFrequently: true
+      }
+    )
+
+  if (!outputContext) {
+    return null
+  }
+
+  outputCanvas.width =
+    Math.max(
+      1,
+      cropWidth
+    )
+
+  outputCanvas.height =
+    Math.max(
+      1,
+      cropHeight
+    )
+
+  outputContext.drawImage(
+    sourceCanvas,
+
+    cropX,
+    cropTop,
+    cropWidth,
+    cropHeight,
+
+    0,
+    0,
+    outputCanvas.width,
+    outputCanvas.height
+  )
+
+  return outputCanvas
+}
+
+
+const ocrV2LargestTextBand =
+findLargestTextBand(
+  ocrV2Canvas
+)
+
+const ocrV2RecognitionCandidates =
+ocrV2LargestTextBand
+  ? [
+      ocrV2LargestTextBand
+    ]
+  : ocrV2ProcessedCandidates.filter(
       (_, index) => {
         const variantIndex =
           index % 6
