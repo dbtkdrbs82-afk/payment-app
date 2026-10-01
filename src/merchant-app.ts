@@ -15817,97 +15817,108 @@ const createRotatedOcrCanvas =
   카드 전체 중 가운데 숫자 영역만 잘라낸다.
 */
 
-const createCardNumberArea =
-(
-  sourceCanvas: HTMLCanvasElement
-) => {
 
-  const canvas =
-    document.createElement(
-      'canvas'
-    )
 
-  const context =
-    canvas.getContext(
-      '2d',
-      {
-        willReadFrequently: true
-      }
-    )
 
-  if (!context) {
-    return null
+const ocrV2NumberAreas =
+[
+  {
+    y: 0.16,
+    height: 0.30
+  },
+  {
+    y: 0.28,
+    height: 0.30
+  },
+  {
+    y: 0.40,
+    height: 0.30
   }
+]
+.map(
+  ({
+    y,
+    height
+  }) => {
 
-  /*
-    화면 카드번호 가이드:
-    left 4%
-    right 4%
-    top 30%
-    height 30%
+    const canvas =
+      document.createElement(
+        'canvas'
+      )
 
-    OCR은 글자가 점선에 약간 걸쳐도
-    잘리지 않도록 위/아래 여유를 준다.
-  */
+    const context =
+      canvas.getContext(
+        '2d',
+        {
+          willReadFrequently: true
+        }
+      )
 
-  const sourceX =
-    Math.round(
-      sourceCanvas.width *
-      0.02
-    )
+    if (!context) {
+      return null
+    }
+
+    const sourceX =
+      Math.round(
+        ocrV2Canvas.width *
+        0.02
+      )
 
     const sourceY =
-    Math.round(
-      sourceCanvas.height *
-      0.16
+      Math.round(
+        ocrV2Canvas.height *
+        y
+      )
+
+    const sourceWidth =
+      Math.round(
+        ocrV2Canvas.width *
+        0.96
+      )
+
+    const sourceHeight =
+      Math.round(
+        ocrV2Canvas.height *
+        height
+      )
+
+    canvas.width =
+      Math.max(
+        1,
+        sourceWidth
+      )
+
+    canvas.height =
+      Math.max(
+        1,
+        sourceHeight
+      )
+
+    context.drawImage(
+      ocrV2Canvas,
+
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+
+      0,
+      0,
+      canvas.width,
+      canvas.height
     )
-  
-  const sourceWidth =
-    Math.round(
-      sourceCanvas.width *
-      0.96
-    )
-  
-  const sourceHeight =
-    Math.round(
-      sourceCanvas.height *
-      0.54
-    )
 
-  canvas.width =
-    Math.max(
-      1,
-      sourceWidth
-    )
-
-  canvas.height =
-    Math.max(
-      1,
-      sourceHeight
-    )
-
-  context.drawImage(
-    sourceCanvas,
-
-    sourceX,
-    sourceY,
-    sourceWidth,
-    sourceHeight,
-
-    0,
-    0,
-    canvas.width,
-    canvas.height
-  )
-
-  return canvas
-}
-
-
-const ocrV2NumberArea =
-createCardNumberArea(
-  ocrV2Canvas
+    return canvas
+  }
 )
+.filter(
+  (
+    canvas
+  ): canvas is HTMLCanvasElement =>
+    canvas !== null
+)
+
+
 
 /*
   유효기간 OCR 영역
@@ -16007,25 +16018,26 @@ const ocrV2ExpiryArea =
     ocrV2Canvas
   )
 
-const ocrV2RotationCandidates =
-ocrV2NumberArea
-  ? [
-      createRotatedOcrCanvas(
-        ocrV2NumberArea,
-        0
-      ),
+  const ocrV2RotationCandidates =
+  ocrV2NumberAreas.flatMap(
+    (numberArea) =>
+      [
+        createRotatedOcrCanvas(
+          numberArea,
+          0
+        ),
 
-      createRotatedOcrCanvas(
-        ocrV2NumberArea,
-        180
+        createRotatedOcrCanvas(
+          numberArea,
+          180
+        )
+      ].filter(
+        (
+          canvas
+        ): canvas is HTMLCanvasElement =>
+          canvas !== null
       )
-    ].filter(
-      (
-        canvas
-      ): canvas is HTMLCanvasElement =>
-        canvas !== null
-    )
-  : []
+  )
 
 /*
   OCR 다중 전처리
@@ -16393,16 +16405,19 @@ const ocrV2ProcessedCandidates =
     )
 
 
-const ocrV2RecognitionCandidates =
-  ocrV2ProcessedCandidates.filter(
-    (_, index) =>
-      index === 0 ||
-      index === 1 ||
-      index === 2 ||
-      index === 5 ||
-      index === 6 ||
-      index === 7
-  )
+    const ocrV2RecognitionCandidates =
+    ocrV2ProcessedCandidates.filter(
+      (_, index) => {
+        const variantIndex =
+          index % 6
+  
+        return (
+          variantIndex === 0 ||
+          variantIndex === 1 ||
+          variantIndex === 2
+        )
+      }
+    )
 
 
 /*
@@ -16532,12 +16547,61 @@ void (
           숫자만 메모리에서 추출한다.
         */
 
-          const digitLines = result.data.text
-          .split(/\r?\n/)
-          .map(line =>
-            line.replace(/\D/g, '')
+          const rawLines =
+          result.data.text
+            .split(/\r?\n/)
+            .map(
+              line =>
+                line.trim()
+            )
+            .filter(Boolean)
+        
+        const digitLines =
+          rawLines
+            .map(
+              line =>
+                line.replace(
+                  /\D/g,
+                  ''
+                )
+            )
+            .filter(Boolean)
+        
+        const fullDigits =
+          result.data.text.replace(
+            /\D/g,
+            ''
           )
-          .filter(Boolean)
+        
+          for (
+            let length = 19;
+            length >= 13;
+            length--
+          ) {
+          
+            if (
+              fullDigits.length < length
+            ) {
+              continue
+            }
+          
+            for (
+              let start = 0;
+              start <=
+                fullDigits.length - length;
+              start++
+            ) {
+          
+              detectedCandidates.push(
+                fullDigits.slice(
+                  start,
+                  start + length
+                )
+              )
+          
+            }
+          
+          }
         
         
 
@@ -16910,7 +16974,8 @@ Array.from(
 const bestCandidate =
 rankedCandidates[0]
 
-
+const secondCandidate =
+  rankedCandidates[1]
 
 /*
 성공 조건
@@ -16925,8 +16990,14 @@ rankedCandidates[0]
 const hasReliableCandidate =
   Boolean(
     bestCandidate &&
-    bestCandidate[1] >= 2
+    bestCandidate[1] >= 2 &&
+    (
+      !secondCandidate ||
+      bestCandidate[1] >
+        secondCandidate[1]
+    )
   )
+  
 
 
 if (
