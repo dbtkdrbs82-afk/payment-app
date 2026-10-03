@@ -15436,7 +15436,81 @@ const ocrV2Status =
   
 
   
+/*
+  OCR Worker 사전 준비
 
+  사용자가 카드 위치를 맞추는 동안
+  Tesseract를 미리 로딩한다.
+*/
+
+let ocrV2PreparedWorker:
+  Awaited<
+    ReturnType<
+      typeof createWorker
+    >
+  > | null =
+  null
+
+let ocrV2WorkerPreparing:
+  Promise<void> | null =
+  null
+
+
+const prepareOcrV2Worker =
+  () => {
+
+    if (
+      ocrV2PreparedWorker ||
+      ocrV2WorkerPreparing
+    ) {
+      return
+    }
+
+    ocrV2WorkerPreparing =
+      (
+        async () => {
+
+          try {
+
+            const preparedWorker =
+              await createWorker(
+                'eng'
+              )
+
+            await preparedWorker.setParameters({
+              tessedit_char_whitelist:
+                '0123456789',
+
+              preserve_interword_spaces:
+                '1',
+
+              tessedit_pageseg_mode:
+                PSM.SINGLE_LINE
+            })
+
+            ocrV2PreparedWorker =
+              preparedWorker
+
+          } catch (error) {
+
+            console.error(
+              'OCR Worker 준비 실패',
+              error
+            )
+
+          } finally {
+
+            ocrV2WorkerPreparing =
+              null
+
+          }
+
+        }
+      )()
+  }
+
+
+prepareOcrV2Worker()
 
   void startOcrV2Camera()
 
@@ -16949,17 +17023,30 @@ void (
 
     try {
 
+      if (ocrV2WorkerPreparing) {
+        await ocrV2WorkerPreparing
+      }
+      
       worker =
-        await createWorker(
-          'eng'
-        )
-
-
+        ocrV2PreparedWorker
+      
+      ocrV2PreparedWorker =
+        null
+      
+      if (!worker) {
+      
+        worker =
+          await createWorker(
+            'eng'
+          )
+      
         await worker.setParameters({
           tessedit_char_whitelist: '0123456789',
           preserve_interword_spaces: '1',
           tessedit_pageseg_mode: PSM.SINGLE_LINE
         })
+      
+      }
 
 
       const detectedCandidates:
