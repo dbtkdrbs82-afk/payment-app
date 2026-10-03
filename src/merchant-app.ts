@@ -15949,6 +15949,10 @@ const ocrV2NumberAreas =
   {
     y: 0.40,
     height: 0.30
+  },
+  {
+    y: 0.05,
+    height: 0.90
   }
 ]
 .map(
