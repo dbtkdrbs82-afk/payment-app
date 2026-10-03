@@ -16181,10 +16181,10 @@ const createOcrProcessedCanvases =
           )
 
           canvas.width =
-  sourceCanvas.width * 3
-
-canvas.height =
-  sourceCanvas.height * 3
+          sourceCanvas.width * 2
+        
+        canvas.height =
+          sourceCanvas.height * 2
 
 
         const context =
