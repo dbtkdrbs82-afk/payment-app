@@ -16030,20 +16030,41 @@ const ocrV2NumberSource =
 
 
 const ocrV2NumberAreas =
-[
-  {
-    y: 0.16,
-    height: 0.30
-  },
-  {
-    y: 0.28,
-    height: 0.30
-  },
-  {
-    y: 0.40,
-    height: 0.30
-  }
-]
+(
+  ocrV2PortraitMode
+    ? [
+        {
+          y: 0.05,
+          height: 0.38
+        },
+        {
+          y: 0.22,
+          height: 0.38
+        },
+        {
+          y: 0.39,
+          height: 0.38
+        },
+        {
+          y: 0.56,
+          height: 0.38
+        }
+      ]
+    : [
+        {
+          y: 0.16,
+          height: 0.30
+        },
+        {
+          y: 0.28,
+          height: 0.30
+        },
+        {
+          y: 0.40,
+          height: 0.30
+        }
+      ]
+)
 .map(
   ({
     y,
