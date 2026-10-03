@@ -16605,6 +16605,8 @@ const createOcrProcessedCanvases =
 
       createVariant('contrast')
 
+      createVariant('strongContrast')
+
 
     /*
       평균 밝기 계산용 임시 canvas 정리
