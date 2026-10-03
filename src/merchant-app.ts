@@ -16484,11 +16484,7 @@ canvas.height =
       5. 반전 흑백
     */
 
-      createVariant('gray')
       createVariant('contrast')
-      createVariant('strongContrast')
-      createVariant('binary')
-      createVariant('inverse')
 
 
     /*
@@ -16917,7 +16913,7 @@ const ocrV2RecognitionCandidates =
       ).filter(
         (_, index) =>
           index === 0 ||
-          index === 2
+          index === 1
       )
   : ocrV2ProcessedCandidates.filter(
       (_, index) => {
