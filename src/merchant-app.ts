@@ -16443,13 +16443,12 @@ const ocrV2ProcessedCandidates =
         )
     )
 
-    /*
-  카드 이미지에서 가장 큰 글자 줄 자동 탐색
+  /*
+  카드 이미지에서 카드번호 후보 줄 탐색
 
-  OCR로 위치를 찾지 않고
-  Canvas 픽셀 분석으로 먼저 큰 글자 영역을 찾는다.
-
-  카드번호 위치를 고정하지 않는다.
+  기존처럼 단순히 픽셀 변화가 많은 영역을 찾지 않고,
+  세로 방향으로 이어지는 문자 높이와
+  가로 방향으로 길게 배열된 영역을 함께 검사한다.
 */
 
 const findLargestTextBand =
@@ -16457,7 +16456,7 @@ const findLargestTextBand =
   sourceCanvas: HTMLCanvasElement
 ): HTMLCanvasElement | null => {
 
-  const sourceContext =
+  const context =
     sourceCanvas.getContext(
       '2d',
       {
@@ -16465,7 +16464,7 @@ const findLargestTextBand =
       }
     )
 
-  if (!sourceContext) {
+  if (!context) {
     return null
   }
 
@@ -16476,14 +16475,14 @@ const findLargestTextBand =
     sourceCanvas.height
 
   if (
-    width < 1 ||
-    height < 1
+    width < 10 ||
+    height < 10
   ) {
     return null
   }
 
   const imageData =
-    sourceContext.getImageData(
+    context.getImageData(
       0,
       0,
       width,
@@ -16494,28 +16493,41 @@ const findLargestTextBand =
     imageData.data
 
   /*
-    각 행의 밝기 변화량을 계산한다.
-
-    큰 글자는 위/아래 경계가 크기 때문에
-    여러 행에 걸쳐 강한 변화가 나타난다.
+    카드 테두리 / 칩 영향을 줄이기 위해
+    좌우 가장자리는 검사에서 제외
   */
+
+  const startX =
+    Math.round(
+      width * 0.06
+    )
+
+  const endX =
+    Math.round(
+      width * 0.94
+    )
 
   const rowScores =
     new Array<number>(
       height
     ).fill(0)
 
+  /*
+    각 행에서 문자처럼 반복되는
+    밝기 경계를 계산
+  */
+
   for (
-    let y = 1;
-    y < height - 1;
+    let y = 2;
+    y < height - 2;
     y++
   ) {
 
-    let score = 0
+    let edgeCount = 0
 
     for (
-      let x = 2;
-      x < width - 2;
+      let x = startX + 2;
+      x < endX - 2;
       x += 2
     ) {
 
@@ -16533,161 +16545,236 @@ const findLargestTextBand =
 
       const gray =
         (
-          data[index] +
-          data[index + 1] +
-          data[index + 2]
-        ) / 3
+          data[index] * 0.299 +
+          data[index + 1] * 0.587 +
+          data[index + 2] * 0.114
+        )
 
       const leftGray =
         (
-          data[leftIndex] +
-          data[leftIndex + 1] +
-          data[leftIndex + 2]
-        ) / 3
+          data[leftIndex] * 0.299 +
+          data[leftIndex + 1] * 0.587 +
+          data[leftIndex + 2] * 0.114
+        )
 
-      const difference =
+      if (
         Math.abs(
           gray -
           leftGray
-        )
-
-      if (difference > 35) {
-        score += difference
+        ) > 32
+      ) {
+        edgeCount++
       }
     }
 
     rowScores[y] =
-      score
+      edgeCount
   }
 
   /*
-    카드번호 한 줄 정도 높이의 창을 이동시키면서
-    가장 강한 글자 영역을 찾는다.
+    한 행에서 의미 있는 글자 경계가
+    얼마나 있어야 하는지 결정
+
+    작은 로고나 짧은 문구는 제외하고
+    카드번호처럼 가로로 긴 문자열을 우선한다.
   */
 
-  const minimumBandHeight =
+  const minimumEdges =
     Math.max(
-      20,
+      8,
       Math.round(
-        height * 0.10
+        (
+          endX -
+          startX
+        ) / 55
       )
     )
 
-  const maximumBandHeight =
-    Math.max(
-      minimumBandHeight,
-      Math.round(
-        height * 0.28
-      )
+  const activeRows =
+    rowScores.map(
+      score =>
+        score >=
+        minimumEdges
     )
 
-  let bestTop = 0
-  let bestBottom = 0
-  let bestScore = -1
+  /*
+    중간에 1~2픽셀 끊긴 부분 연결
+  */
 
   for (
-    let bandHeight =
-      minimumBandHeight;
-    bandHeight <=
-      maximumBandHeight;
-    bandHeight +=
-      Math.max(
-        4,
-        Math.round(
-          height * 0.02
-        )
-      )
+    let y = 2;
+    y < height - 2;
+    y++
   ) {
 
-    let windowScore = 0
-
-    for (
-      let y = 0;
-      y < bandHeight &&
-      y < height;
-      y++
+    if (
+      !activeRows[y] &&
+      (
+        activeRows[y - 1] ||
+        activeRows[y - 2]
+      ) &&
+      (
+        activeRows[y + 1] ||
+        activeRows[y + 2]
+      )
     ) {
-      windowScore +=
-        rowScores[y]
+      activeRows[y] =
+        true
+    }
+  }
+
+  type TextBand = {
+    top: number
+    bottom: number
+    bandHeight: number
+    score: number
+  }
+
+  const bands:
+    TextBand[] =
+    []
+
+  let bandStart =
+    -1
+
+  for (
+    let y = 0;
+    y <= height;
+    y++
+  ) {
+
+    const active =
+      y < height &&
+      activeRows[y]
+
+    if (
+      active &&
+      bandStart < 0
+    ) {
+      bandStart =
+        y
     }
 
-    for (
-      let top = 0;
-      top + bandHeight <= height;
-      top++
+    if (
+      !active &&
+      bandStart >= 0
     ) {
 
-      if (
-        windowScore >
-        bestScore
-      ) {
+      const bandEnd =
+        y - 1
 
-        bestScore =
-          windowScore
+      const bandHeight =
+        bandEnd -
+        bandStart +
+        1
 
-        bestTop =
-          top
-
-        bestBottom =
-          top +
-          bandHeight
-      }
-
-      windowScore -=
-        rowScores[top]
-
-      const nextRow =
-        top +
-        bandHeight
+      /*
+        너무 얇은 선과
+        지나치게 큰 그림 영역 제외
+      */
 
       if (
-        nextRow <
-        height
+        bandHeight >=
+          height * 0.025 &&
+        bandHeight <=
+          height * 0.22
       ) {
-        windowScore +=
-          rowScores[nextRow]
+
+        let totalScore =
+          0
+
+        for (
+          let row =
+            bandStart;
+          row <=
+            bandEnd;
+          row++
+        ) {
+          totalScore +=
+            rowScores[row]
+        }
+
+        /*
+          큰 글자일수록 높이가 크고,
+          카드번호처럼 긴 문자열일수록
+          edge 점수가 높다.
+        */
+
+        const score =
+          totalScore *
+          Math.pow(
+            bandHeight,
+            1.35
+          )
+
+        bands.push({
+          top:
+            bandStart,
+
+          bottom:
+            bandEnd,
+
+          bandHeight,
+
+          score
+        })
       }
+
+      bandStart =
+        -1
     }
   }
 
   if (
-    bestScore <= 0 ||
-    bestBottom <= bestTop
+    bands.length === 0
   ) {
     return null
   }
 
+  bands.sort(
+    (a, b) =>
+      b.score -
+      a.score
+  )
+
+  const bestBand =
+    bands[0]
+
   /*
-    글자 위/아래에 약간의 여유를 둔다.
+    카드번호 위/아래 여유
   */
 
   const paddingY =
-    Math.round(
-      height * 0.035
+    Math.max(
+      8,
+      Math.round(
+        bestBand.bandHeight *
+        0.65
+      )
     )
 
   const cropTop =
     Math.max(
       0,
-      bestTop -
+      bestBand.top -
       paddingY
     )
 
   const cropBottom =
     Math.min(
       height,
-      bestBottom +
+      bestBand.bottom +
       paddingY
     )
 
   const cropX =
     Math.round(
-      width * 0.02
+      width * 0.035
     )
 
   const cropWidth =
     Math.round(
-      width * 0.96
+      width * 0.93
     )
 
   const cropHeight =
@@ -16697,6 +16784,18 @@ const findLargestTextBand =
   const outputCanvas =
     document.createElement(
       'canvas'
+    )
+
+  outputCanvas.width =
+    Math.max(
+      1,
+      cropWidth
+    )
+
+  outputCanvas.height =
+    Math.max(
+      1,
+      cropHeight
     )
 
   const outputContext =
@@ -16710,18 +16809,6 @@ const findLargestTextBand =
   if (!outputContext) {
     return null
   }
-
-  outputCanvas.width =
-    Math.max(
-      1,
-      cropWidth
-    )
-
-  outputCanvas.height =
-    Math.max(
-      1,
-      cropHeight
-    )
 
   outputContext.drawImage(
     sourceCanvas,
