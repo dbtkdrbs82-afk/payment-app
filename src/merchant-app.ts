@@ -15949,10 +15949,6 @@ const ocrV2NumberAreas =
   {
     y: 0.40,
     height: 0.30
-  },
-  {
-    y: 0.05,
-    height: 0.90
   }
 ]
 .map(
@@ -16946,13 +16942,12 @@ const ocrV2RecognitionCandidates =
   : ocrV2ProcessedCandidates.filter(
       (_, index) => {
         const variantIndex =
-          index % 6
-  
-        return (
-          variantIndex === 0 ||
-          variantIndex === 1 ||
-          variantIndex === 2
-        )
+  index % 2
+
+return (
+  variantIndex === 0 ||
+  variantIndex === 1
+)
       }
     )
 
