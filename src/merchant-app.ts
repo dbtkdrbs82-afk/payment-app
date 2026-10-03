@@ -16902,9 +16902,23 @@ const findLargestTextBand =
 
 
 const ocrV2LargestTextBand =
-findLargestTextBand(
-  ocrV2Canvas
-)
+  findLargestTextBand(
+    ocrV2Canvas
+  ) ||
+  ocrV2RotationCandidates
+    .map(
+      canvas =>
+        findLargestTextBand(
+          canvas
+        )
+    )
+    .find(
+      (
+        canvas
+      ): canvas is HTMLCanvasElement =>
+        canvas !== null
+    ) ||
+  null
 
 const ocrV2RecognitionCandidates =
   ocrV2LargestTextBand
