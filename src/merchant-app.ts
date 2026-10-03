@@ -18074,8 +18074,8 @@ function renderMerchantManualCard() {
           >
   
             <label>
-              결제금액
-            </label>
+  결제금액 <span class="manual-required">필수</span>
+</label>
   
             <input
               id="mobile-manual-amount"
@@ -18098,8 +18098,8 @@ function renderMerchantManualCard() {
   
   
             <label>
-              카드번호
-            </label>
+  카드번호 <span class="manual-required">필수</span>
+</label>
   
             <input
               id="mobile-manual-card-number"
@@ -18112,8 +18112,8 @@ function renderMerchantManualCard() {
   
   
             <label>
-              유효기간
-            </label>
+  유효기간 <span class="manual-required">필수</span>
+</label>
   
             <input
               id="mobile-manual-expiry"

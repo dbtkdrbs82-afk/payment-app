@@ -2963,3 +2963,10 @@
   width: 100% !important;
   height: 100% !important;
 }
+.manual-required {
+  margin-left: 6px;
+  color: #e53935;
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: middle;
+}
