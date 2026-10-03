@@ -16009,15 +16009,8 @@ const createRotatedOcrCanvas =
 
   }
 
-const ocrV2NumberSource =
-  (
-    ocrV2PortraitMode
-    ? createRotatedOcrCanvas(
-      ocrV2Canvas,
-      270
-    )
-      : ocrV2Canvas
-  ) || ocrV2Canvas
+  const ocrV2NumberSource =
+  ocrV2Canvas
 
  /*
   카드번호 전용 OCR 영역
@@ -16945,10 +16938,10 @@ const findLargestTextBand =
 
     const paddingY =
     Math.max(
-      12,
+      8,
       Math.round(
         bestBand.bandHeight *
-        0.90
+        0.65
       )
     )
 
@@ -16966,9 +16959,15 @@ const findLargestTextBand =
       paddingY
     )
 
-    const cropX = 0
+    const cropX =
+  Math.round(
+    width * 0.01
+  )
 
-    const cropWidth = width
+const cropWidth =
+  Math.round(
+    width * 0.98
+  )
 
   const cropHeight =
     cropBottom -
