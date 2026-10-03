@@ -16966,15 +16966,9 @@ const findLargestTextBand =
       paddingY
     )
 
-    const cropX =
-    Math.round(
-      width * 0.01
-    )
-  
-  const cropWidth =
-    Math.round(
-      width * 0.98
-    )
+    const cropX = 0
+
+    const cropWidth = width
 
   const cropHeight =
     cropBottom -
