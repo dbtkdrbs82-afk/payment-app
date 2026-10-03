@@ -15347,10 +15347,14 @@ const ocrV2GuidePortrait =
     '#ocr-v2-guide-portrait'
   )
 
+  let ocrV2PortraitMode = false
+
 ocrV2GuideLandscape?.addEventListener(
   'click',
   () => {
     if (!ocrV2CardGuide) return
+
+    ocrV2PortraitMode = false
 
     ocrV2CardGuide.style.width =
       '90%'
@@ -15367,6 +15371,8 @@ ocrV2GuidePortrait?.addEventListener(
   'click',
   () => {
     if (!ocrV2CardGuide) return
+
+    ocrV2PortraitMode = true
 
     ocrV2CardGuide.style.width =
       '58%'
@@ -16003,6 +16009,16 @@ const createRotatedOcrCanvas =
 
   }
 
+const ocrV2NumberSource =
+  (
+    ocrV2PortraitMode
+      ? createRotatedOcrCanvas(
+          ocrV2Canvas,
+          90
+        )
+      : ocrV2Canvas
+  ) || ocrV2Canvas
+
  /*
   카드번호 전용 OCR 영역
 
@@ -16052,28 +16068,28 @@ const ocrV2NumberAreas =
     }
 
     const sourceX =
-      Math.round(
-        ocrV2Canvas.width *
-        0.02
-      )
+  Math.round(
+    ocrV2NumberSource.width *
+    0.02
+  )
 
-    const sourceY =
-      Math.round(
-        ocrV2Canvas.height *
-        y
-      )
+  const sourceY =
+  Math.round(
+    ocrV2NumberSource.height *
+    y
+  )
 
-    const sourceWidth =
-      Math.round(
-        ocrV2Canvas.width *
-        0.96
-      )
+  const sourceWidth =
+  Math.round(
+    ocrV2NumberSource.width *
+    0.96
+  )
 
-    const sourceHeight =
-      Math.round(
-        ocrV2Canvas.height *
-        height
-      )
+  const sourceHeight =
+  Math.round(
+    ocrV2NumberSource.height *
+    height
+  )
 
     canvas.width =
       Math.max(
@@ -16087,13 +16103,13 @@ const ocrV2NumberAreas =
         sourceHeight
       )
 
-    context.drawImage(
-      ocrV2Canvas,
-
-      sourceX,
-      sourceY,
-      sourceWidth,
-      sourceHeight,
+      context.drawImage(
+        ocrV2NumberSource,
+      
+        sourceX,
+        sourceY,
+        sourceWidth,
+        sourceHeight,
 
       0,
       0,
@@ -16210,6 +16226,8 @@ const ocrV2ExpiryArea =
   createCardExpiryArea(
     ocrV2Canvas
   )
+
+  
 
   const ocrV2RotationCandidates =
   ocrV2NumberAreas.flatMap(
@@ -16990,7 +17008,7 @@ const findLargestTextBand =
 
 const ocrV2LargestTextBand =
   findLargestTextBand(
-    ocrV2Canvas
+    ocrV2NumberSource
   ) ||
   ocrV2RotationCandidates
     .map(
