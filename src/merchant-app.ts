@@ -17781,8 +17781,10 @@ const formattedExpiryDate =
       )
     : '인식 실패'
 
+    ocrV2RecognizedCardNumber =
+  cardNumber
 
-if (ocrV2Status) {
+  if (ocrV2Status) {
 
   ocrV2Status.textContent =
   '카드번호 : ' +
@@ -17820,9 +17822,17 @@ if (ocrV2Status) {
   '초'
 
   ocrV2Status.style.whiteSpace =
-    'pre-line'
+  'pre-line'
 
 }
+
+history.pushState(
+{},
+'',
+'/merchant-app/card/manual'
+)
+
+renderMerchantManualCard()
 
 
 } else if (
@@ -17973,9 +17983,11 @@ void startOcrV2Camera()
 
 }
 
-  /* =========================================
+ /* =========================================
    모바일 수기 카드결제
 ========================================= */
+
+let ocrV2RecognizedCardNumber = ''
 
 function renderMerchantManualCard() {
 
@@ -18222,6 +18234,21 @@ function renderMerchantManualCard() {
         '#mobile-manual-card-number'
       )
   
+      if (
+        cardNumberInput &&
+        ocrV2RecognizedCardNumber
+      ) {
+      
+        cardNumberInput.value =
+          ocrV2RecognizedCardNumber
+            .replace(
+              /(\d{4})(?=\d)/g,
+              '$1-'
+            )
+      
+        ocrV2RecognizedCardNumber = ''
+      
+      }
   
     cardNumberInput
       ?.addEventListener(
