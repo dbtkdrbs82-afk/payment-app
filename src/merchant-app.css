@@ -2970,3 +2970,9 @@
   font-weight: 700;
   vertical-align: middle;
 }
+.manual-card-check {
+  margin-left: 6px;
+  color: #e53935;
+  font-size: 11px;
+  font-weight: 500;
+}

@@ -18098,7 +18098,9 @@ function renderMerchantManualCard() {
   
   
             <label>
-  카드번호 <span class="manual-required">필수</span>
+  카드번호
+  <span class="manual-required">필수</span>
+  <span class="manual-card-check">카드번호를 재확인 해주세요.</span>
 </label>
   
             <input
@@ -18157,9 +18159,7 @@ function renderMerchantManualCard() {
                 6개월
               </option>
   
-              <option value="12">
-                12개월
-              </option>
+            
   
             </select>
   
