@@ -2976,3 +2976,18 @@
   font-size: 11px;
   font-weight: 500;
 }
+.mobile-manual-card-number-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+.mobile-manual-card-number-row input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  text-align: center;
+  padding-left: 4px;
+  padding-right: 4px;
+}
