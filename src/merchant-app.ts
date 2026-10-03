@@ -16012,10 +16012,10 @@ const createRotatedOcrCanvas =
 const ocrV2NumberSource =
   (
     ocrV2PortraitMode
-      ? createRotatedOcrCanvas(
-          ocrV2Canvas,
-          90
-        )
+    ? createRotatedOcrCanvas(
+      ocrV2Canvas,
+      270
+    )
       : ocrV2Canvas
   ) || ocrV2Canvas
 
