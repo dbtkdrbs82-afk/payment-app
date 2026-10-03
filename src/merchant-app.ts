@@ -17117,18 +17117,38 @@ const orderedOcrCandidates =
     ...fallbackOcrCandidates
   ]
 
+  let ocrPassNumber =
+  0
+
 for (
   const candidateCanvas
   of orderedOcrCandidates
 ) {
-  
-    const candidateStartIndex =
-      detectedCandidates.length
-  
-    const result =
-      await worker.recognize(
-        candidateCanvas
-      )
+
+  ocrPassNumber++
+
+  const candidateStartIndex =
+    detectedCandidates.length
+
+  const ocrStartedAt =
+    performance.now()
+
+  const result =
+    await worker.recognize(
+      candidateCanvas
+    )
+
+  const ocrElapsedSeconds =
+    (
+      performance.now() -
+      ocrStartedAt
+    ) / 1000
+
+  console.log(
+    `[OCR ${ocrPassNumber}]`,
+    ocrElapsedSeconds.toFixed(2) +
+      '초'
+  )
 
 
         /*
