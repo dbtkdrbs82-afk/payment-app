@@ -15519,10 +15519,13 @@ prepareOcrV2Worker()
       'click',
       async () => {
 
-      if (
-        !ocrV2Video ||
-        !ocrV2Canvas
-      ) {
+        const ocrCaptureStartedAt =
+          performance.now()
+      
+        if (
+          !ocrV2Video ||
+          !ocrV2Canvas
+        ) {
 
         alert(
           '촬영 화면을 준비하지 못했습니다.'
@@ -17136,6 +17139,8 @@ for (
   const candidateStartIndex =
     detectedCandidates.length
 
+    
+
   const ocrStartedAt =
     performance.now()
 
@@ -17656,6 +17661,20 @@ if (ocrV2Status) {
   '유효기간 : ' +
   formattedExpiryDate +
   '\n\n' +
+  'OCR 전처리 : ' +
+(
+  (
+    performance.now() -
+    ocrCaptureStartedAt
+  ) / 1000 -
+  ocrPassTimes.reduce(
+    (sum, seconds) =>
+      sum + seconds,
+    0
+  )
+).toFixed(2) +
+'초' +
+'\n' +
   'OCR 1차 : ' +
   (
     ocrPassTimes[0] ??
