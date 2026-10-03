@@ -16605,7 +16605,7 @@ const createOcrProcessedCanvases =
 
       createVariant('contrast')
 
-      createVariant('strongContrast')
+      
 
 
     /*
