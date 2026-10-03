@@ -16943,12 +16943,12 @@ const findLargestTextBand =
     카드번호 위/아래 여유
   */
 
-  const paddingY =
+    const paddingY =
     Math.max(
-      8,
+      12,
       Math.round(
         bestBand.bandHeight *
-        0.65
+        0.90
       )
     )
 
