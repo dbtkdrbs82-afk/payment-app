@@ -17117,6 +17117,12 @@ const orderedOcrCandidates =
     ...fallbackOcrCandidates
   ]
 
+  
+
+const ocrPassTimes:
+  number[] =
+  []
+
   let ocrPassNumber =
   0
 
@@ -17150,6 +17156,9 @@ for (
       '초'
   )
 
+  ocrPassTimes.push(
+    ocrElapsedSeconds
+  )
 
         /*
           OCR 원문은 로그로 남기지 않는다.
@@ -17641,11 +17650,25 @@ const formattedExpiryDate =
 if (ocrV2Status) {
 
   ocrV2Status.textContent =
-    '카드번호 : ' +
-    formattedCardNumber +
-    '\n' +
-    '유효기간 : ' +
-    formattedExpiryDate
+  '카드번호 : ' +
+  formattedCardNumber +
+  '\n' +
+  '유효기간 : ' +
+  formattedExpiryDate +
+  '\n\n' +
+  'OCR 1차 : ' +
+  (
+    ocrPassTimes[0] ??
+    0
+  ).toFixed(2) +
+  '초' +
+  '\n' +
+  'OCR 2차 : ' +
+  (
+    ocrPassTimes[1] ??
+    0
+  ).toFixed(2) +
+  '초'
 
   ocrV2Status.style.whiteSpace =
     'pre-line'
