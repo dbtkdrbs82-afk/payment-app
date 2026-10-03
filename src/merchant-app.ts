@@ -16145,7 +16145,17 @@ const ocrV2ExpiryArea =
 
         createRotatedOcrCanvas(
           numberArea,
+          90
+        ),
+
+        createRotatedOcrCanvas(
+          numberArea,
           180
+        ),
+
+        createRotatedOcrCanvas(
+          numberArea,
+          270
         )
       ].filter(
         (
