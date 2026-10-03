@@ -15194,6 +15194,43 @@ function renderMerchantOcrCard() {
     "
   ></video>
 
+  <div
+  style="
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+  "
+>
+  <button
+    id="ocr-v2-guide-landscape"
+    type="button"
+    style="
+      padding: 7px 14px;
+      border: 0;
+      border-radius: 18px;
+      font-weight: 700;
+    "
+  >
+    가로형
+  </button>
+
+  <button
+    id="ocr-v2-guide-portrait"
+    type="button"
+    style="
+      padding: 7px 14px;
+      border: 0;
+      border-radius: 18px;
+      font-weight: 700;
+    "
+  >
+    세로형
+  </button>
+</div>
 
   <div
   id="ocr-v2-card-guide"
@@ -15300,7 +15337,47 @@ const ocrV2CardGuide =
     '#ocr-v2-card-guide'
   )
 
-  
+  const ocrV2GuideLandscape =
+  document.querySelector<HTMLButtonElement>(
+    '#ocr-v2-guide-landscape'
+  )
+
+const ocrV2GuidePortrait =
+  document.querySelector<HTMLButtonElement>(
+    '#ocr-v2-guide-portrait'
+  )
+
+ocrV2GuideLandscape?.addEventListener(
+  'click',
+  () => {
+    if (!ocrV2CardGuide) return
+
+    ocrV2CardGuide.style.width =
+      '90%'
+
+    ocrV2CardGuide.style.height =
+      'auto'
+
+    ocrV2CardGuide.style.aspectRatio =
+      '1.586 / 1'
+  }
+)
+
+ocrV2GuidePortrait?.addEventListener(
+  'click',
+  () => {
+    if (!ocrV2CardGuide) return
+
+    ocrV2CardGuide.style.width =
+      '58%'
+
+    ocrV2CardGuide.style.height =
+      'auto'
+
+    ocrV2CardGuide.style.aspectRatio =
+      '1 / 1.586'
+  }
+)
 
 
 const ocrV2CaptureButton =
