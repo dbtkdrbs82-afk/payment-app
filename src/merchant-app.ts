@@ -15375,7 +15375,7 @@ ocrV2GuidePortrait?.addEventListener(
     ocrV2PortraitMode = true
 
     ocrV2CardGuide.style.width =
-      '58%'
+  '68%'
 
     ocrV2CardGuide.style.height =
       'auto'
