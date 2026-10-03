@@ -18103,14 +18103,45 @@ function renderMerchantManualCard() {
   <span class="manual-card-check">카드번호를 재확인 해주세요.</span>
 </label>
   
-            <input
-              id="mobile-manual-card-number"
-              type="text"
-              inputmode="numeric"
-              maxlength="19"
-              autocomplete="off"
-              placeholder="0000-0000-0000-0000"
-            >
+            <div class="mobile-manual-card-number-row">
+
+  <input
+    id="mobile-manual-card-number-1"
+    type="text"
+    inputmode="numeric"
+    maxlength="4"
+    autocomplete="off"
+    placeholder="0000"
+  >
+
+  <input
+    id="mobile-manual-card-number-2"
+    type="text"
+    inputmode="numeric"
+    maxlength="4"
+    autocomplete="off"
+    placeholder="0000"
+  >
+
+  <input
+    id="mobile-manual-card-number-3"
+    type="text"
+    inputmode="numeric"
+    maxlength="4"
+    autocomplete="off"
+    placeholder="0000"
+  >
+
+  <input
+    id="mobile-manual-card-number-4"
+    type="text"
+    inputmode="numeric"
+    maxlength="4"
+    autocomplete="off"
+    placeholder="0000"
+  >
+
+</div>
   
   
             <label>
@@ -18229,53 +18260,97 @@ function renderMerchantManualCard() {
   )
   
   
-    const cardNumberInput =
-      document.querySelector<HTMLInputElement>(
-        '#mobile-manual-card-number'
-      )
+  const cardNumberInputs = [
+    document.querySelector<HTMLInputElement>(
+      '#mobile-manual-card-number-1'
+    ),
+    document.querySelector<HTMLInputElement>(
+      '#mobile-manual-card-number-2'
+    ),
+    document.querySelector<HTMLInputElement>(
+      '#mobile-manual-card-number-3'
+    ),
+    document.querySelector<HTMLInputElement>(
+      '#mobile-manual-card-number-4'
+    )
+  ]
   
-      if (
-        cardNumberInput &&
-        ocrV2RecognizedCardNumber
-      ) {
-      
-        cardNumberInput.value =
-          ocrV2RecognizedCardNumber
-            .replace(
-              /(\d{4})(?=\d)/g,
-              '$1-'
+  if (
+    ocrV2RecognizedCardNumber
+  ) {
+  
+    const recognizedNumber =
+      ocrV2RecognizedCardNumber
+        .replace(
+          /[^0-9]/g,
+          ''
+        )
+        .slice(
+          0,
+          16
+        )
+  
+    cardNumberInputs.forEach(
+      (
+        input,
+        index
+      ) => {
+  
+        if (input) {
+          input.value =
+            recognizedNumber.slice(
+              index * 4,
+              index * 4 + 4
             )
-      
-        ocrV2RecognizedCardNumber = ''
-      
-      }
+        }
   
-    cardNumberInput
-      ?.addEventListener(
+      }
+    )
+  
+    ocrV2RecognizedCardNumber = ''
+  
+  }
+  
+  cardNumberInputs.forEach(
+    (
+      input,
+      index
+    ) => {
+  
+      input?.addEventListener(
         'input',
         () => {
   
-          const value =
-            cardNumberInput.value
+          input.value =
+            input.value
               .replace(
                 /[^0-9]/g,
                 ''
               )
               .slice(
                 0,
-                16
+                4
               )
   
+          if (
+            input.value.length === 4 &&
+            index < 3
+          ) {
   
-          cardNumberInput.value =
-            value
-              .replace(
-                /(\d{4})(?=\d)/g,
-                '$1-'
-              )
+            cardNumberInputs[
+              index + 1
+            ]?.focus()
+  
+          }
   
         }
       )
+  
+    }
+  )
+  
+  
+
   
   
     const expiryInput =
@@ -18351,12 +18426,20 @@ function renderMerchantManualCard() {
             ).trim()
   
   
-          const cardNumber =
-            (
-              document.querySelector<HTMLInputElement>(
-                '#mobile-manual-card-number'
-              )?.value || ''
-            )
+            const cardNumber =
+            [
+              '#mobile-manual-card-number-1',
+              '#mobile-manual-card-number-2',
+              '#mobile-manual-card-number-3',
+              '#mobile-manual-card-number-4'
+            ]
+              .map(
+                selector =>
+                  document.querySelector<HTMLInputElement>(
+                    selector
+                  )?.value || ''
+              )
+              .join('')
               .replace(
                 /[^0-9]/g,
                 ''
@@ -18699,20 +18782,32 @@ alert(
 )
   
   
-            const cardInput =
-              document.querySelector<HTMLInputElement>(
-                '#mobile-manual-card-number'
-              )
-  
-            const expiryField =
-              document.querySelector<HTMLInputElement>(
-                '#mobile-manual-expiry'
-              )
-  
-  
-            if (cardInput) {
-              cardInput.value = ''
-            }
+const cardInputs = [
+  '#mobile-manual-card-number-1',
+  '#mobile-manual-card-number-2',
+  '#mobile-manual-card-number-3',
+  '#mobile-manual-card-number-4'
+]
+  .map(
+    selector =>
+      document.querySelector<HTMLInputElement>(
+        selector
+      )
+  )
+
+const expiryField =
+  document.querySelector<HTMLInputElement>(
+    '#mobile-manual-expiry'
+  )
+
+
+cardInputs.forEach(
+  input => {
+    if (input) {
+      input.value = ''
+    }
+  }
+)
   
             if (expiryField) {
               expiryField.value = ''
