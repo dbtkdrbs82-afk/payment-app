@@ -17023,38 +17023,23 @@ const cropWidth =
 
 
 const ocrV2LargestTextBand =
-  ocrV2PortraitMode
-    ? ocrV2NumberAreas
-        .map(
-          canvas =>
-            findLargestTextBand(
-              canvas
-            )
+  findLargestTextBand(
+    ocrV2NumberSource
+  ) ||
+  ocrV2RotationCandidates
+    .map(
+      canvas =>
+        findLargestTextBand(
+          canvas
         )
-        .find(
-          (
-            canvas
-          ): canvas is HTMLCanvasElement =>
-            canvas !== null
-        ) ||
-      null
-    : findLargestTextBand(
-        ocrV2NumberSource
-      ) ||
-      ocrV2RotationCandidates
-        .map(
-          canvas =>
-            findLargestTextBand(
-              canvas
-            )
-        )
-        .find(
-          (
-            canvas
-          ): canvas is HTMLCanvasElement =>
-            canvas !== null
-        ) ||
-      null
+    )
+    .find(
+      (
+        canvas
+      ): canvas is HTMLCanvasElement =>
+        canvas !== null
+    ) ||
+  null
 
 const ocrV2RecognitionCandidates =
   ocrV2LargestTextBand
