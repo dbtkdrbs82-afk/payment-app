@@ -19674,6 +19674,8 @@ const {
       merchant_id:
         merchantId,
 
+        
+
       order_no:
         String(
           manualCallNumber
@@ -22606,6 +22608,92 @@ async function renderMerchantMenuCard() {
             )
           )
 
+          const tableToken =
+  new URLSearchParams(
+    window.location.search
+  ).get(
+    'table_token'
+  ) || ''
+
+
+if (tableToken) {
+
+  const {
+    data: tableData,
+    error: tableError
+  } =
+    await supabase
+      .from(
+        'merchant_tables'
+      )
+      .select(
+        'id, merchant_id, table_number, public_token, status'
+      )
+      .eq(
+        'public_token',
+        tableToken
+      )
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .eq(
+        'status',
+        '사용'
+      )
+      .maybeSingle()
+
+
+  if (
+    tableError ||
+    !tableData
+  ) {
+
+    alert(
+      '테이블 정보를 확인할 수 없습니다.'
+    )
+
+    return
+  }
+
+
+  sessionStorage.setItem(
+    'kiosk_table_id',
+    String(
+      tableData.id
+    )
+  )
+
+  sessionStorage.setItem(
+    'kiosk_table_number',
+    String(
+      tableData.table_number
+    )
+  )
+
+  sessionStorage.setItem(
+    'kiosk_table_token',
+    String(
+      tableData.public_token
+    )
+  )
+
+} else {
+
+  sessionStorage.removeItem(
+    'kiosk_table_id'
+  )
+
+  sessionStorage.removeItem(
+    'kiosk_table_number'
+  )
+
+  sessionStorage.removeItem(
+    'kiosk_table_token'
+  )
+
+}
+
           sessionStorage.setItem(
             'merchantId',
             String(
@@ -23322,6 +23410,20 @@ async function renderMerchantPaymentSuccess() {
           'kiosk_call_number'
         )
   
+        const tableId =
+  sessionStorage.getItem(
+    'kiosk_table_id'
+  )
+
+const tableNumber =
+  sessionStorage.getItem(
+    'kiosk_table_number'
+  )
+
+const tableToken =
+  sessionStorage.getItem(
+    'kiosk_table_token'
+  )
   
       const pgOrderId =
         kioskOrderNo
@@ -23369,7 +23471,18 @@ async function renderMerchantPaymentSuccess() {
             .insert({
               merchant_id:
                 merchantId,
-  
+            
+              table_id:
+                tableId
+                  ? Number(tableId)
+                  : null,
+            
+              table_number:
+                tableNumber || null,
+            
+              table_token:
+                tableToken || null,
+            
               order_no:
                 callNumber ||
                 '-',
