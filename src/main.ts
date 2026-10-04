@@ -10767,6 +10767,7 @@ const getKorpayManualMidValue = (
 '<option value="무선단말기" ' + (merchant.merchant_type === '무선단말기' ? 'selected' : '') + '>무선단말기</option>' +
 '<option value="뷰티" ' + (merchant.merchant_type === '뷰티' ? 'selected' : '') + '>뷰티</option>' +
 '<option value="호텔" ' + (merchant.merchant_type === '호텔' ? 'selected' : '') + '>호텔</option>' +
+'<option value="테이블오더" ' + (merchant.merchant_type === '테이블오더' ? 'selected' : '') + '>테이블오더</option>' +
 '<option value="수기결제" ' + (merchant.merchant_type === '수기결제' ? 'selected' : '') + '>수기결제</option>' +
 '</select>' +
 
