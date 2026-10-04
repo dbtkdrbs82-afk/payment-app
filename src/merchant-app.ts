@@ -12265,7 +12265,7 @@ async function renderMerchantTables() {
           "
         >
 
-          ${
+                    ${
             tables &&
             tables.length > 0
               ? tables
@@ -12273,90 +12273,82 @@ async function renderMerchantTables() {
                     (table: any) => `
                       <div
                         style="
-                          padding:18px;
+                          display:flex;
+                          align-items:center;
+                          gap:10px;
+                          padding:12px 14px;
                           background:#ffffff;
                           border:1px solid #dbe3ee;
-                          border-radius:14px;
+                          border-radius:10px;
                         "
                       >
 
                         <div
                           style="
-                            font-size:18px;
-                            font-weight:900;
-                            color:#172033;
+                            flex:1;
+                            min-width:0;
                           "
                         >
-                          ${
-                            table.table_name ||
-                            table.table_number + '번 테이블'
-                          }
+                          <div
+                            style="
+                              font-size:15px;
+                              font-weight:900;
+                              color:#172033;
+                            "
+                          >
+                            ${table.table_number}번 테이블
+                          </div>
+
+                          <div
+                            style="
+                              margin-top:3px;
+                              font-size:12px;
+                              color:#667085;
+                            "
+                          >
+                            ${table.status}
+                          </div>
                         </div>
 
-                        <div
-  style="
-    margin-top:6px;
-    font-size:13px;
-    color:#667085;
-  "
->
-  테이블번호:
-  ${table.table_number}
-  ·
-  ${table.status}
-</div>
+                        <button
+                          type="button"
+                          data-table-qr-view="${table.id}"
+                          data-table-number="${table.table_number}"
+                          data-table-qr-url="https://nxgsoft.co.kr/pay/?merchant_id=${merchantId}&table_token=${table.public_token}"
+                          style="
+                            width:82px;
+                            height:38px;
+                            flex-shrink:0;
+                            border:0;
+                            border-radius:8px;
+                            background:#174981;
+                            color:#ffffff;
+                            font-size:13px;
+                            font-weight:800;
+                            cursor:pointer;
+                          "
+                        >
+                          QR 보기
+                        </button>
 
-<div
-  style="
-    margin-top:12px;
-    padding:10px;
-    background:#f5f7fa;
-    border-radius:8px;
-    font-size:12px;
-    color:#475467;
-    word-break:break-all;
-  "
->
-
-<button
-  type="button"
-  data-table-qr-view="${table.id}"
-  data-table-number="${table.table_number}"
-  data-table-qr-url="https://nxgsoft.co.kr/pay/?merchant_id=${merchantId}&table_token=${table.public_token}"
-  style="
-    margin-top:12px;
-    width:100%;
-    height:42px;
-    border:0;
-    border-radius:8px;
-    background:#174981;
-    color:#ffffff;
-    font-size:14px;
-    font-weight:800;
-    cursor:pointer;
-  "
->
-  QR 보기
-</button>
-
-<button
-  type="button"
-  data-table-delete="${table.id}"
-  style="
-    margin-top:12px;
-    width:100%;
-    height:42px;
-    border:1px solid #dc2626;
-    border-radius:8px;
-    background:#ffffff;
-    color:#dc2626;
-    font-size:14px;
-    font-weight:800;
-    cursor:pointer;
-  "
->
-  테이블 삭제
-</button>
+                        <button
+                          type="button"
+                          data-table-delete="${table.id}"
+                          style="
+                            width:58px;
+                            height:38px;
+                            flex-shrink:0;
+                            border:1px solid #dc2626;
+                            border-radius:8px;
+                            background:#ffffff;
+                            color:#dc2626;
+                            font-size:13px;
+                            font-weight:800;
+                            cursor:pointer;
+                          "
+                        >
+                          삭제
+                        </button>
 
                       </div>
                     `
