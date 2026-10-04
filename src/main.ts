@@ -3947,9 +3947,18 @@ if (!orderId || !paymentKey || !amount) {
   `
 
   document.querySelector<HTMLButtonElement>('#home-button')!
-    .addEventListener('click', () => {
-      window.location.href = '/'
-    })
+  .addEventListener('click', () => {
+    const merchantId =
+      sessionStorage.getItem('merchantId') ||
+      sessionStorage.getItem('kiosk_merchant_id')
+
+    if (merchantId) {
+      window.location.href =
+        '/kiosk?merchant_id=' + merchantId
+    } else {
+      window.location.href = '/merchant-login'
+    }
+  })
 
 } else {
 
