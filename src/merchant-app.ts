@@ -11939,6 +11939,193 @@ async function renderTableOrderCustomer() {
 }
 
 /* =========================================
+   테이블오더 QR 인쇄화면
+========================================= */
+
+async function renderMerchantTableQr() {
+
+  const tableNumber =
+    sessionStorage.getItem(
+      'table_qr_number'
+    )
+
+  const qrUrl =
+    sessionStorage.getItem(
+      'table_qr_url'
+    )
+
+  if (
+    !tableNumber ||
+    !qrUrl
+  ) {
+
+    alert(
+      'QR 정보를 불러오지 못했습니다.'
+    )
+
+    location.href =
+      '/merchant-app/tables'
+
+    return
+  }
+
+  app.innerHTML = `
+    <div
+      style="
+        max-width:500px;
+        margin:0 auto;
+        padding:24px 18px;
+      "
+    >
+
+      <button
+        id="table-qr-back"
+        type="button"
+        style="
+          height:40px;
+          padding:0 18px;
+          border:1px solid #d0d5dd;
+          border-radius:8px;
+          background:#ffffff;
+          font-weight:800;
+          cursor:pointer;
+        "
+      >
+        ← 테이블관리
+      </button>
+
+      <div
+        id="table-qr-print-area"
+        style="
+          margin-top:20px;
+          padding:40px 24px;
+          background:#ffffff;
+          border:1px solid #e4e7ec;
+          border-radius:16px;
+          text-align:center;
+        "
+      >
+
+        <div
+          style="
+            font-size:22px;
+            font-weight:900;
+            color:#172033;
+          "
+        >
+          QR코드를 스캔해 주세요
+        </div>
+
+        <div
+          id="table-qr-canvas"
+          style="
+            width:280px;
+            height:280px;
+            margin:28px auto 20px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+          "
+        ></div>
+
+        <div
+          style="
+            font-size:28px;
+            font-weight:900;
+            color:#172033;
+          "
+        >
+          TABLE ${tableNumber}
+        </div>
+
+      </div>
+
+      <button
+        id="table-qr-print"
+        type="button"
+        style="
+          width:100%;
+          height:48px;
+          margin-top:16px;
+          border:0;
+          border-radius:8px;
+          background:#174981;
+          color:#ffffff;
+          font-size:16px;
+          font-weight:900;
+          cursor:pointer;
+        "
+      >
+        인쇄
+      </button>
+
+    </div>
+  `
+
+  const qrBox =
+    document.querySelector<HTMLDivElement>(
+      '#table-qr-canvas'
+    )
+
+  if (qrBox) {
+
+    QRCode.toCanvas(
+      qrUrl,
+      {
+        width: 280,
+        margin: 1
+      },
+      (
+        error,
+        canvas
+      ) => {
+
+        if (error) {
+          console.error(error)
+          return
+        }
+
+        qrBox.innerHTML = ''
+
+        qrBox.appendChild(
+          canvas
+        )
+
+      }
+    )
+
+  }
+
+  document
+    .querySelector(
+      '#table-qr-back'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/tables'
+
+      }
+    )
+
+  document
+    .querySelector(
+      '#table-qr-print'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        window.print()
+
+      }
+    )
+
+}
+
+/* =========================================
    모바일 테이블관리
 ========================================= */
 
@@ -12131,22 +12318,26 @@ async function renderMerchantTables() {
   "
 >
 
-<div
-  data-table-qr="${table.id}"
+<button
+  type="button"
+  data-table-qr-view="${table.id}"
+  data-table-number="${table.table_number}"
   data-table-qr-url="https://nxgsoft.co.kr/pay/?merchant_id=${merchantId}&table_token=${table.public_token}"
   style="
-    width:180px;
-    height:180px;
-    margin:16px auto;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    margin-top:12px;
+    width:100%;
+    height:42px;
+    border:0;
+    border-radius:8px;
+    background:#174981;
+    color:#ffffff;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
   "
-></div>
-
-  고객 주문주소<br>
-  https://nxgsoft.co.kr/pay/?merchant_id=${merchantId}&table_token=${table.public_token}
-</div>
+>
+  QR 보기
+</button>
 
 <button
   type="button"
@@ -12342,46 +12533,45 @@ async function renderMerchantTables() {
     )
 
     document
-    .querySelectorAll<HTMLDivElement>(
-      '[data-table-qr]'
+    .querySelectorAll<HTMLButtonElement>(
+      '[data-table-qr-view]'
     )
     .forEach(
-      (qrBox) => {
+      (button) => {
 
-        const qrUrl =
-          qrBox.getAttribute(
-            'data-table-qr-url'
-          )
+        button.addEventListener(
+          'click',
+          () => {
 
-        if (!qrUrl) {
-          return
-        }
-
-        QRCode.toCanvas(
-          qrUrl,
-          {
-            width: 180,
-            margin: 1
-          },
-          (
-            error,
-            canvas
-          ) => {
-
-            if (error) {
-
-              console.error(
-                error
+            const tableNumber =
+              button.getAttribute(
+                'data-table-number'
               )
 
+            const qrUrl =
+              button.getAttribute(
+                'data-table-qr-url'
+              )
+
+            if (
+              !tableNumber ||
+              !qrUrl
+            ) {
               return
             }
 
-            qrBox.innerHTML = ''
-
-            qrBox.appendChild(
-              canvas
+            sessionStorage.setItem(
+              'table_qr_number',
+              tableNumber
             )
+
+            sessionStorage.setItem(
+              'table_qr_url',
+              qrUrl
+            )
+
+            location.href =
+              '/merchant-app/table-qr'
 
           }
         )
@@ -24026,11 +24216,16 @@ if (
     path === '/merchant-app/products'
   ) {
     void renderMerchantProducts()
-  
+
   } else if (
     path === '/merchant-app/tables'
   ) {
     void renderMerchantTables()
+
+  } else if (
+    path === '/merchant-app/table-qr'
+  ) {
+    void renderMerchantTableQr()
   
   } else if (
     path === '/merchant-app/qr'
