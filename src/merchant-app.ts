@@ -12130,6 +12130,20 @@ async function renderMerchantTables() {
     word-break:break-all;
   "
 >
+
+<div
+  data-table-qr="${table.id}"
+  data-table-qr-url="https://nxgsoft.co.kr/pay/?merchant_id=${merchantId}&table_token=${table.public_token}"
+  style="
+    width:180px;
+    height:180px;
+    margin:16px auto;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  "
+></div>
+
   고객 주문주소<br>
   https://nxgsoft.co.kr/pay/?merchant_id=${merchantId}&table_token=${table.public_token}
 </div>
@@ -12320,6 +12334,54 @@ async function renderMerchantTables() {
             )
 
             void renderMerchantTables()
+
+          }
+        )
+
+      }
+    )
+
+    document
+    .querySelectorAll<HTMLDivElement>(
+      '[data-table-qr]'
+    )
+    .forEach(
+      (qrBox) => {
+
+        const qrUrl =
+          qrBox.getAttribute(
+            'data-table-qr-url'
+          )
+
+        if (!qrUrl) {
+          return
+        }
+
+        QRCode.toCanvas(
+          qrUrl,
+          {
+            width: 180,
+            margin: 1
+          },
+          (
+            error,
+            canvas
+          ) => {
+
+            if (error) {
+
+              console.error(
+                error
+              )
+
+              return
+            }
+
+            qrBox.innerHTML = ''
+
+            qrBox.appendChild(
+              canvas
+            )
 
           }
         )
