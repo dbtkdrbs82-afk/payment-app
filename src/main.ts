@@ -12324,8 +12324,17 @@ const payoutDate =
     settlementCycle
   )
         
-          const groupKey =
-            String(row.merchant_id || '') + '_' + payoutDate
+  const payoutGroupStatus =
+  row.payout_status === '출금완료'
+    ? '출금완료'
+    : '미완료'
+
+const groupKey =
+  String(row.merchant_id || '') +
+  '_' +
+  payoutDate +
+  '_' +
+  payoutGroupStatus
         
           const amount = Number(row.amount || 0)
           const feeAmount = Number(row.fee_amount || 0)
@@ -14461,7 +14470,652 @@ if (nextTop) {
           paymentTableBody.appendChild(tr)
         })
     
-        
+        const selectPayoutPayments =
+  async (
+    paymentIds: number[]
+  ): Promise<number[] | null> => {
+
+    const {
+      data: payoutPayments,
+      error: payoutPaymentsError
+    } =
+      await supabase
+        .from('payments')
+        .select(`
+          id,
+          created_at,
+          amount,
+          fee_amount,
+          settlement_amount,
+          approval_number,
+          payout_status,
+          status,
+          settlement_status
+        `)
+        .in(
+          'id',
+          paymentIds
+        )
+        .order(
+          'created_at',
+          {
+            ascending: true
+          }
+        )
+
+
+    if (payoutPaymentsError) {
+
+      alert(
+        '정산 대상 결제내역 조회 실패: ' +
+        payoutPaymentsError.message
+      )
+
+      return null
+    }
+
+
+    const selectablePayments =
+      (payoutPayments || [])
+        .filter((payment: any) => {
+
+          if (
+            payment.payout_status ===
+            '출금완료'
+          ) {
+            return false
+          }
+
+          if (
+            payment.payout_status ===
+            '출금제외'
+          ) {
+            return false
+          }
+
+          if (
+            payment.status ===
+            'cancel'
+          ) {
+            return false
+          }
+
+          if (
+            payment.settlement_status ===
+            '취소'
+          ) {
+            return false
+          }
+
+          return true
+        })
+
+
+    if (
+      selectablePayments.length === 0
+    ) {
+
+      alert(
+        '정산 가능한 결제건이 없습니다.'
+      )
+
+      return null
+    }
+
+
+    /*
+     * 실제 정산 가능한 건이
+     * 1건뿐이면 선택창 없이 진행
+     */
+    if (
+      selectablePayments.length === 1
+    ) {
+
+      return [
+        Number(
+          selectablePayments[0].id
+        )
+      ]
+    }
+
+
+    document
+      .querySelector(
+        '#payout-payment-select-modal'
+      )
+      ?.remove()
+
+
+    const modal =
+      document.createElement('div')
+
+    modal.id =
+      'payout-payment-select-modal'
+
+
+    modal.style.cssText = `
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.48);
+      z-index:99999;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      box-sizing:border-box;
+    `
+
+
+    const paymentRowsHtml =
+      selectablePayments
+        .map((payment: any) => {
+
+          const amount =
+            Number(
+              payment.amount || 0
+            )
+
+          const feeAmount =
+            Number(
+              payment.fee_amount || 0
+            )
+
+          const settlementAmount =
+            Number(
+              payment.settlement_amount ??
+              amount - feeAmount
+            )
+
+
+          const paymentDate =
+            payment.created_at
+              ? new Date(
+                  payment.created_at
+                ).toLocaleString(
+                  'ko-KR',
+                  {
+                    timeZone:
+                      'Asia/Seoul'
+                  }
+                )
+              : '-'
+
+
+          const approvalNumber =
+            String(
+              payment.approval_number ||
+              '-'
+            )
+
+
+          return `
+            <label
+              style="
+                display:flex;
+                gap:12px;
+                align-items:flex-start;
+                padding:15px 4px;
+                border-bottom:1px solid #e5e7eb;
+                cursor:pointer;
+              "
+            >
+
+              <input
+                type="checkbox"
+                class="payout-select-checkbox"
+                value="${payment.id}"
+                data-amount="${settlementAmount}"
+                style="
+                  width:20px;
+                  height:20px;
+                  margin-top:4px;
+                "
+              />
+
+              <div
+                style="
+                  flex:1;
+                  min-width:0;
+                "
+              >
+
+                <div
+                  style="
+                    font-size:14px;
+                    color:#374151;
+                    margin-bottom:5px;
+                  "
+                >
+                  ${paymentDate}
+                </div>
+
+                <div
+                  style="
+                    font-size:13px;
+                    color:#6b7280;
+                    margin-bottom:7px;
+                  "
+                >
+                  승인번호 ${approvalNumber}
+                </div>
+
+                <div
+                  style="
+                    display:flex;
+                    justify-content:space-between;
+                    gap:10px;
+                  "
+                >
+
+                  <span>
+                    결제
+                    <strong>
+                      ${amount.toLocaleString()}원
+                    </strong>
+                  </span>
+
+                  <span>
+                    정산
+                    <strong
+                      style="
+                        color:#174981;
+                      "
+                    >
+                      ${settlementAmount.toLocaleString()}원
+                    </strong>
+                  </span>
+
+                </div>
+
+              </div>
+
+            </label>
+          `
+        })
+        .join('')
+
+
+    modal.innerHTML = `
+      <div
+        style="
+          width:100%;
+          max-width:560px;
+          max-height:85vh;
+          overflow:auto;
+          background:#ffffff;
+          border-radius:14px;
+          box-shadow:0 20px 60px rgba(0,0,0,0.25);
+          padding:22px;
+          box-sizing:border-box;
+        "
+      >
+
+        <div
+          style="
+            font-size:20px;
+            font-weight:800;
+            margin-bottom:5px;
+          "
+        >
+          정산건 선택
+        </div>
+
+        <div
+          style="
+            font-size:14px;
+            color:#6b7280;
+            margin-bottom:18px;
+          "
+        >
+          출금할 결제건을 선택해주세요.
+        </div>
+
+
+        <label
+          style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:10px 4px;
+            border-bottom:2px solid #111827;
+            cursor:pointer;
+            font-weight:700;
+          "
+        >
+
+          <input
+            type="checkbox"
+            id="payout-select-all"
+            style="
+              width:20px;
+              height:20px;
+            "
+          />
+
+          전체선택
+
+        </label>
+
+
+        <div>
+          ${paymentRowsHtml}
+        </div>
+
+
+        <div
+          style="
+            margin-top:18px;
+            padding:15px;
+            background:#f3f6fa;
+            border-radius:10px;
+          "
+        >
+
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+              margin-bottom:8px;
+            "
+          >
+
+            <span>
+              선택 건수
+            </span>
+
+            <strong
+              id="payout-selected-count"
+            >
+              0건
+            </strong>
+
+          </div>
+
+
+          <div
+            style="
+              display:flex;
+              justify-content:space-between;
+            "
+          >
+
+            <span>
+              선택 정산금액
+            </span>
+
+            <strong
+              id="payout-selected-amount"
+              style="
+                color:#174981;
+                font-size:18px;
+              "
+            >
+              0원
+            </strong>
+
+          </div>
+
+        </div>
+
+
+        <div
+          style="
+            display:flex;
+            gap:10px;
+            margin-top:20px;
+          "
+        >
+
+          <button
+            type="button"
+            id="payout-select-cancel"
+            style="
+              flex:1;
+              padding:13px;
+              border:1px solid #d1d5db;
+              border-radius:8px;
+              background:#ffffff;
+              cursor:pointer;
+            "
+          >
+            취소
+          </button>
+
+
+          <button
+            type="button"
+            id="payout-select-confirm"
+            style="
+              flex:1;
+              padding:13px;
+              border:0;
+              border-radius:8px;
+              background:#174981;
+              color:#ffffff;
+              font-weight:700;
+              cursor:pointer;
+            "
+          >
+            선택건 출금
+          </button>
+
+        </div>
+
+      </div>
+    `
+
+
+    document.body.appendChild(
+      modal
+    )
+
+
+    return await new Promise<
+      number[] | null
+    >((resolve) => {
+
+      const checkboxes =
+        Array.from(
+          modal.querySelectorAll<HTMLInputElement>(
+            '.payout-select-checkbox'
+          )
+        )
+
+
+      const selectAll =
+        modal.querySelector<HTMLInputElement>(
+          '#payout-select-all'
+        )
+
+
+      const selectedCount =
+        modal.querySelector<HTMLElement>(
+          '#payout-selected-count'
+        )
+
+
+      const selectedAmount =
+        modal.querySelector<HTMLElement>(
+          '#payout-selected-amount'
+        )
+
+
+      const updateSelectedSummary =
+        () => {
+
+          const checked =
+            checkboxes.filter(
+              (checkbox) =>
+                checkbox.checked
+            )
+
+
+          const totalAmount =
+            checked.reduce(
+              (
+                sum,
+                checkbox
+              ) => {
+
+                return (
+                  sum +
+                  Number(
+                    checkbox.dataset
+                      .amount || 0
+                  )
+                )
+
+              },
+              0
+            )
+
+
+          if (selectedCount) {
+
+            selectedCount.textContent =
+              checked.length +
+              '건'
+
+          }
+
+
+          if (selectedAmount) {
+
+            selectedAmount.textContent =
+              totalAmount
+                .toLocaleString() +
+              '원'
+
+          }
+
+
+          if (selectAll) {
+
+            selectAll.checked =
+              checked.length ===
+                checkboxes.length &&
+              checkboxes.length > 0
+
+          }
+
+        }
+
+
+      checkboxes.forEach(
+        (checkbox) => {
+
+          checkbox.addEventListener(
+            'change',
+            updateSelectedSummary
+          )
+
+        }
+      )
+
+
+      selectAll?.addEventListener(
+        'change',
+        () => {
+
+          checkboxes.forEach(
+            (checkbox) => {
+
+              checkbox.checked =
+                selectAll.checked
+
+            }
+          )
+
+          updateSelectedSummary()
+
+        }
+      )
+
+
+      modal
+        .querySelector(
+          '#payout-select-cancel'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            modal.remove()
+
+            resolve(null)
+
+          }
+        )
+
+
+      modal
+        .querySelector(
+          '#payout-select-confirm'
+        )
+        ?.addEventListener(
+          'click',
+          () => {
+
+            const selectedIds =
+              checkboxes
+                .filter(
+                  (checkbox) =>
+                    checkbox.checked
+                )
+                .map(
+                  (checkbox) =>
+                    Number(
+                      checkbox.value
+                    )
+                )
+                .filter(
+                  (id) =>
+                    Number.isInteger(id) &&
+                    id > 0
+                )
+
+
+            if (
+              selectedIds.length === 0
+            ) {
+
+              alert(
+                '정산할 결제건을 선택해주세요.'
+              )
+
+              return
+            }
+
+
+            modal.remove()
+
+            resolve(
+              selectedIds
+            )
+
+          }
+        )
+
+
+      modal.addEventListener(
+        'click',
+        (event) => {
+
+          if (
+            event.target === modal
+          ) {
+
+            modal.remove()
+
+            resolve(null)
+
+          }
+
+        }
+      )
+
+    })
+  }
     
         document.querySelectorAll('.payout-complete-button')
   .forEach((button) => {
@@ -14484,18 +15138,51 @@ if (nextTop) {
               id > 0
           )
 
-      if (
-        paymentIds.length === 0
-      ) {
-        alert(
-          '출금대상 결제정보가 없습니다.'
-        )
-        return
-      }
-
-      targetButton.disabled = true
-      targetButton.textContent =
-        '처리중'
+          if (
+            paymentIds.length === 0
+          ) {
+            alert(
+              '출금대상 결제정보가 없습니다.'
+            )
+            return
+          }
+          
+          
+          /*
+           * 2건 이상이면
+           * 출금할 결제건 선택
+           */
+          let selectedPaymentIds =
+            paymentIds
+          
+          
+          if (
+            paymentIds.length > 1
+          ) {
+          
+            const selectedIds =
+              await selectPayoutPayments(
+                paymentIds
+              )
+          
+          
+            if (
+              !selectedIds ||
+              selectedIds.length === 0
+            ) {
+          
+              return
+            }
+          
+          
+            selectedPaymentIds =
+              selectedIds
+          }
+          
+          
+          targetButton.disabled = true
+          targetButton.textContent =
+            '처리중'
 
       try {
         /*
@@ -14515,7 +15202,7 @@ if (nextTop) {
               body: JSON.stringify({
                 action: 'preview',
                 payment_ids:
-                  paymentIds
+  selectedPaymentIds
               })
             }
           )
@@ -14587,7 +15274,7 @@ if (nextTop) {
               body: JSON.stringify({
                 action: 'execute',
                 payment_ids:
-                  paymentIds
+  selectedPaymentIds
               })
             }
           )
