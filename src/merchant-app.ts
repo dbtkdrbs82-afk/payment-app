@@ -12134,6 +12134,25 @@ async function renderMerchantTables() {
   https://payment-app-ybtf.vercel.app/table/${table.public_token}
 </div>
 
+<button
+  type="button"
+  data-table-delete="${table.id}"
+  style="
+    margin-top:12px;
+    width:100%;
+    height:42px;
+    border:1px solid #dc2626;
+    border-radius:8px;
+    background:#ffffff;
+    color:#dc2626;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+  "
+>
+  테이블 삭제
+</button>
+
                       </div>
                     `
                   )
@@ -12239,6 +12258,71 @@ async function renderMerchantTables() {
         )
 
         void renderMerchantTables()
+
+      }
+    )
+
+    document
+    .querySelectorAll(
+      '[data-table-delete]'
+    )
+    .forEach(
+      (button) => {
+
+        button.addEventListener(
+          'click',
+          async () => {
+
+            const tableId =
+              button.getAttribute(
+                'data-table-delete'
+              )
+
+            if (!tableId) {
+              return
+            }
+
+            const confirmed =
+              confirm(
+                '이 테이블을 삭제하시겠습니까?'
+              )
+
+            if (!confirmed) {
+              return
+            }
+
+            const {
+              error: deleteError
+            } =
+              await supabase
+                .from('merchant_tables')
+                .delete()
+                .eq(
+                  'id',
+                  tableId
+                )
+
+            if (deleteError) {
+
+              console.error(
+                deleteError
+              )
+
+              alert(
+                '테이블 삭제에 실패했습니다.'
+              )
+
+              return
+            }
+
+            alert(
+              '테이블이 삭제되었습니다.'
+            )
+
+            void renderMerchantTables()
+
+          }
+        )
 
       }
     )
