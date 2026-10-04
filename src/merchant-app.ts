@@ -12332,6 +12332,25 @@ async function renderMerchantTables() {
                         </button>
 
                         <button
+  type="button"
+  data-table-url-copy="https://nxgsoft.co.kr/pay/?merchant_id=${merchantId}&table_token=${table.public_token}"
+  style="
+    width:82px;
+    height:38px;
+    flex-shrink:0;
+    border:1px solid #174981;
+    border-radius:8px;
+    background:#ffffff;
+    color:#174981;
+    font-size:13px;
+    font-weight:800;
+    cursor:pointer;
+  "
+>
+  주소 복사
+</button>
+
+                        <button
                           type="button"
                           data-table-delete="${table.id}"
                           style="
@@ -12564,6 +12583,54 @@ async function renderMerchantTables() {
 
             location.href =
               '/merchant-app/table-qr'
+
+          }
+        )
+
+      }
+    )
+
+    document
+    .querySelectorAll<HTMLButtonElement>(
+      '[data-table-url-copy]'
+    )
+    .forEach(
+      (button) => {
+
+        button.addEventListener(
+          'click',
+          async () => {
+
+            const url =
+              button.getAttribute(
+                'data-table-url-copy'
+              )
+
+            if (!url) {
+              return
+            }
+
+            try {
+
+              await navigator.clipboard.writeText(
+                url
+              )
+
+              alert(
+                '주문주소가 복사되었습니다.'
+              )
+
+            } catch (error) {
+
+              console.error(
+                error
+              )
+
+              alert(
+                '주소 복사에 실패했습니다.'
+              )
+
+            }
 
           }
         )
