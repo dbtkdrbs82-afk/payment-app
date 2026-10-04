@@ -12131,7 +12131,7 @@ async function renderMerchantTables() {
   "
 >
   고객 주문주소<br>
-  https://payment-app-ybtf.vercel.app/table/${table.public_token}
+  https://nxgsoft.co.kr/pay/?merchant_id=${merchantId}&table_token=${table.public_token}
 </div>
 
 <button
