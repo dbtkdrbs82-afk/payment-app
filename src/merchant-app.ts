@@ -1601,10 +1601,13 @@ if (
     merchantType === '뷰티'
 
     const isHotel =
-    merchantType === '호텔'
-  
-  const isManualPayment =
-    merchantType === '수기결제'
+  merchantType === '호텔'
+
+const isTableOrder =
+  merchantType === '테이블오더'
+
+const isManualPayment =
+  merchantType === '수기결제'
   
   
   if (isWirelessTerminal) {
@@ -1669,6 +1672,51 @@ if (isManualPayment) {
   <small>주문 및 결제내역 관리</small>
 </button>
   `
+
+} else if (isTableOrder) {
+
+  merchantHomeMenu = `
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="orders"
+    >
+      <span class="merchant-mobile-menu-icon">📋</span>
+      <strong>주문관리</strong>
+      <small>테이블 주문 및 결제내역</small>
+    </button>
+
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="products"
+    >
+      <span class="merchant-mobile-menu-icon">🛍️</span>
+      <strong>상품관리</strong>
+      <small>메뉴 등록 및 수정</small>
+    </button>
+
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="tables"
+    >
+      <span class="merchant-mobile-menu-icon">🍽️</span>
+      <strong>테이블관리</strong>
+      <small>테이블 등록 및 QR · NFC 관리</small>
+    </button>
+
+    <button
+      type="button"
+      class="merchant-mobile-menu-card"
+      data-menu="card"
+    >
+      <span class="merchant-mobile-menu-icon">💳</span>
+      <strong>카드결제</strong>
+      <small>카드 결제 관리</small>
+    </button>
+  `
+
 
 } else if (isNormalStore) {
 
@@ -2610,9 +2658,12 @@ document
             orders:
               '/merchant-app/orders',
         
-            products:
+              products:
               '/merchant-app/products',
-
+            
+            tables:
+              '/merchant-app/tables',
+            
             qr:
               '/merchant-app/qr',
 
@@ -11680,6 +11731,304 @@ async function renderHotelOrdersMobile() {
 
       }
     )
+}
+
+/* =========================================
+   모바일 테이블관리
+========================================= */
+
+async function renderMerchantTables() {
+
+  const merchantIdText =
+    sessionStorage.getItem(
+      'login_merchant_id'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_id'
+    )
+
+  if (!merchantIdText) {
+    location.replace(
+      '/merchant-app'
+    )
+    return
+  }
+
+  const merchantId =
+    Number(merchantIdText)
+
+  const merchantName =
+    sessionStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    localStorage.getItem(
+      'login_merchant_name'
+    ) ||
+    ''
+
+  const {
+    data: tables,
+    error
+  } =
+    await supabase
+      .from('merchant_tables')
+      .select('*')
+      .eq(
+        'merchant_id',
+        merchantId
+      )
+      .order(
+        'id',
+        {
+          ascending: true
+        }
+      )
+
+  if (error) {
+    console.error(error)
+
+    alert(
+      '테이블 정보를 불러오지 못했습니다.'
+    )
+
+    return
+  }
+
+  app.innerHTML = `
+    <div class="merchant-mobile-home">
+
+      <header class="merchant-mobile-header">
+
+        <div>
+          <div class="merchant-mobile-brand">
+            NXG PICK
+          </div>
+
+          <div class="merchant-mobile-store">
+            ${merchantName}
+          </div>
+        </div>
+
+        <button
+          id="merchant-table-back"
+          class="merchant-mobile-logout"
+          type="button"
+        >
+          이전
+        </button>
+
+      </header>
+
+      <main class="merchant-mobile-content">
+
+        <section class="merchant-mobile-welcome">
+
+          <div class="merchant-mobile-welcome-label">
+            테이블오더
+          </div>
+
+          <h1>
+            테이블관리
+          </h1>
+
+          <div class="merchant-mobile-type">
+            테이블을 등록하고 관리합니다.
+          </div>
+
+        </section>
+
+
+        <section
+          style="
+            margin-top:16px;
+          "
+        >
+
+          <button
+            id="merchant-table-add"
+            type="button"
+            style="
+              width:100%;
+              height:52px;
+              border:0;
+              border-radius:12px;
+              background:#174981;
+              color:#ffffff;
+              font-size:16px;
+              font-weight:800;
+              cursor:pointer;
+            "
+          >
+            + 테이블 등록
+          </button>
+
+        </section>
+
+
+        <section
+          style="
+            margin-top:18px;
+            display:grid;
+            gap:12px;
+          "
+        >
+
+          ${
+            tables &&
+            tables.length > 0
+              ? tables
+                  .map(
+                    (table: any) => `
+                      <div
+                        style="
+                          padding:18px;
+                          background:#ffffff;
+                          border:1px solid #dbe3ee;
+                          border-radius:14px;
+                        "
+                      >
+
+                        <div
+                          style="
+                            font-size:18px;
+                            font-weight:900;
+                            color:#172033;
+                          "
+                        >
+                          ${
+                            table.table_name ||
+                            table.table_number + '번 테이블'
+                          }
+                        </div>
+
+                        <div
+                          style="
+                            margin-top:6px;
+                            font-size:13px;
+                            color:#667085;
+                          "
+                        >
+                          테이블번호:
+                          ${table.table_number}
+                          ·
+                          ${table.status}
+                        </div>
+
+                      </div>
+                    `
+                  )
+                  .join('')
+              : `
+                <div
+                  style="
+                    padding:30px 20px;
+                    background:#ffffff;
+                    border:1px solid #dbe3ee;
+                    border-radius:14px;
+                    text-align:center;
+                    color:#667085;
+                  "
+                >
+                  등록된 테이블이 없습니다.
+                </div>
+              `
+          }
+
+        </section>
+
+      </main>
+
+    </div>
+  `
+
+
+  document
+    .querySelector(
+      '#merchant-table-back'
+    )
+    ?.addEventListener(
+      'click',
+      () => {
+
+        location.href =
+          '/merchant-app/home'
+
+      }
+    )
+
+
+  document
+    .querySelector(
+      '#merchant-table-add'
+    )
+    ?.addEventListener(
+      'click',
+      async () => {
+
+        const tableNumber =
+          prompt(
+            '테이블 번호를 입력해주세요.\n예: 1'
+          )
+
+        if (!tableNumber) {
+          return
+        }
+
+        const normalizedTableNumber =
+          tableNumber.trim()
+
+        if (!normalizedTableNumber) {
+          return
+        }
+
+        const tableName =
+          prompt(
+            '테이블 이름을 입력해주세요.\n예: 창가 1번\n\n없으면 취소를 눌러주세요.'
+          )
+
+        const {
+          error: insertError
+        } =
+          await supabase
+            .from('merchant_tables')
+            .insert({
+              merchant_id:
+                merchantId,
+
+              table_number:
+                normalizedTableNumber,
+
+              table_name:
+                tableName
+                  ? tableName.trim()
+                  : null,
+
+              status:
+                '사용'
+            })
+
+        if (insertError) {
+
+          console.error(
+            insertError
+          )
+
+          alert(
+            '테이블 등록에 실패했습니다.'
+          )
+
+          return
+        }
+
+        alert(
+          '테이블이 등록되었습니다.'
+        )
+
+        void renderMerchantTables()
+
+      }
+    )
+
 }
 
   /* =========================================
@@ -23311,6 +23660,11 @@ if (
     path === '/merchant-app/products'
   ) {
     void renderMerchantProducts()
+  
+  } else if (
+    path === '/merchant-app/tables'
+  ) {
+    void renderMerchantTables()
   
   } else if (
     path === '/merchant-app/qr'
