@@ -11734,6 +11734,211 @@ async function renderHotelOrdersMobile() {
 }
 
 /* =========================================
+   테이블오더 고객 주문화면
+========================================= */
+
+async function renderTableOrderCustomer() {
+
+  const token =
+    location.pathname
+      .replace('/table/', '')
+      .trim()
+
+  if (!token) {
+    app.innerHTML = `
+      <div style="
+        padding:40px 20px;
+        text-align:center;
+      ">
+        잘못된 테이블 주소입니다.
+      </div>
+    `
+    return
+  }
+
+  const {
+    data: table,
+    error: tableError
+  } =
+    await supabase
+      .from('merchant_tables')
+      .select(
+        'id, merchant_id, table_number, table_name, status, public_token'
+      )
+      .eq(
+        'public_token',
+        token
+      )
+      .maybeSingle()
+
+  if (
+    tableError ||
+    !table
+  ) {
+
+    console.error(
+      tableError
+    )
+
+    app.innerHTML = `
+      <div style="
+        padding:40px 20px;
+        text-align:center;
+      ">
+        사용할 수 없는 테이블입니다.
+      </div>
+    `
+
+    return
+  }
+
+  if (
+    table.status !== '사용'
+  ) {
+
+    app.innerHTML = `
+      <div style="
+        padding:40px 20px;
+        text-align:center;
+      ">
+        현재 사용할 수 없는 테이블입니다.
+      </div>
+    `
+
+    return
+  }
+
+  const {
+    data: merchant,
+    error: merchantError
+  } =
+    await supabase
+      .from('merchants')
+      .select(
+        'id, merchant_name, merchant_type'
+      )
+      .eq(
+        'id',
+        table.merchant_id
+      )
+      .maybeSingle()
+
+  if (
+    merchantError ||
+    !merchant
+  ) {
+
+    console.error(
+      merchantError
+    )
+
+    app.innerHTML = `
+      <div style="
+        padding:40px 20px;
+        text-align:center;
+      ">
+        가맹점 정보를 불러오지 못했습니다.
+      </div>
+    `
+
+    return
+  }
+
+  app.innerHTML = `
+    <div
+      style="
+        max-width:600px;
+        margin:0 auto;
+        min-height:100vh;
+        padding:24px 18px;
+        background:#f5f7fa;
+      "
+    >
+
+      <div
+        style="
+          padding:24px 20px;
+          background:#ffffff;
+          border-radius:16px;
+          border:1px solid #e4e7ec;
+        "
+      >
+
+        <div
+          style="
+            font-size:13px;
+            font-weight:800;
+            color:#174981;
+          "
+        >
+          NXG PICK
+        </div>
+
+        <h1
+          style="
+            margin:8px 0 0;
+            font-size:24px;
+            color:#172033;
+          "
+        >
+          ${merchant.merchant_name}
+        </h1>
+
+        <div
+          style="
+            margin-top:8px;
+            font-size:16px;
+            font-weight:800;
+            color:#475467;
+          "
+        >
+          ${
+            table.table_name ||
+            table.table_number +
+              '번 테이블'
+          }
+        </div>
+
+      </div>
+
+      <div
+        style="
+          margin-top:16px;
+          padding:30px 20px;
+          background:#ffffff;
+          border-radius:16px;
+          border:1px solid #e4e7ec;
+          text-align:center;
+        "
+      >
+
+        <div
+          style="
+            font-size:18px;
+            font-weight:900;
+            color:#172033;
+          "
+        >
+          메뉴를 준비하고 있습니다.
+        </div>
+
+        <div
+          style="
+            margin-top:8px;
+            font-size:14px;
+            color:#667085;
+          "
+        >
+          테이블 주문 화면 연결 테스트
+        </div>
+
+      </div>
+
+    </div>
+  `
+}
+
+/* =========================================
    모바일 테이블관리
 ========================================= */
 
@@ -11902,17 +12107,32 @@ async function renderMerchantTables() {
                         </div>
 
                         <div
-                          style="
-                            margin-top:6px;
-                            font-size:13px;
-                            color:#667085;
-                          "
-                        >
-                          테이블번호:
-                          ${table.table_number}
-                          ·
-                          ${table.status}
-                        </div>
+  style="
+    margin-top:6px;
+    font-size:13px;
+    color:#667085;
+  "
+>
+  테이블번호:
+  ${table.table_number}
+  ·
+  ${table.status}
+</div>
+
+<div
+  style="
+    margin-top:12px;
+    padding:10px;
+    background:#f5f7fa;
+    border-radius:8px;
+    font-size:12px;
+    color:#475467;
+    word-break:break-all;
+  "
+>
+  고객 주문주소<br>
+  https://payment-app-ybtf.vercel.app/table/${table.public_token}
+</div>
 
                       </div>
                     `
@@ -11981,10 +12201,7 @@ async function renderMerchantTables() {
           return
         }
 
-        const tableName =
-          prompt(
-            '테이블 이름을 입력해주세요.\n예: 창가 1번\n\n없으면 취소를 눌러주세요.'
-          )
+        
 
         const {
           error: insertError
@@ -11998,10 +12215,7 @@ async function renderMerchantTables() {
               table_number:
                 normalizedTableNumber,
 
-              table_name:
-                tableName
-                  ? tableName.trim()
-                  : null,
+                table_name: null,
 
               status:
                 '사용'
@@ -23656,6 +23870,12 @@ if (
   ) {
     void renderBeautyHoursMobile()
   
+  } else if (
+    path.startsWith('/table/')
+  ) {
+    void renderTableOrderCustomer()
+  
+
   } else if (
     path === '/merchant-app/products'
   ) {
