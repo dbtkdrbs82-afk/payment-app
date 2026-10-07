@@ -510,8 +510,11 @@ const ordHp = onlyDigits(customerPhone)
     } catch {
       return res.status(502).json({
         success: false,
-        message: '코페이 응답 형식이 올바르지 않습니다.',
-        detail: responseText
+        message:
+          '코페이 원본응답: ' +
+          responseText,
+        detail:
+          responseText
       })
     }
 
