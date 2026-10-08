@@ -7204,22 +7204,21 @@ row.recordType +
    * 총 230바이트
    */
   const tdLine =
-    'TD' +
-    fitNumber(paymentYear, 4) +
-    fitNumber(quarter, 1) +
-    fitNumber(businessNumber, 10) +
-    fitNumber(
-      includedMerchantIds.size,
-      7
-    ) +
-    '35' +
-    fitNumber(totalPaymentCount, 8) +
-    fitNumber(0, 18) +
-    fitNumber(totalPaymentAmount, 16) +
-    fitNumber(totalPaymentAmount, 15) +
-    fitNumber(totalPaymentCount, 8) +
-    fitNumber(totalPaymentAmount, 16) +
-    fitByteText('', 123)
+  'TD' +
+  fitNumber(paymentYear, 4) +
+  fitNumber(quarter, 1) +
+  fitNumber(businessNumber, 10) +
+  fitNumber(includedMerchantIds.size, 7) +
+  '02' +
+  fitNumber(totalPaymentCount, 8) +
+  '1' +
+  '0'.repeat(17) +
+  fitNumber(totalPaymentAmount * 10, 16) +
+  fitNumber(totalPaymentAmount, 15) +
+  fitNumber(totalPaymentCount, 8) +
+  '1' +
+  fitNumber(totalPaymentAmount, 15) +
+  fitByteText('', 123)
 
   const tdLength =
     byteLength(tdLine)
