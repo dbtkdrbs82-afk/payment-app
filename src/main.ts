@@ -7208,9 +7208,8 @@ row.recordType +
   fitNumber(paymentYear, 4) +
   fitNumber(quarter, 1) +
   fitNumber(businessNumber, 10) +
-  fitNumber(rows.length, 7) +
-  '02' +
-  fitNumber(totalPaymentCount, 8) +
+  fitNumber(lines.length - 1, 9) +
+fitNumber(totalPaymentCount, 8) +
   '1' +
   '0'.repeat(17) +
   fitNumber(totalPaymentAmount * 10, 16) +
