@@ -503,6 +503,15 @@ const ordHp = onlyDigits(customerPhone)
 
     const responseText = await korpayResponse.text()
 
+    console.log('[KORPAY MANUAL]', {
+      httpStatus: korpayResponse.status,
+      contentType: korpayResponse.headers.get('content-type'),
+      responseLength: responseText.length,
+      isJson:
+        responseText.trim().startsWith('{') ||
+        responseText.trim().startsWith('[')
+    })
+
     let korpayData: Record<string, unknown>
 
     try {
