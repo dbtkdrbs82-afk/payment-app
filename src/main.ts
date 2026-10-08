@@ -7208,7 +7208,7 @@ row.recordType +
   fitNumber(paymentYear, 4) +
   fitNumber(quarter, 1) +
   fitNumber(businessNumber, 10) +
-  fitNumber(includedMerchantIds.size, 7) +
+  fitNumber(rows.length, 7) +
   '02' +
   fitNumber(totalPaymentCount, 8) +
   '1' +
