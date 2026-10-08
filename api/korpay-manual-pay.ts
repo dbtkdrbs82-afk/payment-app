@@ -423,15 +423,14 @@ const ordHp = onlyDigits(customerPhone)
 
 
     const mid =
-      String(
-        selectedManualMid.mid
-      ).trim()
-
-
-    const mkey =
-      String(
-        selectedManualMid.mkey
-      ).trim()
+    merchantDbId === 42
+      ? String(merchant.korpay_manual_mid || '').trim()
+      : String(selectedManualMid.mid || '').trim()
+  
+  const mkey =
+    merchantDbId === 42
+      ? String(merchant.korpay_manual_mkey || '').trim()
+      : String(selectedManualMid.mkey || '').trim()
 
 
     const monthlyLimit =
