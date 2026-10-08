@@ -20,7 +20,7 @@ const supabase = createClient(supabaseUrl, supabaseKey)
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 
 const apiBaseUrl =
-  'https://payment-app-ybtf.vercel.app'
+  window.location.origin
 
   function getKorpayEdiDate() {
 
