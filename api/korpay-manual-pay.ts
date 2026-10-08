@@ -488,9 +488,9 @@ const ordHp = onlyDigits(customerPhone)
         hashKey
       }
 
-    const korpayUrl =
+      const korpayUrl =
       process.env.KORPAY_MANUAL_PAY_URL ||
-      'https://staging-pgapi.korpay.com/api/manualpay'
+      'https://pgapi.korpay.com/api/manualpay'
 
     const korpayResponse = await fetch(korpayUrl, {
       method: 'POST',
