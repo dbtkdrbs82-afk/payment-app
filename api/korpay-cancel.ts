@@ -768,10 +768,9 @@ export default async function handler(
             )
 
 
-    const korpayCancelUrl =
-      process.env
-        .KORPAY_CANCEL_URL ||
-      'https://staging-pgapi.korpay.com/api/cancel'
+            const korpayCancelUrl =
+            process.env.KORPAY_CANCEL_URL ||
+            'https://pgapi.korpay.com/api/cancel'
 
 
     /*
