@@ -5482,14 +5482,45 @@ receiptButton?.addEventListener(
                 )
   
   
-              const callMessage =
-                orderNumber +
-                '번 고객님 ' +
-                (
-                  merchantSetting
-                    ?.call_message ||
-                  '주문이 준비되었습니다.'
-                )
+                const numberToKorean = (value: string) => {
+                  const num = Number(value)
+                
+                  if (
+                    !Number.isSafeInteger(num) ||
+                    num < 1 ||
+                    num > 9999
+                  ) {
+                    return value
+                  }
+                
+                  const digits = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구']
+                  const units = ['', '십', '백', '천']
+                
+                  const text = String(num)
+                  let result = ''
+                
+                  for (let i = 0; i < text.length; i++) {
+                    const digit = Number(text[i])
+                    const unitIndex = text.length - i - 1
+                
+                    if (digit === 0) continue
+                
+                    result +=
+                      (digit === 1 && unitIndex > 0 ? '' : digits[digit]) +
+                      units[unitIndex]
+                  }
+                
+                  return result
+                }
+                
+                const callMessage =
+                  numberToKorean(orderNumber) +
+                  ' 번 고객님 ' +
+                  (
+                    merchantSetting
+                      ?.call_message ||
+                    '주문이 준비되었습니다.'
+                  )
   
   
               window
