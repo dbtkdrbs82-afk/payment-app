@@ -1,0 +1,792 @@
+﻿diff --git a/src/main.ts b/src/main.ts
+index eb98252d181..aeec77bd395 100644
+--- a/src/main.ts
++++ b/src/main.ts
+@@ -7204,22 +7204,20 @@ row.recordType +
+    * 珥?230諛붿씠??    */
+   const tdLine =
+-    'TD' +
+-    fitNumber(paymentYear, 4) +
+-    fitNumber(quarter, 1) +
+-    fitNumber(businessNumber, 10) +
+-    fitNumber(
+-      includedMerchantIds.size,
+-      7
+-    ) +
+-    '35' +
+-    fitNumber(totalPaymentCount, 8) +
+-    fitNumber(0, 18) +
+-    fitNumber(totalPaymentAmount, 16) +
+-    fitNumber(totalPaymentAmount, 15) +
+-    fitNumber(totalPaymentCount, 8) +
+-    fitNumber(totalPaymentAmount, 16) +
+-    fitByteText('', 123)
++  'TD' +
++  fitNumber(paymentYear, 4) +
++  fitNumber(quarter, 1) +
++  fitNumber(businessNumber, 10) +
++  fitNumber(lines.length - 1, 9) +
++fitNumber(totalPaymentCount, 8) +
++  '1' +
++  '0'.repeat(17) +
++  fitNumber(totalPaymentAmount * 10, 16) +
++  fitNumber(totalPaymentAmount, 15) +
++  fitNumber(totalPaymentCount, 8) +
++  '1' +
++  fitNumber(totalPaymentAmount, 15) +
++  fitByteText('', 123)
+ 
+   const tdLength =
+     byteLength(tdLine)
+@@ -12324,8 +12322,17 @@ const payoutDate =
+     settlementCycle
+   )
+         
+-          const groupKey =
+-            String(row.merchant_id || '') + '_' + payoutDate
++  const payoutGroupStatus =
++  row.payout_status === '異쒓툑?꾨즺'
++    ? '異쒓툑?꾨즺'
++    : '誘몄셿猷?
++
++const groupKey =
++  String(row.merchant_id || '') +
++  '_' +
++  payoutDate +
++  '_' +
++  payoutGroupStatus
+         
+           const amount = Number(row.amount || 0)
+           const feeAmount = Number(row.fee_amount || 0)
+@@ -14461,7 +14468,652 @@ if (nextTop) {
+           paymentTableBody.appendChild(tr)
+         })
+     
+-        
++        const selectPayoutPayments =
++  async (
++    paymentIds: number[]
++  ): Promise<number[] | null> => {
++
++    const {
++      data: payoutPayments,
++      error: payoutPaymentsError
++    } =
++      await supabase
++        .from('payments')
++        .select(`
++          id,
++          created_at,
++          amount,
++          fee_amount,
++          settlement_amount,
++          approval_number,
++          payout_status,
++          status,
++          settlement_status
++        `)
++        .in(
++          'id',
++          paymentIds
++        )
++        .order(
++          'created_at',
++          {
++            ascending: true
++          }
++        )
++
++
++    if (payoutPaymentsError) {
++
++      alert(
++        '?뺤궛 ???寃곗젣?댁뿭 議고쉶 ?ㅽ뙣: ' +
++        payoutPaymentsError.message
++      )
++
++      return null
++    }
++
++
++    const selectablePayments =
++      (payoutPayments || [])
++        .filter((payment: any) => {
++
++          if (
++            payment.payout_status ===
++            '異쒓툑?꾨즺'
++          ) {
++            return false
++          }
++
++          if (
++            payment.payout_status ===
++            '異쒓툑?쒖쇅'
++          ) {
++            return false
++          }
++
++          if (
++            payment.status ===
++            'cancel'
++          ) {
++            return false
++          }
++
++          if (
++            payment.settlement_status ===
++            '痍⑥냼'
++          ) {
++            return false
++          }
++
++          return true
++        })
++
++
++    if (
++      selectablePayments.length === 0
++    ) {
++
++      alert(
++        '?뺤궛 媛?ν븳 寃곗젣嫄댁씠 ?놁뒿?덈떎.'
++      )
++
++      return null
++    }
++
++
++    /*
++     * ?ㅼ젣 ?뺤궛 媛?ν븳 嫄댁씠
++     * 1嫄대퓧?대㈃ ?좏깮李??놁씠 吏꾪뻾
++     */
++    if (
++      selectablePayments.length === 1
++    ) {
++
++      return [
++        Number(
++          selectablePayments[0].id
++        )
++      ]
++    }
++
++
++    document
++      .querySelector(
++        '#payout-payment-select-modal'
++      )
++      ?.remove()
++
++
++    const modal =
++      document.createElement('div')
++
++    modal.id =
++      'payout-payment-select-modal'
++
++
++    modal.style.cssText = `
++      position:fixed;
++      inset:0;
++      background:rgba(0,0,0,0.48);
++      z-index:99999;
++      display:flex;
++      align-items:center;
++      justify-content:center;
++      padding:20px;
++      box-sizing:border-box;
++    `
++
++
++    const paymentRowsHtml =
++      selectablePayments
++        .map((payment: any) => {
++
++          const amount =
++            Number(
++              payment.amount || 0
++            )
++
++          const feeAmount =
++            Number(
++              payment.fee_amount || 0
++            )
++
++          const settlementAmount =
++            Number(
++              payment.settlement_amount ??
++              amount - feeAmount
++            )
++
++
++          const paymentDate =
++            payment.created_at
++              ? new Date(
++                  payment.created_at
++                ).toLocaleString(
++                  'ko-KR',
++                  {
++                    timeZone:
++                      'Asia/Seoul'
++                  }
++                )
++              : '-'
++
++
++          const approvalNumber =
++            String(
++              payment.approval_number ||
++              '-'
++            )
++
++
++          return `
++            <label
++              style="
++                display:flex;
++                gap:12px;
++                align-items:flex-start;
++                padding:15px 4px;
++                border-bottom:1px solid #e5e7eb;
++                cursor:pointer;
++              "
++            >
++
++              <input
++                type="checkbox"
++                class="payout-select-checkbox"
++                value="${payment.id}"
++                data-amount="${settlementAmount}"
++                style="
++                  width:20px;
++                  height:20px;
++                  margin-top:4px;
++                "
++              />
++
++              <div
++                style="
++                  flex:1;
++                  min-width:0;
++                "
++              >
++
++                <div
++                  style="
++                    font-size:14px;
++                    color:#374151;
++                    margin-bottom:5px;
++                  "
++                >
++                  ${paymentDate}
++                </div>
++
++                <div
++                  style="
++                    font-size:13px;
++                    color:#6b7280;
++                    margin-bottom:7px;
++                  "
++                >
++                  ?뱀씤踰덊샇 ${approvalNumber}
++                </div>
++
++                <div
++                  style="
++                    display:flex;
++                    justify-content:space-between;
++                    gap:10px;
++                  "
++                >
++
++                  <span>
++                    寃곗젣
++                    <strong>
++                      ${amount.toLocaleString()}??+                    </strong>
++                  </span>
++
++                  <span>
++                    ?뺤궛
++                    <strong
++                      style="
++                        color:#174981;
++                      "
++                    >
++                      ${settlementAmount.toLocaleString()}??+                    </strong>
++                  </span>
++
++                </div>
++
++              </div>
++
++            </label>
++          `
++        })
++        .join('')
++
++
++    modal.innerHTML = `
++      <div
++        style="
++          width:100%;
++          max-width:560px;
++          max-height:85vh;
++          overflow:auto;
++          background:#ffffff;
++          border-radius:14px;
++          box-shadow:0 20px 60px rgba(0,0,0,0.25);
++          padding:22px;
++          box-sizing:border-box;
++        "
++      >
++
++        <div
++          style="
++            font-size:20px;
++            font-weight:800;
++            margin-bottom:5px;
++          "
++        >
++          ?뺤궛嫄??좏깮
++        </div>
++
++        <div
++          style="
++            font-size:14px;
++            color:#6b7280;
++            margin-bottom:18px;
++          "
++        >
++          異쒓툑??寃곗젣嫄댁쓣 ?좏깮?댁＜?몄슂.
++        </div>
++
++
++        <label
++          style="
++            display:flex;
++            align-items:center;
++            gap:8px;
++            padding:10px 4px;
++            border-bottom:2px solid #111827;
++            cursor:pointer;
++            font-weight:700;
++          "
++        >
++
++          <input
++            type="checkbox"
++            id="payout-select-all"
++            style="
++              width:20px;
++              height:20px;
++            "
++          />
++
++          ?꾩껜?좏깮
++
++        </label>
++
++
++        <div>
++          ${paymentRowsHtml}
++        </div>
++
++
++        <div
++          style="
++            margin-top:18px;
++            padding:15px;
++            background:#f3f6fa;
++            border-radius:10px;
++          "
++        >
++
++          <div
++            style="
++              display:flex;
++              justify-content:space-between;
++              margin-bottom:8px;
++            "
++          >
++
++            <span>
++              ?좏깮 嫄댁닔
++            </span>
++
++            <strong
++              id="payout-selected-count"
++            >
++              0嫄?+            </strong>
++
++          </div>
++
++
++          <div
++            style="
++              display:flex;
++              justify-content:space-between;
++            "
++          >
++
++            <span>
++              ?좏깮 ?뺤궛湲덉븸
++            </span>
++
++            <strong
++              id="payout-selected-amount"
++              style="
++                color:#174981;
++                font-size:18px;
++              "
++            >
++              0??+            </strong>
++
++          </div>
++
++        </div>
++
++
++        <div
++          style="
++            display:flex;
++            gap:10px;
++            margin-top:20px;
++          "
++        >
++
++          <button
++            type="button"
++            id="payout-select-cancel"
++            style="
++              flex:1;
++              padding:13px;
++              border:1px solid #d1d5db;
++              border-radius:8px;
++              background:#ffffff;
++              cursor:pointer;
++            "
++          >
++            痍⑥냼
++          </button>
++
++
++          <button
++            type="button"
++            id="payout-select-confirm"
++            style="
++              flex:1;
++              padding:13px;
++              border:0;
++              border-radius:8px;
++              background:#174981;
++              color:#ffffff;
++              font-weight:700;
++              cursor:pointer;
++            "
++          >
++            ?좏깮嫄?異쒓툑
++          </button>
++
++        </div>
++
++      </div>
++    `
++
++
++    document.body.appendChild(
++      modal
++    )
++
++
++    return await new Promise<
++      number[] | null
++    >((resolve) => {
++
++      const checkboxes =
++        Array.from(
++          modal.querySelectorAll<HTMLInputElement>(
++            '.payout-select-checkbox'
++          )
++        )
++
++
++      const selectAll =
++        modal.querySelector<HTMLInputElement>(
++          '#payout-select-all'
++        )
++
++
++      const selectedCount =
++        modal.querySelector<HTMLElement>(
++          '#payout-selected-count'
++        )
++
++
++      const selectedAmount =
++        modal.querySelector<HTMLElement>(
++          '#payout-selected-amount'
++        )
++
++
++      const updateSelectedSummary =
++        () => {
++
++          const checked =
++            checkboxes.filter(
++              (checkbox) =>
++                checkbox.checked
++            )
++
++
++          const totalAmount =
++            checked.reduce(
++              (
++                sum,
++                checkbox
++              ) => {
++
++                return (
++                  sum +
++                  Number(
++                    checkbox.dataset
++                      .amount || 0
++                  )
++                )
++
++              },
++              0
++            )
++
++
++          if (selectedCount) {
++
++            selectedCount.textContent =
++              checked.length +
++              '嫄?
++
++          }
++
++
++          if (selectedAmount) {
++
++            selectedAmount.textContent =
++              totalAmount
++                .toLocaleString() +
++              '??
++
++          }
++
++
++          if (selectAll) {
++
++            selectAll.checked =
++              checked.length ===
++                checkboxes.length &&
++              checkboxes.length > 0
++
++          }
++
++        }
++
++
++      checkboxes.forEach(
++        (checkbox) => {
++
++          checkbox.addEventListener(
++            'change',
++            updateSelectedSummary
++          )
++
++        }
++      )
++
++
++      selectAll?.addEventListener(
++        'change',
++        () => {
++
++          checkboxes.forEach(
++            (checkbox) => {
++
++              checkbox.checked =
++                selectAll.checked
++
++            }
++          )
++
++          updateSelectedSummary()
++
++        }
++      )
++
++
++      modal
++        .querySelector(
++          '#payout-select-cancel'
++        )
++        ?.addEventListener(
++          'click',
++          () => {
++
++            modal.remove()
++
++            resolve(null)
++
++          }
++        )
++
++
++      modal
++        .querySelector(
++          '#payout-select-confirm'
++        )
++        ?.addEventListener(
++          'click',
++          () => {
++
++            const selectedIds =
++              checkboxes
++                .filter(
++                  (checkbox) =>
++                    checkbox.checked
++                )
++                .map(
++                  (checkbox) =>
++                    Number(
++                      checkbox.value
++                    )
++                )
++                .filter(
++                  (id) =>
++                    Number.isInteger(id) &&
++                    id > 0
++                )
++
++
++            if (
++              selectedIds.length === 0
++            ) {
++
++              alert(
++                '?뺤궛??寃곗젣嫄댁쓣 ?좏깮?댁＜?몄슂.'
++              )
++
++              return
++            }
++
++
++            modal.remove()
++
++            resolve(
++              selectedIds
++            )
++
++          }
++        )
++
++
++      modal.addEventListener(
++        'click',
++        (event) => {
++
++          if (
++            event.target === modal
++          ) {
++
++            modal.remove()
++
++            resolve(null)
++
++          }
++
++        }
++      )
++
++    })
++  }
+     
+         document.querySelectorAll('.payout-complete-button')
+   .forEach((button) => {
+@@ -14484,18 +15136,51 @@ if (nextTop) {
+               id > 0
+           )
+ 
+-      if (
+-        paymentIds.length === 0
+-      ) {
+-        alert(
+-          '異쒓툑???寃곗젣?뺣낫媛 ?놁뒿?덈떎.'
+-        )
+-        return
+-      }
+-
+-      targetButton.disabled = true
+-      targetButton.textContent =
+-        '泥섎━以?
++          if (
++            paymentIds.length === 0
++          ) {
++            alert(
++              '異쒓툑???寃곗젣?뺣낫媛 ?놁뒿?덈떎.'
++            )
++            return
++          }
++          
++          
++          /*
++           * 2嫄??댁긽?대㈃
++           * 異쒓툑??寃곗젣嫄??좏깮
++           */
++          let selectedPaymentIds =
++            paymentIds
++          
++          
++          if (
++            paymentIds.length > 1
++          ) {
++          
++            const selectedIds =
++              await selectPayoutPayments(
++                paymentIds
++              )
++          
++          
++            if (
++              !selectedIds ||
++              selectedIds.length === 0
++            ) {
++          
++              return
++            }
++          
++          
++            selectedPaymentIds =
++              selectedIds
++          }
++          
++          
++          targetButton.disabled = true
++          targetButton.textContent =
++            '泥섎━以?
+ 
+       try {
+         /*
+@@ -14515,7 +15200,7 @@ if (nextTop) {
+               body: JSON.stringify({
+                 action: 'preview',
+                 payment_ids:
+-                  paymentIds
++  selectedPaymentIds
+               })
+             }
+           )
+@@ -14587,7 +15272,7 @@ if (nextTop) {
+               body: JSON.stringify({
+                 action: 'execute',
+                 payment_ids:
+-                  paymentIds
++  selectedPaymentIds
+               })
+             }
+           )
