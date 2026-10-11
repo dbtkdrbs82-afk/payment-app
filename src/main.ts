@@ -40365,8 +40365,9 @@ if (kioskSuccessRecoveryUrl) {
   const isBeautyKiosk =
   kioskMerchant?.merchant_type === '뷰티'
 
-const isNormalStoreKiosk =
-  kioskMerchant?.merchant_type === '일반매장'
+  const isNormalStoreKiosk =
+  kioskMerchant?.merchant_type === '일반매장' ||
+  kioskMerchant?.merchant_type === '테이블오더'
 
 const useCompactProductCard =
   isBeautyKiosk ||
