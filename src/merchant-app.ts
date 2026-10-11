@@ -12213,6 +12213,452 @@ async function renderMerchantTableQr() {
 
 }
 
+
+/* =========================================
+   NFC 테이블 선택 일괄인쇄
+========================================= */
+
+function bindNfcTableBatchPrint(
+  tables: any[],
+  merchantId: number
+) {
+
+  const addButton =
+    document.querySelector(
+      '#merchant-table-add'
+    )
+
+  if (!addButton) return
+
+  const escapeText = (value: any) =>
+    String(value ?? '').replace(
+      /[&<>"']/g,
+      (char) => (
+        {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        } as Record<string, string>
+      )[char] || char
+    )
+
+  addButton.insertAdjacentHTML(
+    'afterend',
+    `
+    <button
+      id="nfc-batch-open"
+      type="button"
+      style="
+        width:100%;
+        height:48px;
+        margin-top:10px;
+        border:1px solid #174981;
+        border-radius:10px;
+        background:#ffffff;
+        color:#174981;
+        font-weight:800;
+        cursor:pointer;
+      "
+    >
+      NFC 스티커 선택인쇄
+    </button>
+
+    <div
+      id="nfc-batch-panel"
+      style="
+        display:none;
+        padding:18px;
+        margin-top:12px;
+        background:#ffffff;
+        border:1px solid #dbe3ee;
+        border-radius:12px;
+      "
+    >
+      <h3 style="margin:0 0 12px;">
+        인쇄할 테이블 선택
+      </h3>
+
+      <label style="font-weight:800;">
+        <input id="nfc-batch-all" type="checkbox">
+        전체 선택
+      </label>
+
+      <div style="
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
+        margin:16px 0;
+      ">
+        ${tables.map((table: any) => `
+          <label style="
+            padding:12px;
+            border:1px solid #dbe3ee;
+            border-radius:8px;
+          ">
+            <input
+              class="nfc-batch-check"
+              type="checkbox"
+              value="${table.id}"
+            >
+            ${escapeText(table.table_number)}번 테이블
+          </label>
+        `).join('')}
+      </div>
+
+      <button
+        id="nfc-batch-print"
+        type="button"
+        style="
+          width:100%;
+          height:48px;
+          border:0;
+          border-radius:8px;
+          background:#174981;
+          color:#ffffff;
+          font-weight:800;
+          cursor:pointer;
+        "
+      >
+        선택한 테이블 인쇄
+      </button>
+    </div>
+    `
+  )
+
+  const panel =
+    document.querySelector<HTMLElement>(
+      '#nfc-batch-panel'
+    )
+
+  document.querySelector(
+    '#nfc-batch-open'
+  )?.addEventListener('click', () => {
+    if (!panel) return
+
+    panel.style.display =
+      panel.style.display === 'none'
+        ? 'block'
+        : 'none'
+  })
+
+  const allCheckbox =
+    document.querySelector<HTMLInputElement>(
+      '#nfc-batch-all'
+    )
+
+  const checkboxes = Array.from(
+    document.querySelectorAll<HTMLInputElement>(
+      '.nfc-batch-check'
+    )
+  )
+
+  allCheckbox?.addEventListener(
+    'change',
+    () => {
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked =
+          allCheckbox.checked
+      })
+    }
+  )
+
+  checkboxes.forEach((checkbox) => {
+    checkbox.addEventListener('change', () => {
+      if (allCheckbox) {
+        allCheckbox.checked =
+          checkboxes.length > 0 &&
+          checkboxes.every((item) => item.checked)
+      }
+    })
+  })
+
+  document.querySelector(
+    '#nfc-batch-print'
+  )?.addEventListener('click', async () => {
+
+    const selectedIds = new Set(
+      checkboxes
+        .filter((checkbox) => checkbox.checked)
+        .map((checkbox) => checkbox.value)
+    )
+
+    const selectedTables = tables
+      .filter((table: any) =>
+        selectedIds.has(String(table.id))
+      )
+      .sort((a: any, b: any) =>
+        String(a.table_number).localeCompare(
+          String(b.table_number),
+          'ko',
+          { numeric: true }
+        )
+      )
+
+    if (selectedTables.length === 0) {
+      alert('인쇄할 테이블을 선택해주세요.')
+      return
+    }
+
+    if (selectedTables.some(
+      (table: any) => !table.public_token
+    )) {
+      alert('QR 정보가 없는 테이블이 있습니다.')
+      return
+    }
+
+    const popup =
+      window.open('', '_blank')
+
+    if (!popup) {
+      alert('팝업 차단을 해제해주세요.')
+      return
+    }
+
+    popup.document.write(
+      '<h3 style="font-family:sans-serif;padding:24px;">' +
+      'NFC 스티커를 준비하고 있습니다...' +
+      '</h3>'
+    )
+    popup.document.close()
+
+    try {
+
+      const cards = await Promise.all(
+        selectedTables.map(
+          async (table: any) => {
+
+            const qrUrl =
+              'https://nxgsoft.co.kr/pay/?merchant_id=' +
+              merchantId +
+              '&table_token=' +
+              table.public_token
+
+            const qrImage =
+              await QRCode.toDataURL(
+                qrUrl,
+                {
+                  width: 400,
+                  margin: 1,
+                  errorCorrectionLevel: 'M'
+                }
+              )
+
+            return {
+              number: escapeText(
+                table.table_number
+              ),
+              qrImage
+            }
+          }
+        )
+      )
+
+      const pages: typeof cards[] = []
+
+      for (let i = 0; i < cards.length; i += 10) {
+        pages.push(cards.slice(i, i + 10))
+      }
+
+      const cardHtml = pages.map(
+        (page) => `
+          <section class="nfc-print-sheet">
+            ${page.map((card) => `
+              <div class="nfc-print-slot">
+                <div class="nfc-print-card">
+
+                  <img
+                    class="nfc-print-bg"
+                    src="${window.location.origin}/nxg-pick-nfc.png"
+                  >
+
+                  <img
+                    class="nfc-print-qr"
+                    src="${card.qrImage}"
+                  >
+
+                  <div class="nfc-print-number">
+                    TABLE ${card.number}
+                  </div>
+
+                </div>
+              </div>
+            `).join('')}
+          </section>
+        `
+      ).join('')
+
+      popup.document.open()
+      popup.document.write(`
+        <!DOCTYPE html>
+        <html lang="ko">
+        <head>
+          <meta charset="UTF-8">
+          <title>NXG PICK NFC 스티커 인쇄</title>
+
+          <style>
+            * {
+              box-sizing: border-box;
+            }
+
+            body {
+              margin: 0;
+              background: #f1f3f6;
+              font-family: Arial, sans-serif;
+            }
+
+            .nfc-print-toolbar {
+              padding: 16px;
+              text-align: center;
+            }
+
+            .nfc-print-toolbar button {
+              padding: 12px 36px;
+              border: 0;
+              border-radius: 8px;
+              background: #174981;
+              color: white;
+              font-weight: 800;
+              cursor: pointer;
+            }
+
+            .nfc-print-sheet {
+              width: 194mm;
+              height: 281mm;
+              margin: 12px auto;
+              background: white;
+              display: grid;
+              grid-template-columns: repeat(2, 85.6mm);
+              grid-template-rows: repeat(5, 54mm);
+              column-gap: 4mm;
+              row-gap: 2mm;
+              align-content: center;
+              justify-content: center;
+            }
+
+            .nfc-print-slot {
+              position: relative;
+              width: 85.6mm;
+              height: 54mm;
+              overflow: hidden;
+            }
+
+            .nfc-print-card {
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              width: 54mm;
+              height: 85.6mm;
+              transform:
+                translate(-50%, -50%)
+                rotate(-90deg);
+              overflow: hidden;
+            }
+
+            .nfc-print-bg {
+              position: absolute;
+              inset: 0;
+              width: 100%;
+              height: 100%;
+            }
+
+            .nfc-print-qr {
+              position: absolute;
+              left: 50%;
+              top: 79.8%;
+              width: 25%;
+              height: auto;
+              transform: translate(-50%, -50%);
+              background: white;
+            }
+
+            .nfc-print-number {
+              position: absolute;
+              left: 50%;
+              top: 93.2%;
+              transform: translate(-50%, -50%);
+              color: white;
+              font-size: 9pt;
+              font-weight: 800;
+              white-space: nowrap;
+            }
+
+            @page {
+              size: A4 portrait;
+              margin: 8mm;
+            }
+
+            @media print {
+              body {
+                margin: 0 !important;
+                background: white !important;
+              }
+
+              .nfc-print-toolbar {
+                display: none !important;
+              }
+
+              .nfc-print-sheet {
+                margin: 0 !important;
+                break-inside: avoid;
+                page-break-inside: avoid;
+              }
+
+              .nfc-print-sheet:not(:last-child) {
+                break-after: page;
+                page-break-after: always;
+              }
+
+              * {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+
+        <body>
+          <div class="nfc-print-toolbar">
+            <p>
+              ${cards.length}개 스티커 /
+              A4 ${pages.length}장
+            </p>
+
+            <p>
+              실제 크기 100%로 인쇄해주세요.
+            </p>
+
+            <button id="nfc-start-print">
+              인쇄하기
+            </button>
+          </div>
+
+          ${cardHtml}
+
+        </body>
+        </html>
+      `)
+
+      popup.document.close()
+
+      popup.document.querySelector(
+        '#nfc-start-print'
+      )?.addEventListener('click', () => {
+        popup.print()
+      })
+
+    } catch (error) {
+      console.error('NFC 일괄인쇄 오류:', error)
+      popup.document.body.textContent =
+        'QR 생성에 실패했습니다.'
+    }
+
+  })
+
+}
+
+
 /* =========================================
    모바일 테이블관리
 ========================================= */
@@ -12484,6 +12930,7 @@ async function renderMerchantTables() {
     </div>
   `
 
+  bindNfcTableBatchPrint(tables || [], merchantId)
 
   document
     .querySelector(
