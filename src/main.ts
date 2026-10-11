@@ -4218,6 +4218,18 @@ approved_at:
       await supabase.from('orders').insert({
         merchant_id: Number(merchantId),
       
+        // 테이블오더 전용 정보
+        table_id:
+          sessionStorage.getItem('kiosk_table_id')
+            ? Number(sessionStorage.getItem('kiosk_table_id'))
+            : null,
+      
+        table_number:
+          sessionStorage.getItem('kiosk_table_number') || null,
+      
+        table_token:
+          sessionStorage.getItem('kiosk_table_token') || null,
+      
         // 고객 화면에 표시할 주문 대기번호
         order_no: callNumber || '-',
         call_number:
@@ -42243,6 +42255,51 @@ if (
   await supabase.rpc('get_next_call_number', {
     target_merchant_id: Number(merchantId)
   })
+
+  // 테이블오더 전용 테이블번호 확인
+sessionStorage.removeItem('kiosk_table_id')
+sessionStorage.removeItem('kiosk_table_number')
+sessionStorage.removeItem('kiosk_table_token')
+
+if (kioskMerchant?.merchant_type === '테이블오더') {
+
+  const tableToken =
+    (params.get('table_token') || '').trim()
+
+  if (!tableToken) {
+    alert('테이블 정보가 없습니다. 테이블 QR 또는 NFC로 접속해주세요.')
+    return
+  }
+
+  const { data: tableData, error: tableError } =
+    await supabase
+      .from('merchant_tables')
+      .select('id, table_number, public_token')
+      .eq('merchant_id', merchantId)
+      .eq('public_token', tableToken)
+      .eq('status', '사용')
+      .maybeSingle()
+
+  if (tableError || !tableData) {
+    alert('등록된 테이블 정보를 확인할 수 없습니다.')
+    return
+  }
+
+  sessionStorage.setItem(
+    'kiosk_table_id',
+    String(tableData.id)
+  )
+
+  sessionStorage.setItem(
+    'kiosk_table_number',
+    String(tableData.table_number)
+  )
+
+  sessionStorage.setItem(
+    'kiosk_table_token',
+    String(tableData.public_token)
+  )
+}
 
 if (callNumberError || !nextCallNumber) {
   alert(
