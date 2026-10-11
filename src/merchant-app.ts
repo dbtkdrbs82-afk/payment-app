@@ -2748,6 +2748,13 @@ async function renderMerchantOrders() {
   
     const merchantId =
       Number(merchantIdText)
+
+      const isTableOrderOrders =
+  (
+    sessionStorage.getItem('login_merchant_type') ||
+    localStorage.getItem('login_merchant_type') ||
+    ''
+  ) === '테이블오더'
   
     const merchantName =
       sessionStorage.getItem(
@@ -3898,7 +3905,15 @@ if (filteredOrders.length === 0) {
   class="merchant-mobile-receipt-button"
   data-order-id="${order.id}"
 >
-  ${orderNumber}번
+${
+  isTableOrderOrders
+    ? (
+        order.table_number
+          ? 'TABLE ' + order.table_number
+          : '테이블번호 미확인'
+      )
+    : `${orderNumber}번`
+}
   <span
     style="
       margin-left:8px;
@@ -3970,26 +3985,38 @@ if (filteredOrders.length === 0) {
 </span>
   
   
+${
+  statusText === '취소완료'
+    ? ''
+    : isTableOrderOrders
+      ? (
+          statusText === '완료'
+            ? ''
+            : `
+              <button
+                type="button"
+                class="merchant-mobile-table-complete"
+                data-id="${order.id}"
+              >
+                완료처리
+              </button>
+            `
+        )
+      : `
+          <button
+            type="button"
+            class="merchant-mobile-call-button"
+            data-id="${order.id}"
+            data-number="${orderNumber}"
+          >
             ${
-              statusText ===
-              '취소완료'
-                ? ''
-                : `
-                  <button
-                    type="button"
-                    class="merchant-mobile-call-button"
-                    data-id="${order.id}"
-                    data-number="${orderNumber}"
-                  >
-                    ${
-                      statusText ===
-                      '완료'
-                        ? '재호출'
-                        : '고객호출'
-                    }
-                  </button>
-                `
+              statusText === '완료'
+                ? '재호출'
+                : '고객호출'
             }
+          </button>
+        `
+}
   
           </div>
         `
@@ -5446,6 +5473,58 @@ receiptButton?.addEventListener(
             }
           )
       }
+
+      document
+  .querySelectorAll<HTMLButtonElement>(
+    '.merchant-mobile-table-complete'
+  )
+  .forEach((button) => {
+    button.addEventListener('click', async () => {
+      const orderId = Number(button.dataset.id)
+
+      if (!orderId) return
+
+      if (!confirm('주문을 완료처리 하시겠습니까?')) {
+        return
+      }
+
+      button.disabled = true
+
+      const { data, error } = await supabase
+        .from('orders')
+        .update({
+          order_status: '완료'
+        })
+        .eq('id', orderId)
+        .eq('merchant_id', merchantId)
+        .select('id')
+
+      if (error || !data?.length) {
+        alert(
+          '완료처리 실패: ' +
+          (error?.message || '변경된 주문이 없습니다.')
+        )
+
+        button.disabled = false
+        return
+      }
+
+      const card = button.closest(
+        '.merchant-mobile-order-card'
+      )
+
+      const status = card?.querySelector(
+        '.merchant-mobile-order-status'
+      )
+
+      if (status) {
+        status.textContent = '완료'
+        status.setAttribute('data-status', '완료')
+      }
+
+      button.remove()
+    })
+  })
   
     document
       .querySelectorAll<HTMLButtonElement>(
