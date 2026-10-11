@@ -12047,7 +12047,7 @@ async function renderMerchantTableQr() {
     position: absolute;
     left: 50%;
     top: 79.5%;
-    width: 27%;
+    width: 25%;
     transform: translate(-50%, -50%);
     background: white;
   }
@@ -12060,7 +12060,7 @@ async function renderMerchantTableQr() {
 
   .nfc-table-number {
     position: absolute;
-    top: 93.2%;
+    top: 93.7%;
     left: 50%;
     transform: translate(-50%, -50%);
     color: #ffffff;
