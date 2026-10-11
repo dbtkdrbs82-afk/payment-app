@@ -42266,10 +42266,9 @@ if (kioskMerchant?.merchant_type === '테이블오더') {
   const tableToken =
     (params.get('table_token') || '').trim()
 
-  if (!tableToken) {
-    alert('테이블 정보가 없습니다. 테이블 QR 또는 NFC로 접속해주세요.')
-    return
-  }
+    if (!tableToken) {
+      console.warn('테이블 토큰 없이 기본 결제로 진행합니다.')
+    } else {
 
   const { data: tableData, error: tableError } =
     await supabase
@@ -42299,6 +42298,7 @@ if (kioskMerchant?.merchant_type === '테이블오더') {
     'kiosk_table_token',
     String(tableData.public_token)
   )
+}
 }
 
 if (callNumberError || !nextCallNumber) {
