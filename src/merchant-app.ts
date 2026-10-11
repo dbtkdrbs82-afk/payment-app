@@ -12025,51 +12025,105 @@ async function renderMerchantTableQr() {
         ← 테이블관리
       </button>
 
-      <div
-        id="table-qr-print-area"
-        style="
-          margin-top:20px;
-          padding:40px 24px;
-          background:#ffffff;
-          border:1px solid #e4e7ec;
-          border-radius:16px;
-          text-align:center;
-        "
-      >
+      
+<style>
+  #table-qr-print-area {
+    position: relative;
+    width: 320px;
+    max-width: 100%;
+    aspect-ratio: 54 / 85.6;
+    margin: 20px auto 0;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
 
-        <div
-          style="
-            font-size:22px;
-            font-weight:900;
-            color:#172033;
-          "
-        >
-          QR코드를 스캔해 주세요
-        </div>
+  #table-qr-print-area .nfc-card-background {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
 
-        <div
-          id="table-qr-canvas"
-          style="
-            width:280px;
-            height:280px;
-            margin:28px auto 20px;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-          "
-        ></div>
+  #table-qr-canvas {
+    position: absolute;
+    left: 50%;
+    top: 79%;
+    width: 27%;
+    transform: translate(-50%, -50%);
+    background: white;
+  }
 
-        <div
-          style="
-            font-size:28px;
-            font-weight:900;
-            color:#172033;
-          "
-        >
-          TABLE ${tableNumber}
-        </div>
+  #table-qr-canvas canvas {
+    display: block;
+    width: 100% !important;
+    height: auto !important;
+  }
 
-      </div>
+  .nfc-table-number {
+    position: absolute;
+    top: 92.9%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  @media print {
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      background: #ffffff !important;
+    }
+
+    body * {
+      visibility: hidden !important;
+    }
+
+    #table-qr-print-area,
+    #table-qr-print-area * {
+      visibility: visible !important;
+    }
+
+    #table-qr-print-area {
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      width: 54mm !important;
+      height: 85.6mm !important;
+      max-width: none !important;
+      margin: 0 !important;
+    }
+
+    .nfc-table-number {
+      font-size: 9pt !important;
+    }
+  }
+</style>
+
+<div id="table-qr-print-area">
+
+  <img
+    class="nfc-card-background"
+    src="/nxg-pick-nfc.png"
+    alt="NXG PICK NFC 카드"
+  >
+
+  <div id="table-qr-canvas"></div>
+
+  <div class="nfc-table-number">
+    TABLE ${tableNumber}
+  </div>
+
+</div>
+
+
 
       <button
         id="table-qr-print"
