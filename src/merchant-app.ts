@@ -12080,6 +12080,9 @@ async function renderMerchantTableQr() {
       margin: 0 !important;
       padding: 0 !important;
       background: #ffffff !important;
+      #table-qr-canvas {
+  top: 80.2% !important;
+}
     }
 
     body * {
