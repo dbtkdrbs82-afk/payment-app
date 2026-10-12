@@ -2727,12 +2727,18 @@ document
   }
 
  
-
 /* =========================================
    모바일 주문관리
 ========================================= */
 
+let merchantOrdersAutoRefreshTimer: number | null = null
+
 async function renderMerchantOrders() {
+
+  if (merchantOrdersAutoRefreshTimer !== null) {
+    window.clearInterval(merchantOrdersAutoRefreshTimer)
+    merchantOrdersAutoRefreshTimer = null
+  }
 
     const merchantIdText =
       sessionStorage.getItem(
@@ -2955,6 +2961,83 @@ const endIso =
       </div>
     `
   
+    // 테이블오더 모바일 신규 주문 음성 설정
+const tableVoiceKey =
+'nxg_table_order_voice_' + merchantId
+
+if (isTableOrderOrders) {
+
+const titleBox = document.querySelector(
+  '.merchant-mobile-page-title'
+)
+
+const voiceButton = document.createElement('button')
+
+voiceButton.type = 'button'
+voiceButton.id = 'table-order-voice-toggle'
+
+voiceButton.style.cssText = `
+  width:100%;
+  padding:14px;
+  margin:8px 0 14px;
+  border:1px solid #d7e0eb;
+  border-radius:12px;
+  background:#174981;
+  color:#ffffff;
+  font-size:16px;
+  font-weight:800;
+  cursor:pointer;
+`
+
+const updateVoiceButton = () => {
+  const enabled =
+    localStorage.getItem(tableVoiceKey) === '1'
+
+  voiceButton.textContent =
+    enabled
+      ? '🔔 새 주문 음성 알림 ON'
+      : '🔕 새 주문 음성 알림 OFF'
+}
+
+updateVoiceButton()
+
+voiceButton.addEventListener('click', () => {
+
+  if (!('speechSynthesis' in window)) {
+    alert('이 브라우저는 음성 안내를 지원하지 않습니다.')
+    return
+  }
+
+  const enabled =
+    localStorage.getItem(tableVoiceKey) !== '1'
+
+  localStorage.setItem(
+    tableVoiceKey,
+    enabled ? '1' : '0'
+  )
+
+  updateVoiceButton()
+
+  window.speechSynthesis.cancel()
+
+  if (enabled) {
+    const speech = new SpeechSynthesisUtterance(
+      '주문 음성 알림이 켜졌습니다.'
+    )
+
+    speech.lang = 'ko-KR'
+    speech.rate = 0.95
+
+    window.speechSynthesis.speak(speech)
+  }
+
+})
+
+titleBox?.insertAdjacentElement(
+  'afterend',
+  voiceButton
+)
+}
   
     document
       .querySelector(
@@ -5683,7 +5766,96 @@ receiptButton?.addEventListener(
   
         }
       )
+
+        // 테이블오더 신규 주문 자동 감지
+  if (isTableOrderOrders) {
+
+    let lastKnownOrderId = Math.max(
+      0,
+      ...orders.map(
+        (order: any) => Number(order.id) || 0
+      )
+    )
+
+    let checkingOrders = false
+
+    merchantOrdersAutoRefreshTimer =
+      window.setInterval(async () => {
+
+        if (
+          document.visibilityState !== 'visible' ||
+          location.pathname !== '/merchant-app/orders' ||
+          checkingOrders
+        ) {
+          return
+        }
+
+        checkingOrders = true
+
+        try {
+
+          const { data, error } = await supabase
+            .from('orders')
+            .select('id')
+            .eq('merchant_id', merchantId)
+            .gte('created_at', startIso)
+            .lte('created_at', endIso)
+            .order('id', { ascending: false })
+            .limit(1)
+
+          if (error) {
+            console.error('신규 주문 확인 실패:', error)
+            return
+          }
+
+          const newestId =
+            Number(data?.[0]?.id || 0)
+
+            if (newestId > lastKnownOrderId) {
+
+              lastKnownOrderId = newestId
+            
+              // 테이블오더 새 주문 음성 안내
+              if (
+                localStorage.getItem(tableVoiceKey) === '1' &&
+                'speechSynthesis' in window
+              ) {
+            
+                window.speechSynthesis.cancel()
+            
+                const speech =
+                  new SpeechSynthesisUtterance(
+                    '새 주문이 접수되었습니다.'
+                  )
+            
+                speech.lang = 'ko-KR'
+                speech.rate = 0.95
+                speech.volume = 1
+            
+                window.speechSynthesis.speak(speech)
+              }
+            
+              await renderMerchantOrders()
+            
+            }
+
+        } catch (error) {
+
+          console.error('주문 자동갱신 오류:', error)
+
+        } finally {
+
+          checkingOrders = false
+
+        }
+
+      }, 5000)
+
   }
+      
+  }
+
+   
 
   /* =========================================
    뷰티 모바일 주문관리
