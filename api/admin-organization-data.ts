@@ -293,15 +293,18 @@ import type {
        * 소속 가맹점 결제만 조회
        */
       let payments: any[] = []
-  
-      if (
-        merchantIds.length > 0
-      ) {
-        const {
-          data: paymentData,
-          error: paymentError,
-        } =
-          await supabase
+
+      if (merchantIds.length > 0) {
+
+        const pageSize = 1000
+        let offset = 0
+
+        while (true) {
+
+          const {
+            data: paymentData,
+            error: paymentError
+          } = await supabase
             .from('payments')
             .select(`
               id,
@@ -311,30 +314,34 @@ import type {
               approved_at,
               created_at
             `)
-            .eq(
-              'status',
-              'paid'
+            .eq('status', 'paid')
+            .in('merchant_id', merchantIds)
+            .order('id', { ascending: true })
+            .range(offset, offset + pageSize - 1)
+
+          if (paymentError) {
+
+            console.error(
+              '조직 매출 조회 오류:',
+              paymentError.message
             )
-            .in(
-              'merchant_id',
-              merchantIds
-            )
-  
-        if (paymentError) {
-          console.error(
-            '조직 매출 조회 오류:',
-            paymentError.message
-          )
-  
-          return res.status(500).json({
-            success: false,
-            message:
-              '조직 매출 정보를 불러오지 못했습니다.',
-          })
+
+            return res.status(500).json({
+              success: false,
+              message: '조직 매출 정보를 불러오지 못했습니다.'
+            })
+          }
+
+          const rows = paymentData || []
+
+          payments.push(...rows)
+
+          if (rows.length < pageSize) {
+            break
+          }
+
+          offset += pageSize
         }
-  
-        payments =
-          paymentData || []
       }
   
       return res.status(200).json({
