@@ -19691,6 +19691,12 @@ if (paymentFilters) {
 
   const pg = filters.pg || 'all'
   const dateType = filters.dateType || 'created_at'
+  // 거래일자는 승인된 결제건만 표시
+if (dateType === 'created_at') {
+  payments = payments.filter(
+    (payment) => payment.status === 'paid'
+  )
+}
   const startDate = filters.startDate || ''
   const endDate = filters.endDate || ''
   const searchType = filters.searchType || 'all'
