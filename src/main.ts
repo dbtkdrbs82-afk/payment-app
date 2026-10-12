@@ -12014,10 +12014,92 @@ rows.forEach((row) => {
 
       const payoutPaymentsLoadStart = performance.now()
     
-      const { data: payments, error } = await supabase
-        .from('payments')
-        .select('*')
-        .order('created_at', { ascending: false })
+      const { data: payments, error } = await (async () => {
+
+        const allPayments: any[] = []
+        const pageSize = 500
+      
+        let lastId: number | null = null
+        let expectedCount: number | null = null
+      
+        while (true) {
+      
+          let query = supabase
+            .from('payments')
+            .select('*', { count: 'exact' })
+            .order('id', { ascending: false })
+            .limit(pageSize)
+      
+          if (lastId !== null) {
+            query = query.lt('id', lastId)
+          }
+      
+          const { data, error, count } = await query
+      
+          if (error) {
+            return { data: null, error }
+          }
+      
+          if (expectedCount === null) {
+            expectedCount = count
+          }
+      
+          if (expectedCount === null) {
+            return {
+              data: null,
+              error: {
+                message: '출금관리 전체 결제건수를 확인할 수 없습니다.'
+              }
+            }
+          }
+      
+          const rows = data || []
+      
+          if (rows.length === 0) {
+            break
+          }
+      
+          allPayments.push(...rows)
+      
+          lastId = Number(rows[rows.length - 1].id)
+      
+          if (rows.length < pageSize) {
+            break
+          }
+        }
+      
+        if (allPayments.length !== expectedCount) {
+          return {
+            data: null,
+            error: {
+              message:
+                '출금관리 조회 건수 불일치: DB ' +
+                expectedCount +
+                '건 / 조회 ' +
+                allPayments.length +
+                '건'
+            }
+          }
+        }
+      
+        allPayments.sort((a, b) =>
+          new Date(b.created_at).getTime() -
+          new Date(a.created_at).getTime() ||
+          Number(b.id) - Number(a.id)
+        )
+      
+        console.log(
+          '[출금관리] 전체 조회 완료:',
+          allPayments.length,
+          '건'
+        )
+      
+        return {
+          data: allPayments,
+          error: null
+        }
+      
+      })()
 
         console.log(
           '[출금관리] payments:',
@@ -19336,7 +19418,7 @@ const [
     (async () => {
 
       const allPayments: any[] = []
-      const pageSize = 10
+      const pageSize = 500
 
       let lastId: number | null = null
       let expectedCount: number | null = null
