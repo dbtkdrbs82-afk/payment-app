@@ -19333,20 +19333,94 @@ const [
 ] = await Promise.all([
   measurePaymentRequest(
     'payments',
-    supabase
-      .from('payments')
-      .select('*')
-      .gte(
-        'created_at',
-        paymentQueryStart
+    (async () => {
+
+      const allPayments: any[] = []
+      const pageSize = 500
+
+      let lastId: number | null = null
+      let expectedCount: number | null = null
+
+      while (true) {
+
+        let query = supabase
+          .from('payments')
+          .select('*', { count: 'exact' })
+          .gte('created_at', paymentQueryStart)
+          .lte('created_at', paymentQueryEnd)
+          .order('id', { ascending: false })
+          .limit(pageSize)
+
+        if (lastId !== null) {
+          query = query.lt('id', lastId)
+        }
+
+        const { data, error, count } = await query
+
+        if (error) {
+          return { data: null, error }
+        }
+
+        if (expectedCount === null) {
+          expectedCount = count
+        }
+
+        if (expectedCount === null) {
+          return {
+            data: null,
+            error: {
+              message: '전체 결제건수를 확인할 수 없습니다.'
+            }
+          }
+        }
+
+        const rows = data || []
+
+        if (rows.length === 0) {
+          break
+        }
+
+        allPayments.push(...rows)
+
+        lastId = Number(rows[rows.length - 1].id)
+
+        if (rows.length < pageSize) {
+          break
+        }
+      }
+
+      if (allPayments.length !== expectedCount) {
+        return {
+          data: null,
+          error: {
+            message:
+              '결제건수 불일치: DB ' +
+              expectedCount +
+              '건 / 조회 ' +
+              allPayments.length +
+              '건. 다시 조회해주세요.'
+          }
+        }
+      }
+
+      allPayments.sort((a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime() ||
+        Number(b.id) - Number(a.id)
       )
-      .lte(
-        'created_at',
-        paymentQueryEnd
+
+      console.log(
+        '[결제관리] 전체 조회 완료:',
+        allPayments.length,
+        '건'
       )
-      .order('created_at', {
-        ascending: false
-      })
+
+      return {
+        data: allPayments,
+        error: null
+      }
+
+    })()
   ),
 
   measurePaymentRequest(
