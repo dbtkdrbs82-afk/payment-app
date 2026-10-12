@@ -8726,7 +8726,7 @@ paymentTableBody.innerHTML =
     '<label>개통번호</label><input id="open-number" />' +
     '<label>관리번호</label><input id="manage-number" />' +
     '<label>무선단말기 개통번호</label><input id="wireless-open-number" />' +
-    '<label>무선단말기 관리번호</label><input id="wireless-manage-number" />' +
+    '<label>무선단말기 일련번호</label><input id="wireless-manage-number" />' +
   '</div>' +
 '</div>' +
 
