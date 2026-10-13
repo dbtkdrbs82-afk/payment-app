@@ -40868,6 +40868,74 @@ if (isBeautyKiosk) {
                 `
             }
 
+            ${
+              kioskMerchant?.merchant_type === '일반매장'
+                ? `
+                  <div style="
+                    display:flex;
+                    gap:8px;
+                    padding:10px 16px;
+                    align-items:center;
+                  ">
+                    <input
+                      id="nxg-kiosk-search-input"
+                      type="search"
+                      placeholder="상품명을 입력해주세요"
+                      style="
+                        flex:1;
+                        min-width:0;
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:10px;
+                        font-size:15px;
+                      "
+                    >
+            
+                    <button
+                      id="nxg-kiosk-search-btn"
+                      type="button"
+                      style="
+                        padding:12px;
+                        border:0;
+                        border-radius:10px;
+                        background:#174981;
+                        color:white;
+                        font-weight:700;
+                      "
+                    >
+                      검색
+                    </button>
+            
+                    <button
+                      id="nxg-kiosk-search-clear"
+                      type="button"
+                      style="
+                        padding:12px;
+                        border:1px solid #d1d5db;
+                        border-radius:10px;
+                        background:white;
+                        font-weight:700;
+                      "
+                    >
+                      전체
+                    </button>
+                  </div>
+            
+                  <p
+                    id="nxg-kiosk-search-no-result"
+                    style="
+                      display:none;
+                      text-align:center;
+                      color:#64748b;
+                      padding:12px;
+                    "
+                  >
+                    검색 결과가 없습니다.
+                  </p>
+                `
+                : ''
+            }
+
              <div
   class="kiosk-category-list"
   style="${
@@ -41585,6 +41653,113 @@ reservation_time?: string
 duration_minutes?: number
 beauty_schedule_status?: Record<string, string>
   }[] = []
+
+  // NXG PICK 일반매장 상품 다중검색
+if (kioskMerchant?.merchant_type === '일반매장') {
+
+  const searchInput =
+    document.querySelector<HTMLInputElement>(
+      '#nxg-kiosk-search-input'
+    )
+
+  const searchButton =
+    document.querySelector<HTMLButtonElement>(
+      '#nxg-kiosk-search-btn'
+    )
+
+  const clearButton =
+    document.querySelector<HTMLButtonElement>(
+      '#nxg-kiosk-search-clear'
+    )
+
+  const noResult =
+    document.querySelector<HTMLElement>(
+      '#nxg-kiosk-search-no-result'
+    )
+
+  const productCards =
+    Array.from(
+      document.querySelectorAll<HTMLElement>(
+        '.kiosk-category-list .kiosk-product-card'
+      )
+    )
+
+  const normalize = (value: string) =>
+    value.toLowerCase().replace(/[\s,，]+/g, '')
+
+  const searchProducts = () => {
+
+    const text = searchInput?.value.trim() || ''
+    const keyword = normalize(text)
+
+    // 전체 카테고리에서 검색
+    document.querySelector<HTMLButtonElement>(
+      '.kiosk-category-tab[data-category="__all__"]'
+    )?.click()
+
+    const words = text
+      .split(/[\s,，]+/)
+      .map(normalize)
+      .filter(Boolean)
+
+    const exactMatches = productCards.filter((card) => {
+      const name = normalize(
+        card.querySelector('h3')?.textContent || ''
+      )
+
+      return name.length > 0 && keyword.includes(name)
+    })
+
+    let visibleCount = 0
+
+    productCards.forEach((card) => {
+
+      const name = normalize(
+        card.querySelector('h3')?.textContent || ''
+      )
+
+      const matched =
+        !keyword ||
+        (
+          exactMatches.length >= 2
+            ? keyword.includes(name)
+            : words.some((word) => name.includes(word)) ||
+              keyword.includes(name)
+        )
+
+      card.style.display = matched ? '' : 'none'
+
+      if (matched) visibleCount++
+    })
+
+    if (noResult) {
+      noResult.style.display =
+        visibleCount === 0 ? 'block' : 'none'
+    }
+  }
+
+  searchButton?.addEventListener(
+    'click',
+    searchProducts
+  )
+
+  searchInput?.addEventListener(
+    'keydown',
+    (event) => {
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        searchProducts()
+      }
+    }
+  )
+
+  clearButton?.addEventListener('click', () => {
+
+    if (searchInput) searchInput.value = ''
+
+    searchProducts()
+  })
+}
 
   const getDirectPaymentAmount = (): number => {
 
