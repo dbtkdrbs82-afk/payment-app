@@ -4464,7 +4464,7 @@ const successGuideHtml =
     margin-top:8px;
     font-size:13px;
     line-height:1.5;
-    color:#6b7280;
+    color:#dc2626;
     font-weight:600;
   "
 >
