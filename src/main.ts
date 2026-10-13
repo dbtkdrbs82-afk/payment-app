@@ -40878,7 +40878,7 @@ if (isBeautyKiosk) {
                     align-items:center;
                   ">
                     <input
-                      id="nxg-kiosk-search-input"
+                      id="nxg-kiosk-search-input"                     
                       type="search"
                       placeholder="상품명을 입력해주세요"
                       style="
@@ -40888,10 +40888,12 @@ if (isBeautyKiosk) {
                         border:1px solid #d1d5db;
                         border-radius:10px;
                         font-size:15px;
+                        flex:1 1 0 !important;
+width:0 !important;
+min-width:0 !important;
                       "
                     >
-            
-                    <button
+                                <button
                       id="nxg-kiosk-search-btn"
                       type="button"
                       style="
@@ -40901,6 +40903,9 @@ if (isBeautyKiosk) {
                         background:#174981;
                         color:white;
                         font-weight:700;
+                        flex:0 0 72px !important;
+width:72px !important;
+box-sizing:border-box !important;
                       "
                     >
                       검색
@@ -40915,6 +40920,9 @@ if (isBeautyKiosk) {
                         border-radius:10px;
                         background:white;
                         font-weight:700;
+                        flex:0 0 72px !important;
+width:72px !important;
+box-sizing:border-box !important;
                       "
                     >
                       전체
