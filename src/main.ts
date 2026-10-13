@@ -40891,6 +40891,8 @@ if (isBeautyKiosk) {
                         flex:1 1 0 !important;
 width:0 !important;
 min-width:0 !important;
+position:relative;
+top:-8px;
                       "
                     >
                                 <button
@@ -40923,6 +40925,8 @@ box-sizing:border-box !important;
                         flex:0 0 72px !important;
 width:72px !important;
 box-sizing:border-box !important;
+position:relative;
+top:-8px;
                       "
                     >
                       전체
