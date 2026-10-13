@@ -4726,6 +4726,8 @@ ${
     let customerAlertAudioContext:
       AudioContext | null =
       null
+
+      let customerAlertSoundTimers: number[] = []
   
     let lastHandledCallAt =
       ''
@@ -4758,6 +4760,11 @@ ${
             null
         }
   
+        customerAlertSoundTimers.forEach((timer) => {
+          window.clearTimeout(timer)
+        })
+        
+        customerAlertSoundTimers = []
   
         if (
           'vibrate' in navigator
@@ -5049,9 +5056,14 @@ ${
             lastHandledCallAt =
               calledAt
   
-            startCustomerVibration()
-  
-            playCustomerAlertSound()
+              startCustomerVibration()
+
+              playCustomerAlertSound()
+              
+              customerAlertSoundTimers = [
+                window.setTimeout(playCustomerAlertSound, 3000),
+                window.setTimeout(playCustomerAlertSound, 6000)
+              ]
           }
   
         } else {
