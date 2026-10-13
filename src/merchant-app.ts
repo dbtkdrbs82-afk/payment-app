@@ -3898,6 +3898,46 @@ if (filteredOrders.length === 0) {
                 )
                 .join(', ')
             : '-'
+
+            const servedOrderItemsHtml =
+  (
+    isTableOrderOrders ||
+    (
+      sessionStorage.getItem('login_merchant_type') ||
+      localStorage.getItem('login_merchant_type')
+    ) === '일반매장'
+  ) && Array.isArray(order.items)
+    ? order.items.map((item: any, itemIndex: number) => {
+
+        const servedIndices =
+          Array.isArray(order.served_item_indices)
+            ? order.served_item_indices
+            : []
+
+        const isServed =
+          servedIndices.includes(itemIndex)
+
+        const itemName =
+          String(item.name || item.product_name || '-')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;')
+
+        return `
+          <span
+            class="merchant-served-item"
+            data-item-index="${itemIndex}"
+            style="
+              cursor:pointer;
+              text-decoration:${isServed ? 'line-through' : 'none'};
+              color:${isServed ? '#9ca3af' : 'inherit'};
+            "
+          >${itemName} x ${Number(item.quantity || 1)}</span>
+        `
+      }).join(', ')
+    : orderItems
   
             const paymentForOrder =
             payments.find(
@@ -4055,10 +4095,10 @@ ${
   
   
           <div class="merchant-mobile-order-items">
-  
-            ${orderItems}
-  
-          </div>
+
+  ${servedOrderItemsHtml}
+
+</div>
   
   
           <div class="merchant-mobile-order-bottom">
@@ -4111,6 +4151,70 @@ ${
         orderList.appendChild(
           card
         )
+
+        // 일반매장 / 테이블오더 상품별 제공 체크
+let servedSavePending = false
+
+card.querySelectorAll<HTMLElement>(
+  '.merchant-served-item'
+).forEach((itemElement) => {
+
+  itemElement.addEventListener('click', async () => {
+
+    if (servedSavePending) return
+
+    const itemIndex =
+      Number(itemElement.dataset.itemIndex)
+
+    if (!Number.isInteger(itemIndex)) return
+
+    const previousIndices: number[] =
+      Array.isArray(order.served_item_indices)
+        ? [...order.served_item_indices]
+        : []
+
+    const nextIndices =
+      previousIndices.includes(itemIndex)
+        ? previousIndices.filter(
+            (index) => index !== itemIndex
+          )
+        : [...previousIndices, itemIndex]
+
+    servedSavePending = true
+
+    const { data, error } = await supabase
+      .from('orders')
+      .update({
+        served_item_indices: nextIndices
+      })
+      .eq('id', order.id)
+      .eq('merchant_id', merchantId)
+      .select('id')
+
+    servedSavePending = false
+
+    if (error || !data?.length) {
+      alert(
+        '상품 제공 상태 저장 실패: ' +
+        (error?.message || '저장 권한을 확인해주세요.')
+      )
+      return
+    }
+
+    order.served_item_indices = nextIndices
+
+    const isServed =
+      nextIndices.includes(itemIndex)
+
+    itemElement.style.textDecoration =
+      isServed ? 'line-through' : 'none'
+
+    itemElement.style.color =
+      isServed ? '#9ca3af' : 'inherit'
+
+  })
+
+})
 
         const cancelOpenButton =
   card.querySelector<HTMLButtonElement>(
