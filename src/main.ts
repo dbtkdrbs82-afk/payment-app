@@ -12508,6 +12508,7 @@ branch_admin_name: row.branch_admin_name || '',
     .select(`
       id,
       merchant_name,
+      owner_name,
       branch_admin_id,
       agency_admin_id,
       manager_admin_id
@@ -14513,6 +14514,11 @@ if (nextTop) {
             '<td>' +
   settlementColorBar +
   (row.merchant_name || '-') +
+  ' / ' +
+  (
+    payoutMerchantMap.get(Number(row.merchant_id))
+      ?.owner_name || '-'
+  ) +
   '<span class="payout-count-badge">' +
     row.payment_count +
   '</span>' +
