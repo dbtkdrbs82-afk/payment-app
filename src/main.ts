@@ -10500,7 +10500,11 @@ merchantTableTop?.appendChild(
   '<td>' + (merchant.phone || '-') + '</td>' +
   '<td>' + (merchant.fee_rate || 0) + '%</td>' +
   '<td>' + (merchant.settlement_cycle || '-') + '</td>' +
-  '<td>' + (merchant.status || '운영') + '</td>' 
+  '<td>' +
+  (merchant.status === '신청'
+    ? '<span style="display:inline-block;background:#fef08a;color:#854d0e;font-weight:800;padding:4px 12px;border-radius:6px;">신청</span>'
+    : (merchant.status || '운영')) +
+'</td>'
 
       
   paymentTableBody.appendChild(tr)
