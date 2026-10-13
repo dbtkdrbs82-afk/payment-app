@@ -4499,8 +4499,63 @@ ${
 
     
 
-  app.innerHTML = `
-    <div class="page ${isHotelSuccess ? 'hotel-success-page' : ''}">
+    app.innerHTML = `
+    <style>
+      .nxg-pick-compact .payment-card {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+      }
+
+      .nxg-pick-compact .payment-card > h1 {
+        margin: 0 0 6px !important;
+        line-height: 1.2 !important;
+      }
+
+      .nxg-pick-compact .order-number-title {
+        margin: 4px 0 !important;
+      }
+
+      .nxg-pick-compact .order-number-box {
+        margin: 4px 0 8px !important;
+        padding: 8px 12px !important;
+      }
+
+      .nxg-pick-compact .order-wait-message {
+        margin: 4px 0 6px !important;
+        line-height: 1.3 !important;
+      }
+
+      .nxg-pick-compact #customer-alert-enable,
+      .nxg-pick-compact #customer-vibration-stop {
+        margin-top: 6px !important;
+        padding: 10px 14px !important;
+      }
+
+      .nxg-pick-compact #customer-vibration-stop + p {
+        margin: 6px 0 !important;
+        line-height: 1.3 !important;
+      }
+
+      .nxg-pick-compact .payment-card > p[style*="background:#fff7ed"] {
+        margin: 6px 0 !important;
+        padding: 8px !important;
+        line-height: 1.35 !important;
+      }
+
+      .nxg-pick-compact .receipt-view-btn {
+        margin: 6px 0 !important;
+      }
+
+      .nxg-pick-compact .payment-amount {
+        margin: 6px 0 !important;
+      }
+
+      .nxg-pick-compact #home-button {
+        margin-top: 6px !important;
+      }
+    </style>
+
+    <div class="page ${isHotelSuccess ? 'hotel-success-page' : ''} ${source === 'kiosk' ? 'nxg-pick-compact' : ''}">
   <div class="payment-card ${isHotelSuccess ? 'hotel-success-card' : ''}">
 
   <h1>
