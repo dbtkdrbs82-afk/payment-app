@@ -19586,6 +19586,13 @@ const [
         id,
         merchant_name,
         owner_name,
+        business_number,
+        phone,
+        address,
+        address_detail,
+        toss_mid,
+        korpay_pg_mid,
+        korpay_manual_mid,
         branch_admin_id,
         agency_admin_id,
         manager_admin_id
@@ -20566,11 +20573,13 @@ visiblePayments.forEach((payment, index) => {
   '<button type="button" ' +
     'class="admin-receipt-btn admin-receipt-link" ' +
     'data-order="' + (payment.order_id || '') + '" ' +
+    'data-approval-number="' + (payment.approval_number || '') + '" ' +
     'data-order-number="' + (payment.order_number || '') + '" ' +
     'data-amount="' + (payment.amount || 0) + '" ' +
     'data-sender="' + (payment.sender_name || '') + '" ' +
     'data-merchant="' + (payment.merchant_name || '') + '" ' +
     'data-pg="' + (payment.pg_company || '토스페이먼츠') + '" ' +
+    'data-pg-mid="' + (payment.pg_mid || '') + '" ' +
     'data-merchant-id="' + (payment.merchant_id || '') + '" ' +
     'data-date="' + (payment.created_at || '') + '" ' +
     'data-status="' + (payment.status || '') + '"' +
@@ -20911,7 +20920,8 @@ document.querySelectorAll('.admin-receipt-btn')
     button.addEventListener('click', async () => {
       const target = button as HTMLElement
 
-      const orderId = target.dataset.order || '-'
+      
+      const approvalNumber = target.dataset.approvalNumber || '-'
       const orderNumber = target.dataset.orderNumber || '-'
       const amount = Number(target.dataset.amount || 0)
       const sender = target.dataset.sender || '-'
@@ -20926,7 +20936,13 @@ document.querySelectorAll('.admin-receipt-btn')
 const pgCompany =
   target.dataset.pg || '토스페이먼츠'
 
+  const receiptPgMid =
+  target.dataset.pgMid || '-'
 
+  const receiptMerchant =
+  paymentMerchantMap.get(
+    Number(target.dataset.merchantId || 0)
+  )
 
 const date = target.dataset.date
         ? new Date(target.dataset.date).toLocaleString('ko-KR')
@@ -20973,7 +20989,7 @@ const date = target.dataset.date
                 <h4>구매정보</h4>
                 <table>
                   <tr><th>주문자명</th><td>${sender}</td></tr>
-                  <tr><th>승인번호</th><td>${orderId}</td></tr>
+                  <tr><th>승인번호</th><td>${approvalNumber}</td></tr>
                   <tr><th>주문번호</th><td>${orderNumber}</td></tr>
                   <tr><th>상품명 / 구매자</th><td>${merchant}</td></tr>
                 </table>
@@ -20996,20 +21012,43 @@ const date = target.dataset.date
             </div>
       
             <section>
-              <h4>상점정보</h4>
-              <table>
-                <tr><th>상점명</th><td>${merchant}</td><th>대표자명</th><td>-</td></tr>
-                <tr><th>URL주소</th><td>-</td><th>사업자번호</th><td>-</td></tr>
-                <tr><th>이용문의</th><td colspan="3">-</td></tr>
-                <tr><th>주소</th><td colspan="3">-</td></tr>
-              </table>
-            </section>
+  <h4>상점정보</h4>
+  <table>
+    <tr>
+      <th>상점명</th>
+      <td>${receiptMerchant?.merchant_name || merchant}</td>
+      <th>대표자명</th>
+      <td>${receiptMerchant?.owner_name || '-'}</td>
+    </tr>
+    <tr>
+      <th>URL주소</th>
+      <td>-</td>
+      <th>사업자번호</th>
+      <td>${receiptMerchant?.business_number || '-'}</td>
+    </tr>
+    <tr>
+      <th>이용문의</th>
+      <td colspan="3">${receiptMerchant?.phone || '-'}</td>
+    </tr>
+    <tr>
+      <th>주소</th>
+      <td colspan="3">
+        ${
+          [
+            receiptMerchant?.address,
+            receiptMerchant?.address_detail
+          ].filter(Boolean).join(' ') || '-'
+        }
+      </td>
+    </tr>
+  </table>
+</section>
       
             <section>
               <h4>결제서비스업체(PG)정보</h4>
               <table>
                 <tr><th>카드사 가맹점명</th><td>${pgCompany}</td><th>사업자번호</th><td>-</td></tr>
-                <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>-</td></tr>
+                <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>${receiptPgMid}</td></tr>
                 <tr><th>주소</th><td colspan="3">-</td></tr>
               </table>
             </section>
