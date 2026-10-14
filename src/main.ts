@@ -3998,7 +3998,7 @@ let merchantName =
 
   let feeRate = 0
   let merchantType = ''
-  let tossMid = ''
+  
   
   if (merchantId) {
     const { data: merchantFeeData } = await supabase
@@ -4019,10 +4019,7 @@ let merchantName =
     merchantFeeData?.merchant_type || ''
   )
 
-tossMid =
-  String(
-    merchantFeeData?.toss_mid || ''
-  )
+
 
   if (!merchantName) {
     merchantName = merchantFeeData?.merchant_name || ''
@@ -4718,22 +4715,9 @@ ${
     </tr>
 
     <tr>
-      <th>
-        대표자명
-      </th>
-
-      <td>
-        임한욱
-      </td>
-
-      <th>
-        가맹점번호
-      </th>
-
-      <td style="width:180px">
-        ${tossMid || '-'}
-      </td>
-    </tr>
+  <th>대표자명</th>
+  <td colspan="3">임한욱</td>
+</tr>
 
     <tr>
       <th>
@@ -20578,8 +20562,7 @@ visiblePayments.forEach((payment, index) => {
     'data-amount="' + (payment.amount || 0) + '" ' +
     'data-sender="' + (payment.sender_name || '') + '" ' +
     'data-merchant="' + (payment.merchant_name || '') + '" ' +
-    'data-pg="' + (payment.pg_company || '토스페이먼츠') + '" ' +
-    'data-pg-mid="' + (payment.pg_mid || '') + '" ' +
+    'data-pg="' + (payment.pg_company || '토스페이먼츠') + '" ' +   
     'data-merchant-id="' + (payment.merchant_id || '') + '" ' +
     'data-date="' + (payment.created_at || '') + '" ' +
     'data-status="' + (payment.status || '') + '"' +
@@ -20936,8 +20919,22 @@ document.querySelectorAll('.admin-receipt-btn')
 const pgCompany =
   target.dataset.pg || '토스페이먼츠'
 
-  const receiptPgMid =
-  target.dataset.pgMid || '-'
+  const receiptPgInfo =
+  String(pgCompany).includes('코페이')
+    ? {
+        businessNumber: '206-81-90716',
+        ownerName: '채수철',
+        phone: '1644-5145',
+        address: '서울 성동구 성수일로 77 서울숲IT밸리 608-611호'
+      }
+    : String(pgCompany).includes('토스')
+      ? {
+          businessNumber: '411-86-01799',
+          ownerName: '임한욱',
+          phone: '1544-7772',
+          address: '서울특별시 강남구 테헤란로 131, 14층'
+        }
+      : null
 
   const receiptMerchant =
   paymentMerchantMap.get(
@@ -21047,9 +21044,22 @@ const date = target.dataset.date
             <section>
               <h4>결제서비스업체(PG)정보</h4>
               <table>
-                <tr><th>카드사 가맹점명</th><td>${pgCompany}</td><th>사업자번호</th><td>-</td></tr>
-                <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>${receiptPgMid}</td></tr>
-                <tr><th>주소</th><td colspan="3">-</td></tr>
+                <tr>
+  <th>카드사 가맹점명</th>
+  <td>${pgCompany}</td>
+  <th>사업자번호</th>
+  <td>${receiptPgInfo?.businessNumber || '-'}</td>
+</tr>
+<tr>
+  <th>대표자명</th>
+  <td>${receiptPgInfo?.ownerName || '-'}</td>
+  <th>대표전화</th>
+  <td>${receiptPgInfo?.phone || '-'}</td>
+</tr>
+<tr>
+  <th>주소</th>
+  <td colspan="3">${receiptPgInfo?.address || '-'}</td>
+</tr>
               </table>
             </section>
       
@@ -24568,14 +24578,7 @@ const hotelCustomerRequestHtml =
   const receiptPgCompany =
     paymentForOrder?.pg_company || '-'
 
-    const receiptPgMid =
-    paymentForOrder?.pg_mid ||
-    (
-      String(paymentForOrder?.pg_company || '').includes('토스')
-        ? merchantSetting?.toss_mid
-        : merchantSetting?.korpay_mid
-    ) ||
-    '-'
+    
 
     if (isHotel) {
 
@@ -24598,7 +24601,7 @@ const hotelCustomerRequestHtml =
             'data-card-number="' + receiptCardNumber + '" ' +
             'data-card-company="' + receiptCardCompany + '" ' +
             'data-pg-company="' + receiptPgCompany + '" ' +
-            'data-pg-mid="' + receiptPgMid + '" ' +
+            
           '>' +
             orderNumber + '번' +
           '</button>' +
@@ -24765,7 +24768,7 @@ const hotelCustomerRequestHtml =
     'data-card-number="' + receiptCardNumber + '" ' +
     'data-card-company="' + receiptCardCompany + '" ' +
     'data-pg-company="' + receiptPgCompany + '" ' +
-    'data-pg-mid="' + receiptPgMid + '" ' +
+    
   '>' +
     orderNumber + '번' +
   '</button>' +
@@ -25127,8 +25130,24 @@ receiptButtons.forEach((button) => {
     const pgCompany =
       target.getAttribute('data-pg-company') || '-'
 
-    const pgMid =
-      target.getAttribute('data-pg-mid') || '-'
+      const merchantReceiptPgInfo =
+  String(pgCompany).includes('코페이')
+    ? {
+        businessNumber: '206-81-90716',
+        ownerName: '채수철',
+        phone: '1644-5145',
+        address: '서울 성동구 성수일로 77 서울숲IT밸리 608-611호'
+      }
+    : String(pgCompany).includes('토스')
+      ? {
+          businessNumber: '411-86-01799',
+          ownerName: '임한욱',
+          phone: '1544-7772',
+          address: '서울특별시 강남구 테헤란로 131, 14층'
+        }
+      : null
+
+    
 
       const receiptStatus =
       target.getAttribute('data-status') || ''
@@ -25269,9 +25288,22 @@ receiptButtons.forEach((button) => {
           <section>
             <h4>결제서비스업체(PG)정보</h4>
             <table>
-              <tr><th>카드사 가맹점명</th><td>${pgCompany}</td><th>사업자번호</th><td>-</td></tr>
-              <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>${pgMid}</td></tr>
-              <tr><th>주소</th><td colspan="3">-</td></tr>
+              <tr>
+  <th>카드사 가맹점명</th>
+  <td>${pgCompany}</td>
+  <th>사업자번호</th>
+  <td>${merchantReceiptPgInfo?.businessNumber || '-'}</td>
+</tr>
+<tr>
+  <th>대표자명</th>
+  <td>${merchantReceiptPgInfo?.ownerName || '-'}</td>
+  <th>대표전화</th>
+  <td>${merchantReceiptPgInfo?.phone || '-'}</td>
+</tr>
+<tr>
+  <th>주소</th>
+  <td colspan="3">${merchantReceiptPgInfo?.address || '-'}</td>
+</tr>
             </table>
           </section>
     
@@ -34800,15 +34832,8 @@ document
                       }
                     </td>
 
-                    <th>가맹점번호</th>
-                    <td>
-                      ${
-                        payment.pg_mid ||
-                        merchant?.toss_mid ||
-                        merchant?.korpay_manual_mid ||
-                        '-'
-                      }
-                    </td>
+                    <th>결제서비스</th>
+<td>PG 결제</td>
                   </tr>
 
                   <tr>
@@ -43592,7 +43617,7 @@ if (error || kioskPaymentSaveError) {
       <h4>결제서비스업체(PG)정보</h4>
       <table>
         <tr><th>카드사 가맹점명</th><td>토스페이먼츠</td><th>사업자번호</th><td>-</td></tr>
-        <tr><th>대표자명</th><td>-</td><th>가맹점번호</th><td>-</td></tr>
+        <tr><th>대표자명</th><td colspan="3">-</td></tr>
         <tr><th>주소</th><td colspan="3">-</td></tr>
       </table>
     </section>
