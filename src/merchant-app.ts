@@ -4988,8 +4988,7 @@ receiptButton?.addEventListener(
       paymentForOrder?.approval_number ||
       '-'
 
-    const paymentKey =
-      paymentForOrder?.payment_key ||
+    
       '-'
 
     const cardNumber =
@@ -5185,14 +5184,7 @@ receiptButton?.addEventListener(
                 </strong>
               </div>
 
-              <div
-                class="merchant-mobile-receipt-row"
-              >
-                <span>거래번호</span>
-                <strong>
-                  ${paymentKey}
-                </strong>
-              </div>
+              
 
             </section>
 
