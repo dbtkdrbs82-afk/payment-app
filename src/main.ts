@@ -40978,8 +40978,8 @@ if (isBeautyKiosk) {
   class="kiosk-category-tabs"
   style="${
     isNormalStoreKiosk
-      ? 'display:flex;flex-wrap:wrap;justify-content:center;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-x:hidden;'
-      : ''
+  ? 'display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow:hidden;'
+  : ''
   }"
 >
 
@@ -40988,7 +40988,8 @@ if (isBeautyKiosk) {
       ? `
         <button
           class="kiosk-category-tab active"
-          data-category="__all__"
+data-category="__all__"
+style="width:100%;min-width:0;max-width:none;margin:0;padding:10px 2px;font-size:13px;white-space:nowrap;box-sizing:border-box;"
         >
           전체
         </button>
@@ -41004,8 +41005,9 @@ if (isBeautyKiosk) {
           : ''
       }"
       data-category="${category}"
-    >
-      ${category}
+style="${isNormalStoreKiosk ? 'width:100%;min-width:0;max-width:none;margin:0;padding:10px 2px;font-size:13px;white-space:nowrap;box-sizing:border-box;' : ''}"
+>
+  ${category}
     </button>
   `).join('')}
 
