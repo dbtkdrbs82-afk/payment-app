@@ -41130,7 +41130,7 @@ top:-9px;
             data-product-id="${product.id}"
             style="${
               isNormalStoreKiosk
-  ? 'width:100%;min-width:0;max-width:240px;height:275px;min-height:275px;max-height:275px;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;'
+  ? 'width:100%;min-width:0;max-width:240px;margin:0 auto;justify-self:center;height:275px;min-height:275px;max-height:275px;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;'
                 : (
                     isBeautyKiosk
                       ? 'min-height:0;height:auto;overflow:hidden;'
