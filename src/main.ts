@@ -40974,7 +40974,14 @@ if (isBeautyKiosk) {
               isBeautyKiosk
                 ? ''
                 : `
-                  <div class="kiosk-category-tabs">
+                  <div
+  class="kiosk-category-tabs"
+  style="${
+    isNormalStoreKiosk
+      ? 'display:flex;flex-wrap:wrap;justify-content:center;width:100%;max-width:100%;min-width:0;box-sizing:border-box;overflow-x:hidden;'
+      : ''
+  }"
+>
 
   ${
     isNormalStoreKiosk
