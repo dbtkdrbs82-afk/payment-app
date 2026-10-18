@@ -140,71 +140,120 @@ export function getNxgPickVisibleOrders(): NxgPickTrackedOrder[] {
 }
 
 // 기존 주문표 아래에 표시할 다른 가맹점 주문 목록
+
 export function createNxgPickOtherOrdersPanel(
-    currentPgOrderId: string
-  ): HTMLElement | null {
+  currentPgOrderId: string
+): HTMLElement | null {
 
-    const orders = getNxgPickVisibleOrders()
-      .filter((order) => order.pgOrderId !== currentPgOrderId)
-      .slice(0, 9)
+  const orders = getNxgPickVisibleOrders()
+    .filter((order) => order.pgOrderId !== currentPgOrderId)
+    .slice(0, 9)
 
-    if (orders.length === 0) return null
+  if (orders.length === 0) return null
 
-    const panel = document.createElement('section')
-    panel.id = 'nxg-pick-other-orders'
-    panel.style.cssText = `
-      margin-top:16px;
-      padding:14px;
-      border:1px solid #e5e7eb;
-      border-radius:12px;
-      background:#ffffff;
-      text-align:left;
+  const panel = document.createElement('section')
+  panel.id = 'nxg-pick-other-orders'
+  panel.style.cssText = `
+    width:100%;
+    margin:0;
+    padding:0;
+    border:0;
+    background:transparent;
+    text-align:left;
+  `
+
+  // 기존 개별 알림 끄기 버튼의 위치 유지
+  const style = document.createElement('style')
+  style.textContent = `
+    #nxg-pick-other-orders .nxg-pick-other-stop {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: end;
+  align-self: start;
+  margin-top: 0;
+  background: #174981 !important;
+}
+
+  `
+  panel.appendChild(style)
+
+  const list = document.createElement('div')
+  list.style.cssText = `
+    width:100%;
+    max-height:420px;
+    overflow-y:auto;
+  `
+
+  orders.forEach((order) => {
+    const row = document.createElement('div')
+    row.className = 'nxg-pick-other-row'
+
+    row.style.cssText = `
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      align-items:center;
+      column-gap:12px;
+      row-gap:8px;
+      padding:18px 6px;
+      border-bottom:1px solid #e5e7eb;
     `
 
-    const title = document.createElement('h3')
-    title.textContent = `다른 가맹점 주문현황 (${orders.length}건)`
-    title.style.cssText = `
+    const name = document.createElement('span')
+    name.textContent =
+      order.merchantName || `가맹점 ${order.merchantId}`
+
+    name.style.cssText = `
+      min-width:0;
+      font-size:18px;
+      font-weight:800;
+      color:#222222;
+      overflow-wrap:anywhere;
+    `
+
+    const number = document.createElement('strong')
+    number.textContent = `${order.orderNumber}번`
+
+    number.style.cssText = `
+      max-width:150px;
+      text-align:right;
       font-size:16px;
-      margin:0 0 12px;
-      color:#174981;
+      font-weight:800;
+      line-height:1.5;
+      color:#c9a23b;
+    `
+// 매장명은 왼쪽 위
+    name.style.gridColumn = '1'
+    name.style.gridRow = '1'
+
+    // 주문번호는 오른쪽 위
+    number.style.gridColumn = '2'
+    number.style.gridRow = '1'
+
+    // 주문 상태는 매장명 아래
+    const statusText = document.createElement('span')
+    statusText.className = 'nxg-pick-other-status'
+    statusText.textContent = '잠시만 기다려주세요.'
+
+    statusText.style.cssText = `
+      grid-column:1;
+      grid-row:2;
+      font-size:13px;
+      line-height:1.5;
+      color:#6b7280;
     `
 
-    panel.appendChild(title)
+    row.appendChild(name)
+    row.appendChild(statusText)
+    row.appendChild(number)
+    list.appendChild(row)
 
-    const list = document.createElement('div')
-    list.style.cssText = `
-      max-height:300px;
-      overflow-y:auto;
-    `
+  })
 
-    orders.forEach((order) => {
-      const row = document.createElement('div')
-      row.style.cssText = `
-        display:flex;
-        justify-content:space-between;
-        align-items:center;
-        gap:10px;
-        padding:12px 4px;
-        border-bottom:1px solid #eeeeee;
-      `
+  panel.appendChild(list)
 
-      const name = document.createElement('span')
-      name.textContent =
-        order.merchantName || `가맹점 ${order.merchantId}`
+  return panel
+}
 
-      const number = document.createElement('strong')
-      number.textContent = `${order.orderNumber}번`
-      number.style.color = '#c9a23b'
-
-      row.appendChild(name)
-      row.appendChild(number)
-      list.appendChild(row)
-    })
-
-    panel.appendChild(list)
-
-    return panel
-  }
 
   // 실제 결제완료가 확인된 주문만 다중 주문 목록에 등록
 export function saveVerifiedNxgPickOrder(
