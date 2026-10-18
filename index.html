@@ -82,8 +82,29 @@
         import('/src/merchant-app.ts')
       } else {
         import('/src/main.ts')
+        
       }
     </script>
+
+    <!-- NXG PICK 다중 주문: QR 결제완료 화면 전용 -->
+    <script type="module">
+      if (
+        window.location.pathname === '/success' &&
+        new URLSearchParams(window.location.search)
+          .get('source') === 'kiosk'
+      ) {
+        import('/src/nxg-pick-multi-bootstrap.ts')
+          .then(({ startNxgPickMultiOrders }) => {
+            startNxgPickMultiOrders()
+          })
+          .catch((error) => {
+            console.error(
+              'NXG PICK 다중 주문 실행 실패:',
+              error
+            )
+          })
+      }
+    </script>
+
   </body>
 </html>
-

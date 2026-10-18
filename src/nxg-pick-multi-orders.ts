@@ -8,22 +8,22 @@ export type NxgPickTrackedOrder = {
     orderNumber: string
     savedAt: number
   }
-  
+
   const STORAGE_KEY = 'nxg_pick_multi_orders_v1'
   const MAX_AGE = 24 * 60 * 60 * 1000
   const MAX_ORDERS = 30
-  
+
   // 저장된 주문 목록 가져오기
   export function getNxgPickTrackedOrders(): NxgPickTrackedOrder[] {
     try {
       const saved = JSON.parse(
         localStorage.getItem(STORAGE_KEY) || '[]'
       )
-  
+
       if (!Array.isArray(saved)) return []
-  
+
       const now = Date.now()
-  
+
       return saved
         .filter((order): order is NxgPickTrackedOrder =>
           order !== null &&
@@ -42,7 +42,7 @@ export type NxgPickTrackedOrder = {
       return []
     }
   }
-  
+
   // 새로운 주문 추가
   export function saveNxgPickTrackedOrder(
     order: Omit<NxgPickTrackedOrder, 'savedAt'>
@@ -54,30 +54,30 @@ export type NxgPickTrackedOrder = {
     ) {
       return false
     }
-  
+
     try {
       const orders = getNxgPickTrackedOrders().filter(
         (saved) =>
           saved.merchantId !== order.merchantId ||
           saved.pgOrderId !== order.pgOrderId
       )
-  
+
       orders.push({
         ...order,
         savedAt: Date.now()
       })
-  
+
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(orders.slice(-MAX_ORDERS))
       )
-  
+
       return true
     } catch {
       return false
     }
   }
-  
+
   // 특정 주문만 제거
   export function removeNxgPickTrackedOrder(
     merchantId: string,
@@ -89,7 +89,7 @@ export type NxgPickTrackedOrder = {
           order.merchantId !== merchantId ||
           order.pgOrderId !== pgOrderId
       )
-  
+
       localStorage.setItem(
         STORAGE_KEY,
         JSON.stringify(orders)
@@ -105,11 +105,11 @@ export function getNxgPickLatestOrder() {
       const text = localStorage.getItem(
         'nxg_last_kiosk_order'
       )
-  
+
       if (!text) return null
-  
+
       const order = JSON.parse(text)
-  
+
       if (
         !order ||
         !order.merchantId ||
@@ -118,7 +118,7 @@ export function getNxgPickLatestOrder() {
       ) {
         return null
       }
-  
+
       return {
         merchantId: String(order.merchantId),
         pgOrderId: String(order.pgOrderId),
@@ -143,13 +143,13 @@ export function getNxgPickVisibleOrders(): NxgPickTrackedOrder[] {
 export function createNxgPickOtherOrdersPanel(
     currentPgOrderId: string
   ): HTMLElement | null {
-  
+
     const orders = getNxgPickVisibleOrders()
       .filter((order) => order.pgOrderId !== currentPgOrderId)
       .slice(0, 9)
-  
+
     if (orders.length === 0) return null
-  
+
     const panel = document.createElement('section')
     panel.id = 'nxg-pick-other-orders'
     panel.style.cssText = `
@@ -160,7 +160,7 @@ export function createNxgPickOtherOrdersPanel(
       background:#ffffff;
       text-align:left;
     `
-  
+
     const title = document.createElement('h3')
     title.textContent = `다른 가맹점 주문현황 (${orders.length}건)`
     title.style.cssText = `
@@ -168,15 +168,15 @@ export function createNxgPickOtherOrdersPanel(
       margin:0 0 12px;
       color:#174981;
     `
-  
+
     panel.appendChild(title)
-  
+
     const list = document.createElement('div')
     list.style.cssText = `
       max-height:300px;
       overflow-y:auto;
     `
-  
+
     orders.forEach((order) => {
       const row = document.createElement('div')
       row.style.cssText = `
@@ -187,22 +187,22 @@ export function createNxgPickOtherOrdersPanel(
         padding:12px 4px;
         border-bottom:1px solid #eeeeee;
       `
-  
+
       const name = document.createElement('span')
       name.textContent =
         order.merchantName || `가맹점 ${order.merchantId}`
-  
+
       const number = document.createElement('strong')
       number.textContent = `${order.orderNumber}번`
       number.style.color = '#c9a23b'
-  
+
       row.appendChild(name)
       row.appendChild(number)
       list.appendChild(row)
     })
-  
+
     panel.appendChild(list)
-  
+
     return panel
   }
 
@@ -219,28 +219,71 @@ export function saveVerifiedNxgPickOrder(
     merchantName: string,
     pgOrderId: string
   ): boolean {
-  
+
     if (dbOrder.payment_status !== '결제완료') {
       return false
     }
-  
+
     if (
       String(dbOrder.merchant_id) !== merchantId ||
       String(dbOrder.pg_order_id) !== pgOrderId
     ) {
       return false
     }
-  
+
     const orderNumber = String(
       dbOrder.call_number || dbOrder.order_no || ''
     )
-  
+
     if (!orderNumber) return false
-  
+
     return saveNxgPickTrackedOrder({
       merchantId,
       merchantName,
       pgOrderId,
       orderNumber
     })
+  }
+/* NXG PICK 다중 주문표 화면 연결 */
+export function mountNxgPickMultiOrders(): void {
+    if (window.location.pathname !== '/success') return
+  const params = new URLSearchParams(window.location.search)
+   if (params.get('source') !== 'kiosk') return
+  const currentOrderId = String(
+      params.get('orderId') || ''
+    ).replace(/[^a-zA-Z0-9]/g, '')
+   if (!currentOrderId) return
+    // 기존 픽업 알림 주문표가 표시된 경우에만 실행
+    const alertButton =
+      document.querySelector<HTMLButtonElement>(
+        '#customer-alert-enable'
+      )
+  if (!alertButton) return
+  const paymentCard =
+      alertButton.closest<HTMLElement>('.payment-card')
+   if (!paymentCard) return
+  // 중복 표시 방지
+    if (
+      paymentCard.querySelector('#nxg-pick-other-orders')
+    ) {
+      return
+    }
+
+    // 기존 주문표는 유지하고 다른 주문 목록만 추가
+    const otherOrdersPanel =
+      createNxgPickOtherOrdersPanel(currentOrderId)
+
+    if (!otherOrdersPanel) return
+
+    const receiptButton =
+      paymentCard.querySelector('#receipt-view-btn')
+
+    if (receiptButton) {
+      paymentCard.insertBefore(
+        otherOrdersPanel,
+        receiptButton
+      )
+    } else {
+      paymentCard.appendChild(otherOrdersPanel)
+    }
   }
