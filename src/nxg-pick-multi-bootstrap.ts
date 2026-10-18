@@ -187,6 +187,7 @@ const currentStopButton =
   )
 
 if (currentStopButton) {
+    currentStopButton.textContent = '알림 끄기'
   currentStopButton.style.width = 'auto'
   currentStopButton.style.fontSize = '13px'
   currentStopButton.style.background = '#174981'
@@ -198,6 +199,31 @@ if (currentStopButton) {
   )
 
   right.appendChild(currentStopButton)
+  
+  // 모든 주문의 알림 끄기 버튼 크기 통일
+ 
+
+  const unifiedStopStyle = document.createElement('style')
+
+  unifiedStopStyle.textContent = `
+    #nxg-pick-unified #customer-vibration-stop,
+    #nxg-pick-unified .nxg-pick-other-stop {
+      width:100px !important;
+      min-height:38px !important;
+      padding:8px 10px !important;
+      font-size:14px !important;
+      font-weight:700 !important;
+      line-height:1.4 !important;
+      border-radius:8px !important;
+      background:#174981 !important;
+      color:#ffffff !important;
+      box-sizing:border-box !important;
+      white-space:nowrap !important;
+      text-align:center !important;
+    }
+  `
+
+  section.appendChild(unifiedStopStyle)
 }
 
 
