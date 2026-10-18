@@ -2,9 +2,10 @@
 import { createClient } from '@supabase/supabase-js'
 
 import {
-    saveVerifiedNxgPickOrder,
-    getNxgPickLatestOrder
-  } from './nxg-pick-multi-orders'
+  saveVerifiedNxgPickOrder,
+  getNxgPickLatestOrder,
+  getNxgPickVisibleOrders
+} from './nxg-pick-multi-orders'
 
 
 // 기존 main.ts와 동일한 공개 Supabase 접속 정보
@@ -416,3 +417,33 @@ const playAlarm = () => {
     }
   }
 
+/* 현재 주문의 실제 준비 상태 조회 */
+/* 알림 확인 여부와 관계없이 주문 상태 유지 */
+
+export async function getNxgPickCurrentOrderStatus(): Promise<string | null> {
+  const pgOrderId = String(
+    new URLSearchParams(location.search).get('orderId') || ''
+  ).replace(/[^a-zA-Z0-9]/g, '')
+
+  const order = getNxgPickVisibleOrders().find(
+    (item) => item.pgOrderId === pgOrderId
+  )
+
+  if (!order) return null
+
+  try {
+    const { data, error } = await nxgOrderDb
+      .from('orders')
+      .select('order_status')
+      .eq('merchant_id', Number(order.merchantId))
+      .eq('pg_order_id', order.pgOrderId)
+      .eq('payment_status', '결제완료')
+      .maybeSingle()
+
+    if (error || !data) return null
+
+    return String(data.order_status || '')
+  } catch {
+    return null
+  }
+}

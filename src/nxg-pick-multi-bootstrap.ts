@@ -231,6 +231,93 @@ if (currentStopButton) {
           row.appendChild(right)
           section.appendChild(row)
 
+          // 현재 주문과 다른 주문의 글자 크기 통일
+          merchant.style.fontSize = '18px'
+
+          numberTitle.style.setProperty(
+            'font-size', '18px', 'important'
+          )
+
+          numberBox.style.setProperty(
+            'font-size', '18px', 'important'
+          )
+
+          const statusStyle = document.createElement('style')
+          statusStyle.textContent = `
+            #nxg-pick-unified .nxg-pick-other-row strong {
+              font-size:18px !important;
+            }
+
+            #nxg-pick-unified .nxg-pick-other-status {
+              font-size:14px !important;
+              line-height:1.5 !important;
+            }
+          `
+          section.appendChild(statusStyle)
+
+          // 현재 주문의 실제 DB 상태를 표시
+          const currentStatus = document.createElement('div')
+          currentStatus.style.cssText = `
+            font-size:14px;
+            line-height:1.5;
+            font-weight:500;
+            color:#6b7280;
+          `
+
+          left.appendChild(currentStatus)
+
+          let statusChecking = false
+
+          const refreshCurrentStatus = async () => {
+            if (
+              statusChecking ||
+              document.visibilityState !== 'visible'
+            ) return
+
+            statusChecking = true
+
+            try {
+              const { getNxgPickCurrentOrderStatus } =
+                await import('./nxg-pick-verified-order')
+
+              const status =
+                await getNxgPickCurrentOrderStatus()
+
+              if (status === null) return
+
+              const ready = status === '완료'
+
+              currentStatus.textContent = ready
+                ? '상품이 준비되었습니다. 픽업해주세요.'
+                : '잠시만 기다려주세요.'
+
+              currentStatus.style.color = ready
+                ? '#16a34a'
+                : '#6b7280'
+
+              currentStatus.style.fontWeight = ready
+                ? '800'
+                : '500'
+
+              // 기존 고객호출용 요소는 삭제하지 않음
+              waitMessage.style.display = 'none'
+
+            } catch (error) {
+              console.error(
+                '현재 주문 상태 표시 오류:',
+                error
+              )
+            } finally {
+              statusChecking = false
+            }
+          }
+
+          void refreshCurrentStatus()
+
+          window.setInterval(() => {
+            void refreshCurrentStatus()
+          }, 5000)
+
           const otherPanel =
             document.getElementById('nxg-pick-other-orders')
 
