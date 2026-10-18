@@ -163,8 +163,43 @@ if (!isGeneralStore) return
             'color', '#16a34a', 'important'
           )
 
-          right.appendChild(numberTitle)
-          right.appendChild(numberBox)
+          
+const numberLine = document.createElement('div')
+numberLine.style.cssText = `
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+`
+
+numberLine.appendChild(numberTitle)
+numberLine.appendChild(numberBox)
+
+right.style.flexDirection = 'column'
+right.style.alignItems = 'flex-end'
+
+right.appendChild(numberLine)
+
+// 현재 주문의 진동 끄기 버튼을 주문번호 아래로 이동
+const currentStopButton =
+  card.querySelector<HTMLButtonElement>(
+    '#customer-vibration-stop'
+  )
+
+if (currentStopButton) {
+  currentStopButton.style.width = 'auto'
+  currentStopButton.style.fontSize = '13px'
+  currentStopButton.style.background = '#174981'
+  currentStopButton.style.setProperty(
+    'padding', '8px 12px', 'important'
+  )
+  currentStopButton.style.setProperty(
+    'margin-top', '6px', 'important'
+  )
+
+  right.appendChild(currentStopButton)
+}
+
 
           row.appendChild(left)
           row.appendChild(right)
