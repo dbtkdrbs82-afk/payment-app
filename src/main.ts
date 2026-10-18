@@ -10541,7 +10541,7 @@ merchantTableTop?.appendChild(
       
         tr.innerHTML =
   '<td>' + (merchantStartIndex + index + 1) + '</td>'+
-  '<td><button class="merchant-link-btn" data-id="' + merchant.id + '">' + (merchant.merchant_login_id || ('MER' + String(merchant.id).padStart(4, '0'))) + '</button></td>' +
+  '<td><button class="merchant-link-btn" data-id="' + merchant.id + '">MER' + String(merchant.id).padStart(4, '0') + '</button></td>' +
 '<td><button class="merchant-link-btn" data-id="' + merchant.id + '">' + (merchant.merchant_name || '-') + '</button></td>' +
   '<td>' + (merchant.owner_name || '-') + '</td>' +
   '<td>' + (merchant.phone || '-') + '</td>' +
