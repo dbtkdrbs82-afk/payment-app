@@ -12295,6 +12295,10 @@ if (payoutBalanceValue) {
         
           const amount =
             Number(payment.amount || 0)
+
+            if (payment.status !== 'paid') {
+              return
+            }
         
           if (!approvalNumber) {
             return
@@ -13661,6 +13665,10 @@ document.querySelector('#duplicate-payment-card')
 
         const amount =
         Number(payment.amount || 0)
+
+        if (payment.status !== 'paid') {
+          return
+        }
       
       const duplicateKey =
         approvalNumber + '_' + amount
