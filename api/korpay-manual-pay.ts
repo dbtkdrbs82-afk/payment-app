@@ -292,20 +292,37 @@ const ordHp = onlyDigits(customerPhone)
       nextMonthStart.toISOString()
 
 
-    /* =========================================
-       MID별 월 승인금액 확인 후 사용 MID 선택
+      /* =========================================
+       MID별 월 잔여한도 + 1회 100만원 기준
+       자동 분할 계획 생성
     ========================================= */
 
-    let selectedManualMid: any =
-      null
+    const PER_PAYMENT_LIMIT =
+      1000000
 
-    let selectedMonthlyUsed =
-      0
+
+    const splitPlan: Array<{
+      mid: string
+      mkey: string
+      amount: number
+      priority: number
+      monthlyUsed: number
+      monthlyLimit: number
+    }> = []
+
+
+    let remainingAmount =
+      goodsAmt
 
 
     for (
       const manualMid of manualMidRows
     ) {
+
+      if (remainingAmount <= 0) {
+        break
+      }
+
 
       const candidateMid =
         String(
@@ -391,326 +408,826 @@ const ordHp = onlyDigits(customerPhone)
         )
 
 
-      if (
-        monthlyUsed +
-        goodsAmt <=
-        candidateMonthlyLimit
-      ) {
-
-        selectedManualMid =
-          manualMid
-
-        selectedMonthlyUsed =
+      const monthlyRemaining =
+        Math.max(
+          0,
+          candidateMonthlyLimit -
           monthlyUsed
+        )
 
-        break
+
+      if (monthlyRemaining <= 0) {
+        continue
       }
+
+
+      const splitAmount =
+        Math.min(
+          remainingAmount,
+          PER_PAYMENT_LIMIT,
+          monthlyRemaining
+        )
+
+
+      if (splitAmount <= 0) {
+        continue
+      }
+
+
+      splitPlan.push({
+        mid:
+          candidateMid,
+
+        mkey:
+          candidateMkey,
+
+        amount:
+          splitAmount,
+
+        priority:
+          Number(
+            manualMid.priority || 0
+          ),
+
+        monthlyUsed,
+
+        monthlyLimit:
+          candidateMonthlyLimit
+      })
+
+
+      remainingAmount -=
+        splitAmount
     }
 
 
-    if (!selectedManualMid) {
+    /*
+     * 등록된 MID 전체를 사용해도
+     * 총 결제금액을 처리할 수 없는 경우
+     */
+    if (remainingAmount > 0) {
 
       return res.status(400).json({
         success: false,
 
         message:
-          '등록된 코페이 수기결제 MID의 월 결제한도가 모두 부족합니다.',
+          '등록된 코페이 수기결제 MID의 월 잔여한도가 부족합니다.',
 
         resultCode:
-          'MONTHLY_LIMIT_EXCEEDED'
+          'MONTHLY_LIMIT_EXCEEDED',
+
+        requestedAmount:
+          goodsAmt,
+
+        shortageAmount:
+          remainingAmount
       })
     }
 
 
-    const mid =
-    merchantDbId === 42
-      ? String(merchant.korpay_manual_mid || '').trim()
-      : String(selectedManualMid.mid || '').trim()
-  
-  const mkey =
-    merchantDbId === 42
-      ? String(merchant.korpay_manual_mkey || '').trim()
-      : String(selectedManualMid.mkey || '').trim()
-
-
-    const monthlyLimit =
-      Number(
-        selectedManualMid.monthly_limit ||
-        5000000
-      )
-
-
     console.log(
-      '[코페이 수기결제 MID 선택]',
+      '[코페이 수기결제 분할계획]',
       {
         merchantId:
           merchantDbId,
 
-        mid,
-
-        monthlyUsed:
-          selectedMonthlyUsed,
-
-        paymentAmount:
+        totalAmount:
           goodsAmt,
 
-        monthlyLimit,
+        splits:
+          splitPlan.map(
+            (item) => ({
+              mid:
+                item.mid,
 
-        priority:
-          selectedManualMid.priority
+              amount:
+                item.amount,
+
+              priority:
+                item.priority,
+
+              monthlyUsed:
+                item.monthlyUsed,
+
+              monthlyLimit:
+                item.monthlyLimit
+            })
+          )
       }
     )
 
-    const ordNo =
-  Date.now().toString().padStart(13, '0').slice(-13) +
-  Array.from(
-    randomBytes(17),
-    (byte) => String(byte % 10)
-  ).join('')
 
-    const hashKey = createHash('sha256')
-      .update(mid + String(goodsAmt))
-      .digest('hex')
-      .toLowerCase()
+    const korpayUrl =
+      process.env
+        .KORPAY_MANUAL_PAY_URL ||
+      'https://staging-pgapi.korpay.com/api/manualpay'
+
+
+    const korpayCancelUrl =
+      process.env
+        .KORPAY_CANCEL_URL ||
+      'https://staging-pgapi.korpay.com/api/cancel'
+
+
+    type ApprovedSplit = {
+      ordNo: string
+      mid: string
+      amount: number
+      tid: string
+      approvalNumber: string | null
+      approvedAt: string | null
+      cardCompany: string | null
+      cardNumber: string | null
+      response: Record<string, unknown>
+    }
+
+
+    const approvedSplits:
+      ApprovedSplit[] = []
+
+
+    /*
+     * 중간 실패시
+     * 앞에서 승인된 건 전체 자동취소
+     */
+    const rollbackApprovedSplits =
+      async () => {
+
+        const rollbackErrors:
+          string[] = []
+
+
+        for (
+          const approved of
+          [...approvedSplits].reverse()
+        ) {
+
+          try {
+
+            const cancelResponse =
+              await fetch(
+                korpayCancelUrl,
+                {
+                  method:
+                    'POST',
+
+                  headers: {
+                    'Content-Type':
+                      'application/json'
+                  },
+
+                  body:
+                    JSON.stringify({
+                      ordNo:
+                        approved.ordNo,
+
+                      canAmt:
+                        String(
+                          approved.amount
+                        ),
+
+                      mid:
+                        approved.mid,
+
+                      canNm:
+                        String(
+                          buyerName ||
+                          merchant.merchant_name ||
+                          '가맹점'
+                        )
+                          .trim()
+                          .slice(
+                            0,
+                            30
+                          ),
+
+                      canMsg:
+                        '분할결제 중간실패 자동취소',
+
+                      partCanFlg:
+                        '0'
+                    })
+                }
+              )
+
+
+            const cancelText =
+              await cancelResponse.text()
+
+
+            let cancelData:
+              Record<string, any> = {}
+
+
+            try {
+
+              cancelData =
+                JSON.parse(
+                  cancelText
+                )
+
+            } catch {
+
+              cancelData = {
+                raw:
+                  cancelText
+              }
+            }
+
+
+            const cancelCode =
+              String(
+                cancelData.res_code ||
+                cancelData.resCode ||
+                ''
+              ).trim()
+
+
+            if (
+              !cancelResponse.ok ||
+              cancelCode !== '0000'
+            ) {
+
+              rollbackErrors.push(
+                approved.mid +
+                ' / ' +
+                approved.amount +
+                '원'
+              )
+            }
+
+          } catch (error) {
+
+            rollbackErrors.push(
+              approved.mid +
+              ' / ' +
+              approved.amount +
+              '원'
+            )
+
+            console.error(
+              '분할결제 자동취소 오류:',
+              error
+            )
+          }
+        }
+
+
+        return rollbackErrors
+      }
+
+
+    /*
+     * 분할계획 순서대로 실제 승인
+     */
+    for (
+      let index = 0;
+      index < splitPlan.length;
+      index += 1
+    ) {
+
+      const split =
+        splitPlan[index]
+
+
+      const ordNo =
+        Date.now()
+          .toString()
+          .padStart(
+            13,
+            '0'
+          )
+          .slice(
+            -13
+          ) +
+        Array.from(
+          randomBytes(17),
+          (byte) =>
+            String(
+              byte % 10
+            )
+        ).join('')
+
+
+      const hashKey =
+        createHash(
+          'sha256'
+        )
+          .update(
+            split.mid +
+            String(
+              split.amount
+            )
+          )
+          .digest(
+            'hex'
+          )
+          .toLowerCase()
+
 
       const korpayRequest = {
         ordNo,
-        mkey,
-        mid,
-        goodsAmt: String(goodsAmt),
+
+        mkey:
+          split.mkey,
+
+        mid:
+          split.mid,
+
+        goodsAmt:
+          String(
+            split.amount
+          ),
+
         cardNo,
-        expireYymm: expiry,
-        
+
+        expireYymm:
+          expiry,
+
         quotaMon,
-        buyer_nm: String(buyerName || '구매자').trim(),
-        goodsNm: String(goodsName || '일반 카드결제').trim(),
+
+        buyer_nm:
+          String(
+            buyerName ||
+            '구매자'
+          ).trim(),
+
+        goodsNm:
+          String(
+            goodsName ||
+            '일반 카드결제'
+          ).trim(),
+
         ordHp,
+
         hashKey
       }
 
-      const korpayUrl =
-      process.env.KORPAY_MANUAL_PAY_URL ||
-      'https://pgapi.korpay.com/api/manualpay'
 
-    const korpayResponse = await fetch(korpayUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(korpayRequest)
-    })
+      const korpayResponse =
+        await fetch(
+          korpayUrl,
+          {
+            method:
+              'POST',
 
-    const responseText = await korpayResponse.text()
+            headers: {
+              'Content-Type':
+                'application/json'
+            },
 
-    let korpayData: Record<string, unknown>
+            body:
+              JSON.stringify(
+                korpayRequest
+              )
+          }
+        )
 
-    try {
-      korpayData = JSON.parse(responseText)
-    } catch {
-      return res.status(502).json({
-        success: false,
-        message: '코페이 응답 형식이 올바르지 않습니다.',
-        detail: responseText
-      })
-    }
 
-    if (!korpayResponse.ok) {
-      return res.status(korpayResponse.status).json({
-        success: false,
-        message: '코페이 수기결제 요청에 실패했습니다.',
-        detail: korpayData
-      })
-    }
+      const responseText =
+        await korpayResponse.text()
 
-    const resultCode = String(
-      korpayData.res_code ??
-      korpayData.resultCode ??
-      ''
-    )
 
-    if (resultCode !== '0000') {
-        return res.status(400).json({
+      let korpayData:
+        Record<string, any>
+
+
+      try {
+
+        korpayData =
+          JSON.parse(
+            responseText
+          )
+
+      } catch {
+
+        const rollbackErrors =
+          await rollbackApprovedSplits()
+
+
+        return res.status(502).json({
           success: false,
+
           message:
-            String(korpayData.res_msg || '') ||
-            '카드결제가 승인되지 않았습니다.',
-      
-          resultCode,
-          usedMid: mid,
-          usedMkeyLast4: mkey.slice(-4),
-      
-          detail: korpayData
+            '코페이 응답 형식이 올바르지 않습니다.',
+
+          detail:
+            responseText,
+
+          rollbackErrors
         })
       }
 
+
+      const resultCode =
+        String(
+          korpayData.res_code ??
+          korpayData.resultCode ??
+          ''
+        ).trim()
+
+
+      if (
+        !korpayResponse.ok ||
+        resultCode !== '0000'
+      ) {
+
+        const rollbackErrors =
+          await rollbackApprovedSplits()
+
+
+        return res.status(
+          korpayResponse.ok
+            ? 400
+            : korpayResponse.status
+        ).json({
+
+          success:
+            false,
+
+          message:
+            String(
+              korpayData.res_msg ||
+              korpayData.resMsg ||
+              ''
+            ).trim() ||
+            '카드결제가 승인되지 않았습니다.',
+
+          resultCode,
+
+          failedSplit:
+            index + 1,
+
+          failedAmount:
+            split.amount,
+
+          usedMid:
+            split.mid,
+
+          usedMkeyLast4:
+            split.mkey.slice(
+              -4
+            ),
+
+          rollbackSuccess:
+            rollbackErrors.length ===
+            0,
+
+          rollbackErrors,
+
+          detail:
+            korpayData
+        })
+      }
+
+
       const paymentTid =
-  String(korpayData.TID || '').trim()
+        String(
+          korpayData.TID ||
+          korpayData.tid ||
+          ''
+        ).trim()
 
 
+      if (!paymentTid) {
+
+        const rollbackErrors =
+          await rollbackApprovedSplits()
+
+
+        return res.status(502).json({
+          success: false,
+
+          message:
+            '결제는 승인됐지만 코페이 TID를 받지 못했습니다.',
+
+          rollbackSuccess:
+            rollbackErrors.length ===
+            0,
+
+          rollbackErrors
+        })
+      }
+
+
+      const approvalNumber =
+        String(
+          korpayData.APP_NO ||
+          korpayData.app_no ||
+          korpayData.approval_number ||
+          korpayData.approvalNo ||
+          ''
+        ).trim() ||
+        null
+
+
+      const approvedAt =
+        String(
+          korpayData.APP_DATE ||
+          korpayData.appDate ||
+          ''
+        ).trim() ||
+        null
+
+
+      const cardCompany =
+        String(
+          korpayData.VAN_ISS_CP_CD ||
+          korpayData.cardCompany ||
+          ''
+        ).trim() ||
+        null
+
+
+      const resultCardNumber =
+        String(
+          korpayData.CARD_NO ||
+          korpayData.cardNo ||
+          ''
+        ).trim() ||
+        null
+
+
+      approvedSplits.push({
+        ordNo,
+
+        mid:
+          split.mid,
+
+        amount:
+          split.amount,
+
+        tid:
+          paymentTid,
+
+        approvalNumber,
+
+        approvedAt,
+
+        cardCompany,
+
+        cardNumber:
+          resultCardNumber,
+
+        response:
+          korpayData
+      })
+    }
+
+
+    /*
+     * 모든 승인 성공 후
+     * payments 한번에 저장
+     */
 
     const normalizedBillingIds =
-    Array.isArray(billingIds)
-      ? billingIds
-          .map((id) => Number(id))
-          .filter((id) => id > 0)
-      : []
-  
-  
-  const approvalNumber =
-    String(
-      korpayData.APP_NO ||
-      korpayData.app_no ||
-      korpayData.approval_number ||
-      korpayData.approvalNo ||
-      ''
-    ).trim() || null
-  
-  
-  const cardNumberResult =
-    String(
-      korpayData.CARD_NO ||
-      korpayData.cardNo ||
-      ''
-    ).trim() || null
-  
-  
-  const paymentMessage =
-    normalizedBillingIds.length > 0
-      ? (
-          '아카데미 정기결제 / 청구ID ' +
-          normalizedBillingIds.join(',')
-        )
-      : (
-          String(
+      Array.isArray(
+        billingIds
+      )
+        ? billingIds
+            .map(
+              (id) =>
+                Number(id)
+            )
+            .filter(
+              (id) =>
+                id > 0
+            )
+        : []
+
+
+    const baseMessage =
+      normalizedBillingIds.length > 0
+        ? (
+            '아카데미 정기결제 / 청구ID ' +
+            normalizedBillingIds.join(',')
+          )
+        : String(
             goodsName ||
             '수기결제'
           ).trim()
-        )
-  
-  
-  const paymentSenderName =
-    String(
-      buyerName ||
-      ''
-    ).trim() || null
-  
-  
-  if (paymentTid) {
-  
+
+
+    const paymentRows =
+      approvedSplits.map(
+        (
+          approved,
+          index
+        ) => ({
+
+          order_id:
+            approved.ordNo,
+
+          payment_key:
+            approved.tid,
+
+          pg_order_no:
+            approved.ordNo,
+
+          pg_mid:
+            approved.mid,
+
+          merchant_id:
+            merchantDbId,
+
+          merchant_name:
+            merchant.merchant_name ||
+            null,
+
+          amount:
+            approved.amount,
+
+          status:
+            'paid',
+
+          pg_company:
+            '코페이',
+
+          payment_method:
+            '수기결제',
+
+          sender_name:
+            String(
+              buyerName ||
+              ''
+            ).trim() ||
+            null,
+
+          message:
+            approvedSplits.length > 1
+              ? (
+                  baseMessage +
+                  ' / 분할 ' +
+                  (index + 1) +
+                  '/' +
+                  approvedSplits.length
+                )
+              : baseMessage,
+
+          approval_number:
+            approved.approvalNumber,
+
+          card_number:
+            approved.cardNumber,
+
+          card_company:
+            approved.cardCompany,
+
+          installment_months:
+            quotaMon ||
+            '00',
+
+          approved_at:
+            new Date()
+              .toISOString(),
+
+          settlement_status:
+            '정산대기',
+
+          payout_status:
+            '출금대기',
+
+          duplicate_status:
+            '정상'
+        })
+      )
+
+
     const paymentResponse =
       await fetch(
         `${supabaseUrl}/rest/v1/payments`,
         {
-          method: 'POST',
-  
+          method:
+            'POST',
+
           headers: {
             ...supabaseHeaders,
-            Prefer: 'return=minimal'
+
+            Prefer:
+              'return=minimal'
           },
-  
+
           body:
-            JSON.stringify({
-  
-              order_id:
-                ordNo,
-  
-              payment_key:
-                paymentTid,
-  
-              pg_order_no:
-                ordNo,
-  
-              pg_mid:
-                mid,
-  
-              merchant_id:
-                merchantDbId,
-  
-              merchant_name:
-                merchant.merchant_name ||
-                null,
-  
-              amount:
-                goodsAmt,
-  
-              status:
-                'paid',
-  
-              pg_company:
-                '코페이',
-  
-              payment_method:
-                '수기결제',
-  
-              sender_name:
-                paymentSenderName,
-  
-              message:
-                paymentMessage,
-  
-              approval_number:
-                approvalNumber,
-  
-              card_number:
-                cardNumberResult,
-  
-              installment_months:
-                quotaMon || '00',
-  
-              approved_at:
-                new Date().toISOString(),
-  
-              settlement_status:
-                '정산대기',
-  
-              payout_status:
-                '출금대기',
-  
-              duplicate_status:
-                '정상'
-            })
+            JSON.stringify(
+              paymentRows
+            )
         }
       )
-  
-  
+
+
     if (!paymentResponse.ok) {
-  
+
       const paymentSaveError =
         await paymentResponse.text()
-  
+
+
       console.error(
-        '코페이 수기결제 payments 저장 실패:',
+        '코페이 분할결제 payments 저장 실패:',
         paymentSaveError
       )
-  
+
+
+      const rollbackErrors =
+        await rollbackApprovedSplits()
+
+
       return res.status(500).json({
         success: false,
-  
+
         message:
           '코페이 결제는 승인됐지만 결제내역 저장에 실패했습니다.',
-  
-        approvalNumber,
-  
-        tid:
-          paymentTid,
-  
-        usedMid:
-          mid
+
+        rollbackSuccess:
+          rollbackErrors.length ===
+          0,
+
+        rollbackErrors,
+
+        detail:
+          paymentSaveError
       })
     }
-  }
+
+
+    const firstApproved =
+      approvedSplits[0]
+
 
     return res.status(200).json({
-      success: true,
-      message: '결제가 승인되었습니다.',
-      orderId: ordNo,
-      usedMid: mid,
-      approvalNumber: korpayData.APP_NO || null,
-      approvedAt: korpayData.APP_DATE || null,
-      tid: korpayData.TID || null,
-      cardCompany: korpayData.VAN_ISS_CP_CD || null,
-      response: korpayData
-    })
+
+      success:
+        true,
+
+      message:
+        approvedSplits.length > 1
+          ? (
+              '총 ' +
+              goodsAmt.toLocaleString() +
+              '원이 ' +
+              approvedSplits.length +
+              '건으로 분할 승인되었습니다.'
+            )
+          : '결제가 승인되었습니다.',
+
+      totalAmount:
+        goodsAmt,
+
+      splitCount:
+        approvedSplits.length,
+
+      orderId:
+        firstApproved?.ordNo ||
+        null,
+
+      approvalNumber:
+        firstApproved
+          ?.approvalNumber ||
+        null,
+
+      approvedAt:
+        firstApproved
+          ?.approvedAt ||
+        null,
+
+      tid:
+        firstApproved?.tid ||
+        null,
+
+      cardCompany:
+        firstApproved
+          ?.cardCompany ||
+        null,
+
+      usedMid:
+        firstApproved?.mid ||
+        null,
+
+      splitPayments:
+        approvedSplits.map(
+          (
+            approved,
+            index
+          ) => ({
+            split:
+              index + 1,
+
+            amount:
+              approved.amount,
+
+            mid:
+              approved.mid,
+
+            orderId:
+              approved.ordNo,
+
+            tid:
+              approved.tid,
+
+            approvalNumber:
+              approved.approvalNumber
+          })
+        )
+    })  
   } catch (error) {
     console.error('Korpay manual payment error:', error)
 
