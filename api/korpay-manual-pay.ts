@@ -1093,60 +1093,149 @@ const ordHp = onlyDigits(customerPhone)
       )
 
 
-    const paymentResponse =
-      await fetch(
-        `${supabaseUrl}/rest/v1/payments`,
-        {
-          method:
-            'POST',
+      for (const paymentRow of paymentRows) {
 
-          headers: {
-            ...supabaseHeaders,
-
-            Prefer:
-              'return=minimal'
-          },
-
-          body:
-            JSON.stringify(
-              paymentRows
+        const paymentKey =
+          String(
+            paymentRow.payment_key || ''
+          ).trim()
+      
+      
+        const existingPaymentResponse =
+          await fetch(
+            `${supabaseUrl}/rest/v1/payments` +
+              `?select=id` +
+              `&payment_key=eq.${encodeURIComponent(paymentKey)}` +
+              `&limit=1`,
+            {
+              method: 'GET',
+              headers: supabaseHeaders
+            }
+          )
+      
+      
+        const existingPaymentRows =
+          await existingPaymentResponse.json()
+      
+      
+        if (!existingPaymentResponse.ok) {
+      
+          console.error(
+            '코페이 기존 결제 조회 실패:',
+            existingPaymentRows
+          )
+      
+      
+          const rollbackErrors =
+            await rollbackApprovedSplits()
+      
+      
+          return res.status(500).json({
+            success: false,
+      
+            message:
+              '결제내역 확인 중 오류가 발생했습니다.',
+      
+            rollbackSuccess:
+              rollbackErrors.length === 0,
+      
+            rollbackErrors
+          })
+        }
+      
+      
+        const existingPayment =
+          Array.isArray(existingPaymentRows) &&
+          existingPaymentRows.length > 0
+            ? existingPaymentRows[0]
+            : null
+      
+      
+        let paymentSaveResponse: Response
+      
+      
+        if (existingPayment?.id) {
+      
+          /*
+           * 코페이 Noti가 먼저 저장한 경우
+           * 같은 TID 행을 새로 만들지 않고 업데이트
+           */
+          paymentSaveResponse =
+            await fetch(
+              `${supabaseUrl}/rest/v1/payments` +
+                `?id=eq.${existingPayment.id}`,
+              {
+                method: 'PATCH',
+      
+                headers: {
+                  ...supabaseHeaders,
+                  Prefer: 'return=minimal'
+                },
+      
+                body:
+                  JSON.stringify(
+                    paymentRow
+                  )
+              }
+            )
+      
+        } else {
+      
+          /*
+           * 아직 Noti 저장건이 없으면 신규 저장
+           */
+          paymentSaveResponse =
+            await fetch(
+              `${supabaseUrl}/rest/v1/payments`,
+              {
+                method: 'POST',
+      
+                headers: {
+                  ...supabaseHeaders,
+                  Prefer: 'return=minimal'
+                },
+      
+                body:
+                  JSON.stringify(
+                    paymentRow
+                  )
+              }
             )
         }
-      )
-
-
-    if (!paymentResponse.ok) {
-
-      const paymentSaveError =
-        await paymentResponse.text()
-
-
-      console.error(
-        '코페이 분할결제 payments 저장 실패:',
-        paymentSaveError
-      )
-
-
-      const rollbackErrors =
-        await rollbackApprovedSplits()
-
-
-      return res.status(500).json({
-        success: false,
-
-        message:
-          '코페이 결제는 승인됐지만 결제내역 저장에 실패했습니다.',
-
-        rollbackSuccess:
-          rollbackErrors.length ===
-          0,
-
-        rollbackErrors,
-
-        detail:
-          paymentSaveError
-      })
-    }
+      
+      
+        if (!paymentSaveResponse.ok) {
+      
+          const paymentSaveError =
+            await paymentSaveResponse.text()
+      
+      
+          console.error(
+            '코페이 분할결제 payments 저장 실패:',
+            paymentSaveError
+          )
+      
+      
+          const rollbackErrors =
+            await rollbackApprovedSplits()
+      
+      
+          return res.status(500).json({
+            success: false,
+      
+            message:
+              '코페이 결제는 승인됐지만 결제내역 저장에 실패했습니다.',
+      
+            rollbackSuccess:
+              rollbackErrors.length === 0,
+      
+            rollbackErrors,
+      
+            detail:
+              paymentSaveError
+          })
+        }
+      }
 
 
     const firstApproved =
