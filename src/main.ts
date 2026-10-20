@@ -35352,16 +35352,46 @@ excelRows.length > 0
     ]])
 
 
-    /* 카드번호 열(E열)을 텍스트 형식으로 고정 */
-for (let rowIndex = 2; rowIndex <= excelRows.length + 1; rowIndex += 1) {
-  const cellAddress = `E${rowIndex}`
-  const cell = worksheet[cellAddress]
+  
+/* 카드번호 E열을 텍스트 형식으로 고정 */
+/* 빈 엑셀 양식도 300행까지 적용 */
 
-  if (cell) {
-    cell.t = 's'
-    cell.z = '@'
-  }
+const cardTextLastRow =
+Math.max(excelRows.length + 1, 301)
+
+for (
+let rowIndex = 2;
+rowIndex <= cardTextLastRow;
+rowIndex += 1
+) {
+const cellAddress = `E${rowIndex}`
+
+const existingValue =
+  worksheet[cellAddress]?.v
+
+worksheet[cellAddress] = {
+  t: 's',
+  v: existingValue == null
+    ? ''
+    : String(existingValue),
+  z: '@'
 }
+}
+
+const sheetRange =
+XLSX.utils.decode_range(
+  worksheet['!ref'] || 'A1:J1'
+)
+
+sheetRange.e.r =
+Math.max(
+  sheetRange.e.r,
+  cardTextLastRow - 1
+)
+
+worksheet['!ref'] =
+XLSX.utils.encode_range(sheetRange)
+
 
   worksheet['!cols'] = [
     { wch: 10 },
