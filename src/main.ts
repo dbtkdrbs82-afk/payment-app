@@ -35100,7 +35100,7 @@ ${getMemberMenuHtml('batch')}
       <div class="academy-batch-tools">
 
   <button id="batch-template-download-btn">
-    📥 선택건 엑셀 다운로드
+    📥 결제 양식 엑셀 다운로드
   </button>
 
   <label
@@ -35258,10 +35258,7 @@ document.querySelector('#batch-template-download-btn')
       .filter((id) => id > 0)
   )
 
-  if (ids.length === 0) {
-    alert('엑셀로 내려받을 청구건을 선택해주세요.')
-    return
-  }
+  
 
   const selectedBillings =
     (billings || []).filter((billing) =>
@@ -35332,13 +35329,28 @@ document.querySelector('#batch-template-download-btn')
     )
   })
   
-  const excelRows =
-    Array.from(
-      excelGroupedMap.values()
-    )
+  
+const excelRows =
+Array.from(
+  excelGroupedMap.values()
+)
 
-  const worksheet =
-    XLSX.utils.json_to_sheet(excelRows)
+const worksheet =
+excelRows.length > 0
+  ? XLSX.utils.json_to_sheet(excelRows)
+  : XLSX.utils.aoa_to_sheet([[
+      '청구ID',
+      '회원명',
+      '청구월',
+      '결제금액',
+      '카드번호',
+      '유효기간월',
+      '유효기간년',
+      '할부개월',
+      '상품명',
+      '연락처'
+    ]])
+
 
     /* 카드번호 열(E열)을 텍스트 형식으로 고정 */
 for (let rowIndex = 2; rowIndex <= excelRows.length + 1; rowIndex += 1) {
@@ -35554,9 +35566,7 @@ document.querySelector('#batch-excel-load-btn')
           const errors: string[] = []
 
 
-          if (billingIds.length === 0) {
-            errors.push('청구ID 없음')
-          }
+          
 
           if (!memberName) {
             errors.push('회원명 없음')
@@ -35948,26 +35958,31 @@ const failMessages: string[] = []
                 }
       
       
-                const { error: billingUpdateError } =
-  await supabase
-    .from('billings')
-    .update({
-      payment_status: '완료'
-    })
-    .in('id', row.billingIds)
-    .eq('merchant_id', merchantId)
-      
-                if (billingUpdateError) {
-      
-                  failCount += 1
-      
-                  failMessages.push(
-                    row.memberName +
-                    ' : 결제 승인 성공 / 청구 완료처리 실패'
-                  )
-      
-                  continue
-                }
+                
+if (row.billingIds.length > 0) {
+
+  const { error: billingUpdateError } =
+    await supabase
+      .from('billings')
+      .update({
+        payment_status: '완료'
+      })
+      .in('id', row.billingIds)
+      .eq('merchant_id', merchantId)
+
+  if (billingUpdateError) {
+
+    failCount += 1
+
+    failMessages.push(
+      row.memberName +
+      ' : 결제 승인 성공 / 청구 완료처리 실패'
+    )
+
+    continue
+  }
+}
+
       
   /* =========================
    아카데미 회원명 연결
@@ -36037,9 +36052,14 @@ const { error: paymentMemberError } =
       sender_name:
         row.memberName,
 
-      message:
-        '아카데미 정기결제 / 청구ID ' +
-        row.billingIds.join(',')
+      
+message:
+row.billingIds.length > 0
+  ? '아카데미 정기결제 / 청구ID ' +
+    row.billingIds.join(',')
+  : '아카데미 비회원 수기결제 / ' +
+    row.productName
+
     })
     .eq('id', paymentId)
 
