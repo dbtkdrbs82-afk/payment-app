@@ -35520,14 +35520,21 @@ document.querySelector('#batch-excel-load-btn')
       const worksheet =
         workbook.Sheets[firstSheetName]
 
-      const rawRows =
-        XLSX.utils.sheet_to_json<Record<string, any>>(
-          worksheet,
-          {
-            defval: '',
-            raw: false
-          }
-        )
+      
+const rawRows =
+XLSX.utils.sheet_to_json<Record<string, any>>(
+  worksheet,
+  {
+    defval: '',
+    raw: false
+  }
+).filter((row) =>
+  Object.values(row).some(
+    (value) =>
+      String(value ?? '').trim() !== ''
+  )
+)
+
 
       if (rawRows.length === 0) {
         alert('엑셀에 결제 데이터가 없습니다.')
