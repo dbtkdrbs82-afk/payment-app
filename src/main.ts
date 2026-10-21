@@ -40819,6 +40819,12 @@ if (kioskSuccessRecoveryUrl) {
   kioskMerchant?.merchant_type === '일반매장' ||
   kioskMerchant?.merchant_type === '테이블오더'
 
+const isManualPaymentKiosk =
+  kioskMerchant?.merchant_type === '수기결제'
+
+const isDirectAmountKiosk =
+  isNormalStoreKiosk || isManualPaymentKiosk
+
 const useCompactProductCard =
   isBeautyKiosk ||
   isNormalStoreKiosk
@@ -41404,9 +41410,23 @@ ${
     `
     : '<h2>PICK</h2>'
 }
+              ${
+                isManualPaymentKiosk
+                  ? `
+                    <div style="margin:12px 0 22px;padding:20px 16px;background:#eff6ff;border:2px solid #1e4e88;border-radius:14px;">
+                      <label for="kiosk-direct-amount" style="display:block;margin-bottom:12px;color:#173a6b;font-size:20px;font-weight:800;">결제금액 직접입력</label>
+                      <div style="display:flex;align-items:center;gap:10px;">
+                        <input id="kiosk-direct-amount" type="number" min="1" step="1" inputmode="numeric" placeholder="금액 입력"
+                          style="width:100%;min-width:0;height:62px;padding:0 16px;border:1px solid #93c5fd;border-radius:10px;box-sizing:border-box;background:#ffffff;font-size:24px;font-weight:800;text-align:right;" />
+                        <strong style="font-size:20px;">&#50896;</strong>
+                      </div>
+                    </div>
+                  `
+                  : ''
+              }
               <div id="cart-items">
               ${
-                isBeautyKiosk
+                isBeautyKiosk || isManualPaymentKiosk
                   ? ''
                   : '<p class="empty-cart">상품을 선택해주세요.</p>'
               }
@@ -41989,7 +42009,7 @@ if (kioskMerchant?.merchant_type === '일반매장') {
 
   const getDirectPaymentAmount = (): number => {
 
-    if (!isNormalStoreKiosk) {
+    if (!isDirectAmountKiosk) {
       return 0
     }
   
@@ -42045,7 +42065,7 @@ if (kioskMerchant?.merchant_type === '일반매장') {
           
 
           if (cart.length === 0) {
-            cartItems.innerHTML = isBeautyKiosk
+            cartItems.innerHTML = isBeautyKiosk || isManualPaymentKiosk
   ? ''
   : '<p class="empty-cart">상품을 선택해주세요.</p>'
             return
@@ -42802,7 +42822,7 @@ duration_minutes:
       cart.length > 0
         ? cart
         : (
-            isNormalStoreKiosk &&
+            isDirectAmountKiosk &&
             directAmount > 0
               ? [
                   {
@@ -43392,7 +43412,7 @@ document.querySelector('#kiosk-card-pay-button')
       cart.length > 0
         ? cart
         : (
-            isNormalStoreKiosk &&
+            isDirectAmountKiosk &&
             directAmount > 0
               ? [
                   {
