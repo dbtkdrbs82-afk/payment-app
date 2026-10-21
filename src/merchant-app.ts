@@ -2105,7 +2105,7 @@ if (isManualPayment) {
       <main class="merchant-mobile-content">
 
                 ${
-          isNormalStore
+                  (isNormalStore || isManualPayment)
             ? `
               <section class="merchant-mobile-welcome merchant-mobile-qr-welcome">
 
@@ -2184,7 +2184,7 @@ if (isManualPayment) {
     </div>
   `
 
-  if (isNormalStore) {
+  if (isNormalStore || isManualPayment) {
 
     const homeQrBox =
       document.querySelector<HTMLDivElement>(
