@@ -1421,6 +1421,20 @@ export async function renderPgAdminMobile(
   
             </div>
   
+                        ${
+              adminRole === 'MANAGER'
+                ? `
+                  <button
+                    id="mobile-manager-apply-link"
+                    class="nxg-mobile-filter-button"
+                    type="button"
+                    style="margin:0 0 14px;"
+                  >
+                    🔗 가입신청서 링크 생성
+                  </button>
+                `
+                : ''
+            }
   
             <div
               class="nxg-mobile-filter"
@@ -1478,7 +1492,65 @@ export async function renderPgAdminMobile(
             >
             </div>
           `
-  
+          document
+          .querySelector('#mobile-manager-apply-link')
+          ?.addEventListener('click', async () => {
+            try {
+              const response = await fetch(
+                '/api/admin-my-apply-ref',
+                {
+                  method: 'GET',
+                  credentials: 'include',
+                  cache: 'no-store'
+                }
+              )
+
+              const result = await response.json()
+
+              if (!response.ok || !result?.success) {
+                alert(
+                  result?.message ||
+                  '담당자 정보를 확인하지 못했습니다.'
+                )
+                return
+              }
+
+              const ref = String(result.ref || '').trim()
+
+              if (!ref) {
+                alert('담당자 연락처가 등록되지 않았습니다.')
+                return
+              }
+
+              const applyUrl =
+                'https://payment-app-ybtf.vercel.app/merchant-apply-form?ref=' +
+                encodeURIComponent(ref)
+
+              try {
+                await navigator.clipboard.writeText(applyUrl)
+
+                alert(
+                  '담당자 전용 가입신청서 링크가 복사되었습니다.\n\n' +
+                  applyUrl
+                )
+              } catch {
+                prompt(
+                  '링크를 길게 눌러 복사해주세요.',
+                  applyUrl
+                )
+              }
+
+            } catch (error) {
+              console.error(
+                '가입신청서 링크 생성 오류:',
+                error
+              )
+
+              alert(
+                '가입신청서 링크 생성에 실패했습니다.'
+              )
+            }
+          })
   
         const renderMerchantCards =
           () => {
