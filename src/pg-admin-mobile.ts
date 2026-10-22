@@ -1422,7 +1422,7 @@ export async function renderPgAdminMobile(
             </div>
   
                         ${
-              adminRole === 'MANAGER'
+              adminRole !== 'MASTER'
                 ? `
                   <button
                     id="mobile-manager-apply-link"
@@ -1515,7 +1515,9 @@ export async function renderPgAdminMobile(
                 return
               }
 
-              const ref = String(result.ref || '').trim()
+              const ref = String(result.ref || '')
+  .replace(/[^0-9]/g, '')
+  .replace(/^010/, '')
 
               if (!ref) {
                 alert('담당자 연락처가 등록되지 않았습니다.')
