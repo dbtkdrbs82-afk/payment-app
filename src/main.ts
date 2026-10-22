@@ -10079,7 +10079,37 @@ const merchantListResult =
   
   const cleanKeyword =
     keyword.replace(/-/g, '')
-  
+
+    const matchingManualMidMerchantIds = new Set<number>()
+
+if (keyword && (searchType === 'pg_mid' || searchType === 'all')) {
+  const midSearchResponse = await fetch(
+    '/api/admin-merchant-mid-search',
+    {
+      method: 'POST',
+      credentials: 'include',
+      cache: 'no-store',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        keyword: keyword.trim()
+      })
+    }
+  )
+
+  const midSearchResult = await midSearchResponse.json()
+
+  if (!midSearchResponse.ok || !midSearchResult?.success) {
+    alert(midSearchResult?.message || '복수 MID 조회에 실패했습니다.')
+    return
+  }
+
+  for (const id of midSearchResult.merchantIds || []) {
+    matchingManualMidMerchantIds.add(Number(id))
+  }
+}
+      
   const startDate =
     document.querySelector<HTMLInputElement>(
       '#merchant-start-date'
@@ -10146,13 +10176,26 @@ if (keyword) {
       String(merchant.daou_terminal_mid || '')
     }
 
-    if (searchType !== 'all') {
-      return targetMap[searchType]?.includes(cleanKeyword)
-    }
+    const additionalMidMatched =
+  matchingManualMidMerchantIds.has(Number(merchant.id))
 
-    return Object.values(targetMap).some((value) =>
-      value.replace(/-/g, '').includes(cleanKeyword)
-    )
+if (searchType === 'pg_mid') {
+  return (
+    additionalMidMatched ||
+    targetMap.pg_mid.replace(/-/g, '').includes(cleanKeyword)
+  )
+}
+
+if (searchType !== 'all') {
+  return targetMap[searchType]?.includes(cleanKeyword) || false
+}
+
+return (
+  additionalMidMatched ||
+  Object.values(targetMap).some((value) =>
+    value.replace(/-/g, '').includes(cleanKeyword)
+  )
+)
   })
 }
 
