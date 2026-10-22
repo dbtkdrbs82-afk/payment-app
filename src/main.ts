@@ -11288,6 +11288,21 @@ if (organizationUsersError) {
 
     if (!branchId) return
 
+    const directManagers =
+    managers.filter((manager: any) =>
+      Number(manager.parent_admin_id) === branchId
+    )
+
+  if (managerSelect) {
+    managerSelect.innerHTML =
+      '<option value="">담당자 선택</option>' +
+      directManagers.map((manager: any) =>
+        '<option value="' + manager.id + '">' +
+          (manager.admin_name || '-') +
+        '</option>'
+      ).join('')
+  }
+
     const filteredAgencies =
       agencies.filter((agency: any) =>
         Number(agency.parent_admin_id) === branchId
@@ -11313,7 +11328,27 @@ if (organizationUsersError) {
         '<option value="">담당자 선택</option>'
     }
 
-    if (!agencyId) return
+    if (!agencyId) {
+      const branchId =
+        Number(branchSelect?.value || 0)
+    
+      const directManagers =
+        managers.filter((manager: any) =>
+          Number(manager.parent_admin_id) === branchId
+        )
+    
+      if (managerSelect) {
+        managerSelect.innerHTML =
+          '<option value="">담당자 선택</option>' +
+          directManagers.map((manager: any) =>
+            '<option value="' + manager.id + '">' +
+              (manager.admin_name || '-') +
+            '</option>'
+          ).join('')
+      }
+    
+      return
+    }
 
     const filteredManagers =
       managers.filter((manager: any) =>
