@@ -133,7 +133,7 @@ export default async function handler(
     const { data, error } = await supabase
       .from('admin_users')
       .select(
-        'id, admin_name, login_id, role, status, parent_admin_id, phone'
+        'id, admin_name, company_name, login_id, role, status, parent_admin_id, phone'
       )
       .eq('status', '사용중')
 
