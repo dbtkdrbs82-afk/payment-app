@@ -139,10 +139,12 @@ export default async function handler(
       })
     }
 
-    if (actor.role !== 'MANAGER') {
+    if (
+      !['BRANCH', 'AGENCY', 'MANAGER'].includes(actor.role)
+    ) {
       return res.status(403).json({
         success: false,
-        message: '담당자 계정으로 로그인해주세요.'
+        message: '가입신청서 링크 생성 권한이 없습니다.'
       })
     }
 
