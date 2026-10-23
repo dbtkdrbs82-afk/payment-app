@@ -20503,6 +20503,9 @@ const filteredVisiblePayments =
     )
   })
 
+  const renderPaymentPage = () => {
+  paymentTableBody.innerHTML = ''
+
     const savedPaymentPage =
     Number(
       sessionStorage.getItem('payment_current_page') || '1'
@@ -20570,11 +20573,7 @@ const filteredVisiblePayments =
           String(currentPaymentPage - 1)
         )
   
-        document
-          .querySelector<HTMLElement>(
-            '.admin-tab[data-page="payment"]'
-          )
-          ?.click()
+        renderPaymentPage()
       })
   
     document
@@ -20587,11 +20586,7 @@ const filteredVisiblePayments =
           String(currentPaymentPage + 1)
         )
   
-        document
-          .querySelector<HTMLElement>(
-            '.admin-tab[data-page="payment"]'
-          )
-          ?.click()
+        renderPaymentPage()
       })
   
     const prevButton =
@@ -21184,16 +21179,20 @@ const date = target.dataset.date
       document.querySelector<HTMLElement>('#admin-receipt-modal')!.style.display = 'flex'
       
       document.querySelector('#admin-receipt-close-btn')
-  ?.addEventListener('click', () => {
-    document.querySelector('#admin-receipt-modal')?.remove()
-  })
-})
-
-})
-}
-
-})
-})
+      ?.addEventListener('click', () => {
+        document.querySelector('#admin-receipt-modal')?.remove()
+      })
+    })
+    
+    })
+    
+    } // renderPaymentPage 끝
+    renderPaymentPage()
+    
+    }
+    
+    })
+    })
 
 } else if (path === '/store') {
     const params = new URLSearchParams(window.location.search)
