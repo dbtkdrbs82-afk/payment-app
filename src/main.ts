@@ -10538,68 +10538,58 @@ merchantTableTop?.appendChild(
   merchantPagination
 )
       
-      document.querySelector('#merchant-prev-page')
-        ?.addEventListener('click', () => {
-          if (merchantCurrentPage <= 1) return
-      
-          sessionStorage.setItem(
-            'merchant_admin_page',
-            String(merchantCurrentPage - 1)
-          )
-      
-          location.reload()
-        })
-        document.querySelector('#merchant-next-page')
-        ?.addEventListener('click', () => {
-          if (
-            merchantCurrentPage >= totalMerchantPages
-          ) return
-      
-          sessionStorage.setItem(
-            'merchant_admin_page',
-            String(merchantCurrentPage + 1)
-          )
-      
-          location.reload()
-        })
+const moveMerchantPage = (page: number) => {
+  if (
+    page < 1 ||
+    page > totalMerchantPages ||
+    page === merchantCurrentPage
+  ) return
 
-        document.querySelector('#merchant-first-page')
+  sessionStorage.setItem(
+    'merchant_admin_page',
+    String(page)
+  )
+
+  merchantSearchButton?.click()
+}
+
+document.querySelector('#merchant-first-page')
   ?.addEventListener('click', () => {
-    if (merchantCurrentPage <= 1) return
+    moveMerchantPage(1)
+  })
 
-    sessionStorage.setItem(
-      'merchant_admin_page',
-      '1'
-    )
+document.querySelector('#merchant-prev-page')
+  ?.addEventListener('click', () => {
+    moveMerchantPage(merchantCurrentPage - 1)
+  })
 
-    location.reload()
+document.querySelector('#merchant-next-page')
+  ?.addEventListener('click', () => {
+    moveMerchantPage(merchantCurrentPage + 1)
   })
 
 document.querySelector('#merchant-last-page')
   ?.addEventListener('click', () => {
-    if (merchantCurrentPage >= totalMerchantPages) return
-
-    sessionStorage.setItem(
-      'merchant_admin_page',
-      String(totalMerchantPages)
-    )
-
-    location.reload()
+    moveMerchantPage(totalMerchantPages)
   })
 
-        pageSizeSelect?.addEventListener('change', () => {
-          sessionStorage.setItem(
-            'admin_page_size',
-            pageSizeSelect.value
-          )
-        
-          sessionStorage.setItem(
-            'merchant_admin_page',
-            '1'
-          )
-        
-          location.reload()
-        })
+pageSizeSelect?.addEventListener('change', (event) => {
+  event.stopPropagation()
+
+  const select = event.target as HTMLSelectElement
+
+  sessionStorage.setItem(
+    'admin_page_size',
+    select.value
+  )
+
+  sessionStorage.setItem(
+    'merchant_admin_page',
+    '1'
+  )
+
+  merchantSearchButton?.click()
+})
   
       merchants
       .forEach((merchant, index) => {
