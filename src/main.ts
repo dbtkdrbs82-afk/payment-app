@@ -11349,12 +11349,23 @@ if (organizationUsersError) {
       String(user.login_id || '').startsWith('B')
     )
 
+    const getOrganizationOptionName = (user: any) => {
+      const companyName = String(user.company_name || '').trim()
+      const adminName = String(user.admin_name || '').trim()
+    
+      if (companyName) {
+        return companyName + (adminName ? ' (' + adminName + ')' : '')
+      }
+    
+      return adminName || '-'
+    }
+
   if (branchSelect) {
     branchSelect.innerHTML =
       '<option value="">지사 선택</option>' +
       branches.map((branch: any) =>
         '<option value="' + branch.id + '">' +
-          (branch.admin_name || '-') +
+      getOrganizationOptionName(branch) +
         '</option>'
       ).join('')
   }
@@ -11400,7 +11411,7 @@ if (organizationUsersError) {
         '<option value="">대리점 선택</option>' +
         filteredAgencies.map((agency: any) =>
           '<option value="' + agency.id + '">' +
-            (agency.admin_name || '-') +
+        getOrganizationOptionName(agency) +
           '</option>'
         ).join('')
     }
@@ -11429,7 +11440,7 @@ if (organizationUsersError) {
           '<option value="">담당자 선택</option>' +
           directManagers.map((manager: any) =>
             '<option value="' + manager.id + '">' +
-              (manager.admin_name || '-') +
+          getOrganizationOptionName(manager) +
             '</option>'
           ).join('')
       }
@@ -11502,6 +11513,16 @@ if (savedManagerId && managerSelect) {
 
       const getValue = (id: string) =>
   (document.getElementById(id) as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null)?.value || ''
+   
+      const getOrganizationAdminName = (selectId: string) => {
+        const selectedId = Number(getValue(selectId))
+      
+        const user = organizationUsers.find(
+          (item: any) => Number(item.id) === selectedId
+        )
+      
+        return String(user?.admin_name || '').trim()
+      }
       
       const updateData: any = {
   merchant_name: merchantName,
@@ -11512,9 +11533,8 @@ if (savedManagerId && managerSelect) {
   register_type: getValue('register_type'),
   manager_admin_id: Number(getValue('manager_admin_id')) || null,
 
-manager_admin_name:
-  document.querySelector<HTMLSelectElement>('#manager_admin_id')
-    ?.selectedOptions[0]?.textContent?.trim() || '',
+  manager_admin_name:
+  getOrganizationAdminName('manager_admin_id'),
 
 manager_phone:
   organizationUsers?.find(
@@ -11526,19 +11546,17 @@ agency_admin_id:
   Number(getValue('agency_admin_select')) || null,
 
 agency_name:
-  document.querySelector<HTMLSelectElement>('#agency_admin_select')
-    ?.selectedOptions[0]?.textContent?.trim() || '',
+  getOrganizationAdminName('agency_admin_select'),
 
 agency_admin_name:
-  document.querySelector<HTMLSelectElement>('#agency_admin_select')
-    ?.selectedOptions[0]?.textContent?.trim() || '',
+  getOrganizationAdminName('agency_admin_select'),
 
 branch_admin_id:
   Number(getValue('branch_admin_select')) || null,
 
 branch_admin_name:
-  document.querySelector<HTMLSelectElement>('#branch_admin_select')
-    ?.selectedOptions[0]?.textContent?.trim() || '',
+  getOrganizationAdminName('branch_admin_select'),
+  
     pg_company:
     getValue('online-pg-company-1') ||
     getValue('online-pg-company-2') ||
