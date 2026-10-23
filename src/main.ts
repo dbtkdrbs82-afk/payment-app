@@ -10291,6 +10291,79 @@ const rejectedCount =
   '<button id="merchant-bulk-check" class="merchant-search-btn">가맹점일괄조회</button>' +
 '</div>'
   }
+
+  // 가맹점관리 카드 클릭 필터
+const merchantSummaryCards =
+summaryBox?.querySelectorAll<HTMLElement>(
+  '.merchant-status-card'
+)
+
+const showMerchantCardList = (status: string) => {
+
+// 기존 검색조건 초기화
+const resetFields = [
+  '#merchant-pg-filter',
+  '#merchant-start-date',
+  '#merchant-end-date',
+  '#merchant-search-keyword'
+]
+
+resetFields.forEach((selector) => {
+  const field =
+    document.querySelector<HTMLInputElement | HTMLSelectElement>(
+      selector
+    )
+
+  if (field) field.value = ''
+})
+
+const searchType =
+  document.querySelector<HTMLSelectElement>(
+    '#merchant-search-type'
+  )
+
+if (searchType) searchType.value = 'all'
+
+const statusFilter =
+  document.querySelector<HTMLSelectElement>(
+    '#merchant-status-filter'
+  )
+
+if (statusFilter) {
+  statusFilter.value = status
+}
+
+// 첫 페이지부터 표시
+sessionStorage.setItem(
+  'merchant_admin_page',
+  '1'
+)
+
+// 전체 새로고침 없이 목록 갱신
+merchantSearchButton?.click()
+}
+
+// 전체 가맹점 카드
+const totalMerchantCard = merchantSummaryCards?.[0]
+
+if (totalMerchantCard) {
+totalMerchantCard.style.cursor = 'pointer'
+
+totalMerchantCard.addEventListener('click', () => {
+  showMerchantCardList('')
+})
+}
+
+// 신청대기 카드
+const waitingMerchantCard = merchantSummaryCards?.[1]
+
+if (waitingMerchantCard) {
+waitingMerchantCard.style.cursor = 'pointer'
+
+waitingMerchantCard.addEventListener('click', () => {
+  showMerchantCardList('신청')
+})
+}
   
   document.querySelector('#copy-merchant-apply-link')
     ?.addEventListener('click', async () => {
