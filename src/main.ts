@@ -10509,27 +10509,27 @@ const residentNumbers =
       merchantPagination.style.margin = '0 auto'
       
       merchantPagination.innerHTML =
-        '<button id="merchant-prev-page"' +
-          (merchantCurrentPage <= 1 ? ' disabled' : '') +
-        '>' +
-          '이전' +
-        '</button>' +
-      
-        '<span>' +
-          merchantCurrentPage +
-          ' / ' +
-          totalMerchantPages +
-        '</span>' +
-      
-        '<button id="merchant-next-page"' +
-          (
-            merchantCurrentPage >= totalMerchantPages
-              ? ' disabled'
-              : ''
-          ) +
-        '>' +
-          '다음' +
-        '</button>'
+  '<button id="merchant-first-page"' +
+    (merchantCurrentPage <= 1 ? ' disabled' : '') +
+  '>≪ 처음</button>' +
+
+  '<button id="merchant-prev-page"' +
+    (merchantCurrentPage <= 1 ? ' disabled' : '') +
+  '>이전</button>' +
+
+  '<span>' +
+    merchantCurrentPage +
+    ' / ' +
+    totalMerchantPages +
+  '</span>' +
+
+  '<button id="merchant-next-page"' +
+    (merchantCurrentPage >= totalMerchantPages ? ' disabled' : '') +
+  '>다음</button>' +
+
+  '<button id="merchant-last-page"' +
+    (merchantCurrentPage >= totalMerchantPages ? ' disabled' : '') +
+  '>마지막 ≫</button>'
       
         const merchantTableTop =
   document.querySelector('.admin-table-top')
@@ -10562,6 +10562,30 @@ merchantTableTop?.appendChild(
       
           location.reload()
         })
+
+        document.querySelector('#merchant-first-page')
+  ?.addEventListener('click', () => {
+    if (merchantCurrentPage <= 1) return
+
+    sessionStorage.setItem(
+      'merchant_admin_page',
+      '1'
+    )
+
+    location.reload()
+  })
+
+document.querySelector('#merchant-last-page')
+  ?.addEventListener('click', () => {
+    if (merchantCurrentPage >= totalMerchantPages) return
+
+    sessionStorage.setItem(
+      'merchant_admin_page',
+      String(totalMerchantPages)
+    )
+
+    location.reload()
+  })
 
         pageSizeSelect?.addEventListener('change', () => {
           sessionStorage.setItem(
