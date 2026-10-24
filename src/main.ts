@@ -2902,12 +2902,7 @@ alert(
   '휴대폰에서 본인인증을 완료해주세요.'
 )
 
-location.href =
-  '/merchant-app'
-
-  alert('가입신청이 완료되었습니다.')
-
-location.href = '/merchant-app'
+location.replace('https://play.google.com/store/apps/details?id=kr.co.nxgsoft.payment')
 })
 
 } else if (path === '/merchant-create') {
