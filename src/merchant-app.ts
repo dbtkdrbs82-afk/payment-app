@@ -5879,6 +5879,10 @@ receiptButton?.addEventListener(
                 status.textContent =
                   '완료'
               }
+
+              if (orderMerchantType === '일반매장') {
+                void renderMerchantOrders()
+              }
   
             }
           )
@@ -5887,7 +5891,7 @@ receiptButton?.addEventListener(
       )
 
         // 테이블오더 신규 주문 자동 감지
-  if (isTableOrderOrders) {
+  if (isTableOrderOrders || orderMerchantType === '일반매장') {
 
     let lastKnownOrderId = Math.max(
       0,
@@ -5896,6 +5900,10 @@ receiptButton?.addEventListener(
       )
     )
 
+    let previousOrderState = JSON.stringify(
+      orders.map((row: any) => [row.id, row.order_status, row.cancel_status])
+        .sort((a: any, b: any) => Number(a[0]) - Number(b[0]))
+    )
     let checkingOrders = false
 
     merchantOrdersAutoRefreshTimer =
@@ -5915,12 +5923,12 @@ receiptButton?.addEventListener(
 
           const { data, error } = await supabase
             .from('orders')
-            .select('id')
+            .select('id,order_status,cancel_status')
             .eq('merchant_id', merchantId)
             .gte('created_at', startIso)
             .lte('created_at', endIso)
             .order('id', { ascending: false })
-            .limit(1)
+            
 
           if (error) {
             console.error('신규 주문 확인 실패:', error)
@@ -5930,12 +5938,21 @@ receiptButton?.addEventListener(
           const newestId =
             Number(data?.[0]?.id || 0)
 
-            if (newestId > lastKnownOrderId) {
+            const currentOrderState = JSON.stringify(
+              (data || []).map((row: any) => [
+                row.id, row.order_status, row.cancel_status
+              ]).sort((a: any, b: any) => Number(a[0]) - Number(b[0]))
+            )
+            const newOrderArrived = newestId > lastKnownOrderId
+
+            if (currentOrderState !== previousOrderState) {
+              previousOrderState = currentOrderState
 
               lastKnownOrderId = newestId
             
               // 테이블오더 새 주문 음성 안내
               if (
+                newOrderArrived && isTableOrderOrders &&
                 localStorage.getItem(tableVoiceKey) === '1' &&
                 'speechSynthesis' in window
               ) {
