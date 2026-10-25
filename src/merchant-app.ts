@@ -5950,28 +5950,30 @@ receiptButton?.addEventListener(
 
               lastKnownOrderId = newestId
             
-              // 테이블오더 새 주문 음성 안내
+              await renderMerchantOrders()
+
+              // 신규 주문일 때만 음성 안내
+              const voiceEnabled = isTableOrderOrders
+                ? localStorage.getItem(tableVoiceKey) === '1'
+                : merchantSetting?.voice_enabled === true
+
               if (
-                newOrderArrived && isTableOrderOrders &&
-                localStorage.getItem(tableVoiceKey) === '1' &&
+                newOrderArrived &&
+                voiceEnabled &&
                 'speechSynthesis' in window
               ) {
-            
                 window.speechSynthesis.cancel()
-            
-                const speech =
-                  new SpeechSynthesisUtterance(
-                    '새 주문이 접수되었습니다.'
-                  )
-            
+
+                const speech = new SpeechSynthesisUtterance(
+                  '새 주문이 접수되었습니다.'
+                )
+
                 speech.lang = 'ko-KR'
                 speech.rate = 0.95
                 speech.volume = 1
-            
+
                 window.speechSynthesis.speak(speech)
               }
-            
-              await renderMerchantOrders()
             
             }
 
