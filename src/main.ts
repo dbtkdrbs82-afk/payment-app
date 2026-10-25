@@ -4822,13 +4822,7 @@ ${
               'vibrate' in navigator
             ) {
   
-              navigator.vibrate([
-                250,
-                120,
-                250,
-                120,
-                1200
-              ])
+              navigator.vibrate([800, 200, 800, 200, 1000])
             }
           }
   

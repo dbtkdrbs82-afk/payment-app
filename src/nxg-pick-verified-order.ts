@@ -226,7 +226,7 @@ const playAlarm = () => {
       ) return
 
       if ('vibrate' in navigator) {
-        navigator.vibrate([250, 120, 250, 120, 600])
+        navigator.vibrate([800, 200, 800, 200, 1000])
       }
 
       const ctx = soundContext
