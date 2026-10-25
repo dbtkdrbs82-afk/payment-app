@@ -3409,15 +3409,37 @@ const getOrderStatus = (
 }
 
 
-const filteredOrders =
+const baseFilteredOrders =
   selectedStatus === '전체'
     ? orders
     : orders.filter(
         (order: any) =>
-          getOrderStatus(order) ===
-          selectedStatus
+          getOrderStatus(order) === selectedStatus
       )
 
+const orderMerchantType =
+  sessionStorage.getItem('login_merchant_type') ||
+  localStorage.getItem('login_merchant_type') || ''
+
+const useOrderSorting =
+  orderMerchantType === '일반매장' ||
+  orderMerchantType === '테이블오더'
+
+const filteredOrders = useOrderSorting
+  ? [...baseFilteredOrders].sort((a: any, b: any) => {
+      const aDone = ['완료', '취소완료'].includes(getOrderStatus(a))
+      const bDone = ['완료', '취소완료'].includes(getOrderStatus(b))
+
+      if (aDone !== bDone) {
+        return Number(aDone) - Number(bDone)
+      }
+
+      return (
+        new Date(a.created_at).getTime() -
+        new Date(b.created_at).getTime()
+      ) || (Number(a.id) - Number(b.id))
+    })
+  : baseFilteredOrders
 
 const totalPages =
   Math.max(
@@ -5705,6 +5727,7 @@ receiptButton?.addEventListener(
       }
 
       button.remove()
+      void renderMerchantOrders()
     })
   })
   
