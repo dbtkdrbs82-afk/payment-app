@@ -342,7 +342,7 @@ if (
 
     const merchantResponse = await fetch(
       `${supabaseUrl}/rest/v1/merchants` +
-        `?select=id,merchant_name,fee_rate,manager_admin_id,manager_admin_name,agency_admin_id,agency_admin_name,branch_admin_id,branch_admin_name` +
+        `?select=id,merchant_name,fee_rate,manager_admin_id,manager_admin_name,agency_admin_id,agency_admin_name,branch_admin_id,branch_admin_name,korpay_terminal_mid,korpay_manual_mid,korpay_pg_mid` +
         `&or=(` +
           `korpay_terminal_mid.eq.${encodeURIComponent(korpayMid)},` +
           `korpay_manual_mid.eq.${encodeURIComponent(korpayMid)},` +
@@ -367,11 +367,71 @@ if (
       })
     }
 
-    const merchant =
+    let merchant =
       Array.isArray(merchantRows) && merchantRows.length > 0
         ? merchantRows[0]
         : null
 
+    // 복수 수기 MID의 2번 이후 MID도 가맹점 연결
+    let isAdditionalManualMid = false
+
+    if (!merchant) {
+      const midResponse = await fetch(
+        `${supabaseUrl}/rest/v1/merchant_korpay_manual_mids` +
+        `?select=merchant_id` +
+        `&mid=eq.${encodeURIComponent(korpayMid)}` +
+        `&status=eq.${encodeURIComponent('사용중')}` +
+        `&limit=2`,
+        { method: 'GET', headers }
+      )
+
+      if (!midResponse.ok) {
+        return res.status(500).json({
+          result: 'ERROR',
+          message: '복수 수기 MID 조회 실패'
+        })
+      }
+
+      const midRows = await midResponse.json()
+
+      if (Array.isArray(midRows) && midRows.length > 1) {
+        return res.status(409).json({
+          result: 'ERROR',
+          message: 'MID 중복 등록 확인 필요'
+        })
+      }
+
+      const mappedId = Number(
+        Array.isArray(midRows) && midRows.length === 1
+          ? midRows[0].merchant_id
+          : 0
+      )
+
+      if (Number.isInteger(mappedId) && mappedId > 0) {
+        const mappedResponse = await fetch(
+          `${supabaseUrl}/rest/v1/merchants` +
+          `?select=id,merchant_name,fee_rate,manager_admin_id,manager_admin_name,agency_admin_id,agency_admin_name,branch_admin_id,branch_admin_name,korpay_terminal_mid,korpay_manual_mid,korpay_pg_mid` +
+          `&id=eq.${mappedId}&limit=1`,
+          { method: 'GET', headers }
+        )
+
+        if (!mappedResponse.ok) {
+          return res.status(500).json({
+            result: 'ERROR',
+            message: '복수 MID 가맹점 조회 실패'
+          })
+        }
+
+        const mappedRows = await mappedResponse.json()
+
+        merchant =
+          Array.isArray(mappedRows) && mappedRows.length === 1
+            ? mappedRows[0]
+            : null
+
+        isAdditionalManualMid = Boolean(merchant)
+      }
+    }
     if (!merchant) {
       console.error('등록되지 않은 코페이 단말기 MID:', korpayMid)
 
@@ -409,7 +469,7 @@ const paymentData = {
       payment_method:
   merchant.korpay_terminal_mid === korpayMid
     ? '무선단말기'
-    : merchant.korpay_manual_mid === korpayMid
+    : (merchant.korpay_manual_mid === korpayMid || isAdditionalManualMid)
     ? '수기결제'
     : '온라인인증',
 
