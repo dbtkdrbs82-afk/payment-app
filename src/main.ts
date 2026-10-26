@@ -20194,28 +20194,63 @@ if (dateType === 'created_at') {
   }
 }
 
-const currentPaymentIds =
-  payments
-    .map((payment) => Number(payment.id))
-    .filter((id) => Number.isFinite(id))
+const currentPaymentIds = payments
+  .map((payment) => Number(payment.id))
+  .filter((id) => Number.isFinite(id))
 
-const paymentCancelRequestResult =
-  currentPaymentIds.length > 0
-    ? await supabase
+const paymentCancelRequests: any[] = []
+let paymentCancelRequestError: { message: string } | null = null
+
+const cancelRequestLoadStart = performance.now()
+const cancelBatchSize = 150
+const cancelParallelCount = 4
+
+for (
+  let offset = 0;
+  offset < currentPaymentIds.length;
+  offset += cancelBatchSize * cancelParallelCount
+) {
+  const batchResults = await Promise.all(
+    Array.from({ length: cancelParallelCount }, (_, index) => {
+      const batchIds = currentPaymentIds.slice(
+        offset + index * cancelBatchSize,
+        offset + (index + 1) * cancelBatchSize
+      )
+
+      if (batchIds.length === 0) {
+        return Promise.resolve({
+          data: [] as any[],
+          error: null
+        })
+      }
+
+      return supabase
         .from('cancel_requests')
         .select('id, payment_id, status, reason')
         .eq('status', '요청중')
-        .in('payment_id', currentPaymentIds)
-    : {
-        data: [],
-        error: null
-      }
+        .in('payment_id', batchIds)
+    })
+  )
 
-const {
-  data: paymentCancelRequests,
-  error: paymentCancelRequestError
-} = paymentCancelRequestResult
+  for (const result of batchResults) {
+    if (result.error) {
+      paymentCancelRequestError = result.error
+      break
+    }
 
+    paymentCancelRequests.push(...(result.data || []))
+  }
+
+  if (paymentCancelRequestError) {
+    break
+  }
+}
+
+console.log(
+  '[결제관리] cancel_requests:',
+  Math.round(performance.now() - cancelRequestLoadStart) + 'ms',
+  paymentCancelRequests.length + '건'
+)
 if (paymentCancelRequestError) {
   alert(
     '취소요청 조회 실패: ' +
