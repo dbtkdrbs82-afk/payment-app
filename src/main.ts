@@ -20084,6 +20084,13 @@ const savedAdminRole =
 }
 }
 
+const getPaymentNetAmount = (payment: any) => {
+  const amount = Number(payment.amount || 0)
+
+  return payment.status === 'partial_cancel'
+    ? Math.max(0, amount - Number(payment.cancel_amount || 0))
+    : amount
+}
 const paymentFilters = (window as any).paymentFilters
 
 if (paymentFilters) {
@@ -20094,7 +20101,7 @@ if (paymentFilters) {
   // 거래일자는 승인된 결제건만 표시
 if (dateType === 'created_at') {
   payments = payments.filter(
-    (payment) => payment.status === 'paid'
+    (payment) => payment.status === 'paid' || payment.status === 'partial_cancel'
   )
 }
   const startDate = filters.startDate || ''
@@ -20291,12 +20298,12 @@ if (summaryBox) {
 const totalAmount = payments.reduce((sum, payment) => {
   if (
     selectedDateType === 'created_at' &&
-    payment.status !== 'paid'
+    payment.status !== 'paid' && payment.status !== 'partial_cancel'
   ) {
     return sum
   }
 
-  return sum + Number(payment.amount || 0)
+  return sum + getPaymentNetAmount(payment)
 }, 0)
 
   const merchantCount =
@@ -20492,13 +20499,15 @@ const filteredVisiblePayments =
           결제상태:
             payment.status === 'cancel'
               ? '취소'
-              : '승인',
+              : payment.status === 'partial_cancel'
+                ? '부분취소 (' + Number(payment.cancel_amount || 0).toLocaleString() + '원 취소)'
+                : '승인',
 
           결제수단:
             payment.payment_method || '카드',
 
           결제금액:
-            amount,
+            getPaymentNetAmount(payment),
 
           거래방식:
             payment.pg_company || '',
@@ -20518,7 +20527,7 @@ const filteredVisiblePayments =
     const totalExcelAmount =
       filteredVisiblePayments.reduce(
         (sum: number, payment: any) =>
-          sum + Number(payment.amount || 0),
+          sum + getPaymentNetAmount(payment),
         0
       )
 
@@ -20733,7 +20742,9 @@ visiblePayments.forEach((payment, index) => {
   const cancelStatusText =
     payment.status === 'cancel'
       ? '취소완료'
-      : cancelRequest
+      : payment.status === 'partial_cancel'
+        ? '부분취소'
+        : cancelRequest
         ? '취소요청'
         : '-'
 
@@ -20781,7 +20792,9 @@ visiblePayments.forEach((payment, index) => {
   '</button>' +
 '</td>' +
     '<td>' +
-  '<button type="button" class="payment-cancel-link" data-id="' + payment.id + '">' +
+  '<button type="button" class="payment-cancel-link" data-id="' + payment.id + '"' +
+  (payment.status === 'partial_cancel' ? ' disabled title="부분취소 내역"' : '') +
+  '>' +
   cancelStatusText +
     '<br/>' +
     '<span title="' + (payment.payment_key || '-') + '">' +
@@ -20820,7 +20833,17 @@ visiblePayments.forEach((payment, index) => {
       : payment.installment_months + '개월'
   ) +
 '</td>' +
-    '<td>' + getStatusText(payment.status) + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
+    '<td>' +
+  (payment.status === 'partial_cancel' ? '부분취소' : getStatusText(payment.status)) +
+  '<br/>' +
+  (payment.status === 'partial_cancel'
+    ? '원승인 ' + Number(payment.amount || 0).toLocaleString() + '원' +
+      '<br/><span style="color:#b91c1c">부분취소 -' +
+      Number(payment.cancel_amount || 0).toLocaleString() + '원</span>' +
+      '<br/><strong>잔액 ' +
+      getPaymentNetAmount(payment).toLocaleString() + '원</strong>'
+    : Number(payment.amount || 0).toLocaleString() + '원') +
+'</td>' +
     '<td>' + (payment.pg_company || '온라인') + '<br/>' + Number(payment.amount || 0).toLocaleString() + '원</td>' +
     '<td>' +
   Number(payment.fee_amount || 0).toLocaleString() + '원<br/>' +
