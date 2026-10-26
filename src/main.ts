@@ -19655,7 +19655,7 @@ const [
     (async () => {
 
       const allPayments: any[] = []
-      const pageSize = 500
+      const pageSize = 1000
 
       let lastId: number | null = null
       let expectedCount: number | null = null
