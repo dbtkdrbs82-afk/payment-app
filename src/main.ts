@@ -12646,7 +12646,11 @@ const payoutDate =
           const groupKey =
             String(row.merchant_id || '') + '_' + payoutDate
         
-          const amount = Number(row.amount || 0)
+          const originalAmount = Number(row.amount || 0)
+          const amount =
+            row.status === 'partial_cancel'
+              ? Math.max(0, originalAmount - Number(row.cancel_amount || 0))
+              : originalAmount
           const feeAmount = Number(row.fee_amount || 0)
         
           const settlementAmount = Number(
