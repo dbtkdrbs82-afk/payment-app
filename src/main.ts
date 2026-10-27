@@ -20126,14 +20126,38 @@ if (dateType === 'created_at') {
 
   if (startDate) {
     payments = payments.filter((payment) => {
-      const targetDate = String(payment[dateType] || '').slice(0, 10)
+      const rawDateText = String(payment[dateType] || '')
+
+      if (!rawDateText) {
+        return false
+      }
+
+      const targetDate =
+        new Date(rawDateText).toLocaleDateString(
+          'en-CA',
+          {
+            timeZone: 'Asia/Seoul'
+          }
+        )
       return targetDate >= startDate
     })
   }
   
   if (endDate) {
     payments = payments.filter((payment) => {
-      const targetDate = String(payment[dateType] || '').slice(0, 10)
+      const rawDateText = String(payment[dateType] || '')
+
+      if (!rawDateText) {
+        return false
+      }
+
+      const targetDate =
+        new Date(rawDateText).toLocaleDateString(
+          'en-CA',
+          {
+            timeZone: 'Asia/Seoul'
+          }
+        )
       return targetDate <= endDate
     })
   }
