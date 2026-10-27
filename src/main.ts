@@ -19624,12 +19624,12 @@ const paymentQueryEndDate =
 
 const paymentQueryStart =
   paymentQueryStartDate
-    ? paymentQueryStartDate + 'T00:00:00'
+    ? new Date(paymentQueryStartDate + 'T00:00:00+09:00').toISOString()
     : ''
 
 const paymentQueryEnd =
   paymentQueryEndDate
-    ? paymentQueryEndDate + 'T23:59:59.999'
+    ? new Date(paymentQueryEndDate + 'T23:59:59.999+09:00').toISOString()
     : ''
 
     const paymentLoadStart = performance.now()
