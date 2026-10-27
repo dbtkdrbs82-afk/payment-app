@@ -87,7 +87,7 @@ const ordHp = onlyDigits(customerPhone)
 
     const merchantResponse = await fetch(
       `${supabaseUrl}/rest/v1/merchants` +
-        `?select=id,merchant_name,korpay_manual_mid,korpay_manual_mkey` +
+        `?select=id,merchant_name,fee_rate,korpay_manual_mid,korpay_manual_mkey` +
         `&id=eq.${merchantDbId}` +
         `&limit=1`,
       {
@@ -1047,6 +1047,24 @@ const ordHp = onlyDigits(customerPhone)
 
           amount:
             approved.amount,
+
+          fee_rate:
+            Number(merchant.fee_rate || 0),
+
+          fee_amount:
+            Math.round(
+              approved.amount *
+              Number(merchant.fee_rate || 0) /
+              100
+            ),
+
+          settlement_amount:
+            approved.amount -
+            Math.round(
+              approved.amount *
+              Number(merchant.fee_rate || 0) /
+              100
+            ),
 
           status:
             'paid',
