@@ -14,7 +14,7 @@ import type {
   
   
   const supabaseUrl =
-    'https://rnmptlxdeihvfwegoqnf.supabase.co'
+    (process.env.SUPABASE_URL?.trim() || '')
   
   
   function verifyHotelStaffPassword(

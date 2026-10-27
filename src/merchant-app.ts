@@ -12,15 +12,15 @@ import {
     PSM
   } from 'tesseract.js'
 
-  const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 
 const apiBaseUrl =
-  'https://payment-app-ybtf.vercel.app'
+  window.location.origin
 
   function getKorpayEdiDate() {
 

@@ -7,6 +7,12 @@ import type {
     req: VercelRequest,
     res: VercelResponse
   ) {
+  if (process.env.VERCEL_ENV === 'preview') {
+    return res.status(403).json({
+      message: 'Preview payment disabled'
+    })
+  }
+
     if (req.method !== 'POST') {
       return res.status(405).json({
         success: false,

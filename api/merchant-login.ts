@@ -15,7 +15,7 @@ import {
 const supabaseUrl =
   process.env.SUPABASE_URL?.trim() ||
   process.env.VITE_SUPABASE_URL?.trim() ||
-  'https://rnmptlxdeihvfwegoqnf.supabase.co'
+  ''
 
 
 const MERCHANT_SESSION_SECRET =
