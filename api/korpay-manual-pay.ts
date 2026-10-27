@@ -421,12 +421,23 @@ const ordHp = onlyDigits(customerPhone)
       }
 
 
-      const splitAmount =
+      const requiredSplitAmount =
         Math.min(
           remainingAmount,
-          PER_PAYMENT_LIMIT,
-          monthlyRemaining
+          PER_PAYMENT_LIMIT
         )
+
+
+      if (
+        monthlyRemaining <
+        requiredSplitAmount
+      ) {
+        continue
+      }
+
+
+      const splitAmount =
+        requiredSplitAmount
 
 
       if (splitAmount <= 0) {
