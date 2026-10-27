@@ -1205,32 +1205,96 @@ const ordHp = onlyDigits(customerPhone)
       
       
         if (!paymentSaveResponse.ok) {
-      
+
           const paymentSaveError =
             await paymentSaveResponse.text()
-      
-      
+
+          /*
+           * DB UNIQUE 충돌이 발생한 경우
+           * 같은 payment_key 행을 찾아 기존 행에 병합한다.
+           * 실제 승인건을 중복 저장 오류 때문에 취소하지 않는다.
+           */
+          if (
+            paymentSaveResponse.status === 409 &&
+            paymentKey
+          ) {
+
+            const conflictFindResponse =
+              await fetch(
+                `${supabaseUrl}/rest/v1/payments` +
+                  `?select=id` +
+                  `&payment_key=eq.${encodeURIComponent(paymentKey)}` +
+                  `&limit=1`,
+                {
+                  method: 'GET',
+                  headers: supabaseHeaders
+                }
+              )
+
+            const conflictRows =
+              await conflictFindResponse.json()
+
+            const conflictPayment =
+              Array.isArray(conflictRows) &&
+              conflictRows.length > 0
+                ? conflictRows[0]
+                : null
+
+            if (
+              conflictFindResponse.ok &&
+              conflictPayment?.id
+            ) {
+
+              const conflictMergeResponse =
+                await fetch(
+                  `${supabaseUrl}/rest/v1/payments` +
+                    `?id=eq.${conflictPayment.id}`,
+                  {
+                    method: 'PATCH',
+
+                    headers: {
+                      ...supabaseHeaders,
+                      Prefer: 'return=minimal'
+                    },
+
+                    body:
+                      JSON.stringify(
+                        paymentRow
+                      )
+                  }
+                )
+
+              if (conflictMergeResponse.ok) {
+
+                console.log(
+                  '코페이 중복 TID 충돌 병합 완료:',
+                  paymentKey
+                )
+
+                continue
+              }
+            }
+          }
+
           console.error(
             '코페이 분할결제 payments 저장 실패:',
             paymentSaveError
           )
-      
-      
+
           const rollbackErrors =
             await rollbackApprovedSplits()
-      
-      
+
           return res.status(500).json({
             success: false,
-      
+
             message:
               '코페이 결제는 승인됐지만 결제내역 저장에 실패했습니다.',
-      
+
             rollbackSuccess:
               rollbackErrors.length === 0,
-      
+
             rollbackErrors,
-      
+
             detail:
               paymentSaveError
           })

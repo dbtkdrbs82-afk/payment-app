@@ -536,8 +536,61 @@ const paymentData = {
         }
       )
     }
+    let savedData = await saveResponse.json()
 
-    const savedData = await saveResponse.json()
+    if (
+      !saveResponse.ok &&
+      saveResponse.status === 409 &&
+      tid
+    ) {
+      const conflictFindResponse = await fetch(
+        `${supabaseUrl}/rest/v1/payments` +
+          `?select=id` +
+          `&payment_key=eq.${encodeURIComponent(tid)}` +
+          `&limit=1`,
+        {
+          method: 'GET',
+          headers
+        }
+      )
+
+      const conflictRows =
+        await conflictFindResponse.json()
+
+      const conflictPayment =
+        Array.isArray(conflictRows) &&
+        conflictRows.length > 0
+          ? conflictRows[0]
+          : null
+
+      if (
+        conflictFindResponse.ok &&
+        conflictPayment?.id
+      ) {
+        saveResponse = await fetch(
+          `${supabaseUrl}/rest/v1/payments` +
+            `?id=eq.${conflictPayment.id}`,
+          {
+            method: 'PATCH',
+            headers: {
+              ...headers,
+              Prefer: 'return=representation'
+            },
+            body: JSON.stringify(paymentData)
+          }
+        )
+
+        savedData =
+          await saveResponse.json()
+
+        if (saveResponse.ok) {
+          console.log(
+            '코페이 Noti 중복 TID 병합 완료:',
+            tid
+          )
+        }
+      }
+    }
 
     if (!saveResponse.ok) {
       console.error('payments 저장 실패:', savedData)
@@ -548,8 +601,7 @@ const paymentData = {
         detail: savedData
       })
     }
-
-    const savedPayment =
+const savedPayment =
   Array.isArray(savedData) && savedData.length > 0
     ? savedData[0]
     : null
