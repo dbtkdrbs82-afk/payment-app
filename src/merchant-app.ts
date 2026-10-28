@@ -24968,7 +24968,7 @@ if (
 
           const merchantResponse =
           await fetch(
-            '/api/merchant-login',
+            ((window as any).Capacitor?.isNativePlatform?.() ? 'https://app.nxgsoft.co.kr/api/merchant-login' : '/api/merchant-login'),
             {
               method: 'POST',
 
@@ -25111,7 +25111,7 @@ if (
 
         const staffResponse =
           await fetch(
-            '/api/hotel-staff-login',
+            ((window as any).Capacitor?.isNativePlatform?.() ? 'https://app.nxgsoft.co.kr/api/hotel-staff-login' : '/api/hotel-staff-login'),
             {
               method: 'POST',
 

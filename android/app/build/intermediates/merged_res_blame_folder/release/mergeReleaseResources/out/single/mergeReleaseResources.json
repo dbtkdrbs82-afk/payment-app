@@ -8,6 +8,10 @@
         "source": "kr.co.nxgsoft.payment.app-main-29:/xml/file_paths.xml"
     },
     {
+        "merged": "C:\\Users\\user\\.gradle\\daemon\\8.14.3\\kr.co.nxgsoft.payment.app-release-28:\\xml_config.xml.flat",
+        "source": "C:\\Users\\user\\.gradle\\daemon\\8.14.3\\kr.co.nxgsoft.payment.app-main-29:\\xml\\config.xml"
+    },
+    {
         "merged": "kr.co.nxgsoft.payment.app-release-28:/drawable_splash.png.flat",
         "source": "kr.co.nxgsoft.payment.app-main-29:/drawable/splash.png"
     },
@@ -90,10 +94,6 @@
     {
         "merged": "kr.co.nxgsoft.payment.app-release-28:/drawable-port-xhdpi_splash.png.flat",
         "source": "kr.co.nxgsoft.payment.app-main-29:/drawable-port-xhdpi/splash.png"
-    },
-    {
-        "merged": "kr.co.nxgsoft.payment.app-release-28:/xml_config.xml.flat",
-        "source": "kr.co.nxgsoft.payment.app-main-29:/xml/config.xml"
     },
     {
         "merged": "kr.co.nxgsoft.payment.app-release-28:/mipmap-anydpi-v26_ic_launcher.xml.flat",

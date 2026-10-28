@@ -53,10 +53,10 @@
       proguardRules="proguard.txt"/>
   <library
       name=":@@:capacitor-android::release"
-      jars="C:\Users\user\.gradle\caches\8.14.3\transforms\5da8b1349572245e7f1d3da8cae82a36\transformed\out\jars\classes.jar;C:\Users\user\.gradle\caches\8.14.3\transforms\5da8b1349572245e7f1d3da8cae82a36\transformed\out\jars\libs\R.jar"
+      jars="C:\Users\user\.gradle\caches\8.14.3\transforms\b7a243d411233f79eafabe2625e232e8\transformed\out\jars\classes.jar;C:\Users\user\.gradle\caches\8.14.3\transforms\b7a243d411233f79eafabe2625e232e8\transformed\out\jars\libs\R.jar"
       resolved="android:capacitor-android:unspecified"
       partialResultsDir="C:\payment-app\node_modules\@capacitor\android\capacitor\build\intermediates\lint_vital_partial_results\release\lintVitalAnalyzeRelease\out"
-      folder="C:\Users\user\.gradle\caches\8.14.3\transforms\5da8b1349572245e7f1d3da8cae82a36\transformed\out"
+      folder="C:\Users\user\.gradle\caches\8.14.3\transforms\b7a243d411233f79eafabe2625e232e8\transformed\out"
       manifest="AndroidManifest.xml"
       resFolder="res"
       assetsFolder="assets"
