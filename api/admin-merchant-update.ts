@@ -436,6 +436,11 @@ import type {
   
         'resident_number',
         'business_number',
+        'corporate_number',
+        'tax_type',
+        'product_item',
+        'business_type',
+        'business_category',
         'email',
         'zipcode',
         'address',
