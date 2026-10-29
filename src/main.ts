@@ -11937,6 +11937,7 @@ if (page === 'payout') {
         if (tableTop) {
           tableTop.innerHTML =
             '<button id="payout-excel-download" type="button">엑셀 다운로드</button>' +
+            '<button id="payout-bank-download" type="button">우리은행 대량이체 파일</button>' +
         
             '<div class="payout-top-pagination">' +
               '<button id="payout-prev-top">이전</button>' +
@@ -15376,6 +15377,233 @@ document.querySelector('#payout-excel-download')
 
   })
 
+
+document.querySelector('#payout-bank-download')
+  ?.addEventListener('click', async () => {
+    if (currentPayoutView === 'manager') {
+      alert('가맹점 출금관리 화면에서 이용해주세요.')
+      return
+    }
+
+    const todayText = new Date().toLocaleDateString(
+      'en-CA',
+      { timeZone: 'Asia/Seoul' }
+    )
+
+    const selectedIds = new Set(
+      getFilteredPayoutRows().flatMap(
+        (row) => row.payment_ids.map(Number)
+      )
+    )
+
+    const duePayments = (payments || []).filter((p: any) => {
+      if (!selectedIds.has(Number(p.id))) return false
+      if (String(p.pg_company || '').trim() !== '코페이') return false
+      if (p.payout_status !== '출금대기') return false
+      if (p.payout_hold === true) return false
+
+      const cycle =
+        settlementCycleMap.get(Number(p.merchant_id)) || '1일'
+
+      return getPayoutDate(p.created_at, cycle) <= todayText
+    })
+
+    const unsafePayments = duePayments.filter((p: any) =>
+      p.status === 'partial_cancel' ||
+      Number(p.cancel_amount || 0) > 0 ||
+      cancelRequestMap.has(Number(p.id)) ||
+      (p.status !== 'paid' && p.status !== 'cancel') ||
+      p.settlement_status === '취소'
+    )
+
+    if (unsafePayments.length > 0) {
+      alert(
+        '취소 또는 결제상태 확인이 필요한 거래가 ' +
+        unsafePayments.length +
+        '건 있습니다.\n해당 거래 확인 후 다시 다운로드해주세요.'
+      )
+      return
+    }
+
+    const eligiblePayments = duePayments.filter(
+      (p: any) => p.status === 'paid'
+    )
+
+    if (eligiblePayments.length === 0) {
+      alert('우리은행 대량이체 대상 출금대기 건이 없습니다.')
+      return
+    }
+
+    const merchantIds = Array.from(
+      new Set(
+        eligiblePayments.map((p: any) => Number(p.merchant_id))
+      )
+    )
+
+    if (merchantIds.some((id) => !Number.isSafeInteger(id) || id <= 0)) {
+      alert('가맹점 ID가 올바르지 않은 거래가 있습니다.')
+      return
+    }
+
+    const merchantMap = new Map<number, any>()
+
+    for (let i = 0; i < merchantIds.length; i += 100) {
+      const ids = merchantIds.slice(i, i + 100)
+
+      const { data, error } = await supabase
+        .from('merchants')
+        .select('id,merchant_name,bank_name,account_number,account_holder')
+        .in('id', ids)
+
+      if (error) {
+        alert('정산계좌 조회 실패: ' + error.message)
+        return
+      }
+
+      ;(data || []).forEach((merchant: any) => {
+        merchantMap.set(Number(merchant.id), merchant)
+      })
+    }
+
+    const transferMap = new Map<number, {
+      bankName: string
+      accountNumber: string
+      accountHolder: string
+      amount: number
+    }>()
+
+    for (const p of eligiblePayments) {
+      const merchantId = Number(p.merchant_id)
+      const merchant = merchantMap.get(merchantId)
+
+      if (!merchant) {
+        alert('가맹점 정보가 없습니다: MER' + String(merchantId).padStart(4, '0'))
+        return
+      }
+
+      const bankName = String(merchant.bank_name || '').trim()
+      const accountNumber = String(merchant.account_number || '')
+        .replace(/\s/g, '')
+      const accountHolder = String(merchant.account_holder || '').trim()
+
+      if (
+        !bankName ||
+        !/^[0-9-]+$/.test(accountNumber) ||
+        !accountHolder
+      ) {
+        alert(
+          '정산계좌 정보 확인이 필요합니다: MER' +
+          String(merchantId).padStart(4, '0')
+        )
+        return
+      }
+
+      const amount = Number(
+        p.settlement_amount ??
+        (Number(p.amount || 0) - Number(p.fee_amount || 0))
+      )
+
+      if (!Number.isSafeInteger(amount) || amount <= 0) {
+        alert(
+          '출금액 확인이 필요합니다: 결제번호 ' +
+          String(p.id)
+        )
+        return
+      }
+
+      const existing = transferMap.get(merchantId)
+
+      if (existing) {
+        existing.amount += amount
+      } else {
+        transferMap.set(merchantId, {
+          bankName,
+          accountNumber,
+          accountHolder,
+          amount
+        })
+      }
+    }
+
+    const transferRows = Array.from(transferMap.entries())
+      .sort((a, b) => a[0] - b[0])
+
+    if (
+      transferRows.some(([, row]) =>
+        !Number.isSafeInteger(row.amount) || row.amount <= 0
+      )
+    ) {
+      alert('가맹점별 출금액 합계에 오류가 있습니다.')
+      return
+    }
+
+    const totalAmount = transferRows.reduce(
+      (sum, [, row]) => sum + row.amount,
+      0
+    )
+
+    const confirmed = confirm(
+      '우리은행 대량이체 파일 생성\n\n' +
+      '가맹점: ' + transferRows.length + '곳\n' +
+      '결제건수: ' + eligiblePayments.length + '건\n' +
+      '이체합계: ' + totalAmount.toLocaleString('ko-KR') + '원\n\n' +
+      '주의: 기존 자동정산과 중복 송금되지 않도록 확인하세요.\n' +
+      '파일을 생성하시겠습니까?'
+    )
+
+    if (!confirmed) return
+
+    const excelRows = transferRows.map(([merchantId, row]) => [
+      row.bankName,
+      row.accountNumber,
+      row.amount,
+      row.accountHolder,
+      '',
+      '',
+      'NXG정산',
+      'MER' + String(merchantId).padStart(4, '0')
+    ])
+
+    const worksheet = XLSX.utils.aoa_to_sheet(excelRows)
+
+    excelRows.forEach((row, index) => {
+      const address = XLSX.utils.encode_cell({
+        r: index,
+        c: 1
+      })
+
+      worksheet[address] = {
+        t: 's',
+        v: String(row[1]),
+        z: '@'
+      }
+    })
+
+    worksheet['!cols'] = [
+      { wch: 16 },
+      { wch: 25 },
+      { wch: 18 },
+      { wch: 20 },
+      { wch: 18 },
+      { wch: 14 },
+      { wch: 18 },
+      { wch: 18 }
+    ]
+
+    const workbook = XLSX.utils.book_new()
+
+    XLSX.utils.book_append_sheet(
+      workbook,
+      worksheet,
+      'Sheet1'
+    )
+
+    XLSX.writeFile(
+      workbook,
+      `우리은행_대량이체_${todayText}.xls`,
+      { bookType: 'biff8' }
+    )
+  })
 
 document.querySelector('#payout-search-btn')
   ?.addEventListener('click', () => {
