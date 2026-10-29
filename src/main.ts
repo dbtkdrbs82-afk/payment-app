@@ -11936,8 +11936,10 @@ if (page === 'payout') {
 
         if (tableTop) {
           tableTop.innerHTML =
+            '<div class="payout-download-group" style="display:flex;gap:8px;align-items:center">' +
             '<button id="payout-excel-download" type="button">엑셀 다운로드</button>' +
             '<button id="payout-bank-download" type="button">우리은행 대량이체 파일</button>' +
+            '</div>' +
         
             '<div class="payout-top-pagination">' +
               '<button id="payout-prev-top">이전</button>' +
@@ -15399,13 +15401,8 @@ document.querySelector('#payout-bank-download')
     const duePayments = (payments || []).filter((p: any) => {
       if (!selectedIds.has(Number(p.id))) return false
       if (String(p.pg_company || '').trim() !== '코페이') return false
-      if (p.payout_status !== '출금대기') return false
       if (p.payout_hold === true) return false
-
-      const cycle =
-        settlementCycleMap.get(Number(p.merchant_id)) || '1일'
-
-      return getPayoutDate(p.created_at, cycle) <= todayText
+      return true
     })
 
     const unsafePayments = duePayments.filter((p: any) =>
