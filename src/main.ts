@@ -17244,7 +17244,7 @@ const savedHeadOfficeKeyword =
           <div
             style="
               display:flex;
-              justify-content:space-between;
+              justify-content:flex-end;position:relative;
               align-items:center;
               width:100%;
               gap:12px;
@@ -17253,7 +17253,7 @@ const savedHeadOfficeKeyword =
       
             <div
               id="head-office-pagination"
-              class="merchant-pagination"
+              class="merchant-pagination" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;"
             ></div>
       
             <select
@@ -18505,77 +18505,90 @@ const headOfficePagination =
   )
 
 if (headOfficePagination) {
+  let activeHeadOfficePage = currentHeadOfficePage
+
   headOfficePagination.innerHTML = `
     <button id="head-office-page-first" type="button"
-      ${currentHeadOfficePage <= 1 ? 'disabled' : ''}>처음</button>
-
+      ${activeHeadOfficePage <= 1 ? 'disabled' : ''}>≪ 처음</button>
     <button id="head-office-page-prev" type="button"
-      ${currentHeadOfficePage <= 1 ? 'disabled' : ''}>이전</button>
-
-    <span style="
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      min-width:80px;
-      font-weight:700;
-    ">
-      ${currentHeadOfficePage} / ${totalHeadOfficePages}
+      ${activeHeadOfficePage <= 1 ? 'disabled' : ''}>이전</button>
+    <span style="display:inline-flex;align-items:center;justify-content:center;min-width:80px;font-weight:700;">
+      ${activeHeadOfficePage} / ${totalHeadOfficePages}
     </span>
-
     <button id="head-office-page-next" type="button"
-      ${currentHeadOfficePage >= totalHeadOfficePages ? 'disabled' : ''}>다음</button>
-
+      ${activeHeadOfficePage >= totalHeadOfficePages ? 'disabled' : ''}>다음</button>
     <button id="head-office-page-last" type="button"
-      ${currentHeadOfficePage >= totalHeadOfficePages ? 'disabled' : ''}>끝</button>
+      ${activeHeadOfficePage >= totalHeadOfficePages ? 'disabled' : ''}>마지막 ≫</button>
   `
 
   const goToHeadOfficePage = (newPage: number) => {
     if (
       newPage < 1 ||
       newPage > totalHeadOfficePages ||
-      newPage === currentHeadOfficePage
+      newPage === activeHeadOfficePage
     ) {
       return
     }
+
+    activeHeadOfficePage = newPage
 
     sessionStorage.setItem(
       'head_office_fee_page',
       String(newPage)
     )
 
-    document
-      .querySelector<HTMLElement>(
-        '.admin-tab[data-page="payment"]'
-      )
-      ?.click()
+    const pageStart = (newPage - 1) * headOfficePageSize
+
+    paymentTableBody.innerHTML = merchantSummaries
+      .slice(pageStart, pageStart + headOfficePageSize)
+      .map((row, index) => {
+        const merchantCode =
+          'MER' + String(row.merchantId).padStart(4, '0')
+
+        return `
+          <tr>
+            <td>${pageStart + index + 1}</td>
+            <td>${merchantCode}<br>${row.merchantName}</td>
+            <td>${row.paymentCount.toLocaleString()}건</td>
+            <td>${row.paymentAmount.toLocaleString()}원</td>
+            <td>${row.merchantFee.toLocaleString()}원</td>
+            <td>${row.pgCost.toLocaleString()}원</td>
+            <td>${row.organizationFee.toLocaleString()}원</td>
+            <td><strong>${row.headOfficeFee.toLocaleString()}원</strong></td>
+          </tr>
+        `
+      })
+      .join('')
+
+    const indicator = headOfficePagination.querySelector('span')
+    if (indicator) {
+      indicator.textContent = `${newPage} / ${totalHeadOfficePages}`
+    }
+
+    const first = headOfficePagination.querySelector<HTMLButtonElement>('#head-office-page-first')
+    const prev = headOfficePagination.querySelector<HTMLButtonElement>('#head-office-page-prev')
+    const next = headOfficePagination.querySelector<HTMLButtonElement>('#head-office-page-next')
+    const last = headOfficePagination.querySelector<HTMLButtonElement>('#head-office-page-last')
+
+    if (first) first.disabled = newPage <= 1
+    if (prev) prev.disabled = newPage <= 1
+    if (next) next.disabled = newPage >= totalHeadOfficePages
+    if (last) last.disabled = newPage >= totalHeadOfficePages
   }
 
-  headOfficePagination
-    .querySelector('#head-office-page-first')
-    ?.addEventListener('click', () =>
-      goToHeadOfficePage(1)
-    )
+  headOfficePagination.querySelector('#head-office-page-first')
+    ?.addEventListener('click', () => goToHeadOfficePage(1))
 
-  headOfficePagination
-    .querySelector('#head-office-page-prev')
-    ?.addEventListener('click', () =>
-      goToHeadOfficePage(currentHeadOfficePage - 1)
-    )
+  headOfficePagination.querySelector('#head-office-page-prev')
+    ?.addEventListener('click', () => goToHeadOfficePage(activeHeadOfficePage - 1))
 
-  headOfficePagination
-    .querySelector('#head-office-page-next')
-    ?.addEventListener('click', () =>
-      goToHeadOfficePage(currentHeadOfficePage + 1)
-    )
+  headOfficePagination.querySelector('#head-office-page-next')
+    ?.addEventListener('click', () => goToHeadOfficePage(activeHeadOfficePage + 1))
 
-  headOfficePagination
-    .querySelector('#head-office-page-last')
-    ?.addEventListener('click', () =>
-      goToHeadOfficePage(totalHeadOfficePages)
-    )
+  headOfficePagination.querySelector('#head-office-page-last')
+    ?.addEventListener('click', () => goToHeadOfficePage(totalHeadOfficePages))
 }
-  
-          document
+document
           .querySelector(
             '#head-office-fee-search'
           )
