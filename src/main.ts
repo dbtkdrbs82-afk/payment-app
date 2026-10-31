@@ -17314,6 +17314,7 @@ const savedHeadOfficeKeyword =
           fee_rate,
           fee_amount,
           pg_company,
+pg_mid,
 payment_method,
 branch_admin_id,
           branch_fee_rate,
@@ -17397,7 +17398,7 @@ const {
   await supabase
     .from('merchants')
     .select(
-      'id, settlement_cycle, branch_admin_id, agency_admin_id, manager_admin_id'
+      'id, settlement_cycle, korpay_manual_mid, branch_admin_id, agency_admin_id, manager_admin_id'
     )
     .in(
       'id',
@@ -17837,8 +17838,13 @@ try {
             ) {
             
               if (
-                paymentMethod.includes(
-                  '수기'
+                (
+                  paymentMethod.includes('수기') ||
+                  (
+                    String(payment.pg_mid || '').trim() !== '' &&
+                    String(payment.pg_mid || '').trim() ===
+                      String(merchantOrg?.korpay_manual_mid || '').trim()
+                  )
                 )
               ) {
             
