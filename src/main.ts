@@ -17295,9 +17295,14 @@ const savedHeadOfficeKeyword =
       ).toISOString()
   
   
-    const {
-      data: headOfficePayments,
-      error: headOfficePaymentError
+    const headOfficePayments: any[] = []
+    let headOfficePaymentError: any = null
+    let headOfficeOffset = 0
+
+    while (true) {
+      const {
+      data: headOfficeBatch,
+      error: headOfficeBatchError
     } =
       await supabase
         .from('payments')
@@ -17336,8 +17341,27 @@ branch_admin_id,
             ascending: false
           }
         )
-  
-  
+        .order('id', { ascending: false })
+        .range(headOfficeOffset, headOfficeOffset + 999)
+
+      if (headOfficeBatchError) {
+        headOfficePaymentError = headOfficeBatchError
+        break
+      }
+
+      if (!headOfficeBatch || headOfficeBatch.length === 0) {
+        break
+      }
+
+      headOfficePayments.push(...headOfficeBatch)
+
+      if (headOfficeBatch.length < 1000) {
+        break
+      }
+
+      headOfficeOffset += 1000
+    }
+
     if (headOfficePaymentError) {
   
       alert(
@@ -18030,7 +18054,56 @@ try {
       )
   
   
-      if (summaryBox) {
+          const headOfficeCycleCards = [
+      { label: '토스 1일', pg: '토스', cycle: '1일' },
+      { label: '토스 4일', pg: '토스', cycle: '4일' },
+      { label: '코페이 1일', pg: '코페이', cycle: '1일' },
+      { label: '코페이 3일', pg: '코페이', cycle: '3일' },
+      { label: '코페이 4일', pg: '코페이', cycle: '4일' },
+      { label: '코페이 7일', pg: '코페이', cycle: '7일' }
+    ].map((group) => {
+      const rows = headOfficeRows.filter((row: any) => {
+        const cycle = String(
+          headOfficeMerchantCycleMap.get(
+            Number(row.merchant_id || 0)
+          ) || '4일'
+        )
+
+        return (
+          String(row.pg_company || '').includes(group.pg) &&
+          cycle === group.cycle
+        )
+      })
+
+      return {
+        ...group,
+        count: rows.length,
+        amount: rows.reduce(
+          (sum: number, row: any) =>
+            sum + Number(row.amount || 0),
+          0
+        )
+      }
+    })
+
+    const headOfficeCycleCardsHtml = `
+      <div class="payment-mini-summary" style="
+        display:grid;
+        grid-template-columns:repeat(6,minmax(0,1fr));
+        gap:10px;
+        width:100%;
+        margin-top:10px;
+      ">
+        ${headOfficeCycleCards.map((group) => `
+          <div class="payment-mini-summary-card">
+            <strong>${group.label} (${group.count.toLocaleString()}건)</strong>
+            <span>${group.amount.toLocaleString()}원</span>
+          </div>
+        `).join('')}
+      </div>
+    `
+
+if (summaryBox) {
 
         summaryBox.innerHTML = `
           <div
@@ -18121,7 +18194,8 @@ try {
             </div>
       
           </div>
-        `
+        ${headOfficeCycleCardsHtml}
+`
       }
   
   
@@ -18430,72 +18504,75 @@ const headOfficePagination =
     '#head-office-pagination'
   )
 
-
 if (headOfficePagination) {
+  headOfficePagination.innerHTML = `
+    <button id="head-office-page-first" type="button"
+      ${currentHeadOfficePage <= 1 ? 'disabled' : ''}>처음</button>
 
-  headOfficePagination.innerHTML =
-    ''
+    <button id="head-office-page-prev" type="button"
+      ${currentHeadOfficePage <= 1 ? 'disabled' : ''}>이전</button>
 
+    <span style="
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-width:80px;
+      font-weight:700;
+    ">
+      ${currentHeadOfficePage} / ${totalHeadOfficePages}
+    </span>
 
-  for (
-    let pageNumber = 1;
-    pageNumber <= totalHeadOfficePages;
-    pageNumber += 1
-  ) {
+    <button id="head-office-page-next" type="button"
+      ${currentHeadOfficePage >= totalHeadOfficePages ? 'disabled' : ''}>다음</button>
 
-    const pageButton =
-      document.createElement(
-        'button'
-      )
+    <button id="head-office-page-last" type="button"
+      ${currentHeadOfficePage >= totalHeadOfficePages ? 'disabled' : ''}>끝</button>
+  `
 
-
-    pageButton.type =
-      'button'
-
-
-    pageButton.textContent =
-      String(
-        pageNumber
-      )
-
-
+  const goToHeadOfficePage = (newPage: number) => {
     if (
-      pageNumber ===
-      currentHeadOfficePage
+      newPage < 1 ||
+      newPage > totalHeadOfficePages ||
+      newPage === currentHeadOfficePage
     ) {
-
-      pageButton.classList.add(
-        'active'
-      )
+      return
     }
 
-
-    pageButton.addEventListener(
-      'click',
-      () => {
-
-        sessionStorage.setItem(
-          'head_office_fee_page',
-          String(
-            pageNumber
-          )
-        )
-
-
-        document
-          .querySelector<HTMLElement>(
-            '.admin-tab[data-page="payment"]'
-          )
-          ?.click()
-
-      }
+    sessionStorage.setItem(
+      'head_office_fee_page',
+      String(newPage)
     )
 
-
-    headOfficePagination.appendChild(
-      pageButton
-    )
+    document
+      .querySelector<HTMLElement>(
+        '.admin-tab[data-page="payment"]'
+      )
+      ?.click()
   }
+
+  headOfficePagination
+    .querySelector('#head-office-page-first')
+    ?.addEventListener('click', () =>
+      goToHeadOfficePage(1)
+    )
+
+  headOfficePagination
+    .querySelector('#head-office-page-prev')
+    ?.addEventListener('click', () =>
+      goToHeadOfficePage(currentHeadOfficePage - 1)
+    )
+
+  headOfficePagination
+    .querySelector('#head-office-page-next')
+    ?.addEventListener('click', () =>
+      goToHeadOfficePage(currentHeadOfficePage + 1)
+    )
+
+  headOfficePagination
+    .querySelector('#head-office-page-last')
+    ?.addEventListener('click', () =>
+      goToHeadOfficePage(totalHeadOfficePages)
+    )
 }
   
           document
