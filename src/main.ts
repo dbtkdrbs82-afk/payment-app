@@ -11935,13 +11935,14 @@ if (page === 'payout') {
         }
 
         if (tableTop) {
+          (tableTop as HTMLElement).style.position = 'relative'
           tableTop.innerHTML =
             '<div class="payout-download-group" style="display:flex;gap:8px;align-items:center">' +
             '<button id="payout-excel-download" type="button">엑셀 다운로드</button>' +
             '<button id="payout-bank-download" type="button">우리은행 대량이체 파일</button>' +
             '</div>' +
         
-            '<div class="payout-top-pagination">' +
+            '<div class="payout-top-pagination" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:12px;white-space:nowrap;">' +
               '<button id="payout-prev-top">이전</button>' +
               '<span id="payout-page-info-top">1 / 1</span>' +
               '<button id="payout-next-top">다음</button>' +
