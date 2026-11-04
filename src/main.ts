@@ -1106,7 +1106,7 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
 
               korpay.payment(
-                'https://staging-payments.korpay.com/v1',
+                'https://payments.korpay.com/v1',
                 paymentData,
                 {
 
@@ -4075,11 +4075,113 @@ const customerDisplayOrderNumber =
         )
       }
 
-const { data: existingPayment } = await supabase
-  .from('payments')
-  .select('id')
-  .eq('order_id', orderId)
-  .maybeSingle()
+/* NXG_KORPAY_VERIFIED_SUCCESS */
+let existingPayment: { id: number } | null = null
+
+if (params.get('pg') === '코페이') {
+  const query = new URLSearchParams({
+    orderId,
+    paymentKey,
+    merchantId: String(merchantId || '')
+  })
+
+  const statusResponse = await fetch(
+    '/api/korpay-payment-status?' + query.toString(),
+    { cache: 'no-store' }
+  )
+  const verified = await statusResponse.json().catch(() => null)
+
+  if (!statusResponse.ok || verified?.verified !== true ||
+      Number(verified.amount) !== paymentAmount ||
+      Number(verified.merchantId) !== Number(merchantId)) {
+    app.innerHTML = `
+      <div class="page"><div class="payment-card">
+        <h2>결제 상태 확인 필요</h2>
+        <p>승인된 거래인지 확인할 수 없습니다. 재결제하지 말고 관리자에게 문의해 주세요.</p>
+      </div></div>
+    `
+    throw new Error('코페이 결제 상태 검증 실패')
+  }
+
+  existingPayment = { id: Number(verified.id) }
+
+  if (source === 'kiosk') {
+    const kioskOrderNo = sessionStorage.getItem('kiosk_order_no')
+    const kioskMerchantId = sessionStorage.getItem('kiosk_merchant_id')
+    const kioskItemsText = sessionStorage.getItem('kiosk_items')
+    const kioskTotalAmount = Number(sessionStorage.getItem('kiosk_total_amount'))
+    const kioskCallNumber = sessionStorage.getItem('kiosk_call_number')
+
+    const { data: savedOrder, error: orderLookupError } = await supabase
+      .from('orders')
+      .select('id')
+      .eq('merchant_id', Number(merchantId))
+      .eq('pg_order_id', orderId)
+      .maybeSingle()
+
+    if (orderLookupError) {
+      throw new Error('코페이 승인 주문 조회 실패: ' + orderLookupError.message)
+    }
+
+    if (!savedOrder) {
+      if (!kioskOrderNo || !kioskMerchantId || !kioskItemsText ||
+          Number(kioskMerchantId) !== Number(merchantId) ||
+          kioskTotalAmount !== paymentAmount) {
+        app.innerHTML = `
+          <div class="page"><div class="payment-card">
+            <h2>결제 승인은 완료되었습니다</h2>
+            <p>주문정보 연동을 확인할 수 없습니다. 다시 결제하지 말고 매장에 문의해 주세요.</p>
+          </div></div>
+        `
+        throw new Error('코페이 승인 이후 주문정보 세션 누락')
+      }
+
+      const kioskItems = JSON.parse(kioskItemsText)
+      const { error: orderInsertError } = await supabase
+        .from('orders')
+        .insert({
+          merchant_id: Number(merchantId),
+          table_id: sessionStorage.getItem('kiosk_table_id')
+            ? Number(sessionStorage.getItem('kiosk_table_id')) : null,
+          table_number: sessionStorage.getItem('kiosk_table_number') || null,
+          table_token: sessionStorage.getItem('kiosk_table_token') || null,
+          order_no: kioskCallNumber || '-',
+          call_number: kioskCallNumber ? Number(kioskCallNumber) : null,
+          pg_order_id: orderId,
+          customer_name: sessionStorage.getItem('beauty_customer_name') || null,
+          customer_phone: sessionStorage.getItem('beauty_customer_phone') || null,
+          items: kioskItems,
+          total_amount: paymentAmount,
+          order_status: '접수',
+          payment_status: '결제완료'
+        })
+
+      if (orderInsertError) {
+        app.innerHTML = `
+          <div class="page"><div class="payment-card">
+            <h2>결제 승인은 완료되었습니다</h2>
+            <p>주문 저장 확인이 필요합니다. 다시 결제하지 말고 매장에 문의해 주세요.</p>
+          </div></div>
+        `
+        throw new Error('코페이 승인 주문 저장 실패: ' + orderInsertError.message)
+      }
+    }
+
+    sessionStorage.removeItem('kiosk_order_no')
+    sessionStorage.removeItem('kiosk_merchant_id')
+    sessionStorage.removeItem('kiosk_items')
+    sessionStorage.removeItem('kiosk_total_amount')
+  }
+} else {
+  const { data, error } = await supabase
+    .from('payments')
+    .select('id')
+    .eq('order_id', orderId)
+    .maybeSingle()
+
+  if (error) throw new Error('기존 결제 조회 실패')
+  existingPayment = data
+}
 
 if (existingPayment) {
   console.log('이미 저장된 주문입니다.')
@@ -43824,7 +43926,7 @@ sessionStorage.setItem(
     
     
       korpay.payment(
-        'https://staging-payments.korpay.com/v1',
+        'https://payments.korpay.com/v1',
         paymentData,
         {
     
