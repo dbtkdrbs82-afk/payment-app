@@ -1,0 +1,52 @@
+/* NXG PC 관리자 반응형 레이아웃 */
+/* 노트북 및 태블릿 전용 */
+
+@media (min-width: 769px) and (max-width: 1500px) {
+
+  .admin-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-wrap .admin-menu {
+    height: auto !important;
+    min-height: 40px;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    padding: 8px 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-wrap .admin-search-box,
+  .admin-wrap .admin-summary,
+  .admin-wrap .admin-table-top {
+    width: calc(100% - 40px) !important;
+    max-width: calc(100% - 40px) !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-wrap .admin-search-box {
+    overflow-x: auto !important;
+  }
+
+  .admin-wrap .admin-table-top {
+    flex-wrap: wrap !important;
+  }
+
+  .admin-wrap .admin-table-scroll {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-wrap .admin-table-scroll .admin-table {
+    width: max-content !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    table-layout: auto !important;
+  }
+}

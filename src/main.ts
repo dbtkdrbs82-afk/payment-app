@@ -1,4 +1,6 @@
 import './style.css'
+import './pg-admin-fold.css'
+import './pg-admin-responsive.css'
 import { loadTossPayments } from '@tosspayments/payment-sdk'
 import { createClient } from '@supabase/supabase-js'
 import Tesseract from 'tesseract.js'
