@@ -1,18 +1,19 @@
-/* NXG PC 관리자 반응형 레이아웃 */
-/* 노트북 및 태블릿 전용 */
+﻿/* NXG PC 관리자 반응형 레이아웃 */
+/* 큰 PC 모니터는 기존 디자인 유지 */
 
 @media (min-width: 769px) and (max-width: 1500px) {
 
   .admin-wrap {
     width: 100% !important;
-    max-width: 100% !important;
     min-width: 0 !important;
+    max-width: 100% !important;
     box-sizing: border-box !important;
   }
 
   .admin-wrap .admin-menu {
     height: auto !important;
     min-height: 40px;
+    display: flex !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
     padding: 8px 12px !important;
@@ -24,29 +25,79 @@
   .admin-wrap .admin-table-top {
     width: calc(100% - 40px) !important;
     max-width: calc(100% - 40px) !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
   }
 
+  /* 검색창 및 필터 자동 줄바꿈 */
+  .admin-wrap .admin-search-box,
+  .admin-wrap .filter-row,
+  .admin-wrap .merchant-filter-line,
+  .admin-wrap .payment-search-line,
+  .admin-wrap .admin-search-box > div:last-child {
+    flex-wrap: wrap !important;
+    max-width: 100% !important;
+  }
+
   .admin-wrap .admin-search-box {
-    overflow-x: auto !important;
+    overflow-x: visible !important;
   }
 
   .admin-wrap .admin-table-top {
+    display: flex !important;
     flex-wrap: wrap !important;
+    gap: 10px !important;
   }
 
+  /* 테이블 전체를 화면 안에 배치 */
   .admin-wrap .admin-table-scroll {
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: auto !important;
+    min-width: 0 !important;
+    overflow-x: visible !important;
     box-sizing: border-box !important;
   }
 
   .admin-wrap .admin-table-scroll .admin-table {
-    width: max-content !important;
-    min-width: 100% !important;
-    max-width: none !important;
+    display: table !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     margin: 0 !important;
-    table-layout: auto !important;
+    table-layout: fixed !important;
+  }
+
+  /* 열 너비 강제 지정 해제 */
+  .admin-wrap .admin-table-scroll .admin-table th,
+  .admin-wrap .admin-table-scroll .admin-table td {
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    height: auto !important;
+    padding: 7px 3px !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    text-overflow: clip !important;
+    box-sizing: border-box !important;
+  }
+
+  .admin-wrap .admin-table-scroll button {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    padding: 6px 3px !important;
+    font-size: 11px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .admin-wrap .admin-table-scroll input,
+  .admin-wrap .admin-table-scroll select {
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
 }
