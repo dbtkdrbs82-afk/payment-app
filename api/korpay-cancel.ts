@@ -207,6 +207,30 @@ export default async function handler(
     'no-store'
   )
 
+  const origin = String(req.headers.origin || '')
+  const allowedOrigins = [
+    'https://localhost',
+    'http://localhost',
+    'capacitor://localhost'
+  ]
+
+  res.setHeader('Vary', 'Origin')
+  res.setHeader('Content-Type', 'application/json; charset=utf-8')
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin)
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+    res.setHeader('Access-Control-Max-Age', '600')
+  }
+
+  if (req.method === 'OPTIONS') {
+    return res.status(
+      allowedOrigins.includes(origin) ? 204 : 403
+    ).end()
+  }
+
+
 
   if (
     req.method !== 'POST'

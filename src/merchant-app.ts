@@ -4463,38 +4463,8 @@ cancelOpenButton
               )
               return
             }
-      
-      
-            const paymentDateSource =
-              paymentForOrder?.approved_at ||
-              paymentForOrder?.created_at ||
-              order.created_at
-      
-      
-            const paymentDate =
-              getKoreaDate(
-                new Date(
-                  paymentDateSource
-                )
-              )
-      
-            const today =
-              getKoreaDate(
-                new Date()
-              )
-      
-      
-            if (
-              paymentDate !== today
-            ) {
-      
-              alert(
-                '당일 결제건만 직접 취소할 수 있습니다.\n' +
-                '본사 승인요청을 이용해주세요.'
-              )
-      
-              return
-            }
+
+
       
       
             const {
