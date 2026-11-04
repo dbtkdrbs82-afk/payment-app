@@ -670,9 +670,7 @@ export default async function handler(
       !adminAllowed
     ) {
 
-      const paymentDateSource =
-        payment.approved_at ||
-        payment.created_at
+      const paymentDateSource = payment.created_at || payment.approved_at
 
 
       if (!paymentDateSource) {
