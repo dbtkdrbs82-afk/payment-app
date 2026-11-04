@@ -101,3 +101,64 @@
     box-sizing: border-box !important;
   }
 }
+
+/* NXG PAYOUT PAGINATION FIX */
+/* 출금관리 페이지 이동 버튼 겹침 해결 */
+
+@media (max-width: 1500px) {
+
+  .admin-wrap .admin-table-top:has(> .payout-top-pagination) {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 10px !important;
+    overflow: visible !important;
+  }
+
+  .admin-wrap .admin-table-top .payout-download-group {
+    order: 1;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+
+  .admin-wrap .admin-table-top #withdraw-page-size {
+    order: 2;
+    margin-left: auto !important;
+  }
+
+  .admin-wrap .admin-table-top .payout-top-pagination {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+
+    order: 3;
+    flex: 0 0 100% !important;
+
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 12px !important;
+
+    margin: 8px 0 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .admin-wrap .admin-table-top #payout-prev-top,
+  .admin-wrap .admin-table-top #payout-next-top {
+    width: 100px !important;
+    min-width: 0 !important;
+    max-width: 100px !important;
+    height: 38px !important;
+    padding: 0 10px !important;
+    font-size: 14px !important;
+    margin: 0 !important;
+  }
+
+  .admin-wrap .admin-table-top #payout-page-info-top {
+    min-width: 55px !important;
+    font-size: 14px !important;
+    text-align: center !important;
+  }
+}
