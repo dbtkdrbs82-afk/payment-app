@@ -313,7 +313,10 @@ export default async function handler(
           '일반매장',
       },
 
-      passwordResetRequired:
-        false,
+      passwordResetRequired: false,
+      nativeSessionToken:
+        req.headers['x-nxg-native-app'] === '1'
+          ? merchantSession
+          : undefined,
     })
 }

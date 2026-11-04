@@ -1,5 +1,64 @@
 import './merchant-app.css'
 
+function nxgCancelUrl(url: string): string {
+  return (window as any).Capacitor?.isNativePlatform?.()
+    ? 'https://app.nxgsoft.co.kr' + url
+    : url
+}
+
+function nxgCancelHeaders(): Record<string, string> {
+  if (!(window as any).Capacitor?.isNativePlatform?.()) {
+    return {}
+  }
+
+  const token = sessionStorage.getItem('nxg_native_merchant_session')
+
+  if (!token) {
+    throw new Error('Please log out and log in again')
+  }
+
+  return { Authorization: 'Bearer ' + token }
+}
+
+
+type NxgTtsBridge = {
+  getPlatform?: () => string
+  nativePromise?: (
+    plugin: string,
+    method: string,
+    data: { text: string }
+  ) => Promise<unknown>
+}
+
+async function nxgSpeak(text: string): Promise<void> {
+  const bridge = (window as Window & {
+    Capacitor?: NxgTtsBridge
+  }).Capacitor
+
+  if (bridge?.getPlatform?.() === 'android') {
+    if (typeof bridge.nativePromise !== 'function') {
+      throw new Error('Android TTS bridge unavailable')
+    }
+
+    await bridge.nativePromise('NxgTts', 'speak', { text })
+    return
+  }
+
+  if (!('speechSynthesis' in window)) {
+    throw new Error('Speech synthesis unavailable')
+  }
+
+  window.speechSynthesis.cancel()
+
+  const speech = new SpeechSynthesisUtterance(text)
+  speech.lang = 'ko-KR'
+  speech.rate = 0.95
+  speech.volume = 1
+  window.speechSynthesis.speak(speech)
+}
+
+
+
 import {
     createClient
   } from '@supabase/supabase-js'
@@ -3001,36 +3060,21 @@ const updateVoiceButton = () => {
 
 updateVoiceButton()
 
-voiceButton.addEventListener('click', () => {
-
-  if (!('speechSynthesis' in window)) {
-    alert('이 브라우저는 음성 안내를 지원하지 않습니다.')
-    return
-  }
-
-  const enabled =
-    localStorage.getItem(tableVoiceKey) !== '1'
-
-  localStorage.setItem(
-    tableVoiceKey,
-    enabled ? '1' : '0'
-  )
-
+voiceButton.addEventListener('click', async () => {
+  const enabled = localStorage.getItem(tableVoiceKey) !== '1'
+  localStorage.setItem(tableVoiceKey, enabled ? '1' : '0')
   updateVoiceButton()
 
-  window.speechSynthesis.cancel()
-
   if (enabled) {
-    const speech = new SpeechSynthesisUtterance(
-      '주문 음성 알림이 켜졌습니다.'
-    )
-
-    speech.lang = 'ko-KR'
-    speech.rate = 0.95
-
-    window.speechSynthesis.speak(speech)
+    try {
+      await nxgSpeak('주문 음성 알림이 켜졌습니다.')
+    } catch (speechError) {
+      console.error('Voice toggle TTS failed:', speechError)
+      alert('음성 안내를 재생할 수 없습니다.')
+    }
+  } else if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel()
   }
-
 })
 
 titleBox?.insertAdjacentElement(
@@ -4522,13 +4566,13 @@ cancelOpenButton
       
                 const response =
                 await fetch(
-                  '/api/korpay-cancel',
+                  nxgCancelUrl('/api/korpay-cancel'),
                   {
                     method: 'POST',
                 
                     credentials: 'include',
                 
-                    headers: {
+                    headers: { ...nxgCancelHeaders(),
                       'Content-Type':
                         'application/json'
                     },
@@ -4587,13 +4631,13 @@ cancelOpenButton
       
                 const response =
                 await fetch(
-                  '/api/toss-cancel',
+                  nxgCancelUrl('/api/toss-cancel'),
                   {
                     method: 'POST',
                 
                     credentials: 'include',
                 
-                    headers: {
+                    headers: { ...nxgCancelHeaders(),
                       'Content-Type':
                         'application/json'
                     },
@@ -5807,26 +5851,13 @@ receiptButton?.addEventListener(
                   )
   
   
-              window
-                .speechSynthesis
-                .cancel()
-  
-  
-              const speech =
-                new SpeechSynthesisUtterance(
-                  callMessage
-                )
-  
-              speech.lang =
-                'ko-KR'
-  
-              speech.rate =
-                0.95
-  
-  
-              window
-                .speechSynthesis
-                .speak(speech)
+              try {
+  await nxgSpeak(callMessage)
+} catch (speechError) {
+  console.error('Customer TTS failed:', speechError)
+  alert('고객호출 음성 출력에 실패했습니다.')
+  return
+}
   
   
               const {
@@ -5957,23 +5988,13 @@ receiptButton?.addEventListener(
                 ? localStorage.getItem(tableVoiceKey) === '1'
                 : merchantSetting?.voice_enabled === true
 
-              if (
-                newOrderArrived &&
-                voiceEnabled &&
-                'speechSynthesis' in window
-              ) {
-                window.speechSynthesis.cancel()
-
-                const speech = new SpeechSynthesisUtterance(
-                  '새 주문이 접수되었습니다.'
-                )
-
-                speech.lang = 'ko-KR'
-                speech.rate = 0.95
-                speech.volume = 1
-
-                window.speechSynthesis.speak(speech)
-              }
+              if (newOrderArrived && voiceEnabled) {
+  try {
+    await nxgSpeak('새 주문이 접수되었습니다.')
+  } catch (speechError) {
+    console.error('New order TTS failed:', speechError)
+  }
+}
             
             }
 
@@ -24966,7 +24987,8 @@ if (
 
         try {
 
-          const merchantResponse =
+          sessionStorage.removeItem('nxg_native_merchant_session');
+const merchantResponse =
           await fetch(
             ((window as any).Capacitor?.isNativePlatform?.() ? 'https://app.nxgsoft.co.kr/api/merchant-login' : '/api/merchant-login'),
             {
@@ -24974,7 +24996,7 @@ if (
 
               headers: {
                 'Content-Type':
-                  'application/json'
+                  'application/json', ...((window as any).Capacitor?.isNativePlatform?.() ? {'X-NXG-NATIVE-APP':'1'} : {})
               },
 
               body:
@@ -25004,6 +25026,16 @@ if (
 
           const merchant =
             merchantResult.merchant
+if ((window as any).Capacitor?.isNativePlatform?.()) {
+  if (!merchantResult.nativeSessionToken) {
+    throw new Error('Native session unavailable')
+  }
+  sessionStorage.setItem(
+    'nxg_native_merchant_session',
+    String(merchantResult.nativeSessionToken)
+  )
+}
+
 
 
           const merchantLoginData:

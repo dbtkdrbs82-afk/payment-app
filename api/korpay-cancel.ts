@@ -356,11 +356,14 @@ export default async function handler(
       )
 
 
+    const bearerHeader = String(req.headers.authorization || '')
+    const bearerToken = /^Bearer\s+/i.test(bearerHeader)
+      ? bearerHeader.replace(/^Bearer\s+/i, '')
+      : ''
+
     const merchantSession =
-      verifySignedSession(
-        merchantToken,
-        MERCHANT_SESSION_SECRET
-      )
+      verifySignedSession(merchantToken, MERCHANT_SESSION_SECRET) ||
+      verifySignedSession(bearerToken, MERCHANT_SESSION_SECRET)
 
 
     let merchantActor: any =
