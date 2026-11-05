@@ -20465,7 +20465,7 @@ function renderMerchantManualCard() {
   
             const response =
               await fetch(
-                '/api/korpay-manual-pay',
+                nxgCancelUrl('/api/korpay-manual-pay'),
                 {
                   method:
                     'POST',
