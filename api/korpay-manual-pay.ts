@@ -531,7 +531,7 @@ const ordHp = onlyDigits(customerPhone)
     const korpayUrl =
       process.env
         .KORPAY_MANUAL_PAY_URL ||
-      'https://staging-pgapi.korpay.com/api/manualpay'
+      'https://pgapi.korpay.com/api/manualpay'
 
 
     const korpayCancelUrl =
