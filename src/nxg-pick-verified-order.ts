@@ -129,14 +129,19 @@ export async function updateNxgPickOtherOrderStatuses(): Promise<void> {
 
       const rows = Array.from(list.children)
 
-      orders.forEach((order, index) => {
+      orders.forEach((order) => {
         const found = (data || []).find(
           (item) =>
             String(item.merchant_id) === order.merchantId &&
             String(item.pg_order_id) === order.pgOrderId
         )
 
-        const number = rows[index]?.querySelector('strong')
+        const row = rows.find((candidate) => {
+          const element = candidate as HTMLElement
+          return element.dataset.nxgOrderId === order.pgOrderId &&
+            element.dataset.nxgMerchantId === order.merchantId
+        })
+        const number = row?.querySelector('strong')
         if (!number) return
 
         const status = !found
@@ -150,7 +155,7 @@ export async function updateNxgPickOtherOrderStatuses(): Promise<void> {
 
 number.textContent = '주문번호 ' + order.orderNumber + '번'
 
-const statusText = rows[index]?.querySelector<HTMLElement>(
+const statusText = row?.querySelector<HTMLElement>(
   '.nxg-pick-other-status'
 )
 
@@ -159,10 +164,10 @@ if (statusText) {
     status === '준비완료'
       ? '상품이 준비되었습니다. 픽업해주세요.'
       : status === '접수'
-        ? '잠시만 기다려주세요.'
+        ? '상품을 준비하고 있습니다. 잠시만 기다려주세요.'
         : status === '확인중'
           ? '주문 상태 확인 중'
-          : '상품을 준비하고 있습니다.'
+          : '상품을 준비하고 있습니다. 잠시만 기다려주세요.'
 
   statusText.style.color =
     status === '준비완료' ? '#16a34a' : '#6b7280'

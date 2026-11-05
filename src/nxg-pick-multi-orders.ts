@@ -10,7 +10,7 @@ export type NxgPickTrackedOrder = {
   }
 
   const STORAGE_KEY = 'nxg_pick_multi_orders_v1'
-  const MAX_AGE = 24 * 60 * 60 * 1000
+  const MAX_AGE = 3 * 60 * 60 * 1000
   const MAX_ORDERS = 30
 
   // 저장된 주문 목록 가져오기
@@ -187,6 +187,8 @@ export function createNxgPickOtherOrdersPanel(
   orders.forEach((order) => {
     const row = document.createElement('div')
     row.className = 'nxg-pick-other-row'
+    row.dataset.nxgOrderId = order.pgOrderId
+    row.dataset.nxgMerchantId = order.merchantId
 
     row.style.cssText = `
       display:grid;
@@ -232,7 +234,7 @@ export function createNxgPickOtherOrdersPanel(
     // 주문 상태는 매장명 아래
     const statusText = document.createElement('span')
     statusText.className = 'nxg-pick-other-status'
-    statusText.textContent = '잠시만 기다려주세요.'
+    statusText.textContent = '상품을 준비하고 있습니다. 잠시만 기다려주세요.'
 
     statusText.style.cssText = `
       grid-column:1;
@@ -246,6 +248,29 @@ export function createNxgPickOtherOrdersPanel(
     row.appendChild(statusText)
     row.appendChild(number)
     list.appendChild(row)
+
+    // 3시간 경과 주문은 화면에서만 숨김
+    const expireAt = order.savedAt + MAX_AGE
+
+    const hideExpiredRow = () => {
+      if (Date.now() < expireAt) return
+
+      row.remove()
+      document.removeEventListener(
+        'visibilitychange',
+        hideExpiredRow
+      )
+    }
+
+    window.setTimeout(
+      hideExpiredRow,
+      Math.max(0, expireAt - Date.now())
+    )
+
+    document.addEventListener(
+      'visibilitychange',
+      hideExpiredRow
+    )
 
   })
 
