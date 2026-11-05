@@ -41926,7 +41926,7 @@ top:-9px;
             data-product-id="${product.id}"
             style="${
               isNormalStoreKiosk
-  ? 'width:100%;min-width:0;max-width:240px;margin:0 auto;justify-self:center;height:275px;min-height:275px;max-height:275px;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;'
+  ? 'width:100%;min-width:0;max-width:240px;margin:0 auto;justify-self:center;height:335px;min-height:335px;max-height:335px;overflow:hidden;display:flex;flex-direction:column;box-sizing:border-box;'
                 : (
                     isBeautyKiosk
                       ? 'min-height:0;height:auto;overflow:hidden;'
@@ -41942,7 +41942,7 @@ top:-9px;
                     alt="${product.product_name}"
                     style="${
                       useCompactProductCard
-                        ? 'width:100%;height:175px;min-height:175px;max-height:175px;object-fit:cover;display:block;'
+                        ? 'width:100%;height:235px;min-height:235px;max-height:235px;object-fit:cover;display:block;'
                         : ''
                     }"
                   >
@@ -41955,7 +41955,7 @@ top:-9px;
                           class="no-image"
                           style="${
                             isNormalStoreKiosk
-                              ? 'width:100%;height:175px;min-height:175px;max-height:175px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;'
+                              ? 'width:100%;height:235px;min-height:235px;max-height:235px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;'
                               : ''
                           }"
                         >
