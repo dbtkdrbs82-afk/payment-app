@@ -41861,8 +41861,31 @@ top:-9px;
                 : ''
             }
 
-             <div
-  class="kiosk-category-list"
+<style>
+.kiosk-category-list[data-normal-kiosk="true"] {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+  align-items: start;
+}
+
+.kiosk-category-list[data-normal-kiosk="true"] > .kiosk-category-section:not(.hidden-category),
+.kiosk-category-list[data-normal-kiosk="true"] > .kiosk-category-section:not(.hidden-category) > .kiosk-products {
+  display: contents !important;
+}
+
+.kiosk-category-list[data-normal-kiosk="true"] > .kiosk-category-section.hidden-category {
+  display: none !important;
+}
+
+.kiosk-category-list[data-normal-kiosk="true"] .kiosk-product-card {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+}
+</style>
+<div
+  class="kiosk-category-list" data-normal-kiosk="${isNormalStoreKiosk}"
   style="${
     isBeautyKiosk
       ? 'display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,240px));gap:14px;justify-content:center;'
