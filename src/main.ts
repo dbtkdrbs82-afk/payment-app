@@ -41883,6 +41883,19 @@ top:-9px;
   max-width: none !important;
   margin: 0 !important;
 }
+
+.kiosk-category-list[data-normal-kiosk="true"] .kiosk-product-card {
+  height: 400px !important;
+  min-height: 400px !important;
+  max-height: 400px !important;
+}
+
+.kiosk-category-list[data-normal-kiosk="true"] .kiosk-product-card > img,
+.kiosk-category-list[data-normal-kiosk="true"] .kiosk-product-card > .no-image {
+  height: 300px !important;
+  min-height: 300px !important;
+  max-height: 300px !important;
+}
 </style>
 <div
   class="kiosk-category-list" data-normal-kiosk="${isNormalStoreKiosk}"
