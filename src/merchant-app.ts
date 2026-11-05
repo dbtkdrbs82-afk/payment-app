@@ -4706,7 +4706,7 @@ cancelOpenButton
               console.error(error)
       
               alert(
-                '취소 처리 중 오류가 발생했습니다.'
+                (error instanceof Error ? '앱 취소 오류: ' + error.message : '앱 취소 오류: ' + String(error))
               )
       
             } finally {
