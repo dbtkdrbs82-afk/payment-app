@@ -1,3 +1,4 @@
+import { App as CapacitorApp } from '@capacitor/app';
 import './merchant-app.css'
 
 function nxgCancelUrl(url: string): string {
@@ -6,20 +7,101 @@ function nxgCancelUrl(url: string): string {
     : url
 }
 
-function nxgCancelHeaders(): Record<string, string> {
+type NxgSecureBridge = {
+  nativePromise?: (
+    plugin: string,
+    method: string,
+    data: Record<string, string>
+  ) => Promise<any>
+}
+
+async function nxgClearNativeSession(): Promise<void> {
+  if ((window as any).Capacitor?.isNativePlatform?.()) {
+    await nxgSecureSession('clear')
+  }
+
+  sessionStorage.removeItem('nxg_native_merchant_session')
+}
+async function nxgSecureSession(
+  method: 'save' | 'load' | 'clear',
+  token = ''
+): Promise<any> {
+  const capacitor = (window as any).Capacitor as NxgSecureBridge
+
+  if (typeof capacitor?.nativePromise !== 'function') {
+    throw new Error('Android secure session unavailable')
+  }
+
+  return capacitor.nativePromise(
+    'NxgSecureSession',
+    method,
+    method === 'save' ? { token } : {}
+  )
+}
+function nxgIsSessionExpired(token: string): boolean {
+  try {
+    const payloadPart = token.split('.')[0]
+    const base64 = payloadPart
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+
+    const payload = JSON.parse(atob(base64))
+    const expiresAt = Number(payload.exp)
+
+    return !Number.isFinite(expiresAt) ||
+      Date.now() >= expiresAt
+  } catch {
+    return true
+  }
+}
+
+async function nxgCancelHeaders(): Promise<Record<string, string>> {
   if (!(window as any).Capacitor?.isNativePlatform?.()) {
     return {}
   }
 
-  const token = sessionStorage.getItem('nxg_native_merchant_session')
+  let token = sessionStorage.getItem(
+    'nxg_native_merchant_session'
+  ) || ''
 
   if (!token) {
-    throw new Error('Please log out and log in again')
+    try {
+      const saved = await nxgSecureSession('load')
+      token = String(saved?.token || '')
+
+      if (token) {
+        sessionStorage.setItem(
+          'nxg_native_merchant_session',
+          token
+        )
+      }
+    } catch (error) {
+      console.error('취소 인증 복구 실패:', error)
+    }
+  }
+
+  if (!token) {
+    throw new Error(
+      '취소 인증정보가 없습니다. 로그아웃 후 다시 로그인해 주세요.'
+    )
+  }
+
+  if (nxgIsSessionExpired(token)) {
+    sessionStorage.removeItem('nxg_native_merchant_session')
+
+    try {
+      await nxgSecureSession('clear')
+    } catch (error) {
+      console.error('만료 인증정보 삭제 실패:', error)
+    }
+
+    throw new Error(
+      '취소 인증이 만료되었습니다. 로그아웃 후 다시 로그인해 주세요.'
+    )
   }
 
   return { Authorization: 'Bearer ' + token }
 }
-
 
 type NxgTtsBridge = {
   getPlatform?: () => string
@@ -191,6 +273,28 @@ const app =
 
 const path =
   window.location.pathname
+
+/* NXG_ANDROID_BACK_HANDLER */
+if ((window as any).Capacitor?.isNativePlatform?.()) {
+  void CapacitorApp.addListener('backButton', () => {
+    const currentPath = window.location.pathname
+
+    if (
+      currentPath === '/merchant-app' ||
+      currentPath === '/merchant-app/home'
+    ) {
+      return
+    }
+
+    if (currentPath.startsWith('/merchant-app/card/')) {
+      window.location.replace('/merchant-app/card')
+      return
+    }
+
+    window.location.replace('/merchant-app/home')
+  })
+}
+
 
   type NxgBeforeInstallPromptEvent =
   Event & {
@@ -1573,8 +1677,15 @@ async function renderMerchantWirelessTerminal() {
     )
     ?.addEventListener(
       'click',
-      () => {
+      async () => {
     
+        try {
+          await nxgClearNativeSession()
+        } catch (error) {
+          console.error('로그아웃 인증정보 삭제 실패:', error)
+          alert('인증정보 삭제에 실패했습니다. 다시 시도해 주세요.')
+          return
+        }
         clearMerchantServerSession()
     
         merchantLoginKeys.forEach(
@@ -2087,9 +2198,16 @@ if (isManualPayment) {
       )
 
 
-    const hotelAdminLogout = () => {
+    const hotelAdminLogout = async () => {
 
-      clearMerchantServerSession()
+      try {
+          await nxgClearNativeSession()
+        } catch (error) {
+          console.error('로그아웃 인증정보 삭제 실패:', error)
+          alert('인증정보 삭제에 실패했습니다. 다시 시도해 주세요.')
+          return
+        }
+        clearMerchantServerSession()
 
       merchantLoginKeys.forEach(
         (key) => {
@@ -2295,8 +2413,15 @@ if (isManualPayment) {
     )
     ?.addEventListener(
       'click',
-      () => {
+      async () => {
     
+        try {
+          await nxgClearNativeSession()
+        } catch (error) {
+          console.error('로그아웃 인증정보 삭제 실패:', error)
+          alert('인증정보 삭제에 실패했습니다. 다시 시도해 주세요.')
+          return
+        }
         clearMerchantServerSession()
     
         merchantLoginKeys.forEach(
@@ -4519,7 +4644,7 @@ cancelOpenButton
                 
                     credentials: 'include',
                 
-                    headers: { ...nxgCancelHeaders(),
+                    headers: { ...(await nxgCancelHeaders()),
                       'Content-Type':
                         'application/json'
                     },
@@ -4584,7 +4709,7 @@ cancelOpenButton
                 
                     credentials: 'include',
                 
-                    headers: { ...nxgCancelHeaders(),
+                    headers: { ...(await nxgCancelHeaders()),
                       'Content-Type':
                         'application/json'
                     },
@@ -24977,9 +25102,13 @@ if ((window as any).Capacitor?.isNativePlatform?.()) {
   if (!merchantResult.nativeSessionToken) {
     throw new Error('Native session unavailable')
   }
+  const nativeToken = String(merchantResult.nativeSessionToken)
+
+  await nxgSecureSession('save', nativeToken)
+
   sessionStorage.setItem(
     'nxg_native_merchant_session',
-    String(merchantResult.nativeSessionToken)
+    nativeToken
   )
 }
 
