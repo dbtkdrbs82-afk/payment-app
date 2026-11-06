@@ -4043,32 +4043,9 @@ if (filteredOrders.length === 0) {
                     payment.payment_key
                   )
           
-                const sameAmount =
-                  Number(
-                    payment.amount || 0
-                  ) ===
-                  Number(
-                    order.total_amount || 0
-                  )
-          
-                const timeGap =
-                  Math.abs(
-                    new Date(
-                      payment.created_at
-                    ).getTime() -
-                    new Date(
-                      order.created_at
-                    ).getTime()
-                  )
-          
-                return (
+                return Boolean(
                   sameOrderId ||
-                  samePaymentKey ||
-                  (
-                    sameAmount &&
-                    timeGap <
-                      1000 * 60 * 5
-                  )
+                  samePaymentKey
                 )
               }
             ) 
