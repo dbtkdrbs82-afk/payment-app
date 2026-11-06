@@ -1,4 +1,5 @@
 import { App as CapacitorApp } from '@capacitor/app';
+import { nxgCheckForAppUpdate } from './nxg-app-update'
 import './merchant-app.css'
 
 function nxgCancelUrl(url: string): string {
@@ -20995,67 +20996,77 @@ function renderMerchantSmsCard() {
     }
   )
 
-      const createSmsPaymentLink = () => {
+      const createSmsPaymentLink = async (): Promise<string> => {
 
-        const productName =
-          (
-            document.querySelector<HTMLInputElement>(
-              '#mobile-sms-product-name'
-            )?.value || ''
-          ).trim()
-      
-      
-        const amount =
-          Number(
-            document.querySelector<HTMLInputElement>(
-              '#mobile-sms-amount'
-            )?.value || 0
-          )
-      
-      
-        if (!productName) {
-      
-          alert(
-            '상품명을 입력해주세요.'
-          )
-      
-          return ''
-        }
-      
-      
-        if (
-          !amount ||
-          amount < 100
-        ) {
-      
-          alert(
-            '결제금액을 확인해주세요.'
-          )
-      
-          return ''
-        }
-      
-      
-        return (
-          apiBaseUrl +
-          '/pay' +
-          '?merchantId=' +
-          encodeURIComponent(
-            String(merchantId)
-          ) +
-          '&merchantName=' +
-          encodeURIComponent(
-            merchantName
-          ) +
-          '&productName=' +
-          encodeURIComponent(
-            productName
-          ) +
-          '&amount=' +
-          amount
-        )
-      
-      }
+  const productName = (
+    document.querySelector<HTMLInputElement>(
+      '#mobile-sms-product-name'
+    )?.value || ''
+  ).trim()
+
+  const amount = Number(
+    document.querySelector<HTMLInputElement>(
+      '#mobile-sms-amount'
+    )?.value || 0
+  )
+
+  if (!productName) {
+    alert('상품명을 입력해주세요.')
+    return ''
+  }
+
+  if (!Number.isSafeInteger(amount) || amount < 100) {
+    alert('결제금액을 확인해주세요.')
+    return ''
+  }
+
+  try {
+    const url =
+      (window as any).Capacitor?.isNativePlatform?.()
+        ? 'https://app.nxgsoft.co.kr/api/sms-payment-create'
+        : '/api/sms-payment-create'
+
+    const response = await fetch(url, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(await nxgCancelHeaders())
+      },
+      body: JSON.stringify({
+        productName,
+        amount
+      })
+    })
+
+    const data = await response.json()
+
+    if (
+      !response.ok ||
+      !data?.success ||
+      !data?.paymentLink
+    ) {
+      throw new Error(
+        data?.message ||
+        'SMS 결제링크 생성에 실패했습니다.'
+      )
+    }
+
+    return String(data.paymentLink)
+
+  } catch (error) {
+    console.error('SMS 결제링크 생성 오류:', error)
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : 'SMS 결제링크 생성에 실패했습니다.'
+    )
+
+    return ''
+  }
+}
+
       
       
       document
@@ -21064,7 +21075,7 @@ function renderMerchantSmsCard() {
         )
         ?.addEventListener(
           'click',
-          () => {
+          async () => {
       
             const phone =
               (
@@ -21089,7 +21100,7 @@ function renderMerchantSmsCard() {
       
       
             const paymentLink =
-              createSmsPaymentLink()
+              await createSmsPaymentLink()
       
       
             if (!paymentLink) {
@@ -21115,7 +21126,20 @@ function renderMerchantSmsCard() {
               paymentLink
       
       
-            window.location.href =
+            if ((window as any).Capacitor?.isNativePlatform?.()) {
+  try {
+    await (window as any).Capacitor.nativePromise(
+      'NxgSms',
+      'compose',
+      { phone, message }
+    )
+  } catch (error) {
+    console.error('SMS 작성 오류:', error)
+    alert('문자 작성 화면을 열지 못했습니다.')
+  }
+  return
+}
+window.location.href =
               'sms:' +
               phone +
               '?body=' +
@@ -21136,7 +21160,7 @@ function renderMerchantSmsCard() {
           async () => {
       
             const paymentLink =
-              createSmsPaymentLink()
+              await createSmsPaymentLink()
       
       
             if (!paymentLink) {
@@ -25372,6 +25396,7 @@ if (
   ) {
   
     renderMerchantHome()
+    void nxgCheckForAppUpdate()
   
   } else if (
     path === '/merchant-app/orders'

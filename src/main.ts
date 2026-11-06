@@ -744,33 +744,122 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
 } else if (path === '/pay') {
 
-  const params =
-    new URLSearchParams(
-      window.location.search
-    )
+  const params = new URLSearchParams(
+    window.location.search
+  )
 
-  const merchantId =
-    Number(
-      params.get('merchantId') || 0
-    )
+  const paymentToken = params.get('t') || ''
 
-  const merchantNameParam =
-    params.get('merchantName') || ''
+  let smsPaymentStatus = 'pending'
 
-  const productName =
-    params.get('productName') || ''
+  if (paymentToken) {
+    try {
+      const response = await fetch(
+        '/api/sms-payment-status',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            token: paymentToken
+          }),
+          cache: 'no-store'
+        }
+      )
 
-  const amount =
-    Number(
-      params.get('amount') || 0
-    )
+      const result = await response.json()
+
+      smsPaymentStatus =
+        response.ok && result.success === true
+          ? String(result.status || 'review')
+          : 'review'
+
+    } catch (error) {
+      console.error('SMS 결제 상태 확인 오류:', error)
+      smsPaymentStatus = 'review'
+    }
+  }
+
+  /* NXG_SMS_TOKEN_ONLY */
+const smsPaymentNotice =
+  !paymentToken
+    ? '기존 결제링크는 사용할 수 없습니다. 가맹점에 새 결제링크를 요청해주세요.'
+    :
+    smsPaymentStatus === 'paid'
+      ? '이미 결제가 완료된 요청입니다.'
+      : smsPaymentStatus === 'processing'
+        ? '결제 진행 중입니다. 중복 결제하지 마세요.'
+        : smsPaymentStatus === 'expired'
+          ? '사용 기간이 만료된 결제 링크입니다.'
+          : smsPaymentStatus === 'canceled'
+            ? '취소된 결제요청입니다.'
+            : smsPaymentStatus === 'review'
+              ? '결제 상태 확인이 필요합니다. 가맹점에 문의해 주세요.'
+              : '결제정보를 확인할 수 없습니다.'
 
 
-  if (
-    !merchantId ||
-    !productName ||
-    !amount
-  ) {
+  let merchantId = paymentToken
+    ? 0
+    : Number(params.get('merchantId') || 0)
+
+  let merchantNameParam = paymentToken
+    ? ''
+    : params.get('merchantName') || ''
+
+  let productName = paymentToken
+    ? ''
+    : params.get('productName') || ''
+
+  let amount = paymentToken
+    ? 0
+    : Number(params.get('amount') || 0)
+
+  if (paymentToken && smsPaymentStatus === 'pending') {
+    try {
+      const response = await fetch(
+        '/api/sms-payment-read?t=' +
+          encodeURIComponent(paymentToken),
+        {
+          cache: 'no-store',
+          referrerPolicy: 'no-referrer'
+        }
+      )
+
+      const info = await response.json()
+
+      if (!response.ok || !info.success) {
+        throw new Error(
+          info.message || '결제정보 조회 실패'
+        )
+      }
+
+      const savedMerchantId = Number(info.merchantId)
+      const savedAmount = Number(info.amount)
+      const savedProductName =
+        String(info.productName || '').trim()
+
+      if (
+        !Number.isSafeInteger(savedMerchantId) ||
+        savedMerchantId <= 0 ||
+        !Number.isSafeInteger(savedAmount) ||
+        savedAmount < 100 ||
+        !savedProductName
+      ) {
+        throw new Error('결제정보가 올바르지 않습니다.')
+      }
+
+      merchantId = savedMerchantId
+      merchantNameParam = String(info.merchantName || '')
+      productName = savedProductName
+      amount = savedAmount
+
+    } catch (error) {
+      console.error('SMS 링크 조회 오류:', error)
+    }
+  }
+
+  if (!paymentToken || !merchantId || !productName || !amount || smsPaymentStatus !== 'pending') {
 
     app.innerHTML = `
       <div class="page">
@@ -778,7 +867,7 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
         <div class="payment-card">
 
           <h1>
-            결제정보를 확인할 수 없습니다.
+            ${smsPaymentNotice}
           </h1>
 
         </div>
@@ -788,24 +877,40 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
   } else {
 
-    const {
-      data: paymentMerchant,
-      error: paymentMerchantError
-    } =
-      await supabase
-        .from('merchants')
-        .select(`
-          merchant_name,
-          online_pg_company_1,
-          toss_client_key,
-          korpay_pg_mid,
-          korpay_pg_mkey
-        `)
-        .eq(
-          'id',
-          merchantId
-        )
-        .single()
+    const merchantResult = paymentToken
+  ? await supabase
+      .from('merchants')
+      .select(
+        'merchant_name,online_pg_company_1,toss_client_key'
+      )
+      .eq('id', merchantId)
+      .single()
+  : await supabase
+      .from('merchants')
+      .select(
+        'merchant_name,online_pg_company_1,toss_client_key,korpay_pg_mid,korpay_pg_mkey'
+      )
+      .eq('id', merchantId)
+      .single()
+
+const paymentMerchantError = merchantResult.error
+const merchantRow = merchantResult.data
+
+const paymentMerchant = merchantRow
+  ? {
+      merchant_name: merchantRow.merchant_name,
+      online_pg_company_1: merchantRow.online_pg_company_1,
+      toss_client_key: merchantRow.toss_client_key,
+      korpay_pg_mid:
+        'korpay_pg_mid' in merchantRow
+          ? String(merchantRow.korpay_pg_mid || '')
+          : '',
+      korpay_pg_mkey:
+        'korpay_pg_mkey' in merchantRow
+          ? String(merchantRow.korpay_pg_mkey || '')
+          : ''
+    }
+  : null
 
 
     if (
@@ -877,12 +982,26 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
             </p>
 
 
-            <button
-              id="pay-button"
-              type="button"
-            >
-              결제하기
-            </button>
+            <div style="display:flex;gap:12px;margin-top:20px">
+
+  <button
+    id="pay-button"
+    type="button"
+    style="flex:1"
+  >
+    모바일결제
+  </button>
+
+  <button
+    id="sms-manual-button"
+    type="button"
+    style="flex:1"
+    disabled
+  >
+    수기결제
+  </button>
+
+</div>
 
           </div>
 
@@ -897,6 +1016,83 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
         ?.addEventListener(
           'click',
           async () => {
+            let smsOrderId = ''
+
+            if (paymentToken) {
+              const smsButton =
+                document.querySelector<HTMLButtonElement>(
+                  '#pay-button'
+                )
+
+              if (smsButton?.disabled) return
+
+              if (smsButton) {
+                smsButton.disabled = true
+              }
+
+              try {
+                const response = await fetch(
+                  '/api/sms-payment-start',
+                  {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                      token: paymentToken,
+                      method: 'mobile'
+                    })
+                  }
+                )
+
+                const result =
+                  await response.json().catch(() => null)
+
+                if (!response.ok || result?.success !== true) {
+                  throw new Error(
+                    result?.message ||
+                    '결제 시작에 실패했습니다.'
+                  )
+                }
+
+                if (
+                  Number(result.merchantId) !== merchantId ||
+                  Number(result.amount) !== amount ||
+                  String(result.pgCompany) !== selectedOnlinePg ||
+                  !result.orderId
+                ) {
+                  throw new Error(
+                    '결제정보가 일치하지 않습니다.'
+                  )
+                }
+
+                smsOrderId = String(result.orderId)
+
+                sessionStorage.setItem(
+                  'nxg_sms_payment_token',
+                  paymentToken
+                )
+
+                sessionStorage.setItem(
+                  'nxg_sms_payment_order_id',
+                  smsOrderId
+                )
+
+              } catch (error) {
+                if (smsButton) {
+                  smsButton.disabled = false
+                }
+
+                alert(
+                  error instanceof Error
+                    ? error.message
+                    : '결제 시작 오류'
+                )
+
+                return
+              }
+            }
+
 
             sessionStorage.setItem(
               'merchantId',
@@ -959,14 +1155,13 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
                     amount:
                       amount,
 
-                    orderId:
-                      (
+                    orderId: (smsOrderId || (
                         'SMS-TOSS-' +
                         Date.now()
                       ).replace(
                         /[^a-zA-Z0-9]/g,
                         ''
-                      ),
+                      )),
 
                     orderName:
                       productName,
@@ -987,7 +1182,7 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
                     failUrl:
                       window.location.origin +
-                      '/fail'
+                      '/fail' + (paymentToken ? '?source=sms' : '')
                   }
                 )
 
@@ -1000,12 +1195,71 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
               '코페이'
             ) {
 
-              if (
-                !paymentMerchant
-                  .korpay_pg_mid ||
-                !paymentMerchant
-                  .korpay_pg_mkey
-              ) {
+              let smsKorpayData: {
+  mid: string
+  ediDate: string
+  hashKey: string
+} | null = null
+
+if (paymentToken) {
+  try {
+    if (!smsOrderId) {
+      throw new Error('SMS 주문번호가 없습니다.')
+    }
+
+    const response = await fetch(
+      '/api/sms-korpay-prepare',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          token: paymentToken,
+          orderId: smsOrderId
+        })
+      }
+    )
+
+    const result = await response.json().catch(() => null)
+
+    if (
+      !response.ok ||
+      result?.success !== true ||
+      String(result.orderId) !== smsOrderId ||
+      Number(result.merchantId) !== merchantId ||
+      Number(result.amount) !== amount ||
+      String(result.productName) !== productName ||
+      !String(result.mid || '').trim() ||
+      !/^\d{14}$/.test(String(result.ediDate || '')) ||
+      !/^[a-f0-9]{64}$/i.test(String(result.hashKey || ''))
+    ) {
+      throw new Error(
+        result?.message ||
+        '코페이 결제정보 검증에 실패했습니다.'
+      )
+    }
+
+    smsKorpayData = {
+      mid: String(result.mid),
+      ediDate: String(result.ediDate),
+      hashKey: String(result.hashKey)
+    }
+
+  } catch (error) {
+    console.error('SMS 코페이 결제 준비 오류:', error)
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : '코페이 결제 준비에 실패했습니다.'
+    )
+
+    return
+  }
+}
+
+if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_pg_mkey)) {
 
                 alert(
                   '코페이 PG MID 또는 MKEY가 등록되지 않았습니다.'
@@ -1015,22 +1269,19 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
               }
 
 
-              const ediDate =
-                getKorpayEdiDate()
+              const ediDate = smsKorpayData ? smsKorpayData.ediDate : getKorpayEdiDate()
 
 
-              const orderNo =
-                (
+              const orderNo = (smsOrderId || (
                   'SMS-KORPAY-' +
                   Date.now()
                 ).replace(
                   /[^a-zA-Z0-9]/g,
                   ''
-                )
+                ))
 
 
-              const hashKey =
-                await createKorpayHash(
+              const hashKey = smsKorpayData ? smsKorpayData.hashKey : await createKorpayHash(
                   String(
                     paymentMerchant
                       .korpay_pg_mid
@@ -1047,8 +1298,7 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
               const paymentData = {
 
                 merchantId:
-                  paymentMerchant
-                    .korpay_pg_mid,
+                  (smsKorpayData ? smsKorpayData.mid : paymentMerchant.korpay_pg_mid),
 
                 productName:
                   productName,
@@ -1145,11 +1395,9 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
                     if (payButton) {
 
-                      payButton.disabled =
-                        false
+                      payButton.disabled = Boolean(paymentToken)
 
-                      payButton.innerText =
-                        '결제하기'
+                      payButton.innerText = paymentToken ? '결제 상태 확인 필요' : '결제하기'
                     }
 
                   },
@@ -1164,11 +1412,9 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
                     if (payButton) {
 
-                      payButton.disabled =
-                        false
+                      payButton.disabled = Boolean(paymentToken)
 
-                      payButton.innerText =
-                        '결제하기'
+                      payButton.innerText = paymentToken ? '결제 상태 확인 필요' : '결제하기'
                     }
 
                   }
@@ -1624,7 +1870,7 @@ app.innerHTML = `
     `
 
     document.querySelector<HTMLButtonElement>('#create-payment-link-button')!
-      .addEventListener('click', () => {
+      .addEventListener('click', async () => {
         const merchantSelect =
           document.querySelector<HTMLSelectElement>('#link-merchant-select')!
 
@@ -1643,8 +1889,57 @@ app.innerHTML = `
           return
         }
 
-        const paymentLink =
-          `${window.location.origin}/pay?merchantId=${merchantId}&merchantName=${encodeURIComponent(merchantName)}&productName=${encodeURIComponent(productName)}&amount=${amount}`
+        const createButton =
+          document.querySelector<HTMLButtonElement>(
+            '#create-payment-link-button'
+          )
+
+        if (createButton?.disabled) return
+        if (createButton) createButton.disabled = true
+
+        let paymentLink = ''
+
+        try {
+          const response = await fetch(
+            '/api/sms-payment-admin-create',
+            {
+              method: 'POST',
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                merchantId: Number(merchantId),
+                productName,
+                amount: Number(amount)
+              })
+            }
+          )
+
+          const result = await response.json()
+
+          if (!response.ok || !result.success) {
+            throw new Error(
+              result.message || '결제링크 생성 실패'
+            )
+          }
+
+          paymentLink = String(result.paymentLink || '')
+
+          if (!paymentLink) {
+            throw new Error('결제링크를 받지 못했습니다.')
+          }
+
+        } catch (error) {
+          alert(
+            error instanceof Error
+              ? error.message
+              : '결제링크 생성 오류'
+          )
+          return
+        } finally {
+          if (createButton) createButton.disabled = false
+        }
 
         document.querySelector<HTMLDivElement>('#payment-link-result')!.innerHTML = `
           <div class="create-result-card">
@@ -4298,6 +4593,17 @@ approved_at:
 
   if (error) {
     alert('DB 저장 실패: ' + error.message)
+
+    if (
+      source === 'sms' &&
+      /^(SMSTOSS|SMSKORPAY)/.test(orderId)
+    ) {
+      throw new Error(
+        'SMS 결제 승인 후 DB 저장 확인 실패: ' +
+        error.message
+      )
+    }
+
   } else {
     alert('DB 저장 성공')
   }
@@ -4450,6 +4756,71 @@ approved_at:
     }
   }
 }
+/* NXG SMS 결제 완료 검증 */
+if (
+  source === 'sms' &&
+  /^(SMSTOSS|SMSKORPAY)/.test(orderId)
+) {
+
+  const smsToken =
+    sessionStorage.getItem('nxg_sms_payment_token') || ''
+
+  const smsOrderId =
+    sessionStorage.getItem('nxg_sms_payment_order_id') || ''
+
+  let smsVerified = false
+
+  if (/^(SMSTOSS|SMSKORPAY)[0-9a-f]{24}$/.test(orderId)) {
+    try {
+      const response = await fetch(
+        '/api/sms-payment-finish',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            token: smsToken && smsOrderId === orderId ? smsToken : '',
+            orderId
+          })
+        }
+      )
+
+      const result = await response.json()
+
+      smsVerified =
+        response.ok &&
+        result.success === true &&
+        result.status === 'paid'
+
+    } catch (error) {
+      console.error(
+        'SMS 결제 완료 검증 오류:',
+        error
+      )
+    }
+  }
+
+  if (!smsVerified) {
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card">
+          <h2>결제 상태 확인 필요</h2>
+          <p>
+            결제가 승인되었을 수 있습니다.
+            중복 결제하지 말고 가맹점에 문의해 주세요.
+          </p>
+        </div>
+      </div>
+    `
+
+    throw new Error('SMS 결제 완료 검증 실패')
+  }
+
+  sessionStorage.removeItem('nxg_sms_payment_token')
+  sessionStorage.removeItem('nxg_sms_payment_order_id')
+}
+
 if (source === 'kiosk') {
 
   const kioskSuccessRecoveryUrl =
@@ -5307,6 +5678,24 @@ document.querySelector('#receipt-close-btn')
 } else if (path === '/fail') {
   const params = new URLSearchParams(window.location.search)
 
+  /* NXG_SMS_FAIL_NOTICE */
+  if (params.get('source') === 'sms') {
+    app.innerHTML = `
+      <div class="page">
+        <div class="payment-card">
+          <h2>결제 상태 확인 필요</h2>
+          <p>
+            결제가 중단되었거나 승인 결과를
+            확인하지 못했습니다.
+          </p>
+          <p>
+            중복 결제하지 마시고
+            가맹점에 결제 상태를 문의해 주세요.
+          </p>
+        </div>
+      </div>
+    `
+  } else {
   const code = params.get('code')
   const message = params.get('message')
 
@@ -5326,7 +5715,9 @@ document.querySelector('#receipt-close-btn')
       window.location.href = '/'
     })
 
-    } else if (path === '/admin-login' || path === '/') {
+
+  }
+} else if (path === '/admin-login' || path === '/') {
   app.innerHTML = `
   <div class="nxg-login-page">
     <div class="nxg-login-left">
@@ -39540,67 +39931,73 @@ if (cardOpenMode === 'cash') {
             `
         
         
-            const createPcSmsPaymentLink =
-              () => {
-        
-                const productName =
-                  (
-                    document.querySelector<HTMLInputElement>(
-                      '#pc-sms-product-name'
-                    )?.value || ''
-                  ).trim()
-        
-        
-                const amount =
-                  Number(
-                    document.querySelector<HTMLInputElement>(
-                      '#pc-sms-amount'
-                    )?.value || 0
-                  )
-        
-        
-                if (!productName) {
-        
-                  alert(
-                    '상품명을 입력해주세요.'
-                  )
-        
-                  return ''
-                }
-        
-        
-                if (
-                  !amount ||
-                  amount < 100
-                ) {
-        
-                  alert(
-                    '결제금액을 확인해주세요.'
-                  )
-        
-                  return ''
-                }
-        
-        
-                return (
-                  window.location.origin +
-                  '/pay' +
-                  '?merchantId=' +
-                  encodeURIComponent(
-                    merchantId
-                  ) +
-                  '&merchantName=' +
-                  encodeURIComponent(
-                    merchantName
-                  ) +
-                  '&productName=' +
-                  encodeURIComponent(
-                    productName
-                  ) +
-                  '&amount=' +
-                  amount
-                )
-              }
+            const createPcSmsPaymentLink = async (): Promise<string> => {
+  const productName = (
+    document.querySelector<HTMLInputElement>(
+      '#pc-sms-product-name'
+    )?.value || ''
+  ).trim()
+
+  const amount = Number(
+    document.querySelector<HTMLInputElement>(
+      '#pc-sms-amount'
+    )?.value || 0
+  )
+
+  if (!productName) {
+    alert('상품명을 입력해주세요.')
+    return ''
+  }
+
+  if (!Number.isSafeInteger(amount) || amount < 100) {
+    alert('결제금액을 확인해주세요.')
+    return ''
+  }
+
+  try {
+    const response = await fetch(
+      '/api/sms-payment-create',
+      {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          productName,
+          amount
+        })
+      }
+    )
+
+    const result = await response.json()
+
+    if (
+      !response.ok ||
+      result?.success !== true ||
+      !result?.paymentLink
+    ) {
+      throw new Error(
+        result?.message ||
+        '결제링크 생성에 실패했습니다.'
+      )
+    }
+
+    return String(result.paymentLink)
+
+  } catch (error) {
+    console.error('PC SMS 링크 생성 오류:', error)
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : '결제링크 생성에 실패했습니다.'
+    )
+
+    return ''
+  }
+}
+
         
         
               document
@@ -39631,7 +40028,7 @@ if (cardOpenMode === 'cash') {
               )
               ?.addEventListener(
                 'click',
-                () => {
+                async () => {
         
                   const phone =
                     (
@@ -39656,7 +40053,7 @@ if (cardOpenMode === 'cash') {
         
         
                   const paymentLink =
-                    createPcSmsPaymentLink()
+                    await createPcSmsPaymentLink()
         
         
                   if (!paymentLink) {
@@ -39703,7 +40100,7 @@ if (cardOpenMode === 'cash') {
                 async () => {
         
                   const paymentLink =
-                    createPcSmsPaymentLink()
+                    await createPcSmsPaymentLink()
         
         
                   if (!paymentLink) {

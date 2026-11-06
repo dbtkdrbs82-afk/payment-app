@@ -100,6 +100,46 @@ export default async function handler(req, res) {
       return replyPage(res, '결제 상태 확인 필요', '이 주문은 이미 처리 이력이 있습니다. 중복 결제를 시도하지 말고 관리자에게 확인해 주세요.', 409)
     }
 
+    /* NXG_SMS_AMOUNT_GUARD */
+    if (orderId.startsWith('SMSKORPAY')) {
+      if (!/^SMSKORPAY[0-9a-f]{24}$/.test(orderId)) {
+        return replyPage(
+          res,
+          '결제정보 확인 실패',
+          'SMS 주문번호가 올바르지 않습니다.',
+          400
+        )
+      }
+
+      const smsQuery = new URLSearchParams({
+        select: 'merchant_id,amount,status,payment_method',
+        pg_order_id: `eq.${orderId}`,
+        limit: '2'
+      })
+
+      const smsRows = await dbGet(
+        `${base}/sms_payment_requests?${smsQuery}`
+      )
+
+      const smsRequest =
+        smsRows.length === 1 ? smsRows[0] : null
+
+      if (
+        !smsRequest ||
+        smsRequest.status !== 'processing' ||
+        smsRequest.payment_method !== 'mobile' ||
+        Number(smsRequest.merchant_id) !== merchantId ||
+        Number(smsRequest.amount) !== expectedAmount
+      ) {
+        return replyPage(
+          res,
+          '결제정보 확인 실패',
+          'SMS 결제금액 또는 진행 상태가 일치하지 않습니다.',
+          409
+        )
+      }
+    }
+
     // 코페이 공식 샘플: 인증 paymentKey로 서버 간 승인 호출.
     const confirmUrl = `https://payments.korpay.com/v1/payments/confirm?paymentKey=${encodeURIComponent(authKey)}`
     let response
