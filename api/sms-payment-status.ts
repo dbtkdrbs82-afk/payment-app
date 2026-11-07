@@ -95,14 +95,6 @@ export default async function handler(
 
     // 실제 저장된 승인내역을 최우선으로 확인
     if (orderId) {
-      /* NXG_SMS_MANUAL_STATUS_V1 */
-      if (/^SMSMANUAL[0-9a-f]{24}$/.test(orderId)) {
-        return res.status(200).json({
-          success: true,
-          status: request.status === 'paid' ? 'paid' : 'review'
-        })
-      }
-
       const pgCompany = orderId.startsWith('SMSKORPAY')
         ? '코페이'
         : orderId.startsWith('SMSTOSS')
@@ -171,8 +163,9 @@ export default async function handler(
 
     /* NXG_SMS_PROCESSING_REVIEW */
     if (request.status === 'processing') {
-      if (new Date(request.expires_at).getTime() <= Date.now()) {
-        return res.status(200).json({ success: true, status: 'expired' })
+      const startedAt = new Date(request.payment_started_at || '').getTime()
+      if (!Number.isFinite(startedAt) || Date.now() - startedAt >= 900000) {
+        return res.status(200).json({ success: true, status: 'review' })
       }
     }
     return res.status(200).json({

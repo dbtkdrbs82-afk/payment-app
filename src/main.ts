@@ -815,7 +815,7 @@ const smsPaymentNotice =
     ? 0
     : Number(params.get('amount') || 0)
 
-  if (paymentToken && (smsPaymentStatus === 'pending' || smsPaymentStatus === 'processing')) {
+  if (paymentToken && smsPaymentStatus === 'pending') {
     try {
       const response = await fetch(
         '/api/sms-payment-read?t=' +
@@ -859,7 +859,7 @@ const smsPaymentNotice =
     }
   }
 
-  if (!paymentToken || !merchantId || !productName || !amount || (smsPaymentStatus !== 'pending' && smsPaymentStatus !== 'processing')) {
+  if (!paymentToken || !merchantId || !productName || !amount || smsPaymentStatus !== 'pending') {
 
     app.innerHTML = `
       <div class="page">
@@ -996,6 +996,7 @@ const paymentMerchant = merchantRow
     id="sms-manual-button"
     type="button"
     style="flex:1"
+    disabled
   >
     수기결제
   </button>
@@ -1007,199 +1008,6 @@ const paymentMerchant = merchantRow
         </div>
       `
 
-
-      /* NXG_SMS_MANUAL_FORM_V1 */
-      const smsManualForm = document.createElement('form')
-      smsManualForm.id = 'nxg-sms-manual-form'
-      smsManualForm.hidden = true
-      smsManualForm.autocomplete = 'off'
-
-      smsManualForm.innerHTML = `
-        <div style="margin-top:20px;padding:16px;border:1px solid #ddd;border-radius:10px">
-          <h3>수기 카드결제</h3>
-
-          <label>카드번호</label>
-          <input
-            name="cardNumber"
-            type="text"
-            inputmode="numeric"
-            autocomplete="off"
-            placeholder="카드번호 13~19자리"
-            maxlength="23"
-            required
-            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 14px"
-          />
-
-          <label>유효기간 (YYMM)</label>
-          <input
-            name="expiryYymm"
-            type="text"
-            inputmode="numeric"
-            autocomplete="off"
-            placeholder="예: 2812"
-            maxlength="4"
-            required
-            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 14px"
-          />
-
-          <label>구매자명</label>
-          <input
-            name="buyerName"
-            type="text"
-            autocomplete="off"
-            maxlength="40"
-            placeholder="구매자명"
-            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 14px"
-          />
-
-          <label>휴대폰번호 (선택)</label>
-          <input
-            name="customerPhone"
-            type="tel"
-            autocomplete="off"
-            maxlength="13"
-            placeholder="01012345678"
-            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 14px"
-          />
-
-          <label>할부개월</label>
-          <select
-            name="installment"
-            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 18px"
-          >
-            <option value="00">일시불</option>
-            <option value="02">2개월</option>
-            <option value="03">3개월</option>
-            <option value="04">4개월</option>
-            <option value="05">5개월</option>
-            <option value="06">6개월</option>
-            <option value="07">7개월</option>
-            <option value="08">8개월</option>
-            <option value="09">9개월</option>
-            <option value="10">10개월</option>
-            <option value="11">11개월</option>
-            <option value="12">12개월</option>
-          </select>
-
-          <button
-            type="submit"
-            style="width:100%;padding:15px"
-          >
-            수기결제 승인
-          </button>
-        </div>
-      `
-
-      document
-        .querySelector('.payment-card')
-        ?.appendChild(smsManualForm)
-
-      const smsManualButton =
-        document.querySelector<HTMLButtonElement>(
-          '#sms-manual-button'
-        )
-
-      smsManualButton?.addEventListener('click', () => {
-        smsManualForm.hidden = !smsManualForm.hidden
-      })
-
-      smsManualForm.addEventListener('submit', async (event) => {
-        event.preventDefault()
-
-        const submitButton =
-          smsManualForm.querySelector<HTMLButtonElement>(
-            'button[type="submit"]'
-          )
-
-        if (!submitButton || submitButton.disabled) return
-
-        const formData = new FormData(smsManualForm)
-
-        const cardNumber =
-          String(formData.get('cardNumber') || '')
-            .replace(/\D/g, '')
-
-        const expiryYymm =
-          String(formData.get('expiryYymm') || '')
-            .replace(/\D/g, '')
-
-        if (
-          !/^\d{13,19}$/.test(cardNumber) ||
-          !/^\d{4}$/.test(expiryYymm)
-        ) {
-          alert('카드번호와 유효기간을 확인해주세요.')
-          return
-        }
-
-        submitButton.disabled = true
-        submitButton.textContent = '승인 처리 중...'
-
-        try {
-          const response = await fetch(
-            '/api/sms-payment-manual',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              cache: 'no-store',
-              body: JSON.stringify({
-                token: paymentToken,
-                cardNumber,
-                expiryYymm,
-                installment:
-                  String(formData.get('installment') || '00'),
-                buyerName:
-                  String(formData.get('buyerName') || ''),
-                customerPhone:
-                  String(formData.get('customerPhone') || '')
-              })
-            }
-          )
-
-          const result =
-            await response.json().catch(() => null)
-
-          if (!response.ok || result?.success !== true) {
-            alert(
-              result?.message ||
-              '결제 결과 확인이 필요합니다. 가맹점에 문의해주세요.'
-            )
-            return
-          }
-
-          smsManualForm.reset()
-          smsManualForm.textContent =
-            '결제가 완료되었습니다.'
-
-          const mobileButton =
-            document.querySelector<HTMLButtonElement>(
-              '#pay-button'
-            )
-
-          if (mobileButton) mobileButton.disabled = true
-          if (smsManualButton) smsManualButton.disabled = true
-
-          alert('수기결제 승인 완료')
-
-        } catch {
-          alert(
-            '승인 결과를 확인할 수 없습니다. ' +
-            '다시 결제하지 말고 가맹점에 확인해주세요.'
-          )
-        } finally {
-          const cardInput =
-            smsManualForm.querySelector<HTMLInputElement>(
-              '[name="cardNumber"]'
-            )
-          const expiryInput =
-            smsManualForm.querySelector<HTMLInputElement>(
-              '[name="expiryYymm"]'
-            )
-          if (cardInput) cardInput.value = ''
-          if (expiryInput) expiryInput.value = ''
-        }
-      })
 
       document
         .querySelector<HTMLButtonElement>(

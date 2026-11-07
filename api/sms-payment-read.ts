@@ -91,7 +91,7 @@ export default async function handler(
     }
 
     if (
-      (request.status !== 'pending' && request.status !== 'processing') ||
+      request.status !== 'pending' ||
       !request.expires_at ||
       new Date(request.expires_at).getTime() <= Date.now()
     ) {
