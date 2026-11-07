@@ -815,7 +815,7 @@ const smsPaymentNotice =
     ? 0
     : Number(params.get('amount') || 0)
 
-  if (paymentToken && smsPaymentStatus === 'pending') {
+  if (paymentToken && (smsPaymentStatus === 'pending' || smsPaymentStatus === 'processing')) {
     try {
       const response = await fetch(
         '/api/sms-payment-read?t=' +
@@ -859,7 +859,7 @@ const smsPaymentNotice =
     }
   }
 
-  if (!paymentToken || !merchantId || !productName || !amount || smsPaymentStatus !== 'pending') {
+  if (!paymentToken || !merchantId || !productName || !amount || (smsPaymentStatus !== 'pending' && smsPaymentStatus !== 'processing')) {
 
     app.innerHTML = `
       <div class="page">
@@ -996,7 +996,6 @@ const paymentMerchant = merchantRow
     id="sms-manual-button"
     type="button"
     style="flex:1"
-    disabled
   >
     수기결제
   </button>
@@ -1009,6 +1008,199 @@ const paymentMerchant = merchantRow
       `
 
 
+      /* NXG_SMS_MANUAL_FORM_V1 */
+      const smsManualForm = document.createElement('form')
+      smsManualForm.id = 'nxg-sms-manual-form'
+      smsManualForm.hidden = true
+      smsManualForm.autocomplete = 'off'
+
+      smsManualForm.innerHTML = `
+        <div style="margin-top:20px;padding:16px;border:1px solid #ddd;border-radius:10px">
+          <h3>수기 카드결제</h3>
+
+          <label>카드번호</label>
+          <input
+            name="cardNumber"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="카드번호 13~19자리"
+            maxlength="23"
+            required
+            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 14px"
+          />
+
+          <label>유효기간 (YYMM)</label>
+          <input
+            name="expiryYymm"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="예: 2812"
+            maxlength="4"
+            required
+            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 14px"
+          />
+
+          <label>구매자명</label>
+          <input
+            name="buyerName"
+            type="text"
+            autocomplete="off"
+            maxlength="40"
+            placeholder="구매자명"
+            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 14px"
+          />
+
+          <label>휴대폰번호 (선택)</label>
+          <input
+            name="customerPhone"
+            type="tel"
+            autocomplete="off"
+            maxlength="13"
+            placeholder="01012345678"
+            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 14px"
+          />
+
+          <label>할부개월</label>
+          <select
+            name="installment"
+            style="width:100%;box-sizing:border-box;padding:12px;margin:7px 0 18px"
+          >
+            <option value="00">일시불</option>
+            <option value="02">2개월</option>
+            <option value="03">3개월</option>
+            <option value="04">4개월</option>
+            <option value="05">5개월</option>
+            <option value="06">6개월</option>
+            <option value="07">7개월</option>
+            <option value="08">8개월</option>
+            <option value="09">9개월</option>
+            <option value="10">10개월</option>
+            <option value="11">11개월</option>
+            <option value="12">12개월</option>
+          </select>
+
+          <button
+            type="submit"
+            style="width:100%;padding:15px"
+          >
+            수기결제 승인
+          </button>
+        </div>
+      `
+
+      document
+        .querySelector('.payment-card')
+        ?.appendChild(smsManualForm)
+
+      const smsManualButton =
+        document.querySelector<HTMLButtonElement>(
+          '#sms-manual-button'
+        )
+
+      smsManualButton?.addEventListener('click', () => {
+        smsManualForm.hidden = !smsManualForm.hidden
+      })
+
+      smsManualForm.addEventListener('submit', async (event) => {
+        event.preventDefault()
+
+        const submitButton =
+          smsManualForm.querySelector<HTMLButtonElement>(
+            'button[type="submit"]'
+          )
+
+        if (!submitButton || submitButton.disabled) return
+
+        const formData = new FormData(smsManualForm)
+
+        const cardNumber =
+          String(formData.get('cardNumber') || '')
+            .replace(/\D/g, '')
+
+        const expiryYymm =
+          String(formData.get('expiryYymm') || '')
+            .replace(/\D/g, '')
+
+        if (
+          !/^\d{13,19}$/.test(cardNumber) ||
+          !/^\d{4}$/.test(expiryYymm)
+        ) {
+          alert('카드번호와 유효기간을 확인해주세요.')
+          return
+        }
+
+        submitButton.disabled = true
+        submitButton.textContent = '승인 처리 중...'
+
+        try {
+          const response = await fetch(
+            '/api/sms-payment-manual',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              cache: 'no-store',
+              body: JSON.stringify({
+                token: paymentToken,
+                cardNumber,
+                expiryYymm,
+                installment:
+                  String(formData.get('installment') || '00'),
+                buyerName:
+                  String(formData.get('buyerName') || ''),
+                customerPhone:
+                  String(formData.get('customerPhone') || '')
+              })
+            }
+          )
+
+          const result =
+            await response.json().catch(() => null)
+
+          if (!response.ok || result?.success !== true) {
+            alert(
+              result?.message ||
+              '결제 결과 확인이 필요합니다. 가맹점에 문의해주세요.'
+            )
+            return
+          }
+
+          smsManualForm.reset()
+          smsManualForm.textContent =
+            '결제가 완료되었습니다.'
+
+          const mobileButton =
+            document.querySelector<HTMLButtonElement>(
+              '#pay-button'
+            )
+
+          if (mobileButton) mobileButton.disabled = true
+          if (smsManualButton) smsManualButton.disabled = true
+
+          alert('수기결제 승인 완료')
+
+        } catch {
+          alert(
+            '승인 결과를 확인할 수 없습니다. ' +
+            '다시 결제하지 말고 가맹점에 확인해주세요.'
+          )
+        } finally {
+          const cardInput =
+            smsManualForm.querySelector<HTMLInputElement>(
+              '[name="cardNumber"]'
+            )
+          const expiryInput =
+            smsManualForm.querySelector<HTMLInputElement>(
+              '[name="expiryYymm"]'
+            )
+          if (cardInput) cardInput.value = ''
+          if (expiryInput) expiryInput.value = ''
+        }
+      })
+
       document
         .querySelector<HTMLButtonElement>(
           '#pay-button'
@@ -1017,6 +1209,12 @@ const paymentMerchant = merchantRow
           'click',
           async () => {
             let smsOrderId = ''
+            /* NXG_SMS_FAST_CLIENT */
+            let smsKorpayData: {
+              mid: string
+              ediDate: string
+              hashKey: string
+            } | null = null
 
             if (paymentToken) {
               const smsButton =
@@ -1064,6 +1262,24 @@ const paymentMerchant = merchantRow
                   throw new Error(
                     '결제정보가 일치하지 않습니다.'
                   )
+                }
+
+                if (selectedOnlinePg === '코페이') {
+                  const auth = result.korpay
+                  if (
+                    !/^SMSKORPAY[0-9a-f]{24}$/.test(String(result.orderId || '')) ||
+                    String(result.productName || '') !== productName ||
+                    !String(auth?.mid || '').trim() ||
+                    !/^\d{14}$/.test(String(auth?.ediDate || '')) ||
+                    !/^[a-f0-9]{64}$/i.test(String(auth?.hashKey || ''))
+                  ) {
+                    throw new Error('코페이 인증정보 검증 실패')
+                  }
+                  smsKorpayData = {
+                    mid: String(auth.mid),
+                    ediDate: String(auth.ediDate),
+                    hashKey: String(auth.hashKey)
+                  }
                 }
 
                 smsOrderId = String(result.orderId)
@@ -1194,70 +1410,6 @@ const paymentMerchant = merchantRow
               selectedOnlinePg ===
               '코페이'
             ) {
-
-              let smsKorpayData: {
-  mid: string
-  ediDate: string
-  hashKey: string
-} | null = null
-
-if (paymentToken) {
-  try {
-    if (!smsOrderId) {
-      throw new Error('SMS 주문번호가 없습니다.')
-    }
-
-    const response = await fetch(
-      '/api/sms-korpay-prepare',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          token: paymentToken,
-          orderId: smsOrderId
-        })
-      }
-    )
-
-    const result = await response.json().catch(() => null)
-
-    if (
-      !response.ok ||
-      result?.success !== true ||
-      String(result.orderId) !== smsOrderId ||
-      Number(result.merchantId) !== merchantId ||
-      Number(result.amount) !== amount ||
-      String(result.productName) !== productName ||
-      !String(result.mid || '').trim() ||
-      !/^\d{14}$/.test(String(result.ediDate || '')) ||
-      !/^[a-f0-9]{64}$/i.test(String(result.hashKey || ''))
-    ) {
-      throw new Error(
-        result?.message ||
-        '코페이 결제정보 검증에 실패했습니다.'
-      )
-    }
-
-    smsKorpayData = {
-      mid: String(result.mid),
-      ediDate: String(result.ediDate),
-      hashKey: String(result.hashKey)
-    }
-
-  } catch (error) {
-    console.error('SMS 코페이 결제 준비 오류:', error)
-
-    alert(
-      error instanceof Error
-        ? error.message
-        : '코페이 결제 준비에 실패했습니다.'
-    )
-
-    return
-  }
-}
 
 if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_pg_mkey)) {
 
@@ -1395,9 +1547,9 @@ if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_
 
                     if (payButton) {
 
-                      payButton.disabled = Boolean(paymentToken)
+                      payButton.disabled = false
 
-                      payButton.innerText = paymentToken ? '결제 상태 확인 필요' : '결제하기'
+                      payButton.innerText = paymentToken ? '모바일결제' : '결제하기'
                     }
 
                   },
@@ -1412,9 +1564,9 @@ if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_
 
                     if (payButton) {
 
-                      payButton.disabled = Boolean(paymentToken)
+                      payButton.disabled = false
 
-                      payButton.innerText = paymentToken ? '결제 상태 확인 필요' : '결제하기'
+                      payButton.innerText = paymentToken ? '모바일결제' : '결제하기'
                     }
 
                   }
