@@ -92,6 +92,8 @@ export default async function handler(
           product_name,
           amount,
           status,
+          payment_method,
+          pg_order_id,
           expires_at
         `)
         .eq('token_hash', tokenHash)
@@ -105,7 +107,7 @@ export default async function handler(
     }
 
     if (
-      request.status !== 'pending' ||
+      (request.status !== 'pending' && request.status !== 'processing') ||
       !request.expires_at ||
       new Date(request.expires_at).getTime() <= Date.now()
     ) {
@@ -145,6 +147,47 @@ export default async function handler(
         success: false,
         message: '온라인 결제사가 설정되지 않았습니다.'
       })
+    }
+
+
+    // SMS ????: ???? ?? ?? ???? ???
+    if (request.status === 'processing') {
+      const existingOrderId = String(request.pg_order_id || '');
+      const prefix = pgCompany === '\uCF54\uD398\uC774' ? 'SMSKORPAY' : 'SMSTOSS';
+
+      if (
+        request.payment_method !== 'mobile' ||
+        !existingOrderId.startsWith(prefix) ||
+        !/^(SMSKORPAY|SMSTOSS)[0-9a-f]{24}$/.test(existingOrderId)
+      ) {
+        return res.status(409).json({
+          success: false,
+          message: '?? ?? ??? ??????.'
+        });
+      }
+
+      const { data: rows, error: checkError } = await supabase
+        .from('payments')
+        .select('id')
+        .eq('order_id', existingOrderId)
+        .eq('merchant_id', request.merchant_id)
+        .limit(1);
+
+      if (checkError || rows?.length) {
+        return res.status(409).json({
+          success: false,
+          message: '?? ???? ??? ?????.'
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        merchantId: request.merchant_id,
+        productName: request.product_name,
+        amount: request.amount,
+        orderId: existingOrderId,
+        pgCompany
+      });
     }
 
     const orderId =
