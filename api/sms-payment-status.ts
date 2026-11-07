@@ -23,7 +23,7 @@ export default async function handler(
 
   if (
     origin &&
-    origin !== 'https://app.nxgsoft.co.kr' && origin !== 'https://payment-app-ybtf-git-sms-payment-test-20261107-nxg-s-projects.vercel.app'
+    origin !== 'https://app.nxgsoft.co.kr'
   ) {
     return res.status(403).json({
       success: false,
@@ -102,6 +102,7 @@ export default async function handler(
           status: request.status === 'paid' ? 'paid' : 'review'
         })
       }
+
       const pgCompany = orderId.startsWith('SMSKORPAY')
         ? '코페이'
         : orderId.startsWith('SMSTOSS')
@@ -159,7 +160,7 @@ export default async function handler(
     }
 
     if (
-      (request.status === 'pending' || request.status === 'processing') &&
+      request.status === 'pending' &&
       new Date(request.expires_at).getTime() <= Date.now()
     ) {
       return res.status(200).json({
@@ -168,6 +169,13 @@ export default async function handler(
       })
     }
 
+    /* NXG_SMS_PROCESSING_REVIEW */
+    if (request.status === 'processing') {
+      const startedAt = new Date(request.payment_started_at || '').getTime()
+      if (!Number.isFinite(startedAt) || Date.now() - startedAt >= 900000) {
+        return res.status(200).json({ success: true, status: 'review' })
+      }
+    }
     return res.status(200).json({
       success: true,
       status: request.status

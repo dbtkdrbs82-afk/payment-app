@@ -815,7 +815,7 @@ const smsPaymentNotice =
     ? 0
     : Number(params.get('amount') || 0)
 
-  if (paymentToken && (smsPaymentStatus === 'pending' || smsPaymentStatus === 'processing')) {
+  if (paymentToken && smsPaymentStatus === 'pending') {
     try {
       const response = await fetch(
         '/api/sms-payment-read?t=' +
@@ -859,7 +859,7 @@ const smsPaymentNotice =
     }
   }
 
-  if (!paymentToken || !merchantId || !productName || !amount || (smsPaymentStatus !== 'pending' && smsPaymentStatus !== 'processing')) {
+  if (!paymentToken || !merchantId || !productName || !amount || smsPaymentStatus !== 'pending') {
 
     app.innerHTML = `
       <div class="page">
@@ -1209,12 +1209,6 @@ const paymentMerchant = merchantRow
           'click',
           async () => {
             let smsOrderId = ''
-            /* NXG_SMS_FAST_CLIENT */
-            let smsKorpayData: {
-              mid: string
-              ediDate: string
-              hashKey: string
-            } | null = null
 
             if (paymentToken) {
               const smsButton =
@@ -1262,24 +1256,6 @@ const paymentMerchant = merchantRow
                   throw new Error(
                     '결제정보가 일치하지 않습니다.'
                   )
-                }
-
-                if (selectedOnlinePg === '코페이') {
-                  const auth = result.korpay
-                  if (
-                    !/^SMSKORPAY[0-9a-f]{24}$/.test(String(result.orderId || '')) ||
-                    String(result.productName || '') !== productName ||
-                    !String(auth?.mid || '').trim() ||
-                    !/^\d{14}$/.test(String(auth?.ediDate || '')) ||
-                    !/^[a-f0-9]{64}$/i.test(String(auth?.hashKey || ''))
-                  ) {
-                    throw new Error('코페이 인증정보 검증 실패')
-                  }
-                  smsKorpayData = {
-                    mid: String(auth.mid),
-                    ediDate: String(auth.ediDate),
-                    hashKey: String(auth.hashKey)
-                  }
                 }
 
                 smsOrderId = String(result.orderId)
@@ -1410,6 +1386,70 @@ const paymentMerchant = merchantRow
               selectedOnlinePg ===
               '코페이'
             ) {
+
+              let smsKorpayData: {
+  mid: string
+  ediDate: string
+  hashKey: string
+} | null = null
+
+if (paymentToken) {
+  try {
+    if (!smsOrderId) {
+      throw new Error('SMS 주문번호가 없습니다.')
+    }
+
+    const response = await fetch(
+      '/api/sms-korpay-prepare',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          token: paymentToken,
+          orderId: smsOrderId
+        })
+      }
+    )
+
+    const result = await response.json().catch(() => null)
+
+    if (
+      !response.ok ||
+      result?.success !== true ||
+      String(result.orderId) !== smsOrderId ||
+      Number(result.merchantId) !== merchantId ||
+      Number(result.amount) !== amount ||
+      String(result.productName) !== productName ||
+      !String(result.mid || '').trim() ||
+      !/^\d{14}$/.test(String(result.ediDate || '')) ||
+      !/^[a-f0-9]{64}$/i.test(String(result.hashKey || ''))
+    ) {
+      throw new Error(
+        result?.message ||
+        '코페이 결제정보 검증에 실패했습니다.'
+      )
+    }
+
+    smsKorpayData = {
+      mid: String(result.mid),
+      ediDate: String(result.ediDate),
+      hashKey: String(result.hashKey)
+    }
+
+  } catch (error) {
+    console.error('SMS 코페이 결제 준비 오류:', error)
+
+    alert(
+      error instanceof Error
+        ? error.message
+        : '코페이 결제 준비에 실패했습니다.'
+    )
+
+    return
+  }
+}
 
 if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_pg_mkey)) {
 
@@ -1547,9 +1587,9 @@ if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_
 
                     if (payButton) {
 
-                      payButton.disabled = false
+                      payButton.disabled = Boolean(paymentToken)
 
-                      payButton.innerText = paymentToken ? '모바일결제' : '결제하기'
+                      payButton.innerText = paymentToken ? '결제 상태 확인 필요' : '결제하기'
                     }
 
                   },
@@ -1564,9 +1604,9 @@ if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_
 
                     if (payButton) {
 
-                      payButton.disabled = false
+                      payButton.disabled = Boolean(paymentToken)
 
-                      payButton.innerText = paymentToken ? '모바일결제' : '결제하기'
+                      payButton.innerText = paymentToken ? '결제 상태 확인 필요' : '결제하기'
                     }
 
                   }
