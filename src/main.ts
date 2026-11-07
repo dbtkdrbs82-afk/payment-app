@@ -815,7 +815,7 @@ const smsPaymentNotice =
     ? 0
     : Number(params.get('amount') || 0)
 
-  if (paymentToken && smsPaymentStatus === 'pending') {
+  if (paymentToken && (smsPaymentStatus === 'pending' || smsPaymentStatus === 'processing')) {
     try {
       const response = await fetch(
         '/api/sms-payment-read?t=' +
@@ -859,7 +859,7 @@ const smsPaymentNotice =
     }
   }
 
-  if (!paymentToken || !merchantId || !productName || !amount || smsPaymentStatus !== 'pending') {
+  if (!paymentToken || !merchantId || !productName || !amount || (smsPaymentStatus !== 'pending' && smsPaymentStatus !== 'processing')) {
 
     app.innerHTML = `
       <div class="page">
