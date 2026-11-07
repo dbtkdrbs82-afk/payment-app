@@ -171,9 +171,8 @@ export default async function handler(
 
     /* NXG_SMS_PROCESSING_REVIEW */
     if (request.status === 'processing') {
-      const startedAt = new Date(request.payment_started_at || '').getTime()
-      if (!Number.isFinite(startedAt) || Date.now() - startedAt >= 900000) {
-        return res.status(200).json({ success: true, status: 'review' })
+      if (new Date(request.expires_at).getTime() <= Date.now()) {
+        return res.status(200).json({ success: true, status: 'expired' })
       }
     }
     return res.status(200).json({
