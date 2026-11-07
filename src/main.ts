@@ -982,26 +982,12 @@ const paymentMerchant = merchantRow
             </p>
 
 
-            <div style="display:flex;gap:12px;margin-top:20px">
-
-  <button
-    id="pay-button"
-    type="button"
-    style="flex:1"
-  >
-    모바일결제
-  </button>
-
-  <button
-    id="sms-manual-button"
-    type="button"
-    style="flex:1"
-    disabled
-  >
-    수기결제
-  </button>
-
-</div>
+            <button
+  id="pay-button"
+  type="button"
+>
+  결제하기
+</button>
 
           </div>
 
