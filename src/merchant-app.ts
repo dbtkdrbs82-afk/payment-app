@@ -17138,7 +17138,7 @@ function renderMerchantOcrCard() {
     margin-bottom: 14px;
   "
 >
-  카드번호와 유효기간이 잘 보이도록 맞춰주세요.
+  가로형은 카드 전체, 세로형은 카드번호 16자리만 흰색 선 안에 맞춰주세요.
 </div>
 
 
@@ -17201,13 +17201,26 @@ function renderMerchantOcrCard() {
     id="ocr-v2-guide-portrait"
     type="button"
     style="
-      padding: 7px 14px;
+      padding: 7px 12px;
       border: 0;
       border-radius: 18px;
       font-weight: 700;
     "
   >
-    세로형
+    세로 4줄
+  </button>
+
+  <button
+    id="ocr-v2-guide-portrait-two"
+    type="button"
+    style="
+      padding: 7px 12px;
+      border: 0;
+      border-radius: 18px;
+      font-weight: 700;
+    "
+  >
+    세로 2줄
   </button>
 </div>
 
@@ -17326,6 +17339,18 @@ const ocrV2GuidePortrait =
     '#ocr-v2-guide-portrait'
   )
 
+  const ocrV2GuidePortraitTwo =
+    document.querySelector<HTMLButtonElement>(
+      '#ocr-v2-guide-portrait-two'
+    )
+
+  const nxgSetOcrGuideLabel = (message: string) => {
+    const label = document.querySelector<HTMLDivElement>(
+      '#ocr-v2-guide-label'
+    )
+    if (label) label.textContent = message
+  }
+
   let ocrV2PortraitMode = false
 
 ocrV2GuideLandscape?.addEventListener(
@@ -17343,6 +17368,10 @@ ocrV2GuideLandscape?.addEventListener(
 
     ocrV2CardGuide.style.aspectRatio =
       '1.586 / 1'
+
+    nxgSetOcrGuideLabel(
+      '가로형 카드를 흰색 선에 맞춰주세요'
+    )
   }
 )
 
@@ -17353,14 +17382,30 @@ ocrV2GuidePortrait?.addEventListener(
 
     ocrV2PortraitMode = true
 
-    ocrV2CardGuide.style.width =
-  '68%'
+    ocrV2CardGuide.style.width = '42%'
+    ocrV2CardGuide.style.height = 'auto'
+    ocrV2CardGuide.style.aspectRatio = '0.60 / 1'
 
-    ocrV2CardGuide.style.height =
-      'auto'
+    nxgSetOcrGuideLabel(
+      '세로 4줄: 카드번호 16자리만 선 안에 맞춰주세요'
+    )
+  }
+)
 
-    ocrV2CardGuide.style.aspectRatio =
-      '1 / 1.586'
+ocrV2GuidePortraitTwo?.addEventListener(
+  'click',
+  () => {
+    if (!ocrV2CardGuide) return
+
+    ocrV2PortraitMode = true
+
+    ocrV2CardGuide.style.width = '88%'
+    ocrV2CardGuide.style.height = 'auto'
+    ocrV2CardGuide.style.aspectRatio = '2.5 / 1'
+
+    nxgSetOcrGuideLabel(
+      '세로 2줄: 카드번호 16자리만 선 안에 맞춰주세요'
+    )
   }
 )
 
