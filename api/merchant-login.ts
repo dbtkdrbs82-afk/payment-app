@@ -46,7 +46,7 @@ function createMerchantSession(
 
     exp:
       Date.now() +
-      8 * 60 * 60 * 1000,
+      30 * 24 * 60 * 60 * 1000,
   }
 
 
@@ -287,7 +287,7 @@ export default async function handler(
 
       'SameSite=Strict',
 
-      'Max-Age=28800',
+      'Max-Age=2592000',
     ].join('; ')
   )
 
