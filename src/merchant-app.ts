@@ -19305,14 +19305,27 @@ if (ocrV2PortraitMode) {
         0
       ) / Math.max(1, fourBoxes.length)
 
-    const hasTwoRows =
+    const isTwoByTwo =
       fourBoxes.length === 4 &&
-      centerY(fourBoxes[2]) -
-      centerY(fourBoxes[1]) >
-      averageHeight * 0.6
+      Math.abs(centerY(fourBoxes[0]) - centerY(fourBoxes[1])) <=
+        averageHeight * 0.7 &&
+      Math.abs(centerY(fourBoxes[2]) - centerY(fourBoxes[3])) <=
+        averageHeight * 0.7 &&
+      centerY(fourBoxes[2]) - centerY(fourBoxes[1]) >
+        averageHeight * 0.6
 
-    if (hasTwoRows) {
-      const orderedBoxes = [
+    const isOneByFour =
+      fourBoxes.length === 4 &&
+      [1, 2, 3].every(index =>
+        centerY(fourBoxes[index]) -
+        centerY(fourBoxes[index - 1]) >
+        averageHeight * 0.6
+      )
+
+    if (isTwoByTwo || isOneByFour) {
+      const orderedBoxes = isOneByFour
+        ? [...fourBoxes]
+        : [
         ...fourBoxes.slice(0, 2).sort(
           (a, b) => a.x0 - b.x0
         ),
