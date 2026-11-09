@@ -19206,6 +19206,224 @@ void (
   }
 
 
+/*
+ * NXG 세로형 OCR 2x2 숫자 그룹 테스트
+ * 가로형에서는 실행하지 않는다.
+ * 촬영 이미지는 메모리에서만 처리한다.
+ */
+let nxgPortraitTwoPassVerified = false
+
+if (ocrV2PortraitMode) {
+  const nxgLayoutCanvases =
+    createOcrProcessedCanvases(ocrV2Canvas)
+
+  try {
+    const layoutCanvas = nxgLayoutCanvases[0]
+
+    if (!layoutCanvas) {
+      throw new Error('세로형 분석 이미지 없음')
+    }
+
+    if (ocrV2Status) {
+      ocrV2Status.textContent =
+        '세로형 큰 숫자 4칸 위치를 찾는 중...'
+    }
+
+    await worker.setParameters({
+      tessedit_char_whitelist: '0123456789',
+      tessedit_pageseg_mode: PSM.SPARSE_TEXT
+    })
+
+    const layoutResult = await worker.recognize(
+      layoutCanvas,
+      {},
+      { blocks: true }
+    )
+
+    type NxgPortraitBox = {
+      x0: number
+      y0: number
+      x1: number
+      y1: number
+    }
+
+    const boxes: NxgPortraitBox[] = []
+
+    for (const block of layoutResult.data.blocks || []) {
+      for (const paragraph of block.paragraphs || []) {
+        for (const line of paragraph.lines || []) {
+          for (const word of line.words || []) {
+            const digits = String(word.text || '')
+              .replace(/\D/g, '')
+
+            const bbox = word.bbox
+
+            if (!bbox) continue
+
+            const count =
+              digits.length === 4 ? 1 :
+              digits.length === 8 ? 2 :
+              digits.length === 16 ? 4 : 0
+
+            if (!count) continue
+
+            const width = bbox.x1 - bbox.x0
+
+            for (let i = 0; i < count; i++) {
+              boxes.push({
+                x0: bbox.x0 + width * i / count,
+                x1: bbox.x0 + width * (i + 1) / count,
+                y0: bbox.y0,
+                y1: bbox.y1
+              })
+            }
+          }
+        }
+      }
+    }
+
+    const fourBoxes = boxes
+      .filter(box =>
+        box.y1 - box.y0 >=
+        layoutCanvas.height * 0.012
+      )
+      .sort((a, b) =>
+        (b.y1 - b.y0) - (a.y1 - a.y0)
+      )
+      .slice(0, 4)
+
+    const centerY = (box: NxgPortraitBox) =>
+      (box.y0 + box.y1) / 2
+
+    fourBoxes.sort((a, b) =>
+      centerY(a) - centerY(b)
+    )
+
+    const averageHeight =
+      fourBoxes.reduce(
+        (sum, box) => sum + box.y1 - box.y0,
+        0
+      ) / Math.max(1, fourBoxes.length)
+
+    const hasTwoRows =
+      fourBoxes.length === 4 &&
+      centerY(fourBoxes[2]) -
+      centerY(fourBoxes[1]) >
+      averageHeight * 0.6
+
+    if (hasTwoRows) {
+      const orderedBoxes = [
+        ...fourBoxes.slice(0, 2).sort(
+          (a, b) => a.x0 - b.x0
+        ),
+        ...fourBoxes.slice(2, 4).sort(
+          (a, b) => a.x0 - b.x0
+        )
+      ]
+
+      await worker.setParameters({
+        tessedit_char_whitelist: '0123456789',
+        tessedit_pageseg_mode: PSM.SINGLE_WORD
+      })
+
+      const readings: string[] = []
+
+      for (let pass = 0; pass < 2; pass++) {
+        const parts: string[] = []
+
+        for (const box of orderedBoxes) {
+          const margin =
+            (box.y1 - box.y0) * 0.4
+
+          const left = Math.max(
+            0, Math.floor(box.x0 - margin)
+          )
+          const top = Math.max(
+            0, Math.floor(box.y0 - margin)
+          )
+          const right = Math.min(
+            layoutCanvas.width,
+            Math.ceil(box.x1 + margin)
+          )
+          const bottom = Math.min(
+            layoutCanvas.height,
+            Math.ceil(box.y1 + margin)
+          )
+
+          const tile = document.createElement('canvas')
+
+          tile.width = Math.max(1, right - left)
+          tile.height = Math.max(1, bottom - top)
+
+          tile.getContext('2d')?.drawImage(
+            layoutCanvas,
+            left, top,
+            tile.width, tile.height,
+            0, 0,
+            tile.width, tile.height
+          )
+
+          const variants =
+            createOcrProcessedCanvases(tile)
+
+          let part = ''
+
+          if (variants[pass]) {
+            const result = await worker.recognize(
+              variants[pass]
+            )
+
+            part = result.data.text.replace(/\D/g, '')
+          }
+
+          parts.push(part)
+
+          for (const canvas of variants) {
+            canvas.width = 0
+            canvas.height = 0
+          }
+
+          tile.width = 0
+          tile.height = 0
+        }
+
+        if (parts.every(part => part.length === 4)) {
+          const number = parts.join('')
+
+          if (isValidLuhn(number)) {
+            readings.push(number)
+          }
+        }
+      }
+
+      if (
+        readings.length === 2 &&
+        readings[0] === readings[1]
+      ) {
+        detectedCandidates.push(
+          readings[0],
+          readings[1]
+        )
+
+        nxgPortraitTwoPassVerified = true
+      }
+    }
+
+  } catch {
+    // 세로형 보조 탐색 실패 시 기존 OCR로 복귀
+    console.warn('세로형 4칸 보조 탐색 실패')
+  } finally {
+    for (const canvas of nxgLayoutCanvases) {
+      canvas.width = 0
+      canvas.height = 0
+    }
+
+    await worker.setParameters({
+      tessedit_char_whitelist: '0123456789',
+      tessedit_pageseg_mode: PSM.SINGLE_LINE
+    })
+  }
+}
 const earlyCandidateCounts =
   new Map<
     string,
@@ -19224,10 +19442,12 @@ const fallbackOcrCandidates =
   )
 
 const orderedOcrCandidates =
-  [
-    ...primaryOcrCandidates,
-    ...fallbackOcrCandidates
-  ]
+  nxgPortraitTwoPassVerified
+    ? []
+    : [
+        ...primaryOcrCandidates,
+        ...fallbackOcrCandidates
+      ]
 
   
 
