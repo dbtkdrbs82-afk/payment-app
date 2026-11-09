@@ -17583,6 +17583,12 @@ prepareOcrV2Worker()
 
         const ocrCaptureStartedAt =
           performance.now()
+
+        if (ocrV2PortraitMode) {
+          document.querySelector(
+            '#nxg-portrait-ocr-diagnostics'
+          )?.remove()
+        }
       
         if (
           !ocrV2Video ||
@@ -19214,6 +19220,62 @@ void (
  */
 let nxgPortraitTwoPassVerified = false
 
+const nxgPortraitDiag = {
+  layoutMs: 0,
+  readMs: 0,
+  rows: 0,
+  lengths: [] as number[],
+  candidates: 0,
+  verified: false
+}
+
+const nxgShowPortraitDiag = (
+  fallbackTimes: number[]
+) => {
+  if (!ocrV2PortraitMode || !ocrV2Status) return
+
+  let panel = document.querySelector<HTMLDivElement>(
+    '#nxg-portrait-ocr-diagnostics'
+  )
+
+  if (!panel) {
+    panel = document.createElement('div')
+    panel.id = 'nxg-portrait-ocr-diagnostics'
+    panel.style.cssText =
+      'white-space:pre-line;font-size:13px;' +
+      'padding:12px;margin-top:10px;' +
+      'background:#f1f5f9;color:#111827;' +
+      'border-radius:8px;'
+
+    ocrV2Status.insertAdjacentElement(
+      'afterend',
+      panel
+    )
+  }
+
+  const fallbackMs = fallbackTimes.reduce(
+    (sum, value) => sum + value,
+    0
+  ) * 1000
+
+  panel.textContent = [
+    '세로형 OCR 진단 (카드번호 미기록)',
+    '줄 탐색: ' + nxgPortraitDiag.layoutMs + 'ms',
+    '발견한 줄: ' + nxgPortraitDiag.rows + '개',
+    '줄별 자릿수: ' +
+      (nxgPortraitDiag.lengths.join(', ') || '없음'),
+    '줄 판독: ' + nxgPortraitDiag.readMs + 'ms',
+    'Luhn 후보: ' + nxgPortraitDiag.candidates + '개',
+    '재검증: ' +
+      (nxgPortraitDiag.verified ? '통과' : '미통과'),
+    '기존 OCR 재시도: ' + fallbackTimes.length + '회',
+    '기존 OCR 시간: ' + Math.round(fallbackMs) + 'ms',
+    '전체 시간: ' +
+      Math.round(performance.now() - ocrCaptureStartedAt) +
+      'ms'
+  ].join('\n')
+}
+
 if (ocrV2PortraitMode) {
   const layoutImages =
     createOcrProcessedCanvases(ocrV2Canvas)
@@ -19239,9 +19301,14 @@ if (ocrV2PortraitMode) {
       tessedit_pageseg_mode: PSM.SPARSE_TEXT
     })
 
+    const nxgLayoutStart = performance.now()
+
     const layout = await portraitWorker.recognize(
       image, {}, { blocks: true }
     )
+
+    nxgPortraitDiag.layoutMs =
+      Math.round(performance.now() - nxgLayoutStart)
 
     type PortraitRow = {
       x0: number
@@ -19305,6 +19372,8 @@ if (ocrV2PortraitMode) {
       .slice(0, 7)
       .sort((a, b) => a.y0 - b.y0)
 
+    nxgPortraitDiag.rows = rows.length
+
     // 가로형과 동일한 한 줄 OCR 방식 적용
     await portraitWorker.setParameters({
       tessedit_char_whitelist: '0123456789',
@@ -19312,6 +19381,8 @@ if (ocrV2PortraitMode) {
     })
 
     const firstReadings: string[] = []
+
+    const nxgReadStart = performance.now()
 
     for (const row of rows) {
       const padding =
@@ -19366,6 +19437,12 @@ if (ocrV2PortraitMode) {
       }
     }
 
+    nxgPortraitDiag.readMs =
+      Math.round(performance.now() - nxgReadStart)
+
+    nxgPortraitDiag.lengths =
+      firstReadings.map(value => value.length)
+
     // A형: 8+8, B형: 4+4+4+4
     const matches: Array<{
       number: string
@@ -19410,6 +19487,8 @@ if (ocrV2PortraitMode) {
       new Set(matches.map(item => item.number))
     )
 
+    nxgPortraitDiag.candidates = uniqueNumbers.length
+
     if (uniqueNumbers.length === 1) {
       const selected = matches.find(
         item => item.number === uniqueNumbers[0]
@@ -19445,6 +19524,7 @@ if (ocrV2PortraitMode) {
           )
 
           nxgPortraitTwoPassVerified = true
+          nxgPortraitDiag.verified = true
         }
       }
     }
@@ -19709,6 +19789,10 @@ if (earlyConfirmedCandidate) {
   같은 촬영 이미지에서 만들어둔
   유효기간 후보 영역만 OCR 한다.
 */
+
+if (ocrV2PortraitMode) {
+  nxgShowPortraitDiag(ocrPassTimes)
+}
 
 const detectedExpiryCandidates:
 string[] =
