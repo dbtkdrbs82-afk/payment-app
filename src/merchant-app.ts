@@ -17138,7 +17138,7 @@ function renderMerchantOcrCard() {
     margin-bottom: 14px;
   "
 >
-  가로형은 카드 전체, 세로형은 카드번호 16자리만 흰색 선 안에 맞춰주세요.
+  카드번호와 유효기간이 잘 보이도록 맞춰주세요.
 </div>
 
 
@@ -17201,26 +17201,13 @@ function renderMerchantOcrCard() {
     id="ocr-v2-guide-portrait"
     type="button"
     style="
-      padding: 7px 12px;
+      padding: 7px 14px;
       border: 0;
       border-radius: 18px;
       font-weight: 700;
     "
   >
-    세로 4줄
-  </button>
-
-  <button
-    id="ocr-v2-guide-portrait-two"
-    type="button"
-    style="
-      padding: 7px 12px;
-      border: 0;
-      border-radius: 18px;
-      font-weight: 700;
-    "
-  >
-    세로 2줄
+    세로형
   </button>
 </div>
 
@@ -17339,20 +17326,7 @@ const ocrV2GuidePortrait =
     '#ocr-v2-guide-portrait'
   )
 
-  const ocrV2GuidePortraitTwo =
-    document.querySelector<HTMLButtonElement>(
-      '#ocr-v2-guide-portrait-two'
-    )
-
-  const nxgSetOcrGuideLabel = (message: string) => {
-    const label = document.querySelector<HTMLDivElement>(
-      '#ocr-v2-guide-label'
-    )
-    if (label) label.textContent = message
-  }
-
   let ocrV2PortraitMode = false
-  let nxgPortraitRowCount: 2 | 4 = 4
 
 ocrV2GuideLandscape?.addEventListener(
   'click',
@@ -17369,10 +17343,6 @@ ocrV2GuideLandscape?.addEventListener(
 
     ocrV2CardGuide.style.aspectRatio =
       '1.586 / 1'
-
-    nxgSetOcrGuideLabel(
-      '가로형 카드를 흰색 선에 맞춰주세요'
-    )
   }
 )
 
@@ -17382,33 +17352,15 @@ ocrV2GuidePortrait?.addEventListener(
     if (!ocrV2CardGuide) return
 
     ocrV2PortraitMode = true
-    nxgPortraitRowCount = 4
 
-    ocrV2CardGuide.style.width = '42%'
-    ocrV2CardGuide.style.height = 'auto'
-    ocrV2CardGuide.style.aspectRatio = '0.60 / 1'
+    ocrV2CardGuide.style.width =
+  '68%'
 
-    nxgSetOcrGuideLabel(
-      '세로 4줄: 카드번호 16자리만 선 안에 맞춰주세요'
-    )
-  }
-)
+    ocrV2CardGuide.style.height =
+      'auto'
 
-ocrV2GuidePortraitTwo?.addEventListener(
-  'click',
-  () => {
-    if (!ocrV2CardGuide) return
-
-    ocrV2PortraitMode = true
-    nxgPortraitRowCount = 2
-
-    ocrV2CardGuide.style.width = '88%'
-    ocrV2CardGuide.style.height = 'auto'
-    ocrV2CardGuide.style.aspectRatio = '2.5 / 1'
-
-    nxgSetOcrGuideLabel(
-      '세로 2줄: 카드번호 16자리만 선 안에 맞춰주세요'
-    )
+    ocrV2CardGuide.style.aspectRatio =
+      '1 / 1.586'
   }
 )
 
@@ -17631,12 +17583,6 @@ prepareOcrV2Worker()
 
         const ocrCaptureStartedAt =
           performance.now()
-
-        if (ocrV2PortraitMode) {
-          document.querySelector(
-            '#nxg-portrait-ocr-diagnostics'
-          )?.remove()
-        }
       
         if (
           !ocrV2Video ||
@@ -19260,204 +19206,6 @@ void (
   }
 
 
-/*
- * NXG 세로형 OCR
- * A형: 8자리 + 8자리
- * B형: 4자리 + 4자리 + 4자리 + 4자리
- * 가로형 OCR은 변경하지 않는다.
- */
-let nxgPortraitTwoPassVerified = false
-
-const nxgPortraitDiag = {
-  rowCount: 0,
-  firstLengths: [] as number[],
-  secondLengths: [] as number[],
-  readMs: 0,
-  verified: false
-}
-
-const nxgShowPortraitDiag = (
-  fallbackTimes: number[]
-) => {
-  if (!ocrV2PortraitMode || !ocrV2Status) return
-
-  let panel = document.querySelector<HTMLDivElement>(
-    '#nxg-portrait-ocr-diagnostics'
-  )
-
-  if (!panel) {
-    panel = document.createElement('div')
-    panel.id = 'nxg-portrait-ocr-diagnostics'
-    panel.style.cssText =
-      'white-space:pre-line;font-size:13px;' +
-      'padding:12px;margin-top:10px;' +
-      'background:#f1f5f9;color:#111827;' +
-      'border-radius:8px;'
-
-    ocrV2Status.insertAdjacentElement('afterend', panel)
-  }
-
-  panel.textContent = [
-    '세로형 직접 분할 OCR 진단',
-    '분할한 줄: ' + nxgPortraitDiag.rowCount + '개',
-    '1차 자릿수: ' +
-      (nxgPortraitDiag.firstLengths.join(', ') || '없음'),
-    '2차 자릿수: ' +
-      (nxgPortraitDiag.secondLengths.join(', ') || '없음'),
-    '분할 OCR 시간: ' + nxgPortraitDiag.readMs + 'ms',
-    '재검증: ' +
-      (nxgPortraitDiag.verified ? '통과' : '미통과'),
-    '기존 OCR 재시도: ' + fallbackTimes.length + '회',
-    '전체 시간: ' +
-      Math.round(performance.now() - ocrCaptureStartedAt) +
-      'ms'
-  ].join('\n')
-}
-
-if (ocrV2PortraitMode) {
-  const rowCanvases: HTMLCanvasElement[][] = []
-  const startedAt = performance.now()
-
-  try {
-    if (!worker) {
-      throw new Error('OCR Worker 없음')
-    }
-
-    const portraitWorker = worker
-    const source = ocrV2Canvas
-    const rowCount = nxgPortraitRowCount
-    const expectedDigits = rowCount === 4 ? 4 : 8
-
-    nxgPortraitDiag.rowCount = rowCount
-
-    if (ocrV2Status) {
-      ocrV2Status.textContent =
-        '카드번호 ' + rowCount + '줄을 인식하고 있습니다...'
-    }
-
-    await portraitWorker.setParameters({
-      tessedit_char_whitelist: '0123456789',
-      preserve_interword_spaces: '1',
-      tessedit_pageseg_mode: PSM.SINGLE_LINE
-    })
-
-    // 촬영된 숫자 영역을 2줄 또는 4줄로 직접 분할
-    const bandHeight = source.height / rowCount
-
-    for (let index = 0; index < rowCount; index++) {
-      const top = Math.max(
-        0,
-        Math.floor(
-          index * bandHeight - bandHeight * 0.07
-        )
-      )
-
-      const bottom = Math.min(
-        source.height,
-        Math.ceil(
-          (index + 1) * bandHeight + bandHeight * 0.07
-        )
-      )
-
-      const left = Math.floor(source.width * 0.02)
-      const width = Math.max(
-        1, Math.floor(source.width * 0.96)
-      )
-
-      const tile = document.createElement('canvas')
-
-      tile.width = width
-      tile.height = Math.max(1, bottom - top)
-
-      tile.getContext('2d')?.drawImage(
-        source,
-        left, top, width, tile.height,
-        0, 0, width, tile.height
-      )
-
-      const variants =
-        createOcrProcessedCanvases(tile)
-
-      rowCanvases.push(variants)
-
-      tile.width = 0
-      tile.height = 0
-    }
-
-    const readRows = async (variantIndex: number) => {
-      const values: string[] = []
-
-      for (const variants of rowCanvases) {
-        const canvas = variants[variantIndex]
-
-        if (!canvas) {
-          values.push('')
-          continue
-        }
-
-        const result =
-          await portraitWorker.recognize(canvas)
-
-        // 카드번호 원문은 기록하지 않는다
-        values.push(
-          result.data.text.replace(/\D/g, '')
-        )
-      }
-
-      return values
-    }
-
-    const first = await readRows(0)
-    const second = await readRows(1)
-
-    nxgPortraitDiag.firstLengths =
-      first.map(value => value.length)
-
-    nxgPortraitDiag.secondLengths =
-      second.map(value => value.length)
-
-    const firstNumber = first.join('')
-    const secondNumber = second.join('')
-
-    if (
-      first.length === rowCount &&
-      second.length === rowCount &&
-      first.every(value => value.length === expectedDigits) &&
-      second.every(value => value.length === expectedDigits) &&
-      firstNumber === secondNumber &&
-      firstNumber.length === 16 &&
-      isValidLuhn(firstNumber)
-    ) {
-      detectedCandidates.push(
-        firstNumber,
-        firstNumber
-      )
-
-      nxgPortraitTwoPassVerified = true
-      nxgPortraitDiag.verified = true
-    }
-
-  } catch {
-    console.warn('세로형 직접 분할 OCR 실패')
-  } finally {
-    nxgPortraitDiag.readMs =
-      Math.round(performance.now() - startedAt)
-
-    for (const variants of rowCanvases) {
-      for (const canvas of variants) {
-        canvas.width = 0
-        canvas.height = 0
-      }
-    }
-
-    if (worker) {
-      await worker.setParameters({
-        tessedit_char_whitelist: '0123456789',
-        tessedit_pageseg_mode: PSM.SINGLE_LINE
-      })
-    }
-  }
-}
 const earlyCandidateCounts =
   new Map<
     string,
@@ -19476,12 +19224,10 @@ const fallbackOcrCandidates =
   )
 
 const orderedOcrCandidates =
-  (ocrV2PortraitMode || nxgPortraitTwoPassVerified)
-    ? []
-    : [
-        ...primaryOcrCandidates,
-        ...fallbackOcrCandidates
-      ]
+  [
+    ...primaryOcrCandidates,
+    ...fallbackOcrCandidates
+  ]
 
   
 
@@ -19693,10 +19439,6 @@ if (earlyConfirmedCandidate) {
   같은 촬영 이미지에서 만들어둔
   유효기간 후보 영역만 OCR 한다.
 */
-
-if (ocrV2PortraitMode) {
-  nxgShowPortraitDiag(ocrPassTimes)
-}
 
 const detectedExpiryCandidates:
 string[] =
