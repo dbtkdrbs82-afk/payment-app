@@ -19225,6 +19225,9 @@ const nxgPortraitDiag = {
   readMs: 0,
   rows: 0,
   lengths: [] as number[],
+  repairedLengths: [] as number[],
+  retryCount: 0,
+  retryMs: 0,
   candidates: 0,
   verified: false
 }
@@ -19265,6 +19268,10 @@ const nxgShowPortraitDiag = (
     '줄별 자릿수: ' +
       (nxgPortraitDiag.lengths.join(', ') || '없음'),
     '줄 판독: ' + nxgPortraitDiag.readMs + 'ms',
+    '재인식 후 자릿수: ' +
+      (nxgPortraitDiag.repairedLengths.join(', ') || '없음'),
+    '선별 재인식: ' + nxgPortraitDiag.retryCount + '회',
+    '선별 재인식 시간: ' + nxgPortraitDiag.retryMs + 'ms',
     'Luhn 후보: ' + nxgPortraitDiag.candidates + '개',
     '재검증: ' +
       (nxgPortraitDiag.verified ? '통과' : '미통과'),
@@ -19443,6 +19450,65 @@ if (ocrV2PortraitMode) {
     nxgPortraitDiag.lengths =
       firstReadings.map(value => value.length)
 
+    const repairedReadings = [...firstReadings]
+    const repairedRowIndices = new Set<number>()
+    const retryTargets = new Set<number>()
+
+    for (const shape of [
+      { lines: 2, digits: 8 },
+      { lines: 4, digits: 4 }
+    ]) {
+      for (
+        let start = 0;
+        start <= firstReadings.length - shape.lines;
+        start++
+      ) {
+        const incorrect: number[] = []
+
+        for (
+          let index = start;
+          index < start + shape.lines;
+          index++
+        ) {
+          if (firstReadings[index].length !== shape.digits) {
+            incorrect.push(index)
+          }
+        }
+
+        if (incorrect.length === 1) {
+          retryTargets.add(incorrect[0])
+        }
+      }
+    }
+
+    const retryStarted = performance.now()
+
+    // 최대 두 줄만 추가 인식해 처리 시간 제한
+    for (const index of [...retryTargets].slice(0, 2)) {
+      const contrastImage = rowImages[index]?.[1]
+
+      if (!contrastImage) continue
+
+      const recognized =
+        await portraitWorker.recognize(contrastImage)
+
+      const digits =
+        recognized.data.text.replace(/\D/g, '')
+
+      nxgPortraitDiag.retryCount++
+
+      if (digits.length === 4 || digits.length === 8) {
+        repairedReadings[index] = digits
+        repairedRowIndices.add(index)
+      }
+    }
+
+    nxgPortraitDiag.retryMs =
+      Math.round(performance.now() - retryStarted)
+
+    nxgPortraitDiag.repairedLengths =
+      repairedReadings.map(value => value.length)
+
     // A형: 8+8, B형: 4+4+4+4
     const matches: Array<{
       number: string
@@ -19459,7 +19525,7 @@ if (ocrV2PortraitMode) {
         start <= firstReadings.length - layoutType.lines;
         start++
       ) {
-        const parts = firstReadings.slice(
+        const parts = repairedReadings.slice(
           start,
           start + layoutType.lines
         )
@@ -19502,9 +19568,19 @@ if (ocrV2PortraitMode) {
           index < selected.start + selected.lines;
           index++
         ) {
-          const variant = rowImages[index]?.[1]
+          const repaired = repairedRowIndices.has(index)
+
+          const variant = rowImages[index]?.[
+            repaired ? 0 : 1
+          ]
 
           if (!variant) break
+
+          await portraitWorker.setParameters({
+            tessedit_char_whitelist: '0123456789',
+            tessedit_pageseg_mode:
+              repaired ? PSM.SINGLE_WORD : PSM.SINGLE_LINE
+          })
 
           const recognized =
             await portraitWorker.recognize(variant)
