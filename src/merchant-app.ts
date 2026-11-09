@@ -17352,6 +17352,7 @@ const ocrV2GuidePortrait =
   }
 
   let ocrV2PortraitMode = false
+  let nxgPortraitRowCount: 2 | 4 = 4
 
 ocrV2GuideLandscape?.addEventListener(
   'click',
@@ -17381,6 +17382,7 @@ ocrV2GuidePortrait?.addEventListener(
     if (!ocrV2CardGuide) return
 
     ocrV2PortraitMode = true
+    nxgPortraitRowCount = 4
 
     ocrV2CardGuide.style.width = '42%'
     ocrV2CardGuide.style.height = 'auto'
@@ -17398,6 +17400,7 @@ ocrV2GuidePortraitTwo?.addEventListener(
     if (!ocrV2CardGuide) return
 
     ocrV2PortraitMode = true
+    nxgPortraitRowCount = 2
 
     ocrV2CardGuide.style.width = '88%'
     ocrV2CardGuide.style.height = 'auto'
@@ -19266,14 +19269,10 @@ void (
 let nxgPortraitTwoPassVerified = false
 
 const nxgPortraitDiag = {
-  layoutMs: 0,
+  rowCount: 0,
+  firstLengths: [] as number[],
+  secondLengths: [] as number[],
   readMs: 0,
-  rows: 0,
-  lengths: [] as number[],
-  repairedLengths: [] as number[],
-  retryCount: 0,
-  retryMs: 0,
-  candidates: 0,
   verified: false
 }
 
@@ -19295,33 +19294,20 @@ const nxgShowPortraitDiag = (
       'background:#f1f5f9;color:#111827;' +
       'border-radius:8px;'
 
-    ocrV2Status.insertAdjacentElement(
-      'afterend',
-      panel
-    )
+    ocrV2Status.insertAdjacentElement('afterend', panel)
   }
 
-  const fallbackMs = fallbackTimes.reduce(
-    (sum, value) => sum + value,
-    0
-  ) * 1000
-
   panel.textContent = [
-    '세로형 OCR 진단 (카드번호 미기록)',
-    '줄 탐색: ' + nxgPortraitDiag.layoutMs + 'ms',
-    '발견한 줄: ' + nxgPortraitDiag.rows + '개',
-    '줄별 자릿수: ' +
-      (nxgPortraitDiag.lengths.join(', ') || '없음'),
-    '줄 판독: ' + nxgPortraitDiag.readMs + 'ms',
-    '재인식 후 자릿수: ' +
-      (nxgPortraitDiag.repairedLengths.join(', ') || '없음'),
-    '선별 재인식: ' + nxgPortraitDiag.retryCount + '회',
-    '선별 재인식 시간: ' + nxgPortraitDiag.retryMs + 'ms',
-    'Luhn 후보: ' + nxgPortraitDiag.candidates + '개',
+    '세로형 직접 분할 OCR 진단',
+    '분할한 줄: ' + nxgPortraitDiag.rowCount + '개',
+    '1차 자릿수: ' +
+      (nxgPortraitDiag.firstLengths.join(', ') || '없음'),
+    '2차 자릿수: ' +
+      (nxgPortraitDiag.secondLengths.join(', ') || '없음'),
+    '분할 OCR 시간: ' + nxgPortraitDiag.readMs + 'ms',
     '재검증: ' +
       (nxgPortraitDiag.verified ? '통과' : '미통과'),
     '기존 OCR 재시도: ' + fallbackTimes.length + '회',
-    '기존 OCR 시간: ' + Math.round(fallbackMs) + 'ms',
     '전체 시간: ' +
       Math.round(performance.now() - ocrCaptureStartedAt) +
       'ms'
@@ -19329,341 +19315,139 @@ const nxgShowPortraitDiag = (
 }
 
 if (ocrV2PortraitMode) {
-  const layoutImages =
-    createOcrProcessedCanvases(ocrV2Canvas)
-
-  const rowImages: HTMLCanvasElement[][] = []
+  const rowCanvases: HTMLCanvasElement[][] = []
+  const startedAt = performance.now()
 
   try {
-    const image = layoutImages[0]
-
-    if (!image || !worker) {
-      throw new Error('세로형 OCR 준비 실패')
+    if (!worker) {
+      throw new Error('OCR Worker 없음')
     }
 
     const portraitWorker = worker
+    const source = ocrV2Canvas
+    const rowCount = nxgPortraitRowCount
+    const expectedDigits = rowCount === 4 ? 4 : 8
+
+    nxgPortraitDiag.rowCount = rowCount
 
     if (ocrV2Status) {
       ocrV2Status.textContent =
-        '세로형 숫자 줄을 분석하고 있습니다...'
+        '카드번호 ' + rowCount + '줄을 인식하고 있습니다...'
     }
 
     await portraitWorker.setParameters({
       tessedit_char_whitelist: '0123456789',
-      tessedit_pageseg_mode: PSM.SPARSE_TEXT
-    })
-
-    const nxgLayoutStart = performance.now()
-
-    const layout = await portraitWorker.recognize(
-      image, {}, { blocks: true }
-    )
-
-    nxgPortraitDiag.layoutMs =
-      Math.round(performance.now() - nxgLayoutStart)
-
-    type PortraitRow = {
-      x0: number
-      y0: number
-      x1: number
-      y1: number
-    }
-
-    const allRows: PortraitRow[] = []
-
-    // 인식된 숫자 내용 대신 글자 줄의 위치를 탐색
-    for (const block of layout.data.blocks || []) {
-      for (const paragraph of block.paragraphs || []) {
-        for (const line of paragraph.lines || []) {
-          const box = line.bbox
-
-          if (!box) continue
-
-          const height = box.y1 - box.y0
-          const width = box.x1 - box.x0
-
-          if (
-            height < image.height * 0.015 ||
-            width < image.width * 0.10
-          ) continue
-
-          const center = (box.y0 + box.y1) / 2
-
-          const existing = allRows.find(row =>
-            Math.abs(
-              (row.y0 + row.y1) / 2 - center
-            ) <=
-            Math.max(
-              row.y1 - row.y0,
-              height
-            ) * 0.55
-          )
-
-          if (existing) {
-            existing.x0 = Math.min(existing.x0, box.x0)
-            existing.x1 = Math.max(existing.x1, box.x1)
-            existing.y0 = Math.min(existing.y0, box.y0)
-            existing.y1 = Math.max(existing.y1, box.y1)
-          } else {
-            allRows.push({
-              x0: box.x0,
-              x1: box.x1,
-              y0: box.y0,
-              y1: box.y1
-            })
-          }
-        }
-      }
-    }
-
-    // 큰 글자 줄부터 후보를 선별하고 위에서 아래로 정렬
-    const rows = allRows
-      .sort((a, b) =>
-        (b.y1 - b.y0) - (a.y1 - a.y0)
-      )
-      .slice(0, 7)
-      .sort((a, b) => a.y0 - b.y0)
-
-    nxgPortraitDiag.rows = rows.length
-
-    // 가로형과 동일한 한 줄 OCR 방식 적용
-    await portraitWorker.setParameters({
-      tessedit_char_whitelist: '0123456789',
+      preserve_interword_spaces: '1',
       tessedit_pageseg_mode: PSM.SINGLE_LINE
     })
 
-    const firstReadings: string[] = []
+    // 촬영된 숫자 영역을 2줄 또는 4줄로 직접 분할
+    const bandHeight = source.height / rowCount
 
-    const nxgReadStart = performance.now()
-
-    for (const row of rows) {
-      const padding =
-        (row.y1 - row.y0) * 0.65
-
-      const x = Math.max(
-        0, Math.floor(row.x0 - padding)
-      )
-
-      const y = Math.max(
-        0, Math.floor(row.y0 - padding)
-      )
-
-      const right = Math.min(
-        image.width,
-        Math.ceil(row.x1 + padding)
+    for (let index = 0; index < rowCount; index++) {
+      const top = Math.max(
+        0,
+        Math.floor(
+          index * bandHeight - bandHeight * 0.07
+        )
       )
 
       const bottom = Math.min(
-        image.height,
-        Math.ceil(row.y1 + padding)
+        source.height,
+        Math.ceil(
+          (index + 1) * bandHeight + bandHeight * 0.07
+        )
+      )
+
+      const left = Math.floor(source.width * 0.02)
+      const width = Math.max(
+        1, Math.floor(source.width * 0.96)
       )
 
       const tile = document.createElement('canvas')
 
-      tile.width = Math.max(1, right - x)
-      tile.height = Math.max(1, bottom - y)
+      tile.width = width
+      tile.height = Math.max(1, bottom - top)
 
       tile.getContext('2d')?.drawImage(
-        image,
-        x, y, tile.width, tile.height,
-        0, 0, tile.width, tile.height
+        source,
+        left, top, width, tile.height,
+        0, 0, width, tile.height
       )
 
       const variants =
         createOcrProcessedCanvases(tile)
 
-      rowImages.push(variants)
+      rowCanvases.push(variants)
 
       tile.width = 0
       tile.height = 0
-
-      if (variants[0]) {
-        const recognized =
-          await portraitWorker.recognize(variants[0])
-
-        firstReadings.push(
-          recognized.data.text.replace(/\D/g, '')
-        )
-      } else {
-        firstReadings.push('')
-      }
     }
 
-    nxgPortraitDiag.readMs =
-      Math.round(performance.now() - nxgReadStart)
+    const readRows = async (variantIndex: number) => {
+      const values: string[] = []
 
-    nxgPortraitDiag.lengths =
-      firstReadings.map(value => value.length)
+      for (const variants of rowCanvases) {
+        const canvas = variants[variantIndex]
 
-    const repairedReadings = [...firstReadings]
-    const repairedRowIndices = new Set<number>()
-    const retryTargets = new Set<number>()
-
-    for (const shape of [
-      { lines: 2, digits: 8 },
-      { lines: 4, digits: 4 }
-    ]) {
-      for (
-        let start = 0;
-        start <= firstReadings.length - shape.lines;
-        start++
-      ) {
-        const incorrect: number[] = []
-
-        for (
-          let index = start;
-          index < start + shape.lines;
-          index++
-        ) {
-          if (firstReadings[index].length !== shape.digits) {
-            incorrect.push(index)
-          }
-        }
-
-        if (incorrect.length === 1) {
-          retryTargets.add(incorrect[0])
-        }
-      }
-    }
-
-    const retryStarted = performance.now()
-
-    // 최대 두 줄만 추가 인식해 처리 시간 제한
-    for (const index of [...retryTargets].slice(0, 2)) {
-      const contrastImage = rowImages[index]?.[1]
-
-      if (!contrastImage) continue
-
-      const recognized =
-        await portraitWorker.recognize(contrastImage)
-
-      const digits =
-        recognized.data.text.replace(/\D/g, '')
-
-      nxgPortraitDiag.retryCount++
-
-      if (digits.length === 4 || digits.length === 8) {
-        repairedReadings[index] = digits
-        repairedRowIndices.add(index)
-      }
-    }
-
-    nxgPortraitDiag.retryMs =
-      Math.round(performance.now() - retryStarted)
-
-    nxgPortraitDiag.repairedLengths =
-      repairedReadings.map(value => value.length)
-
-    // A형: 8+8, B형: 4+4+4+4
-    const matches: Array<{
-      number: string
-      start: number
-      lines: number
-    }> = []
-
-    for (const layoutType of [
-      { lines: 2, digitsPerLine: 8 },
-      { lines: 4, digitsPerLine: 4 }
-    ]) {
-      for (
-        let start = 0;
-        start <= firstReadings.length - layoutType.lines;
-        start++
-      ) {
-        const parts = repairedReadings.slice(
-          start,
-          start + layoutType.lines
-        )
-
-        if (!parts.every(
-          part => part.length === layoutType.digitsPerLine
-        )) {
+        if (!canvas) {
+          values.push('')
           continue
         }
 
-        const number = parts.join('')
+        const result =
+          await portraitWorker.recognize(canvas)
 
-        if (isValidLuhn(number)) {
-          matches.push({
-            number,
-            start,
-            lines: layoutType.lines
-          })
-        }
+        // 카드번호 원문은 기록하지 않는다
+        values.push(
+          result.data.text.replace(/\D/g, '')
+        )
       }
+
+      return values
     }
 
-    // 유일한 후보만 대비 강화 영상으로 재검증
-    const uniqueNumbers = Array.from(
-      new Set(matches.map(item => item.number))
-    )
+    const first = await readRows(0)
+    const second = await readRows(1)
 
-    nxgPortraitDiag.candidates = uniqueNumbers.length
+    nxgPortraitDiag.firstLengths =
+      first.map(value => value.length)
 
-    if (uniqueNumbers.length === 1) {
-      const selected = matches.find(
-        item => item.number === uniqueNumbers[0]
+    nxgPortraitDiag.secondLengths =
+      second.map(value => value.length)
+
+    const firstNumber = first.join('')
+    const secondNumber = second.join('')
+
+    if (
+      first.length === rowCount &&
+      second.length === rowCount &&
+      first.every(value => value.length === expectedDigits) &&
+      second.every(value => value.length === expectedDigits) &&
+      firstNumber === secondNumber &&
+      firstNumber.length === 16 &&
+      isValidLuhn(firstNumber)
+    ) {
+      detectedCandidates.push(
+        firstNumber,
+        firstNumber
       )
 
-      if (selected) {
-        const verify: string[] = []
-
-        for (
-          let index = selected.start;
-          index < selected.start + selected.lines;
-          index++
-        ) {
-          const repaired = repairedRowIndices.has(index)
-
-          const variant = rowImages[index]?.[
-            repaired ? 0 : 1
-          ]
-
-          if (!variant) break
-
-          await portraitWorker.setParameters({
-            tessedit_char_whitelist: '0123456789',
-            tessedit_pageseg_mode:
-              repaired ? PSM.SINGLE_WORD : PSM.SINGLE_LINE
-          })
-
-          const recognized =
-            await portraitWorker.recognize(variant)
-
-          verify.push(
-            recognized.data.text.replace(/\D/g, '')
-          )
-        }
-
-        if (
-          verify.length === selected.lines &&
-          verify.join('') === selected.number
-        ) {
-          detectedCandidates.push(
-            selected.number,
-            selected.number
-          )
-
-          nxgPortraitTwoPassVerified = true
-          nxgPortraitDiag.verified = true
-        }
-      }
+      nxgPortraitTwoPassVerified = true
+      nxgPortraitDiag.verified = true
     }
 
   } catch {
-    console.warn('세로형 숫자 줄 탐색 실패')
+    console.warn('세로형 직접 분할 OCR 실패')
   } finally {
-    // 임시 OCR 이미지 정리
-    for (const variants of rowImages) {
+    nxgPortraitDiag.readMs =
+      Math.round(performance.now() - startedAt)
+
+    for (const variants of rowCanvases) {
       for (const canvas of variants) {
         canvas.width = 0
         canvas.height = 0
       }
-    }
-
-    for (const canvas of layoutImages) {
-      canvas.width = 0
-      canvas.height = 0
     }
 
     if (worker) {
@@ -19674,7 +19458,6 @@ if (ocrV2PortraitMode) {
     }
   }
 }
-
 const earlyCandidateCounts =
   new Map<
     string,
@@ -19693,7 +19476,7 @@ const fallbackOcrCandidates =
   )
 
 const orderedOcrCandidates =
-  nxgPortraitTwoPassVerified
+  (ocrV2PortraitMode || nxgPortraitTwoPassVerified)
     ? []
     : [
         ...primaryOcrCandidates,
