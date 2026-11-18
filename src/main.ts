@@ -7,6 +7,7 @@ import Tesseract from 'tesseract.js'
 import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
 import { renderBeautyStaff } from './beauty/staff'
+import { mountKorpayMidPoolButton, mountKorpayMidAssignment } from './admin-korpay-mid-pool'
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 const adminPassword = '1234'
@@ -10767,6 +10768,8 @@ const rejectedCount =
 '</div>'
   }
 
+  mountKorpayMidPoolButton()
+
   // 가맹점관리 카드 클릭 필터
 const merchantSummaryCards =
 summaryBox?.querySelectorAll<HTMLElement>(
@@ -11212,6 +11215,13 @@ const korpayManualMids =
     : []
 
 
+const escapeKorpayMidValue = (value: unknown) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+
 const getKorpayManualMidValue = (
   priority: number,
   field: 'mid' | 'mkey'
@@ -11511,11 +11521,11 @@ const getKorpayManualMidValue = (
   '<h3>PG / 단말기 정보</h3>' +
   '<div class="merchant-detail-grid">' +
 
-    '<label>코페이 PG MID</label><input id="korpay_pg_mid" value="' + (merchant.korpay_pg_mid || '') + '" />' +
-    '<label>코페이 PG MKEY</label><input id="korpay_pg_mkey" value="' + (merchant.korpay_pg_mkey || '') + '" />' +
+    '<label>코페이 PG MID</label><input id="korpay_pg_mid" value="' + escapeKorpayMidValue(merchant.korpay_pg_mid) + '" />' +
+    '<label>코페이 PG MKEY</label><input id="korpay_pg_mkey" value="' + escapeKorpayMidValue(merchant.korpay_pg_mkey) + '" />' +
 
-    '<label>코페이 단말기 MID</label><input id="korpay_terminal_mid" value="' + (merchant.korpay_terminal_mid || '') + '" />' +
-    '<label>코페이 단말기 MKEY</label><input id="korpay_terminal_mkey" value="' + (merchant.korpay_terminal_mkey || '') + '" />' +
+    '<label>코페이 단말기 MID</label><input id="korpay_terminal_mid" value="' + escapeKorpayMidValue(merchant.korpay_terminal_mid) + '" />' +
+    '<label>코페이 단말기 MKEY</label><input id="korpay_terminal_mkey" value="' + escapeKorpayMidValue(merchant.korpay_terminal_mkey) + '" />' +
 
     Array.from(
       { length: 10 },
@@ -11557,7 +11567,7 @@ const getKorpayManualMidValue = (
           '<input id="' +
           midId +
           '" value="' +
-          midValue +
+          escapeKorpayMidValue(midValue) +
           '" />' +
     
           '<label>코페이 수기 MKEY ' +
@@ -11567,7 +11577,7 @@ const getKorpayManualMidValue = (
           '<input id="' +
           mkeyId +
           '" value="' +
-          mkeyValue +
+          escapeKorpayMidValue(mkeyValue) +
           '" />'
         )
       }
@@ -11725,6 +11735,8 @@ const getKorpayManualMidValue = (
           '</div>' +
         '</td>' +
       '</tr>'
+
+      mountKorpayMidAssignment(Number(merchant.id))
 
       document.querySelector<HTMLButtonElement>('.address-search-btn')
   ?.addEventListener('click', () => {
@@ -12197,7 +12209,9 @@ await fetch(
         updateData,
   
       korpayManualMids:
-        korpayManualMids
+        korpayManualMids,
+      preserveKorpayMids:
+        adminRole === 'MASTER' && currentAdminId === 'NXGMASTER16'
     })
   }
 )

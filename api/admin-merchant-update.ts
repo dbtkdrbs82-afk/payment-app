@@ -409,6 +409,23 @@ import type {
       }
   
   
+      // NXG PC MID 보관함: 일반정보 저장 시 기존 MID 보호
+      const preserveKorpayMids =
+        req.body?.preserveKorpayMids === true
+
+      if (
+        preserveKorpayMids &&
+        (
+          actor.role !== 'MASTER' ||
+          actor.login_id !== 'NXGMASTER16'
+        )
+      ) {
+        return res.status(403).json({
+          success: false,
+          message: '대표관리자만 사용할 수 있습니다.'
+        })
+      }
+
       const contactFields = [
         'phone',
         'email',
@@ -861,6 +878,15 @@ import type {
       }
   
   
+      if (preserveKorpayMids) {
+        delete updateData.korpay_pg_mid
+        delete updateData.korpay_pg_mkey
+        delete updateData.korpay_terminal_mid
+        delete updateData.korpay_terminal_mkey
+        delete updateData.korpay_manual_mid
+        delete updateData.korpay_manual_mkey
+      }
+
       if (
         Object.keys(
           updateData
@@ -909,8 +935,11 @@ import type {
        * MASTER / BRANCH만 수정 가능
        */
             if (
-              actor.role === 'MASTER' ||
-              actor.role === 'BRANCH'
+              !preserveKorpayMids &&
+              (
+                actor.role === 'MASTER' ||
+                actor.role === 'BRANCH'
+              )
             ) {
       
               const normalizedManualMids =
