@@ -32,6 +32,139 @@ async function poolRequest(body: Record<string, unknown>) {
   return result
 }
 
+function ensureKorpayPoolStyles() {
+  if (document.getElementById('nxg-mid-pool-scoped-style')) return
+
+  const style = document.createElement('style')
+  style.id = 'nxg-mid-pool-scoped-style'
+
+  style.textContent = `
+    #nxg-mid-pool-dialog,
+    #nxg-mid-assign-dialog {
+      box-sizing: border-box !important;
+      position: fixed !important;
+      inset: 0 !important;
+      margin: auto !important;
+      padding: 24px !important;
+      max-height: 90vh !important;
+      overflow: auto !important;
+      font-size: 14px !important;
+    }
+
+    #nxg-mid-pool-dialog {
+      width: 850px !important;
+      max-width: 94vw !important;
+    }
+
+    #nxg-mid-assign-dialog {
+      width: 560px !important;
+      max-width: 94vw !important;
+    }
+
+    #nxg-mid-pool-dialog h2,
+    #nxg-mid-assign-dialog h2 {
+      font-size: 22px !important;
+      white-space: nowrap !important;
+      flex: 1 !important;
+      margin: 0 !important;
+    }
+
+    #nxg-mid-pool-dialog button,
+    #nxg-mid-assign-dialog button {
+      box-sizing: border-box !important;
+      width: auto !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      height: 42px !important;
+      margin: 0 !important;
+      padding: 0 20px !important;
+      flex: 0 0 auto !important;
+      white-space: nowrap !important;
+      border-radius: 8px !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      background: #174683 !important;
+      color: white !important;
+      border: 1px solid #174683 !important;
+    }
+
+    #nxg-mid-pool-dialog button:disabled,
+    #nxg-mid-assign-dialog button:disabled {
+      opacity: 0.5 !important;
+      cursor: not-allowed !important;
+    }
+
+    #nxg-mid-pool-dialog #mid-pool-close,
+    #nxg-mid-assign-dialog #mid-assign-cancel {
+      background: white !important;
+      color: #334155 !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+
+    #nxg-mid-pool-dialog button[data-mid-type] {
+      flex: 1 1 0 !important;
+      background: #fff !important;
+      color: #174683 !important;
+    }
+
+    #nxg-mid-pool-dialog button[data-mid-type][aria-pressed="true"] {
+      background: #174683 !important;
+      color: white !important;
+    }
+
+    #nxg-mid-pool-dialog div:has(> #pool-single-mid) {
+      display: grid !important;
+      grid-template-columns: minmax(0,1fr) minmax(0,1fr) 90px !important;
+      align-items: center !important;
+      gap: 10px !important;
+    }
+
+    #nxg-mid-pool-dialog input,
+    #nxg-mid-pool-dialog textarea,
+    #nxg-mid-assign-dialog select {
+      box-sizing: border-box !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      max-width: none !important;
+      padding: 12px !important;
+      margin: 0 !important;
+      border: 1px solid #cbd5e1 !important;
+      border-radius: 8px !important;
+      font-size: 14px !important;
+      color: #17365d !important;
+      background: white !important;
+    }
+
+    #nxg-mid-pool-dialog input,
+    #nxg-mid-assign-dialog select {
+      height: 42px !important;
+    }
+
+    #nxg-mid-pool-dialog textarea {
+      height: 110px !important;
+      resize: vertical !important;
+    }
+
+    #nxg-mid-pool-dialog #pool-bulk-register {
+      min-width: 120px !important;
+    }
+
+    #nxg-mid-pool-dialog table {
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+
+    #nxg-mid-pool-dialog th,
+    #nxg-mid-pool-dialog td {
+      font-size: 14px !important;
+      padding: 12px !important;
+    }
+  `
+
+  document.head.appendChild(style)
+}
+
 export function openKorpayMidPool() {
   if (
     location.pathname !== '/pg-admin' ||
@@ -107,7 +240,7 @@ export function openKorpayMidPool() {
     </div>
   `
 
-  document.body.appendChild(dialog)
+  ensureKorpayPoolStyles(); document.body.appendChild(dialog)
 
   const mid = dialog.querySelector<HTMLInputElement>('#pool-single-mid')!
   const mkey = dialog.querySelector<HTMLInputElement>('#pool-single-mkey')!
@@ -135,6 +268,7 @@ export function openKorpayMidPool() {
 
     tabs.forEach(button => {
       const active = button.dataset.midType === currentType
+      button.setAttribute('aria-pressed', String(active))
 
       button.style.cssText =
         'flex:1;padding:12px;border-radius:8px;' +
@@ -454,7 +588,7 @@ export function mountKorpayMidAssignment(merchantId: number) {
         </div>
       `
 
-      document.body.appendChild(dialog)
+      ensureKorpayPoolStyles(); document.body.appendChild(dialog)
 
       const title = dialog.querySelector<HTMLElement>('#mid-assign-title')!
       const merchantLabel = dialog.querySelector<HTMLElement>('#mid-assign-merchant')!
