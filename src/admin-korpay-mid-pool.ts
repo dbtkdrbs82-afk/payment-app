@@ -236,7 +236,7 @@ export function openKorpayMidPool() {
     <textarea id="pool-bulk-input"
       autocomplete="off"
       spellcheck="false"
-      placeholder="일괄 등록: 한 줄에 MID와 MKEY 한 세트&#10;엑셀 복사 또는 공백, 쉼표로 구분하여 입력하세요."
+      placeholder="일괄 등록: MID와 MKEY를 두 줄씩 입력&#10;MID 1&#10;MKEY 1&#10;MID 2&#10;MKEY 2"
       style="box-sizing:border-box;width:100%;height:110px;padding:12px"
     ></textarea>
 
@@ -600,52 +600,78 @@ export function openKorpayMidPool() {
 
   dialog.querySelector('#pool-bulk-register')
     ?.addEventListener('click', () => {
+
+      // MID / MKEY 두 줄을 한 세트로 처리
       const lines = bulk.value
-        .split(/\r?\n/)
-        .filter(line => line.trim())
+        .replace(/\r\n?/g, '\n')
+        .split('\n')
 
-      const pairs: { mid: string; mkey: string }[] = []
+      // 마지막 빈 줄만 제거
+      while (
+        lines.length &&
+        !lines[lines.length - 1].trim()
+      ) {
+        lines.pop()
+      }
 
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim()
+      if (!lines.length) {
+        alert('MID와 MKEY를 입력해주세요.')
+        return
+      }
 
-        // 엑셀 탭 / 쉼표 / 구분선 / 공백 지원
-        const parts = (
-          line.includes('\t')
-            ? line.split('\t')
-            : line.includes(',')
-              ? line.split(',')
-              : line.includes('|')
-                ? line.split('|')
-                : line.split(/\s+/)
-        ).map(value => value.trim())
+      if (lines.length % 2 !== 0) {
+        alert(
+          'MID와 MKEY의 줄 개수가 맞지 않습니다.\n' +
+          'MID 한 줄, MKEY 한 줄씩 입력해주세요.'
+        )
+        return
+      }
 
-        // 엑셀 제목 행 자동 제외
-        if (
-          i === 0 &&
-          parts.length === 2 &&
-          parts[0].toUpperCase() === 'MID' &&
-          parts[1].toUpperCase() === 'MKEY'
-        ) {
-          continue
+      if (lines.length > 200) {
+        alert('한 번에 최대 100세트까지 등록 가능합니다.')
+        return
+      }
+
+      const pairs: {
+        mid: string
+        mkey: string
+      }[] = []
+
+      for (let i = 0; i < lines.length; i += 2) {
+
+        const midValue = lines[i].trim()
+        const mkeyValue = lines[i + 1].trim()
+
+        if (!midValue || !mkeyValue) {
+          alert(
+            (i + 1) + '~' + (i + 2) +
+            '번째 줄을 확인해주세요.\n' +
+            '중간에 빈 줄이 있으면 안 됩니다.'
+          )
+          return
         }
 
-        if (parts.length !== 2 || parts.some(value => !value)) {
+        if (
+          /[\s\/,|]/.test(midValue) ||
+          /\s/.test(mkeyValue)
+        ) {
           alert(
-            (i + 1) + '번째 줄을 확인해주세요.\n' +
-            '한 줄에 MID와 MKEY를 한 세트씩 입력해주세요.'
+            (i + 1) + '~' + (i + 2) +
+            '번째 줄의 입력 형식을 확인해주세요.\n' +
+            'MID와 MKEY를 각각 한 줄씩 입력해주세요.'
           )
           return
         }
 
         pairs.push({
-          mid: parts[0],
-          mkey: parts[1]
+          mid: midValue,
+          mkey: mkeyValue
         })
       }
 
       void register(pairs)
     })
+
 
   tabs.forEach(button => {
     button.addEventListener('click', async () => {
