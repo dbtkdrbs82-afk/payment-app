@@ -213,36 +213,37 @@ export default async function handler(
       })
     }
 
-    // 가맹점 빈 MID 위치에 배정
-    if (action === 'assign') {
+    // 보관함 오등록 종류 변경 및 삭제
+    if (action === 'correct') {
       const poolId = String(req.body?.pool_id || '')
-      const merchantId = Number(req.body?.merchant_id)
-      const midType = String(req.body?.mid_type || '')
-      const slot = Number(req.body?.slot ?? 1)
+      const expectedType = String(req.body?.mid_type || '')
+      const correction = String(req.body?.correction || '')
+      const newType = String(req.body?.new_type || '')
 
       if (
         !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(poolId) ||
-        !Number.isSafeInteger(merchantId) ||
-        merchantId <= 0 ||
-        !MID_TYPES.includes(midType) ||
-        !Number.isInteger(slot) ||
-        slot < 1 ||
-        slot > 10 ||
-        (midType !== 'manual' && slot !== 1)
+        !MID_TYPES.includes(expectedType) ||
+        !['change_type', 'delete'].includes(correction) ||
+        (
+          correction === 'change_type' &&
+          !MID_TYPES.includes(newType)
+        )
       ) {
         return res.status(400).json({
           success: false,
-          message: 'MID 배정정보가 올바르지 않습니다.'
+          message: 'MID 수정정보가 올바르지 않습니다.'
         })
       }
 
       const { data, error } = await supabase.rpc(
-        'nxg_korpay_pool_assign',
+        'nxg_korpay_pool_correct',
         {
           p_pool_id: poolId,
-          p_merchant_id: merchantId,
-          p_type: midType,
-          p_slot: slot
+          p_action: correction,
+          p_expected_type: expectedType,
+          p_new_type: correction === 'change_type'
+            ? newType
+            : null
         }
       )
 
@@ -251,7 +252,17 @@ export default async function handler(
       return res.status(200).json({
         success: true,
         data,
-        message: 'MID 배정 완료'
+        message: correction === 'delete'
+          ? 'MID 삭제 완료'
+          : 'MID 종류 변경 완료'
+      })
+    }
+
+    // 즉시 배정 금지
+    if (action === 'assign') {
+      return res.status(409).json({
+        success: false,
+        message: '가맹점 최종 저장 버튼으로 저장해주세요.'
       })
     }
 

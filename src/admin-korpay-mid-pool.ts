@@ -232,7 +232,7 @@ export function openKorpayMidPool() {
             <th style="padding:10px">No</th>
             <th>MID</th>
             <th>MKEY</th>
-            <th>상태</th>
+            <th>상태</th><th>관리</th>
           </tr>
         </thead>
         <tbody id="mid-pool-rows"></tbody>
@@ -258,6 +258,10 @@ export function openKorpayMidPool() {
         button.disabled = value
       })
 
+    dialog.querySelectorAll<HTMLSelectElement>('select').forEach(select => {
+      select.disabled = value
+    })
+
     mid.disabled = value
     mkey.disabled = value
     bulk.disabled = value
@@ -277,6 +281,61 @@ export function openKorpayMidPool() {
           ? 'background:#174683;color:white;'
           : 'background:white;color:#174683;')
     })
+  }
+
+  async function correctPoolItem(
+    item: PoolItem,
+    correction: 'change_type' | 'delete',
+    newType?: MidType
+  ) {
+    if (busy || item.mid_type !== currentType) return
+
+    if (correction === 'change_type') {
+      if (!newType || newType === item.mid_type) {
+        alert('변경할 MID 종류를 선택해주세요.')
+        return
+      }
+    }
+
+    const message = correction === 'delete'
+      ? item.mid + ' MID를 보관함에서 삭제하시겠습니까?\n다시 사용하려면 재등록해야 합니다.'
+      : item.mid + '의 종류를 ' +
+        typeNames[item.mid_type] + '에서 ' +
+        typeNames[newType!] + '(으)로 변경하시겠습니까?'
+
+    if (!confirm(message)) return
+
+    setBusy(true)
+
+    try {
+      await poolRequest({
+        action: 'correct',
+        correction,
+        pool_id: item.id,
+        mid_type: item.mid_type,
+        new_type: newType || null
+      })
+
+      alert(
+        correction === 'delete'
+          ? 'MID 삭제 완료'
+          : 'MID 종류 변경 완료'
+      )
+
+      await refresh()
+
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : 'MID 수정 실패'
+      )
+
+      await refresh()
+
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function refresh() {
@@ -311,6 +370,94 @@ export function openKorpayMidPool() {
           td.style.cssText = 'padding:12px;border-bottom:1px solid #e2e8f0'
           tr.appendChild(td)
         })
+
+        const actionTd = document.createElement('td')
+
+        const actions = document.createElement('div')
+
+        actions.style.cssText =
+          'display:flex;align-items:center;justify-content:center;' +
+          'gap:6px;flex-wrap:wrap;'
+
+        const typeSelect = document.createElement('select')
+
+        typeSelect.style.cssText =
+          'width:95px!important;min-width:0!important;' +
+          'height:36px!important;padding:5px!important;' +
+          'border:1px solid #cbd5e1;border-radius:6px;' +
+          'font-size:13px;background:white;color:#17365d;'
+
+        const types: MidType[] = [
+          'pg', 'terminal', 'manual'
+        ]
+
+        types.forEach(type => {
+          const option = document.createElement('option')
+          option.value = type
+          option.textContent = typeNames[type]
+          typeSelect.appendChild(option)
+        })
+
+        typeSelect.value = item.mid_type
+
+        const changeButton = document.createElement('button')
+
+        changeButton.type = 'button'
+        changeButton.textContent = '변경'
+
+        changeButton.style.setProperty(
+          'padding', '0 10px', 'important'
+        )
+
+        changeButton.style.setProperty(
+          'height', '36px', 'important'
+        )
+
+        changeButton.onclick = () => {
+          void correctPoolItem(
+            item,
+            'change_type',
+            typeSelect.value as MidType
+          )
+        }
+
+        const deleteButton = document.createElement('button')
+
+        deleteButton.type = 'button'
+        deleteButton.textContent = '삭제'
+
+        deleteButton.style.setProperty(
+          'background', '#fff', 'important'
+        )
+
+        deleteButton.style.setProperty(
+          'color', '#dc2626', 'important'
+        )
+
+        deleteButton.style.setProperty(
+          'border-color', '#dc2626', 'important'
+        )
+
+        deleteButton.style.setProperty(
+          'padding', '0 10px', 'important'
+        )
+
+        deleteButton.style.setProperty(
+          'height', '36px', 'important'
+        )
+
+        deleteButton.onclick = () => {
+          void correctPoolItem(item, 'delete')
+        }
+
+        actions.append(
+          typeSelect,
+          changeButton,
+          deleteButton
+        )
+
+        actionTd.appendChild(actions)
+        tr.appendChild(actionTd)
 
         tbody.appendChild(tr)
       })
@@ -470,6 +617,42 @@ export function mountKorpayMidPoolButton() {
   button.addEventListener('click', openKorpayMidPool)
 }
 
+type PendingAssignment = {
+  merchantId: number
+  pool_id: string
+  mid_type: MidType
+  slot: number
+  mid: string
+}
+
+// 현재 열려있는 가맹점 화면에만 임시 선택정보 보관
+const pendingByInput =
+  new WeakMap<HTMLInputElement, PendingAssignment>()
+
+export function getKorpayPoolAssignments(merchantId: number) {
+  const result: {
+    pool_id: string
+    mid_type: MidType
+    slot: number
+  }[] = []
+
+  document.querySelectorAll<HTMLInputElement>(
+    'input[data-pool-bound="true"]'
+  ).forEach(input => {
+    const pending = pendingByInput.get(input)
+
+    if (pending?.merchantId === merchantId) {
+      result.push({
+        pool_id: pending.pool_id,
+        mid_type: pending.mid_type,
+        slot: pending.slot
+      })
+    }
+  })
+
+  return result
+}
+
 export function mountKorpayMidAssignment(merchantId: number) {
   if (
     location.pathname !== '/pg-admin' ||
@@ -509,6 +692,41 @@ export function mountKorpayMidAssignment(merchantId: number) {
     }))
   ]
 
+  const saveButton =
+    document.querySelector<HTMLButtonElement>('#save-merchant-info')
+
+  const heading = document.getElementById('korpay_pg_mid')
+    ?.closest('.merchant-detail-section')
+    ?.querySelector('h3')
+
+  if (
+    heading &&
+    !document.getElementById('nxg-mid-pending-notice')
+  ) {
+    const notice = document.createElement('p')
+
+    notice.id = 'nxg-mid-pending-notice'
+
+    notice.style.cssText =
+      'padding:10px;background:#eff6ff;color:#174683;' +
+      'border-radius:6px;font-size:13px;margin:8px 0;'
+
+    notice.textContent =
+      'MID 선택은 임시 상태입니다. 하단 저장 버튼을 눌러야 실제 배정됩니다.'
+
+    heading.insertAdjacentElement('afterend', notice)
+  }
+
+  // 임시 선택한 상태에서 개통완료하는 실수 방지
+  document.getElementById('approve-merchant')
+    ?.addEventListener('click', event => {
+      if (getKorpayPoolAssignments(merchantId).length > 0) {
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        alert('선택한 MID를 먼저 최종 저장해주세요.')
+      }
+    }, true)
+
   targets.forEach(target => {
     const midInput =
       document.getElementById(target.midId) as HTMLInputElement | null
@@ -517,49 +735,109 @@ export function mountKorpayMidAssignment(merchantId: number) {
       document.getElementById(target.mkeyId) as HTMLInputElement | null
 
     if (!midInput || !mkeyInput) return
-
     if (midInput.dataset.poolBound === 'true') return
 
     midInput.dataset.poolBound = 'true'
-
     midInput.readOnly = true
     mkeyInput.readOnly = true
     mkeyInput.type = 'password'
 
-    mkeyInput.style.backgroundColor = '#f1f5f9'
+    const occupied = Boolean(
+      midInput.value.trim() ||
+      mkeyInput.value.trim()
+    )
 
-    function updateInputState() {
-      const occupied =
-        Boolean(midInput!.value.trim() || mkeyInput!.value.trim())
-
-      midInput!.style.cursor = occupied ? 'default' : 'pointer'
-
-      midInput!.title = occupied
-        ? '기존 등록 MID는 보호됩니다.'
-        : '미사용 MID 보관함에서 선택'
-
-      midInput!.placeholder = occupied
-        ? ''
-        : typeNames[target.midType] + ' MID 선택'
-
-      mkeyInput!.placeholder = 'MKEY 자동입력'
+    // 기존에 저장된 MID는 계속 보호
+    if (occupied) {
+      midInput.title = '기존 등록 MID는 보호됩니다.'
+      midInput.style.cursor = 'default'
+      return
     }
 
-    updateInputState()
+    const wrapper = document.createElement('div')
+
+    wrapper.style.cssText =
+      'display:flex!important;gap:5px;align-items:center;' +
+      'min-width:0;width:100%;'
+
+    midInput.replaceWith(wrapper)
+    wrapper.appendChild(midInput)
+
+    midInput.style.setProperty('flex', '1 1 0', 'important')
+    midInput.style.setProperty('width', 'auto', 'important')
+    midInput.style.setProperty('min-width', '0', 'important')
+
+    const clearButton = document.createElement('button')
+
+    clearButton.type = 'button'
+    clearButton.textContent = '취소'
+
+    clearButton.style.cssText =
+      'display:none!important;width:auto!important;' +
+      'min-width:0!important;flex:0 0 auto!important;' +
+      'height:32px!important;padding:0 8px!important;' +
+      'background:#fff!important;color:#dc2626!important;' +
+      'border:1px solid #dc2626!important;' +
+      'border-radius:5px!important;font-size:12px!important;'
+
+    wrapper.appendChild(clearButton)
+
+    function renderPending() {
+      const pending = pendingByInput.get(midInput!)
+
+      midInput!.value = pending?.mid || ''
+      midInput!.style.cursor = 'pointer'
+
+      midInput!.placeholder =
+        typeNames[target.midType] + ' MID 선택'
+
+      midInput!.title = pending
+        ? '임시 선택 상태: 클릭하여 다시 선택'
+        : '미사용 MID 보관함에서 선택'
+
+      midInput!.style.backgroundColor =
+        pending ? '#fff7d6' : '#ffffff'
+
+      // 실제 비밀키는 최종 저장 시 서버에서 가져옴
+      mkeyInput!.value = ''
+
+      mkeyInput!.placeholder = pending
+        ? '선택완료 / 저장 시 자동입력'
+        : 'MKEY 자동입력'
+
+      mkeyInput!.style.backgroundColor =
+        pending ? '#fff7d6' : '#f1f5f9'
+
+      clearButton.style.setProperty(
+        'display',
+        pending ? 'inline-block' : 'none',
+        'important'
+      )
+    }
+
+    clearButton.onclick = () => {
+      if (saveButton?.disabled) return
+
+      pendingByInput.delete(midInput)
+      renderPending()
+    }
+
+    renderPending()
 
     async function openSelector() {
+      if (!midInput || !mkeyInput) return
+      if (saveButton?.disabled) return
+
       if (
-        !midInput ||
-        !mkeyInput ||
-        midInput.value.trim() ||
-        mkeyInput.value.trim()
+        document.getElementById('nxg-mid-assign-dialog')
       ) return
 
-      if (document.querySelector('#nxg-mid-assign-dialog')) return
+      ensureKorpayPoolStyles()
 
       const dialog = document.createElement('dialog')
 
       dialog.id = 'nxg-mid-assign-dialog'
+
       dialog.style.cssText =
         'width:560px;max-width:92vw;border:1px solid #d6dfeb;' +
         'border-radius:14px;padding:24px;background:white;color:#17365d;'
@@ -570,39 +848,48 @@ export function mountKorpayMidAssignment(merchantId: number) {
         <p id="mid-assign-merchant"></p>
 
         <p style="color:#64748b">
-          선택한 MID와 MKEY가 한 세트로 저장됩니다.
+          지금은 임시 선택만 합니다.
+          가맹점 최종 저장 전에는 보관함에서 삭제되지 않습니다.
         </p>
 
-        <select id="mid-assign-select"
-          style="width:100%;padding:14px;border:1px solid #ccd6e3;border-radius:8px">
-        </select>
+        <select id="mid-assign-select"></select>
 
         <p id="mid-assign-count"></p>
 
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:24px">
-          <button type="button" id="mid-assign-cancel">취소</button>
-          <button type="button" id="mid-assign-submit"
-            style="background:#174683;color:white;border:0;border-radius:8px;padding:12px 24px">
-            MID 배정
-          </button>
+          <button type="button" id="mid-assign-cancel">닫기</button>
+          <button type="button" id="mid-assign-submit">선택</button>
         </div>
       `
 
-      ensureKorpayPoolStyles(); document.body.appendChild(dialog)
+      document.body.appendChild(dialog)
 
-      const title = dialog.querySelector<HTMLElement>('#mid-assign-title')!
-      const merchantLabel = dialog.querySelector<HTMLElement>('#mid-assign-merchant')!
-      const select = dialog.querySelector<HTMLSelectElement>('#mid-assign-select')!
-      const count = dialog.querySelector<HTMLElement>('#mid-assign-count')!
-      const submit = dialog.querySelector<HTMLButtonElement>('#mid-assign-submit')!
-      const cancel = dialog.querySelector<HTMLButtonElement>('#mid-assign-cancel')!
+      const title =
+        dialog.querySelector<HTMLElement>('#mid-assign-title')!
+
+      const merchantLabel =
+        dialog.querySelector<HTMLElement>('#mid-assign-merchant')!
+
+      const select =
+        dialog.querySelector<HTMLSelectElement>('#mid-assign-select')!
+
+      const count =
+        dialog.querySelector<HTMLElement>('#mid-assign-count')!
+
+      const submit =
+        dialog.querySelector<HTMLButtonElement>('#mid-assign-submit')!
+
+      const cancel =
+        dialog.querySelector<HTMLButtonElement>('#mid-assign-cancel')!
 
       title.textContent =
         typeNames[target.midType] + ' MID 선택' +
-        (target.midType === 'manual' ? ' (' + target.slot + '번)' : '')
+        (target.midType === 'manual'
+          ? ' (' + target.slot + '번)'
+          : '')
 
       merchantLabel.textContent =
-        '배정 가맹점: MER' + String(merchantId).padStart(4, '0')
+        '가맹점: MER' + String(merchantId).padStart(4, '0')
 
       let busy = true
       let items: PoolItem[] = []
@@ -623,28 +910,50 @@ export function mountKorpayMidAssignment(merchantId: number) {
       dialog.showModal()
 
       try {
+        const current = pendingByInput.get(midInput)
+
+        const usedIds = new Set(
+          getKorpayPoolAssignments(merchantId)
+            .filter(item => item.pool_id !== current?.pool_id)
+            .map(item => item.pool_id)
+        )
+
         const result = await poolRequest({
           action: 'list',
           mid_type: target.midType
         })
 
         items = (result.items || []).filter(
-          (item: PoolItem) => item.mid_type === target.midType
+          (item: PoolItem) =>
+            item.mid_type === target.midType &&
+            !usedIds.has(item.id)
         )
 
         const placeholder = document.createElement('option')
+
         placeholder.value = ''
         placeholder.textContent = '미사용 MID를 선택해주세요'
+
         select.appendChild(placeholder)
 
         items.forEach(item => {
           const option = document.createElement('option')
+
           option.value = item.id
           option.textContent = item.mid
+
           select.appendChild(option)
         })
 
-        count.textContent = '미사용 MID: ' + items.length + '개'
+        count.textContent =
+          '선택 가능 MID: ' + items.length + '개'
+
+        if (
+          current &&
+          items.some(item => item.id === current.pool_id)
+        ) {
+          select.value = current.pool_id
+        }
 
         select.disabled = items.length === 0
 
@@ -656,111 +965,48 @@ export function mountKorpayMidAssignment(merchantId: number) {
         count.textContent = error instanceof Error
           ? error.message
           : 'MID 조회 실패'
+
       } finally {
         busy = false
+        submit.disabled = !select.value
       }
 
-      submit.onclick = async () => {
-        if (busy || !select.value) return
+      submit.onclick = () => {
+        if (busy || !select.value || saveButton?.disabled) return
 
-        const selected = items.find(item => item.id === select.value)
+        const selected = items.find(
+          item => item.id === select.value
+        )
 
-        if (!selected || selected.mid_type !== target.midType) return
+        if (
+          !selected ||
+          selected.mid_type !== target.midType
+        ) return
 
-        if (!confirm(
-          selected.mid + '을(를) 해당 가맹점에 배정하시겠습니까?\n\n' +
-          'MID와 MKEY는 즉시 저장되며 미사용 보관함에서 삭제됩니다.'
-        )) return
+        const current = pendingByInput.get(midInput)
 
-        busy = true
-        submit.disabled = true
-        cancel.disabled = true
-        select.disabled = true
-
-        let assigned = false
-
-        try {
-          await poolRequest({
-            action: 'assign',
-            pool_id: selected.id,
-            merchant_id: merchantId,
-            mid_type: target.midType,
-            slot: target.slot
-          })
-
-          assigned = true
-
-          const response = await fetch(
-            '/api/admin-merchant-detail?id=' +
-            encodeURIComponent(String(merchantId)),
-            {
-              method: 'GET',
-              credentials: 'include',
-              cache: 'no-store'
-            }
+        if (
+          getKorpayPoolAssignments(merchantId).some(
+            item =>
+              item.pool_id === selected.id &&
+              item.pool_id !== current?.pool_id
           )
-
-          const result = await response.json()
-
-          if (!response.ok || !result?.success || !result.merchant) {
-            throw new Error('배정정보 재조회 실패')
-          }
-
-          let savedMid = ''
-          let savedMkey = ''
-
-          if (target.midType === 'manual') {
-            const row = (result.korpayManualMids || []).find(
-              (item: any) => Number(item.priority) === target.slot
-            )
-
-            savedMid = String(row?.mid || '')
-            savedMkey = String(row?.mkey || '')
-
-          } else if (target.midType === 'pg') {
-            savedMid = String(result.merchant.korpay_pg_mid || '')
-            savedMkey = String(result.merchant.korpay_pg_mkey || '')
-
-          } else {
-            savedMid = String(result.merchant.korpay_terminal_mid || '')
-            savedMkey = String(result.merchant.korpay_terminal_mkey || '')
-          }
-
-          if (savedMid !== selected.mid || !savedMkey) {
-            throw new Error('배정된 MID 정보 확인 필요')
-          }
-
-          midInput.value = savedMid
-          mkeyInput.value = savedMkey
-
-          updateInputState()
-
-          alert('MID / MKEY 배정 완료')
-          dialog.close()
-
-        } catch (error) {
-          if (assigned) {
-            alert(
-              'MID 배정은 완료됐습니다.\n' +
-              '가맹점 상세정보를 다시 열어 확인해주세요.'
-            )
-
-            midInput.placeholder = '배정정보 다시 확인 필요'
-            midInput.onclick = null
-            midInput.onkeydown = null
-
-          } else {
-            alert(
-              (error instanceof Error ? error.message : 'MID 배정 실패') +
-              '\n가맹점 상세정보를 다시 확인한 후 재시도해주세요.'
-            )
-          }
-
-          dialog.close()
-
-        } finally {
-          busy = false
+        ) {
+          alert('이미 다른 칸에서 선택한 MID입니다.')
+          return
         }
+
+        // DB 저장하지 않음. 현재 화면에만 임시 보관.
+        pendingByInput.set(midInput, {
+          merchantId,
+          pool_id: selected.id,
+          mid_type: target.midType,
+          slot: target.slot,
+          mid: selected.mid
+        })
+
+        renderPending()
+        dialog.close()
       }
     }
 

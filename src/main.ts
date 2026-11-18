@@ -7,7 +7,7 @@ import Tesseract from 'tesseract.js'
 import QRCode from 'qrcode'
 import * as XLSX from 'xlsx'
 import { renderBeautyStaff } from './beauty/staff'
-import { mountKorpayMidPoolButton, mountKorpayMidAssignment } from './admin-korpay-mid-pool'
+import { mountKorpayMidPoolButton, mountKorpayMidAssignment, getKorpayPoolAssignments } from './admin-korpay-mid-pool'
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 const adminPassword = '1234'
@@ -12187,54 +12187,86 @@ if (newPassword) {
   updateData.merchant_password = newPassword
 }
     
-const updateResponse =
-await fetch(
-  '/api/admin-merchant-update',
-  {
-    method: 'POST',
+const preserveKorpayMids =
+  adminRole === 'MASTER' &&
+  currentAdminId === 'NXGMASTER16'
 
-    credentials: 'include',
+const korpayPoolAssignments = preserveKorpayMids
+  ? getKorpayPoolAssignments(Number(merchant.id))
+  : []
 
-    headers: {
-      'Content-Type':
-        'application/json'
-    },
-
-    body:
-    JSON.stringify({
-      merchantId:
-        merchant.id,
-  
-      data:
-        updateData,
-  
-      korpayManualMids:
-        korpayManualMids,
-      preserveKorpayMids:
-        adminRole === 'MASTER' && currentAdminId === 'NXGMASTER16'
-    })
-  }
-)
-
-
-const updateResult =
-await updateResponse.json()
-
-
-if (
-!updateResponse.ok ||
-!updateResult?.success
-) {
-alert(
-  updateResult?.message ||
-  '가맹점 정보 저장에 실패했습니다.'
-)
-
-return
+if (preserveKorpayMids) {
+  // 임시 입력값을 일반 MID 수정정보로 전달하지 않음
+  delete updateData.korpay_pg_mid
+  delete updateData.korpay_pg_mkey
+  delete updateData.korpay_terminal_mid
+  delete updateData.korpay_terminal_mkey
+  delete updateData.korpay_manual_mid
+  delete updateData.korpay_manual_mkey
 }
 
-    alert('저장되었습니다.')
-    location.reload()
+const finalSaveButton =
+  document.querySelector<HTMLButtonElement>('#save-merchant-info')
+
+if (preserveKorpayMids && finalSaveButton?.disabled) return
+
+if (preserveKorpayMids && finalSaveButton) {
+  finalSaveButton.disabled = true
+  finalSaveButton.textContent = '저장 중...'
+}
+
+try {
+  const updateResponse = await fetch(
+    '/api/admin-merchant-update',
+    {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        merchantId: merchant.id,
+        data: updateData,
+        korpayManualMids: preserveKorpayMids
+          ? []
+          : korpayManualMids,
+        preserveKorpayMids,
+        korpayPoolAssignments
+      })
+    }
+  )
+
+  const updateResult = await updateResponse.json()
+
+  if (!updateResponse.ok || !updateResult?.success) {
+    alert(
+      updateResult?.message ||
+      '가맹점 정보 저장에 실패했습니다.'
+    )
+    return
+  }
+
+  alert(
+    korpayPoolAssignments.length > 0
+      ? '가맹점 저장 및 MID ' +
+        korpayPoolAssignments.length + '개 배정 완료'
+      : '저장되었습니다.'
+  )
+
+  location.reload()
+
+} catch {
+  alert(
+    '저장 결과를 확인하지 못했습니다. ' +
+    '가맹점 상세정보를 다시 조회하여 저장 여부를 확인해주세요.'
+  )
+
+} finally {
+  if (preserveKorpayMids && finalSaveButton) {
+    finalSaveButton.disabled = false
+    finalSaveButton.textContent = '저장'
+  }
+}
   })
   document.querySelector('#approve-merchant')
   ?.addEventListener('click', async () => {

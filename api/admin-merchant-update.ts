@@ -426,6 +426,83 @@ import type {
         })
       }
 
+      // MID 보관함 임시 선택정보 검증
+      const rawAssignments = req.body?.korpayPoolAssignments
+
+      if (
+        rawAssignments !== undefined &&
+        !Array.isArray(rawAssignments)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: 'MID 선택정보가 올바르지 않습니다.'
+        })
+      }
+
+      const poolAssignments: any[] =
+        rawAssignments || []
+
+      if (poolAssignments.length > 0) {
+
+        if (
+          !preserveKorpayMids ||
+          actor.role !== 'MASTER' ||
+          actor.login_id !== 'NXGMASTER16'
+        ) {
+          return res.status(403).json({
+            success: false,
+            message: 'MID 배정 권한이 없습니다.'
+          })
+        }
+
+        if (poolAssignments.length > 12) {
+          return res.status(400).json({
+            success: false,
+            message: 'MID 선택 수량이 올바르지 않습니다.'
+          })
+        }
+
+        const usedIds = new Set<string>()
+        const usedSlots = new Set<string>()
+
+        for (const item of poolAssignments) {
+          const poolId = item?.pool_id
+          const type = item?.mid_type
+          const slot = item?.slot
+
+          if (
+            typeof poolId !== 'string' ||
+            !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(poolId) ||
+            !['pg', 'terminal', 'manual'].includes(type) ||
+            !Number.isInteger(slot) ||
+            slot < 1 ||
+            slot > 10 ||
+            (type !== 'manual' && slot !== 1)
+          ) {
+            return res.status(400).json({
+              success: false,
+              message: 'MID 선택정보가 올바르지 않습니다.'
+            })
+          }
+
+          const normalizedId = poolId.toLowerCase()
+          const slotKey = type + ':' + slot
+
+          if (
+            usedIds.has(normalizedId) ||
+            usedSlots.has(slotKey)
+          ) {
+            return res.status(400).json({
+              success: false,
+              message: '중복 선택된 MID가 있습니다.'
+            })
+          }
+
+          usedIds.add(normalizedId)
+          usedSlots.add(slotKey)
+        }
+      }
+
       const contactFields = [
         'phone',
         'email',
@@ -900,6 +977,51 @@ import type {
       }
   
   
+      // 선택한 MID가 있는 경우에만 통합 저장
+      // 일반정보 + MID 배정 + 보관함 삭제를 한 번에 처리
+      if (poolAssignments.length > 0) {
+
+        const { data: result, error: poolSaveError } =
+          await supabase.rpc(
+            'nxg_korpay_merchant_save',
+            {
+              p_merchant_id: merchantId,
+              p_data: updateData,
+              p_items: poolAssignments.map(item => ({
+                pool_id: item.pool_id,
+                mid_type: item.mid_type,
+                slot: item.slot
+              }))
+            }
+          )
+
+        if (poolSaveError) {
+
+          console.error(
+            'MID integrated save error:',
+            poolSaveError.code || 'unknown'
+          )
+
+          const message =
+            poolSaveError.code === 'P0001'
+              ? poolSaveError.message
+              : poolSaveError.code === '55P03'
+                ? '다른 작업이 진행 중입니다. 다시 시도해주세요.'
+                : '가맹점 및 MID 저장에 실패했습니다.'
+
+          return res.status(400).json({
+            success: false,
+            message
+          })
+        }
+
+        return res.status(200).json({
+          success: true,
+          data: result,
+          message: '가맹점 및 MID 저장 완료'
+        })
+      }
+
       const {
         data: updatedMerchant,
         error: updateError,
