@@ -812,9 +812,23 @@ export function mountKorpayMidAssignment(merchantId: number) {
   function readMerchantCycle(): SettlementCycle | null {
     const value = merchantCycleSelect?.value
 
-    return value === '1일' || value === '3일'
-      ? value
-      : null
+    // 가맹점 정산주기와 코페이 MID 정산주기는 별개
+    // NXG 1일 정산: 코페이 1일 MID
+    // NXG 3일 / 4일 / 7일 정산: 코페이 3일 MID
+
+    if (value === '1일') {
+      return '1일'
+    }
+
+    if (
+      value === '3일' ||
+      value === '4일' ||
+      value === '7일'
+    ) {
+      return '3일'
+    }
+
+    return null
   }
 
   const updatePendingForCycle: (() => boolean)[] = []
@@ -826,9 +840,9 @@ export function mountKorpayMidAssignment(merchantId: number) {
 
     if (cleared > 0) {
       alert(
-        '정산주기가 변경되어 임시 선택한 MID ' +
+        '필요한 코페이 MID 정산주기가 변경되어 임시 선택한 MID ' +
         cleared + '개를 취소했습니다.\n' +
-        '변경된 정산주기에 맞는 MID를 다시 선택해주세요.'
+        '변경된 기준에 맞는 코페이 MID를 다시 선택해주세요.'
       )
     }
   })
@@ -954,7 +968,7 @@ export function mountKorpayMidAssignment(merchantId: number) {
 
       if (!selectedCycle) {
         alert(
-          '코페이 정산주기는 1일 또는 3일입니다.\n' +
+          '가맹점 정산주기는 1일, 3일, 4일, 7일 중 선택해주세요.\n' +
           '가맹점 정산주기를 먼저 선택해주세요.'
         )
 
