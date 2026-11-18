@@ -214,6 +214,42 @@ export default async function handler(
     }
 
     // 보관함 오등록 종류 변경 및 삭제
+    if (action === 'preview') {
+      const poolId = String(req.body?.pool_id || '')
+      const midType = String(req.body?.mid_type || '')
+
+      if (
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(poolId) ||
+        !MID_TYPES.includes(midType)
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: 'MID 선택정보가 올바르지 않습니다.'
+        })
+      }
+
+      const { data, error } = await supabase
+        .from('korpay_mid_pool')
+        .select('id,mid_type,mid,mkey')
+        .eq('id', poolId)
+        .eq('mid_type', midType)
+        .maybeSingle()
+
+      if (error) throw error
+
+      if (!data || !data.mkey) {
+        return res.status(409).json({
+          success: false,
+          message: '선택한 MID가 변경되었거나 존재하지 않습니다.'
+        })
+      }
+
+      return res.status(200).json({
+        success: true,
+        item: data
+      })
+    }
+
     if (action === 'correct') {
       const poolId = String(req.body?.pool_id || '')
       const expectedType = String(req.body?.mid_type || '')

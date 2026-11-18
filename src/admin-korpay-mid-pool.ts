@@ -623,6 +623,7 @@ type PendingAssignment = {
   mid_type: MidType
   slot: number
   mid: string
+  mkey: string
 }
 
 // 현재 열려있는 가맹점 화면에만 임시 선택정보 보관
@@ -798,11 +799,11 @@ export function mountKorpayMidAssignment(merchantId: number) {
       midInput!.style.backgroundColor =
         pending ? '#fff7d6' : '#ffffff'
 
-      // 실제 비밀키는 최종 저장 시 서버에서 가져옴
-      mkeyInput!.value = ''
+      // 선택한 MID와 짝이 맞는 MKEY 표시
+      mkeyInput!.value = pending?.mkey || ''
 
       mkeyInput!.placeholder = pending
-        ? '선택완료 / 저장 시 자동입력'
+        ? 'MKEY 자동입력 완료'
         : 'MKEY 자동입력'
 
       mkeyInput!.style.backgroundColor =
@@ -971,7 +972,7 @@ export function mountKorpayMidAssignment(merchantId: number) {
         submit.disabled = !select.value
       }
 
-      submit.onclick = () => {
+      submit.onclick = async () => {
         if (busy || !select.value || saveButton?.disabled) return
 
         const selected = items.find(
@@ -996,17 +997,63 @@ export function mountKorpayMidAssignment(merchantId: number) {
           return
         }
 
-        // DB 저장하지 않음. 현재 화면에만 임시 보관.
-        pendingByInput.set(midInput, {
-          merchantId,
-          pool_id: selected.id,
-          mid_type: target.midType,
-          slot: target.slot,
-          mid: selected.mid
-        })
+        busy = true
+        submit.disabled = true
+        cancel.disabled = true
+        select.disabled = true
 
-        renderPending()
-        dialog.close()
+        try {
+          const preview = await poolRequest({
+            action: 'preview',
+            pool_id: selected.id,
+            mid_type: target.midType
+          })
+
+          const pair = preview.item
+
+          if (
+            !pair ||
+            pair.id !== selected.id ||
+            pair.mid_type !== target.midType ||
+            pair.mid !== selected.mid ||
+            typeof pair.mkey !== 'string' ||
+            !pair.mkey
+          ) {
+            throw new Error('MID / MKEY 정보가 일치하지 않습니다.')
+          }
+
+          if (!midInput.isConnected || !mkeyInput.isConnected) {
+            dialog.close()
+            return
+          }
+
+          // MID와 MKEY를 현재 화면에만 임시 입력
+          // 아직 DB 저장 및 보관함 삭제하지 않음
+          pendingByInput.set(midInput, {
+            merchantId,
+            pool_id: selected.id,
+            mid_type: target.midType,
+            slot: target.slot,
+            mid: pair.mid,
+            mkey: pair.mkey
+          })
+
+          renderPending()
+          dialog.close()
+
+        } catch (error) {
+          alert(
+            error instanceof Error
+              ? error.message
+              : 'MID / MKEY 조회 실패'
+          )
+
+        } finally {
+          busy = false
+          submit.disabled = !select.value
+          cancel.disabled = false
+          select.disabled = items.length === 0
+        }
       }
     }
 
