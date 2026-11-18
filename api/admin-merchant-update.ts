@@ -983,7 +983,7 @@ import type {
 
         const { data: result, error: poolSaveError } =
           await supabase.rpc(
-            'nxg_korpay_merchant_save',
+            'nxg_korpay_merchant_save_v2',
             {
               p_merchant_id: merchantId,
               p_data: updateData,

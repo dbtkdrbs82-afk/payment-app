@@ -141,21 +141,33 @@ export default async function handler(
 
     const action = String(req.body?.action || '')
 
-    // 미사용 MID 목록 조회
+    const cycles = ['1일', '3일']
+
+    // 정산주기별 MID 목록 조회
     if (action === 'list') {
       const midType = String(req.body?.mid_type || '')
+      const cycle = req.body?.settlement_cycle
 
-      if (!MID_TYPES.includes(midType)) {
+      if (
+        !MID_TYPES.includes(midType) ||
+        (cycle !== null && !cycles.includes(cycle))
+      ) {
         return res.status(400).json({
           success: false,
-          message: 'MID 종류가 올바르지 않습니다.'
+          message: 'MID 종류와 정산주기를 확인해주세요.'
         })
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('korpay_mid_pool')
-        .select('id,mid_type,mid,created_at')
+        .select('id,mid_type,mid,settlement_cycle,created_at')
         .eq('mid_type', midType)
+
+      query = cycle === null
+        ? query.is('settlement_cycle', null)
+        : query.eq('settlement_cycle', cycle)
+
+      const { data, error } = await query
         .order('created_at', { ascending: true })
         .order('id', { ascending: true })
 
@@ -167,7 +179,7 @@ export default async function handler(
       })
     }
 
-    // MID / MKEY 일괄 등록
+    // 1일 / 3일 MID 개별 및 일괄 등록
     if (action === 'register') {
       const items = req.body?.items
 
@@ -184,23 +196,25 @@ export default async function handler(
 
       const normalized = items.map((row: any) => ({
         mid_type: String(row?.mid_type || '').trim(),
+        settlement_cycle: String(row?.settlement_cycle || '').trim(),
         mid: String(row?.mid || '').trim(),
         mkey: String(row?.mkey || '').trim()
       }))
 
       if (normalized.some(row =>
         !MID_TYPES.includes(row.mid_type) ||
+        !cycles.includes(row.settlement_cycle) ||
         !row.mid ||
         !row.mkey
       )) {
         return res.status(400).json({
           success: false,
-          message: 'MID 종류와 MID / MKEY를 확인해주세요.'
+          message: 'MID / MKEY와 정산주기를 확인해주세요.'
         })
       }
 
       const { data, error } = await supabase.rpc(
-        'nxg_korpay_pool_register',
+        'nxg_korpay_pool_register_v2',
         { p_items: normalized }
       )
 
@@ -209,18 +223,20 @@ export default async function handler(
       return res.status(200).json({
         success: true,
         count: data,
-        message: 'MID 보관함 등록 완료'
+        message: 'MID 등록 완료'
       })
     }
 
-    // 보관함 오등록 종류 변경 및 삭제
+    // 선택한 MID와 짝이 맞는 MKEY 자동입력
     if (action === 'preview') {
       const poolId = String(req.body?.pool_id || '')
       const midType = String(req.body?.mid_type || '')
+      const cycle = req.body?.settlement_cycle
 
       if (
         !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(poolId) ||
-        !MID_TYPES.includes(midType)
+        !MID_TYPES.includes(midType) ||
+        !cycles.includes(cycle)
       ) {
         return res.status(400).json({
           success: false,
@@ -230,9 +246,10 @@ export default async function handler(
 
       const { data, error } = await supabase
         .from('korpay_mid_pool')
-        .select('id,mid_type,mid,mkey')
+        .select('id,mid_type,mid,mkey,settlement_cycle')
         .eq('id', poolId)
         .eq('mid_type', midType)
+        .eq('settlement_cycle', cycle)
         .maybeSingle()
 
       if (error) throw error
@@ -240,7 +257,7 @@ export default async function handler(
       if (!data || !data.mkey) {
         return res.status(409).json({
           success: false,
-          message: '선택한 MID가 변경되었거나 존재하지 않습니다.'
+          message: 'MID가 변경되었거나 존재하지 않습니다.'
         })
       }
 
@@ -250,35 +267,49 @@ export default async function handler(
       })
     }
 
+    // 결제 유형 및 정산주기 변경 / 삭제
     if (action === 'correct') {
       const poolId = String(req.body?.pool_id || '')
       const expectedType = String(req.body?.mid_type || '')
+      const expectedCycle = req.body?.settlement_cycle
       const correction = String(req.body?.correction || '')
       const newType = String(req.body?.new_type || '')
+      const newCycle = req.body?.new_cycle
 
       if (
         !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(poolId) ||
         !MID_TYPES.includes(expectedType) ||
+        (
+          expectedCycle !== null &&
+          !cycles.includes(expectedCycle)
+        ) ||
         !['change_type', 'delete'].includes(correction) ||
         (
           correction === 'change_type' &&
-          !MID_TYPES.includes(newType)
+          (
+            !MID_TYPES.includes(newType) ||
+            !cycles.includes(newCycle)
+          )
         )
       ) {
         return res.status(400).json({
           success: false,
-          message: 'MID 수정정보가 올바르지 않습니다.'
+          message: 'MID 변경정보를 확인해주세요.'
         })
       }
 
       const { data, error } = await supabase.rpc(
-        'nxg_korpay_pool_correct',
+        'nxg_korpay_pool_correct_v2',
         {
           p_pool_id: poolId,
           p_action: correction,
           p_expected_type: expectedType,
+          p_expected_cycle: expectedCycle,
           p_new_type: correction === 'change_type'
             ? newType
+            : null,
+          p_new_cycle: correction === 'change_type'
+            ? newCycle
             : null
         }
       )
@@ -290,11 +321,11 @@ export default async function handler(
         data,
         message: correction === 'delete'
           ? 'MID 삭제 완료'
-          : 'MID 종류 변경 완료'
+          : 'MID 종류 및 정산주기 변경 완료'
       })
     }
 
-    // 즉시 배정 금지
+    // 기존 즉시 배정 금지 유지
     if (action === 'assign') {
       return res.status(409).json({
         success: false,

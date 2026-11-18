@@ -1,4 +1,5 @@
 type MidType = 'pg' | 'terminal' | 'manual'
+type SettlementCycle = '1일' | '3일'
 
 const typeNames: Record<MidType, string> = {
   pg: 'PG',
@@ -10,6 +11,7 @@ type PoolItem = {
   id: string
   mid_type: MidType
   mid: string
+  settlement_cycle: SettlementCycle | null
 }
 
 async function poolRequest(body: Record<string, unknown>) {
@@ -175,6 +177,7 @@ export function openKorpayMidPool() {
   if (document.querySelector('#nxg-mid-pool-dialog')) return
 
   let currentType: MidType = 'pg'
+  let currentCycle: SettlementCycle | null = '1일'
   let busy = false
 
   const dialog = document.createElement('dialog')
@@ -196,9 +199,27 @@ export function openKorpayMidPool() {
     </p>
 
     <div style="display:flex;gap:8px;margin:20px 0">
-      <button type="button" data-mid-type="pg">PG MID</button>
-      <button type="button" data-mid-type="terminal">단말기 MID</button>
-      <button type="button" data-mid-type="manual">수기 MID</button>
+      <button type="button" data-mid-type="pg" data-mid-cycle="1일">PG MID / 1일</button>
+      <button type="button" data-mid-type="terminal" data-mid-cycle="1일">단말기 MID / 1일</button>
+      <button type="button" data-mid-type="manual" data-mid-cycle="1일">수기 MID / 1일</button>
+    </div>
+
+    <div style="display:flex;gap:8px;margin:8px 0">
+      <button type="button" data-mid-type="pg" data-mid-cycle="3일">PG MID / 3일</button>
+      <button type="button" data-mid-type="terminal" data-mid-cycle="3일">단말기 MID / 3일</button>
+      <button type="button" data-mid-type="manual" data-mid-cycle="3일">수기 MID / 3일</button>
+    </div>
+
+    <details style="margin:12px 0;color:#64748b">
+      <summary style="cursor:pointer">미분류 MID 정리 (기존 등록분)</summary>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button type="button" data-mid-type="pg" data-mid-cycle="">PG 미분류</button>
+        <button type="button" data-mid-type="terminal" data-mid-cycle="">단말기 미분류</button>
+        <button type="button" data-mid-type="manual" data-mid-cycle="">수기 미분류</button>
+      </div>
+    </details>
+
+    <div style="display:none">
     </div>
 
     <h3 id="mid-pool-title"></h3>
@@ -262,16 +283,22 @@ export function openKorpayMidPool() {
       select.disabled = value
     })
 
-    mid.disabled = value
-    mkey.disabled = value
-    bulk.disabled = value
+    mid.disabled = value || currentCycle === null
+    mkey.disabled = value || currentCycle === null
+    bulk.disabled = value || currentCycle === null
+
+    dialog.querySelectorAll<HTMLButtonElement>(
+      '#pool-single-register, #pool-bulk-register'
+    ).forEach(button => {
+      button.disabled = value || currentCycle === null
+    })
   }
 
   function updateTabs() {
-    title.textContent = typeNames[currentType] + ' MID 등록'
+    title.textContent = typeNames[currentType] + ' MID / ' + (currentCycle ? currentCycle + ' 정산' : '미분류 정리')
 
     tabs.forEach(button => {
-      const active = button.dataset.midType === currentType
+      const active = button.dataset.midType === currentType && (button.dataset.midCycle || null) === currentCycle
       button.setAttribute('aria-pressed', String(active))
 
       button.style.cssText =
@@ -286,22 +313,35 @@ export function openKorpayMidPool() {
   async function correctPoolItem(
     item: PoolItem,
     correction: 'change_type' | 'delete',
-    newType?: MidType
+    newType?: MidType,
+    newCycle?: SettlementCycle
   ) {
-    if (busy || item.mid_type !== currentType) return
+    if (
+      busy ||
+      item.mid_type !== currentType ||
+      item.settlement_cycle !== currentCycle
+    ) return
 
     if (correction === 'change_type') {
-      if (!newType || newType === item.mid_type) {
-        alert('변경할 MID 종류를 선택해주세요.')
+      if (!newType || !newCycle) {
+        alert('MID 종류와 정산주기를 선택해주세요.')
+        return
+      }
+
+      if (
+        newType === item.mid_type &&
+        newCycle === item.settlement_cycle
+      ) {
+        alert('변경된 내용이 없습니다.')
         return
       }
     }
 
     const message = correction === 'delete'
-      ? item.mid + ' MID를 보관함에서 삭제하시겠습니까?\n다시 사용하려면 재등록해야 합니다.'
-      : item.mid + '의 종류를 ' +
-        typeNames[item.mid_type] + '에서 ' +
-        typeNames[newType!] + '(으)로 변경하시겠습니까?'
+      ? item.mid + ' MID를 보관함에서 삭제하시겠습니까?'
+      : item.mid + ' MID를\n' +
+        typeNames[newType!] + ' / ' +
+        newCycle + ' 정산으로 변경하시겠습니까?'
 
     if (!confirm(message)) return
 
@@ -313,13 +353,15 @@ export function openKorpayMidPool() {
         correction,
         pool_id: item.id,
         mid_type: item.mid_type,
-        new_type: newType || null
+        settlement_cycle: item.settlement_cycle,
+        new_type: newType || null,
+        new_cycle: newCycle || null
       })
 
       alert(
         correction === 'delete'
           ? 'MID 삭제 완료'
-          : 'MID 종류 변경 완료'
+          : 'MID 종류 및 정산주기 변경 완료'
       )
 
       await refresh()
@@ -328,7 +370,7 @@ export function openKorpayMidPool() {
       alert(
         error instanceof Error
           ? error.message
-          : 'MID 수정 실패'
+          : 'MID 변경 실패'
       )
 
       await refresh()
@@ -347,7 +389,8 @@ export function openKorpayMidPool() {
     try {
       const result = await poolRequest({
         action: 'list',
-        mid_type: currentType
+        mid_type: currentType,
+        settlement_cycle: currentCycle
       })
 
       const items: PoolItem[] = result.items || []
@@ -400,6 +443,31 @@ export function openKorpayMidPool() {
 
         typeSelect.value = item.mid_type
 
+        const cycleSelect = document.createElement('select')
+
+        cycleSelect.style.cssText =
+          'width:90px!important;min-width:0!important;' +
+          'height:36px!important;padding:5px!important;' +
+          'border:1px solid #cbd5e1;border-radius:6px;' +
+          'font-size:13px;background:white;color:#17365d;'
+
+        const cycleOptions = [
+          { value: '', label: '미분류' },
+          { value: '1일', label: '1일 정산' },
+          { value: '3일', label: '3일 정산' }
+        ]
+
+        cycleOptions.forEach(cycle => {
+          const option = document.createElement('option')
+          option.value = cycle.value
+          option.textContent = cycle.label
+          option.disabled = cycle.value === ''
+          cycleSelect.appendChild(option)
+        })
+
+        cycleSelect.value = item.settlement_cycle || ''
+
+
         const changeButton = document.createElement('button')
 
         changeButton.type = 'button'
@@ -417,7 +485,8 @@ export function openKorpayMidPool() {
           void correctPoolItem(
             item,
             'change_type',
-            typeSelect.value as MidType
+            typeSelect.value as MidType,
+            cycleSelect.value as SettlementCycle
           )
         }
 
@@ -452,6 +521,7 @@ export function openKorpayMidPool() {
 
         actions.append(
           typeSelect,
+          cycleSelect,
           changeButton,
           deleteButton
         )
@@ -473,6 +543,11 @@ export function openKorpayMidPool() {
   ) {
     if (busy) return
 
+    if (!currentCycle) {
+      alert('1일 또는 3일 정산 탭을 선택해주세요.')
+      return
+    }
+
     if (
       !pairs.length ||
       pairs.length > 100 ||
@@ -483,7 +558,7 @@ export function openKorpayMidPool() {
     }
 
     if (!confirm(
-      typeNames[currentType] + ' MID ' +
+      typeNames[currentType] + ' MID / ' + currentCycle + ' 정산 ' +
       pairs.length + '개를 등록하시겠습니까?'
     )) return
 
@@ -494,6 +569,7 @@ export function openKorpayMidPool() {
         action: 'register',
         items: pairs.map(pair => ({
           mid_type: currentType,
+          settlement_cycle: currentCycle,
           mid: pair.mid,
           mkey: pair.mkey
         }))
@@ -562,6 +638,7 @@ export function openKorpayMidPool() {
       bulk.value = ''
 
       currentType = button.dataset.midType as MidType
+      currentCycle = (button.dataset.midCycle || null) as SettlementCycle | null
 
       setBusy(true)
       try {
@@ -624,6 +701,7 @@ type PendingAssignment = {
   slot: number
   mid: string
   mkey: string
+  settlement_cycle: SettlementCycle
 }
 
 // 현재 열려있는 가맹점 화면에만 임시 선택정보 보관
@@ -728,6 +806,33 @@ export function mountKorpayMidAssignment(merchantId: number) {
       }
     }, true)
 
+  const merchantCycleSelect =
+    document.querySelector<HTMLSelectElement>('#settlement_cycle')
+
+  function readMerchantCycle(): SettlementCycle | null {
+    const value = merchantCycleSelect?.value
+
+    return value === '1일' || value === '3일'
+      ? value
+      : null
+  }
+
+  const updatePendingForCycle: (() => boolean)[] = []
+
+  merchantCycleSelect?.addEventListener('change', () => {
+    const cleared = updatePendingForCycle
+      .map(update => update())
+      .filter(Boolean).length
+
+    if (cleared > 0) {
+      alert(
+        '정산주기가 변경되어 임시 선택한 MID ' +
+        cleared + '개를 취소했습니다.\n' +
+        '변경된 정산주기에 맞는 MID를 다시 선택해주세요.'
+      )
+    }
+  })
+
   targets.forEach(target => {
     const midInput =
       document.getElementById(target.midId) as HTMLInputElement | null
@@ -825,9 +930,37 @@ export function mountKorpayMidAssignment(merchantId: number) {
 
     renderPending()
 
+    updatePendingForCycle.push(() => {
+      const pending = pendingByInput.get(midInput)
+
+      if (
+        pending &&
+        pending.settlement_cycle !== readMerchantCycle()
+      ) {
+        pendingByInput.delete(midInput)
+        renderPending()
+        return true
+      }
+
+      renderPending()
+      return false
+    })
+
     async function openSelector() {
       if (!midInput || !mkeyInput) return
       if (saveButton?.disabled) return
+
+      const selectedCycle = readMerchantCycle()
+
+      if (!selectedCycle) {
+        alert(
+          '코페이 정산주기는 1일 또는 3일입니다.\n' +
+          '가맹점 정산주기를 먼저 선택해주세요.'
+        )
+
+        merchantCycleSelect?.focus()
+        return
+      }
 
       if (
         document.getElementById('nxg-mid-assign-dialog')
@@ -884,7 +1017,7 @@ export function mountKorpayMidAssignment(merchantId: number) {
         dialog.querySelector<HTMLButtonElement>('#mid-assign-cancel')!
 
       title.textContent =
-        typeNames[target.midType] + ' MID 선택' +
+        typeNames[target.midType] + ' MID / ' + selectedCycle + ' 정산 선택' +
         (target.midType === 'manual'
           ? ' (' + target.slot + '번)'
           : '')
@@ -921,12 +1054,14 @@ export function mountKorpayMidAssignment(merchantId: number) {
 
         const result = await poolRequest({
           action: 'list',
-          mid_type: target.midType
+          mid_type: target.midType,
+          settlement_cycle: selectedCycle
         })
 
         items = (result.items || []).filter(
           (item: PoolItem) =>
             item.mid_type === target.midType &&
+            item.settlement_cycle === selectedCycle &&
             !usedIds.has(item.id)
         )
 
@@ -1006,7 +1141,8 @@ export function mountKorpayMidAssignment(merchantId: number) {
           const preview = await poolRequest({
             action: 'preview',
             pool_id: selected.id,
-            mid_type: target.midType
+            mid_type: target.midType,
+            settlement_cycle: selectedCycle
           })
 
           const pair = preview.item
@@ -1015,11 +1151,16 @@ export function mountKorpayMidAssignment(merchantId: number) {
             !pair ||
             pair.id !== selected.id ||
             pair.mid_type !== target.midType ||
+            pair.settlement_cycle !== selectedCycle ||
             pair.mid !== selected.mid ||
             typeof pair.mkey !== 'string' ||
             !pair.mkey
           ) {
             throw new Error('MID / MKEY 정보가 일치하지 않습니다.')
+          }
+
+          if (readMerchantCycle() !== selectedCycle) {
+            throw new Error('정산주기가 변경되었습니다. 다시 선택해주세요.')
           }
 
           if (!midInput.isConnected || !mkeyInput.isConnected) {
@@ -1035,7 +1176,8 @@ export function mountKorpayMidAssignment(merchantId: number) {
             mid_type: target.midType,
             slot: target.slot,
             mid: pair.mid,
-            mkey: pair.mkey
+            mkey: pair.mkey,
+            settlement_cycle: selectedCycle
           })
 
           renderPending()
