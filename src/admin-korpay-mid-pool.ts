@@ -236,7 +236,7 @@ export function openKorpayMidPool() {
     <textarea id="pool-bulk-input"
       autocomplete="off"
       spellcheck="false"
-      placeholder="일괄 등록: 한 줄에 MID와 MKEY 한 세트&#10;엑셀에서 MID / MKEY 2개 열을 복사해 붙여넣으세요."
+      placeholder="일괄 등록: 한 줄에 MID와 MKEY 한 세트&#10;엑셀 복사 또는 공백, 쉼표로 구분하여 입력하세요."
       style="box-sizing:border-box;width:100%;height:110px;padding:12px"
     ></textarea>
 
@@ -607,12 +607,34 @@ export function openKorpayMidPool() {
       const pairs: { mid: string; mkey: string }[] = []
 
       for (let i = 0; i < lines.length; i++) {
-        const parts = lines[i]
-          .split('\t')
-          .map(value => value.trim())
+        const line = lines[i].trim()
+
+        // 엑셀 탭 / 쉼표 / 구분선 / 공백 지원
+        const parts = (
+          line.includes('\t')
+            ? line.split('\t')
+            : line.includes(',')
+              ? line.split(',')
+              : line.includes('|')
+                ? line.split('|')
+                : line.split(/\s+/)
+        ).map(value => value.trim())
+
+        // 엑셀 제목 행 자동 제외
+        if (
+          i === 0 &&
+          parts.length === 2 &&
+          parts[0].toUpperCase() === 'MID' &&
+          parts[1].toUpperCase() === 'MKEY'
+        ) {
+          continue
+        }
 
         if (parts.length !== 2 || parts.some(value => !value)) {
-          alert((i + 1) + '번째 줄의 MID / MKEY를 확인해주세요.')
+          alert(
+            (i + 1) + '번째 줄을 확인해주세요.\n' +
+            '한 줄에 MID와 MKEY를 한 세트씩 입력해주세요.'
+          )
           return
         }
 
