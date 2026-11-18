@@ -8,6 +8,7 @@ const typeNames: Record<MidType, string> = {
 }
 
 type PoolItem = {
+  has_mkey?: boolean
   id: string
   mid_type: MidType
   mid: string
@@ -295,6 +296,14 @@ export function openKorpayMidPool() {
   }
 
   function updateTabs() {
+    mkey.placeholder = currentType === 'terminal'
+      ? 'MKEY (선택사항)'
+      : 'MKEY (필수)'
+
+    bulk.placeholder = currentType === 'terminal'
+      ? '단말기 일괄 등록: MID만 한 줄씩\nMID 1\nMID 2\nMID 3'
+      : '일괄 등록: MID와 MKEY를 두 줄씩 입력\nMID 1\nMKEY 1\nMID 2\nMKEY 2'
+
     title.textContent = typeNames[currentType] + ' MID / ' + (currentCycle ? currentCycle + ' 정산' : '미분류 정리')
 
     tabs.forEach(button => {
@@ -403,7 +412,7 @@ export function openKorpayMidPool() {
         const values = [
           String(index + 1),
           item.mid,
-          '********',
+          item.has_mkey === false ? '없음' : '********',
           '미사용'
         ]
 
@@ -551,7 +560,7 @@ export function openKorpayMidPool() {
     if (
       !pairs.length ||
       pairs.length > 100 ||
-      pairs.some(pair => !pair.mid || !pair.mkey)
+      pairs.some(pair => !pair.mid || (currentType !== 'terminal' && !pair.mkey))
     ) {
       alert('MID와 MKEY를 정확히 입력해주세요.')
       return
@@ -616,6 +625,29 @@ export function openKorpayMidPool() {
 
       if (!lines.length) {
         alert('MID와 MKEY를 입력해주세요.')
+        return
+      }
+
+      if (currentType === 'terminal') {
+        if (lines.length > 100) {
+          alert('한 번에 최대 100개까지 등록 가능합니다.')
+          return
+        }
+
+        const mids = lines.map(line => line.trim())
+
+        if (mids.some(value => !value || /[\s\/,|]/.test(value))) {
+          alert('단말기 MID만 한 줄씩 입력해주세요.')
+          return
+        }
+
+        void register(
+          mids.map(value => ({
+            mid: value,
+            mkey: ''
+          }))
+        )
+
         return
       }
 
@@ -969,9 +1001,9 @@ export function mountKorpayMidAssignment(merchantId: number) {
       // 선택한 MID와 짝이 맞는 MKEY 표시
       mkeyInput!.value = pending?.mkey || ''
 
-      mkeyInput!.placeholder = pending
-        ? 'MKEY 자동입력 완료'
-        : 'MKEY 자동입력'
+      mkeyInput!.placeholder = target.midType === 'terminal'
+        ? (pending?.mkey ? 'MKEY 자동입력 완료' : 'MKEY 없음')
+        : (pending ? 'MKEY 자동입력 완료' : 'MKEY 자동입력')
 
       mkeyInput!.style.backgroundColor =
         pending ? '#fff7d6' : '#f1f5f9'
@@ -1216,7 +1248,7 @@ export function mountKorpayMidAssignment(merchantId: number) {
             pair.settlement_cycle !== selectedCycle ||
             pair.mid !== selected.mid ||
             typeof pair.mkey !== 'string' ||
-            !pair.mkey
+            (target.midType !== 'terminal' && !pair.mkey)
           ) {
             throw new Error('MID / MKEY 정보가 일치하지 않습니다.')
           }

@@ -160,7 +160,7 @@ export default async function handler(
 
       let query = supabase
         .from('korpay_mid_pool')
-        .select('id,mid_type,mid,settlement_cycle,created_at')
+        .select('id,mid_type,mid,mkey,settlement_cycle,created_at')
         .eq('mid_type', midType)
 
       query = cycle === null
@@ -175,7 +175,10 @@ export default async function handler(
 
       return res.status(200).json({
         success: true,
-        items: data || []
+        items: (data || []).map(({ mkey, ...row }) => ({
+          ...row,
+          has_mkey: Boolean(String(mkey || '').trim())
+        }))
       })
     }
 
@@ -205,7 +208,7 @@ export default async function handler(
         !MID_TYPES.includes(row.mid_type) ||
         !cycles.includes(row.settlement_cycle) ||
         !row.mid ||
-        !row.mkey
+        (row.mid_type !== 'terminal' && !row.mkey)
       )) {
         return res.status(400).json({
           success: false,
@@ -254,7 +257,7 @@ export default async function handler(
 
       if (error) throw error
 
-      if (!data || !data.mkey) {
+      if (!data || (midType !== 'terminal' && !data.mkey)) {
         return res.status(409).json({
           success: false,
           message: 'MID가 변경되었거나 존재하지 않습니다.'
