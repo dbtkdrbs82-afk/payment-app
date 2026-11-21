@@ -355,6 +355,14 @@ export default async function handler(
     })
   }
 
+  // 수동 출금모드: 토스 실제 송금 일시중지
+  if (process.env.NXG_PAYOUT_MODE !== 'toss_auto_enabled_2026') {
+    return res.status(409).json({
+      success: false,
+      message: '토스 지급대행이 일시중지되어 있습니다.'
+    })
+  }
+
   try {
     const secretKey =
       process.env

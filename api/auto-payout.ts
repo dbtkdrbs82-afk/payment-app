@@ -206,6 +206,7 @@ if (
     message: '자동정산 실행 권한이 없습니다.',
   })
 }
+if (process.env.NXG_PAYOUT_MODE !== 'toss_auto_enabled_2026') return res.status(200).json({success:true,skipped:true,message:'자동송금 일시중지'});
 if (process.env.PAYOUT_CRON_ENABLED !== 'true') {
   return res.status(200).json({
     success: true,
