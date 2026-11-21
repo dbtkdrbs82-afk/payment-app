@@ -12467,6 +12467,7 @@ if (page === 'payout') {
             '<div class="payout-download-group" style="display:flex;gap:8px;align-items:center">' +
             '<button id="payout-excel-download" type="button">엑셀 다운로드</button>' +
             '<button id="payout-bank-download" type="button">우리은행 대량이체 파일</button>' +
+            '<button id="payout-bulk-complete" type="button">선택 출금완료</button>' +
             '</div>' +
         
             '<div class="payout-top-pagination" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:12px;white-space:nowrap;">' +
@@ -15438,7 +15439,7 @@ if (nextTop) {
             ' 가맹점에 ' +
             payoutAmount
               .toLocaleString() +
-            '원을 실제 지급하시겠습니까?'
+            '원 입금 확인 후 출금완료 상태로 기록하시겠습니까? (실제 송금 없음)'
           )
         ) {
           return
@@ -15908,6 +15909,187 @@ document.querySelector('#payout-excel-download')
   })
 
 
+  document.querySelector('#payout-bulk-complete')
+    ?.addEventListener('click', async () => {
+      if (currentPayoutView === 'manager') {
+        alert('가맹점 출금관리 화면에서 이용해주세요.')
+        return
+      }
+
+      const button = document.querySelector<HTMLButtonElement>(
+        '#payout-bulk-complete'
+      )
+
+      if (button) button.disabled = true
+
+      try {
+        const byId = new Map<number, any>(
+          (payments || []).map((p: any) => [Number(p.id), p])
+        )
+
+        const groups = new Map<number, {
+          id: number
+          name: string
+          amount: number
+          count: number
+          ids: Set<number>
+        }>()
+
+        for (const row of getFilteredPayoutRows()) {
+          if (row.payout_status !== '출금대기') continue
+          if (row.payout_hold === true) continue
+
+          const merchantId = Number(row.merchant_id)
+          const ids = Array.from(new Set<number>(
+            (row.payment_ids || []).map(Number)
+          ))
+
+          if (!Number.isSafeInteger(merchantId) || merchantId <= 0) continue
+          if (ids.length === 0) continue
+
+          const details = ids.map((id) => byId.get(id))
+
+          if (details.some((p: any) =>
+            !p ||
+            p.status !== 'paid' ||
+            p.payout_status !== '출금대기' ||
+            p.payout_hold === true ||
+            p.settlement_status === '취소' ||
+            Number(p.cancel_amount || 0) > 0 ||
+            cancelRequestMap.has(Number(p.id)) ||
+            !Number.isSafeInteger(Number(p.settlement_amount)) ||
+            Number(p.settlement_amount) <= 0
+          )) continue
+
+          const item = groups.get(merchantId) || {
+            id: merchantId,
+            name: String(row.merchant_name || ('MER' + String(merchantId).padStart(4, '0'))),
+            amount: 0,
+            count: 0,
+            ids: new Set<number>()
+          }
+
+          details.forEach((p: any) => {
+            const id = Number(p.id)
+            if (item.ids.has(id)) return
+            item.ids.add(id)
+            item.amount += Number(p.settlement_amount)
+            item.count += 1
+          })
+
+          groups.set(merchantId, item)
+        }
+
+        const choices = Array.from(groups.values()).filter(
+          (item) => item.ids.size <= 500
+        )
+
+        if (choices.length === 0) {
+          alert('선택 출금완료가 가능한 출금대기 거래가 없습니다.')
+          return
+        }
+
+        const { selectPayoutMerchants } =
+          await import('./payout-merchant-selector')
+
+        const selected = await selectPayoutMerchants(
+          choices.map(({ id, name, amount, count }) => ({
+            id, name, amount, count
+          })),
+          '선택 완료'
+        )
+
+        if (!selected || selected.size === 0) return
+
+        const targets = choices.filter((item) => selected.has(item.id))
+        const previews: Array<{
+          item: typeof targets[number]
+          amount: number
+        }> = []
+
+        for (const item of targets) {
+          const response = await fetch('/api/admin-payout-complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              action: 'preview',
+              payment_ids: Array.from(item.ids)
+            })
+          })
+
+          const result = await response.json()
+
+          if (!response.ok || !result?.success ||
+              Number(result.payment_count) !== item.ids.size ||
+              Number(result.amount) !== item.amount) {
+            throw new Error(
+              item.name + ': 출금정보가 변경되었거나 확인에 실패했습니다. 새로고침 후 다시 확인해주세요.'
+            )
+          }
+
+          previews.push({ item, amount: Number(result.amount) })
+        }
+
+        const total = previews.reduce((sum, x) => sum + x.amount, 0)
+
+        if (!confirm(
+          '선택 가맹점: ' + targets.length + '곳\n' +
+          '결제건수: ' + targets.reduce((sum, x) => sum + x.count, 0) + '건\n' +
+          '출금완료 처리금액: ' + total.toLocaleString('ko-KR') + '원\n\n' +
+          '실제 은행 입금이 모두 완료되었습니까?\n' +
+          '확인을 누르면 DB 상태만 출금완료로 변경합니다.\n' +
+          '이 버튼은 실제 송금을 실행하지 않습니다.'
+        )) return
+
+        let completed = 0
+
+        for (const { item } of previews) {
+          try {
+            const response = await fetch('/api/admin-payout-complete', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                action: 'execute',
+                payment_ids: Array.from(item.ids)
+              })
+            })
+
+            const result = await response.json()
+
+            if (!response.ok || result?.success !== true ||
+                result?.bank_transfer_executed !== false ||
+                Number(result.payment_count) !== item.ids.size) {
+              throw new Error(result?.message || '처리 결과 확인 실패')
+            }
+
+            completed++
+          } catch (error) {
+            alert(
+              '처리 중단\n' +
+              '완료 확인: ' + completed + '곳\n' +
+              '확인 필요: ' + item.name + '\n\n' +
+              String(error instanceof Error ? error.message : error) +
+              '\n\n은행 이체를 다시 실행하지 말고 출금상태를 확인해주세요.'
+            )
+            location.reload()
+            return
+          }
+        }
+
+        alert(
+          '선택한 ' + completed +
+          '개 가맹점의 출금완료 상태 기록 성공\n실제 송금은 실행하지 않았습니다.'
+        )
+        location.reload()
+      } catch (error) {
+        alert(error instanceof Error ? error.message : '처리 중 오류가 발생했습니다.')
+      } finally {
+        if (button) button.disabled = false
+      }
+    })
+
 document.querySelector('#payout-bank-download')
   ?.addEventListener('click', async () => {
     if (currentPayoutView === 'manager') {
@@ -15921,14 +16103,19 @@ document.querySelector('#payout-bank-download')
     )
 
     const selectedIds = new Set(
-      getFilteredPayoutRows().flatMap(
-        (row) => row.payment_ids.map(Number)
-      )
+      getFilteredPayoutRows()
+        .filter((row) =>
+          String(row.pg_company || '').trim() === '코페이' &&
+          row.payout_status === '출금대기' &&
+          row.payout_hold !== true
+        )
+        .flatMap((row) => row.payment_ids.map(Number))
     )
 
     const duePayments = (payments || []).filter((p: any) => {
       if (!selectedIds.has(Number(p.id))) return false
       if (String(p.pg_company || '').trim() !== '코페이') return false
+      if (p.payout_status !== '출금대기') return false
       if (p.payout_hold === true) return false
       return true
     })
@@ -15950,7 +16137,7 @@ document.querySelector('#payout-bank-download')
       return
     }
 
-    const eligiblePayments = duePayments.filter(
+    let eligiblePayments = duePayments.filter(
       (p: any) => p.status === 'paid'
     )
 
@@ -15959,6 +16146,50 @@ document.querySelector('#payout-bank-download')
       return
     }
 
+    if (eligiblePayments.some((p: any) =>
+      !Number.isSafeInteger(Number(p.merchant_id)) ||
+      Number(p.merchant_id) <= 0
+    )) {
+      alert('가맹점 ID가 올바르지 않은 거래가 있습니다.')
+      return
+    }
+
+    const bankMerchantChoices = new Map<number, {
+      id: number
+      name: string
+      amount: number
+      count: number
+    }>()
+
+    eligiblePayments.forEach((p: any) => {
+      const id = Number(p.merchant_id)
+      const item = bankMerchantChoices.get(id) || {
+        id,
+        name: String(p.merchant_name || ('MER' + String(id).padStart(4, '0'))),
+        amount: 0,
+        count: 0
+      }
+      item.amount += Number(
+        p.settlement_amount ??
+        (Number(p.amount || 0) - Number(p.fee_amount || 0))
+      )
+      item.count += 1
+      bankMerchantChoices.set(id, item)
+    })
+
+    const { selectPayoutMerchants } =
+      await import('./payout-merchant-selector')
+
+    const chosenMerchants = await selectPayoutMerchants(
+      Array.from(bankMerchantChoices.values()),
+      '우리은행 대량이체 파일 생성'
+    )
+
+    if (!chosenMerchants || chosenMerchants.size === 0) return
+
+    eligiblePayments = eligiblePayments.filter(
+      (p: any) => chosenMerchants.has(Number(p.merchant_id))
+    )
     const merchantIds = Array.from(
       new Set(
         eligiblePayments.map((p: any) => Number(p.merchant_id))

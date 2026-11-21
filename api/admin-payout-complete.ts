@@ -511,6 +511,44 @@ import type {
         })
       }
   
+      // 수동 출금완료: 실제 송금은 절대 호출하지 않음
+      // 기존 토스 지급 경로는 향후 재사용을 위해 아래에 보존
+      if (action === 'execute') {
+        const { data: result, error: rpcError } =
+          await supabase.rpc('nxg_manual_payout_complete_v1', {
+            p_payment_ids: paymentIds
+          })
+
+        if (rpcError) {
+          return res.status(409).json({
+            success: false,
+            message: rpcError.message || '수동 출금완료 처리에 실패했습니다.'
+          })
+        }
+
+        if (
+          result?.success !== true ||
+          Number(result?.updated_count) !== paymentIds.length ||
+          result?.bank_transfer_executed !== false
+        ) {
+          return res.status(500).json({
+            success: false,
+            message: '수동 출금완료 결과를 확인해주세요.'
+          })
+        }
+
+        return res.status(200).json({
+          success: true,
+          merchant_id: merchantId,
+          merchant_name: merchantName,
+          amount: payoutAmount,
+          payment_count: paymentIds.length,
+          payout_sent: false,
+          bank_transfer_executed: false,
+          message: '출금완료 상태만 기록했습니다. 실제 송금은 실행하지 않았습니다.'
+        })
+      }
+
       const baseUrl =
         getBaseUrl(req)
   
