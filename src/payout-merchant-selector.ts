@@ -27,6 +27,13 @@ export function selectPayoutMerchants(
     allLabel.append(allBox, document.createTextNode('전체선택'))
     dialog.appendChild(allLabel)
 
+    const summary = document.createElement('div')
+    summary.style.cssText =
+      'padding:12px;background:#eef4ff;border-radius:8px;' +
+      'font-weight:bold;margin:8px 0 12px;line-height:1.8'
+    summary.setAttribute('aria-live', 'polite')
+    dialog.appendChild(summary)
+
     const list = document.createElement('div')
     list.style.cssText = 'max-height:48vh;overflow:auto;border-top:1px solid #ddd'
     const boxes: Array<{ id: number; input: HTMLInputElement }> = []
@@ -69,10 +76,24 @@ export function selectPayoutMerchants(
     dialog.appendChild(footer)
 
     const refresh = () => {
-      const count = boxes.filter((x) => x.input.checked).length
+      const selectedIds = new Set(
+        boxes.filter((x) => x.input.checked).map((x) => x.id)
+      )
+
+      const chosen = items.filter((x) => selectedIds.has(x.id))
+      const count = chosen.length
+      const paymentCount = chosen.reduce((sum, x) => sum + x.count, 0)
+      const amount = chosen.reduce((sum, x) => sum + x.amount, 0)
+
+      summary.textContent =
+        '전체 ' + items.length + '곳 / 선택 ' + count + '곳' +
+        ' / 결제 ' + paymentCount.toLocaleString('ko-KR') + '건' +
+        ' / 선택금액 ' + amount.toLocaleString('ko-KR') + '원'
+
       allBox.checked = count === boxes.length
       allBox.indeterminate = count > 0 && count < boxes.length
       ok.disabled = count === 0
+      ok.textContent = actionLabel + ' (' + count + '곳)'
     }
 
     allBox.onchange = () => {
@@ -81,6 +102,7 @@ export function selectPayoutMerchants(
     }
 
     boxes.forEach((x) => { x.input.onchange = refresh })
+    refresh()
 
     let result: Set<number> | null = null
 
