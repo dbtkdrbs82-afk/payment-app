@@ -15773,6 +15773,13 @@ document.querySelector('#payout-excel-download')
           if (ids.length === 0) continue
 
           const details = ids.map((id) => byId.get(id))
+            .filter((p: any) =>
+              p &&
+              p.payout_status === '출금대기' &&
+              String(p.pg_company || '').trim() === '코페이'
+            )
+
+          if (details.length === 0) continue
 
           if (details.some((p: any) =>
             !p ||
