@@ -207,7 +207,8 @@ import type {
   
     if (
       action !== 'preview' &&
-      action !== 'execute'
+      action !== 'execute' &&
+      action !== 'execute_bulk'
     ) {
       return res.status(400).json({
         success: false,
@@ -250,7 +251,7 @@ import type {
     }
   
     if (
-      paymentIds.length > 500
+      paymentIds.length > (action === 'execute_bulk' ? 10000 : 500)
     ) {
       return res.status(400).json({
         success: false,
@@ -325,6 +326,32 @@ import type {
         })
       }
   
+      // Manual payout state change only: no bank transfer or payment API
+      if (action === 'execute_bulk') {
+        const { data: result, error: rpcError } = await supabase.rpc(
+          'nxg_payout_mark_selected_v1',
+          { p_payment_ids: paymentIds }
+        )
+        if (rpcError) {
+          return res.status(409).json({
+            success: false,
+            message: rpcError.message || '출금완료 변경 실패'
+          })
+        }
+        if (result?.success !== true ||
+            Number(result?.updated_count) !== paymentIds.length ||
+            result?.bank_transfer_executed !== false) {
+          return res.status(500).json({
+            success: false,
+            message: '출금완료 변경 결과를 확인할 수 없습니다. DB 상태를 확인해주세요.'
+          })
+        }
+        return res.status(200).json({
+          success: true,
+          updated_count: paymentIds.length,
+          bank_transfer_executed: false
+        })
+      }
       const {
         data: paymentRows,
         error: paymentError,

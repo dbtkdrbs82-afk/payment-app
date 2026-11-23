@@ -15812,9 +15812,7 @@ document.querySelector('#payout-excel-download')
           groups.set(merchantId, item)
         }
 
-        const choices = Array.from(groups.values()).filter(
-          (item) => item.ids.size <= 500
-        )
+        const choices = Array.from(groups.values())
 
         if (choices.length === 0) {
           alert('선택 출금완료가 가능한 출금대기 거래가 없습니다.')
@@ -15833,108 +15831,41 @@ document.querySelector('#payout-excel-download')
 
         if (!selected || selected.size === 0) return
 
-        const payoutProgress = document.createElement('div')
-        payoutProgress.id = 'nxg-payout-progress'
-        payoutProgress.style.cssText =
-          'position:fixed;bottom:20px;left:50%;' +
-          'transform:translateX(-50%);z-index:2147483647;' +
-          'background:#173d70;color:white;padding:14px 20px;' +
-          'border-radius:10px;font-weight:bold;max-width:90vw'
-        payoutProgress.setAttribute('role', 'status')
-        document.body.appendChild(payoutProgress)
-
         const targets = choices.filter((item) => selected.has(item.id))
-        const previews: Array<{
-          item: typeof targets[number]
-          amount: number
-        }> = []
+        const paymentIds = Array.from(
+          new Set<number>(targets.flatMap((item) => Array.from(item.ids)))
+        )
 
-        for (const item of targets) {
-          payoutProgress.textContent =
-            '출금정보 확인 중: ' +
-            (previews.length + 1) + '/' + targets.length + '곳'
-          const response = await fetch('/api/admin-payout-complete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-              action: 'preview',
-              payment_ids: Array.from(item.ids)
-            })
+        if (paymentIds.length === 0) return
+        if (paymentIds.length > 10000) {
+          throw new Error('한 번에 처리할 수 있는 결제건수는 10000건입니다.')
+        }
+
+        // No preview calls and no per-merchant requests.
+        const response = await fetch('/api/admin-payout-complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            action: 'execute_bulk',
+            payment_ids: paymentIds
           })
-
-          const result = await response.json()
-
-          if (!response.ok || !result?.success ||
-              Number(result.payment_count) !== item.ids.size ||
-              Number(result.amount) !== item.amount) {
-            throw new Error(
-              item.name + ': 출금정보가 변경되었거나 확인에 실패했습니다. 새로고침 후 다시 확인해주세요.'
-            )
-          }
-
-          previews.push({ item, amount: Number(result.amount) })
+        })
+        const result = await response.json().catch(() => null)
+        if (!response.ok || result?.success !== true ||
+            Number(result?.updated_count) !== paymentIds.length ||
+            result?.bank_transfer_executed !== false) {
+          throw new Error(result?.message ||
+            '출금완료 변경 결과를 확인할 수 없습니다. 새로고침해 DB 상태를 확인해주세요.')
         }
-
-        const total = previews.reduce((sum, x) => sum + x.amount, 0)
-
-        if (!confirm(
-          '선택 가맹점: ' + targets.length + '곳\n' +
-          '결제건수: ' + targets.reduce((sum, x) => sum + x.count, 0) + '건\n' +
-          '출금완료 처리금액: ' + total.toLocaleString('ko-KR') + '원\n\n' +
-          '실제 은행 입금이 모두 완료되었습니까?\n' +
-          '확인을 누르면 DB 상태만 출금완료로 변경합니다.\n' +
-          '이 버튼은 실제 송금을 실행하지 않습니다.'
-        )) return
-
-        let completed = 0
-
-        for (const { item } of previews) {
-          payoutProgress.textContent =
-            '출금완료 기록 중: ' +
-            (completed + 1) + '/' + previews.length + '곳'
-          try {
-            const response = await fetch('/api/admin-payout-complete', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-                action: 'execute',
-                payment_ids: Array.from(item.ids)
-              })
-            })
-
-            const result = await response.json()
-
-            if (!response.ok || result?.success !== true ||
-                result?.bank_transfer_executed !== false ||
-                Number(result.payment_count) !== item.ids.size) {
-              throw new Error(result?.message || '처리 결과 확인 실패')
-            }
-
-            completed++
-          } catch (error) {
-            alert(
-              '처리 중단\n' +
-              '완료 확인: ' + completed + '곳\n' +
-              '확인 필요: ' + item.name + '\n\n' +
-              String(error instanceof Error ? error.message : error) +
-              '\n\n은행 이체를 다시 실행하지 말고 출금상태를 확인해주세요.'
-            )
-            location.reload()
-            return
-          }
-        }
-
         alert(
-          '선택한 ' + completed +
-          '개 가맹점의 출금완료 상태 기록 성공\n실제 송금은 실행하지 않았습니다.'
+          '선택한 ' + targets.length + '곳 / ' +
+          paymentIds.length + '건을 출금완료로 표시했습니다.'
         )
         location.reload()
       } catch (error) {
         alert(error instanceof Error ? error.message : '처리 중 오류가 발생했습니다.')
       } finally {
-        document.getElementById('nxg-payout-progress')?.remove()
         if (button) button.disabled = false
       }
     })
@@ -16158,15 +16089,13 @@ document.querySelector('#payout-bank-download')
 
     if (!confirmed) return
 
-    const excelRows = transferRows.map(([merchantId, row]) => [
+    const excelRows = transferRows.map(([, row]) => [
       row.bankName,
       row.accountNumber,
       row.amount,
       row.accountHolder,
-      '',
-      '',
       'NXG정산',
-      'MER' + String(merchantId).padStart(4, '0')
+      ''
     ])
 
     const worksheet = XLSX.utils.aoa_to_sheet(excelRows)
@@ -16190,9 +16119,7 @@ document.querySelector('#payout-bank-download')
       { wch: 18 },
       { wch: 20 },
       { wch: 18 },
-      { wch: 14 },
-      { wch: 18 },
-      { wch: 18 }
+      { wch: 14 }
     ]
 
     const workbook = XLSX.utils.book_new()
