@@ -15833,6 +15833,16 @@ document.querySelector('#payout-excel-download')
 
         if (!selected || selected.size === 0) return
 
+        const payoutProgress = document.createElement('div')
+        payoutProgress.id = 'nxg-payout-progress'
+        payoutProgress.style.cssText =
+          'position:fixed;bottom:20px;left:50%;' +
+          'transform:translateX(-50%);z-index:2147483647;' +
+          'background:#173d70;color:white;padding:14px 20px;' +
+          'border-radius:10px;font-weight:bold;max-width:90vw'
+        payoutProgress.setAttribute('role', 'status')
+        document.body.appendChild(payoutProgress)
+
         const targets = choices.filter((item) => selected.has(item.id))
         const previews: Array<{
           item: typeof targets[number]
@@ -15840,6 +15850,9 @@ document.querySelector('#payout-excel-download')
         }> = []
 
         for (const item of targets) {
+          payoutProgress.textContent =
+            '출금정보 확인 중: ' +
+            (previews.length + 1) + '/' + targets.length + '곳'
           const response = await fetch('/api/admin-payout-complete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -15877,6 +15890,9 @@ document.querySelector('#payout-excel-download')
         let completed = 0
 
         for (const { item } of previews) {
+          payoutProgress.textContent =
+            '출금완료 기록 중: ' +
+            (completed + 1) + '/' + previews.length + '곳'
           try {
             const response = await fetch('/api/admin-payout-complete', {
               method: 'POST',
@@ -15918,6 +15934,7 @@ document.querySelector('#payout-excel-download')
       } catch (error) {
         alert(error instanceof Error ? error.message : '처리 중 오류가 발생했습니다.')
       } finally {
+        document.getElementById('nxg-payout-progress')?.remove()
         if (button) button.disabled = false
       }
     })
