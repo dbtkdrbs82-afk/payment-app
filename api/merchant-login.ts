@@ -182,6 +182,7 @@ export default async function handler(
         merchant_login_id,
         merchant_password,
         merchant_name,
+        owner_name,
         merchant_type,
         status
       `)
@@ -307,6 +308,9 @@ export default async function handler(
 
         name:
           merchant.merchant_name,
+
+        ownerName:
+          merchant.owner_name || '',
 
         type:
           merchant.merchant_type ||

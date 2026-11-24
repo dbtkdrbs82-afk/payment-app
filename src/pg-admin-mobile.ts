@@ -2902,6 +2902,7 @@ export async function renderPgAdminMobile(
               <p>
                 PC 관리자와 동일한 조직 권한으로 조회합니다.
               </p>
+              ${(adminRole === 'BRANCH' || adminRole === 'AGENCY') ?                  '<button type="button" id="nxg-mobile-org-create" style="margin-top:10px;padding:11px 16px;border:0;border-radius:9px;background:#174981;color:#fff;font-weight:700">+ 조직 등록</button>' : ''}
     
             </div>
     
@@ -3462,6 +3463,112 @@ export async function renderPgAdminMobile(
             </section>
           `
     
+        if ((adminRole === 'BRANCH' || adminRole === 'AGENCY') && currentAdminDbId > 0) {
+          content.querySelector<HTMLButtonElement>('#nxg-mobile-org-create')
+            ?.addEventListener('click', () => {
+              const dialog = document.createElement('dialog')
+              dialog.style.cssText =
+                'width:min(94vw,440px);max-height:85vh;overflow:auto;' +
+                'padding:20px;border:1px solid #ccd6e2;border-radius:12px;' +
+                'background:white;color:#222'
+
+              dialog.innerHTML =                 '<form id="nxg-org-create-form" style="display:flex;flex-direction:column;gap:12px">' +
+                '<strong style="font-size:20px">조직 등록</strong>' +
+                '<label>등록 구분<select id="nxg-org-role" style="display:block;width:100%;padding:10px">' +
+                (adminRole === 'BRANCH'
+                  ? '<option value="AGENCY">대리점</option><option value="MANAGER">담당자</option>'
+                  : '<option value="MANAGER">담당자</option>') +
+                '</select></label>' +
+                '<label>상위조직<select id="nxg-org-parent" style="display:block;width:100%;padding:10px"></select></label>' +
+                '<label>이름<input id="nxg-org-name" maxlength="80" required style="display:block;width:100%;padding:10px;box-sizing:border-box"></label>' +
+                '<label>회사명(선택)<input id="nxg-org-company" maxlength="100" style="display:block;width:100%;padding:10px;box-sizing:border-box"></label>' +
+                '<label>로그인 비밀번호<input id="nxg-org-password" type="password" autocomplete="new-password" minlength="8" required style="display:block;width:100%;padding:10px;box-sizing:border-box"></label>' +
+                '<div style="display:flex;gap:10px;justify-content:flex-end">' +
+                '<button id="nxg-org-cancel" type="button" style="padding:10px">취소</button>' +
+                '<button id="nxg-org-submit" type="submit" style="padding:10px;background:#174981;color:white;border:0;border-radius:8px">등록</button>' +
+                '</div></form>'
+
+              document.body.appendChild(dialog)
+              const role = dialog.querySelector<HTMLSelectElement>('#nxg-org-role')!
+              const parent = dialog.querySelector<HTMLSelectElement>('#nxg-org-parent')!
+              const form = dialog.querySelector<HTMLFormElement>('#nxg-org-create-form')!
+              const submit = dialog.querySelector<HTMLButtonElement>('#nxg-org-submit')!
+
+              const fillParents = () => {
+                parent.replaceChildren()
+                const available = [currentAdmin, ...(
+                  adminRole === 'BRANCH' && role.value === 'MANAGER'
+                    ? visibleAdmins.filter((u: any) =>
+                        u.role === 'AGENCY' &&
+                        Number(u.parent_admin_id) === currentAdminDbId)
+                    : []
+                )]
+                available.forEach((user: any) => {
+                  if (!user) return
+                  const option = document.createElement('option')
+                  option.value = String(user.id)
+                  option.textContent = roleText(String(user.role)) + ' - ' +
+                    String(user.company_name || user.admin_name || user.login_id || '')
+                  parent.appendChild(option)
+                })
+              }
+              role.addEventListener('change', fillParents)
+              fillParents()
+              dialog.querySelector('#nxg-org-cancel')?.addEventListener('click', () => dialog.close())
+              dialog.addEventListener('close', () => dialog.remove(), { once: true })
+
+              form.addEventListener('submit', async (event) => {
+                event.preventDefault()
+                const adminName = dialog.querySelector<HTMLInputElement>('#nxg-org-name')!.value.trim()
+                const password = dialog.querySelector<HTMLInputElement>('#nxg-org-password')!.value
+                if (!adminName || password.length < 8 || !Number(parent.value)) {
+                  alert('이름, 비밀번호(8자리 이상), 상위조직을 확인해주세요.')
+                  return
+                }
+                submit.disabled = true
+                try {
+                  const response = await fetch('/api/admin-user-create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                      role: role.value,
+                      admin_name: adminName,
+                      company_name: dialog.querySelector<HTMLInputElement>('#nxg-org-company')!.value.trim(),
+                      password,
+                      parent_admin_id: Number(parent.value)
+                    })
+                  })
+                  const result = await response.json()
+                  if (!response.ok || !result?.success) {
+                    throw new Error(result?.message || '조직 등록에 실패했습니다.')
+                  }
+                  dialog.close()
+                  alert('조직 등록 완료\n새 로그인 ID: ' + result.login_id)
+                  // Refresh the list only after an actual registration, not on ordinary page views.
+                  try {
+                    const userResponse = await fetch('/api/admin-user-list', {
+                      credentials: 'include', cache: 'no-store'
+                    })
+                    const userResult = await userResponse.json()
+                    if (userResponse.ok && userResult?.success) {
+                      adminUsers = userResult.users || []
+                      await renderOrganizationPage()
+                    }
+                  } catch (refreshError) {
+                    console.warn('조직 목록 새로고침 실패:', refreshError)
+                  }
+                } catch (error) {
+                  alert(error instanceof Error ? error.message : '조직 등록 중 오류가 발생했습니다.')
+                } finally {
+                  submit.disabled = false
+                }
+              })
+
+              dialog.showModal()
+            })
+        }
+
       }
   
   

@@ -417,10 +417,33 @@ window.addEventListener(
 )
 
 
+function nxgMerchantStoreHeading(merchantName: string): string {
+  const ownerName = (
+    sessionStorage.getItem('login_merchant_owner_name') ||
+    localStorage.getItem('login_merchant_owner_name') ||
+    ''
+  ).trim()
+  const escapeText = (value: string): string =>
+    String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;')
+
+  return escapeText(merchantName) + (
+    ownerName
+      ? ' <span style="font-size:0.78em;font-weight:500;white-space:nowrap">대표 ' +
+          escapeText(ownerName) + '</span>'
+      : ''
+  )
+}
+
   const merchantLoginKeys = [
     'login_merchant_id',
     'login_merchant_code',
     'login_merchant_name',
+    'login_merchant_owner_name',
     'login_merchant_type',
   
     'hotel_staff_mode',
@@ -1023,7 +1046,7 @@ async function renderMerchantWirelessTerminal() {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
 
         </div>
@@ -2015,7 +2038,7 @@ if (isManualPayment) {
             </div>
 
             <div class="merchant-mobile-store">
-              ${merchantName}
+              ${nxgMerchantStoreHeading(merchantName)}
             </div>
 
           </div>
@@ -2265,7 +2288,7 @@ if (isManualPayment) {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
         </div>
 
@@ -3018,7 +3041,7 @@ const endIso =
             </div>
   
             <div class="merchant-mobile-store">
-              ${merchantName}
+              ${nxgMerchantStoreHeading(merchantName)}
             </div>
           </div>
   
@@ -6188,7 +6211,7 @@ async function renderBeautyOrders() {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
 
         </div>
@@ -8263,7 +8286,7 @@ const isBeautyMobileStaffDayOff = (
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
 
         </div>
@@ -9653,7 +9676,7 @@ async function renderBeautyScheduleMobile() {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
 
         </div>
@@ -10621,7 +10644,7 @@ async function renderBeautyHoursMobile() {
         </div>
 
         <div class="merchant-mobile-store">
-          ${merchantName}
+          ${nxgMerchantStoreHeading(merchantName)}
         </div>
 
       </div>
@@ -11383,7 +11406,7 @@ async function renderHotelOrdersMobile() {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
 
         </div>
@@ -13217,7 +13240,7 @@ async function renderMerchantTables() {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
         </div>
 
@@ -13722,7 +13745,7 @@ const isBeauty =
             </div>
   
             <div class="merchant-mobile-store">
-              ${merchantName}
+              ${nxgMerchantStoreHeading(merchantName)}
             </div>
   
           </div>
@@ -15852,7 +15875,7 @@ async function renderMerchantQr() {
             </div>
   
             <div class="merchant-mobile-store">
-              ${merchantName}
+              ${nxgMerchantStoreHeading(merchantName)}
             </div>
   
           </div>
@@ -16786,7 +16809,7 @@ function renderMerchantCard() {
             </div>
   
             <div class="merchant-mobile-store">
-              ${merchantName}
+              ${nxgMerchantStoreHeading(merchantName)}
             </div>
   
           </div>
@@ -17082,7 +17105,7 @@ function renderMerchantOcrCard() {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
 
         </div>
@@ -20017,7 +20040,7 @@ function renderMerchantManualCard() {
             </div>
   
             <div class="merchant-mobile-store">
-              ${merchantName}
+              ${nxgMerchantStoreHeading(merchantName)}
             </div>
   
           </div>
@@ -20872,7 +20895,7 @@ function renderMerchantSmsCard() {
             </div>
   
             <div class="merchant-mobile-store">
-              ${merchantName}
+              ${nxgMerchantStoreHeading(merchantName)}
             </div>
   
           </div>
@@ -21235,7 +21258,7 @@ function renderMerchantCashReceipt() {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
 
         </div>
@@ -21932,7 +21955,7 @@ async function renderMerchantCashReceiptHistory() {
           </div>
 
           <div class="merchant-mobile-store">
-            ${merchantName}
+            ${nxgMerchantStoreHeading(merchantName)}
           </div>
 
         </div>
@@ -23039,7 +23062,7 @@ async function renderMerchantMenuCard() {
             </div>
   
             <div class="merchant-mobile-store">
-              ${merchantName}
+              ${nxgMerchantStoreHeading(merchantName)}
             </div>
   
           </div>
@@ -24612,7 +24635,7 @@ const tableToken =
               </div>
   
               <div class="merchant-mobile-store">
-                ${merchantName}
+                ${nxgMerchantStoreHeading(merchantName)}
               </div>
   
             </div>
@@ -25159,6 +25182,9 @@ if ((window as any).Capacitor?.isNativePlatform?.()) {
                   ''
                 ),
 
+              login_merchant_owner_name:
+                String(merchant.ownerName || ''),
+
               login_merchant_type:
                 String(
                   merchant.type ||
@@ -25289,6 +25315,8 @@ if ((window as any).Capacitor?.isNativePlatform?.()) {
                   staffResult.merchant.name ||
                   ''
                 ),
+
+              login_merchant_owner_name: '',
 
               login_merchant_type:
                 '호텔',
