@@ -433,7 +433,7 @@ function nxgMerchantStoreHeading(merchantName: string): string {
 
   return escapeText(merchantName) + (
     ownerName
-      ? ' <span style="font-size:0.78em;font-weight:500;white-space:nowrap">대표 ' +
+      ? ' <span style="font-size:0.78em;font-weight:500;white-space:nowrap">' +
           escapeText(ownerName) + '</span>'
       : ''
   )
