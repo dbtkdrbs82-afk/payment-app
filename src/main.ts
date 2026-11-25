@@ -41,14 +41,14 @@ async function nxgWebCancelPinOk(pin: string): Promise<boolean> {
 // HQ MASTER-only reset button shown inside the selected merchant's detail screen.
 async function nxgAttachMerchantCancelPinReset(merchantId: number): Promise<void> {
   if (window.location.pathname !== '/pg-admin' || !Number.isSafeInteger(merchantId) || merchantId <= 0) return;
-  const loginButton = document.querySelector<HTMLButtonElement>('#show-merchant-login');
-  if (!loginButton) return;
+  const passwordInput = document.querySelector<HTMLInputElement>('#merchant-password-input');
+  if (!passwordInput) return;
   try {
     const me = await fetch('/api/admin-me', { credentials: 'include', cache: 'no-store' });
     if (!me.ok) return;
     const info = await me.json();
     if (info?.admin?.role !== 'MASTER') return;
-    if (!loginButton.isConnected || document.querySelector('#show-merchant-login') !== loginButton) return;
+    if (!passwordInput.isConnected || document.querySelector('#merchant-password-input') !== passwordInput) return;
     if (sessionStorage.getItem('selected_merchant_id') !== String(merchantId)) return;
     if (document.querySelector('#nxg-merchant-cancel-pin-reset')) return;
     const merchantCode = 'MER' + String(merchantId).padStart(4, '0');
@@ -74,7 +74,11 @@ async function nxgAttachMerchantCancelPinReset(merchantId: number): Promise<void
         button.disabled = false;
       }
     });
-    loginButton.insertAdjacentElement('afterend', button);
+    const label = document.createElement('label');
+    label.id = 'nxg-merchant-cancel-pin-reset-label';
+    label.textContent = '취소 비밀번호';
+    passwordInput.insertAdjacentElement('afterend', label);
+    label.insertAdjacentElement('afterend', button);
   } catch { /* Stay hidden when admin session is unavailable. */ }
 }
 
