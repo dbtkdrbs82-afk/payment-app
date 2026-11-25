@@ -12,15 +12,8 @@ import { mountKorpayMidPoolButton, mountKorpayMidAssignment, getKorpayPoolAssign
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 const adminPassword = '1234'
 
-// NXG cancel PIN: MER0015 pilot only. Does not alter payment authorization.
+// Merchant convenience cancellation PIN; payment authorization is unchanged.
 async function nxgWebCancelPinOk(pin: string): Promise<boolean> {
-  const merchantId = Number(
-    sessionStorage.getItem('login_merchant_id') ||
-    localStorage.getItem('login_merchant_id') ||
-    sessionStorage.getItem('merchant_id') ||
-    localStorage.getItem('merchant_id') || '0'
-  );
-  if (merchantId !== 15) return pin === '1234';
   const response = await fetch('/api/cancel-pin-settings', { credentials: 'include' });
   if (!response.ok) throw new Error('취소 비밀번호 설정 조회에 실패했습니다.');
   const result = await response.json();
@@ -45,49 +38,44 @@ async function nxgWebCancelPinOk(pin: string): Promise<boolean> {
   return verifier === 'v1.' + verifier.split('.')[1] + '.' + hex;
 }
 
-// MER0015 reset control on HQ admin. Backend independently verifies MASTER session.
-async function nxgAttachTestCancelPinReset(): Promise<void> {
-  if (window.location.pathname !== '/pg-admin') return;
+// HQ MASTER-only reset button shown inside the selected merchant's detail screen.
+async function nxgAttachMerchantCancelPinReset(merchantId: number): Promise<void> {
+  if (window.location.pathname !== '/pg-admin' || !Number.isSafeInteger(merchantId) || merchantId <= 0) return;
+  const loginButton = document.querySelector<HTMLButtonElement>('#show-merchant-login');
+  if (!loginButton) return;
   try {
-    const me = await fetch('/api/admin-me', { credentials: 'include' });
+    const me = await fetch('/api/admin-me', { credentials: 'include', cache: 'no-store' });
     if (!me.ok) return;
     const info = await me.json();
     if (info?.admin?.role !== 'MASTER') return;
-    if (document.querySelector('#nxg-test-cancel-pin-reset')) return;
+    if (!loginButton.isConnected || document.querySelector('#show-merchant-login') !== loginButton) return;
+    if (sessionStorage.getItem('selected_merchant_id') !== String(merchantId)) return;
+    if (document.querySelector('#nxg-merchant-cancel-pin-reset')) return;
+    const merchantCode = 'MER' + String(merchantId).padStart(4, '0');
     const button = document.createElement('button');
-    button.id = 'nxg-test-cancel-pin-reset';
+    button.id = 'nxg-merchant-cancel-pin-reset';
     button.type = 'button';
-    button.textContent = 'MER0015 취소 비밀번호 초기화';
-    button.style.cssText =
-      'position:fixed;bottom:18px;right:18px;z-index:99999;' +
-      'padding:10px 14px;background:#173c66;color:white;' +
-      'border:0;border-radius:9px;cursor:pointer;font-size:13px;';
+    button.className = 'merchant-save-btn';
+    button.textContent = '취소 비밀번호 초기화';
     button.addEventListener('click', async () => {
-      if (!window.confirm('테스트 가맹점 MER0015의 취소 비밀번호를 1234로 초기화할까요?')) return;
+      if (!window.confirm(merchantCode + ' 취소 비밀번호를 1234로 초기화할까요?')) return;
       button.disabled = true;
       try {
         const response = await fetch('/api/cancel-pin-settings', {
           method: 'POST', credentials: 'include',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'reset', merchantId: 15 })
+          body: JSON.stringify({ action: 'reset', merchantId })
         });
-        if (!response.ok || !(await response.json())?.success) {
-          throw new Error('초기화에 실패했습니다.');
-        }
-        alert('MER0015 취소 비밀번호가 1234로 초기화되었습니다.');
+        if (!response.ok || !(await response.json())?.success) throw new Error('초기화에 실패했습니다.');
+        alert(merchantCode + ' 취소 비밀번호가 1234로 초기화되었습니다.');
       } catch (error) {
         alert(error instanceof Error ? error.message : '초기화에 실패했습니다.');
       } finally {
         button.disabled = false;
       }
     });
-    document.body.appendChild(button);
-  } catch { /* Admin login screens simply do not show the control. */ }
-}
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => { void nxgAttachTestCancelPinReset(); });
-} else {
-  void nxgAttachTestCancelPinReset();
+    loginButton.insertAdjacentElement('afterend', button);
+  } catch { /* Stay hidden when admin session is unavailable. */ }
 }
 
 const adminSecondCode = '5678'
@@ -11640,6 +11628,7 @@ const getKorpayManualMidValue = (
         '</td>' +
       '</tr>'
 
+      void nxgAttachMerchantCancelPinReset(Number(merchant.id))
       mountKorpayMidAssignment(Number(merchant.id))
 
       document.querySelector<HTMLButtonElement>('.address-search-btn')

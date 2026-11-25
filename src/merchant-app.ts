@@ -158,7 +158,7 @@ import {
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
 
 const supabase = createClient(supabaseUrl, supabaseKey)
-// MER0015 pilot: convenience PIN check in the app, not payment authorization.
+// Merchant convenience cancellation PIN; payment authorization is unchanged.
 async function nxgCancelPinVerifier(pin: string, providedSalt?: string): Promise<string> {
   const salt = providedSalt
     ? Uint8Array.from(providedSalt.match(/.{2}/g)!.map(byte => parseInt(byte, 16)))
@@ -193,7 +193,6 @@ async function nxgCancelPinMatches(pin: string): Promise<boolean> {
 document.addEventListener('click', async event => {
   const element = event.target
   if (!(element instanceof Element) || !element.closest('#merchant-mobile-cancel-pin-open')) return
-  if (Number(sessionStorage.getItem('login_merchant_id')) !== 15) return
   const current = window.prompt('현재 취소 비밀번호 4자리를 입력해 주세요.')
   if (current === null) return
   const next = window.prompt('새 취소 비밀번호 4자리를 입력해 주세요.')
@@ -2446,9 +2445,7 @@ if (isManualPayment) {
   >
     🔒 비밀번호 변경
   </button>
-  ${Number(merchantId) === 15 ? `
   <button id="merchant-mobile-cancel-pin-open" type="button" style="width:100%;height:46px;margin-top:8px;border:1px solid #d7e0eb;border-radius:12px;background:#ffffff;color:#172033;font-weight:800;">🔒 취소 비밀번호 변경</button>
-  ` : ''}
 </section>
 
       </main>
@@ -4648,9 +4645,7 @@ cancelOpenButton
       
             let cancelPinOk = false
             try {
-              cancelPinOk = Number(merchantId) === 15
-                ? await nxgCancelPinMatches(password)
-                : password === '1234'
+              cancelPinOk = await nxgCancelPinMatches(password)
             } catch (error) {
               alert('취소 비밀번호 설정을 불러오지 못했습니다. 다시 시도해 주세요.')
               return
