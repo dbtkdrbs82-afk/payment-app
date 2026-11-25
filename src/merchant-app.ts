@@ -158,6 +158,74 @@ import {
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJubXB0bHhkZWlodmZ3ZWdvcW5mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg2MzcwMDMsImV4cCI6MjA5NDIxMzAwM30.5SeOiuZgFmU7RUu5kzLpLBUwC91SYI3WxqRFoafMrG8'
 
 const supabase = createClient(supabaseUrl, supabaseKey)
+// MER0015 pilot: convenience PIN check in the app, not payment authorization.
+async function nxgCancelPinVerifier(pin: string, providedSalt?: string): Promise<string> {
+  const salt = providedSalt
+    ? Uint8Array.from(providedSalt.match(/.{2}/g)!.map(byte => parseInt(byte, 16)))
+    : crypto.getRandomValues(new Uint8Array(16))
+  const secret = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveBits']
+  )
+  const hash = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, secret, 256
+  )
+  const hex = (bytes: Uint8Array) =>
+    Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('')
+  return `v1.${hex(salt)}.${hex(new Uint8Array(hash))}`
+}
+
+async function nxgCancelPinMatches(pin: string): Promise<boolean> {
+  const response = await fetch(nxgCancelUrl('/api/cancel-pin-settings'), {
+    credentials: 'include', headers: await nxgCancelHeaders()
+  })
+  if (!response.ok) throw new Error('취소 비밀번호 설정을 불러올 수 없습니다.')
+  const result = await response.json()
+  if (!result?.success) throw new Error('취소 비밀번호 설정을 불러올 수 없습니다.')
+  if (!result.pinVerifier) return pin === '1234'
+  const verifier = String(result.pinVerifier)
+  if (!/^v1\.[0-9a-f]{32}\.[0-9a-f]{64}$/.test(verifier)) {
+    throw new Error('지원하지 않는 비밀번호 설정 형식입니다.')
+  }
+  const salt = verifier.split('.')[1]
+  return (await nxgCancelPinVerifier(pin, salt)) === verifier
+}
+
+document.addEventListener('click', async event => {
+  const element = event.target
+  if (!(element instanceof Element) || !element.closest('#merchant-mobile-cancel-pin-open')) return
+  if (Number(sessionStorage.getItem('login_merchant_id')) !== 15) return
+  const current = window.prompt('현재 취소 비밀번호 4자리를 입력해 주세요.')
+  if (current === null) return
+  const next = window.prompt('새 취소 비밀번호 4자리를 입력해 주세요.')
+  if (next === null) return
+  const confirm = window.prompt('새 취소 비밀번호를 다시 입력해 주세요.')
+  if (confirm === null) return
+  if (!/^\d{4}$/.test(current) || !/^\d{4}$/.test(next)) {
+    alert('취소 비밀번호는 숫자 4자리여야 합니다.')
+    return
+  }
+  if (next !== confirm) { alert('새 비밀번호 확인이 일치하지 않습니다.'); return }
+  if (next === current) { alert('기존 비밀번호와 다른 번호를 입력해 주세요.'); return }
+  try {
+    if (!(await nxgCancelPinMatches(current))) {
+      alert('현재 취소 비밀번호가 일치하지 않습니다.')
+      return
+    }
+    const pinVerifier = await nxgCancelPinVerifier(next)
+    const response = await fetch(nxgCancelUrl('/api/cancel-pin-settings'), {
+      method: 'POST', credentials: 'include',
+      headers: { ...(await nxgCancelHeaders()), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pinVerifier })
+    })
+    if (!response.ok || !(await response.json())?.success) {
+      throw new Error('취소 비밀번호 저장에 실패했습니다.')
+    }
+    alert('취소 비밀번호가 변경되었습니다.')
+  } catch (error) {
+    alert(error instanceof Error ? error.message : '비밀번호 변경 중 오류가 발생했습니다.')
+  }
+})
+
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 
@@ -2378,6 +2446,9 @@ if (isManualPayment) {
   >
     🔒 비밀번호 변경
   </button>
+  ${Number(merchantId) === 15 ? `
+  <button id="merchant-mobile-cancel-pin-open" type="button" style="width:100%;height:46px;margin-top:8px;border:1px solid #d7e0eb;border-radius:12px;background:#ffffff;color:#172033;font-weight:800;">🔒 취소 비밀번호 변경</button>
+  ` : ''}
 </section>
 
       </main>
@@ -4575,7 +4646,16 @@ cancelOpenButton
             }
       
       
-            if (password !== '1234') {
+            let cancelPinOk = false
+            try {
+              cancelPinOk = Number(merchantId) === 15
+                ? await nxgCancelPinMatches(password)
+                : password === '1234'
+            } catch (error) {
+              alert('취소 비밀번호 설정을 불러오지 못했습니다. 다시 시도해 주세요.')
+              return
+            }
+            if (!cancelPinOk) {
               alert(
                 '취소 비밀번호가 일치하지 않습니다.'
               )

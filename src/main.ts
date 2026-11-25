@@ -11,6 +11,85 @@ import { mountKorpayMidPoolButton, mountKorpayMidAssignment, getKorpayPoolAssign
 
 const clientKey = 'live_ck_GjLJoQ1aVZ2QXB2vMWyPVw6KYe2R'
 const adminPassword = '1234'
+
+// NXG cancel PIN: MER0015 pilot only. Does not alter payment authorization.
+async function nxgWebCancelPinOk(pin: string): Promise<boolean> {
+  const merchantId = Number(
+    sessionStorage.getItem('login_merchant_id') ||
+    localStorage.getItem('login_merchant_id') ||
+    sessionStorage.getItem('merchant_id') ||
+    localStorage.getItem('merchant_id') || '0'
+  );
+  if (merchantId !== 15) return pin === '1234';
+  const response = await fetch('/api/cancel-pin-settings', { credentials: 'include' });
+  if (!response.ok) throw new Error('취소 비밀번호 설정 조회에 실패했습니다.');
+  const result = await response.json();
+  if (!result?.success) throw new Error('취소 비밀번호 설정 조회에 실패했습니다.');
+  if (!result.pinVerifier) return pin === '1234';
+  const verifier = String(result.pinVerifier);
+  if (!/^v1\.[0-9a-f]{32}\.[0-9a-f]{64}$/.test(verifier)) {
+    throw new Error('취소 비밀번호 설정 형식이 올바르지 않습니다.');
+  }
+  const salt = Uint8Array.from(
+    verifier.split('.')[1].match(/.{2}/g)!.map(x => parseInt(x, 16))
+  );
+  const key = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(pin), 'PBKDF2', false, ['deriveBits']
+  );
+  const bits = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, key, 256
+  );
+  const hex = Array.from(new Uint8Array(bits), byte =>
+    byte.toString(16).padStart(2, '0')
+  ).join('');
+  return verifier === 'v1.' + verifier.split('.')[1] + '.' + hex;
+}
+
+// MER0015 reset control on HQ admin. Backend independently verifies MASTER session.
+async function nxgAttachTestCancelPinReset(): Promise<void> {
+  if (window.location.pathname !== '/pg-admin') return;
+  try {
+    const me = await fetch('/api/admin-me', { credentials: 'include' });
+    if (!me.ok) return;
+    const info = await me.json();
+    if (info?.admin?.role !== 'MASTER') return;
+    if (document.querySelector('#nxg-test-cancel-pin-reset')) return;
+    const button = document.createElement('button');
+    button.id = 'nxg-test-cancel-pin-reset';
+    button.type = 'button';
+    button.textContent = 'MER0015 취소 비밀번호 초기화';
+    button.style.cssText =
+      'position:fixed;bottom:18px;right:18px;z-index:99999;' +
+      'padding:10px 14px;background:#173c66;color:white;' +
+      'border:0;border-radius:9px;cursor:pointer;font-size:13px;';
+    button.addEventListener('click', async () => {
+      if (!window.confirm('테스트 가맹점 MER0015의 취소 비밀번호를 1234로 초기화할까요?')) return;
+      button.disabled = true;
+      try {
+        const response = await fetch('/api/cancel-pin-settings', {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'reset', merchantId: 15 })
+        });
+        if (!response.ok || !(await response.json())?.success) {
+          throw new Error('초기화에 실패했습니다.');
+        }
+        alert('MER0015 취소 비밀번호가 1234로 초기화되었습니다.');
+      } catch (error) {
+        alert(error instanceof Error ? error.message : '초기화에 실패했습니다.');
+      } finally {
+        button.disabled = false;
+      }
+    });
+    document.body.appendChild(button);
+  } catch { /* Admin login screens simply do not show the control. */ }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { void nxgAttachTestCancelPinReset(); });
+} else {
+  void nxgAttachTestCancelPinReset();
+}
+
 const adminSecondCode = '5678'
 
 const supabaseUrl = 'https://rnmptlxdeihvfwegoqnf.supabase.co'
@@ -27589,7 +27668,14 @@ document.querySelector('#close-cancel-modal')
       return
     }
 
-    if (password !== '1234') {
+    let nxgPinOk = false;
+    try {
+      nxgPinOk = await nxgWebCancelPinOk(password);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '취소 비밀번호 확인에 실패했습니다.');
+      return;
+    }
+    if (!nxgPinOk) {
       alert('취소 비밀번호가 일치하지 않습니다.')
       return
     }
@@ -35174,7 +35260,14 @@ document
       return
     }
 
-    if (password !== '1234') {
+    let nxgPinOk = false;
+    try {
+      nxgPinOk = await nxgWebCancelPinOk(password);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : '취소 비밀번호 확인에 실패했습니다.');
+      return;
+    }
+    if (!nxgPinOk) {
       alert('취소 비밀번호가 일치하지 않습니다.')
       return
     }
