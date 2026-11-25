@@ -484,6 +484,17 @@ window.addEventListener(
 )
 
 
+
+/* NXG 1.18 - Android-native QR save/share/print. Browser behavior untouched. */
+function nxgQrIsNative(): boolean {
+  return !!(window as any).Capacitor?.isNativePlatform?.()
+}
+async function nxgQrNative(action: 'saveImage' | 'shareImage' | 'printImage', dataUrl: string, fileName: string): Promise<void> {
+  const bridge=(window as any).Capacitor
+  if (!nxgQrIsNative() || typeof bridge?.nativePromise !== 'function') throw new Error('Android QR 기능을 사용할 수 없습니다.')
+  await bridge.nativePromise('NxgQr',action,{dataUrl,fileName})
+}
+
 function nxgMerchantStoreHeading(merchantName: string): string {
   const ownerName = (
     sessionStorage.getItem('login_merchant_owner_name') ||
@@ -16535,6 +16546,13 @@ async function renderMerchantQr() {
           await createMobileQrPosterCanvas()
 
 
+        if (nxgQrIsNative()) {
+          const safeName = merchantName.replace(/[\\/:*?"<>|]/g, '_') + '_PICK_QR.png'
+          await nxgQrNative('saveImage',canvas.toDataURL('image/png'),safeName)
+          alert('QR 이미지가 저장되었습니다.')
+          return
+        }
+
         const blob =
           await new Promise<Blob | null>(
             (resolve) => {
@@ -16625,6 +16643,11 @@ document
         const canvas =
           await createMobileQrPosterCanvas()
 
+
+        if (nxgQrIsNative()) {
+          await nxgQrNative('shareImage',canvas.toDataURL('image/png'),'NXG_PICK_QR.png')
+          return
+        }
 
         const blob =
           await new Promise<Blob | null>(
@@ -16720,6 +16743,17 @@ document
   ?.addEventListener(
     'click',
     async () => {
+
+      if (nxgQrIsNative()) {
+        try {
+          const canvas=await createMobileQrPosterCanvas()
+          await nxgQrNative('printImage',canvas.toDataURL('image/png'),'NXG_PICK_QR.png')
+        } catch(error) {
+          console.error(error)
+          alert('안드로이드 인쇄창을 열지 못했습니다.')
+        }
+        return
+      }
 
       const printWindow =
         window.open(

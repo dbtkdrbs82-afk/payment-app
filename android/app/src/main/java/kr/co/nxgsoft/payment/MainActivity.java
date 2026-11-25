@@ -8,6 +8,7 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         registerPlugin(NxgTtsPlugin.class);
         registerPlugin(NxgSecureSessionPlugin.class);
+        registerPlugin(NxgQrPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }
