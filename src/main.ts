@@ -36428,6 +36428,10 @@ ${getMemberMenuHtml('batch')}
   🧾 현금영수증
 </button>
 
+<button id="pay-general-manual-btn" class="payment-method-btn" type="button">
+  💳 일반 수기결제
+</button>
+
 <button id="close-payment-method-modal">
   닫기
 </button>
@@ -37454,6 +37458,12 @@ document.querySelector('#close-payment-method-modal')
     if (paymentModal) {
       paymentModal.style.display = 'none'
     }
+  })
+
+  document.querySelector('#pay-general-manual-btn')
+  ?.addEventListener('click', () => {
+    // 회원 및 청구건 선택과 무관한 기존 일반 수기결제 화면
+    location.href = '/merchant-app/card/manual'
   })
 
   document.querySelector('#pay-qr-btn')
