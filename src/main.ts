@@ -11622,7 +11622,6 @@ const getKorpayManualMidValue = (
 ) +
             '<div class="merchant-detail-actions">' +
             '<button class="merchant-save-btn" id="save-merchant-info">저장</button>' +
-              '<button class="merchant-save-btn" id="approve-merchant">개통완료</button>' +
               '<button class="merchant-save-btn" id="show-merchant-login">로그인정보 확인</button>' +
 '<button class="merchant-reject-btn" id="delete-merchant">삭제</button>' +
 '<button class="merchant-close-btn" id="back-merchant-list">목록으로</button>' +
@@ -12143,11 +12142,45 @@ try {
     return
   }
 
+  // 저장 성공 후에만 개통 처리: MID 통합 저장 완료 전에는 실행하지 않음.
+  // 이미 '운영'으로 바꾸었으나 로그인 ID가 없는 가맹점도 복구.
+  const shouldAutoApprove =
+    (adminRole === 'MASTER' || adminRole === 'BRANCH') &&
+    updateData.status === '운영' &&
+    (
+      String(merchant.status || '') !== '운영' ||
+      !String(merchant.merchant_login_id || '').trim()
+    )
+
+  if (shouldAutoApprove) {
+    try {
+      const approveResponse = await fetch('/api/admin-merchant-approve', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ merchantId: merchant.id })
+      })
+      const approveResult = await approveResponse.json()
+      if (!approveResponse.ok || !approveResult?.success) {
+        alert('가맹점 정보 및 MID 저장은 완료됐지만 자동 개통 처리에 실패했습니다.\n' +
+          (approveResult?.message || '다시 조회 후 확인해주세요.'))
+        location.reload()
+        return
+      }
+    } catch (error) {
+      console.error('가맹점 자동 개통 처리 실패:', error)
+      alert('가맹점 정보 및 MID 저장은 완료됐지만 자동 개통 결과를 확인하지 못했습니다.\n다시 조회 후 확인해주세요.')
+      location.reload()
+      return
+    }
+  }
+
   alert(
-    korpayPoolAssignments.length > 0
+    (korpayPoolAssignments.length > 0
       ? '가맹점 저장 및 MID ' +
         korpayPoolAssignments.length + '개 배정 완료'
-      : '저장되었습니다.'
+      : '저장되었습니다.') +
+    (shouldAutoApprove ? '\n개통완료 및 로그인 정보 생성' : '')
   )
 
   location.reload()
@@ -12165,59 +12198,6 @@ try {
   }
 }
   })
-  document.querySelector('#approve-merchant')
-  ?.addEventListener('click', async () => {
-
-    if (adminRole === 'AGENCY' || adminRole === 'MANAGER') {
-      alert('권한이 없습니다.')
-      return
-    }
-
-    if (!confirm('개통완료 처리하시겠습니까?')) return
-
-    const approveResponse =
-  await fetch(
-    '/api/admin-merchant-approve',
-    {
-      method: 'POST',
-
-      credentials: 'include',
-
-      headers: {
-        'Content-Type':
-          'application/json'
-      },
-
-      body:
-        JSON.stringify({
-          merchantId:
-            merchant.id
-        })
-    }
-  )
-
-
-const approveResult =
-  await approveResponse.json()
-
-
-if (
-  !approveResponse.ok ||
-  !approveResult?.success
-) {
-  alert(
-    approveResult?.message ||
-    '개통완료 처리에 실패했습니다.'
-  )
-
-  return
-}
-
-    alert('개통완료 처리되었습니다.')
-
-location.reload()
-  })
-
   document.querySelector('#show-merchant-login')
   ?.addEventListener('click', async () => {
 
