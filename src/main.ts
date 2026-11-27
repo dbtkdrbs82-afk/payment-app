@@ -12876,41 +12876,131 @@ if (payoutBalanceValue) {
   void loadPayoutTossBalance()
         
 
-        const duplicatePaymentKeys = new Set<string>()
+        // 코페이: 승인번호는 다른 날짜에 재사용될 수 있으므로 한국시간 승인일별 검사.
+        // PG 거래번호(TID)가 같은 별도 DB 행은 날짜와 관계없이 따로 확인한다.
+        // 이 코드는 조회/표시만 수행한다. 결제·정산 데이터는 수정하지 않는다.
+        type DuplicateReviewGroup = {
+          kind: 'tid' | 'approval'
+          title: string
+          detail: string
+          rows: any[]
+          canDelete: boolean
+        }
 
-        const duplicateKeyCount: Record<string, number> = {}
-        
-        ;(payments || []).forEach((payment: any) => {
-          const approvalNumber =
-            String(payment.approval_number || '').trim()
-        
-          const amount =
-            Number(payment.amount || 0)
-
-            if (payment.status !== 'paid') {
-              return
-            }
-        
-          if (!approvalNumber) {
-            return
-          }
-        
-          const duplicateKey =
-            approvalNumber + '_' + amount
-        
-          duplicateKeyCount[duplicateKey] =
-            (duplicateKeyCount[duplicateKey] || 0) + 1
+        const duplicateKoreaDateFormatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: 'Asia/Seoul',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
         })
-        
-        Object.entries(duplicateKeyCount)
-          .forEach(([duplicateKey, count]) => {
-            if (count > 1) {
-              duplicatePaymentKeys.add(duplicateKey)
-            }
+
+        const getPaymentApprovalKoreaDate = (payment: any): string => {
+          for (const value of [payment.approved_at, payment.created_at]) {
+            if (!value) continue
+            const date = new Date(value)
+            if (Number.isNaN(date.getTime())) continue
+            const parts = duplicateKoreaDateFormatter.formatToParts(date)
+            const get = (type: string) =>
+              parts.find(part => part.type === type)?.value || ''
+            const year = get('year')
+            const month = get('month')
+            const day = get('day')
+            if (year && month && day) return year + '-' + month + '-' + day
+          }
+          return ''
+        }
+
+        const getDuplicatePg = (payment: any): string =>
+          String(payment.pg_company || '').trim().toLowerCase().replace(/\s+/g, '')
+
+        const isKorpayDuplicateCheck = (payment: any): boolean =>
+          ['코페이', 'korpay'].includes(getDuplicatePg(payment))
+
+        const sameTransactionRows = new Map<string, any[]>()
+        const sameDayApprovalRows = new Map<string, any[]>()
+
+        ;(payments || []).forEach((payment: any) => {
+          if (payment.status !== 'paid') return
+          const pg = getDuplicatePg(payment)
+          const merchantId = Number(payment.merchant_id || 0)
+          const tid = String(payment.payment_key || '').trim()
+          const approval = String(payment.approval_number || '').trim()
+
+          // 원 거래번호가 같은 저장 기록을 검토. 승인번호는 필요하지 않다.
+          if (pg && Number.isInteger(merchantId) && merchantId > 0 && tid) {
+            const key = JSON.stringify([pg, merchantId, tid])
+            if (!sameTransactionRows.has(key)) sameTransactionRows.set(key, [])
+            sameTransactionRows.get(key)!.push(payment)
+          }
+
+          // 코페이 승인번호는 서로 다른 날짜에 같아도 문제 없음.
+          const approvalDate = getPaymentApprovalKoreaDate(payment)
+          if (
+            isKorpayDuplicateCheck(payment) &&
+            approval && approval !== '-' &&
+            approval !== '00000000' &&
+            approvalDate
+          ) {
+            const key = JSON.stringify([approvalDate, approval])
+            if (!sameDayApprovalRows.has(key)) sameDayApprovalRows.set(key, [])
+            sameDayApprovalRows.get(key)!.push(payment)
+          }
+        })
+
+        const duplicateReviewGroups: DuplicateReviewGroup[] = []
+
+        sameTransactionRows.forEach((rows) => {
+          if (rows.length < 2) return
+          const first = rows[0]
+          const firstAmount = Number(first.amount)
+          const firstMid = String(first.pg_mid || '').trim()
+          const firstApproval = String(first.approval_number || '').trim()
+          const samePaymentDetails =
+            Number.isFinite(firstAmount) && firstAmount > 0 &&
+            rows.every((row: any) =>
+              Number(row.amount) === firstAmount &&
+              String(row.pg_mid || '').trim() === firstMid &&
+              String(row.approval_number || '').trim() === firstApproval
+            )
+
+          const unsettled = rows.every((row: any) =>
+            String(row.payout_status || '') === '출금대기' &&
+            String(row.settlement_status || '') === '정산대기'
+          )
+
+          duplicateReviewGroups.push({
+            kind: 'tid',
+            title: '동일 PG 거래번호(TID) 중복 저장 의심',
+            detail: 'TID: ' + String(first.payment_key || '-'),
+            rows,
+            // 같은 거래·금액·MID·승인번호이고 아직 출금/정산 전인 경우에만 수동 정리 허용
+            canDelete: samePaymentDetails && unsettled
           })
-        
-        const duplicateErrorCount =
-          duplicatePaymentKeys.size
+        })
+
+        sameDayApprovalRows.forEach((rows, key) => {
+          if (rows.length < 2) return
+          const uniqueTransactions = new Set(rows.map((row: any) =>
+            JSON.stringify([
+              Number(row.merchant_id || 0),
+              String(row.payment_key || '').trim() || ('row-' + String(row.id))
+            ])
+          ))
+          // 같은 TID 중복은 위 그룹에서 이미 검토하므로 중복 표시하지 않는다.
+          if (uniqueTransactions.size < 2) return
+
+          const [date, approval] = JSON.parse(key) as [string, string]
+          duplicateReviewGroups.push({
+            kind: 'approval',
+            title: '같은 날 승인번호 중복 확인 필요',
+            detail: '승인일: ' + date + ' / 승인번호: ' + approval,
+            rows,
+            // 서로 다른 TID의 거래는 정상 승인일 수도 있으므로 화면에서 삭제 금지
+            canDelete: false
+          })
+        })
+
+        const duplicateErrorCount = duplicateReviewGroups.length
           const payoutErrorPayments =
           (payments || []).filter((payment: any) => {
         
@@ -13840,7 +13930,7 @@ ${canViewPayoutBalance ? `
 >
               <div class="payout-summary-icon">⚠️</div>
               <div class="payout-summary-info">
-                <div class="payout-summary-title">중복결제오류</div>
+                <div class="payout-summary-title">중복거래 확인필요</div>
                 <div class="payout-summary-value">${duplicateErrorCount.toLocaleString()}건</div>
               </div>
             </div>
@@ -14252,44 +14342,20 @@ try {
 
 document.querySelector('#duplicate-payment-card')
   ?.addEventListener('click', () => {
-    const duplicateGroups: Record<string, any[]> = {}
-
-    ;(payments || []).forEach((payment: any) => {
-      const approvalNumber =
-        String(payment.approval_number || '').trim()
-
-        const amount =
-        Number(payment.amount || 0)
-
-        if (payment.status !== 'paid') {
-          return
-        }
-      
-      const duplicateKey =
-        approvalNumber + '_' + amount
-      
-      if (
-        !approvalNumber ||
-        !duplicatePaymentKeys.has(duplicateKey)
-      ) {
-        return
-      }
-
-      if (!duplicateGroups[duplicateKey]) {
-        duplicateGroups[duplicateKey] = []
-      }
-      
-      duplicateGroups[duplicateKey].push(payment)
-    })
-
-    const groupEntries = Object.entries(duplicateGroups)
-
-    if (groupEntries.length === 0) {
-      alert('중복결제 내역이 없습니다.')
+    if (duplicateReviewGroups.length === 0) {
+      alert('확인이 필요한 중복거래 기록이 없습니다.')
       return
     }
 
     document.querySelector('#duplicate-payment-modal')?.remove()
+
+    const escapeDuplicateText = (value: any): string =>
+      String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
 
     const modal = document.createElement('div')
     modal.id = 'duplicate-payment-modal'
@@ -14298,58 +14364,47 @@ document.querySelector('#duplicate-payment-card')
     modal.innerHTML = `
       <div class="duplicate-payment-modal-card">
         <div class="duplicate-payment-modal-header">
-          <h3>중복결제 관리</h3>
-
-          <button
-            type="button"
-            id="duplicate-payment-modal-close"
-            class="duplicate-payment-modal-close"
-          >
-            ×
-          </button>
+          <h3>중복거래 확인</h3>
+          <button type="button" id="duplicate-payment-modal-close" class="duplicate-payment-modal-close">×</button>
         </div>
-
         <div class="duplicate-payment-modal-body">
-          ${groupEntries.map(([approvalNumber, rows]) => `
-            <div class="duplicate-payment-group">
+          <p style="margin:4px 0 14px;line-height:1.6">
+            코페이는 다른 날짜에 동일한 승인번호가 나올 수 있습니다.
+            같은 날짜의 승인번호 중복은 확인 대상으로 표시합니다.
+            <strong>서로 다른 TID의 거래는 이 화면에서 삭제할 수 없습니다.</strong>
+          </p>
+          ${duplicateReviewGroups.map((group, groupIndex) => `
+            <div class="duplicate-payment-group" data-duplicate-group-index="${groupIndex}">
               <div class="duplicate-payment-group-title">
-                승인번호 ${approvalNumber}
+                ${escapeDuplicateText(group.title)}<br>
+                <small>${escapeDuplicateText(group.detail)}</small>
               </div>
-
-              ${rows.map((row: any, index: number) => `
-                <label class="duplicate-payment-row ${index === 0 ? 'keep-row' : 'delete-row'}">
-  <input
-    type="radio"
-    name="keep-payment-${approvalNumber}"
-    value="${row.id}"
-    ${index === 0 ? 'checked' : ''}
-  >
-
-  <span class="duplicate-payment-status">
-    ${index === 0 ? '정상 유지' : '삭제 예정'}
-  </span>
-
-  <span>${row.merchant_name || '-'}</span>
-
-  <span>
-    ${Number(row.amount || 0).toLocaleString()}원
-  </span>
-
-  <span>
-    ${row.created_at
-      ? new Date(row.created_at).toLocaleString()
-      : '-'}
-  </span>
-</label>
+              ${group.rows.map((row: any, index: number) => `
+                <label class="duplicate-payment-row ${group.canDelete ? (index === 0 ? 'keep-row' : 'delete-row') : ''}">
+                  ${group.canDelete ? `
+                    <input type="radio" name="keep-payment-${groupIndex}" value="${Number(row.id)}" ${index === 0 ? 'checked' : ''}>
+                    <span class="duplicate-payment-status">${index === 0 ? '정상 유지' : '삭제 후보'}</span>
+                  ` : `<span class="duplicate-payment-status">확인 필요</span>`}
+                  <span>${escapeDuplicateText(row.merchant_name || '-')}</span>
+                  <span>${Number(row.amount || 0).toLocaleString()}원</span>
+                  <span>승인번호: ${escapeDuplicateText(row.approval_number || '-')}</span>
+                  <span>TID: ${escapeDuplicateText(row.payment_key || '-')}</span>
+                  <span>${escapeDuplicateText(row.approved_at || row.created_at
+                    ? new Date(row.approved_at || row.created_at).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
+                    : '-')}</span>
+                </label>
               `).join('')}
-
-              <button
-                type="button"
-                class="duplicate-payment-delete-button"
-                data-approval-number="${approvalNumber}"
-              >
-                중복결제 삭제
-              </button>
+              ${group.canDelete ? `
+                <button type="button" class="duplicate-payment-delete-button" data-group-index="${groupIndex}">
+                  동일 TID 중복 기록 정리
+                </button>
+              ` : `
+                <p style="margin:8px 0 4px;font-size:13px">
+                  ${group.kind === 'approval'
+                    ? '서로 다른 결제일 수 있으므로 삭제가 차단되어 있습니다. 코페이 TID와 거래내역을 대조해 주세요.'
+                    : '이미 출금·정산됐거나 거래 정보가 달라 삭제가 차단되어 있습니다.'}
+                </p>
+              `}
             </div>
           `).join('')}
         </div>
@@ -14358,162 +14413,108 @@ document.querySelector('#duplicate-payment-card')
 
     document.body.appendChild(modal)
 
-    document.querySelectorAll(
-      '.duplicate-payment-row input[type="radio"]'
-    ).forEach((radio) => {
-      radio.addEventListener('change', () => {
-        const input = radio as HTMLInputElement
-        const groupName = input.name
-    
-        document.querySelectorAll<HTMLInputElement>(
-          'input[name="' + groupName + '"]'
-        ).forEach((groupRadio) => {
-          const row = groupRadio.closest(
-            '.duplicate-payment-row'
-          )
-    
-          const status = row?.querySelector(
-            '.duplicate-payment-status'
-          )
-    
-          if (!row || !status) return
-    
-          if (groupRadio.checked) {
-            row.classList.add('keep-row')
-            row.classList.remove('delete-row')
-            status.textContent = '정상 유지'
-          } else {
-            row.classList.add('delete-row')
-            row.classList.remove('keep-row')
-            status.textContent = '삭제 예정'
-          }
-        })
-      })
-    })
-
-    document.querySelector('#duplicate-payment-modal-close')
-      ?.addEventListener('click', () => {
-        modal.remove()
-      })
+    modal.querySelector('#duplicate-payment-modal-close')
+      ?.addEventListener('click', () => modal.remove())
 
     modal.addEventListener('click', (event) => {
-      if (event.target === modal) {
-        modal.remove()
-      }
+      if (event.target === modal) modal.remove()
     })
 
-    document.querySelectorAll('.duplicate-payment-delete-button')
-      .forEach((button) => {
-        button.addEventListener('click', async () => {
-          const approvalNumber =
-            (button as HTMLElement).getAttribute('data-approval-number') || ''
+    modal.querySelectorAll<HTMLInputElement>('.duplicate-payment-row input[type="radio"]')
+      .forEach((radio) => radio.addEventListener('change', () => {
+        const section = radio.closest('.duplicate-payment-group')
+        section?.querySelectorAll<HTMLInputElement>('.duplicate-payment-row input[type="radio"]')
+          .forEach((item) => {
+            const row = item.closest('.duplicate-payment-row')
+            const status = row?.querySelector('.duplicate-payment-status')
+            if (!row || !status) return
+            row.classList.toggle('keep-row', item.checked)
+            row.classList.toggle('delete-row', !item.checked)
+            status.textContent = item.checked ? '정상 유지' : '삭제 후보'
+          })
+      }))
 
-          const selected =
-            document.querySelector<HTMLInputElement>(
-              'input[name="keep-payment-' +
-              approvalNumber +
-              '"]:checked'
-            )
+    modal.querySelectorAll<HTMLButtonElement>('.duplicate-payment-delete-button')
+      .forEach((button) => button.addEventListener('click', async () => {
+        const groupIndex = Number(button.dataset.groupIndex)
+        const group = duplicateReviewGroups[groupIndex]
+        if (!group || group.kind !== 'tid' || !group.canDelete) {
+          alert('삭제할 수 없는 거래입니다.')
+          return
+        }
 
-          if (!selected) {
-            alert('정상으로 남길 결제를 선택해주세요.')
-            return
-          }
+        // 화면 표시 이후의 오조작도 방지: 삭제 시점에 동일 거래 조건 재검증
+        const keepSelected = modal.querySelector<HTMLInputElement>(
+          `input[name="keep-payment-${groupIndex}"]:checked`
+        )
+        if (!keepSelected) {
+          alert('정상으로 남길 기록을 선택해주세요.')
+          return
+        }
+        const keepPaymentId = Number(keepSelected.value)
+        const keepRow = group.rows.find((row: any) => Number(row.id) === keepPaymentId)
+        if (!keepRow) return
 
-          const keepPaymentId = Number(selected.value)
+        const sameTidAndDetails = group.rows.every((row: any) =>
+          Number(row.merchant_id) === Number(keepRow.merchant_id) &&
+          String(row.pg_company || '').trim().toLowerCase() === String(keepRow.pg_company || '').trim().toLowerCase() &&
+          String(row.payment_key || '').trim() !== '' &&
+          String(row.payment_key || '').trim() === String(keepRow.payment_key || '').trim() &&
+          String(row.pg_mid || '').trim() === String(keepRow.pg_mid || '').trim() &&
+          String(row.approval_number || '').trim() === String(keepRow.approval_number || '').trim() &&
+          Number(row.amount) === Number(keepRow.amount) &&
+          String(row.payout_status || '') === '출금대기' &&
+          String(row.settlement_status || '') === '정산대기'
+        )
+        if (!sameTidAndDetails) {
+          alert('거래 정보가 달라 삭제할 수 없습니다.')
+          return
+        }
 
-          const deletePaymentIds =
-            (duplicateGroups[approvalNumber] || [])
-              .map((row: any) => Number(row.id))
-              .filter((id: number) => id !== keepPaymentId)
+        const deletePaymentIds = group.rows
+          .map((row: any) => Number(row.id))
+          .filter((id: number) => id > 0 && id !== keepPaymentId)
+        if (deletePaymentIds.length === 0) return
 
-          if (deletePaymentIds.length === 0) {
-            alert('삭제할 중복결제가 없습니다.')
-            return
-          }
+        const confirmMessage =
+          '동일 TID로 중복 저장된 DB 기록을 정리하시겠습니까?\n\n' +
+          '가맹점: ' + String(keepRow.merchant_name || '-') + '\n' +
+          'TID: ' + String(keepRow.payment_key || '-') + '\n' +
+          '승인번호: ' + String(keepRow.approval_number || '-') + '\n' +
+          '금액: ' + Number(keepRow.amount || 0).toLocaleString() + '원\n' +
+          '삭제 후보: ' + deletePaymentIds.length + '건\n\n' +
+          'PG 실제 승인 여부를 확인한 뒤 진행하세요. 삭제 이력은 백업됩니다.'
+        if (!confirm(confirmMessage)) return
 
-          const adminPassword = prompt(
-            '중복결제 삭제를 위해 관리자 비밀번호를 입력해주세요.'
-          )
+        const adminPassword = prompt('중복 기록 정리를 위해 관리자 비밀번호를 입력해주세요.')
+        if (!adminPassword) return
 
-          if (!adminPassword) {
-            return
-          }
-
-          const selectedPayment =
-  (duplicateGroups[approvalNumber] || [])
-    .find(
-      (row: any) =>
-        Number(row.id) === keepPaymentId
-    )
-
-const confirmMessage =
-  '중복결제를 삭제하시겠습니까?\n\n' +
-  '승인번호: ' +
-  approvalNumber +
-  '\n\n' +
-  '정상으로 남길 결제\n' +
-  '- 가맹점: ' +
-  (selectedPayment?.merchant_name || '-') +
-  '\n' +
-  '- 결제금액: ' +
-  Number(selectedPayment?.amount || 0).toLocaleString() +
-  '원\n\n' +
-  '삭제 대상: ' +
-  deletePaymentIds.length +
-  '건\n\n' +
-  '삭제되는 결제는 중복결제 이력에 백업됩니다.'
-
-if (!confirm(confirmMessage)) {
-  return
-}
-
-          const adminId =
-            sessionStorage.getItem('admin_id') || ''
-
-          const { data, error } =
-            await supabase.functions.invoke(
-              'delete-duplicate-payments',
-              {
-                body: {
-                  loginId: adminId,
-                  password: adminPassword,
-                  keepPaymentId,
-                  deletePaymentIds
-                }
-              }
-            )
-
+        button.disabled = true
+        try {
+          const adminId = sessionStorage.getItem('admin_id') || ''
+          const { data, error } = await supabase.functions.invoke('delete-duplicate-payments', {
+            body: { loginId: adminId, password: adminPassword, keepPaymentId, deletePaymentIds }
+          })
           if (error) {
-            alert(
-              '중복결제 삭제 실패: ' +
-              error.message
-            )
+            alert('중복 기록 정리 실패: ' + error.message)
             return
           }
-
           if (!data?.success) {
-            alert(
-              data?.error ||
-              '중복결제 삭제에 실패했습니다.'
-            )
+            alert(data?.error || '중복 기록 정리에 실패했습니다.')
             return
           }
-
-          alert(
-            '중복결제 ' +
-            data.deletedCount +
-            '건 삭제 완료\n\n' +
-            '✓ 원본 백업 완료\n' +
-            '✓ 출금·정산 재계산 완료'
-          )
-
+          alert('중복 기록 ' + data.deletedCount + '건 정리 완료\n원본 백업 및 정산 재계산 결과를 확인하세요.')
           location.reload()
-        })
-      })
+        } catch (error) {
+          console.error('중복 결제 DB 기록 정리 오류:', error)
+          alert('정리 요청 결과를 확인하지 못했습니다. 내역을 재조회해 주세요.')
+        } finally {
+          button.disabled = false
+        }
+      }))
   })
 
-  document.querySelector('#payout-error-card')
+    document.querySelector('#payout-error-card')
   ?.addEventListener('click', () => {
     if (payoutErrorPayments.length === 0) {
       alert('출금오류 내역이 없습니다.')
