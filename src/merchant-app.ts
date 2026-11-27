@@ -1,5 +1,6 @@
 import { App as CapacitorApp } from '@capacitor/app';
 import { nxgCheckForAppUpdate } from './nxg-app-update'
+import { mountNxgMerchantNotices } from './nxg-notice-ui'
 import './merchant-app.css'
 
 function nxgCancelUrl(url: string): string {
@@ -25533,7 +25534,12 @@ if (
   ) {
   
     renderMerchantHome()
-    void nxgCheckForAppUpdate()
+    const refreshNxgNotices = mountNxgMerchantNotices(app, nxgCancelHeaders, nxgCheckForAppUpdate)
+    if ((window as any).Capacitor?.isNativePlatform?.()) {
+      void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+        if (isActive && location.pathname === '/merchant-app/home') refreshNxgNotices()
+      })
+    }
   
   } else if (
     path === '/merchant-app/orders'

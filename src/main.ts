@@ -1,4 +1,5 @@
 import './style.css'
+import { mountNxgNoticeAdmin } from './nxg-notice-ui'
 import './pg-admin-fold.css'
 import './pg-admin-responsive.css'
 import { loadTossPayments } from '@tosspayments/payment-sdk'
@@ -5944,6 +5945,7 @@ if (!sessionStorage.getItem('admin_id')) {
 </div>
 `
    
+  if (adminRole === 'MASTER') mountNxgNoticeAdmin()
   document.querySelector('.admin-table-scroll')?.classList.add('payment-table-scroll')
 document.querySelector('.admin-table')?.classList.add('payment-admin-table')
        function formatDate(dateText: string) {
