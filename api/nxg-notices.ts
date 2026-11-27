@@ -3,7 +3,8 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 import { createClient } from '@supabase/supabase-js'
 
 const base = 'https://app.nxgsoft.co.kr'
-const origins = [base, 'https://localhost', 'http://localhost', 'capacitor://localhost']
+const adminOrigins = [base, 'https://payment-app-ybtf.vercel.app'];
+const origins = [...adminOrigins, 'https://localhost', 'http://localhost', 'capacitor://localhost']
 const fields = 'id,merchant_id,title,body,starts_at,ends_at,popup,link_url,created_at,updated_at'
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 function cookie(header: string | undefined, name: string) {
@@ -63,7 +64,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({success:true,notices:data || []})
     }
     // Only MASTER can list, create, edit or delete notices, regardless of client UI.
-    if (origin !== base) return fail(403,'관리자 화면에서만 사용할 수 있습니다.')
+    if (!adminOrigins.includes(origin)) return fail(403,'관리자 화면에서만 사용할 수 있습니다.')
     const admin = verify(cookie(req.headers.cookie,'nxg_admin_session'),process.env.ADMIN_SESSION_SECRET?.trim() || '')
     if (!admin) return fail(401,'관리자 재로그인이 필요합니다.')
     const {data: user,error: ue} = await db.from('admin_users').select('id,role').eq('id',admin.id).eq('login_id',admin.login_id).eq('status','사용중').maybeSingle()
