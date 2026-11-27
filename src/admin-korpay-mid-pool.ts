@@ -951,6 +951,48 @@ export function mountKorpayMidAssignment(merchantId: number) {
     if (occupied) {
       midInput.title = '기존 등록 MID는 보호됩니다.'
       midInput.style.cursor = 'default'
+
+      // nxg-terminal-mid-only: only an existing wireless terminal MID.
+      if (target.midType === 'terminal' && midInput.value.trim()) {
+        const wrapper = document.createElement('div')
+        wrapper.style.cssText = 'display:flex;gap:5px;align-items:center;min-width:0;width:100%;'
+        midInput.replaceWith(wrapper)
+        wrapper.appendChild(midInput)
+        midInput.style.setProperty('flex', '1 1 0', 'important')
+        midInput.style.setProperty('width', 'auto', 'important')
+        midInput.style.setProperty('min-width', '0', 'important')
+        const button = document.createElement('button')
+        button.type = 'button'
+        button.textContent = '직접 변경'
+        button.style.cssText = 'flex:0 0 auto!important;width:auto!important;white-space:nowrap;padding:6px 9px;'
+        wrapper.appendChild(button)
+        button.onclick = async () => {
+          if (button.disabled || saveButton?.disabled) return
+          const expectedMid = midInput.value
+          const entered = prompt('새 단말기 MID를 입력해주세요. MKEY는 변경되지 않습니다.', expectedMid)
+          if (entered === null) return
+          const newMid = entered.trim()
+          if (!newMid || newMid === expectedMid) return
+          if (!confirm('단말기 MID만 변경하시겠습니까?\n기존: ' + expectedMid + '\n신규: ' + newMid + '\n기존 결제내역은 수정하지 않습니다.')) return
+          button.disabled = true
+          if (saveButton) saveButton.disabled = true
+          try {
+            const result = await poolRequest({
+              action: 'terminal_mid_only',
+              merchant_id: merchantId,
+              expected_mid: expectedMid,
+              new_mid: newMid
+            })
+            midInput.value = String(result.mid)
+            alert('단말기 MID 변경 완료')
+          } catch (error) {
+            alert(error instanceof Error ? error.message : '단말기 MID 변경 실패')
+          } finally {
+            button.disabled = false
+            if (saveButton) saveButton.disabled = false
+          }
+        }
+      }
       return
     }
 

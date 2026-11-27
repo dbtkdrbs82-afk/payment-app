@@ -141,6 +141,25 @@ export default async function handler(
 
     const action = String(req.body?.action || '')
 
+    // nxg-terminal-mid-only: the existing MASTER session check above applies.
+    if (action === 'terminal_mid_only') {
+      const merchantId = Number(req.body?.merchant_id)
+      const expectedMid = req.body?.expected_mid
+      const newMid = typeof req.body?.new_mid === 'string' ? req.body.new_mid.trim() : ''
+      if (!Number.isSafeInteger(merchantId) || merchantId <= 0 ||
+          typeof expectedMid !== 'string' || !expectedMid.trim() ||
+          !newMid || newMid.length > 200 || /[\x00-\x1f\x7f]/.test(newMid)) {
+        return res.status(400).json({ success: false, message: '단말기 MID를 확인해주세요.' })
+      }
+      const { data, error } = await supabase.rpc('nxg_change_terminal_mid_only', {
+        p_merchant_id: merchantId,
+        p_expected_mid: expectedMid,
+        p_new_mid: newMid
+      })
+      if (error) throw error
+      return res.status(200).json({ success: true, mid: data.mid })
+    }
+
     const cycles = ['1일', '3일']
 
     // 정산주기별 MID 목록 조회
