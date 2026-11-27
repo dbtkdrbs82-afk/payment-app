@@ -42,10 +42,13 @@ async function openAdmin() {
   const body=node('textarea');body.rows=5;body.maxLength=5000;body.required=true;field('내용',body)
   const target=node('select');target.add(new Option('전체 가맹점','all'));target.add(new Option('특정 가맹점','one'));field('공지 대상',target)
   const picker=node('div','','display:none;border:1px solid #dbe3ee;padding:10px;border-radius:9px;margin-bottom:12px;')
-  const search=node('input');search.placeholder='가맹점명 또는 MER0015';search.style.cssText=inputCss
-  const results=node('select');results.style.cssText=inputCss;results.add(new Option('가맹점을 검색해 주세요',''))
-  const searchBtn=button('가맹점 검색',()=>{void (async()=>{try{searchBtn.disabled=true;const r=await api('merchants',{q:search.value});results.replaceChildren(new Option('가맹점을 선택하세요',''));for(const m of r.merchants) results.add(new Option(m.merchant_name+' (MER'+String(m.id).padStart(4,'0')+')',String(m.id)));status.textContent=r.merchants.length?'':'검색 결과 없음'}catch(e){status.textContent=String((e as Error).message)}finally{searchBtn.disabled=false}})()},true)
-  picker.append(search,searchBtn,results);form.append(picker)
+
+  const search=node('input');
+  search.placeholder='MER0042';
+  search.maxLength=24;
+  search.style.cssText=inputCss;
+  picker.append(node('label','가맹점 번호'),search);
+  form.append(picker);
   target.onchange=()=>{picker.style.display=target.value==='one'?'block':'none'}
   const starts=node('input');starts.type='datetime-local';starts.required=true;field('시작 (한국시간)',starts)
   const ends=node('input');ends.type='datetime-local';ends.required=true;field('종료 (한국시간)',ends)
@@ -54,7 +57,7 @@ async function openAdmin() {
   form.append(button('Google Play 업데이트 링크 넣기',()=>{link.value=playUrl},true))
   const actions=node('div','','display:flex;gap:10px;flex-wrap:wrap;margin:16px 0;')
   const save=button('공지 등록',()=>form.requestSubmit());let editId=''
-  const reset=()=>{editId='';form.reset();starts.value=kstInput(new Date());ends.value=kstInput(new Date(Date.now()+7*86400000));picker.style.display='none';results.replaceChildren(new Option('가맹점을 검색해 주세요',''));save.textContent='공지 등록'}
+  const reset=()=>{editId='';form.reset();starts.value=kstInput(new Date());ends.value=kstInput(new Date(Date.now()+7*86400000));picker.style.display='none';search.value='';save.textContent='공지 등록'}
   actions.append(save,button('새 공지 작성',reset,true));form.append(actions)
   const list=node('div');panel.append(form,status,node('h3','등록된 공지 (최근 100건)','margin:16px 0 10px;font-size:18px;'),list);reset()
   const reload=async()=>{
@@ -65,10 +68,10 @@ async function openAdmin() {
       const active=Date.parse(n.starts_at)<=Date.now()&&Date.parse(n.ends_at)>Date.now()
       item.append(node('strong',n.title,'display:block;overflow-wrap:anywhere;'),node('p',(n.merchant_id==null?'전체 가맹점':'MER'+String(n.merchant_id).padStart(4,'0'))+' / '+(n.popup?'팝업':'일반')+' / '+(active?'게시 중':Date.parse(n.starts_at)>Date.now()?'예약':'종료'),'font-size:13px;color:#536478;margin:4px 0;'),node('p',dateText(n.starts_at)+' ~ '+dateText(n.ends_at),'font-size:13px;color:#536478;margin:4px 0 8px;'))
       const row=node('div','','display:flex;gap:8px;')
-      row.append(button('수정',()=>{editId=n.id;title.value=n.title;body.value=n.body;target.value=n.merchant_id==null?'all':'one';picker.style.display=n.merchant_id==null?'none':'block';results.replaceChildren(new Option(n.merchant_id==null?'가맹점 검색':'MER'+String(n.merchant_id).padStart(4,'0'),n.merchant_id==null?'':String(n.merchant_id)));starts.value=kstInput(new Date(n.starts_at));ends.value=kstInput(new Date(n.ends_at));mode.value=n.popup?'popup':'list';link.value=n.link_url||'';save.textContent='수정 저장';panel.scrollTop=0},true),button('삭제',()=>{if(!confirm('이 공지를 삭제할까요?'))return;void (async()=>{try{await api('delete',{id:n.id});if(editId===n.id)reset();await reload();status.textContent='삭제 완료'}catch(e){status.textContent=(e as Error).message}})()},true));item.append(row);list.append(item)
+      row.append(button('수정',()=>{editId=n.id;title.value=n.title;body.value=n.body;target.value=n.merchant_id==null?'all':'one';picker.style.display=n.merchant_id==null?'none':'block';search.value=n.merchant_id==null?'':'MER'+String(n.merchant_id).padStart(4,'0');starts.value=kstInput(new Date(n.starts_at));ends.value=kstInput(new Date(n.ends_at));mode.value=n.popup?'popup':'list';link.value=n.link_url||'';save.textContent='수정 저장';panel.scrollTop=0},true),button('삭제',()=>{if(!confirm('이 공지를 삭제할까요?'))return;void (async()=>{try{await api('delete',{id:n.id});if(editId===n.id)reset();await reload();status.textContent='삭제 완료'}catch(e){status.textContent=(e as Error).message}})()},true));item.append(row);list.append(item)
     }
   }
-  form.onsubmit=e=>{e.preventDefault();void(async()=>{try{if(target.value==='one'&&!results.value)throw Error('가맹점을 선택해주세요.');save.disabled=true;await api('save',{id:editId,title:title.value,body:body.value,merchant_id:target.value==='all'?null:Number(results.value),starts_at:new Date(starts.value+'+09:00').toISOString(),ends_at:new Date(ends.value+'+09:00').toISOString(),popup:mode.value==='popup',link_url:link.value});reset();await reload();status.textContent='저장 완료'}catch(e){status.textContent=(e as Error).message}finally{save.disabled=false}})()}
+  form.onsubmit=e=>{e.preventDefault();void(async()=>{try{const merchantCode=search.value.trim();const directId=Number(merchantCode.replace(/^MER/i,''));if(target.value==='one'&&(!/^(?:MER)?\d+$/i.test(merchantCode)||!Number.isSafeInteger(directId)||directId<=0))throw Error('\uAC00\uB9F9\uC810 \uBC88\uD638\uB97C \uD655\uC778\uD574\uC8FC\uC138\uC694.');save.disabled=true;await api('save',{id:editId,title:title.value,body:body.value,merchant_id:target.value==='all'?null:directId,starts_at:new Date(starts.value+'+09:00').toISOString(),ends_at:new Date(ends.value+'+09:00').toISOString(),popup:mode.value==='popup',link_url:link.value});reset();await reload();status.textContent='저장 완료'}catch(e){status.textContent=(e as Error).message}finally{save.disabled=false}})()}
   try{await reload()}catch(e){status.textContent=(e as Error).message}
 }
 export function mountNxgMerchantNotices(root:HTMLElement,auth:()=>Promise<Record<string,string>>,update:()=>Promise<void>) {
