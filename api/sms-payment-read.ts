@@ -125,7 +125,8 @@ export default async function handler(
       merchantName: merchant.merchant_name,
       productName: request.product_name,
       amount: request.amount,
-      expiresAt: request.expires_at
+      expiresAt: request.expires_at,
+      manualEnabled: process.env.NXG_SMS_MANUAL_ENABLED === 'true'
     })
 
   } catch (error) {

@@ -822,6 +822,13 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
 
   const paymentToken = params.get('t') || ''
 
+  const smsEscapeHtml = (value: any) => String(value == null ? '' : value)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+  const smsPgSafeName = (value: string) =>
+    value.replace(/[^\uAC00-\uD7A3A-Za-z0-9 ]/g, ' ').trim().slice(0, 50) || 'NXG PICK'
+  let smsManualEnabled = false
   let smsPaymentStatus = 'pending'
 
   if (paymentToken) {
@@ -925,6 +932,7 @@ const smsPaymentNotice =
       merchantNameParam = String(info.merchantName || '')
       productName = savedProductName
       amount = savedAmount
+      smsManualEnabled = info.manualEnabled === true
 
     } catch (error) {
       console.error('SMS 링크 조회 오류:', error)
@@ -1034,7 +1042,7 @@ const paymentMerchant = merchantRow
                 가맹점:
               </strong>
 
-              ${merchantName}
+              ${smsEscapeHtml(merchantName)}
             </p>
 
             <p>
@@ -1042,7 +1050,7 @@ const paymentMerchant = merchantRow
                 상품명:
               </strong>
 
-              ${productName}
+              ${smsEscapeHtml(productName)}
             </p>
 
             <p>
@@ -1058,8 +1066,18 @@ const paymentMerchant = merchantRow
   id="pay-button"
   type="button"
 >
-  결제하기
+  온라인결제
 </button>
+${smsManualEnabled ? `
+<button id="sms-manual-toggle" type="button">수기결제</button>
+<div id="sms-manual-panel" style="display:none; margin-top:12px">
+<p>카드번호 및 유효기간을 입력해주세요.</p>
+<input id="sms-card-no" type="text" inputmode="numeric" autocomplete="off" maxlength="23" placeholder="카드번호" aria-label="카드번호" />
+<input id="sms-card-expiry" type="text" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="유효기간 YYMM" aria-label="유효기간" />
+<input id="sms-card-installment" type="text" inputmode="numeric" autocomplete="off" maxlength="2" value="00" placeholder="할부 개월 00" aria-label="할부개월" />
+<button id="sms-manual-submit" type="button">수기결제 승인요청</button>
+</div>
+` : ''}
 
           </div>
 
@@ -1067,6 +1085,40 @@ const paymentMerchant = merchantRow
       `
 
 
+      if (paymentToken && smsManualEnabled) {
+        const toggle = document.querySelector<HTMLButtonElement>('#sms-manual-toggle')
+        const panel = document.querySelector<HTMLElement>('#sms-manual-panel')
+        const manualButton = document.querySelector<HTMLButtonElement>('#sms-manual-submit')
+        toggle?.addEventListener('click', () => {
+          if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none'
+        })
+        manualButton?.addEventListener('click', async () => {
+          const cardNumber = (document.querySelector<HTMLInputElement>('#sms-card-no')?.value || '').replace(/\D/g, '')
+          const expiryYymm = (document.querySelector<HTMLInputElement>('#sms-card-expiry')?.value || '').replace(/\D/g, '')
+          const installment = (document.querySelector<HTMLInputElement>('#sms-card-installment')?.value || '00').replace(/\D/g, '') || '00'
+          if (!/^\d{13,19}$/.test(cardNumber) || !/^\d{4}$/.test(expiryYymm) || !/^\d{1,2}$/.test(installment)) {
+            alert('카드번호·유효기간·할부개월을 확인해주세요.')
+            return
+          }
+          if (manualButton.disabled) return
+          manualButton.disabled = true
+          try {
+            const response = await fetch('/api/korpay-manual-pay', {
+              method: 'POST',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ smsToken: paymentToken, cardNumber, expiryYymm, installment })
+            })
+            const result = await response.json().catch(() => null)
+            if (!response.ok || result?.success !== true) throw new Error(result?.message || '승인 결과를 확인하지 못했습니다. 재결제하지 말고 가맹점에 문의해주세요.')
+            alert('수기결제가 승인되었습니다.')
+            location.reload()
+          } catch (error) {
+            alert(error instanceof Error ? error.message : '승인 결과가 확인되지 않았습니다. 재결제하지 말고 가맹점에 문의해주세요.')
+          } finally {
+            manualButton.disabled = false
+          }
+        })
+      }
       document
         .querySelector<HTMLButtonElement>(
           '#pay-button'
@@ -1222,7 +1274,7 @@ const paymentMerchant = merchantRow
                       )),
 
                     orderName:
-                      productName,
+                      smsPgSafeName(productName),
 
                     customerName:
                       merchantName,
@@ -1359,7 +1411,7 @@ if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_
                   (smsKorpayData ? smsKorpayData.mid : paymentMerchant.korpay_pg_mid),
 
                 productName:
-                  productName,
+                  smsPgSafeName(productName),
 
                 orderNumber:
                   orderNo,

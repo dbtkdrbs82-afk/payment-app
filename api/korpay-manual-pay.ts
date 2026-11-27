@@ -57,10 +57,51 @@ export default async function handler(
       customerPhone
     } = req.body || {}
 
-    const merchantDbId = Number(merchantId)
-const goodsAmt = Number(amount)
-const cardNo = onlyDigits(cardNumber)
-const expiry = onlyDigits(expiryYymm)
+    const smsToken = String(req.body?.smsToken || '').trim()
+    let smsRequest: { merchant_id: number; product_name: string; amount: number } | null = null
+    let smsTokenHash = ''
+    let smsOrderId = ''
+    let merchantDbId = Number(merchantId)
+    let goodsAmt = Number(amount)
+    let effectiveGoodsName = String(goodsName || '').trim()
+    const cardNo = onlyDigits(cardNumber)
+    const expiry = onlyDigits(expiryYymm)
+
+    if (smsToken) {
+      if (process.env.NXG_SMS_MANUAL_ENABLED !== 'true') {
+        return res.status(403).json({success: false, message: 'SMS 수기결제는 아직 사용 가능하지 않습니다.'})
+      }
+      if (!/^[a-zA-Z0-9_-]{32}$/.test(smsToken)) {
+        return res.status(400).json({success: false, message: 'SMS 결제링크가 올바르지 않습니다.'})
+      }
+      smsTokenHash = createHash('sha256').update(smsToken).digest('hex')
+      const requestResponse = await fetch(
+        supabaseUrl + '/rest/v1/sms_payment_requests' +
+        '?select=merchant_id,product_name,amount,status,expires_at' +
+        '&token_hash=eq.' + encodeURIComponent(smsTokenHash) + '&limit=1',
+        {headers: {apikey: serviceRoleKey, Authorization: 'Bearer ' + serviceRoleKey}}
+      )
+      if (!requestResponse.ok) return res.status(500).json({success:false,message:'SMS 결제정보를 확인하지 못했습니다.'})
+      const requests = await requestResponse.json()
+      const request = Array.isArray(requests) ? requests[0] : null
+      if (!request || request.status !== 'pending' ||
+          !request.expires_at || new Date(request.expires_at).getTime() <= Date.now()) {
+        return res.status(409).json({success:false,message:'이미 진행 중이거나 만료된 결제링크입니다.'})
+      }
+      smsRequest = {
+        merchant_id: Number(request.merchant_id),
+        product_name: String(request.product_name || ''),
+        amount: Number(request.amount)
+      }
+      merchantDbId = smsRequest.merchant_id
+      goodsAmt = smsRequest.amount
+      effectiveGoodsName = smsRequest.product_name
+      // SMS 고객 수기결제는 1회 100만원 단일승인만 허용한다.
+      // 100만원을 초과하는 기존 가맹점 수기 분할결제 로직에는 영향을 주지 않는다.
+      if (!Number.isSafeInteger(goodsAmt) || goodsAmt < 100 || goodsAmt > 1000000) {
+        return res.status(400).json({success:false,message:'SMS 수기결제는 100원부터 100만원까지 이용할 수 있습니다.'})
+      }
+    }
 
 const quotaMon = onlyDigits(installment || '00').padStart(2, '0')
 const ordHp = onlyDigits(customerPhone)
@@ -105,7 +146,7 @@ const ordHp = onlyDigits(customerPhone)
 
     const merchantResponse = await fetch(
       `${supabaseUrl}/rest/v1/merchants` +
-        `?select=id,merchant_name,fee_rate,korpay_manual_mid,korpay_manual_mkey` +
+        `?select=id,merchant_name,fee_rate,korpay_manual_mid,korpay_manual_mkey,status` +
         `&id=eq.${merchantDbId}` +
         `&limit=1`,
       {
@@ -131,7 +172,7 @@ const ordHp = onlyDigits(customerPhone)
         ? merchantRows[0]
         : null
 
-    if (!merchant) {
+    if (!merchant || (smsRequest && merchant.status !== '운영')) {
       return res.status(404).json({
         success: false,
         message: '가맹점을 찾을 수 없습니다.'
@@ -546,6 +587,33 @@ const ordHp = onlyDigits(customerPhone)
     )
 
 
+    if (smsRequest) {
+      smsOrderId = 'SMSKORPAY' + randomBytes(12).toString('hex')
+      const now = new Date().toISOString()
+      const lockResponse = await fetch(
+        supabaseUrl + '/rest/v1/sms_payment_requests' +
+        '?token_hash=eq.' + encodeURIComponent(smsTokenHash) +
+        '&status=eq.pending&expires_at=gt.' + encodeURIComponent(now),
+        {
+          method: 'PATCH',
+          headers: {...supabaseHeaders, Prefer: 'return=representation'},
+          body: JSON.stringify({
+            status: 'processing',
+            pg_order_id: smsOrderId,
+            payment_method: 'manual',
+            payment_started_at: now
+          })
+        }
+      )
+      if (!lockResponse.ok) {
+        return res.status(500).json({success:false,message:'SMS 결제 시작을 저장하지 못했습니다.'})
+      }
+      const locked = await lockResponse.json()
+      if (!Array.isArray(locked) || locked.length !== 1) {
+        return res.status(409).json({success:false,message:'이미 다른 결제가 진행 중입니다.'})
+      }
+    }
+
     const korpayUrl =
       process.env
         .KORPAY_MANUAL_PAY_URL ||
@@ -781,11 +849,12 @@ const ordHp = onlyDigits(customerPhone)
             '구매자'
           ).trim(),
 
-        goodsNm:
-          String(
-            goodsName ||
-            '일반 카드결제'
-          ).trim(),
+        // 코페이 입력제한으로 오류가 날 수 있는 자모·기호는 PG 전송명에서만 치환.
+        // 원본 상품명은 NXG 결제내역 message에 유지한다.
+        goodsNm: (
+          effectiveGoodsName.replace(/[^\uAC00-\uD7A3A-Za-z0-9 ]/g, ' ').trim().slice(0, 50) ||
+          'NXG PICK'
+        ),
 
         ordHp,
 
@@ -1032,7 +1101,7 @@ const ordHp = onlyDigits(customerPhone)
             normalizedBillingIds.join(',')
           )
         : String(
-            goodsName ||
+            effectiveGoodsName ||
             '수기결제'
           ).trim()
 
@@ -1045,7 +1114,7 @@ const ordHp = onlyDigits(customerPhone)
         ) => ({
 
           order_id:
-            approved.ordNo,
+            smsOrderId || approved.ordNo,
 
           payment_key:
             approved.tid,
@@ -1348,6 +1417,27 @@ const ordHp = onlyDigits(customerPhone)
         }
       }
 
+
+    if (smsRequest) {
+      // 결제내역이 저장된 뒤에만 SMS 링크를 완료 처리한다.
+      const finishResponse = await fetch(
+        supabaseUrl + '/rest/v1/sms_payment_requests' +
+        '?token_hash=eq.' + encodeURIComponent(smsTokenHash) +
+        '&pg_order_id=eq.' + encodeURIComponent(smsOrderId) + '&status=eq.processing',
+        {
+          method: 'PATCH',
+          headers: {...supabaseHeaders, Prefer: 'return=representation'},
+          body: JSON.stringify({status:'paid',paid_at:new Date().toISOString()})
+        }
+      )
+      const finished = finishResponse.ok ? await finishResponse.json() : []
+      if (!Array.isArray(finished) || finished.length !== 1) {
+        return res.status(502).json({
+          success: false,
+          message: '카드 승인은 완료됐지만 SMS 상태 확인이 필요합니다. 다시 결제하지 말고 가맹점에 문의해주세요.'
+        })
+      }
+    }
 
     const firstApproved =
       approvedSplits[0]

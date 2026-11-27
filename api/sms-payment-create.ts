@@ -120,7 +120,9 @@ export default async function handler(
     })
   }
 
-  if (!allowedOrigins.includes(origin)) {
+  // 네이티브 HTTP 요청은 Origin 헤더가 없을 수 있다.
+  // 유효하지 않은 Origin은 계속 거절하고, Origin이 없는 요청은 아래 서명 세션으로 인증한다.
+  if (origin && !allowedOrigins.includes(origin)) {
     return res.status(403).json({
       success: false,
       message: '허용되지 않은 요청입니다.'
