@@ -821,6 +821,10 @@ document.querySelector<HTMLButtonElement>('#message-view-button')!
   )
 
   const paymentToken = params.get('t') || ''
+  // Browser history can restore a disabled button from its page cache.
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) window.location.reload()
+  })
 
   const smsEscapeHtml = (value: any) => String(value == null ? '' : value)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -942,7 +946,7 @@ const smsPaymentNotice =
   if (!paymentToken || !merchantId || !productName || !amount || smsPaymentStatus !== 'pending') {
 
     app.innerHTML = `
-      <div class="page">
+      <div class="page sms-payment-page">
 
         <div class="payment-card">
 
@@ -999,7 +1003,7 @@ const paymentMerchant = merchantRow
     ) {
 
       app.innerHTML = `
-        <div class="page">
+        <div class="page sms-payment-page">
 
           <div class="payment-card">
 
@@ -1029,7 +1033,7 @@ const paymentMerchant = merchantRow
 
 
       app.innerHTML = `
-        <div class="page">
+        <div class="page sms-payment-page">
 
           <div class="payment-card">
 
@@ -1070,12 +1074,31 @@ const paymentMerchant = merchantRow
 </button>
 ${smsManualEnabled ? `
 <button id="sms-manual-toggle" type="button">수기결제</button>
-<div id="sms-manual-panel" style="display:none; margin-top:12px">
-<p>카드번호 및 유효기간을 입력해주세요.</p>
-<input id="sms-card-no" type="text" inputmode="numeric" autocomplete="off" maxlength="23" placeholder="카드번호" aria-label="카드번호" />
-<input id="sms-card-expiry" type="text" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="유효기간 YYMM" aria-label="유효기간" />
-<input id="sms-card-installment" type="text" inputmode="numeric" autocomplete="off" maxlength="2" value="00" placeholder="할부 개월 00" aria-label="할부개월" />
-<button id="sms-manual-submit" type="button">수기결제 승인요청</button>
+<div id="sms-manual-panel" style="display:none">
+  <p class="sms-manual-help">카드정보를 직접 입력해주세요.</p>
+  <label for="sms-card-no">카드번호</label>
+  <input id="sms-card-no" type="text" inputmode="numeric" autocomplete="off" maxlength="23" placeholder="0000-0000-0000-0000" />
+  <label for="sms-card-month">유효기간 (월 / 년)</label>
+  <div class="sms-expiry-row">
+    <input id="sms-card-month" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="월 (MM)" aria-label="유효기간 월" />
+    <input id="sms-card-year" type="text" inputmode="numeric" autocomplete="off" maxlength="2" placeholder="년 (YY)" aria-label="유효기간 년" />
+  </div>
+  <label for="sms-card-installment">할부방법</label>
+  <select id="sms-card-installment">
+    <option value="00">일시불</option>
+    <option value="02">2개월</option>
+    <option value="03">3개월</option>
+    <option value="04">4개월</option>
+    <option value="05">5개월</option>
+    <option value="06">6개월</option>
+    <option value="07">7개월</option>
+    <option value="08">8개월</option>
+    <option value="09">9개월</option>
+    <option value="10">10개월</option>
+    <option value="11">11개월</option>
+    <option value="12">12개월</option>
+  </select>
+  <button id="sms-manual-submit" type="button">결제하기</button>
 </div>
 ` : ''}
 
@@ -1092,11 +1115,22 @@ ${smsManualEnabled ? `
         toggle?.addEventListener('click', () => {
           if (panel) panel.style.display = panel.style.display === 'none' ? 'block' : 'none'
         })
+        const cardInput = document.querySelector<HTMLInputElement>('#sms-card-no')
+        cardInput?.addEventListener('input', () => {
+          cardInput.value = (cardInput.value.replace(/\D/g, '').slice(0, 19).match(/.{1,4}/g) || []).join('-')
+        })
+        const monthInput = document.querySelector<HTMLInputElement>('#sms-card-month')
+        const yearInput = document.querySelector<HTMLInputElement>('#sms-card-year')
+        for (const input of [monthInput, yearInput]) {
+          input?.addEventListener('input', () => { input.value = input.value.replace(/\D/g, '').slice(0, 2) })
+        }
         manualButton?.addEventListener('click', async () => {
-          const cardNumber = (document.querySelector<HTMLInputElement>('#sms-card-no')?.value || '').replace(/\D/g, '')
-          const expiryYymm = (document.querySelector<HTMLInputElement>('#sms-card-expiry')?.value || '').replace(/\D/g, '')
-          const installment = (document.querySelector<HTMLInputElement>('#sms-card-installment')?.value || '00').replace(/\D/g, '') || '00'
-          if (!/^\d{13,19}$/.test(cardNumber) || !/^\d{4}$/.test(expiryYymm) || !/^\d{1,2}$/.test(installment)) {
+          const cardNumber = (cardInput?.value || '').replace(/\D/g, '')
+          const month = monthInput?.value || ''
+          const year = yearInput?.value || ''
+          const expiryYymm = year + month
+          const installment = document.querySelector<HTMLSelectElement>('#sms-card-installment')?.value || '00'
+          if (!/^\d{13,19}$/.test(cardNumber) || !/^(0[1-9]|1[0-2])$/.test(month) || !/^\d{2}$/.test(year) || !/^(00|0[2-9]|1[0-2])$/.test(installment)) {
             alert('카드번호·유효기간·할부개월을 확인해주세요.')
             return
           }
@@ -1243,10 +1277,9 @@ ${smsManualEnabled ? `
 
               if (!tossClientKey) {
 
-                alert(
-                  '토스 Client Key가 등록되지 않았습니다.'
-                )
-
+                alert('토스 Client Key가 등록되지 않았습니다.')
+                const button = document.querySelector<HTMLButtonElement>('#pay-button')
+                if (button) { button.disabled = false; button.innerText = '온라인결제' }
                 return
               }
 
@@ -1358,6 +1391,8 @@ if (paymentToken) {
 
   } catch (error) {
     console.error('SMS 코페이 결제 준비 오류:', error)
+    const button = document.querySelector<HTMLButtonElement>('#pay-button')
+    if (button) { button.disabled = false; button.innerText = '온라인결제' }
 
     alert(
       error instanceof Error
@@ -1453,10 +1488,9 @@ if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_
 
               if (!korpay) {
 
-                alert(
-                  'Korpay SDK를 찾을 수 없습니다.'
-                )
-
+                alert('Korpay SDK를 찾을 수 없습니다.')
+                const button = document.querySelector<HTMLButtonElement>('#pay-button')
+                if (button) { button.disabled = false; button.innerText = '온라인결제' }
                 return
               }
 
@@ -1505,9 +1539,9 @@ if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_
 
                     if (payButton) {
 
-                      payButton.disabled = Boolean(paymentToken)
+                      payButton.disabled = false
 
-                      payButton.innerText = paymentToken ? '결제 상태 확인 필요' : '결제하기'
+                      payButton.innerText = paymentToken ? '온라인결제' : '결제하기'
                     }
 
                   },
@@ -1522,9 +1556,9 @@ if (!paymentToken && (!paymentMerchant.korpay_pg_mid || !paymentMerchant.korpay_
 
                     if (payButton) {
 
-                      payButton.disabled = Boolean(paymentToken)
+                      payButton.disabled = false
 
-                      payButton.innerText = paymentToken ? '결제 상태 확인 필요' : '결제하기'
+                      payButton.innerText = paymentToken ? '온라인결제' : '결제하기'
                     }
 
                   }
@@ -5618,18 +5652,22 @@ document.querySelector('#receipt-close-btn')
     app.innerHTML = `
       <div class="page">
         <div class="payment-card">
-          <h2>결제 상태 확인 필요</h2>
-          <p>
-            결제가 중단되었거나 승인 결과를
-            확인하지 못했습니다.
-          </p>
-          <p>
-            중복 결제하지 마시고
-            가맹점에 결제 상태를 문의해 주세요.
-          </p>
+          <h2>결제 중단</h2>
+          <p>문자 결제 링크를 다시 열면 결제 상태를 확인합니다.</p>
+          <p>아직 승인 요청이 시작되지 않았다면 당일 다시 결제할 수 있습니다.</p>
+          <button id="sms-fail-reopen" type="button">결제 링크 다시 열기</button>
         </div>
       </div>
     `
+    const smsRetryToken = sessionStorage.getItem('nxg_sms_payment_token') || ''
+    const retryButton = document.querySelector<HTMLButtonElement>('#sms-fail-reopen')
+    if (!/^[a-zA-Z0-9_-]{32}$/.test(smsRetryToken)) {
+      retryButton?.remove()
+    } else {
+      retryButton?.addEventListener('click', () => {
+        location.href = '/pay?t=' + encodeURIComponent(smsRetryToken)
+      })
+    }
   } else {
   const code = params.get('code')
   const message = params.get('message')

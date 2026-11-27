@@ -126,7 +126,7 @@ export default async function handler(req, res) {
 
       if (
         !smsRequest ||
-        smsRequest.status !== 'processing' ||
+        smsRequest.status !== 'pending' ||
         smsRequest.payment_method !== 'mobile' ||
         Number(smsRequest.merchant_id) !== merchantId ||
         Number(smsRequest.amount) !== expectedAmount
@@ -137,6 +137,27 @@ export default async function handler(req, res) {
           'SMS 결제금액 또는 진행 상태가 일치하지 않습니다.',
           409
         )
+      }
+      // Only the current SMS order can acquire the approval lock.
+      // Never release this lock merely because the browser closes.
+      const now = new Date().toISOString()
+      const lockQuery = new URLSearchParams({
+        pg_order_id: `eq.${orderId}`,
+        status: 'eq.pending',
+        payment_method: 'eq.mobile',
+        merchant_id: `eq.${merchantId}`,
+        amount: `eq.${expectedAmount}`,
+        expires_at: `gt.${now}`,
+        select: 'id'
+      })
+      const lock = await fetch(`${base}/sms_payment_requests?${lockQuery}`, {
+        method: 'PATCH', headers: { ...headers, Prefer: 'return=representation' },
+        body: JSON.stringify({ status: 'processing', payment_started_at: now })
+      })
+      if (!lock.ok) return replyPage(res, '결제 상태 확인 필요', '결제 승인 준비를 확인할 수 없습니다. 문자 링크에서 상태를 확인해 주세요.', 503)
+      const locked = await lock.json()
+      if (!Array.isArray(locked) || locked.length !== 1) {
+        return replyPage(res, '결제 상태 확인', '현재 문자 링크를 다시 열어 결제 상태를 확인해 주세요.', 409)
       }
     }
 

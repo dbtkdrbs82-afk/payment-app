@@ -157,10 +157,12 @@ export default async function handler(
       await supabase
         .from('sms_payment_requests')
         .update({
-          status: 'processing',
+          // Opening the authentication window is not a card approval.
+          // A new attempt may replace this order while the request is pending.
+          status: 'pending',
           pg_order_id: orderId,
           payment_method: 'mobile',
-          payment_started_at: new Date().toISOString()
+          payment_started_at: null
         })
         .eq('token_hash', tokenHash)
         .eq('status', 'pending')

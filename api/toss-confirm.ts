@@ -87,13 +87,32 @@ export default async function handler(
       if (
         !Array.isArray(rows) ||
         rows.length !== 1 ||
-        rows[0].status !== 'processing' ||
+        rows[0].status !== 'pending' ||
         rows[0].payment_method !== 'mobile' ||
         Number(rows[0].amount) !== Number(amount)
       ) {
         return res.status(409).json({
           message: 'SMS 결제요청 금액 또는 상태가 일치하지 않습니다.'
         })
+      }
+      const now = new Date().toISOString()
+      const lockQuery = new URLSearchParams({
+        pg_order_id: `eq.${String(orderId)}`,
+        status: 'eq.pending',
+        payment_method: 'eq.mobile',
+        amount: `eq.${Number(amount)}`,
+        expires_at: `gt.${now}`,
+        select: 'id'
+      })
+      const lock = await fetch(`${dbUrl}/rest/v1/sms_payment_requests?${lockQuery}`, {
+        method: 'PATCH',
+        headers: { apikey: dbKey, Authorization: `Bearer ${dbKey}`, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+        body: JSON.stringify({ status: 'processing', payment_started_at: now })
+      })
+      if (!lock.ok) return res.status(503).json({ message: 'SMS 승인 준비 상태를 확인하지 못했습니다.' })
+      const locked = await lock.json()
+      if (!Array.isArray(locked) || locked.length !== 1) {
+        return res.status(409).json({ message: '문자 링크를 다시 열어 결제 상태를 확인해주세요.' })
       }
     }
 

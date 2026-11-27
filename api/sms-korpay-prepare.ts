@@ -86,7 +86,7 @@ export default async function handler(
     if (
       paymentError ||
       !payment ||
-      payment.status !== 'processing' ||
+      payment.status !== 'pending' ||
       payment.payment_method !== 'mobile' ||
       !Number.isSafeInteger(Number(payment.amount)) ||
       Number(payment.amount) < 100 ||

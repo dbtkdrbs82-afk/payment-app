@@ -14704,3 +14704,17 @@ height: 150px !important;
   }
 
 }
+
+
+/* NXG_SMS_REENTRY_LAYOUT_20261127 */
+.page.sms-payment-page { box-sizing: border-box; min-height: 100vh; height: auto; padding: 20px 16px; align-items: flex-start; zoom: 1; }
+.sms-payment-page .payment-card { box-sizing: border-box; width: 100%; max-width: 420px; margin: 0 auto; padding: 24px; }
+.sms-payment-page .payment-card h1 { margin: 0 0 18px; font-size: 25px; }
+.sms-payment-page .payment-card p { overflow-wrap: anywhere; }
+.sms-payment-page .payment-card button { width: 100%; box-sizing: border-box; min-height: 48px; margin-top: 12px; }
+#sms-manual-panel { text-align: left; margin-top: 20px; }
+#sms-manual-panel .sms-manual-help { text-align: center; margin: 0 0 18px; font-size: 14px; color: #475569; }
+#sms-manual-panel label { display: block; font-size: 14px; font-weight: 600; margin: 12px 0 6px; }
+#sms-manual-panel input, #sms-manual-panel select { display: block; box-sizing: border-box; width: 100%; min-width: 0; height: 48px; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 16px; background: #fff; color: #0f172a; }
+#sms-manual-panel .sms-expiry-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
+#sms-manual-panel #sms-manual-submit { margin-top: 22px; }

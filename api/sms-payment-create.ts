@@ -239,7 +239,9 @@ export default async function handler(
         merchant_id: session.id,
         product_name: productName,
         amount,
-        status: 'pending'
+        status: 'pending',
+        // Midnight in Korea: same-day link validity (UTC timestamp).
+        expires_at: new Date(Math.floor((Date.now() + 9 * 3600000) / 86400000) * 86400000 + 86400000 - 9 * 3600000).toISOString()
       })
       .select('expires_at')
       .single()
