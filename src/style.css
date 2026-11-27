@@ -14718,3 +14718,49 @@ height: 150px !important;
 #sms-manual-panel input, #sms-manual-panel select { display: block; box-sizing: border-box; width: 100%; min-width: 0; height: 48px; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 9px; font-size: 16px; background: #fff; color: #0f172a; }
 #sms-manual-panel .sms-expiry-row { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 10px; }
 #sms-manual-panel #sms-manual-submit { margin-top: 22px; }
+
+
+/* NXG_SMS_PAYMENT_LARGE_UI */
+.page.sms-payment-page {
+  padding: 16px 12px 30px;
+  zoom: 1 !important;
+}
+
+.sms-payment-page .payment-card {
+  width: 100%;
+  max-width: 680px;
+  padding: 28px 20px;
+  box-sizing: border-box;
+}
+
+.sms-payment-page .payment-card h1,
+.sms-payment-page .payment-card h2 {
+  font-size: 30px;
+  line-height: 1.4;
+}
+
+.sms-payment-page .payment-card p {
+  font-size: 20px;
+  line-height: 1.6;
+}
+
+.sms-payment-page .payment-card button {
+  font-size: 20px;
+  min-height: 60px;
+  border-radius: 10px;
+}
+
+.sms-payment-page #sms-manual-panel label {
+  font-size: 18px;
+  margin-top: 18px;
+}
+
+.sms-payment-page #sms-manual-panel input,
+.sms-payment-page #sms-manual-panel select {
+  font-size: 20px;
+  height: 58px;
+}
+
+.sms-payment-page #sms-manual-panel .sms-manual-help {
+  font-size: 18px;
+}
